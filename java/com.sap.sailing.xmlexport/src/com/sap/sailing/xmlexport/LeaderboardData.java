@@ -21,6 +21,7 @@ import org.jdom.Element;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
@@ -1035,7 +1036,10 @@ public class LeaderboardData extends ExportAction {
         final List<Element> racesElements = new ArrayList<Element>();
         final List<Element> competitorElements = new ArrayList<Element>();
         for (Competitor competitor : leaderboard.getAllCompetitors()) {
-            Boat boatOfCompetitor = null; // TODO: Where can we get the boat here?
+            Boat boatOfCompetitor = null;
+            if (competitor.hasBoat()) {
+                boatOfCompetitor = ((CompetitorWithBoat) competitor).getBoat();
+            }
             Util.Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages = checkData(competitor, boatOfCompetitor);
             competitorElements.add(createCompetitorXML(competitor, boatOfCompetitor, leaderboard, /*shortVersion*/ false, competitorConfidenceAndErrorMessages));
         }

@@ -70,14 +70,19 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
     void clearCompetitors();
     
     /**
-     * Obtains a non-live snapshot of the list of competitors managed by this store.
+     * Obtains a non-live snapshot of the list of all (with and without boat) competitors managed by this store.
      */
-    Iterable<? extends Competitor> getCompetitors();
+    Iterable<? extends Competitor> getAllCompetitors();
 
     /**
-     * Obtains a non-live snapshot of the list of competitors with a assigned boat.
+     * Obtains a non-live snapshot of the list of competitors with an assigned boat.
      */
     Iterable<CompetitorWithBoat> getCompetitorsWithBoat();
+
+    /**
+     * Obtains a non-live snapshot of the list of competitors without an assigned boat.
+     */
+    Iterable<Competitor> getCompetitorsWithoutBoat();
 
     /**
      * Updates the competitor with {@link Competitor#getId() ID} <code>id</code> by setting the name, sail ID and nationality to

@@ -63,7 +63,7 @@ public class GetCompetitorSuggestionAction implements SailingAction<CompetitorSu
     
     @GwtIncompatible
     private Iterable<Competitor> getFilteredCompetitors(SailingDispatchContext ctx) {
-        Iterable<? extends Competitor> allCompetitors = ctx.getRacingEventService().getCompetitorStore().getCompetitors();
+        Iterable<? extends Competitor> allCompetitors = ctx.getRacingEventService().getCompetitorStore().getAllCompetitors();
         return competitorFilter.applyFilter(queryTokens, Util.addAll(allCompetitors, new ArrayList<Competitor>())); 
     }
     

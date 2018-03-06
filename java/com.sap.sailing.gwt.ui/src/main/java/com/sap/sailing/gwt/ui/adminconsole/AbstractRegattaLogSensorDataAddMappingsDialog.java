@@ -60,7 +60,7 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
         boatTable = new BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>>(sailingService, stringMessages,
                 errorReporter, /* multiSelection */ false, /* enable Pager */ true, /* allowActions */ false);
         competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
-                /* multiSelection */ false, /* enablePager */ true, /* show only competitors with boat */ false);
+                /* multiSelection */ false, /* enablePager */ true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
 
         boatTable.getSelectionModel().addSelectionChangeHandler(event -> {
             this.mappedToSelectionChanged(boatTable.getSelectionModel().getSelectedObject());
