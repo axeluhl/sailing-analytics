@@ -138,4 +138,6 @@ public interface Maneuver extends GPSFix {
 
     Duration getDuration();
 
+    double getMinSpeed();
+
 }

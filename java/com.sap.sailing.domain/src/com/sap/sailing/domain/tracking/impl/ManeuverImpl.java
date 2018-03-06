@@ -96,6 +96,12 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     public SpeedWithBearing getSpeedWithBearingAfter() {
         return getManeuverBoundaries().getSpeedWithBearingAfter();
     }
+    
+    @Override
+    public double getMinSpeed() {
+        //TODO implement
+        return 0;
+    }
 
     @Override
     public String toString() {

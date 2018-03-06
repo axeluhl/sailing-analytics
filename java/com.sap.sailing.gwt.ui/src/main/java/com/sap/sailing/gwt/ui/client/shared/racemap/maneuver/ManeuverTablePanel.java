@@ -178,20 +178,29 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 return new InvertibleComparatorAdapter<SingleManeuverDTO>() {
                     @Override
                     public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
-                        return o1.getDirection().compareTo(o2.getDirection());
+                        if(o1.getDirectionChange() == null && o2.getDirectionChange() == null){
+                            return 0;
+                        }
+                        if(o1.getDirectionChange() != null && o2.getDirectionChange() == null){
+                            return 1;
+                        }
+                        if(o1.getDirectionChange() == null && o2.getDirectionChange() != null){
+                            return -1;
+                        }
+                        return o1.getDirectionChange().compareTo(o2.getDirectionChange());
                     }
                 };
             }
 
             @Override
             public Header<?> getHeader() {
-                return new TextHeader(stringMessages.bearing());
+                return new TextHeader("i18n kurschange");
             }
 
             @Override
             public String getValue(SingleManeuverDTO object) {
-                return object.getDirection() == null ? null
-                        : towDigitAccuracy.format(object.getDirection());
+                return object.getDirectionChange() == null ? null
+                        : towDigitAccuracy.format(object.getDirectionChange());
             }
         };
     }
