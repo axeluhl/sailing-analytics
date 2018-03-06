@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,8 +56,10 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -493,7 +496,11 @@ public class DomainFactoryImpl implements DomainFactory {
                 result.add(new RaceStartedAndFinishedReceiver(
                         trackedRegatta, tractracEvent, simulator, this, eventSubscriber, raceSubscriber, timeoutInMilliseconds));
                 break;
-            }
+            case SENSORDATA:
+                result.add(new SensorDataReceiver(
+                        trackedRegatta, tractracEvent, simulator, this, eventSubscriber, raceSubscriber, timeoutInMilliseconds));
+                break;
+            }                
         }
         return result;
     }
@@ -509,7 +516,8 @@ public class DomainFactoryImpl implements DomainFactory {
                 raceDefinitionSetToUpdate, trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, courseDesignUpdateURI,
                 tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber,
                 useInternalMarkPassingAlgorithm, timeoutInMilliseconds, ReceiverType.RACECOURSE,
-                ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
+                ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS,
+                ReceiverType.SENSORDATA);
     }
     
     @Override
@@ -688,13 +696,15 @@ public class DomainFactoryImpl implements DomainFactory {
             IRace race, BoatClass defaultBoatClass) {
         final CompetitorStore competitorAndBoatStore = baseDomainFactory.getCompetitorStore();
         final Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        Regatta regatta = trackedRegatta.getRegatta();
+        LeaderboardGroup leaderboardGroup = leaderboardGroupResolver.resolveLeaderboardGroupByRegattaName(regatta.getName());
+        AtomicBoolean leaderboardGroupConsistencyChecked = new AtomicBoolean(false);
         getCompetingCompetitors(race).forEach(rc->{
             Serializable competitorId = rc.getCompetitor().getId(); 
             BoatMetaData competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
             // If the tractrac race contains boat metadata we assume the regatta can have changing boats per race.
             // As the attribute 'canBoatsOfCompetitorsChangePerRace' is new and 'false' is the default value 
             // we need to set it's value to true for the regatta, but only if the regatta is of type MigratableRegattaImpl
-            Regatta regatta = trackedRegatta.getRegatta();
             // the check for migration needs to obtain the lock for check and possible migration
             synchronized (regatta) {
                 if (competitorBoatInfo != null && regatta.canBoatsOfCompetitorsChangePerRace() == false) {
@@ -702,11 +712,24 @@ public class DomainFactoryImpl implements DomainFactory {
                     if (regatta instanceof MigratableRegatta) {
                         MigratableRegatta migratableRegatta = (MigratableRegatta) regatta;
                         migratableRegatta.migrateCanBoatsOfCompetitorsChangePerRace();
-                        logger.log(Level.INFO, "Successful migration of regatta " + regatta.getName() +
-                                " to be of type 'canBoatsOfCompetitorsChangePerRace=true'");
+                        if (!leaderboardGroupConsistencyChecked.get()) {
+                            if (!checkConsistencyOfRegattaTypeInSeries(leaderboardGroup, regatta)) {
+                                logger.log(Level.SEVERE, "Bug2822 DB-Migration: Regatta " + regatta.getName() +
+                                        " has different value of 'canBoatsOfCompetitorsChangePerRace' than other regattas in leaderboardGroup " + leaderboardGroup.getName());
+                            }
+                            leaderboardGroupConsistencyChecked.set(true);
+                        }
                     } else {
-                        logger.log(Level.SEVERE, "Regatta " + regatta.getName() +
+                        logger.log(Level.SEVERE, "Bug2822 DB-Migration: Regatta " + regatta.getName() +
                                 " has wrong type 'canBoatsOfCompetitorsChangePerRace' but can't be migrated because it is not of type MigratableRegattaImpl");
+                    }
+                } else {
+                    if (!leaderboardGroupConsistencyChecked.get()) {
+                        if (!checkConsistencyOfRegattaTypeInSeries(leaderboardGroup, regatta)) {
+                            logger.log(Level.SEVERE, "Bug2822 DB-Migration: Regatta " + regatta.getName() +
+                                    " has different value of 'canBoatsOfCompetitorsChangePerRace' than other regattas in leaderboardGroup " + leaderboardGroup.getName());
+                        }
+                        leaderboardGroupConsistencyChecked.set(true);
                     }
                 }
             }
@@ -716,11 +739,9 @@ public class DomainFactoryImpl implements DomainFactory {
                 Serializable boatId;
                 String sailId;
                 if (competitorBoatInfo != null) {
-                    LeaderboardGroup leaderboardGroup = leaderboardGroupResolver.resolveLeaderboardGroupByRegattaName(regatta.getName());
                     boatId = createUniqueBoatIdentifierFromBoatMetadata(regatta, leaderboardGroup, competitorBoatInfo);
                     sailId = competitorBoatInfo.getId(); // we take here the boatId as sailID which is a number like 1, 2, 3
                 } else {
-                    // TODO bug2822: How do we get a valid boat here?
                     boatId = createUniqueBoatIdentifierFromCompetitor(rc.getCompetitor());
                     sailId = rc.getCompetitor().getShortName();
                 }
@@ -769,6 +790,24 @@ public class DomainFactoryImpl implements DomainFactory {
         return competitorsAndBoats;
     }
 
+    private boolean checkConsistencyOfRegattaTypeInSeries(LeaderboardGroup leaderboardGroup, Regatta regatta) {
+        boolean result = true;
+        final boolean canBoatsOfCompetitorsChangePerRace = regatta.canBoatsOfCompetitorsChangePerRace();
+        if (leaderboardGroup != null) {
+            for (Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
+                if (leaderboard instanceof RegattaLeaderboard) {
+                    RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                    if (canBoatsOfCompetitorsChangePerRace != regattaLeaderboard.getRegatta().canBoatsOfCompetitorsChangePerRace()) {
+                        result = false;
+                        break;
+                    }
+                     
+                }
+            }
+        }
+        return result;
+    }
+    
     /**
      * Create an unique key for a boat derived from the regatta, a leaderboardGroup (can be null) and the boat metadata
      * @return a unique boat key 

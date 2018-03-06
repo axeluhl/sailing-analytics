@@ -87,7 +87,7 @@ public class ChartFactory extends Chart {
         Chart angleChart = new Chart().setType(Type.LINE).setHeight100().setWidth100();
         angleChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
         angleChart.setExporting(new Exporting().setEnabled(false));
-        angleChart.getYAxis().setAxisTitleText(stringMessages.beatAngle() + " (" + stringMessages.degreesShort() + ")");
+        angleChart.getYAxis().setAxisTitleText(stringMessages.TWA() + " (" + stringMessages.degreesShort() + ")");
         angleChart.getXAxis().setAxisTitleText(stringMessages.windSpeed());
         return angleChart;
     }
@@ -107,7 +107,7 @@ public class ChartFactory extends Chart {
         lineChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
         lineChart.getXAxis().setMin(-179).setMax(180).setTickInterval(45);
         lineChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(30).setEnabled(true)).setAxisTitle(
-                new AxisTitle().setText(stringMessages.beatAngle() + " (" + stringMessages.degreesShort() + ")"));
+                new AxisTitle().setText(stringMessages.TWA() + " (" + stringMessages.degreesShort() + ")"));
         lineChart.setLegend(new Legend().setEnabled(false));
         lineChart.setExporting(new Exporting().setEnabled(false));
         return lineChart;

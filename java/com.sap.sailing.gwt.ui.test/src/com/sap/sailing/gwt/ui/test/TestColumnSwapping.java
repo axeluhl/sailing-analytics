@@ -55,7 +55,7 @@ public class TestColumnSwapping {
         leaderboardCreationDate = new Date();
         try {
             // get Leaderboard with name and current date
-            leaderboardOriginalDTO = new LeaderboardDTO(null, null, ScoringSchemeType.LOW_POINT, /* higherScoreIsBetter */ false, new LeaderboardDTO.UUIDGenerator() {
+            leaderboardOriginalDTO = new LeaderboardDTO(new Date(), null, null, ScoringSchemeType.LOW_POINT, /* higherScoreIsBetter */ false, new LeaderboardDTO.UUIDGenerator() {
                 @Override
                 public String generateRandomUUID() {
                     return UUID.randomUUID().toString();
@@ -119,7 +119,7 @@ public class TestColumnSwapping {
 
     @Test
     public void testLeaderBoardDTOMethods() {
-        lb = new LeaderboardDTO(null, null, ScoringSchemeType.LOW_POINT, /* higherScoreIsBetter */ false, new LeaderboardDTO.UUIDGenerator() {
+        lb = new LeaderboardDTO(new Date(), null, null, ScoringSchemeType.LOW_POINT, /* higherScoreIsBetter */ false, new LeaderboardDTO.UUIDGenerator() {
             @Override
             public String generateRandomUUID() {
                 return UUID.randomUUID().toString();

@@ -11,7 +11,6 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sse.common.Duration;
@@ -299,19 +298,6 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Distance getManeuverLoss(TimePoint timePointBeforeManeuver, TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver);
 
     TrackedLeg getTrackedLeg();
-
-    /**
-     * Computes the angle between the competitors direction and the wind's "from" direction. The angle's direction is chosen such that
-     * it can be added to the boat's course over ground to arrive at the wind's {@link Wind#getFrom() "from"} direction. Example: wind
-     * from the north (0deg), boat's course over ground 90deg (moving east), then the bearing returned is -90deg.
-     */
-    Bearing getBeatAngle(TimePoint at) throws NoWindException;
-
-    /**
-     * Same as {@link #getBeatAngle}, only that additionally a cache is provided that can allow the method to use
-     * cached wind and leg type values.
-     */
-    Bearing getBeatAngle(TimePoint at, WindLegTypeAndLegBearingCache cache) throws NoWindException;
 
     /**
      * Like {@link #getAverageVelocityMadeGood(TimePoint)}, only with an additional cache argument that allows the method to
