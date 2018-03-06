@@ -16,7 +16,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -74,16 +73,12 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private final DateTimeFormat dateformat = DateTimeFormat.getFormat("HH:mm:ss");
     
     private final SimplePanel contentPanel = new SimplePanel();
-    private final Label selectCompetitorLabel;
+    private final Label importantMessageLabel = new Label();
     private final SortedCellTableWithStylableHeaders<SingleManeuverDTO> maneuverCellTable;
     private final SortableColumn<SingleManeuverDTO, String> competitorColumn;
-    private Timer timer;
-    private TimeRangeWithZoomModel timeRangeWithZoomProvider;
-    private Long timeOfEarliestRequestInMillis;
-    private Long timeOfLatestRequestInMillis;
-    private Map<CompetitorDTO, List<ManeuverDTO>> lastResult;
-    private Date fromTime;
-    private Date newTime;
+    private final Timer timer;
+    private final TimeRangeWithZoomModel timeRangeWithZoomProvider;
+    private final Map<CompetitorDTO, List<ManeuverDTO>> lastResult = new HashMap<>();
     private ManeuverTableSettings settings;
 
     public ManeuverTablePanel(Component<?> parent, ComponentContext<?> context,
@@ -101,7 +96,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         this.timer = timer;
         this.timeRangeWithZoomProvider = timeRangeWithZoomProvider;
 
-        competitorSelectionModel.addCompetitorSelectionChangeListener(this);
+        this.competitorSelectionModel.addCompetitorSelectionChangeListener(this);
+        this.timer.addTimeListener(this);
 
         final FlowPanel rootPanel = new FlowPanel();
         rootPanel.addStyleName(resources.css().maneuverPanel());
@@ -111,14 +107,12 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         settingsButton.setStyleName(resources.css().settingsButton());
         rootPanel.add(settingsButton);
 
-        this.selectCompetitorLabel = new Label(stringMessages.selectCompetitor());
-        this.selectCompetitorLabel.addStyleName(resources.css().importantMessage());
-
-        maneuverCellTable = new SortedCellTableWithStylableHeaders<>(Integer.MAX_VALUE, style.getTableresources());
-        maneuverCellTable.addStyleName(resources.css().maneuverTable());
+        this.importantMessageLabel.addStyleName(resources.css().importantMessage());
+        this.maneuverCellTable = new SortedCellTableWithStylableHeaders<>(Integer.MAX_VALUE, style.getTableresources());
+        this.maneuverCellTable.addStyleName(resources.css().maneuverTable());
 
         final SingleSelectionModel<SingleManeuverDTO> selectionModel = new SingleSelectionModel<>();
-        maneuverCellTable.setSelectionModel(selectionModel);
+        this.maneuverCellTable.setSelectionModel(selectionModel);
         selectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -131,26 +125,19 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             }
         });
         
-        maneuverCellTable.addColumn(competitorColumn = createCompetitorColumn());
-        maneuverCellTable.addColumn(createManeuverTypeColumn());
-        maneuverCellTable.addColumn(createTimeColumn());
-        maneuverCellTable.addColumn(createDurationColumn());
-        maneuverCellTable.addColumn(createSpeedInColumn());
-        maneuverCellTable.addColumn(createSpeedOutColumn());
-        maneuverCellTable.addColumn(createMinSpeedColumn());
-        maneuverCellTable.addColumn(createTurnRateColumn());
-        maneuverCellTable.addColumn(createLossColumn());
-        maneuverCellTable.addColumn(createDirectionColumn());
+        this.maneuverCellTable.addColumn(competitorColumn = createCompetitorColumn());
+        this.maneuverCellTable.addColumn(createManeuverTypeColumn());
+        this.maneuverCellTable.addColumn(createTimeColumn());
+        this.maneuverCellTable.addColumn(createDurationColumn());
+        this.maneuverCellTable.addColumn(createSpeedInColumn());
+        this.maneuverCellTable.addColumn(createSpeedOutColumn());
+        this.maneuverCellTable.addColumn(createMinSpeedColumn());
+        this.maneuverCellTable.addColumn(createTurnRateColumn());
+        this.maneuverCellTable.addColumn(createLossColumn());
+        this.maneuverCellTable.addColumn(createDirectionColumn());
 
         initWidget(rootPanel);
         setVisible(false);
-        clearCacheAndReload();
-    }
-
-    private void clearCacheAndReload() {
-        timeOfEarliestRequestInMillis = null;
-        timeOfLatestRequestInMillis = null;
-        refresh(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime());
     }
 
     private SortableColumn<SingleManeuverDTO, String> createDirectionColumn() {
@@ -449,39 +436,42 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             }
         };
     }
-    
-    private void showCompetitorColumn(boolean show) {
-        if (show) {
-            if (maneuverCellTable.getColumnIndex(competitorColumn) == -1) {
-                maneuverCellTable.insertColumn(0, competitorColumn);
-            }
-        } else {
-            if (maneuverCellTable.getColumnIndex(competitorColumn) > -1) {
-                maneuverCellTable.removeColumn(competitorColumn);
-            }
-        }
-    }
 
     /**
      * Recreate the view, this is meant to save us a remote call if only competitor is changed
      */
-    private void rerender(){
-        if (lastResult == null || fromTime == null || newTime == null) {
-            refresh(fromTime, newTime);
-        } else {
-            ArrayList<SingleManeuverDTO> data = convertToTableFormat();
-            maneuverCellTable.setList(data);
-            for (int i = 0; i < maneuverCellTable.getColumnCount(); i++) {
-                Column<SingleManeuverDTO, ?> column = maneuverCellTable.getColumn(i);
-                if(column instanceof AbstractSortableColumnWithMinMax){
-                    ((AbstractSortableColumnWithMinMax<SingleManeuverDTO, ?>) column).updateMinMax();
+    private void rerender() {
+        if (isVisible()) {
+            if (Util.isEmpty(competitorSelectionModel.getSelectedCompetitors())) {
+                this.importantMessageLabel.setText(stringMessages.selectCompetitor());
+                this.contentPanel.setWidget(importantMessageLabel);
+            } else if (lastResult.isEmpty()) {
+                this.importantMessageLabel.setText(stringMessages.noDataFound());
+                this.contentPanel.setWidget(importantMessageLabel);
+            } else {
+                this.contentPanel.setWidget(maneuverCellTable);
+                this.showCompetitorColumn(Util.size(competitorSelectionModel.getSelectedCompetitors()) != 1);
+                this.maneuverCellTable.setList(convertToTableFormat());
+                for (int i = 0; i < maneuverCellTable.getColumnCount(); i++) {
+                    final Column<SingleManeuverDTO, ?> column = maneuverCellTable.getColumn(i);
+                    if (column instanceof AbstractSortableColumnWithMinMax) {
+                        ((AbstractSortableColumnWithMinMax<SingleManeuverDTO, ?>) column).updateMinMax();
+                    }
                 }
             }
         }
     }
 
+    private void showCompetitorColumn(boolean show) {
+        if (show && maneuverCellTable.getColumnIndex(competitorColumn) == -1) {
+            maneuverCellTable.insertColumn(0, competitorColumn);
+        } else if (maneuverCellTable.getColumnIndex(competitorColumn) > -1) {
+            maneuverCellTable.removeColumn(competitorColumn);
+        }
+    }
+
     private ArrayList<SingleManeuverDTO> convertToTableFormat() {
-        ArrayList<SingleManeuverDTO> data = new ArrayList<>();
+        final ArrayList<SingleManeuverDTO> data = new ArrayList<>();
         for (Entry<CompetitorDTO, List<ManeuverDTO>> res : lastResult.entrySet()) {
             if (competitorSelectionModel.isSelected(res.getKey())) {
                 for (ManeuverDTO maneuver : res.getValue()) {
@@ -497,20 +487,12 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         return data;
     }
     
-    /**
-     * Load new remote data 
-     */
-    private void refresh(Date fromTime, Date newTime) {
-        if(!isVisible()){
-            return;
-        }
-        this.fromTime = fromTime;
-        this.newTime = newTime;
-        Map<CompetitorDTO, Date> from = new HashMap<>();
-        Map<CompetitorDTO, Date> to = new HashMap<>();
+    private void refresh() {
+        final Map<CompetitorDTO, Date> from = new HashMap<>();
+        final Map<CompetitorDTO, Date> to = new HashMap<>();
         for (CompetitorDTO comp : competitorSelectionModel.getAllCompetitors()) {
-            from.put(comp, fromTime);
-            to.put(comp, newTime);
+            from.put(comp, timeRangeWithZoomProvider.getFromTime());
+            to.put(comp, timeRangeWithZoomProvider.getToTime());
         }
 
         sailingService.getManeuvers(raceIdentifier, from, to,
@@ -518,42 +500,35 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
                     @Override
                     public void onSuccess(Map<CompetitorDTO, List<ManeuverDTO>> result) {
-                        lastResult = result;
+                        lastResult.clear();
+                        lastResult.putAll(result);
                         rerender();
                     }
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        caught.printStackTrace();
-                        Window.alert("Could not do stuff");
+                        lastResult.clear();
+                        rerender();
                     }
                 });
     }
 
     @Override
     public void setVisible(boolean visible) {
-        processCompetitorSelectionChange(visible);
         super.setVisible(visible);
+        if (lastResult.isEmpty()) {
+            this.refresh();
+        }
     }
 
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
-        processCompetitorSelectionChange(isVisible());
+        this.rerender();
     }
 
     @Override
     public void removedFromSelection(CompetitorDTO competitor) {
-        processCompetitorSelectionChange(isVisible());
-    }
-
-    private void processCompetitorSelectionChange(boolean visible) {
-        if (visible && !Util.isEmpty(competitorSelectionModel.getSelectedCompetitors())) {
-            this.contentPanel.setWidget(maneuverCellTable);
-            this.showCompetitorColumn(Util.size(competitorSelectionModel.getSelectedCompetitors()) != 1);
-            this.rerender();
-        } else {
-            this.contentPanel.setWidget(selectCompetitorLabel);
-        }
+        this.rerender();
     }
 
     @Override
@@ -602,7 +577,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     @Override
     public SettingsDialogComponent<ManeuverTableSettings> getSettingsDialogComponent(
             ManeuverTableSettings useTheseSettings) {
-        return new ManeuverTableSettingsDialogComponent(settings, stringMessages);
+        return new ManeuverTableSettingsDialogComponent(useTheseSettings, stringMessages);
     }
 
     @Override
@@ -611,40 +586,10 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         rerender();
     }
 
-    /**
-     * If in live mode, fetches what's missing since the last fix and <code>date</code>. If nothing has been loaded yet,
-     * loads from the beginning up to <code>date</code>. If in replay mode, checks if anything has been loaded at all.
-     * If not, everything for the currently selected race is loaded; otherwise, no-op.
-     */
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
-        if (isVisible()) {
-            switch (timer.getPlayMode()) {
-            case Live: {
-                // is date before first cache entry or is cache empty?
-                if (timeOfEarliestRequestInMillis == null || newTime.getTime() < timeOfEarliestRequestInMillis) {
-                    refresh(timeRangeWithZoomProvider.getFromTime(), newTime);
-                } else if (newTime.getTime() > timeOfLatestRequestInMillis) {
-                    refresh(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime());
-                }
-                // otherwise the cache spans across date and so we don't need to load anything
-                break;
-            }
-            case Replay: {
-                if (timeOfLatestRequestInMillis == null) {
-                    // pure replay mode
-                    refresh(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime());
-                } else {
-                    // replay mode during live play
-                    if (timeOfEarliestRequestInMillis == null || newTime.getTime() < timeOfEarliestRequestInMillis) {
-                        refresh(timeRangeWithZoomProvider.getFromTime(), newTime);
-                    } else if (newTime.getTime() > timeOfLatestRequestInMillis) {
-                        refresh(new Date(timeOfLatestRequestInMillis), newTime);
-                    }
-                }
-                break;
-            }
-            }
+        if (isVisible() && timer.getPlayMode() == PlayModes.Live) {
+            refresh();
         }
     }
 
