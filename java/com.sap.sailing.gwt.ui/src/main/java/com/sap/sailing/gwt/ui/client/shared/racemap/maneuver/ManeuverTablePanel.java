@@ -515,10 +515,10 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
     @Override
     public void setVisible(boolean visible) {
-        super.setVisible(visible);
-        if (lastResult.isEmpty()) {
+        if (!isVisible() && visible && lastResult.isEmpty()) {
             this.refresh();
         }
+        super.setVisible(visible);
     }
 
     @Override
