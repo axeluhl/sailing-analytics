@@ -3418,21 +3418,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<ManeuverDTO> result = new ArrayList<ManeuverDTO>();
         for (Maneuver maneuver : maneuvers) {
             final ManeuverDTO maneuverDTO;
-            if (maneuver.getType() == ManeuverType.MARK_PASSING) {
-                maneuverDTO = new MarkpassingManeuverDTO(maneuver.getType(), maneuver.getNewTack(),
-                        maneuver.getPosition(), 
-                        maneuver.getTimePoint().asDate(),
-                        createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore()),
-                        createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter()),
-                        maneuver.getDirectionChangeInDegrees(), maneuver.getManeuverLoss()==null?null:maneuver.getManeuverLoss().getMeters(),
-                                ((MarkPassingManeuver) maneuver).getSide(), maneuver.getDuration(), createSpeedWithBearingDTO(maneuver.getMinSpeed()));
+            final ManeuverType type = maneuver.getType();
+            final Tack newTack = maneuver.getNewTack();
+            final Position position = maneuver.getPosition();
+            final Date timepoint = maneuver.getTimePoint().asDate();
+            final SpeedWithBearingDTO speedBefore = createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore());
+            final SpeedWithBearingDTO speedAfter = createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter());
+            final double directionChangeInDegrees = maneuver.getDirectionChangeInDegrees();
+            final Double maneuverLossInMeters = maneuver.getManeuverLoss() == null ? null
+                    : maneuver.getManeuverLoss().getMeters();
+            final Duration duration = maneuver.getDuration();
+            final SpeedWithBearingDTO minSpeed = maneuver.getMinSpeed() == null ? null
+                    : createSpeedWithBearingDTO(maneuver.getMinSpeed());
+            if (type == ManeuverType.MARK_PASSING) {
+                maneuverDTO = new MarkpassingManeuverDTO(type, newTack, position, timepoint, speedBefore, speedAfter,
+                        directionChangeInDegrees, maneuverLossInMeters, ((MarkPassingManeuver) maneuver).getSide(),
+                        duration, minSpeed);
             } else  {
-                maneuverDTO = new ManeuverDTO(maneuver.getType(), maneuver.getNewTack(),
-                        maneuver.getPosition(), 
-                        maneuver.getTimePoint().asDate(),
-                        createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore()),
-                        createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter()),
-                        maneuver.getDirectionChangeInDegrees(), maneuver.getManeuverLoss()==null?null:maneuver.getManeuverLoss().getMeters(), maneuver.getDuration(), createSpeedWithBearingDTO(maneuver.getMinSpeed()));
+                maneuverDTO = new ManeuverDTO(type, newTack, position, timepoint, speedBefore, speedAfter,
+                        directionChangeInDegrees, maneuverLossInMeters, duration, minSpeed);
             }
             result.add(maneuverDTO);
         }

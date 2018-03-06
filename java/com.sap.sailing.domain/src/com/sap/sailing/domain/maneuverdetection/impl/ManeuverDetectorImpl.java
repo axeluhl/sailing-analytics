@@ -586,7 +586,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                     false);
             for (GPSFixMoving fix : allRelevantManeuverFixes) {
                 SpeedWithBearing speed = track.getEstimatedSpeed(fix.getTimePoint());
-                if (minSpeed == null || speed.getKnots() < minSpeed.getKnots()) {
+                if (speed != null && (minSpeed == null || speed.getKnots() < minSpeed.getKnots())) {
                     minSpeed = speed;
                 }
             }
