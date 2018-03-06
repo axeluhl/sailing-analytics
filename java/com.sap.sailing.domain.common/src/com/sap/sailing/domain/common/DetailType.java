@@ -443,7 +443,9 @@ public enum DetailType implements Serializable {
     }
     
     /**
-     * This method allows, to also restore legacy names of older settings, that do not match the renamed detailtypes anymore. 
+     * This method allows callers to also restore legacy names of older settings that do not match the renamed detailtypes anymore. 
+     * It matches {@code value} primarily to the literals; if no match is found, all {@link #oldNames old names} are checked,
+     * and the first match, if any, is returned. If no match is found, an {@link IllegalArgumentException} is thrown.
      */
     public static DetailType valueOfString(String value) {
         // fastpath for directly mappable values
