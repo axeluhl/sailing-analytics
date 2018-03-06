@@ -630,6 +630,7 @@ public class LeaderboardData extends ExportAction {
         Element competitorElement = new Element("competitor");
         addNamedElementWithValue(competitorElement, "uuid", competitor.getId().toString());
         addNamedElementWithValue(competitorElement, "name", competitor.getName());
+        addNamedElementWithValue(competitorElement, "short_name", competitor.getShortName());
         
         if (shortVersion)
             return competitorElement;
