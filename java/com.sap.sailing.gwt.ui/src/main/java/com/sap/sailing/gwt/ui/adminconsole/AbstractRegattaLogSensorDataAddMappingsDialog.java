@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -128,9 +129,10 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
     protected Collection<TypedDeviceMappingDTO> getResult() {
         List<TypedDeviceMappingDTO> result = new ArrayList<>();
         String dataType = getSelectedImporterType();
-        for (TrackFileImportDeviceIdentifierDTO device : deviceIdTable.getMappings().keySet()) {
-            DeviceIdentifierDTO deviceIdDto = new DeviceIdentifierDTO("FILE", device.uuidAsString);
-            MappableToDevice mappedTo = deviceIdTable.getMappings().get(device);
+        for (Map.Entry<TrackFileImportDeviceIdentifierDTO, MappableToDevice> deviceEntry : deviceIdTable.getMappings().entrySet()) {
+            final TrackFileImportDeviceIdentifierDTO device = deviceEntry.getKey();
+            final DeviceIdentifierDTO deviceIdDto = new DeviceIdentifierDTO("FILE", device.uuidAsString);
+            final MappableToDevice mappedTo = deviceIdTable.getMappings().get(device);
             result.add(new TypedDeviceMappingDTO(deviceIdDto, device.from, device.to, mappedTo, null, dataType));
         }
         return result;
@@ -191,7 +193,7 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
             boatToSelect = null;
 
             if (deviceId != null) {
-                MappableToDevice mappedTo = deviceIdTable.getMappedObjectForDeviceId(deviceId);
+                final MappableToDevice mappedTo = deviceIdTable.getMappedObjectForDeviceId(deviceId);
                 if (mappedTo instanceof CompetitorDTO) {
                     compToSelect = (CompetitorDTO) mappedTo;
                 } else if (mappedTo instanceof BoatDTO) {

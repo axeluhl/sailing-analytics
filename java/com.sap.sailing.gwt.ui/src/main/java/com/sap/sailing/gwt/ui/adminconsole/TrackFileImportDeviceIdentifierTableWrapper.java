@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
@@ -144,6 +145,9 @@ public class TrackFileImportDeviceIdentifierTableWrapper extends
             } else if (mappableToDevice instanceof BoatDTO) {
                 BoatDTO boatDTO = (BoatDTO) mappableToDevice;
                 td.html(new SafeHtmlBuilder().appendEscaped(boatDTO.getName()).toSafeHtml());
+            } else if (mappableToDevice instanceof MarkDTO) {
+                MarkDTO markDTO = (MarkDTO) mappableToDevice;
+                td.html(new SafeHtmlBuilder().appendEscaped(markDTO.getName()).toSafeHtml());
             } else {
                 td.html(new SafeHtmlBuilder().appendEscaped("--").toSafeHtml());
             }

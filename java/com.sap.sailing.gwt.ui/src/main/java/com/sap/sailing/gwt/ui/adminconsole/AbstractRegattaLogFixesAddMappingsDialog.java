@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -36,7 +35,6 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
     private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
     private final MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>> markTable;
     private final BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>> boatTable;
-    private final Map<TrackFileImportDeviceIdentifierDTO, MappableToDevice> mappings = new HashMap<>();
 
     private TrackFileImportDeviceIdentifierDTO deviceToSelect;
     private CompetitorDTO compToSelect;
@@ -157,10 +155,7 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
 
     private void mappedToSelectionChanged(MappableToDevice mappedTo) {
         if (!inInstableTransitionState) {
-            TrackFileImportDeviceIdentifierDTO device = deviceIdTable.getSelectionModel().getSelectedObject();
-            if (device != null) {
-                mappings.put(device, mappedTo);
-            }
+            deviceIdTable.setMappedObjectForSelectedDevice(mappedTo);
 
             if (mappedTo instanceof CompetitorDTO) {
                 compToSelect = (CompetitorDTO) mappedTo;
@@ -188,7 +183,7 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
             markToSelect = null;
 
             if (deviceId != null) {
-                MappableToDevice mappedTo = mappings.get(deviceId);
+                final MappableToDevice mappedTo = deviceIdTable.getMappedObjectForDeviceId(deviceId);
                 if (mappedTo instanceof CompetitorDTO) {
                     compToSelect = (CompetitorDTO) mappedTo;
                 } else if (mappedTo instanceof BoatDTO) {
@@ -228,10 +223,11 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
     @Override
     protected Collection<DeviceMappingDTO> getResult() {
         List<DeviceMappingDTO> result = new ArrayList<>();
-        for (TrackFileImportDeviceIdentifierDTO device : mappings.keySet()) {
-            DeviceIdentifierDTO deviceIdDto = new DeviceIdentifierDTO("FILE", device.uuidAsString);
-            MappableToDevice mappedTo = mappings.get(device);
-            DeviceMappingDTO mapping = new DeviceMappingDTO(deviceIdDto, device.from, device.to, mappedTo, null);
+        for (Map.Entry<TrackFileImportDeviceIdentifierDTO, MappableToDevice> deviceEntry : deviceIdTable.getMappings().entrySet()) {
+            final TrackFileImportDeviceIdentifierDTO device = deviceEntry.getKey();
+            final DeviceIdentifierDTO deviceIdDto = new DeviceIdentifierDTO("FILE", device.uuidAsString);
+            final MappableToDevice mappedTo = deviceEntry.getValue();
+            final DeviceMappingDTO mapping = new DeviceMappingDTO(deviceIdDto, device.from, device.to, mappedTo, null);
             result.add(mapping);
         }
         return result;
