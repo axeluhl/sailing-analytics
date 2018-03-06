@@ -204,7 +204,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
             @Override
             public String getValue(SingleManeuverDTO object) {
-                return object.loss == null ? "" : towDigitAccuracy.format(object.loss) + stringMessages.meters();
+                return object.loss == null ? ""
+                        : (towDigitAccuracy.format(object.loss) + " " + stringMessages.metersUnit());
             }
         };
     }
@@ -517,6 +518,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     public void setVisible(boolean visible) {
         if (!isVisible() && visible && lastResult.isEmpty()) {
             this.refresh();
+        } else {
+            this.rerender();
         }
         super.setVisible(visible);
     }
