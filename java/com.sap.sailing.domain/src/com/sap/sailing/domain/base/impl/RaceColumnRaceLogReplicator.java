@@ -2,7 +2,6 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -47,11 +46,6 @@ public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Seriali
                 raceColumn, 
                 identifier, 
                 event);
-    }
-    
-    @Override
-    public void visit(RaceLogCourseAreaChangedEvent event) {
-        notifyOnAdd(event);
     }
     
     @Override

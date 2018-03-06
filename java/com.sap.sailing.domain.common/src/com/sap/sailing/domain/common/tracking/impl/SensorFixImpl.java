@@ -27,6 +27,13 @@ public abstract class SensorFixImpl implements SensorFix {
     }
 
     @Override
+    public Double[] get() {
+        Double[] result = new Double[fix.get().length];
+        System.arraycopy(fix.get(), 0, result, 0, result.length);
+        return result;
+    }
+
+    @Override
     public double get(String valueName) {
         final ColumnMetadata columnMetadata = resolveMetadataFromValueName(valueName);
         if (columnMetadata == null) {

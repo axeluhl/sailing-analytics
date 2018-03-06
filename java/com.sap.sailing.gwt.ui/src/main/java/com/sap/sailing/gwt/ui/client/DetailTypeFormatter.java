@@ -197,7 +197,7 @@ public class DetailTypeFormatter {
         case CHART_DISTANCE_TO_START_LINE:
             return stringMessages.distanceToLine();
         case CHART_BEAT_ANGLE:
-            return stringMessages.beatAngle();
+            return stringMessages.TWA();
         case CHART_COURSE_OVER_GROUND_TRUE_DEGREES:
             return stringMessages.courseOverGroundTrueDegrees();
         case OVERALL_TOTAL_SCORED_RACE_COUNT:
@@ -747,7 +747,7 @@ public class DetailTypeFormatter {
         case RACE_TIME_TRAVELED_UPWIND:
             return stringMessages.raceTimeUpwindTooltip();
         case CHART_BEAT_ANGLE:
-            return stringMessages.beatAngleTooltip();
+            return stringMessages.TWATooltip();
         case CHART_DISTANCE_TO_START_LINE:
             return "";
         case CHART_COURSE_OVER_GROUND_TRUE_DEGREES:

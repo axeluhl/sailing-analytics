@@ -20,10 +20,13 @@ import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
  * into the {@link DoubleVectorFix}.
  */
 public enum BravoExtendedSensorDataMetadata implements ColumnMetadata {
+    // START ----- DONT CHANGE UNLESS BravoSensorDataMetadata CHANGES TOO ------
     RIDE_HEIGHT_PORT_HULL("RideHeightPort", /* expectedInLogfile */ true), //
     RIDE_HEIGHT_STBD_HULL("RideHeightStbd", /* expectedInLogfile */ true), //
     HEEL("Heel", /* expectedInLogfile */ true), //
     PITCH("PitchRate", /* expectedInLogfile */ true), //
+    // END   ----- DONT CHANGE UNLESS BravoSensorDataMetadata CHANGES TOO ------
+    
     DB_RAKE_PORT("DaggerBoardRakeAnglePort", /* expectedInLogfile */ true), //
     DB_RAKE_STBD("DaggerBoardRakeAngleStbd", /* expectedInLogfile */ true), //
     RUDDER_RAKE_PORT("RudderRakeAnglePort", /* expectedInLogfile */ true), //

@@ -34,6 +34,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -229,7 +230,7 @@ public class RaceBoardPanel
         raceMap = new RaceMap(this, componentContext, raceMapLifecycle, defaultRaceMapSettings, sailingService, asyncActionsExecutor,
                 errorReporter, timer,
                 competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 
-                raceMapResources, /* showHeaderPanel */ true, quickRanksDTOProvider) {
+                raceMapResources, /* showHeaderPanel */ true, quickRanksDTOProvider, this::showInWindChart) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
@@ -371,18 +372,18 @@ public class RaceBoardPanel
             competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
             competitorChart.setVisible(false);
             competitorChart.updateSettings(multiCompetitorRaceChartSettings);
+            new SliceRaceHandler(sailingService, userService, errorReporter, competitorChart, selectedRaceIdentifier,
+                    leaderboardGroupName, leaderboardName, event);
             componentsForSideBySideViewer.add(competitorChart);
             windChart = new WindChart(this, getComponentContext(), windChartLifecycle, sailingService,
                     selectedRaceIdentifier, timer,
                     timeRangeWithZoomModel,
                     windChartSettings, stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */
                     true);
-
             windChart.setVisible(false);
             windChart.getEntryWidget().setTitle(stringMessages.windChart());
             componentsForSideBySideViewer.add(windChart);
         }
-        
         editMarkPassingPanel = new EditMarkPassingsPanel(this, getComponentContext(), sailingService,
                 selectedRaceIdentifier,
                 stringMessages,
@@ -520,6 +521,11 @@ public class RaceBoardPanel
      */
     public void setWindChartVisible(boolean visible) {
         setComponentVisible(leaderboardAndMapViewer, windChart, visible);
+    }
+    
+    public void showInWindChart(WindSource windprovider) {
+        setComponentVisible(leaderboardAndMapViewer, windChart, true);
+        windChart.showProvider(windprovider);
     }
 
     /**
