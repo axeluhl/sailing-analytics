@@ -3032,7 +3032,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // only copy the competitors from the deserialized competitor store; don't use it because it will have set
         // a default Mongo object factory
         logger.info("Reading competitors...");
-        for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
+        for (Competitor competitor : ((CompetitorStore) ois.readObject()).getAllCompetitors()) {
             DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
             // the following should actually be redundant because during de-serialization the Competitor objects,
             // whose classes implement IsManagedByCache, should already have been got/created from/in the

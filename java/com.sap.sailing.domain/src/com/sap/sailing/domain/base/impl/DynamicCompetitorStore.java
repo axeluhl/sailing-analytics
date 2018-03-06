@@ -16,6 +16,6 @@ public interface DynamicCompetitorStore extends CompetitorStore {
             DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag);
 
     @Override
-    Iterable<? extends DynamicCompetitor> getCompetitors();
+    Iterable<? extends DynamicCompetitor> getAllCompetitors();
 
 }

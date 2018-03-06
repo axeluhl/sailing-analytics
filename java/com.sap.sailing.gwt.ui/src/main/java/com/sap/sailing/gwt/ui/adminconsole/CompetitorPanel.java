@@ -45,7 +45,8 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
         super();
         this.leaderboardName = leaderboardName;
-        this.competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true, /* showOnlyCompetitorsWithBoat */ false);
+        this.competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true, 
+                /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         this.refreshableCompetitorSelectionModel = (RefreshableMultiSelectionModel<CompetitorDTO>) competitorTable.getSelectionModel();
 
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);

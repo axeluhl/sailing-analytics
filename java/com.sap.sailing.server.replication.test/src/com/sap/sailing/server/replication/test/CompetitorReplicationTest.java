@@ -166,7 +166,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
                         /* dateOfBirth */null, "This is Rigo, the coach")),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
         Thread.sleep(1000);
-        assertTrue(StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorStore().getCompetitors().spliterator(), /* parallel */ false).anyMatch(
+        assertTrue(StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorStore().getAllCompetitors().spliterator(), /* parallel */ false).anyMatch(
                 c->
                     c.getId().equals(competitor.getId())));
     }

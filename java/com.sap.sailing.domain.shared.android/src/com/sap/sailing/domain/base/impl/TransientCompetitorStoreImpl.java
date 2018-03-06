@@ -258,7 +258,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
     
     @Override
-    public Iterable<Competitor> getCompetitors() {
+    public Iterable<Competitor> getAllCompetitors() {
         LockUtil.lockForRead(lock);
         try {
             return new ArrayList<Competitor>(competitorCache.values());
@@ -273,7 +273,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         try {
             List<CompetitorWithBoat> competitors = new ArrayList<>();
             for (Competitor c: competitorCache.values()) {
-                if (isValidCompetitorWithBoat(c)) {
+                if (c.hasBoat()) {
                     competitors.add((CompetitorWithBoat) c);
                 }
             }
@@ -282,7 +282,23 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             LockUtil.unlockAfterRead(lock);
         }
     }
-    
+
+    @Override
+    public Iterable<Competitor> getCompetitorsWithoutBoat() {
+        LockUtil.lockForRead(lock);
+        try {
+            List<Competitor> competitors = new ArrayList<>();
+            for (Competitor c: competitorCache.values()) {
+                if (!c.hasBoat()) {
+                    competitors.add(c);
+                }
+            }
+            return competitors;
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
+    }
+
     protected void removeCompetitor(Competitor competitor) {
         LockUtil.lockForWrite(lock);
         try {

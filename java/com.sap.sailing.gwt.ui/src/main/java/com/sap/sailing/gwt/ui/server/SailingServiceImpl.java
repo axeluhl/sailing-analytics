@@ -4937,13 +4937,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<CompetitorDTO> getCompetitors(boolean onlyCompetitorsWithBoat) {
+    public Iterable<CompetitorDTO> getCompetitors(boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
         Iterable<CompetitorDTO> result;
         CompetitorStore competitorStore = getService().getBaseDomainFactory().getCompetitorStore();
-        if (onlyCompetitorsWithBoat) {
+        if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == false) {
+            result = convertToCompetitorDTOs(competitorStore.getAllCompetitors());
+        } else if (filterCompetitorsWithBoat == true && filterCompetitorsWithoutBoat == false) {
+            result = convertToCompetitorDTOs(competitorStore.getCompetitorsWithoutBoat());
+        } else if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == true) {
             result = convertToCompetitorDTOs(competitorStore.getCompetitorsWithBoat());
         } else {
-            result = convertToCompetitorDTOs(competitorStore.getCompetitors());
+            result = Collections.emptyList();
         }
         return result;
     }

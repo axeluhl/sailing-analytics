@@ -143,9 +143,9 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         final CaptionPanel allCompetitorsPanel = new CaptionPanel(stringMessages.competitorPool());
         final CaptionPanel registeredCompetitorsPanel = new CaptionPanel(stringMessages.registeredCompetitors());
         allCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */
-                true, /* enablePager */true,  /* showOnlyCompetitorsWithBoat */ !canBoatsOfCompetitorsChangePerRace);
+                true, /* enablePager */true, /* filterCompetitorWithBoat */ canBoatsOfCompetitorsChangePerRace, /* filterCompetitorsWithoutBoat */ !canBoatsOfCompetitorsChangePerRace);
         registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */
-                true, /* enablePager */false,  /* showOnlyCompetitorsWithBoat */ false);
+                true, /* enablePager */false,  /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         allCompetitorsPanel.add(allCompetitorsTable);
         registeredCompetitorsPanel.add(registeredCompetitorsTable);
         VerticalPanel movePanel = new VerticalPanel();

@@ -66,7 +66,7 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
             }
         });
         competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
-                /* multiSelection */ false, /* enable pager */ true, /* show only competitors with boat */ false);
+                /* multiSelection */ false, /* enable pager */ true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         markTable = new MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>>(
         /* multiSelection */ false, sailingService, stringMessages, errorReporter);
 
