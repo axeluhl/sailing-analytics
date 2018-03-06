@@ -194,7 +194,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 		}
         System.out.println(this.calcStandardDev(this.getAssignmentAssociations(bestPLT, new int[18][6])));
 		bestPLT = this.improveCompetitorAllocations(bestPLT, flightCount, groupCount, competitorCount);
-		bestPLT = this.improveAssignmentChanges(bestPLT, flightCount, competitorCount);
+		bestPLT = this.improveAssignmentChanges(bestPLT, flightCount, groupCount, competitorCount);
 		if (flightMultiplier > 1) {
 			bestPLT = this.multiplyFlights(bestPLT, flightCount, groupCount, competitorCount);
 		}
@@ -560,7 +560,18 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 	 * 
 	 * @return the improved pairingListTemplate
 	 */
-	private int[][] improveAssignmentChanges(int[][] pairingList, int flights, int competitors) {
+	private int[][] improveAssignmentChanges(int[][] pairingList, int flights, int groups, int competitors) {
+		int[][] resultPLT =new int[flights*groups][competitors/groups];
+		int[][] temp2= new int[groups][competitors/groups];
+		int counter = 0;
+		for(int i=0;i<flights/groups;i++ ){
+			for(int j=0;j<flights;j=j+competitors/groups){
+				for(int groupIndex=0;groupIndex<groups;groupIndex++){
+					System.arraycopy(pairingList[i+j+groupIndex], 0, resultPLT[counter], 0, pairingList[0].length);
+					counter++;
+				}
+			}
+		}
 		int boatChanges[] = new int[flights - 1];
 		for (int i = 1; i < flights; i++) {
 			int[] groupPrev = pairingList[i * pairingList.length / flights - 1];
@@ -586,6 +597,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 			}
 			boatChanges[i - 1] = groupNext.length - bestMatch;
 		}
+		System.out.println(Arrays.toString(boatChanges));
 		return pairingList;
 	}
 
