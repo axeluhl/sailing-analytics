@@ -69,6 +69,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Install the Google Android SDK (see section "Additional steps required for Android projects" for detailed info!)
   * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> Google -> Web Toolkit -> Add...)
+  * In "Window->Preferences->GWT->Errors/Warnings, set "Missing SDK" to "Ignore"
   * In "Window->Preferences->General->Editors->TextEditors" check Insert Spaces for Tabs 
   * In "Window->Preferences->Web->HTML Files->Editor" indent using Spaces
   * In "Window->Preferences->General->Content Types" select on the right side CSS, now add in the lower file association list *.gss to get limited syntax highlighting and content assist in GSS files
