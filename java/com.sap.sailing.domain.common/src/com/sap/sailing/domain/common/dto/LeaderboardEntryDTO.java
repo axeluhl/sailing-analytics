@@ -163,7 +163,7 @@ public class LeaderboardEntryDTO implements Serializable {
 
     public Double expeditionTimeToPin;
 
-    public Duration expeditionTimeToGUN;
+    public Duration expeditionTimeToGun;
 
     public Double expeditionTimeToCommitteeBoat;
 
@@ -357,7 +357,7 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result + ((expeditionTimeToBurnToPin == null) ? 0 : expeditionTimeToBurnToPin.hashCode());
         result = prime * result
                 + ((expeditionTimeToCommitteeBoat == null) ? 0 : expeditionTimeToCommitteeBoat.hashCode());
-        result = prime * result + ((expeditionTimeToGUN == null) ? 0 : expeditionTimeToGUN.hashCode());
+        result = prime * result + ((expeditionTimeToGun == null) ? 0 : expeditionTimeToGun.hashCode());
         result = prime * result + ((expeditionTimeToPin == null) ? 0 : expeditionTimeToPin.hashCode());
         result = prime * result + ((expeditionTimeToPortLayline == null) ? 0 : expeditionTimeToPortLayline.hashCode());
         result = prime * result + ((expeditionTimeToStbLayline == null) ? 0 : expeditionTimeToStbLayline.hashCode());
@@ -586,10 +586,10 @@ public class LeaderboardEntryDTO implements Serializable {
                 return false;
         } else if (!expeditionTimeToCommitteeBoat.equals(other.expeditionTimeToCommitteeBoat))
             return false;
-        if (expeditionTimeToGUN == null) {
-            if (other.expeditionTimeToGUN != null)
+        if (expeditionTimeToGun == null) {
+            if (other.expeditionTimeToGun != null)
                 return false;
-        } else if (!expeditionTimeToGUN.equals(other.expeditionTimeToGUN))
+        } else if (!expeditionTimeToGun.equals(other.expeditionTimeToGun))
             return false;
         if (expeditionTimeToPin == null) {
             if (other.expeditionTimeToPin != null)

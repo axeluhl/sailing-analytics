@@ -1296,7 +1296,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.EXPEDITION_RACE_DIST_TO_STB_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DIST_TO_STB_LAYLINE, new DoubleTextRaceDetailTypeExtractor(e -> e.expeditionDistToStbLayline), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_GUN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_GUN, new DurationAsSecondsDetailTypeExtractor(e -> e.expeditionTimeToGUN), LEG_COLUMN_HEADER_STYLE,
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_GUN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_GUN, new DurationAsSecondsDetailTypeExtractor(e -> e.expeditionTimeToGun), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT, new DoubleTextRaceDetailTypeExtractor(e -> e.expeditionTimeToCommitteeBoat), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));

@@ -621,7 +621,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         entryDTO.expeditionHeading = fix.getExpeditionHDG();
                         entryDTO.expeditionHeel = fix.getExpeditionHeel();
                         entryDTO.expeditionTargetHeel = fix.getExpeditionTG_Heell();
-                        entryDTO.expeditionTimeToGUN = fix.getExpeditionTmToGun();
+                        entryDTO.expeditionTimeToGun = fix.getExpeditionTmToGun();
                         entryDTO.expeditionTimeToBurnToLine = fix.getExpeditionTmToBurn();
                         entryDTO.expeditionDistanceBelowLine = fix.getExpeditionBelowLn();
                         entryDTO.expeditionCourseDetail = fix.getExpeditionCourse();
