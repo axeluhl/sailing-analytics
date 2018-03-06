@@ -32,16 +32,10 @@ public class SingleManeuverDTO {
         this.loss = loss;
     }
 
-    public Double getDirection() {
-        if(speedIn == null && speedOut == null){
+    public Double getDirectionChange() {
+        if(speedIn == null || speedOut == null){
             return null;
         }
-        if(speedIn != null && speedOut == null){
-            return speedIn.getDegrees();
-        }
-        if(speedIn == null && speedOut != null){
-            return speedOut.getDegrees();
-        }
-        return speedIn.middle(speedOut).getDegrees();
+        return speedIn.getDifferenceTo(speedOut).getDegrees();
     }
 }
