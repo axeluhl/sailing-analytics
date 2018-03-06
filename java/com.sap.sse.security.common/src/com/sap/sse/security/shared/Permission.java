@@ -8,7 +8,7 @@ public interface Permission {
     /**
      * If one or more modes are specified, a string permission is rendered that has the
      * {@link Mode#getStringPermission() permission strings} of those modes listed in the second wildcard permission
-     * component. Otherwise, only the primary permission with one segment is returned.
+     * component. Otherwise, only the primary permission (representing the object type) with one segment is returned.
      */
     String getStringPermission(Mode... modes);
 

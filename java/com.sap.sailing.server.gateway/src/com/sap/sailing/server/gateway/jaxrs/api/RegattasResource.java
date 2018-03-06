@@ -52,7 +52,6 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -108,6 +107,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.util.RoundingUtil;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.Permission.DefaultModes;
 import com.sap.sse.security.shared.User;
 
 @Path("/v1/regattas")
@@ -284,7 +284,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response addCompetitor(@PathParam("regattaname") String regattaName,
             @PathParam("competitorid") String competitorIdAsString) {
         final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
+        subject.checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultModes.UPDATE, regattaName));
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -318,7 +318,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             @QueryParam("timeondistanceallowancepernauticalmileasmillis") Long timeOnDistanceAllowancePerNauticalMileAsMillis,
             @QueryParam("searchtag") String searchTag) {
         final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
+        subject.checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultModes.UPDATE, regattaName));
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -351,7 +351,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response removeCompetitor(@PathParam("regattaname") String regattaName,
             @PathParam("competitorid") String competitorIdAsString) {
         final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
+        subject.checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultModes.UPDATE, regattaName));
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -1589,7 +1589,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/removeracecolumn")
     public Response addRaceColumns(@PathParam("regattaname") String regattaName,
             @QueryParam("racecolumn") String raceColumnName) {
-        SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
+        SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultModes.UPDATE, regattaName));
         final Response response;
         Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
         if (regatta == null) {
@@ -1634,7 +1634,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     }
 
     private RaceColumnInSeries addRaceColumn(String regattaName, String seriesName, String columnName) {
-        SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
+        SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultModes.UPDATE, regattaName));
         return getService().apply(new AddColumnToSeries(new RegattaName(regattaName), seriesName, columnName));
     }
 

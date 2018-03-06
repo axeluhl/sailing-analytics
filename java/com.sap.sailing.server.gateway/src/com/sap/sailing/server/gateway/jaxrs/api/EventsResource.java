@@ -58,7 +58,6 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -90,6 +89,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.Permission.DefaultModes;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -137,7 +137,7 @@ public class EventsResource extends AbstractSailingServerResource {
             @FormParam("numberofraces") String numberOfRacesParam) throws ParseException, NotFoundException,
             NumberFormatException, IOException, org.json.simple.parser.ParseException, InvalidDateException {
         if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Mode.CREATE));
+            SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(DefaultModes.CREATE));
         }
         final Response response;
         if (venueNameParam == null && (venueLat == null || venueLng == null)) {
@@ -191,7 +191,7 @@ public class EventsResource extends AbstractSailingServerResource {
             @FormParam("numberofraces") String numberOfRacesParam) throws ParseException, NotFoundException,
             NumberFormatException, IOException, org.json.simple.parser.ParseException, InvalidDateException {
         if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(Mode.CREATE, eventId));
+            SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(DefaultModes.CREATE, eventId));
         }
         final Response response;
         UUID id;
@@ -435,7 +435,7 @@ public class EventsResource extends AbstractSailingServerResource {
             List<Integer> overallLeaderboardDiscardThresholdsParam, String overallLeaderboardScoringSchemeTypeParam)
             throws NotFoundException {
         if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD_GROUP.getStringPermissionForObjects(Mode.CREATE, leaderboardGroupName));
+            SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD_GROUP.getStringPermissionForObjects(DefaultModes.CREATE, leaderboardGroupName));
         }
         ScoringSchemeType overallLeaderboardScoringSchemeType = overallLeaderboardScoringSchemeTypeParam == null
                 ? null : getScoringSchemeType(overallLeaderboardScoringSchemeTypeParam);
@@ -474,7 +474,7 @@ public class EventsResource extends AbstractSailingServerResource {
 
     private void updateSeries(String regattaName, SeriesCreationParametersDTO defaultSeries) {
         if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
+            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultModes.UPDATE, regattaName));
         }
         getService().apply(new UpdateSeries(new RegattaName(regattaName), "Default", "Default", defaultSeries.isMedal(),
                 defaultSeries.isFleetsCanRunInParallel(), defaultSeries.getDiscardingThresholds(),
@@ -496,7 +496,7 @@ public class EventsResource extends AbstractSailingServerResource {
 
     private RaceColumnInSeries addRaceColumn(String regattaName, String seriesName, String columnName) {
         if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
+            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultModes.UPDATE, regattaName));
         }
         return getService().apply(new AddColumnToSeries(new RegattaName(regattaName), seriesName, columnName));
     }
@@ -506,7 +506,7 @@ public class EventsResource extends AbstractSailingServerResource {
             List<UUID> leaderboardGroupIds, UUID eventId, Map<Locale, URL> sailorsInfoWebsiteURLs,
             Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(Mode.CREATE, eventName));
+            SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(DefaultModes.CREATE, eventName));
         }
         return getService()
                 .apply(new CreateEvent(eventName, eventDescription, startDate, endDate, venueName, isPublic, eventId,
@@ -515,7 +515,7 @@ public class EventsResource extends AbstractSailingServerResource {
     
     private void updateEvent(Event event, LeaderboardGroup leaderboardGroup){
         if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(Mode.UPDATE, event.getId().toString()));
+            SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(DefaultModes.UPDATE, event.getId().toString()));
         }
         List<UUID> newLeaderboardGroupIds = new ArrayList<>();
         StreamSupport.stream(event.getLeaderboardGroups().spliterator(), false)
@@ -529,7 +529,7 @@ public class EventsResource extends AbstractSailingServerResource {
 
     private CourseArea addCourseArea(UUID eventId, String courseAreaName) {
         if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(Mode.UPDATE, eventId.toString()));
+            SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(DefaultModes.UPDATE, eventId.toString()));
         }
         String[] courseAreaNames = new String[] { courseAreaName };
         UUID[] courseAreaIds = new UUID[] { UUID.randomUUID() };
@@ -542,7 +542,7 @@ public class EventsResource extends AbstractSailingServerResource {
             RankingMetrics rankingMetric, UUID regattaId, RegattaCreationParametersDTO regattaCreationParametersDTO,
             int[] leaderboardDiscardThresholds, int numberOfRaces) {
         if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.CREATE, regattaName));
+            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultModes.CREATE, regattaName));
         }
         Regatta regatta = getService().apply(new AddSpecificRegatta(regattaName, boatClassName, startDate, endDate, regattaId,
                 regattaCreationParametersDTO, /* isPersistent */ true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths,
@@ -596,7 +596,7 @@ public class EventsResource extends AbstractSailingServerResource {
 
     private RegattaLeaderboard createRegattaLeaderboard(String regattaName, int[] discardThresholds) {
         if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.CREATE, regattaName));
+            SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(DefaultModes.CREATE, regattaName));
         }
         return getService()
                 .apply(new CreateRegattaLeaderboard(new RegattaName(regattaName), regattaName, discardThresholds));

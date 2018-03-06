@@ -117,19 +117,4 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     public WildcardPermission getPermissionForObjects(com.sap.sse.security.shared.Permission.Mode mode, String... objectIdentifiers) {
         return new WildcardPermission(getStringPermissionForObjects(mode, objectIdentifiers));
     }
-
-    /**
-     * The mode of interaction with a resource; used as the second element of a wildcard permission
-     * 
-     * @author Axel Uhl (d043530)
-     *
-     */
-    public static enum Mode implements com.sap.sse.security.shared.Permission.Mode {
-        CREATE, READ, UPDATE, DELETE;
-
-        @Override
-        public String getStringPermission() {
-            return name();
-        }
-    }
 }

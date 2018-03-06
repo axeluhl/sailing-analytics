@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartZoomChangedEvent;
@@ -26,6 +25,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.shared.Permission.DefaultModes;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -126,8 +126,8 @@ public class SliceRaceHandler {
     private boolean allowsEditing() {
         final UserDTO currentUser = userService.getCurrentUser();
         return currentUser != null
-                && currentUser.hasPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, selectedRaceIdentifier.getRegattaName()))
-                && currentUser.hasPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+                && currentUser.hasPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultModes.UPDATE, selectedRaceIdentifier.getRegattaName()))
+                && currentUser.hasPermission(Permission.LEADERBOARD.getStringPermissionForObjects(DefaultModes.UPDATE, leaderboardName));
     }
 
     private void doSlice() {

@@ -37,11 +37,11 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.security.shared.Permission.DefaultModes;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
 
@@ -83,7 +83,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
     
     private void ensureUserCanManageMedia() {
-        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_MEDIA.getStringPermissionForObjects(Mode.UPDATE));
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_MEDIA.getStringPermissionForObjects(DefaultModes.UPDATE));
     }
 
     @Override
