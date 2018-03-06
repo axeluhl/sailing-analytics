@@ -11,13 +11,13 @@ import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.osgi.framework.BundleContext;
 
-import com.sap.sse.common.WithID;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.HasPermission;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.Role;
@@ -52,9 +52,9 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     OwnershipAnnotation getOwnership(String idOfOwnedObjectAsString);
     
-    OwnershipAnnotation createDefaultOwnershipForNewObject(WithID newObject);
+    OwnershipAnnotation createDefaultOwnershipForNewObject(HasPermission newObject);
 
-    void deleteAllDataForRemovedObject(WithID removedObject);
+    void deleteAllDataForRemovedObject(HasPermission removedObject);
 
     Iterable<AccessControlListAnnotation> getAccessControlLists();
 
