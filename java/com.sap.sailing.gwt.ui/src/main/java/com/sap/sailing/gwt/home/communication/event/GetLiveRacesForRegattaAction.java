@@ -8,7 +8,9 @@ import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.EventActionUtil.CalculationWithEvent;
+import com.sap.sailing.gwt.home.shared.utils.SailingTransportRoutingUtils;
 import com.sap.sailing.gwt.home.server.LiveRaceCalculator;
+import com.sap.sse.gwt.dispatch.client.system.routing.ProvidesDispatchRoutingKey;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 import com.sap.sse.gwt.dispatch.shared.commands.SortedSetResult;
@@ -30,7 +32,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.SortedSetResult;
  * </p>
  */
 public class GetLiveRacesForRegattaAction implements SailingAction<ResultWithTTL<SortedSetResult<LiveRaceDTO>>>,
-        IsClientCacheable {
+        IsClientCacheable, ProvidesDispatchRoutingKey {
     private UUID eventId;
     private String regattaName;
     
@@ -65,5 +67,10 @@ public class GetLiveRacesForRegattaAction implements SailingAction<ResultWithTTL
     @Override
     public void cacheInstanceKey(StringBuilder key) {
         key.append(eventId).append("_").append(regattaName);
+    }
+
+    @Override
+    public String routingPath() {
+        return SailingTransportRoutingUtils.pathForEvent(eventId);        
     }
 }

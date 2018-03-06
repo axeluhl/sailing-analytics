@@ -6,6 +6,8 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
+import com.sap.sailing.gwt.home.shared.utils.SailingTransportRoutingUtils;
+import com.sap.sse.gwt.dispatch.client.system.routing.ProvidesDispatchRoutingKey;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
@@ -20,7 +22,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
  * otherwise.
  * </p>
  */
-public class GetMiniOverallLeaderbordAction implements SailingAction<ResultWithTTL<GetMiniLeaderboardDTO>>, IsClientCacheable {
+public class GetMiniOverallLeaderbordAction implements SailingAction<ResultWithTTL<GetMiniLeaderboardDTO>>, IsClientCacheable,ProvidesDispatchRoutingKey {
     private UUID seriesId;
     private int limit = 0;
 
@@ -62,5 +64,10 @@ public class GetMiniOverallLeaderbordAction implements SailingAction<ResultWithT
     @Override
     public void cacheInstanceKey(StringBuilder key) {
         key.append(seriesId).append("_").append(limit);
+    }
+    
+    @Override
+    public String routingPath() {
+        return SailingTransportRoutingUtils.pathForSeries(seriesId);
     }
 }
