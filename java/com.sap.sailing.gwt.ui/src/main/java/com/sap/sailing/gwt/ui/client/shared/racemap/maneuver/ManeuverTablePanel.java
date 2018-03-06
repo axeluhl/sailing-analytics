@@ -23,7 +23,9 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.Bearing;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.DurationFormatter;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -51,6 +53,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
@@ -107,6 +110,21 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
         maneuverCellTable = new SortedCellTableWithStylableHeaders<>(Integer.MAX_VALUE, style.getTableresources());
 
+        SingleSelectionModel<SingleManeuverDTO> selectionModel = new SingleSelectionModel<>();
+        maneuverCellTable.setSelectionModel(selectionModel);
+        selectionModel.addSelectionChangeHandler(new Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                SingleManeuverDTO selected = selectionModel.getSelectedObject();
+                // TODO and permission for non live position jumpin!
+                if (selected != null && (timer.getPlayMode() == PlayModes.Replay || true)) {
+                    timer.pause();
+                    timer.setTime(selected.time.getTime());
+                }
+            }
+        });
+        
         competitorColumn = createCompetitorColumn();
         maneuverCellTable.addColumn(competitorColumn);
 
@@ -160,19 +178,20 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 return new InvertibleComparatorAdapter<SingleManeuverDTO>() {
                     @Override
                     public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
-                        return o1.direction.compareTo(o2.direction);
+                        return o1.getDirection().compareTo(o2.getDirection());
                     }
                 };
             }
 
             @Override
             public Header<?> getHeader() {
-                return new TextHeader("i18n direction");
+                return new TextHeader(stringMessages.bearing());
             }
 
             @Override
             public String getValue(SingleManeuverDTO object) {
-                return String.valueOf(object.direction);
+                return object.getDirection() == null ? null
+                        : towDigitAccuracy.format(object.getDirection());
             }
         };
     }
@@ -441,9 +460,13 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     
     private void showCompetitorColumn(boolean b) {
         if(b){
-            maneuverCellTable.insertColumn(0, competitorColumn);
+            if(maneuverCellTable.getColumnIndex(competitorColumn) == -1){
+                maneuverCellTable.insertColumn(0, competitorColumn);
+            }
         }else{
-            maneuverCellTable.removeColumn(competitorColumn);
+            if(maneuverCellTable.getColumnIndex(competitorColumn) > -1){
+                maneuverCellTable.removeColumn(competitorColumn);
+            }
         }
     }
 
@@ -474,8 +497,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                     if (settings.getSelectedManeuverTypes().contains(maneuver.type)) {
                         data.add(new SingleManeuverDTO(res.getKey(), maneuver.timepoint, maneuver.type,
                                 maneuver.duration, maneuver.speedWithBearingBefore, maneuver.speedWithBearingAfter,
-                                new SpeedWithBearingDTO(0, 0), maneuver.directionChangeInDegrees, maneuver.maneuverLossInMeters,
-                                Bearing.NORTH));
+                                new SpeedWithBearingDTO(0, 0), maneuver.directionChangeInDegrees, maneuver.maneuverLossInMeters));
                     }
                 }
             }
