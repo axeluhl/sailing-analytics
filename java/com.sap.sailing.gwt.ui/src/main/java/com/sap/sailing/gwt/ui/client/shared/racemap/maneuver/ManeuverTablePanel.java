@@ -543,7 +543,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
     @Override
     public String getLocalizedShortName() {
-        return null;
+        return stringMessages.maneuverTable();
     }
 
     @Override
