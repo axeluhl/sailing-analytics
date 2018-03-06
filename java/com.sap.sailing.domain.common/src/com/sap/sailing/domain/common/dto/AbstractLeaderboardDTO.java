@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.dto;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -44,13 +45,23 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     }
     
     public Set<BoatClassDTO> getBoatClasses() {
-        Set<BoatClassDTO> result = new HashSet<BoatClassDTO>();
+        Set<BoatClassDTO> result = new HashSet<>();
+        collectBoatClasses(result);
+        return result;
+    }
+    
+    private void collectBoatClasses(Collection<BoatClassDTO> boatClasses) {
         if (rows != null) {
             for (CompetitorDTO competitor : rows.keySet()) {
-                result.add(competitor.getBoatClass());
+                boatClasses.add(competitor.getBoatClass());
             }
         }
-        return result;
+    }
+    
+    public BoatClassDTO getDominantBoatClass() {
+        List<BoatClassDTO> result = new ArrayList<>();
+        collectBoatClasses(result);
+        return Util.getDominantObject(result);
     }
 
     public String getDisplayName() {
