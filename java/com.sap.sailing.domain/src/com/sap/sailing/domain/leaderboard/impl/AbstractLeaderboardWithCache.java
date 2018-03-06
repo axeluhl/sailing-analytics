@@ -459,7 +459,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
             row.carriedPoints = this.hasCarriedPoints(competitor) ? this.getCarriedPoints(competitor) : null;
             row.netPoints = this.getNetPoints(competitor, timePoint);
-            
             if (addOverallDetails) {
                 addOverallDetailsToRow(timePoint, competitor, row);
             }
@@ -603,8 +602,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 entryDTO.calculatedTime = raceDetails.getCorrectedTime();
                 entryDTO.calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead = raceDetails.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead();
                 entryDTO.gapToLeaderInOwnTime = raceDetails.getGapToLeaderInOwnTime();
-                
-                
                 try {
                     BravoFixTrack<Competitor> sensorTrack = trackedRace.getSensorTrack(competitor,
                             BravoFixTrack.TRACK_NAME);
@@ -634,7 +631,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 } catch (Exception e) {
                    logger.log(Level.WARNING, "There was an error determining expedition or extended data", e);
                 }
-                
                 final TimePoint startOfRace = trackedRace.getStartOfRace();
                 if (startOfRace != null) {
                     Waypoint startWaypoint = trackedRace.getRace().getCourse().getFirstWaypoint();
