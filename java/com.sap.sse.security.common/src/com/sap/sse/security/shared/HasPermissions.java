@@ -25,7 +25,7 @@ import com.sap.sse.security.shared.Permission.Mode;
  * @author Axel Uhl (d043530)
  *
  */
-public interface HasPermission extends WithID {
+public interface HasPermissions extends WithID {
     /**
      * Returns the bare {@link Permission} type without any operation mode or object identification
      */

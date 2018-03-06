@@ -17,7 +17,7 @@ import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
-import com.sap.sse.security.shared.HasPermission;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.Role;
@@ -52,9 +52,9 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     OwnershipAnnotation getOwnership(String idOfOwnedObjectAsString);
     
-    OwnershipAnnotation createDefaultOwnershipForNewObject(HasPermission newObject);
+    OwnershipAnnotation createDefaultOwnershipForNewObject(HasPermissions newObject);
 
-    void deleteAllDataForRemovedObject(HasPermission removedObject);
+    void deleteAllDataForRemovedObject(HasPermissions removedObject);
 
     Iterable<AccessControlListAnnotation> getAccessControlLists();
 

@@ -162,28 +162,19 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
 
     @Override
     public boolean isPermitted(PrincipalCollection principals, Permission perm) {
-        //TODO check whether WildcardPermission functionality can be used here (perm instanceof)
+        // TODO check whether WildcardPermission functionality can be used here (perm instanceof)
         String[] parts = perm.toString().replaceAll("\\[|\\]", "").split(":");
         String username = (String) principals.getPrimaryPrincipal();
-        try {
-            ArrayList<WildcardPermission> directPermissions = new ArrayList<>();
-            for (WildcardPermission directPermission : getUserStore().getPermissionsFromUser(username)) {
-                directPermissions.add(directPermission);
-            }
-            OwnershipAnnotation ownership = null;
-            AccessControlListAnnotation acl = null;
-            if (parts.length > 2) {
-                ownership = getAccessControlStore().getOwnership(parts[2]);
-                acl = getAccessControlStore().getAccessControlList(parts[2]);
-            }
-            final User user = getUserStore().getUserByName(username);
-            return PermissionChecker.isPermitted(new WildcardPermission(perm.toString().replaceAll("\\[|\\]", "")), 
-                    user, getUserStore().getUserGroupsOfUser(user), ownership==null?null:ownership.getAnnotation(), 
-                    acl==null?null:acl.getAnnotation());
-        } catch (UserManagementException e) {
-            logger.log(Level.SEVERE, "User " + username + " does not exist.", e);
-            return false;
+        OwnershipAnnotation ownership = null;
+        AccessControlListAnnotation acl = null;
+        if (parts.length > 2) {
+            ownership = getAccessControlStore().getOwnership(parts[2]);
+            acl = getAccessControlStore().getAccessControlList(parts[2]);
         }
+        final User user = getUserStore().getUserByName(username);
+        return PermissionChecker.isPermitted(new WildcardPermission(perm.toString().replaceAll("\\[|\\]", "")), 
+                user, getUserStore().getUserGroupsOfUser(user), ownership==null?null:ownership.getAnnotation(), 
+                acl==null?null:acl.getAnnotation());
     }
 
     @Override

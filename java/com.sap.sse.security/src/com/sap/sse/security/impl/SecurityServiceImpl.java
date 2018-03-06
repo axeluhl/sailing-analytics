@@ -93,7 +93,7 @@ import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.AdminRole;
-import com.sap.sse.security.shared.HasPermission;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -334,13 +334,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public OwnershipAnnotation createDefaultOwnershipForNewObject(HasPermission newObject) {
+    public OwnershipAnnotation createDefaultOwnershipForNewObject(HasPermissions newObject) {
         return new OwnershipAnnotation(new OwnershipImpl(getCurrentUser(), getCurrentUser().getDefaultTenant()),
                 newObject.getId().toString(), /* display name */ newObject.toString());
     }
     
     @Override
-    public void deleteAllDataForRemovedObject(HasPermission removedObject) {
+    public void deleteAllDataForRemovedObject(HasPermissions removedObject) {
         final String idOfRemovedObjectAsString = removedObject.getId().toString();
         deleteACL(idOfRemovedObjectAsString);
         deleteOwnership(idOfRemovedObjectAsString);
