@@ -5,6 +5,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
@@ -20,9 +21,9 @@ public class MarkPassingManeuverImpl extends ManeuverWithStableSpeedAndCourseBou
     public MarkPassingManeuverImpl(ManeuverType type, Tack newTack, Position position, Distance maneuverLoss,
             TimePoint timePoint, ManeuverCurveBoundaries mainCurveBoundaries,
             ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries,
-            double maxAngularVelocityInDegreesPerSecond, Waypoint waypointPassed, NauticalSide side, Duration duration) {
+            double maxAngularVelocityInDegreesPerSecond, Waypoint waypointPassed, NauticalSide side, Duration duration, SpeedWithBearing minSpeed) {
         super(type, newTack, position, maneuverLoss, timePoint, mainCurveBoundaries,
-                maneuverCurveWithStableSpeedAndCourseBoundaries, maxAngularVelocityInDegreesPerSecond, duration);
+                maneuverCurveWithStableSpeedAndCourseBoundaries, maxAngularVelocityInDegreesPerSecond, duration, minSpeed);
         this.waypointPassed = waypointPassed;
         this.side = side;
     }

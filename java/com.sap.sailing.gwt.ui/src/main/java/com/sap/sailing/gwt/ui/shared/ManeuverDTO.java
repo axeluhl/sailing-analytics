@@ -8,6 +8,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Duration;
@@ -25,7 +26,7 @@ public class ManeuverDTO implements IsSerializable {
     
     public SpeedWithBearingDTO speedWithBearingAfter;
     
-    public double minSpeed;
+    public SpeedWithBearing minSpeed;
     
     public double directionChangeInDegrees;
     
@@ -36,7 +37,7 @@ public class ManeuverDTO implements IsSerializable {
     public ManeuverDTO() {}
     
     public ManeuverDTO(ManeuverType type, Tack newTack, Position position, Date timepoint, SpeedWithBearingDTO speedWithBearingBefore,
-            SpeedWithBearingDTO speedWithBearingAfter, double directionChangeInDegrees, Double maneuverLossInMeters, Duration duration, double minSpeed) {
+            SpeedWithBearingDTO speedWithBearingAfter, double directionChangeInDegrees, Double maneuverLossInMeters, Duration duration, SpeedWithBearing speedWithBearing) {
         super();
         this.type = type;
         this.newTack = newTack;
@@ -47,7 +48,7 @@ public class ManeuverDTO implements IsSerializable {
         this.directionChangeInDegrees = directionChangeInDegrees;
         this.maneuverLossInMeters = maneuverLossInMeters;
         this.duration = duration;
-        this.minSpeed = minSpeed;
+        this.minSpeed = speedWithBearing;
     }
 
     public String toString(StringMessages stringMessages) {

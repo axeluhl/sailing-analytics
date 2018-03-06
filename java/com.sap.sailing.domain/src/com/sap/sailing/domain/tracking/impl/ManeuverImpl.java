@@ -26,11 +26,12 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     private final ManeuverCurveBoundaries mainCurveBoundaries;
     private final ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries;
     private Duration duration;
+    private SpeedWithBearing minSpeed;
 
     public ManeuverImpl(ManeuverType type, Tack newTack, Position position, Distance maneuverLoss, TimePoint timePoint,
             ManeuverCurveBoundaries mainCurveBoundaries,
             ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries,
-            double maxAngularVelocityInDegreesPerSecond, Duration duration) {
+            double maxAngularVelocityInDegreesPerSecond, Duration duration, SpeedWithBearing minSpeed) {
         this.type = type;
         this.newTack = newTack;
         this.position = position;
@@ -40,6 +41,7 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
         this.maneuverCurveWithStableSpeedAndCourseBoundaries = maneuverCurveWithStableSpeedAndCourseBoundaries;
         this.maxAngularVelocityInDegreesPerSecond = maxAngularVelocityInDegreesPerSecond;
         this.duration = duration;
+        this.minSpeed = minSpeed;
     }
     
     @Override
@@ -98,9 +100,8 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     }
     
     @Override
-    public double getMinSpeed() {
-        //TODO implement
-        return 0;
+    public SpeedWithBearing getMinSpeed() {
+        return minSpeed;
     }
 
     @Override
