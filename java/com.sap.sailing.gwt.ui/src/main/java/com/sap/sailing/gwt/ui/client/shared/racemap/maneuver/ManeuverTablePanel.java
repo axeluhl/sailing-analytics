@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.TextCell;
-import com.google.gwt.dom.client.Style.Overflow;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -18,10 +18,10 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
@@ -62,26 +62,29 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTableSettings>
         implements CompetitorSelectionChangeListener, TimeListener {
+
+    private final ManeuverTablePanelResources resources = GWT.create(ManeuverTablePanelResources.class);
+
     private final SailingServiceAsync sailingService;
-    private RegattaAndRaceIdentifier raceIdentifier;
+    private final RegattaAndRaceIdentifier raceIdentifier;
     private final StringMessages stringMessages;
     private final CompetitorSelectionProvider competitorSelectionModel;
 
     private final NumberFormat towDigitAccuracy = NumberFormatterFactory.getDecimalFormat(2);
+    private final DateTimeFormat dateformat = DateTimeFormat.getFormat("HH:mm:ss");
     
-    private Label selectCompetitorLabel = new Label();
-    private ManeuverTableSettings settings;
-    private SortedCellTableWithStylableHeaders<SingleManeuverDTO> maneuverCellTable;
-    protected DateTimeFormat dateformat = DateTimeFormat.getFormat("HH:mm:ss");
+    private final SimplePanel contentPanel = new SimplePanel();
+    private final Label selectCompetitorLabel;
+    private final SortedCellTableWithStylableHeaders<SingleManeuverDTO> maneuverCellTable;
+    private final SortableColumn<SingleManeuverDTO, String> competitorColumn;
     private Timer timer;
     private TimeRangeWithZoomModel timeRangeWithZoomProvider;
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
-    protected Map<CompetitorDTO, List<ManeuverDTO>> lastResult;
+    private Map<CompetitorDTO, List<ManeuverDTO>> lastResult;
     private Date fromTime;
     private Date newTime;
-    private SortableColumn<SingleManeuverDTO, String> turnRateColumn;
-    private SortableColumn<SingleManeuverDTO, String> competitorColumn;
+    private ManeuverTableSettings settings;
 
     public ManeuverTablePanel(Component<?> parent, ComponentContext<?> context,
             final SailingServiceAsync sailingService, final RegattaAndRaceIdentifier raceIdentifier,
@@ -89,6 +92,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             final ErrorReporter errorReporter, final Timer timer, ManeuverTableSettings initialSettings,
             TimeRangeWithZoomModel timeRangeWithZoomProvider, LeaderBoardStyle style) {
         super(parent, context);
+        this.resources.css().ensureInjected();
         this.settings = initialSettings;
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
@@ -99,24 +103,26 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
         competitorSelectionModel.addCompetitorSelectionChangeListener(this);
 
-        AbsolutePanel rootPanel = new AbsolutePanel();
-        HorizontalPanel tableAndButtons = new HorizontalPanel();
-        rootPanel.add(tableAndButtons, 0, 0);
-        tableAndButtons.setSpacing(3);
-        VerticalPanel buttonPanel = new VerticalPanel();
-        buttonPanel.setSpacing(3);
-        tableAndButtons.add(buttonPanel);
-        buttonPanel.add(selectCompetitorLabel);
+        final FlowPanel rootPanel = new FlowPanel();
+        rootPanel.addStyleName(resources.css().maneuverPanel());
+        this.contentPanel.addStyleName(resources.css().contentContainer());
+        rootPanel.add(contentPanel);
+        final Button settingsButton = SettingsDialog.createSettingsButton(this, stringMessages);
+        settingsButton.setStyleName(resources.css().settingsButton());
+        rootPanel.add(settingsButton);
+
+        this.selectCompetitorLabel = new Label(stringMessages.selectCompetitor());
+        this.selectCompetitorLabel.addStyleName(resources.css().importantMessage());
 
         maneuverCellTable = new SortedCellTableWithStylableHeaders<>(Integer.MAX_VALUE, style.getTableresources());
+        maneuverCellTable.addStyleName(resources.css().maneuverTable());
 
-        SingleSelectionModel<SingleManeuverDTO> selectionModel = new SingleSelectionModel<>();
+        final SingleSelectionModel<SingleManeuverDTO> selectionModel = new SingleSelectionModel<>();
         maneuverCellTable.setSelectionModel(selectionModel);
         selectionModel.addSelectionChangeHandler(new Handler() {
-
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                SingleManeuverDTO selected = selectionModel.getSelectedObject();
+                final SingleManeuverDTO selected = selectionModel.getSelectedObject();
                 // TODO and permission for non live position jumpin!
                 if (selected != null && (timer.getPlayMode() == PlayModes.Replay || true)) {
                     timer.pause();
@@ -125,40 +131,17 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             }
         });
         
-        competitorColumn = createCompetitorColumn();
-        maneuverCellTable.addColumn(competitorColumn);
+        maneuverCellTable.addColumn(competitorColumn = createCompetitorColumn());
+        maneuverCellTable.addColumn(createManeuverTypeColumn());
+        maneuverCellTable.addColumn(createTimeColumn());
+        maneuverCellTable.addColumn(createDurationColumn());
+        maneuverCellTable.addColumn(createSpeedInColumn());
+        maneuverCellTable.addColumn(createSpeedOutColumn());
+        maneuverCellTable.addColumn(createMinSpeedColumn());
+        maneuverCellTable.addColumn(createTurnRateColumn());
+        maneuverCellTable.addColumn(createLossColumn());
+        maneuverCellTable.addColumn(createDirectionColumn());
 
-        SortableColumn<SingleManeuverDTO, String> maneuvertypeColumn = createManeuverTypeColumn();
-        maneuverCellTable.addColumn(maneuvertypeColumn);
-
-        SortableColumn<SingleManeuverDTO, String> timeColumn = createTimeColumn();
-        maneuverCellTable.addColumn(timeColumn);
-
-        SortableColumn<SingleManeuverDTO, String> durationColumn = createDurationColumn();
-        maneuverCellTable.addColumn(durationColumn);
-
-        SortableColumn<SingleManeuverDTO, String> speedInColumn = createSpeedInColumn();
-        maneuverCellTable.addColumn(speedInColumn);
-
-        SortableColumn<SingleManeuverDTO, String> speedOutColumn = createSpeedOutColumn();
-        maneuverCellTable.addColumn(speedOutColumn);
-
-        SortableColumn<SingleManeuverDTO, String> minSpeedColumn = createMinSpeedColumn();
-        maneuverCellTable.addColumn(minSpeedColumn);
-
-        turnRateColumn = createTurnRateColumn();
-        maneuverCellTable.addColumn(turnRateColumn);
-
-        SortableColumn<SingleManeuverDTO, String> lossColumn = createLossColumn();
-        maneuverCellTable.addColumn(lossColumn);
-
-        SortableColumn<SingleManeuverDTO, String> directionColumn = createDirectionColumn();
-        maneuverCellTable.addColumn(directionColumn);
-
-        maneuverCellTable.setVisible(false);
-        tableAndButtons.add(maneuverCellTable);
-        tableAndButtons.add(SettingsDialog.createSettingsButton(this, stringMessages));
-        rootPanel.getElement().getStyle().setOverflow(Overflow.AUTO);
         initWidget(rootPanel);
         setVisible(false);
         clearCacheAndReload();
@@ -467,13 +450,13 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         };
     }
     
-    private void showCompetitorColumn(boolean b) {
-        if(b){
-            if(maneuverCellTable.getColumnIndex(competitorColumn) == -1){
+    private void showCompetitorColumn(boolean show) {
+        if (show) {
+            if (maneuverCellTable.getColumnIndex(competitorColumn) == -1) {
                 maneuverCellTable.insertColumn(0, competitorColumn);
             }
-        }else{
-            if(maneuverCellTable.getColumnIndex(competitorColumn) > -1){
+        } else {
+            if (maneuverCellTable.getColumnIndex(competitorColumn) > -1) {
                 maneuverCellTable.removeColumn(competitorColumn);
             }
         }
@@ -491,8 +474,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             for (int i = 0; i < maneuverCellTable.getColumnCount(); i++) {
                 Column<SingleManeuverDTO, ?> column = maneuverCellTable.getColumn(i);
                 if(column instanceof AbstractSortableColumnWithMinMax){
-                    AbstractSortableColumnWithMinMax<SingleManeuverDTO, ?> c = (AbstractSortableColumnWithMinMax<SingleManeuverDTO, ?>) column;
-                    c.updateMinMax();
+                    ((AbstractSortableColumnWithMinMax<SingleManeuverDTO, ?>) column).updateMinMax();
                 }
             }
         }
@@ -506,7 +488,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                     if (settings.getSelectedManeuverTypes().contains(maneuver.type)) {
                         data.add(new SingleManeuverDTO(res.getKey(), maneuver.timepoint, maneuver.type,
                                 maneuver.duration, maneuver.speedWithBearingBefore, maneuver.speedWithBearingAfter,
-                                new SpeedWithBearingDTO(0, 0), maneuver.directionChangeInDegrees, maneuver.maneuverLossInMeters));
+                                new SpeedWithBearingDTO(0, 0), maneuver.directionChangeInDegrees,
+                                maneuver.maneuverLossInMeters));
                     }
                 }
             }
@@ -564,14 +547,12 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     }
 
     private void processCompetitorSelectionChange(boolean visible) {
-        if (visible && Util.size(competitorSelectionModel.getSelectedCompetitors()) > 0) {
-            selectCompetitorLabel.setText("");
-            maneuverCellTable.setVisible(true);
-            showCompetitorColumn(Util.size(competitorSelectionModel.getSelectedCompetitors()) != 1);
-            rerender();
+        if (visible && !Util.isEmpty(competitorSelectionModel.getSelectedCompetitors())) {
+            this.contentPanel.setWidget(maneuverCellTable);
+            this.showCompetitorColumn(Util.size(competitorSelectionModel.getSelectedCompetitors()) != 1);
+            this.rerender();
         } else {
-            selectCompetitorLabel.setText(stringMessages.selectCompetitor());
-            maneuverCellTable.setVisible(false);
+            this.contentPanel.setWidget(selectCompetitorLabel);
         }
     }
 
