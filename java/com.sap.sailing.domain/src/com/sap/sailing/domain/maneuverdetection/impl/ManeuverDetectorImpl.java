@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -579,12 +580,21 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
 
     private SpeedWithBearing determineMinSpeedInRange(TimePoint timePointBefore, TimePoint timePointAfter) {
         SpeedWithBearing minSpeed = null;
-        Iterable<GPSFixMoving> allRelevantManeuverFixes = track.getFixes(timePointBefore, false, timePointAfter, false);
-        for(GPSFixMoving fix:allRelevantManeuverFixes){
-            SpeedWithBearing speed = track.getEstimatedSpeed(fix.getTimePoint());
-            if(minSpeed == null || speed.getKnots()<minSpeed.getKnots()){
-                minSpeed = speed;
+        track.lockForRead();
+        try {
+            Iterable<GPSFixMoving> allRelevantManeuverFixes = track.getFixes(timePointBefore, false, timePointAfter,
+                    false);
+            for (GPSFixMoving fix : allRelevantManeuverFixes) {
+                SpeedWithBearing speed = track.getEstimatedSpeed(fix.getTimePoint());
+                if (minSpeed == null || speed.getKnots() < minSpeed.getKnots()) {
+                    minSpeed = speed;
+                }
             }
+
+        } catch (Throwable e) {
+            logger.log(Level.SEVERE, "Could not determine MinSpeed", e);
+        } finally {
+            track.unlockAfterRead();
         }
         return minSpeed;
     }

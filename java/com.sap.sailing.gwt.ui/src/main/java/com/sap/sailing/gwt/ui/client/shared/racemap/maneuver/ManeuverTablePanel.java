@@ -280,7 +280,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
             @Override
             public String getValue(SingleManeuverDTO object) {
-                return String.valueOf(object.minSpeed.speedInKnots);
+                return object.minSpeed == null ? null : towDigitAccuracy.format(object.minSpeed.speedInKnots);
             }
         };
     }
