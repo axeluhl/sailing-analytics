@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # You need an installation of the Neon SR2 release of "Eclipse IDE for Eclipse Committers" matching you OS and JDK (32 vs 64 Bit):
-# http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/neon2
+# http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/oxygen2
 
 if [[ $1 == "" ]]; then
     echo "You need to specify the Eclipse installation directory"
@@ -37,7 +37,7 @@ echo "Installing EasyShell..."
 installPlugins http://anb0s.github.io/EasyShell de.anbos.eclipse.easyshell.feature.feature.group
 
 echo "Installing BIRT charts (requirement for MAT)..."
-installPlugins http://download.eclipse.org/birt/update-site/4.6 org.eclipse.birt.chart.feature.group
+installPlugins http://download.eclipse.org/birt/update-site/4.7 org.eclipse.birt.chart.feature.group
 
 echo "Installing Memory Analyzer..."
 installPlugins http://download.eclipse.org/mat/1.7/update-site/ org.eclipse.mat.feature.feature.group,org.eclipse.mat.chart.feature.feature.group
