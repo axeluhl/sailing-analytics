@@ -45,7 +45,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     
     public Set<BoatClassDTO> getBoatClasses() {
         Set<BoatClassDTO> result = new HashSet<BoatClassDTO>();
-        if(rows != null) {
+        if (rows != null) {
             for (CompetitorDTO competitor : rows.keySet()) {
                 result.add(competitor.getBoatClass());
             }
