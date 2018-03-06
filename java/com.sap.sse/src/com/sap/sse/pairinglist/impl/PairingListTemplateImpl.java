@@ -192,6 +192,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 				e.printStackTrace();
 			}
 		}
+        System.out.println(this.calcStandardDev(this.getAssignmentAssociations(bestPLT, new int[18][6])));
 		bestPLT = this.improveCompetitorAllocations(bestPLT, flightCount, groupCount, competitorCount);
 		bestPLT = this.improveAssignmentChanges(bestPLT, flightCount, competitorCount);
 		if (flightMultiplier > 1) {
@@ -530,58 +531,17 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 	 * @return improved pairing list template
 	 */
 	protected int[][] improveCompetitorAllocations(int[][] pairinglist, int flights, int groups, int competitors) {
-		int[][] assignments = this.getAssignmentAssociations(pairinglist, new int[competitors][competitors / groups]);
-		double neededAssigments = flights / (competitors / groups);
-		double bestDev = Double.POSITIVE_INFINITY;
-		int[][] bestPLT = new int[flights * groups][competitors / groups];
-		for (int iteration = 0; iteration < 10; iteration++) {
-			for (int zGroup = 0; zGroup < pairinglist.length; zGroup++) {
-				int[][] groupAssignments = new int[competitors / groups][competitors / groups];
-				for (int zPlace = 0; zPlace < (competitors / groups); zPlace++) {
-					System.arraycopy(assignments[pairinglist[zGroup][zPlace]], 0, groupAssignments[zPlace], 0,
-							(competitors / groups));
-				}
-				for (int zPlace = 0; zPlace < competitors * 50; zPlace++) {
-					int[] position = this.findWorstValuePosition(groupAssignments, (int) neededAssigments);
-					if (groupAssignments[position[0]][position[1]] > neededAssigments - 1
-							&& groupAssignments[position[0]][position[1]] < neededAssigments + 1) {
-						break;
-					} else if (groupAssignments[position[0]][position[1]] < neededAssigments) {
-						int temp = 0;
-						temp = pairinglist[zGroup][position[1]];
-						pairinglist[zGroup][position[1]] = pairinglist[zGroup][position[0]];
-						pairinglist[zGroup][position[0]] = temp;
-						assignments = this.getAssignmentAssociations(pairinglist,
-								new int[competitors][competitors / groups]);
-						for (int x = 0; x < (competitors / groups); x++) {
-							System.arraycopy(assignments[pairinglist[zGroup][x]], 0, groupAssignments[x], 0,
-									(competitors / groups));
-						}
-					} else {
-						if (position[0] == position[1]) {
-							int temp = 0;
-							temp = pairinglist[zGroup][this.findMinValuePosition(groupAssignments[position[0]])];
-							pairinglist[zGroup][this.findMinValuePosition(
-									groupAssignments[position[0]])] = pairinglist[zGroup][position[0]];
-							pairinglist[zGroup][position[0]] = temp;
-							assignments = this.getAssignmentAssociations(pairinglist,
-									new int[competitors][competitors / groups]);
-							for (int x = 0; x < (competitors / groups); x++) {
-								System.arraycopy(assignments[pairinglist[zGroup][x]], 0, groupAssignments[x], 0,
-										(competitors / groups));
-							}
-						} else {
-							groupAssignments[position[0]][position[1]] = -1;
-						}
-					}
-				}
-				if (this.calcStandardDev(pairinglist) < bestDev) {
-					bestDev = this.calcStandardDev(pairinglist);
-					bestPLT = pairinglist;
+		int[][] resultPLT=new int[flights*groups][competitors/groups];
+		for(int flightIndex=0;flightIndex<flights;flightIndex++){
+			int offset=flightIndex % (competitors/groups);
+			for(int fleetIndex=0;fleetIndex<groups;fleetIndex++){
+				Arrays.sort(pairinglist[flightIndex*groups+fleetIndex]);
+				for(int competitorIndex=0;competitorIndex<(competitors/groups);competitorIndex++){
+					resultPLT[flightIndex*groups+fleetIndex][(competitorIndex+offset)%(competitors/groups)]=pairinglist[flightIndex*groups+fleetIndex][competitorIndex];
 				}
 			}
 		}
-		return bestPLT;
+		return resultPLT;
 	}
 
 	/**
