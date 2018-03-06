@@ -186,7 +186,8 @@ public enum DetailType implements Serializable {
     EXPEDITION_LEG_DISTANCE_BELOW_LINE(0, ASCENDING),
     EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION(0, ASCENDING),
     BRAVO_RACE_HEEL_IN_DEGREES(2, DESCENDING),
-    BRAVO_RACE_PITCH_IN_DEGREES(2, DESCENDING),;
+    BRAVO_RACE_PITCH_IN_DEGREES(2, DESCENDING);
+    
     private int precision;
 
     private SortingOrder defaultSortingOrder;
