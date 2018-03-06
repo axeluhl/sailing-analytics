@@ -5,9 +5,27 @@
 # @param $1  instance id
 # @return    public dns name
 # -----------------------------------------------------------
-function query_public_dns_name(){
-	local_echo "Querying for the instance public dns name..."
-	aws_wrapper --region "$region" ec2 describe-instances --instance-ids "$1" --output text --query 'Reservations[*].Instances[*].PublicDnsName'
+function get_public_dns_name(){
+	local public_dns_name=$(aws_wrapper ec2 describe-instances --instance-ids $1 --output text --query 'Reservations[*].Instances[*].PublicDnsName')
+	exit_on_fail validate_hostname $public_dns_name
+}
+
+
+# -----------------------------------------------------------
+# Get resources that should be automatically discovered
+# @return   array of resource ids
+# -----------------------------------------------------------
+function get_resources(){
+	aws resourcegroupstaggingapi get-resources | jq -c ".ResourceTagMappingList[] | select(.ResourceARN)" -r | sanitize
+}
+
+# -----------------------------------------------------------
+# @param1   instance id
+# @param2   tag key
+# @return  tag value
+# -----------------------------------------------------------
+function get_tag_value_for_key(){
+	aws_wrapper ec2 describe-instances --query "Reservations[*].Instances[*].Tags[?Key=='$2'].Value" --instance-ids $1 --output text
 }
 
 # -----------------------------------------------------------
@@ -15,8 +33,33 @@ function query_public_dns_name(){
 # @return    default vpc id
 # -----------------------------------------------------------
 function get_default_vpc_id(){
-	local_echo "Querying for the default vpc id..."
 	aws_wrapper ec2 describe-vpcs --query 'Vpcs[?IsDefault==`true`].VpcId' --output text
+}
+
+# -----------------------------------------------------------
+# Query for instance id by public dns name
+# param $1 public dns name
+# @return    instance id
+# -----------------------------------------------------------
+function get_instance_id(){
+	local_echo "Querying for the instance id of $1..."
+	local instance_id=$(aws_wrapper ec2 describe-instances --query "Reservations[*].Instances[?PublicDnsName=='$1'].InstanceId" --output text)
+	exit_on_fail validate_instance_id $instance_id
+}
+
+# -----------------------------------------------------------
+# Returns the instance id part of e.g. arn:aws:ec2:eu-west-2:017363970217:instance/i-096a32ca8c28bedbb
+# param $1 resource arn
+# @return  id part of arn
+# -----------------------------------------------------------
+function get_resource_id(){
+	cut -d/ -f2 <<< $1
+}
+
+function get_public_ip(){
+	local_echo "Querying for the public ip of $1..."
+	local ip_address=$(aws_wrapper ec2 describe-instances --query "Reservations[*].Instances[?PublicIpAddress=='$1'].InstanceId" --output text)
+	exit_on_fail validate_ipaddress $ip_address
 }
 
 # -----------------------------------------------------------
@@ -35,7 +78,7 @@ function allocate_address(){
 # -----------------------------------------------------------
 function associate_address(){
 	local_echo "Associating instance \"$1\" with elastic ip \"$2\"..."
-	aws_wrapper ec2 associate-address --instance-id "$1" --public-ip "$2"
+	aws_wrapper ec2 associate-address --instance-id $1 --public-ip $2
 }
 
 # -----------------------------------------------------------
@@ -43,7 +86,7 @@ function associate_address(){
 # @return  availability zones array
 # -----------------------------------------------------------
 function get_availability_zones(){
-	aws_wrapper ec2 --region $region describe-availability-zones --query "AvailabilityZones[].ZoneName"
+	aws_wrapper ec2 describe-availability-zones --query "AvailabilityZones[].ZoneName"
 }
 
 # -----------------------------------------------------------
@@ -51,70 +94,49 @@ function get_availability_zones(){
 # @param $1  instance_id
 # -----------------------------------------------------------
 function wait_instance_exists(){
-	local_echo "Wait until instance \"$1\" is recognized by AWS..."
-	aws_wrapper ec2 wait instance-exists --instance-ids $1
+	aws_wrapper ec2 wait instance-exists --instance-ids $1 &> /dev/null
 }
 
 # -----------------------------------------------------------
 # Wait until ssh connection is established
-# @param $1  ssh user
-# @param $2  dns name of instance
+# @param $1  ssh_user
+# @param $2  public dns name
 # -----------------------------------------------------------
 function wait_for_ssh_connection(){
-	echo -n "Connecting to $1@$2..."
-	while ! ssh_wrapper -q $1@$2 true 1>&2; do
-  	echo -n .
-		sleep 2
-	done
-	success "SSH Connection \"$1@$2\" is established."
+	local_echo -n "Connecting to $1@$2..."
+	do_until_true ssh_prewrapper -q $1@$2 true 1>&2
 }
 
-
-# -----------------------------------------------------------
-# Creates $count instances inside $region with image $image_id and
-# $instance_type and $user_data as well as according $tag_specifications,
-# $security_group_ids and $key_name
-# @return    instance id
-# -----------------------------------------------------------
 function run_instance(){
-	local_echo "Creating instance..."
-	write_user_data_to_file
-
-	local command="aws_wrapper --region $region ec2 run-instances"
-	command+=$(add_param "region" $region)
-	command+=$(add_param "image-id" $image_id)
-	command+=$(add_param "count" $instance_count)
-	command+=$(add_param "instance-type" $instance_type)
-	command+=$(add_param "key-name" $key_name)
-	command+=$(add_param "security-group-ids" $instance_security_group_ids)
-	command+=$(add_param "user-data" 'file://${tmpDir}/$user_data_file')
-	command+=$(add_param "tag-specifications" $(printf $tag_specifications "$instance_name"))
-
-	eval "$command"
+	local instance_id=$(aws_wrapper ec2 run-instances --image-id $(get_resource_id $image_id) --count 1 --instance-type $instance_type --key-name $key_name \
+	--security-group-ids $(get_resource_id $instance_security_group_id) --user-data "$1" \
+	--tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance_name}]" | get_attribute '.Instances[0].InstanceId')
+	exit_on_fail validate_instance_id $instance_id
 }
 
 # -----------------------------------------------------------
-# Creates a file with user data for instance creation
+# Get user data of instance with specific instance id
+# @param $1  instance id
+# @return    user data of instance
 # -----------------------------------------------------------
-function write_user_data_to_file(){
-	local MONGODB_HOST="$mongodb_host"
-	local MONGODB_PORT="$mongodb_port"
-	local MONGODB_NAME="$(lower_trim $instance_name | only_letters_and_numbers)"
-	local REPLICATION_CHANNEL="$MONGODB_NAME"
-	local SERVER_NAME="$MONGODB_NAME"
-	local USE_ENVIRONMENT="live-server"
-	local INSTALL_FROM_RELEASE="$(get_latest_release)"
-	local SERVER_STARTUP_NOTIFY="$default_server_startup_notify"
+function get_user_data_from_instance() {
+	aws_wrapper ec2 describe-instance-attribute --instance-id $1 --attribute userData --output text --query "UserData.Value" | sanitize
+}
 
-	local content=
-	content+=$(add_user_data_variable "MONGODB_HOST" $MONGODB_HOST)
-	content+=$(add_user_data_variable "MONGODB_PORT" $MONGODB_PORT)
-	content+=$(add_user_data_variable "MONGODB_NAME" $MONGODB_NAME)
-	content+=$(add_user_data_variable "INSTALL_FROM_RELEASE" $INSTALL_FROM_RELEASE)
-	content+=$(add_user_data_variable "USE_ENVIRONMENT" $USE_ENVIRONMENT)
-	content+=$(add_user_data_variable "REPLICATION_CHANNEL" $REPLICATION_CHANNEL)
-	content+=$(add_user_data_variable "SERVER_NAME" $SERVER_NAME)
-	content+=$(add_user_data_variable "SERVER_STARTUP_NOTIFY" $SERVER_STARTUP_NOTIFY)
+# -----------------------------------------------------------
+# Create instance and output response
+# @param $1  user data
+# -----------------------------------------------------------
+function create_instance(){
+	local_echo -e "Creating instance with following specifications:\n\nRegion: $region\nName: $instance_name\nShort name: $instance_short_name\nType: $instance_type\nBuild: $build_version\n\nUser data:\n${1}\n"
+	instance_id=$(run_instance "$1")
+	wait_instance_exists $instance_id
+	print_instance_description $instance_id
+	echo $instance_id
+}
 
-	echo "$content" > "${tmpDir}/$user_data_file"
+function print_instance_description(){
+	aws_wrapper ec2 describe-instances --instance-ids $1 \
+	--query "Reservations[*].Instances[0].{InstanceId:InstanceId, ImageId:ImageId, Type:InstanceType, PublicDNS:PublicDnsName, KeyName:KeyName, PrivateDnsName:PrivateDnsName, PrivateIpAddress:PrivateIpAddress}"\
+	--output table 1>&2
 }
