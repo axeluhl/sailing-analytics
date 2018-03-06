@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -77,15 +76,14 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private final SimplePanel contentPanel = new SimplePanel();
     private final Label selectCompetitorLabel;
     private final SortedCellTableWithStylableHeaders<SingleManeuverDTO> maneuverCellTable;
+    private final SortableColumn<SingleManeuverDTO, String> competitorColumn;
     private Timer timer;
     private TimeRangeWithZoomModel timeRangeWithZoomProvider;
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
-    protected Map<CompetitorDTO, List<ManeuverDTO>> lastResult;
+    private Map<CompetitorDTO, List<ManeuverDTO>> lastResult;
     private Date fromTime;
     private Date newTime;
-    private SortableColumn<SingleManeuverDTO, String> turnRateColumn;
-    private SortableColumn<SingleManeuverDTO, String> competitorColumn;
     private ManeuverTableSettings settings;
 
     public ManeuverTablePanel(Component<?> parent, ComponentContext<?> context,
@@ -119,13 +117,12 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         maneuverCellTable = new SortedCellTableWithStylableHeaders<>(Integer.MAX_VALUE, style.getTableresources());
         maneuverCellTable.addStyleName(resources.css().maneuverTable());
 
-        SingleSelectionModel<SingleManeuverDTO> selectionModel = new SingleSelectionModel<>();
+        final SingleSelectionModel<SingleManeuverDTO> selectionModel = new SingleSelectionModel<>();
         maneuverCellTable.setSelectionModel(selectionModel);
         selectionModel.addSelectionChangeHandler(new Handler() {
-
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                SingleManeuverDTO selected = selectionModel.getSelectedObject();
+                final SingleManeuverDTO selected = selectionModel.getSelectedObject();
                 // TODO and permission for non live position jumpin!
                 if (selected != null && (timer.getPlayMode() == PlayModes.Replay || true)) {
                     timer.pause();
@@ -134,38 +131,17 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             }
         });
         
-        competitorColumn = createCompetitorColumn();
-        maneuverCellTable.addColumn(competitorColumn);
+        maneuverCellTable.addColumn(competitorColumn = createCompetitorColumn());
+        maneuverCellTable.addColumn(createManeuverTypeColumn());
+        maneuverCellTable.addColumn(createTimeColumn());
+        maneuverCellTable.addColumn(createDurationColumn());
+        maneuverCellTable.addColumn(createSpeedInColumn());
+        maneuverCellTable.addColumn(createSpeedOutColumn());
+        maneuverCellTable.addColumn(createMinSpeedColumn());
+        maneuverCellTable.addColumn(createTurnRateColumn());
+        maneuverCellTable.addColumn(createLossColumn());
+        maneuverCellTable.addColumn(createDirectionColumn());
 
-        SortableColumn<SingleManeuverDTO, String> maneuvertypeColumn = createManeuverTypeColumn();
-        maneuverCellTable.addColumn(maneuvertypeColumn);
-
-        SortableColumn<SingleManeuverDTO, String> timeColumn = createTimeColumn();
-        maneuverCellTable.addColumn(timeColumn);
-
-        SortableColumn<SingleManeuverDTO, String> durationColumn = createDurationColumn();
-        maneuverCellTable.addColumn(durationColumn);
-
-        SortableColumn<SingleManeuverDTO, String> speedInColumn = createSpeedInColumn();
-        maneuverCellTable.addColumn(speedInColumn);
-
-        SortableColumn<SingleManeuverDTO, String> speedOutColumn = createSpeedOutColumn();
-        maneuverCellTable.addColumn(speedOutColumn);
-
-        SortableColumn<SingleManeuverDTO, String> minSpeedColumn = createMinSpeedColumn();
-        maneuverCellTable.addColumn(minSpeedColumn);
-
-        turnRateColumn = createTurnRateColumn();
-        maneuverCellTable.addColumn(turnRateColumn);
-
-        SortableColumn<SingleManeuverDTO, String> lossColumn = createLossColumn();
-        maneuverCellTable.addColumn(lossColumn);
-
-        SortableColumn<SingleManeuverDTO, String> directionColumn = createDirectionColumn();
-        maneuverCellTable.addColumn(directionColumn);
-
-        // maneuverCellTable.setVisible(false);
-        rootPanel.getElement().getStyle().setOverflow(Overflow.AUTO);
         initWidget(rootPanel);
         setVisible(false);
         clearCacheAndReload();
@@ -465,13 +441,13 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         };
     }
     
-    private void showCompetitorColumn(boolean b) {
-        if(b){
-            if(maneuverCellTable.getColumnIndex(competitorColumn) == -1){
+    private void showCompetitorColumn(boolean show) {
+        if (show) {
+            if (maneuverCellTable.getColumnIndex(competitorColumn) == -1) {
                 maneuverCellTable.insertColumn(0, competitorColumn);
             }
-        }else{
-            if(maneuverCellTable.getColumnIndex(competitorColumn) > -1){
+        } else {
+            if (maneuverCellTable.getColumnIndex(competitorColumn) > -1) {
                 maneuverCellTable.removeColumn(competitorColumn);
             }
         }
@@ -489,8 +465,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             for (int i = 0; i < maneuverCellTable.getColumnCount(); i++) {
                 Column<SingleManeuverDTO, ?> column = maneuverCellTable.getColumn(i);
                 if(column instanceof AbstractSortableColumnWithMinMax){
-                    AbstractSortableColumnWithMinMax<SingleManeuverDTO, ?> c = (AbstractSortableColumnWithMinMax<SingleManeuverDTO, ?>) column;
-                    c.updateMinMax();
+                    ((AbstractSortableColumnWithMinMax<SingleManeuverDTO, ?>) column).updateMinMax();
                 }
             }
         }
@@ -504,7 +479,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                     if (settings.getSelectedManeuverTypes().contains(maneuver.type)) {
                         data.add(new SingleManeuverDTO(res.getKey(), maneuver.timepoint, maneuver.type,
                                 maneuver.duration, maneuver.speedWithBearingBefore, maneuver.speedWithBearingAfter,
-                                new SpeedWithBearingDTO(0, 0), maneuver.directionChangeInDegrees, maneuver.maneuverLossInMeters));
+                                new SpeedWithBearingDTO(0, 0), maneuver.directionChangeInDegrees,
+                                maneuver.maneuverLossInMeters));
                     }
                 }
             }

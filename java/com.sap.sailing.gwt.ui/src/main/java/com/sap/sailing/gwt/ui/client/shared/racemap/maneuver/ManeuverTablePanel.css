@@ -1,8 +1,9 @@
 .maneuverPanel {
     margin-top: 1em;
+    overflow: auto;
 }
 .contentContainer {
-    padding: 0 2em 0 .5em;
+    padding: 0 3em 0 .5em;
     display: inline-block;
     width: 100%;
 }
