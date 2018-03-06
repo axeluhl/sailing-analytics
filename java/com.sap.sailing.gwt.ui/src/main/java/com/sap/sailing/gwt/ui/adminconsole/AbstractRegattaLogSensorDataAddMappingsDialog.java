@@ -2,9 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -33,7 +31,6 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
     private final BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>> boatTable;
     private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
     private final StringMessages stringMessages;
-    private final Map<TrackFileImportDeviceIdentifierDTO, MappableToDevice> mappings = new HashMap<>();
 
     private TrackFileImportDeviceIdentifierDTO deviceToSelect;
     private CompetitorDTO compToSelect;
@@ -69,7 +66,6 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
             validateAndUpdate();
         });
         competitorTable.getSelectionModel().addSelectionChangeHandler(event -> {
-            // deviceIdTable.didSelectCompetitorForMapping(competitorTable.getSelectionModel().getSelectedObject());
             this.mappedToSelectionChanged(competitorTable.getSelectionModel().getSelectedObject());
             validateAndUpdate();
         });
@@ -174,10 +170,7 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
 
     private void mappedToSelectionChanged(MappableToDevice mappedTo) {
         if (!inInstableTransitionState) {
-            TrackFileImportDeviceIdentifierDTO device = deviceIdTable.getSelectionModel().getSelectedObject();
-            if (device != null) {
-                mappings.put(device, mappedTo);
-            }
+            deviceIdTable.setMappedObjectForSelectedDevice(mappedTo);
 
             if (mappedTo instanceof CompetitorDTO) {
                 compToSelect = (CompetitorDTO) mappedTo;
@@ -198,7 +191,7 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
             boatToSelect = null;
 
             if (deviceId != null) {
-                MappableToDevice mappedTo = mappings.get(deviceId);
+                MappableToDevice mappedTo = deviceIdTable.getMappedObjectForDeviceId(deviceId);
                 if (mappedTo instanceof CompetitorDTO) {
                     compToSelect = (CompetitorDTO) mappedTo;
                 } else if (mappedTo instanceof BoatDTO) {

@@ -12,7 +12,9 @@ import com.google.gwt.user.cellview.client.AbstractCellTable.Style;
 import com.google.gwt.user.cellview.client.DefaultCellTableBuilder;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -24,7 +26,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 public class TrackFileImportDeviceIdentifierTableWrapper extends
         TableWrapper<TrackFileImportDeviceIdentifierDTO, RefreshableSingleSelectionModel<TrackFileImportDeviceIdentifierDTO>> {
     private TextColumn<TrackFileImportDeviceIdentifierDTO> trackNameColumn;
-    private final Map<TrackFileImportDeviceIdentifierDTO, CompetitorDTO> mappings = new HashMap<>();
+    private final Map<TrackFileImportDeviceIdentifierDTO, MappableToDevice> mappings = new HashMap<>();
 
     public TrackFileImportDeviceIdentifierTableWrapper(SailingServiceAsync sailingService,
             StringMessages stringMessages, ErrorReporter errorReporter) {
@@ -135,30 +137,30 @@ public class TrackFileImportDeviceIdentifierTableWrapper extends
             TableCellBuilder td = tr.startTD();
             td.className(tdClasses.toString());
             td.colSpan(getColumns().size() - 1);
-            CompetitorDTO competitorDTO = mappings.get(rowValue);
-            if (competitorDTO == null) {
-                td.html(new SafeHtmlBuilder().appendEscaped("--").toSafeHtml());
-            } else {
+            MappableToDevice mappableToDevice = mappings.get(rowValue);
+            if (mappableToDevice instanceof CompetitorDTO) {
+                CompetitorDTO competitorDTO = (CompetitorDTO) mappableToDevice;
                 td.html(new SafeHtmlBuilder().appendEscaped(competitorDTO.getName()).toSafeHtml());
+            } else if (mappableToDevice instanceof BoatDTO) {
+                BoatDTO boatDTO = (BoatDTO) mappableToDevice;
+                td.html(new SafeHtmlBuilder().appendEscaped(boatDTO.getName()).toSafeHtml());
+            } else {
+                td.html(new SafeHtmlBuilder().appendEscaped("--").toSafeHtml());
             }
             td.end();
             tr.end();
         }
     }
 
-    public CompetitorDTO getMappedCompetitorForCurrentSelection() {
-        TrackFileImportDeviceIdentifierDTO selectedObject = getSelectionModel().getSelectedObject();
-        if (selectedObject != null) {
-            return mappings.get(selectedObject);
-        }
-        return null;
+    public MappableToDevice getMappedObjectForDeviceId(TrackFileImportDeviceIdentifierDTO deviceId) {
+        return mappings.get(deviceId);
     }
 
-    public void didSelectCompetitorForMapping(CompetitorDTO competitor) {
+    public void setMappedObjectForSelectedDevice(MappableToDevice mappableToDevice) {
         TrackFileImportDeviceIdentifierDTO selectedObject = getSelectionModel().getSelectedObject();
         if (selectedObject != null) {
-            if (competitor != null) {
-                mappings.put(selectedObject, competitor);
+            if (mappableToDevice != null) {
+                mappings.put(selectedObject, mappableToDevice);
             } else {
                 mappings.remove(selectedObject);
             }
@@ -166,7 +168,7 @@ public class TrackFileImportDeviceIdentifierTableWrapper extends
         table.redraw();
     }
 
-    public Map<TrackFileImportDeviceIdentifierDTO, CompetitorDTO> getMappings() {
+    public Map<TrackFileImportDeviceIdentifierDTO, MappableToDevice> getMappings() {
         return mappings;
     }
 }
