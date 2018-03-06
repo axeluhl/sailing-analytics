@@ -797,7 +797,8 @@ public class DomainFactoryImpl implements DomainFactory {
             for (Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
                 if (leaderboard instanceof RegattaLeaderboard) {
                     RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
-                    if (canBoatsOfCompetitorsChangePerRace != regattaLeaderboard.getRegatta().canBoatsOfCompetitorsChangePerRace()) {
+                    boolean hasTrackedRaces = Util.size(regattaLeaderboard.getTrackedRaces()) > 0;
+                    if (hasTrackedRaces && canBoatsOfCompetitorsChangePerRace != regattaLeaderboard.getRegatta().canBoatsOfCompetitorsChangePerRace()) {
                         result = false;
                         break;
                     }
