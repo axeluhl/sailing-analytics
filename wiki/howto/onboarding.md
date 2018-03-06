@@ -8,9 +8,9 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 
 #### Installations
 
-1. Eclipse (Eclipse IDE for Eclipse Committers, e.g. version 4.5.2 "Neon SR2"), http://www.eclipse.org
+1. Eclipse (Eclipse IDE for Eclipse Committers, e.g. version 4.7.2 "Oxygen SR2"), http://www.eclipse.org
 2. Eclipse Extensions
-  * Install GWT Eclipse plugin for Eclipse (https://github.com/gwt-plugins/gwt-eclipse-plugin/tree/gpe-fork using http://storage.googleapis.com/gwt-eclipse-plugin/release as the update site URL)
+  * Install GWT Eclipse plugin for Eclipse (https://github.com/gwt-plugins/gwt-eclipse-plugin using http://storage.googleapis.com/gwt-eclipse-plugin/v3/release as the update site URL)
   * Install Eclipse debugger for GWT SuperDevMode (master version: http://p2.sapsailing.com/p2/sdbg; public release: http://sdbg.github.io/p2)
 3. Git (e.g. Git for Windows v2.12.2), http://git-scm.com / https://git-for-windows.github.io/
 4. MongoDB (e.g. Production Release 2.6.7), download: https://www.mongodb.com/
@@ -23,9 +23,9 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 
 #### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.6.2 "Neon.2"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/neon2) by using the script "configuration/installPluginsForEclipseNeon.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.7.2 "Oxygen.2"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/oxygen2) by using the script "configuration/installPluginsForEclipseOxygen.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
-    ./installPluginsForEclipseNeon.sh "/some/path/on/my/computer/eclipse"
+    ./installPluginsForEclipseOxygen.sh "/some/path/on/my/computer/eclipse"
 
 Be aware that with this script it's not possible to update the plugins to newer versions. Instead you can install a new version by unpacking the base package and executing the script.
 
