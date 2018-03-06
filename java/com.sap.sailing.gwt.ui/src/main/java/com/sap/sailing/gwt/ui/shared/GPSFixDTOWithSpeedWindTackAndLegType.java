@@ -40,7 +40,7 @@ public class GPSFixDTOWithSpeedWindTackAndLegType extends GPSFixDTO implements I
     public GPSFixDTOWithSpeedWindTackAndLegType(Date timepoint, Position position, SpeedWithBearingDTO speedWithBearing, WindDTO wind,
             Tack tack, LegType legType, boolean extrapolated) {
         this(timepoint, position, speedWithBearing, (speedWithBearing != null && wind != null) ?
-                new DegreeBearingImpl(speedWithBearing.getDegrees()).getDifferenceTo(
+                new DegreeBearingImpl(speedWithBearing.bearingInDegrees).getDifferenceTo(
                         new DegreeBearingImpl(wind.dampenedTrueWindFromDeg)).getDegrees() : null, tack, legType, extrapolated);
     }
 

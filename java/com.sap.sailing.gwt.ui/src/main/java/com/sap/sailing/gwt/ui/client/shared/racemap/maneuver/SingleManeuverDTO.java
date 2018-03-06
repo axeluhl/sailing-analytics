@@ -19,7 +19,8 @@ public class SingleManeuverDTO {
     public final Double loss;
 
     public SingleManeuverDTO(CompetitorDTO competitor, Date time, ManeuverType maneuverType, Duration duration,
-            SpeedWithBearingDTO speedIn, SpeedWithBearingDTO speedOut, SpeedWithBearingDTO minSpeed, double turnRate, Double loss) {
+            SpeedWithBearingDTO speedIn, SpeedWithBearingDTO speedOut, SpeedWithBearingDTO minSpeed, double turnRate,
+            Double loss) {
         super();
         this.competitor = competitor;
         this.time = time;
@@ -33,9 +34,16 @@ public class SingleManeuverDTO {
     }
 
     public Double getDirectionChange() {
-        if(speedIn == null || speedOut == null){
+        if (speedIn == null || speedOut == null) {
             return null;
         }
-        return speedIn.getDifferenceTo(speedOut).getDegrees();
+
+        double diff = speedIn.bearingInDegrees - speedOut.bearingInDegrees;
+        if (diff < -180) {
+            diff += 360;
+        } else if (diff > 180) {
+            diff -= 360;
+        }
+        return diff;
     }
 }

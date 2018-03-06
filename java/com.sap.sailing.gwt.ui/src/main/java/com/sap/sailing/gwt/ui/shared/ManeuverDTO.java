@@ -58,7 +58,7 @@ public class ManeuverDTO implements IsSerializable {
                 + ": " + this.type.name();
         String directionChange = stringMessages.directionChange() + ": "
                 + ((int) Math.round(this.directionChangeInDegrees)) + " "+stringMessages.degreesShort()+" ("
-                + ((int) Math.round(before.getDegrees())) + " deg -> " + ((int) Math.round(after.getDegrees())) + " "+stringMessages.degreesShort()+")";
+                + ((int) Math.round(before.bearingInDegrees)) + " deg -> " + ((int) Math.round(after.bearingInDegrees)) + " "+stringMessages.degreesShort()+")";
         String speedChange = stringMessages.speedChange() + ": " 
                 + NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " "+stringMessages.knotsUnit()+" ("
                 + NumberFormat.getDecimalFormat().format(before.speedInKnots) + " "+stringMessages.knotsUnit()+" -> "

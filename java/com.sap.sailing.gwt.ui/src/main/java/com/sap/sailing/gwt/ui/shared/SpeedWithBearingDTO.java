@@ -1,25 +1,21 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
-public class SpeedWithBearingDTO extends DegreeBearingImpl implements IsSerializable {
-    private static final long serialVersionUID = 6612188266415659733L;
+public class SpeedWithBearingDTO implements IsSerializable {
     public double speedInKnots;
+    public double bearingInDegrees;
 
-    /**GWT only**/
-    public SpeedWithBearingDTO() {
-        super(0);
-    }
+    public SpeedWithBearingDTO() {}
     
     public SpeedWithBearingDTO(double speedInKnots, double bearingInDegrees) {
-        super(bearingInDegrees);
+        super();
         this.speedInKnots = speedInKnots;
+        this.bearingInDegrees = bearingInDegrees;
     }
-
+    
     @Override
     public String toString() {
-        return "SpeedWithBearingDTO [speedInKnots=" + speedInKnots + ", getDegrees()=" + getDegrees() + "]";
+        return ""+speedInKnots+"kn to "+bearingInDegrees+"deg";
     }
-
 }

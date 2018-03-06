@@ -1491,7 +1491,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null && lastBoatFix.speedWithBearing != null) {
                     Distance distanceFromBoatPositionInKm = visibleLeaderInfo.getB().getBoatClass().getHullLength(); // one hull length
                     // implement and use Position.translateRhumb()
-                    double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.getDegrees();
+                    double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
                     LatLng boatPosition = coordinateSystem.toLatLng(lastBoatFix.position);
                     LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition,
                             coordinateSystem.mapDegreeBearing(bearingOfBoatInDeg), distanceFromBoatPositionInKm);
@@ -2175,8 +2175,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(maneuver.timepoint)));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.directionChange(),
                 ((int) Math.round(maneuver.directionChangeInDegrees)) + " " + stringMessages.degreesShort() + " ("
-                        + ((int) Math.round(before.getDegrees())) + " " + stringMessages.degreesShort() + " -> "
-                        + ((int) Math.round(after.getDegrees())) + " " + stringMessages.degreesShort() + ")"));
+                        + ((int) Math.round(before.bearingInDegrees)) + " " + stringMessages.degreesShort() + " -> "
+                        + ((int) Math.round(after.bearingInDegrees)) + " " + stringMessages.degreesShort() + ")"));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.speedChange(),
                 NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " "
                         + stringMessages.knotsUnit() + " ("
@@ -2250,7 +2250,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.speed(),
                 NumberFormatterFactory.getDecimalFormat(1).format(speedWithBearing.speedInKnots) + " "+stringMessages.knotsUnit()));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.bearing(), (int) speedWithBearing.getDegrees() + " "+stringMessages.degreesShort()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.bearing(), (int) speedWithBearing.bearingInDegrees + " "+stringMessages.degreesShort()));
         if (lastFix.degreesBoatToTheWind != null) {
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.degreesBoatToTheWind(),
                     (int) Math.abs(lastFix.degreesBoatToTheWind) + " " + stringMessages.degreesShort()));
@@ -2456,13 +2456,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (fixAfter.speedWithBearing == null) {
                             betweenBearing = 0;
                         } else {
-                            betweenBearing = fixAfter.speedWithBearing.getDegrees();
+                            betweenBearing = fixAfter.speedWithBearing.bearingInDegrees;
                         }
                     } else if (fixAfter.speedWithBearing == null) {
-                        betweenBearing = fixBefore.speedWithBearing.getDegrees();
+                        betweenBearing = fixBefore.speedWithBearing.bearingInDegrees;
                     } else {
-                        betweenBearing = new ScalableBearing(new DegreeBearingImpl(fixBefore.speedWithBearing.getDegrees())).
-                                multiply(factorForBefore).add(new ScalableBearing(new DegreeBearingImpl(fixAfter.speedWithBearing.getDegrees())).
+                        betweenBearing = new ScalableBearing(new DegreeBearingImpl(fixBefore.speedWithBearing.bearingInDegrees)).
+                                multiply(factorForBefore).add(new ScalableBearing(new DegreeBearingImpl(fixAfter.speedWithBearing.bearingInDegrees)).
                                         multiply(factorForAfter)).divide(1).getDegrees();
                     }
                     SpeedWithBearingDTO betweenSpeed = new SpeedWithBearingDTO(
