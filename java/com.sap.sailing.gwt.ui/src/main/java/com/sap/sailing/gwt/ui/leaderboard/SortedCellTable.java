@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,6 +12,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.view.client.ListDataProvider;
@@ -149,7 +151,7 @@ public class SortedCellTable<T> extends BaseCelltable<T> {
      * Easy helper to correctly add sortableColumns without that much parameters
      */
     public void addColumn(SortableColumn<T, ?> column) {
-        addColumn(column, column.getHeader(), column.getComparator(), column.isDefaultSortAscending());
+        addColumn(column, column.getHeader(), column.getComparator(), column.getPreferredSortingOrder().isAscending());
     }
     
     /**
@@ -172,7 +174,8 @@ public class SortedCellTable<T> extends BaseCelltable<T> {
      * Allows simpler inserting of a SortableColumn 
      */
     public void insertColumn(int beforeIndex, SortableColumn<T, ?> column) {
-        insertColumn(beforeIndex, column, column.getHeader(), column.getComparator(), column.isDefaultSortAscending());
+        insertColumn(beforeIndex, column, column.getHeader(), column.getComparator(),
+                column.getPreferredSortingOrder().isAscending());
     }
     
     public void insertColumn(int beforeIndex, Column<T, ?> column, Header<?> header, InvertibleComparator<T> comparator, boolean ascendingSorting) {
@@ -256,5 +259,22 @@ public class SortedCellTable<T> extends BaseCelltable<T> {
     
     public ListDataProvider<T> getDataProvider() {
         return dataProvider;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void restoreColumnSortInfos(Column<T, ?> defaultSortColumn) {
+        final ColumnSortList sortList = this.getColumnSortList();
+        final List<ColumnSortInfo> oldSortInfos;
+        if (sortList.size() == 0) {
+            boolean ascending = defaultSortOrderMap.get(defaultSortColumn);
+            comparators.get(defaultSortColumn).setAscending(ascending);
+            oldSortInfos = Collections.singletonList(new ColumnSortInfo(defaultSortColumn, ascending));
+        } else {
+            oldSortInfos = new ArrayList<ColumnSortInfo>(sortList.size());
+            for (int i = sortList.size() - 1; i >= 0; i--) {
+                oldSortInfos.add(sortList.get(i));
+            }
+        }
+        oldSortInfos.forEach(sortInfo -> this.sortColumn((Column<T, ?>) sortInfo.getColumn()));
     }
 }

@@ -80,7 +80,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private final SimplePanel contentPanel = new SimplePanel();
     private final Label importantMessageLabel = new Label();
     private final SortedCellTableWithStylableHeaders<SingleManeuverDTO> maneuverCellTable;
-    private final SortableColumn<SingleManeuverDTO, String> competitorColumn;
+    private final SortableColumn<SingleManeuverDTO, String> competitorColumn, timeColumn;
     private final Timer timer;
     private final TimeRangeWithZoomModel timeRangeWithZoomProvider;
     private final Map<CompetitorDTO, List<ManeuverDTO>> lastResult = new HashMap<>();
@@ -131,17 +131,18 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 final SingleManeuverDTO selected = selectionModel.getSelectedObject();
-                // TODO and permission for non live position jumpin!
                 if (selected != null && (timer.getPlayMode() == PlayModes.Replay || hasCanReplayDuringLiveRacesPermission)) {
                     timer.pause();
                     timer.setTime(selected.getTime().getTime());
+                } else if (selected != null) {
+                    selectionModel.clear();
                 }
             }
         });
 
         this.maneuverCellTable.addColumn(competitorColumn = createCompetitorColumn());
         this.maneuverCellTable.addColumn(createManeuverTypeColumn());
-        this.maneuverCellTable.addColumn(createTimeColumn());
+        this.maneuverCellTable.addColumn(timeColumn = createTimeColumn());
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getDurationAsSeconds,
                 this.stringMessages.durationPlain(), this.stringMessages.secondsUnit()));
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getSpeedInAsKnots,
@@ -150,8 +151,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 this.stringMessages.speedOut(), this.stringMessages.knotsUnit()));
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getMinSpeedAsKnots,
                 this.stringMessages.minSpeed(), this.stringMessages.knotsUnit()));
-        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getTurnRate, this.stringMessages.turnRate(),
-                this.stringMessages.degreesUnit()));
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getTurnRate,
+                this.stringMessages.turnRate(), this.stringMessages.degreesUnit()));
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getLoss,
                 this.stringMessages.maneuverLoss(), stringMessages.metersUnit()));
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getDirectionChangeInDegrees,
@@ -163,10 +164,10 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
     private SortableColumn<SingleManeuverDTO, String> createSortableMinMaxColumn(
             Function<SingleManeuverDTO, Double> extractor, String title, String unit) {
-        AbstractSortableColumnWithMinMax<SingleManeuverDTO, String> col = new AbstractSortableColumnWithMinMax<SingleManeuverDTO, String>(
+        final SortableColumn<SingleManeuverDTO, String> col = new AbstractSortableColumnWithMinMax<SingleManeuverDTO, String>(
                 new TextCell(), SortingOrder.ASCENDING) {
 
-            InvertibleComparatorAdapter<SingleManeuverDTO> comparatorWithAbs = new InvertibleComparatorAdapter<SingleManeuverDTO>() {
+            final InvertibleComparator<SingleManeuverDTO> comparatorWithAbs = new InvertibleComparatorAdapter<SingleManeuverDTO>() {
                 @Override
                 public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
                     Double o1v = extractor.apply(o1);
@@ -184,7 +185,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 }
             };
 
-            HasStringAndDoubleValue<SingleManeuverDTO> dataProvider = new HasStringAndDoubleValue<SingleManeuverDTO>() {
+            final HasStringAndDoubleValue<SingleManeuverDTO> dataProvider = new HasStringAndDoubleValue<SingleManeuverDTO>() {
 
                 @Override
                 public String getStringValueToRender(SingleManeuverDTO row) {
@@ -197,12 +198,12 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
                 @Override
                 public Double getDoubleValue(SingleManeuverDTO row) {
-                    Double v = extractor.apply(row);
-                    return v == null ? null : Math.abs(v);
+                    Double value = extractor.apply(row);
+                    return value == null ? null : Math.abs(value);
                 }
             };
 
-            MinMaxRenderer<SingleManeuverDTO> renderer = new MinMaxRenderer<SingleManeuverDTO>(dataProvider,
+            final MinMaxRenderer<SingleManeuverDTO> renderer = new MinMaxRenderer<SingleManeuverDTO>(dataProvider,
                     comparatorWithAbs);
 
             @Override
@@ -260,17 +261,20 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     }
 
     private SortableColumn<SingleManeuverDTO, String> createTimeColumn() {
-        SortableColumn<SingleManeuverDTO, String> col = new SortableColumn<SingleManeuverDTO, String>(new TextCell(),
-                SortingOrder.ASCENDING) {
+
+        final InvertibleComparator<SingleManeuverDTO> comparator = new InvertibleComparatorAdapter<SingleManeuverDTO>() {
+            @Override
+            public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
+                return o1.getTime().compareTo(o2.getTime());
+            }
+        };
+
+        final SortableColumn<SingleManeuverDTO, String> col = new SortableColumn<SingleManeuverDTO, String>(
+                new TextCell(), SortingOrder.DESCENDING) {
 
             @Override
             public InvertibleComparator<SingleManeuverDTO> getComparator() {
-                return new InvertibleComparatorAdapter<SingleManeuverDTO>() {
-                    @Override
-                    public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
-                        return o1.getTime().compareTo(o2.getTime());
-                    }
-                };
+                return comparator;
             }
 
             @Override
@@ -288,16 +292,18 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     }
 
     private SortableColumn<SingleManeuverDTO, String> createCompetitorColumn() {
+        InvertibleComparator<SingleManeuverDTO> comparator = new InvertibleComparatorAdapter<SingleManeuverDTO>() {
+            @Override
+            public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
+                return o1.getCompetitor().getName().compareTo(o2.getCompetitor().getName());
+            }
+        };
+
         return new SortableColumn<SingleManeuverDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
 
             @Override
             public InvertibleComparator<SingleManeuverDTO> getComparator() {
-                return new InvertibleComparatorAdapter<SingleManeuverDTO>() {
-                    @Override
-                    public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
-                        return o1.getCompetitor().getName().compareTo(o2.getCompetitor().getName());
-                    }
-                };
+                return comparator;
             }
 
             @Override
@@ -333,8 +339,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                         ((AbstractSortableColumnWithMinMax<SingleManeuverDTO, ?>) column).updateMinMax();
                     }
                 }
-                // force redraw now that minmaxis known
-                maneuverCellTable.redraw();
+                this.maneuverCellTable.restoreColumnSortInfos(timeColumn);
+                this.maneuverCellTable.redraw();
             }
         }
     }
