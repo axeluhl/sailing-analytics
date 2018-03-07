@@ -551,7 +551,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
     @Override
     public String getDependentCssClassName() {
-        return null;
+        return "table";
     }
 
     @Override
