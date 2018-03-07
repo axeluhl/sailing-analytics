@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.AbstractCellTable.Style;
@@ -15,6 +14,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
+import com.sap.sailing.gwt.ui.client.MappableToDeviceFormatter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -133,24 +133,28 @@ public class TrackFileImportDeviceIdentifierTableWrapper extends
 
             TableRowBuilder tr = startRow();
             tr.className(trClasses.toString());
+            final MappableToDevice mappableToDevice = mappings.get(rowValue);
             tr.startTD().className(new StringBuilder(tdClasses).append(firstColumnStyle).toString())
-                    .html(SafeHtmlUtils.fromSafeConstant(" ")).end();
+                    .html(SafeHtmlUtils
+                            .fromString(MappableToDeviceFormatter.formatType(mappableToDevice, stringMessages)))
+                    .end();
             TableCellBuilder td = tr.startTD();
             td.className(tdClasses.toString());
             td.colSpan(getColumns().size() - 1);
-            MappableToDevice mappableToDevice = mappings.get(rowValue);
+            final String nameOfMappedItem;
             if (mappableToDevice instanceof CompetitorDTO) {
-                CompetitorDTO competitorDTO = (CompetitorDTO) mappableToDevice;
-                td.html(new SafeHtmlBuilder().appendEscaped(competitorDTO.getName()).toSafeHtml());
+                final CompetitorDTO competitorDTO = (CompetitorDTO) mappableToDevice;
+                nameOfMappedItem = competitorDTO.getName();
             } else if (mappableToDevice instanceof BoatDTO) {
-                BoatDTO boatDTO = (BoatDTO) mappableToDevice;
-                td.html(new SafeHtmlBuilder().appendEscaped(boatDTO.getName()).toSafeHtml());
+                final BoatDTO boatDTO = (BoatDTO) mappableToDevice;
+                nameOfMappedItem = boatDTO.getDisplayName();
             } else if (mappableToDevice instanceof MarkDTO) {
-                MarkDTO markDTO = (MarkDTO) mappableToDevice;
-                td.html(new SafeHtmlBuilder().appendEscaped(markDTO.getName()).toSafeHtml());
+                final MarkDTO markDTO = (MarkDTO) mappableToDevice;
+                nameOfMappedItem = markDTO.getName();
             } else {
-                td.html(new SafeHtmlBuilder().appendEscaped("--").toSafeHtml());
+                nameOfMappedItem = "--";
             }
+            td.html(SafeHtmlUtils.fromString(nameOfMappedItem));
             td.end();
             tr.end();
         }

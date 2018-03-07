@@ -44,6 +44,22 @@ public class BoatDTO extends NamedDTO implements Serializable, MappableToDevice 
     public BoatClassDTO getBoatClass() {
         return boatClass;
     }
+    
+    public String getDisplayName() {
+        final StringBuilder sb = new StringBuilder();
+        final boolean hasSailId = sailId != null && !sailId.isEmpty();
+        if (getName() != null) {
+            sb.append(getName());
+            if (hasSailId) {
+                sb.append(" (").append(sailId).append(')');
+            }
+        } else if (hasSailId) {
+            sb.append(sailId);
+        } else {
+            sb.append(idAsString);
+        }
+        return sb.toString();
+    }
 
     @Override
     public int hashCode() {
