@@ -25,8 +25,8 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     private final double maxAngularVelocityInDegreesPerSecond;
     private final ManeuverCurveBoundaries mainCurveBoundaries;
     private final ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries;
-    private Duration duration;
-    private SpeedWithBearing minSpeed;
+    private final Duration duration;
+    private final SpeedWithBearing minSpeed;
 
     public ManeuverImpl(ManeuverType type, Tack newTack, Position position, Distance maneuverLoss, TimePoint timePoint,
             ManeuverCurveBoundaries mainCurveBoundaries,
