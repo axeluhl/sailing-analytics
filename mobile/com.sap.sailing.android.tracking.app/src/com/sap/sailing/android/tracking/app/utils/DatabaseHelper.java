@@ -3,15 +3,6 @@ package com.sap.sailing.android.tracking.app.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.content.ContentProviderOperation;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.OperationApplicationException;
-import android.database.Cursor;
-import android.os.RemoteException;
-import android.provider.BaseColumns;
-
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -22,16 +13,27 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competito
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase;
+import com.sap.sailing.android.tracking.app.valueobjects.BoatInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkInfo;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Mark;
+
+import android.content.ContentProviderOperation;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.OperationApplicationException;
+import android.database.Cursor;
+import android.os.RemoteException;
+import android.provider.BaseColumns;
 
 public class DatabaseHelper {
 
     private final static String TAG = DatabaseHelper.class.getName();
 
-    protected static DatabaseHelper mInstance;
+    private static DatabaseHelper mInstance;
 
     public static synchronized DatabaseHelper getInstance() {
         if (mInstance == null) {
@@ -155,6 +157,21 @@ public class DatabaseHelper {
         return markInfo;
     }
 
+    public BoatInfo getBoatInfo(Context context, String checkinDigest) {
+        BoatInfo boatInfo = new BoatInfo();
+        boatInfo.checkinDigest = checkinDigest;
+        Cursor boatCursor = context.getContentResolver().query(AnalyticsContract.Boat.CONTENT_URI, null,
+            AnalyticsContract.Boat.BOAT_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
+        if (boatCursor != null) {
+            if (boatCursor.moveToFirst()) {
+                boatInfo.boatId = boatCursor.getString(boatCursor.getColumnIndex(AnalyticsContract.Boat.BOAT_ID));
+                boatInfo.boatName = boatCursor.getString(boatCursor.getColumnIndex(AnalyticsContract.Boat.BOAT_NAME));
+            }
+            boatCursor.close();
+        }
+        return boatInfo;
+    }
+
     public void deleteRegattaFromDatabase(Context context, String checkinDigest) {
         ContentResolver cr = context.getContentResolver();
 
@@ -163,6 +180,7 @@ public class DatabaseHelper {
         int d3 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
         int d4 = cr.delete(Checkin.CONTENT_URI, Checkin.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
         int d5 = cr.delete(AnalyticsContract.Mark.CONTENT_URI, AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
+        int d6 = cr.delete(AnalyticsContract.Boat.CONTENT_URI, AnalyticsContract.Boat.BOAT_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
 
         if (BuildConfig.DEBUG) {
             ExLog.i(context, TAG, "Checkout, number of events deleted: " + d1);
@@ -170,6 +188,7 @@ public class DatabaseHelper {
             ExLog.i(context, TAG, "Checkout, number of leaderboards deleted: " + d3);
             ExLog.i(context, TAG, "Checkout, number of checkinurls deleted: " + d4);
             ExLog.i(context, TAG, "Checkout, number of marks deleted: " + d5);
+            ExLog.i(context, TAG, "Checkout, number of boats deleted: " + d6);
         }
     }
 
@@ -199,7 +218,7 @@ public class DatabaseHelper {
         cv.put(Competitor.COMPETITOR_CHECKIN_DIGEST, competitor.checkinDigest);
 
         opList.add(ContentProviderOperation.newInsert(Competitor.CONTENT_URI).withValues(cv).build());
-        storeBasicInformation(leaderboard, event, checkinURL, opList, contentResolver);
+        addBasicInformationToOperationList(contentResolver, opList, leaderboard, event, checkinURL);
 
         try {
             contentResolver.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
@@ -220,7 +239,7 @@ public class DatabaseHelper {
         cv.put(AnalyticsContract.Mark.MARK_CHECKIN_DIGEST, checkinURL.checkinDigest);
         opList.add(ContentProviderOperation.newInsert(AnalyticsContract.Mark.CONTENT_URI).withValues(cv).build());
 
-        storeBasicInformation(leaderboard, event, checkinURL, opList, contentResolver);
+        addBasicInformationToOperationList(contentResolver, opList, leaderboard, event, checkinURL);
 
         try {
             contentResolver.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
@@ -229,15 +248,36 @@ public class DatabaseHelper {
         }
     }
 
-    private void storeBasicInformation(LeaderboardInfo leaderboard, EventInfo event, CheckinUrlInfo checkinURL,
-        ArrayList<ContentProviderOperation> opList, ContentResolver contentResolver) {
+    public void storeBoatCheckinRow(Context context, EventInfo event, Boat boat,
+        LeaderboardInfo leaderboard, CheckinUrlInfo checkinUrlInfo) throws GeneralDatabaseHelperException {
 
-        // inserting leaderboard first
+        // boat
+        ContentResolver contentResolver = context.getContentResolver();
+        ArrayList<ContentProviderOperation> opList = new ArrayList<>();
+        ContentValues cv = new ContentValues();
+        cv.put(AnalyticsContract.Boat.BOAT_ID, boat.getId().toString());
+        cv.put(AnalyticsContract.Boat.BOAT_NAME, boat.getName());
+        cv.put(AnalyticsContract.Boat.BOAT_CHECKIN_DIGEST, checkinUrlInfo.checkinDigest);
+        opList.add(ContentProviderOperation.newInsert(AnalyticsContract.Boat.CONTENT_URI).withValues(cv).build());
+
+        addBasicInformationToOperationList(contentResolver, opList, leaderboard, event, checkinUrlInfo);
+
+        try {
+            contentResolver.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
+        } catch (RemoteException | OperationApplicationException e) {
+            throw new GeneralDatabaseHelperException(e.getMessage());
+        }
+    }
+
+    private void addBasicInformationToOperationList(ContentResolver contentResolver, ArrayList<ContentProviderOperation> opList,
+        LeaderboardInfo leaderboard, EventInfo event, CheckinUrlInfo checkinURL) {
+
+        // inserting leaderboard
         ContentValues cv = new ContentValues();
         cv.put(Leaderboard.LEADERBOARD_NAME, leaderboard.name);
         cv.put(Leaderboard.LEADERBOARD_DISPLAY_NAME, leaderboard.displayName);
         cv.put(Leaderboard.LEADERBOARD_CHECKIN_DIGEST, leaderboard.checkinDigest);
-        contentResolver.insert(Leaderboard.CONTENT_URI, cv);
+        opList.add(0, ContentProviderOperation.newInsert(Leaderboard.CONTENT_URI).withValues(cv).build());
 
         // now insert event
         cv.clear();
@@ -248,7 +288,6 @@ public class DatabaseHelper {
         cv.put(Event.EVENT_SERVER, event.server);
         cv.put(Event.EVENT_IMAGE_URL, event.imageUrl);
         cv.put(Event.EVENT_CHECKIN_DIGEST, event.checkinDigest);
-
         opList.add(ContentProviderOperation.newInsert(Event.CONTENT_URI).withValues(cv).build());
 
         // checkin url
@@ -256,7 +295,6 @@ public class DatabaseHelper {
         cv.put(Checkin.CHECKIN_URI_VALUE, checkinURL.urlString);
         cv.put(Checkin.CHECKIN_URI_CHECKIN_DIGEST, checkinURL.checkinDigest);
         cv.put(Checkin.CHECKIN_TYPE, checkinURL.type);
-
         opList.add(ContentProviderOperation.newInsert(Checkin.CONTENT_URI).withValues(cv).build());
     }
 

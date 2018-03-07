@@ -20,6 +20,8 @@ import com.sap.sailing.android.shared.util.JsonHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.valueobjects.BoatCheckinData;
+import com.sap.sailing.android.tracking.app.valueobjects.BoatUrlData;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorUrlData;
@@ -30,13 +32,13 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
@@ -52,7 +54,6 @@ import android.widget.Toast;
 public class CheckinManager {
 
     private final static String TAG = CheckinManager.class.getName();
-    private CheckinData checkinData;
     private CheckinDataActivity<CheckinData> activity;
     private AppPreferences prefs;
     private UrlData urlData;
@@ -107,8 +108,13 @@ public class CheckinManager {
                 markUrlData.setMarkId(uri.getQueryParameter(DeviceMappingConstants.URL_MARK_ID_AS_STRING));
                 markUrlData.setMarkUrl(markUrlData.hostWithPort + prefs.getServerMarkPath(leaderboardNameFromQR, markUrlData.getMarkId()));
                 urlData = markUrlData;
+            } else if (parameterNames.contains(DeviceMappingConstants.URL_BOAT_ID_AS_STRING)) {
+                BoatUrlData boatUrlData = new BoatUrlData(server, port);
+                boatUrlData.setBoatId(uri.getQueryParameter(DeviceMappingConstants.URL_BOAT_ID_AS_STRING));
+                boatUrlData.setBoatUrl(boatUrlData.hostWithPort + prefs.getServerBoatPath(boatUrlData.getBoatId()));
+                urlData = boatUrlData;
             } else {
-                ExLog.e(activity, TAG, "Neither mark nor competitor checkin");
+                ExLog.e(activity, TAG, "Neither competitor, boat or boat checkin");
                 exception = new Exception();
             }
             if (urlData != null) {
@@ -120,7 +126,6 @@ public class CheckinManager {
                 urlData.eventUrl = urlData.hostWithPort + prefs.getServerEventPath(urlData.eventId);
                 urlData.leaderboardUrl = urlData.hostWithPort + prefs.getServerLeaderboardPath(urlData.leaderboardName);
             }
-
         } catch (UnsupportedEncodingException e) {
             ExLog.e(activity, TAG, "Failed to encode leaderboard name: " + e.getMessage());
             exception = e;
@@ -136,9 +141,9 @@ public class CheckinManager {
         return urlData;
     }
 
-    private void getLeaderBoardFromServer(HttpGetRequest getLeaderboardRequest) {
+    private void getLeaderBoardFromServer(HttpGetRequest request) {
         NetworkHelper.getInstance(activity)
-            .executeHttpJsonRequestAsync(getLeaderboardRequest, new NetworkHelper.NetworkHelperSuccessListener() {
+            .executeHttpJsonRequestAsync(request, new NetworkHelper.NetworkHelperSuccessListener() {
                 @Override
                 public void performAction(JSONObject response) {
                     final String leaderboardDisplayName = response.optString("displayName", urlData.leaderboardName);
@@ -160,8 +165,8 @@ public class CheckinManager {
             });
     }
 
-    private void getEventFromServer(HttpGetRequest getEventRequest, final String leaderboardDisplayName) {
-        NetworkHelper.getInstance(activity).executeHttpJsonRequestAsync(getEventRequest, new NetworkHelper.NetworkHelperSuccessListener() {
+    private void getEventFromServer(HttpGetRequest request, final String leaderboardDisplayName) {
+        NetworkHelper.getInstance(activity).executeHttpJsonRequestAsync(request, new NetworkHelper.NetworkHelperSuccessListener() {
             @Override
             public void performAction(JSONObject response) {
                 EventBaseJsonDeserializer deserializer = new EventBaseJsonDeserializer(
@@ -189,11 +194,12 @@ public class CheckinManager {
                     handleApiError();
                     return;
                 }
+                HttpGetRequest getRequest;
                 if (urlData instanceof CompetitorUrlData) {
                     CompetitorUrlData competitorUrlData = (CompetitorUrlData) urlData;
                     try {
-                        HttpGetRequest getCompetitorRequest = new HttpGetRequest(new URL(competitorUrlData.competitorUrl), activity);
-                        getCompetitorFromServer(getCompetitorRequest, competitorUrlData, leaderboardDisplayName);
+                        getRequest = new HttpGetRequest(new URL(competitorUrlData.competitorUrl), activity);
+                        getCompetitorFromServer(getRequest, competitorUrlData, leaderboardDisplayName);
                     } catch (MalformedURLException e2) {
                         ExLog.e(activity, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + e2.getMessage());
                         handleApiError();
@@ -201,10 +207,19 @@ public class CheckinManager {
                 } else if (urlData instanceof MarkUrlData) {
                     MarkUrlData markUrlData = (MarkUrlData) urlData;
                     try {
-                        HttpGetRequest getMarkRequest = new HttpGetRequest(new URL(markUrlData.getMarkUrl()), activity);
-                        getMarkFromServer(getMarkRequest, markUrlData, leaderboardDisplayName);
+                        getRequest = new HttpGetRequest(new URL(markUrlData.getMarkUrl()), activity);
+                        getMarkFromServer(getRequest, markUrlData, leaderboardDisplayName);
                     } catch (MalformedURLException exception) {
                         ExLog.e(activity, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + exception.getMessage());
+                        handleApiError();
+                    }
+                } else if (urlData instanceof BoatUrlData) {
+                    BoatUrlData boatUrlData = (BoatUrlData) urlData;
+                    try {
+                        getRequest = new HttpGetRequest(new URL(boatUrlData.getBoatUrl()), activity);
+                        getBoatFromServer(getRequest, boatUrlData, leaderboardDisplayName);
+                    } catch (MalformedURLException exception) {
+                        ExLog.e(activity, TAG, "Error: Failed to perform checking du to a MalformedURLException: " + exception.getMessage());
                         handleApiError();
                     }
                 }
@@ -220,25 +235,25 @@ public class CheckinManager {
         });
     }
 
-    private void getCompetitorFromServer(HttpGetRequest getCompetitorRequest, final CompetitorUrlData urlData, final String leaderboardDisplayName) {
+    private void getCompetitorFromServer(HttpGetRequest request, final CompetitorUrlData data, final String leaderboardDisplayName) {
         NetworkHelper.getInstance(activity)
-            .executeHttpJsonRequestAsync(getCompetitorRequest, new NetworkHelper.NetworkHelperSuccessListener() {
+            .executeHttpJsonRequestAsync(request, new NetworkHelper.NetworkHelperSuccessListener() {
                 @Override
                 public void performAction(JSONObject response) {
                     activity.dismissProgressDialog();
                     try {
-                        urlData.competitorName = response.getString(CompetitorJsonConstants.FIELD_NAME);
-                        urlData.competitorId = response.getString(CompetitorJsonConstants.FIELD_ID);
-                        urlData.competitorSailId = response.getString(CompetitorJsonConstants.FIELD_SAIL_ID);
-                        urlData.competitorNationality = response.getString(CompetitorJsonConstants.FIELD_NATIONALITY);
-                        urlData.competitorCountryCode = response.getString(CompetitorJsonConstants.FIELD_COUNTRY_CODE);
+                        data.competitorName = response.getString(CompetitorJsonConstants.FIELD_NAME);
+                        data.competitorId = response.getString(CompetitorJsonConstants.FIELD_ID);
+                        data.competitorSailId = response.getString(CompetitorJsonConstants.FIELD_SAIL_ID);
+                        data.competitorNationality = response.getString(CompetitorJsonConstants.FIELD_NATIONALITY);
+                        data.competitorCountryCode = response.getString(CompetitorJsonConstants.FIELD_COUNTRY_CODE);
                         // TODO Bug 3358: get optional team image from CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI
                     } catch (JSONException e) {
-                        ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.competitorUrl + ", Error: " + e.getMessage());
+                        ExLog.e(activity, TAG, "Error getting data from call on URL: " + data.competitorUrl + ", Error: " + e.getMessage());
                         handleApiError();
                         return;
                     }
-                    saveCheckinDataAndNotifyListeners(urlData, leaderboardDisplayName);
+                    saveCheckinDataAndNotifyListeners(data, leaderboardDisplayName);
                 }
             }, new NetworkHelper.NetworkHelperFailureListener() {
                 @Override
@@ -249,71 +264,90 @@ public class CheckinManager {
             });
     }
 
-    private void getMarkFromServer(HttpGetRequest getMarkRequest, final MarkUrlData urlData, final String leaderboardDisplayName) {
+    private void getMarkFromServer(HttpGetRequest request, final MarkUrlData data, final String leaderboardDisplayName) {
         NetworkHelper.getInstance(activity)
-            .executeHttpJsonRequestAsync(getMarkRequest, new NetworkHelper.NetworkHelperSuccessListener() {
+            .executeHttpJsonRequestAsync(request, new NetworkHelper.NetworkHelperSuccessListener() {
                 @Override
                 public void performAction(JSONObject response) {
+                    activity.dismissProgressDialog();
                     try {
-                        org.json.simple.JSONObject simpleMark;
-                        simpleMark = JsonHelper.convertToSimple(response);
+                        org.json.simple.JSONObject simpleMark = JsonHelper.convertToSimple(response);
                         MarkDeserializer markDeserializer = new MarkDeserializer(new SharedDomainFactoryImpl(null));
-                        Mark mark = markDeserializer.deserialize(simpleMark);
-                        urlData.setMark(mark);
+                        data.setMark(markDeserializer.deserialize(simpleMark));
                     } catch (ParseException|JsonDeserializationException e) {
                         ExLog.e(activity, TAG, "Failed to deserialize mark");
-                        if (activity != null) {
-                            activity.dismissProgressDialog();
-                            displayAPIErrorRecommendRetry();
-                        }
+                        handleApiError();
                         return;
                     }
-                    saveCheckinDataAndNotifyListeners(urlData, leaderboardDisplayName);
+                    saveCheckinDataAndNotifyListeners(data, leaderboardDisplayName);
                 }
             }, new NetworkHelper.NetworkHelperFailureListener() {
                 @Override
                 public void performAction(NetworkHelper.NetworkHelperError e) {
                     ExLog.e(activity, TAG, "Failed to get mark from server: " + e.getMessage());
-                    if (activity != null) {
-                        activity.dismissProgressDialog();
-                        displayAPIErrorRecommendRetry();
-                    }
+                    handleApiError();
                 }
             });
     }
 
-    private void saveCheckinDataAndNotifyListeners(UrlData urlData, String leaderboardDisplayName) {
-        CheckinData data;
-        if (urlData instanceof CompetitorUrlData) {
-            CompetitorUrlData competitorUrlData = (CompetitorUrlData) urlData;
-            data = new CompetitorCheckinData(competitorUrlData, leaderboardDisplayName);
+    private void getBoatFromServer(HttpGetRequest request, final BoatUrlData data, final String leaderboardDisplayName) {
+        NetworkHelper.getInstance(activity)
+            .executeHttpJsonRequestAsync(request, new NetworkHelper.NetworkHelperSuccessListener() {
+                @Override
+                public void performAction(JSONObject response) {
+                    activity.dismissProgressDialog();
+                    try {
+                        org.json.simple.JSONObject simpleBoat = JsonHelper.convertToSimple(response);
+                        BoatJsonDeserializer boatDeserializer = BoatJsonDeserializer.create(new SharedDomainFactoryImpl(null));
+                        data.setBoat(boatDeserializer.deserialize(simpleBoat));
+                    } catch (ParseException|JsonDeserializationException e) {
+                        ExLog.e(activity, TAG, "Failed to deserialize boat");
+                        handleApiError();
+                        return;
+                    }
+                    saveCheckinDataAndNotifyListeners(data, leaderboardDisplayName);
+                }
+            }, new NetworkHelper.NetworkHelperFailureListener() {
+                @Override
+                public void performAction(NetworkHelper.NetworkHelperError e) {
+                    ExLog.e(activity, TAG, "Failed to get boat from server: " + e.getMessage());
+                    handleApiError();
+                }
+            });
+    }
+
+    private void saveCheckinDataAndNotifyListeners(UrlData data, String leaderboardDisplayName) {
+        CheckinData checkinData;
+        if (data instanceof CompetitorUrlData) {
+            CompetitorUrlData competitorUrlData = (CompetitorUrlData) data;
+            checkinData = new CompetitorCheckinData(competitorUrlData, leaderboardDisplayName);
+        } else if (data instanceof BoatUrlData) {
+            BoatUrlData boatUrlData = (BoatUrlData) data;
+            checkinData = new BoatCheckinData(boatUrlData, leaderboardDisplayName);
         } else {
-            MarkUrlData markUrlData = (MarkUrlData) urlData;
-            data = new MarkCheckinData(markUrlData, leaderboardDisplayName);
+            MarkUrlData markUrlData = (MarkUrlData) data;
+            checkinData = new MarkCheckinData(markUrlData, leaderboardDisplayName);
         }
-        data.setUpdate(update);
+        checkinData.setUpdate(update);
         try {
-            data.setCheckinDigestFromString(urlData.uriStr);
+            checkinData.setCheckinDigestFromString(data.uriStr);
             activity.dismissProgressDialog();
-            setCheckinData(data);
+            setCheckinData(checkinData);
         } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-            ExLog.e(activity, TAG, "Failed to get generate digest of qr-code string (" + urlData.uriStr + "). " + e.getMessage());
+            ExLog.e(activity, TAG, "Failed to get generate digest of qr-code string (" + data.uriStr + "). " + e.getMessage());
             handleApiError();
         }
     }
 
-    public void setCheckinData(CheckinData data) {
-        checkinData = data;
-        activity.onCheckinDataAvailable(getCheckinData());
-    }
-
-    public CheckinData getCheckinData() {
-        return checkinData;
+    private void setCheckinData(CheckinData data) {
+        activity.onCheckinDataAvailable(data);
     }
 
     private void handleApiError() {
         prefs.setLastScannedQRCode(null);
-        activity.dismissProgressDialog();
+        if (activity != null) {
+            activity.dismissProgressDialog();
+        }
         displayAPIErrorRecommendRetry();
         setCheckinData(null);
     }
@@ -322,6 +356,7 @@ public class CheckinManager {
      * Shows a pop-up-dialog that informs the user than an API-call has failed and recommends a retry.
      */
     private void displayAPIErrorRecommendRetry() {
+        setCheckinData(null);
         AlertDialog.Builder builder = new AlertDialog.Builder(activity, R.style.AppTheme_AlertDialog);
         builder.setMessage(activity.getString(R.string.notify_user_api_call_failed));
         builder.setCancelable(true);
@@ -334,7 +369,6 @@ public class CheckinManager {
 
         });
         builder.show();
-        setCheckinData(null);
     }
 
 }

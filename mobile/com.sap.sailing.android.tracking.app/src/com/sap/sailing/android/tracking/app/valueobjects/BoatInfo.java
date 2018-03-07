@@ -1,9 +1,9 @@
 package com.sap.sailing.android.tracking.app.valueobjects;
 
-public class MarkInfo {
+public class BoatInfo {
 
-    public String markId;
-    public String markName;
+    public String boatId;
+    public String boatName;
     public String checkinDigest;
 
 }
