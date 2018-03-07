@@ -34,7 +34,15 @@ public interface HasPermissions extends WithID {
     /**
      * An object-identifying part that can go in the third part of a wildcard permission to identify
      * this object, relative to the scope defined by the {@link #getPermissionType() permission type}
-     * or "category", such as "LEADERBOARD" or similar.
+     * or "category", such as "LEADERBOARD" or similar.<p>
+     * 
+     * Make sure the relative object ID is case insensitive. In other words, there should be no two distinct
+     * objects within the same {@link #getPermissionType() permission type} whose relative object IDs differ
+     * only in their case. Background: these relative object IDs will be used when constructing wildcard
+     * permissions. However, security frameworks such as Shiro tend to convert all permission string elements
+     * to lowercase before further processing. When later those relative IDs are to be extracted again from the
+     * wildcard permission, e.g., for ownership lookup, only their lowercase representation will be further
+     * processed.
      */
     String getRelativeObjectId();
     

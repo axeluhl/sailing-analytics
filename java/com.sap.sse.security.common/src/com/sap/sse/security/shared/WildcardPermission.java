@@ -155,11 +155,8 @@ public class WildcardPermission implements Serializable {
         if (wildcardString == null || wildcardString.trim().length() == 0) {
             throw new IllegalArgumentException("Wildcard string cannot be null or empty. Make sure permission strings are properly formatted.");
         }
-
         wildcardString = wildcardString.trim();
-
         List<String> parts = Arrays.asList(wildcardString.split(PART_DIVIDER_TOKEN));
-
         this.parts = new ArrayList<Set<String>>();
         for (String part : parts) {
             Set<String> subparts = new HashSet<>(Arrays.asList(part.split(SUBPART_DIVIDER_TOKEN)));
@@ -171,7 +168,6 @@ public class WildcardPermission implements Serializable {
             }
             this.parts.add(subparts);
         }
-
         if (this.parts.isEmpty()) {
             throw new IllegalArgumentException("Wildcard string cannot contain only dividers. Make sure permission strings are properly formatted.");
         }
@@ -188,7 +184,7 @@ public class WildcardPermission implements Serializable {
     /*--------------------------------------------
     |  A C C E S S O R S / M O D I F I E R S    |
     ============================================*/
-    protected List<Set<String>> getParts() {
+    public List<Set<String>> getParts() {
         return this.parts;
     }
 
