@@ -16,6 +16,7 @@ public class RestApiApplication extends Application {
         classes.add(LeaderboardGroupsResource.class);
         classes.add(EventsResource.class);
         classes.add(RegattasResource.class);
+        classes.add(BoatsResource.class);
         classes.add(LeaderboardsResource.class);
         classes.add(LeaderboardsResourceV2.class);
         classes.add(PolarResource.class);
