@@ -726,6 +726,19 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Boat getBoatOfCompetitor(Competitor competitor) {
         return competitorsAndBoats.get(competitor);
     }
+    
+    @Override
+    public Competitor getCompetitorOfBoat(Boat boat) {
+        if (boat == null) {
+            return null;
+        }
+        for (Map.Entry<Competitor, Boat> competitorWithBoat : competitorsAndBoats.entrySet()) {
+            if (boat.equals(competitorWithBoat.getValue())) {
+                return competitorWithBoat.getKey();
+            }
+        }
+        return null;
+    }
 
     public Distance getEstimatedDistanceToComplete(TimePoint now) {
         return null;

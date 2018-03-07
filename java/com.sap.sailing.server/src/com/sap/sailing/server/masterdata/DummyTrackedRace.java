@@ -644,6 +644,11 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public Boat getBoatOfCompetitor(Competitor competitor) {
         return null;
     }
+    
+    @Override
+    public Competitor getCompetitorOfBoat(Boat boat) {
+        return null;
+    }
 
     @Override
     public RankingMetric getRankingMetric() {

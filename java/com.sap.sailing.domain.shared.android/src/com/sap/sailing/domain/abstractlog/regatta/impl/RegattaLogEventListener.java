@@ -4,6 +4,8 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceBoatMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceBoatSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
@@ -28,6 +30,11 @@ public abstract class RegattaLogEventListener implements RegattaLogEventVisitor 
 
     @Override
     public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
+        eventAdded(event);
+    }
+    
+    @Override
+    public void visit(RegattaLogDeviceBoatMappingEvent event) {
         eventAdded(event);
     }
 
@@ -63,6 +70,11 @@ public abstract class RegattaLogEventListener implements RegattaLogEventVisitor 
 
     @Override
     public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
+        eventAdded(event);
+    }
+    
+    @Override
+    public void visit(RegattaLogDeviceBoatSensorDataMappingEvent event) {
         eventAdded(event);
     }
 }

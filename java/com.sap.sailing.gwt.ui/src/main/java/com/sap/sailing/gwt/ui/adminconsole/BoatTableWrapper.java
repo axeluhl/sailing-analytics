@@ -32,6 +32,12 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> extends TableWrapper<BoatDTO, S> {
     private final LabeledAbstractFilterablePanel<BoatDTO> filterField;
     
+    public BoatTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
+            ErrorReporter errorReporter, boolean multiSelection, boolean enablePager, boolean allowActions) {
+        this(sailingService, stringMessages, errorReporter, multiSelection, enablePager, DEFAULT_PAGING_SIZE,
+                allowActions);
+    }
+
     public BoatTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, int pagingSize, boolean allowActions) {
         super(sailingService, stringMessages, errorReporter, multiSelection, enablePager, pagingSize,

@@ -2,9 +2,9 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -12,8 +12,8 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -27,18 +27,19 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Collection<DeviceMappingDTO>> {
-    private String leaderboardName;
+
+    private final String leaderboardName;
+    private final StringMessages stringMessages;
     private final SimplePanel importWidgetHolder;
     protected final TrackFileImportDeviceIdentifierTableWrapper deviceIdTable;
-    protected final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
-    protected final MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>> markTable;
-    private final StringMessages stringMessages;
-
-    private final Map<TrackFileImportDeviceIdentifierDTO, MappableToDevice> mappings = new HashMap<>();
+    private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
+    private final MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>> markTable;
+    private final BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>> boatTable;
 
     private TrackFileImportDeviceIdentifierDTO deviceToSelect;
     private CompetitorDTO compToSelect;
     private MarkDTO markToSelect;
+    private BoatDTO boatToSelect;
     private boolean inInstableTransitionState = false;
 
     public AbstractRegattaLogFixesAddMappingsDialog(SailingServiceAsync sailingService,
@@ -56,40 +57,28 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
                         }
                     }
                 }, true, callback);
+        this.leaderboardName = leaderboardName;
         this.stringMessages = stringMessages;
-        deviceIdTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingService, stringMessages, errorReporter);
         importWidgetHolder = new SimplePanel();
-        deviceIdTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                deviceSelectionChanged(deviceIdTable.getSelectionModel().getSelectedObject());
-            }
-        });
+        deviceIdTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingService, stringMessages, errorReporter);
+        registerSelectionChangeHandler(deviceIdTable.getSelectionModel(), this::deviceSelectionChanged);
         competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
                 /* multiSelection */ false, /* enable pager */ true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         markTable = new MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>>(
-        /* multiSelection */ false, sailingService, stringMessages, errorReporter);
+                /* multiSelection */ false, sailingService, stringMessages, errorReporter);
+        boatTable = new BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>>(sailingService, stringMessages,
+                errorReporter, /* multiSelection */ false, /* enable Pager */ true, /* allowActions */ false);
 
-        competitorTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                mappedToSelectionChanged(competitorTable.getSelectionModel().getSelectedObject());
-            }
-        });
-        markTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                mappedToSelectionChanged(markTable.getSelectionModel().getSelectedObject());
-            }
-        });
+        registerSelectionChangeHandler(competitorTable.getSelectionModel(), this::mappedToSelectionChanged);
+        registerSelectionChangeHandler(markTable.getSelectionModel(), this::mappedToSelectionChanged);
+        registerSelectionChangeHandler(boatTable.getSelectionModel(), this::mappedToSelectionChanged);
 
-        this.leaderboardName = leaderboardName;
-
+        getBoatRegistrations(sailingService, errorReporter);
         getCompetitorRegistrations(sailingService, errorReporter);
         getMarks(sailingService, errorReporter);
     }
 
-    void getMarks(SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
+    private void getMarks(SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
         sailingService.getMarksInRegattaLog(leaderboardName, new AsyncCallback<Iterable<MarkDTO>>() {
             @Override
             public void onSuccess(Iterable<MarkDTO> result) {
@@ -103,7 +92,21 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
         });
     }
 
-    void getCompetitorRegistrations(SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
+    private void getBoatRegistrations(final SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
+        sailingService.getBoatRegistrationsForLeaderboard(leaderboardName, new AsyncCallback<Collection<BoatDTO>>() {
+            @Override
+            public void onSuccess(Collection<BoatDTO> result) {
+                boatTable.filterBoats(result);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Could not load boats: " + caught.getMessage());
+            }
+        });
+    }
+
+    private void getCompetitorRegistrations(SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
         sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName,
                 new AsyncCallback<Collection<CompetitorDTO>>() {
                     @Override
@@ -133,6 +136,7 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
         if (inInstableTransitionState) {
             if (deviceIdTable.getSelectionModel().getSelectedObject() == deviceToSelect
                     && competitorTable.getSelectionModel().getSelectedObject() == compToSelect
+                    && boatTable.getSelectionModel().getSelectedObject() == boatToSelect
                     && markTable.getSelectionModel().getSelectedObject() == markToSelect) {
                 inInstableTransitionState = false;
             }
@@ -140,22 +144,30 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
             inInstableTransitionState = true;
             selectOrClear(deviceIdTable.getSelectionModel(), deviceToSelect);
             selectOrClear(competitorTable.getSelectionModel(), compToSelect);
+            selectOrClear(boatTable.getSelectionModel(), boatToSelect);
             selectOrClear(markTable.getSelectionModel(), markToSelect);
         }
     }
 
+    private <T> void registerSelectionChangeHandler(SingleSelectionModel<T> selectionModel, Consumer<T> callback) {
+        selectionModel.addSelectionChangeHandler(event -> callback.accept(selectionModel.getSelectedObject()));
+    }
+
     private void mappedToSelectionChanged(MappableToDevice mappedTo) {
         if (!inInstableTransitionState) {
-            TrackFileImportDeviceIdentifierDTO device = deviceIdTable.getSelectionModel().getSelectedObject();
-            if (device != null) {
-                mappings.put(device, mappedTo);
-            }
+            deviceIdTable.setMappedObjectForSelectedDevice(mappedTo);
 
             if (mappedTo instanceof CompetitorDTO) {
-                markToSelect = null;
                 compToSelect = (CompetitorDTO) mappedTo;
-            } else {
+                boatToSelect = null;
+                markToSelect = null;
+            } else if (mappedTo instanceof BoatDTO) {
                 compToSelect = null;
+                boatToSelect = (BoatDTO) mappedTo;
+                markToSelect = null;
+            } else if (mappedTo instanceof MarkDTO) {
+                compToSelect = null;
+                boatToSelect = null;
                 markToSelect = (MarkDTO) mappedTo;
             }
         }
@@ -167,12 +179,15 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
         if (!inInstableTransitionState) {
             deviceToSelect = deviceId;
             compToSelect = null;
+            boatToSelect = null;
             markToSelect = null;
 
             if (deviceId != null) {
-                MappableToDevice mappedTo = mappings.get(deviceId);
+                final MappableToDevice mappedTo = deviceIdTable.getMappedObjectForDeviceId(deviceId);
                 if (mappedTo instanceof CompetitorDTO) {
                     compToSelect = (CompetitorDTO) mappedTo;
+                } else if (mappedTo instanceof BoatDTO) {
+                    boatToSelect = (BoatDTO) mappedTo;
                 } else if (mappedTo instanceof MarkDTO) {
                     markToSelect = (MarkDTO) mappedTo;
                 }
@@ -187,6 +202,7 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
         VerticalPanel leftPanel = new VerticalPanel();
         VerticalPanel tablesPanel = new VerticalPanel();
         CaptionPanel marksPanel = new CaptionPanel(stringMessages.mark());
+        CaptionPanel boatsPanel = new CaptionPanel(stringMessages.boat());
         CaptionPanel competitorsPanel = new CaptionPanel(stringMessages.competitor());
 
         leftPanel.add(importWidgetHolder);
@@ -194,9 +210,11 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
         panel.add(leftPanel);
         panel.add(tablesPanel);
         tablesPanel.add(marksPanel);
+        tablesPanel.add(boatsPanel);
         tablesPanel.add(competitorsPanel);
 
         marksPanel.setContentWidget(markTable.asWidget());
+        boatsPanel.setContentWidget(boatTable.asWidget());
         competitorsPanel.setContentWidget(competitorTable.asWidget());
 
         return panel;
@@ -205,10 +223,11 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
     @Override
     protected Collection<DeviceMappingDTO> getResult() {
         List<DeviceMappingDTO> result = new ArrayList<>();
-        for (TrackFileImportDeviceIdentifierDTO device : mappings.keySet()) {
-            DeviceIdentifierDTO deviceIdDto = new DeviceIdentifierDTO("FILE", device.uuidAsString);
-            MappableToDevice mappedTo = mappings.get(device);
-            DeviceMappingDTO mapping = new DeviceMappingDTO(deviceIdDto, device.from, device.to, mappedTo, null);
+        for (Map.Entry<TrackFileImportDeviceIdentifierDTO, MappableToDevice> deviceEntry : deviceIdTable.getMappings().entrySet()) {
+            final TrackFileImportDeviceIdentifierDTO device = deviceEntry.getKey();
+            final DeviceIdentifierDTO deviceIdDto = new DeviceIdentifierDTO("FILE", device.uuidAsString);
+            final MappableToDevice mappedTo = deviceEntry.getValue();
+            final DeviceMappingDTO mapping = new DeviceMappingDTO(deviceIdDto, device.from, device.to, mappedTo, null);
             result.add(mapping);
         }
         return result;

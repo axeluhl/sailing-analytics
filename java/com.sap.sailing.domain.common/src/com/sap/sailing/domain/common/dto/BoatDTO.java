@@ -2,9 +2,10 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sse.common.Color;
 
-public class BoatDTO extends NamedDTO implements Serializable {
+public class BoatDTO extends NamedDTO implements Serializable, MappableToDevice {
     private static final long serialVersionUID = -4076992788294272162L;
 
     private String idAsString;
@@ -35,12 +36,29 @@ public class BoatDTO extends NamedDTO implements Serializable {
         return sailId;
     }
     
+    @Override
     public String getIdAsString() {
         return idAsString;
     }
 
     public BoatClassDTO getBoatClass() {
         return boatClass;
+    }
+    
+    public String getDisplayName() {
+        final StringBuilder sb = new StringBuilder();
+        final boolean hasSailId = sailId != null && !sailId.isEmpty();
+        if (getName() != null) {
+            sb.append(getName());
+            if (hasSailId) {
+                sb.append(" (").append(sailId).append(')');
+            }
+        } else if (hasSailId) {
+            sb.append(sailId);
+        } else {
+            sb.append(idAsString);
+        }
+        return sb.toString();
     }
 
     @Override

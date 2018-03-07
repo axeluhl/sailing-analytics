@@ -749,6 +749,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
 
     Boat getBoatOfCompetitor(Competitor competitor);
     
+    Competitor getCompetitorOfBoat(Boat boat);
+    
     /**
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose
      * {@link #getRank(Competitor)} is 0 will be sorted "worst".

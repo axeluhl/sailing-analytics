@@ -26,11 +26,13 @@ public class DeviceMappingConstants {
     public static final String URL_EVENT_ID = "event_id";
     public static final String URL_LEADERBOARD_NAME = "leaderboard_name";
     public static final String URL_COMPETITOR_ID_AS_STRING = "competitor_id";
+    public static final String URL_BOAT_ID_AS_STRING = "boat_id";
     public static final String URL_MARK_ID_AS_STRING = "mark_id";
     public static final String URL_FROM_MILLIS = "from_millis";
     public static final String URL_TO_MILLIS = "to_millis";
 
     public static final String JSON_COMPETITOR_ID_AS_STRING = "competitorId";
+    public static final String JSON_BOAT_ID_AS_STRING = "boatId";
     public static final String JSON_MARK_ID_AS_STRING = "markId";
     public static final String JSON_DEVICE_UUID = "deviceUuid";
     public static final String JSON_DEVICE_TYPE = "deviceType";

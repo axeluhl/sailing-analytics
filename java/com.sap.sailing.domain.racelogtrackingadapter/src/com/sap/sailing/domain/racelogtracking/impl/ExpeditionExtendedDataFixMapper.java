@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceBoatExpeditionExtendedMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
@@ -36,6 +37,7 @@ public class ExpeditionExtendedDataFixMapper implements SensorFixMapper<BravoFix
     
     @Override
     public boolean isResponsibleFor(Class<? extends RegattaLogDeviceMappingEvent<?>> eventType) {
-        return RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl.class.isAssignableFrom(eventType);
+        return RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl.class.isAssignableFrom(eventType)
+                || RegattaLogDeviceBoatExpeditionExtendedMappingEventImpl.class.isAssignableFrom(eventType);
     }
 }
