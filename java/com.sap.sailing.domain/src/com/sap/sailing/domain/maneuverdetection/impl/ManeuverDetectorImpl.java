@@ -502,10 +502,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                     refinedPenaltyDetails = computeManeuverDetails(refinedPenaltyMainCurveDetails,
                             maneuverDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt);
                 }
-                if (legBeforeManeuver != null) {
-                    maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(),
-                            maneuverDetails.getTimePoint(), firstPenaltyCircleCompletedAt);
-                }
+                maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(),
+                        maneuverDetails.getTimePoint(), firstPenaltyCircleCompletedAt);
                 Position penaltyPosition = competitorTrack.getEstimatedPosition(refinedPenaltyDetails.getTimePoint(),
                         /* extrapolate */ false);
                 final Maneuver maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType,
@@ -525,10 +523,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 final Maneuver maneuver;
                 if (numberOfTacks > 0 || numberOfJibes > 0) {
                     maneuverType = numberOfTacks > 0 ? ManeuverType.TACK : ManeuverType.JIBE;
-                    if (legBeforeManeuver != null) {
-                        maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(),
-                                maneuverDetails.getTimePoint(), maneuverDetails.getTimePointAfter());
-                    }
+                    maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(),
+                            maneuverDetails.getTimePoint(), maneuverDetails.getTimePointAfter());
                     maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, tackAfterManeuver,
                             maneuverPosition, maneuverLoss, maneuverDetails.getTimePoint(),
                             maneuverMainCurveDetails.extractEnteringAndExistingDetailsOnly(),
@@ -553,10 +549,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 } else {
                     // no wind information; marking as UNKNOWN
                     maneuverType = ManeuverType.UNKNOWN;
-                    if (legBeforeManeuver != null) {
-                        maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(),
-                                maneuverDetails.getTimePoint(), maneuverDetails.getTimePointAfter());
-                    }
+                    maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(),
+                            maneuverDetails.getTimePoint(), maneuverDetails.getTimePointAfter());
                     maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, tackAfterManeuver, maneuverPosition,
                             maneuverLoss, maneuverDetails.getTimePoint(),
                             maneuverMainCurveDetails.extractEnteringAndExistingDetailsOnly(),
