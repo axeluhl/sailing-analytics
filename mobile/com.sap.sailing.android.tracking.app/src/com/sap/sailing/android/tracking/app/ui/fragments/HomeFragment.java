@@ -31,6 +31,7 @@ import com.sap.sailing.android.tracking.app.utils.CheckoutHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper.GeneralDatabaseHelperException;
 import com.sap.sailing.android.tracking.app.valueobjects.BoatCheckinData;
+import com.sap.sailing.android.tracking.app.valueobjects.BoatInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
@@ -127,8 +128,8 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     private void checkInWithAPIAndDisplayTrackingActivity(CheckinData checkinData) {
         if (checkinData instanceof CompetitorCheckinData) {
             storeCompetitorCheckinData((CompetitorCheckinData) checkinData);
-        } else if (checkinData instanceof MarkCheckinData) {
-            storeMarkCheckinData((MarkCheckinData) checkinData);
+        } else if (checkinData instanceof MarkCheckinData || checkinData instanceof BoatCheckinData) {
+            storeMarkCheckinData(checkinData);
         }
         performAPICheckin(checkinData);
     }
@@ -154,11 +155,16 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         }
     }
 
-    private void storeMarkCheckinData(MarkCheckinData checkinData) {
+    private void storeMarkCheckinData(CheckinData checkinData) {
         if (DatabaseHelper.getInstance().eventLeaderboardMarkCombinationAvailable(getActivity(), checkinData.checkinDigest)) {
             try {
-                DatabaseHelper.getInstance().storeMarkCheckinRow(getActivity(), checkinData.getEvent(), checkinData.getMark(), checkinData
-                    .getLeaderboard(), checkinData.getCheckinUrl());
+                if (checkinData instanceof MarkCheckinData) {
+                    DatabaseHelper.getInstance()
+                        .storeMarkCheckinRow(getActivity(), checkinData.getEvent(), ((MarkCheckinData)checkinData).getMark(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
+                } else {
+                    DatabaseHelper.getInstance()
+                        .storeBoatCheckinRow(getActivity(), checkinData.getEvent(), ((BoatCheckinData)checkinData).getBoat(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
+                }
                 adapter.notifyDataSetChanged();
             } catch (GeneralDatabaseHelperException e) {
                 ExLog.e(getActivity(), TAG, "Batch insert failed: " + e.getMessage());
@@ -174,6 +180,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             Toast.makeText(getActivity(), getString(R.string.info_already_checked_in_this_qr_code), Toast.LENGTH_LONG).show();
         }
     }
+
 
     /**
      * Checkin with API.
@@ -217,7 +224,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     @Override
     public void handleScannedOrUrlMatchedUri(Uri uri) {
         String uriString = uri.toString();
-        CheckinManager manager = new CheckinManager(uriString, (StartActivity) getActivity(), true);
+        CheckinManager manager = new CheckinManager(uriString, (StartActivity) getActivity(), false);
         manager.callServerAndGenerateCheckinData();
     }
 
@@ -252,6 +259,10 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             MarkCheckinData checkinData = (MarkCheckinData) data;
             clearScannedQRCodeInPrefs();
             checkInWithAPIAndDisplayTrackingActivity(checkinData);
+        } else if (data instanceof BoatCheckinData) {
+            BoatCheckinData checkinData = (BoatCheckinData) data;
+            clearScannedQRCodeInPrefs();
+            checkInWithAPIAndDisplayTrackingActivity(checkinData);
         }
     }
 
@@ -264,7 +275,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         Intent intent = new Intent();
         if (type == CheckinUrlInfo.TYPE_COMPETITOR) {
             intent.setClass(getActivity(), RegattaActivity.class);
-        } else if (type == CheckinUrlInfo.TYPE_MARK) {
+        } else if (type == CheckinUrlInfo.TYPE_MARK || type == CheckinUrlInfo.TYPE_BOAT) {
             intent.setClass(getActivity(), BuoyActivity.class);
         }
         intent.putExtra(getString(R.string.checkin_digest), checkinDigest);
@@ -367,8 +378,10 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
                 successListener, failureListener);
         } else if (type == CheckinUrlInfo.TYPE_MARK) {
             MarkInfo markInfo = DatabaseHelper.getInstance().getMarkInfo(getActivity(), checkinDigest);
-            checkoutHelper.checkoutMark((StartActivity) getActivity(), leaderboardInfo.name, eventInfo.server, markInfo.markId,
-                successListener, failureListener);
+            checkoutHelper.checkoutMark((StartActivity) getActivity(), leaderboardInfo.name, eventInfo.server, markInfo.markId, type, successListener, failureListener);
+        } else if (type == CheckinUrlInfo.TYPE_BOAT) {
+            BoatInfo boatInfo = DatabaseHelper.getInstance().getBoatInfo(getActivity(), checkinDigest);
+            checkoutHelper.checkoutMark((StartActivity) getActivity(), leaderboardInfo.name, eventInfo.server, boatInfo.boatId, type, successListener, failureListener);
         }
     }
 
