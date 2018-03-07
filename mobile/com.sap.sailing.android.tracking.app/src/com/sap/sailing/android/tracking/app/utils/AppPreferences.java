@@ -75,7 +75,7 @@ public class AppPreferences extends BaseAppPreferences {
 
     public String getServerBoatPath(String boatId) {
         String path = context.getString(R.string.preference_server_boat_path);
-        return path.replace("{boat_id}", URLEncoder.encode(boatId));
+        return path.replace("{boat_id}", boatId);
     }
 
     public int getGPSFixInterval() {

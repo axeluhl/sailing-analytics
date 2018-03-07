@@ -100,17 +100,17 @@ public class CheckinManager {
             Set<String> parameterNames = uri.getQueryParameterNames();
             if (parameterNames.contains(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING)) {
                 CompetitorUrlData competitorUrlData = new CompetitorUrlData(server, port);
-                competitorUrlData.competitorId = uri.getQueryParameter(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING);
+                competitorUrlData.competitorId = URLEncoder.encode(uri.getQueryParameter(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING));
                 competitorUrlData.competitorUrl = competitorUrlData.hostWithPort + prefs.getServerCompetitorPath(competitorUrlData.competitorId);
                 urlData = competitorUrlData;
             } else if (parameterNames.contains(DeviceMappingConstants.URL_MARK_ID_AS_STRING)) {
                 MarkUrlData markUrlData = new MarkUrlData(server, port);
-                markUrlData.setMarkId(uri.getQueryParameter(DeviceMappingConstants.URL_MARK_ID_AS_STRING));
+                markUrlData.setMarkId(URLEncoder.encode(uri.getQueryParameter(DeviceMappingConstants.URL_MARK_ID_AS_STRING)));
                 markUrlData.setMarkUrl(markUrlData.hostWithPort + prefs.getServerMarkPath(leaderboardNameFromQR, markUrlData.getMarkId()));
                 urlData = markUrlData;
             } else if (parameterNames.contains(DeviceMappingConstants.URL_BOAT_ID_AS_STRING)) {
                 BoatUrlData boatUrlData = new BoatUrlData(server, port);
-                boatUrlData.setBoatId(uri.getQueryParameter(DeviceMappingConstants.URL_BOAT_ID_AS_STRING));
+                boatUrlData.setBoatId(URLEncoder.encode(uri.getQueryParameter(DeviceMappingConstants.URL_BOAT_ID_AS_STRING)));
                 boatUrlData.setBoatUrl(boatUrlData.hostWithPort + prefs.getServerBoatPath(boatUrlData.getBoatId()));
                 urlData = boatUrlData;
             } else {
@@ -120,7 +120,7 @@ public class CheckinManager {
             if (urlData != null) {
                 urlData.uriStr = uri.toString();
                 urlData.checkinURLStr = urlData.hostWithPort + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardNameFromQR);
-                urlData.eventId = uri.getQueryParameter(DeviceMappingConstants.URL_EVENT_ID);
+                urlData.eventId = URLEncoder.encode(uri.getQueryParameter(DeviceMappingConstants.URL_EVENT_ID));
                 urlData.leaderboardName = leaderboardNameFromQR;
                 urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid.getUniqueId(activity)));
                 urlData.eventUrl = urlData.hostWithPort + prefs.getServerEventPath(urlData.eventId);
