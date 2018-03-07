@@ -2067,4 +2067,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String unableToResolveWindFinderSpotId(String id, String message);
     String windFinderWeatherData();
     String maneuverTable();
+    String turnRate();
+    String speedIn();
+    String speedOut();
+    String minSpeed();
 }

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.TextCell;
@@ -19,18 +20,20 @@ import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.DurationFormatter;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
+import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
@@ -44,7 +47,6 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel.LeaderBoardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.MinMaxRenderer;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
-import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
@@ -58,6 +60,9 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTableSettings>
         implements CompetitorSelectionChangeListener, TimeListener {
@@ -71,7 +76,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
     private final NumberFormat towDigitAccuracy = NumberFormatterFactory.getDecimalFormat(2);
     private final DateTimeFormat dateformat = DateTimeFormat.getFormat("HH:mm:ss");
-    
+
     private final SimplePanel contentPanel = new SimplePanel();
     private final Label importantMessageLabel = new Label();
     private final SortedCellTableWithStylableHeaders<SingleManeuverDTO> maneuverCellTable;
@@ -80,13 +85,22 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private final TimeRangeWithZoomModel timeRangeWithZoomProvider;
     private final Map<CompetitorDTO, List<ManeuverDTO>> lastResult = new HashMap<>();
     private ManeuverTableSettings settings;
+    protected boolean hasCanReplayDuringLiveRacesPermission;
 
     public ManeuverTablePanel(Component<?> parent, ComponentContext<?> context,
             final SailingServiceAsync sailingService, final RegattaAndRaceIdentifier raceIdentifier,
             final StringMessages stringMessages, final CompetitorSelectionProvider competitorSelectionModel,
             final ErrorReporter errorReporter, final Timer timer, ManeuverTableSettings initialSettings,
-            TimeRangeWithZoomModel timeRangeWithZoomProvider, LeaderBoardStyle style) {
+            TimeRangeWithZoomModel timeRangeWithZoomProvider, LeaderBoardStyle style, UserService userService) {
         super(parent, context);
+        userService.addUserStatusEventHandler(new UserStatusEventHandler() {
+            
+            @Override
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+                hasCanReplayDuringLiveRacesPermission = user != null && user.hasPermission(
+                        Permission.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission(), SailingPermissionsForRoleProvider.INSTANCE);
+            }
+        });
         this.resources.css().ensureInjected();
         this.settings = initialSettings;
         this.sailingService = sailingService;
@@ -118,249 +132,106 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             public void onSelectionChange(SelectionChangeEvent event) {
                 final SingleManeuverDTO selected = selectionModel.getSelectedObject();
                 // TODO and permission for non live position jumpin!
-                if (selected != null && (timer.getPlayMode() == PlayModes.Replay || true)) {
+                if (selected != null && (timer.getPlayMode() == PlayModes.Replay || hasCanReplayDuringLiveRacesPermission)) {
                     timer.pause();
-                    timer.setTime(selected.time.getTime());
+                    timer.setTime(selected.getTime().getTime());
                 }
             }
         });
-        
+
         this.maneuverCellTable.addColumn(competitorColumn = createCompetitorColumn());
         this.maneuverCellTable.addColumn(createManeuverTypeColumn());
         this.maneuverCellTable.addColumn(createTimeColumn());
-        this.maneuverCellTable.addColumn(createDurationColumn());
-        this.maneuverCellTable.addColumn(createSpeedInColumn());
-        this.maneuverCellTable.addColumn(createSpeedOutColumn());
-        this.maneuverCellTable.addColumn(createMinSpeedColumn());
-        this.maneuverCellTable.addColumn(createTurnRateColumn());
-        this.maneuverCellTable.addColumn(createLossColumn());
-        this.maneuverCellTable.addColumn(createDirectionColumn());
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getDurationAsSeconds,
+                this.stringMessages.durationPlain(), this.stringMessages.secondsUnit()));
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getSpeedInAsKnots,
+                this.stringMessages.speedIn(), this.stringMessages.knotsUnit()));
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getSpeedOutAsKnots,
+                this.stringMessages.speedOut(), this.stringMessages.knotsUnit()));
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getMinSpeedAsKnots,
+                this.stringMessages.minSpeed(), this.stringMessages.knotsUnit()));
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getTurnRate, this.stringMessages.turnRate(),
+                this.stringMessages.degreesUnit()));
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getLoss,
+                this.stringMessages.maneuverLoss(), stringMessages.metersUnit()));
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getDirectionChangeInDegrees,
+                "i18n directionchange", this.stringMessages.degreesUnit()));
 
         initWidget(rootPanel);
         setVisible(false);
     }
 
-    private SortableColumn<SingleManeuverDTO, String> createDirectionColumn() {
-        return new SortableColumn<SingleManeuverDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+    private SortableColumn<SingleManeuverDTO, String> createSortableMinMaxColumn(
+            Function<SingleManeuverDTO, Double> extractor, String title, String unit) {
+        AbstractSortableColumnWithMinMax<SingleManeuverDTO, String> col = new AbstractSortableColumnWithMinMax<SingleManeuverDTO, String>(
+                new TextCell(), SortingOrder.ASCENDING) {
 
-            @Override
-            public InvertibleComparator<SingleManeuverDTO> getComparator() {
-                return new InvertibleComparatorAdapter<SingleManeuverDTO>() {
-                    @Override
-                    public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
-                        if(o1.getDirectionChange() == null && o2.getDirectionChange() == null){
-                            return 0;
-                        }
-                        if(o1.getDirectionChange() != null && o2.getDirectionChange() == null){
-                            return 1;
-                        }
-                        if(o1.getDirectionChange() == null && o2.getDirectionChange() != null){
-                            return -1;
-                        }
-                        return o1.getDirectionChange().compareTo(o2.getDirectionChange());
-                    }
-                };
-            }
-
-            @Override
-            public Header<?> getHeader() {
-                return new TextHeader("i18n kurschange");
-            }
-
-            @Override
-            public String getValue(SingleManeuverDTO object) {
-                return object.getDirectionChange() == null ? null
-                        : towDigitAccuracy.format(object.getDirectionChange());
-            }
-        };
-    }
-
-    private SortableColumn<SingleManeuverDTO, String> createLossColumn() {
-        return new SortableColumn<SingleManeuverDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
-
-            @Override
-            public InvertibleComparator<SingleManeuverDTO> getComparator() {
-                return new InvertibleComparatorAdapter<SingleManeuverDTO>() {
-                    @Override
-                    public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
-                        if(o1.loss == null && o2.loss == null){
-                            return 0;
-                        }
-                        if(o1.loss != null && o2.loss == null){
-                            return 1;
-                        }
-                        if(o1.loss == null && o2.loss != null){
-                            return -1;
-                        }
-                        return Double.compare(o1.loss, o2.loss);
-                    }
-                };
-            }
-
-            @Override
-            public Header<?> getHeader() {
-                return new TextHeader(stringMessages.maneuverLoss());
-            }
-
-            @Override
-            public String getValue(SingleManeuverDTO object) {
-                return object.loss == null ? ""
-                        : (towDigitAccuracy.format(object.loss) + " " + stringMessages.metersUnit());
-            }
-        };
-    }
-
-    private SortableColumn<SingleManeuverDTO, String> createTurnRateColumn() {
-        return new AbstractSortableColumnWithMinMax<SingleManeuverDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
-            InvertibleComparatorAdapter<SingleManeuverDTO> comparator = new InvertibleComparatorAdapter<SingleManeuverDTO>() {
+            InvertibleComparatorAdapter<SingleManeuverDTO> comparatorWithAbs = new InvertibleComparatorAdapter<SingleManeuverDTO>() {
                 @Override
                 public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
-                    return Double.compare(o1.turnRate, o2.turnRate);
+                    Double o1v = extractor.apply(o1);
+                    Double o2v = extractor.apply(o2);
+                    if (o1v == null && o2v == null) {
+                        return 0;
+                    }
+                    if (o1v == null && o2v != null) {
+                        return -1;
+                    }
+                    if (o1v != null && o2v == null) {
+                        return 1;
+                    }
+                    return Double.compare(Math.abs(o1v), Math.abs(o2v));
                 }
             };
-            
+
             HasStringAndDoubleValue<SingleManeuverDTO> dataProvider = new HasStringAndDoubleValue<SingleManeuverDTO>() {
-                
+
                 @Override
                 public String getStringValueToRender(SingleManeuverDTO row) {
-                    return towDigitAccuracy.format(row.turnRate);
+                    Double value = extractor.apply(row);
+                    if (value == null) {
+                        return null;
+                    }
+                    return towDigitAccuracy.format(value);
                 }
 
                 @Override
                 public Double getDoubleValue(SingleManeuverDTO row) {
-                    return row.turnRate;
+                    Double v = extractor.apply(row);
+                    return v == null ? null : Math.abs(v);
                 }
             };
-            
-            MinMaxRenderer<SingleManeuverDTO> renderer = new MinMaxRenderer<SingleManeuverDTO>(dataProvider, comparator);
-            
+
+            MinMaxRenderer<SingleManeuverDTO> renderer = new MinMaxRenderer<SingleManeuverDTO>(dataProvider,
+                    comparatorWithAbs);
+
             @Override
             public InvertibleComparator<SingleManeuverDTO> getComparator() {
-                return comparator;
+                return comparatorWithAbs;
             }
-            
+
             @Override
             public void render(Context context, SingleManeuverDTO object, SafeHtmlBuilder sb) {
-                renderer.render(context, object, "i18n turnratet", sb);
+                renderer.render(context, object, title, sb);
             }
 
             @Override
             public Header<?> getHeader() {
-                return new TextHeader("i18n turnRate");
+                return new TextHeader(title + " [" + unit + "]");
             }
 
             @Override
             public String getValue(SingleManeuverDTO object) {
-                return String.valueOf(object.turnRate);
+                return dataProvider.getStringValueToRender(object);
             }
 
             @Override
             public void updateMinMax() {
-                renderer.updateMinMax(maneuverCellTable.getVisibleItems());
+                renderer.updateMinMax(maneuverCellTable.getDataProvider().getList());
             }
         };
-    }
-
-    private SortableColumn<SingleManeuverDTO, String> createMinSpeedColumn() {
-        return new SortableColumn<SingleManeuverDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
-
-            @Override
-            public InvertibleComparator<SingleManeuverDTO> getComparator() {
-                return new InvertibleComparatorAdapter<SingleManeuverDTO>() {
-                    @Override
-                    public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
-                        return Double.compare(o1.minSpeed.speedInKnots, o2.minSpeed.speedInKnots);
-                    }
-                };
-            }
-
-            @Override
-            public Header<?> getHeader() {
-                return new TextHeader("i18n minSpeed");
-            }
-
-            @Override
-            public String getValue(SingleManeuverDTO object) {
-                return object.minSpeed == null ? null : towDigitAccuracy.format(object.minSpeed.speedInKnots);
-            }
-        };
-    }
-
-    private SortableColumn<SingleManeuverDTO, String> createSpeedOutColumn() {
-        return new SortableColumn<SingleManeuverDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
-
-            @Override
-            public InvertibleComparator<SingleManeuverDTO> getComparator() {
-                return new InvertibleComparatorAdapter<SingleManeuverDTO>() {
-                    @Override
-                    public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
-                        return Double.compare(o1.speedOut.speedInKnots, o2.speedOut.speedInKnots);
-                    }
-                };
-            }
-
-            @Override
-            public Header<?> getHeader() {
-                return new TextHeader("i18n speedOut");
-            }
-
-            @Override
-            public String getValue(SingleManeuverDTO object) {
-                return String.valueOf(stringMessages.knotsValue(object.speedOut.speedInKnots));
-            }
-        };
-    }
-
-    private SortableColumn<SingleManeuverDTO, String> createSpeedInColumn() {
-        return new SortableColumn<SingleManeuverDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
-
-            @Override
-            public InvertibleComparator<SingleManeuverDTO> getComparator() {
-                return new InvertibleComparatorAdapter<SingleManeuverDTO>() {
-                    @Override
-                    public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
-                        return Double.compare(o1.speedIn.speedInKnots, o2.speedIn.speedInKnots);
-                    }
-                };
-            }
-
-            @Override
-            public Header<?> getHeader() {
-                return new TextHeader("i18n speedIn");
-            }
-
-            @Override
-            public String getValue(SingleManeuverDTO object) {
-                return String.valueOf(stringMessages.knotsValue(object.speedIn.speedInKnots));
-            }
-        };
-    }
-
-    private SortableColumn<SingleManeuverDTO, String> createDurationColumn() {
-        return new SortableColumn<SingleManeuverDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
-
-            DurationFormatter duration = DurationFormatter.getInstance(true, true);
-
-            @Override
-            public InvertibleComparator<SingleManeuverDTO> getComparator() {
-                return new InvertibleComparatorAdapter<SingleManeuverDTO>() {
-                    @Override
-                    public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
-                        return o1.duration.compareTo(o2.duration);
-                    }
-                };
-            }
-
-            @Override
-            public Header<?> getHeader() {
-                return new TextHeader(stringMessages.durationPlain());
-            }
-
-            @Override
-            public String getValue(SingleManeuverDTO object) {
-                return duration.format(object.duration) + " " + stringMessages.secondsUnit();
-            }
-        };
+        col.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        return col;
     }
 
     private SortableColumn<SingleManeuverDTO, String> createManeuverTypeColumn() {
@@ -371,46 +242,49 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 return new InvertibleComparatorAdapter<SingleManeuverDTO>() {
                     @Override
                     public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
-                        return o1.maneuverType.compareTo(o2.maneuverType);
+                        return o1.getManeuverType().compareTo(o2.getManeuverType());
                     }
                 };
             }
 
             @Override
             public Header<?> getHeader() {
-                return new TextHeader("i18n Type");
+                return new TextHeader(stringMessages.maneuverType());
             }
 
             @Override
             public String getValue(SingleManeuverDTO object) {
-                return ManeuverTypeFormatter.format(object.maneuverType, stringMessages);
+                return ManeuverTypeFormatter.format(object.getManeuverType(), stringMessages);
             }
         };
     }
 
     private SortableColumn<SingleManeuverDTO, String> createTimeColumn() {
-        return new SortableColumn<SingleManeuverDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
+        SortableColumn<SingleManeuverDTO, String> col = new SortableColumn<SingleManeuverDTO, String>(new TextCell(),
+                SortingOrder.ASCENDING) {
 
             @Override
             public InvertibleComparator<SingleManeuverDTO> getComparator() {
                 return new InvertibleComparatorAdapter<SingleManeuverDTO>() {
                     @Override
                     public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
-                        return o1.time.compareTo(o2.time);
+                        return o1.getTime().compareTo(o2.getTime());
                     }
                 };
             }
 
             @Override
             public Header<?> getHeader() {
-                return new TextHeader("i18n Time");
+                return new TextHeader(stringMessages.time());
             }
 
             @Override
             public String getValue(SingleManeuverDTO object) {
-                return dateformat.format(object.time);
+                return dateformat.format(object.getTime());
             }
         };
+        col.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        return col;
     }
 
     private SortableColumn<SingleManeuverDTO, String> createCompetitorColumn() {
@@ -421,7 +295,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 return new InvertibleComparatorAdapter<SingleManeuverDTO>() {
                     @Override
                     public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
-                        return o1.competitor.getName().compareTo(o2.competitor.getName());
+                        return o1.getCompetitor().getName().compareTo(o2.getCompetitor().getName());
                     }
                 };
             }
@@ -433,7 +307,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
             @Override
             public String getValue(SingleManeuverDTO object) {
-                return object.competitor.getName();
+                return object.getCompetitor().getName();
             }
         };
     }
@@ -459,6 +333,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                         ((AbstractSortableColumnWithMinMax<SingleManeuverDTO, ?>) column).updateMinMax();
                     }
                 }
+                // force redraw now that minmaxis known
+                maneuverCellTable.redraw();
             }
         }
     }
@@ -466,7 +342,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private void showCompetitorColumn(boolean show) {
         if (show && maneuverCellTable.getColumnIndex(competitorColumn) == -1) {
             maneuverCellTable.insertColumn(0, competitorColumn);
-        } else if (maneuverCellTable.getColumnIndex(competitorColumn) > -1) {
+        } else if (!show && maneuverCellTable.getColumnIndex(competitorColumn) > -1) {
             maneuverCellTable.removeColumn(competitorColumn);
         }
     }
@@ -477,17 +353,22 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             if (competitorSelectionModel.isSelected(res.getKey())) {
                 for (ManeuverDTO maneuver : res.getValue()) {
                     if (settings.getSelectedManeuverTypes().contains(maneuver.type)) {
+                        double turnRate = 0;
+                        if (maneuver.duration != null) {
+                            turnRate = Math.abs(maneuver.directionChangeInDegrees) / maneuver.duration.asSeconds();
+                        }
+
                         data.add(new SingleManeuverDTO(res.getKey(), maneuver.timepoint, maneuver.type,
                                 maneuver.duration, maneuver.speedWithBearingBefore, maneuver.speedWithBearingAfter,
-                                new SpeedWithBearingDTO(0, 0), maneuver.directionChangeInDegrees,
-                                maneuver.maneuverLossInMeters));
+                                maneuver.minSpeed, turnRate, maneuver.maneuverLossInMeters,
+                                maneuver.directionChangeInDegrees));
                     }
                 }
             }
         }
         return data;
     }
-    
+
     private void refresh() {
         final Map<CompetitorDTO, Date> from = new HashMap<>();
         final Map<CompetitorDTO, Date> to = new HashMap<>();
