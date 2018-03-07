@@ -65,7 +65,6 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -93,7 +92,6 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderRes
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesEventFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseAreaChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
@@ -3020,10 +3018,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 break;
             case BEAT_ANGLE:
-                if (trackedLeg != null) {
-                    Bearing beatAngle = trackedLeg.getBeatAngle(timePoint, cache);
-                    result = beatAngle == null ? null : Math.abs(beatAngle.getDegrees());
-                }
+                Bearing twa = trackedRace.getTWA(competitor, timePoint, cache);
+                result = twa == null? null:twa.getDegrees();
                 break;
             case CURRENT_HEEL_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getHeel, trackedRace, competitor, timePoint);
@@ -3824,14 +3820,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         eventDTO.setDescription(event.getDescription());
         eventDTO.setOfficialWebsiteURL(event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
         eventDTO.setBaseURL(event.getBaseURL() != null ? event.getBaseURL().toString() : null);
-        for(Map.Entry<Locale, URL> sailorsInfoWebsiteEntry : event.getSailorsInfoWebsiteURLs().entrySet()) {
+        for (Map.Entry<Locale, URL> sailorsInfoWebsiteEntry : event.getSailorsInfoWebsiteURLs().entrySet()) {
             eventDTO.setSailorsInfoWebsiteURL(sailorsInfoWebsiteEntry.getKey() == null ? null : sailorsInfoWebsiteEntry
                     .getKey().toLanguageTag(), sailorsInfoWebsiteEntry.getValue().toExternalForm());
         }
-        for(ImageDescriptor image: event.getImages()) {
+        for (ImageDescriptor image : event.getImages()) {
             eventDTO.addImage(convertToImageDTO(image));
         }
-        for(VideoDescriptor video: event.getVideos()) {
+        for (VideoDescriptor video : event.getVideos()) {
             eventDTO.addVideo(convertToVideoDTO(video));
         }
     }
@@ -7193,12 +7189,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                     event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), event.getUpperFlag(),
                                     event.getLowerFlag(), event.isDisplayed()));
                         }
-                    }
-                    
-                    @Override
-                    public void visit(RaceLogCourseAreaChangedEvent event) {
-                        raceLog.add(new RaceLogCourseAreaChangeEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(),
-                                event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(), event.getCourseAreaId()));
                     }
                     
                     @Override

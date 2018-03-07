@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -32,7 +33,7 @@ import com.sap.sailing.domain.tracking.impl.TrackedLegOfCompetitorImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class BeatAngleTest {
+public class TWATest {
     private Competitor competitor;
     private GPSFixTrack<Competitor, GPSFixMoving> competitorTrack;
     private TrackedRace trackedRace;
@@ -61,62 +62,63 @@ public class BeatAngleTest {
         when(trackedRace.getWind((Position) anyObject(), (TimePoint) anyObject())).thenReturn(
                 new WindImpl(new DegreePosition(0, 0), MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
                         windToBearing)));
-        when(trackedLegOfCompetitor.getSpeedOverGround((TimePoint) anyObject())).thenReturn(new KnotSpeedWithBearingImpl(10, boatToBearing));
-        when(trackedLegOfCompetitor.getBeatAngle((TimePoint) anyObject())).thenCallRealMethod();
-        when(trackedLegOfCompetitor.getBeatAngle((TimePoint) anyObject(), (WindLegTypeAndLegBearingCache) anyObject())).thenCallRealMethod();
+        
+        when(competitorTrack.getEstimatedSpeed((TimePoint) anyObject())).thenReturn(new KnotSpeedWithBearingImpl(10, boatToBearing));
+        when(trackedRace.getTWA(Matchers.eq(competitor), (TimePoint) anyObject())).thenCallRealMethod();
+        when(trackedRace.getTWA(Matchers.eq(competitor), (TimePoint) anyObject(), (WindLegTypeAndLegBearingCache) anyObject())).thenCallRealMethod();
     }
 
     @Test
-    public void testBeatAngleUpwindPort() throws NoWindException {
+    public void testTWAUpwindPort() throws NoWindException {
         final Bearing windToBearing = new DegreeBearingImpl(123);
         final Bearing boatToBearing = new DegreeBearingImpl(348);
         final Bearing legBearing = new DegreeBearingImpl(303);
         setUp(windToBearing, boatToBearing, legBearing, LegType.UPWIND);
-        assertEquals(-45., trackedLegOfCompetitor.getBeatAngle(MillisecondsTimePoint.now()).getDegrees(), 0.00001);
+        assertEquals(-45., trackedRace.getTWA(competitor, MillisecondsTimePoint.now()).getDegrees(), 0.00001);
     }
 
     @Test
-    public void testBeatAngleUpwindStarboard() throws NoWindException {
+    public void testTWAUpwindStarboard() throws NoWindException {
         final Bearing windToBearing = new DegreeBearingImpl(123);
         final Bearing boatToBearing = new DegreeBearingImpl(258);
         final Bearing legBearing = new DegreeBearingImpl(303);
         setUp(windToBearing, boatToBearing, legBearing, LegType.UPWIND);
-        assertEquals(45., trackedLegOfCompetitor.getBeatAngle(MillisecondsTimePoint.now()).getDegrees(), 0.00001);
+        assertEquals(45., trackedRace.getTWA(competitor, MillisecondsTimePoint.now()).getDegrees(), 0.00001);
     }
 
     @Test
-    public void testBeatAngleDownwindPort() throws NoWindException {
+    public void testTWADownwindPort() throws NoWindException {
         final Bearing windToBearing = new DegreeBearingImpl(123);
         final Bearing boatToBearing = new DegreeBearingImpl(120);
         final Bearing legBearing = new DegreeBearingImpl(123);
         setUp(windToBearing, boatToBearing, legBearing, LegType.DOWNWIND);
-        assertEquals(-177., trackedLegOfCompetitor.getBeatAngle(MillisecondsTimePoint.now()).getDegrees(), 0.00001);
+        assertEquals(-177., trackedRace.getTWA(competitor, MillisecondsTimePoint.now()).getDegrees(), 0.00001);
     }
 
     @Test
-    public void testBeatAngleDownwindStarboard() throws NoWindException {
+    public void testTWADownwindStarboard() throws NoWindException {
         final Bearing windToBearing = new DegreeBearingImpl(123);
         final Bearing boatToBearing = new DegreeBearingImpl(126);
         final Bearing legBearing = new DegreeBearingImpl(123);
         setUp(windToBearing, boatToBearing, legBearing, LegType.DOWNWIND);
-        assertEquals(177., trackedLegOfCompetitor.getBeatAngle(MillisecondsTimePoint.now()).getDegrees(), 0.00001);
+        assertEquals(177., trackedRace.getTWA(competitor, MillisecondsTimePoint.now()).getDegrees(), 0.00001);
     }
 
     @Test
-    public void testBeatAngleReachingPort() throws NoWindException {
+    public void testTWAReachingPort() throws NoWindException {
         final Bearing windToBearing = new DegreeBearingImpl(123);
         final Bearing boatToBearing = new DegreeBearingImpl(33);
         final Bearing legBearing = new DegreeBearingImpl(33);
         setUp(windToBearing, boatToBearing, legBearing, LegType.REACHING);
-        assertEquals(-90., trackedLegOfCompetitor.getBeatAngle(MillisecondsTimePoint.now()).getDegrees(), 0.00001);
+        assertEquals(-90., trackedRace.getTWA(competitor, MillisecondsTimePoint.now()).getDegrees(), 0.00001);
     }
 
     @Test
-    public void testBeatAngleReachingStarboard() throws NoWindException {
+    public void testTWAReachingStarboard() throws NoWindException {
         final Bearing windToBearing = new DegreeBearingImpl(303);
         final Bearing boatToBearing = new DegreeBearingImpl(33);
         final Bearing legBearing = new DegreeBearingImpl(33);
         setUp(windToBearing, boatToBearing, legBearing, LegType.REACHING);
-        assertEquals(90., trackedLegOfCompetitor.getBeatAngle(MillisecondsTimePoint.now()).getDegrees(), 0.00001);
+        assertEquals(90., trackedRace.getTWA(competitor, MillisecondsTimePoint.now()).getDegrees(), 0.00001);
     }
 }

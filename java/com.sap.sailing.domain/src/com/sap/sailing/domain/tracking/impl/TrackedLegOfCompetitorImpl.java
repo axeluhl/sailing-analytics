@@ -816,28 +816,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Bearing getBeatAngle(TimePoint at) throws NoWindException {
-        return getBeatAngle(at, new LeaderboardDTOCalculationReuseCache(at));
-    }
-    
-    @Override
-    public Bearing getBeatAngle(TimePoint at, WindLegTypeAndLegBearingCache cache) throws NoWindException {
-        Bearing beatAngle = null;
-        Bearing projectToBearing;
-        Wind wind = cache.getWind(getTrackedRace(), getCompetitor(), at);
-        if (wind == null) {
-            throw new NoWindException("Need at least wind direction to determine windward speed");
-        }
-        projectToBearing = wind.getFrom();
-        SpeedWithBearing speed = getSpeedOverGround(at);
-        if (speed != null) {
-            beatAngle = speed.getBearing().getDifferenceTo(projectToBearing);
-        }
-        return beatAngle;
-    }
-    
-
-    @Override
     public String toString() {
         return "TrackedLegOfCompetitor for "+getCompetitor()+" in leg "+getLeg();
     }
