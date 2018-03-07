@@ -110,6 +110,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
 
     protected void writeCompetitorBaseData(JSONObject jsonCompetitor, CompetitorDTO competitor, LeaderboardDTO leaderboard) {
         jsonCompetitor.put("name", competitor.getName());
+        jsonCompetitor.put("shortName", competitor.getShortName());
         final String displayName = leaderboard.getDisplayName(competitor);
         jsonCompetitor.put("displayName", displayName == null ? competitor.getName() : displayName);
         jsonCompetitor.put("id", competitor.getIdAsString());
