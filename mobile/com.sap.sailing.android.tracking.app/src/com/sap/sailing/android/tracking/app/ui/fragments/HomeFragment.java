@@ -7,30 +7,6 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.annotation.SuppressLint;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.internal.view.ContextThemeWrapper;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.ClickableSpan;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
@@ -54,6 +30,7 @@ import com.sap.sailing.android.tracking.app.utils.CheckinManager;
 import com.sap.sailing.android.tracking.app.utils.CheckoutHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper.GeneralDatabaseHelperException;
+import com.sap.sailing.android.tracking.app.valueobjects.BoatCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
@@ -61,6 +38,30 @@ import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
+
+import android.annotation.SuppressLint;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.internal.view.ContextThemeWrapper;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ClickableSpan;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class HomeFragment extends AbstractHomeFragment implements LoaderCallbacks<Cursor> {
 
@@ -195,6 +196,11 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
                 requestObject = CheckinHelper
                     .getMarkCheckinJson(markCheckinData.getMark().getId().toString(), markCheckinData.deviceUid, "TODO push device ID!!", date
                         .getTime());
+            } else if (checkinData instanceof BoatCheckinData) {
+                BoatCheckinData boatCheckinData = (BoatCheckinData) checkinData;
+                requestObject = CheckinHelper
+                    .getBoatCheckinJson(boatCheckinData.getBoat().getId().toString(), boatCheckinData.deviceUid, "TODO push device ID!!", date
+                        .getTime());
             }
             HttpJsonPostRequest request = new HttpJsonPostRequest(getActivity(), new URL(checkinData.checkinURL), requestObject.toString());
             NetworkHelper.getInstance(getActivity())
@@ -211,7 +217,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     @Override
     public void handleScannedOrUrlMatchedUri(Uri uri) {
         String uriString = uri.toString();
-        CheckinManager manager = new CheckinManager(uriString, (StartActivity) getActivity(), false);
+        CheckinManager manager = new CheckinManager(uriString, (StartActivity) getActivity(), true);
         manager.callServerAndGenerateCheckinData();
     }
 
@@ -276,8 +282,9 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
                     AnalyticsDatabase.Tables.LEADERBOARDS + "." + AnalyticsContract.Leaderboard.LEADERBOARD_DISPLAY_NAME,
                     AnalyticsDatabase.Tables.COMPETITORS + "." + AnalyticsContract.Competitor.COMPETITOR_DISPLAY_NAME,
                     AnalyticsDatabase.Tables.MARKS + "." + AnalyticsContract.Mark.MARK_NAME,
-                    AnalyticsDatabase.Tables.CHECKIN_URIS + "." + AnalyticsContract.Checkin.CHECKIN_TYPE};
-                return new CursorLoader(getActivity(), AnalyticsContract.LeaderboardsEventsCompetitorsMarksJoined.CONTENT_URI, projection, null, null, null);
+                    AnalyticsDatabase.Tables.CHECKIN_URIS + "." + AnalyticsContract.Checkin.CHECKIN_TYPE,
+                    AnalyticsDatabase.Tables.BOATS + "." + AnalyticsContract.Boat.BOAT_NAME };
+                return new CursorLoader(getActivity(), AnalyticsContract.LeaderboardsEventsCompetitorsMarksBoatsJoined.CONTENT_URI, projection, null, null, null);
 
             default:
                 return null;

@@ -29,6 +29,8 @@ public class AnalyticsProvider extends ContentProvider {
 
     private static final String TAG = AnalyticsProvider.class.getSimpleName();
 
+    public static final String ALL_JOINED = "leaderboards_events_competitors_marks_joined";
+
     private AnalyticsDatabase mOpenHelper;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
@@ -50,7 +52,7 @@ public class AnalyticsProvider extends ContentProvider {
 
     private static final int EVENT_GPS_FIXES_JOINED = 700;
 
-    private static final int LEADERBOARDS_EVENTS_COMPETITORS_MARKS_JOINED = 800;
+    private static final int LEADERBOARDS_EVENTS_COMPETITORS_MARKS_BOATS_JOINED = 800;
 
     private static final int MARK = 900;
     private static final int MARK_ID = 901;
@@ -79,7 +81,7 @@ public class AnalyticsProvider extends ContentProvider {
 
         matcher.addURI(authority, "event_gps_fix_joined", EVENT_GPS_FIXES_JOINED);
 
-        matcher.addURI(authority, "leaderboards_events_competitors_marks_joined", LEADERBOARDS_EVENTS_COMPETITORS_MARKS_JOINED);
+        matcher.addURI(authority, "leaderboards_events_competitors_marks_joined", LEADERBOARDS_EVENTS_COMPETITORS_MARKS_BOATS_JOINED);
 
         matcher.addURI(authority, Tables.MARKS, MARK);
         matcher.addURI(authority, Tables.MARKS + "/*", MARK_ID);
@@ -117,8 +119,8 @@ public class AnalyticsProvider extends ContentProvider {
                 table = Tables.EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS;
                 break;
 
-            case LEADERBOARDS_EVENTS_COMPETITORS_MARKS_JOINED:
-                table = Tables.LEADERBOARDS_JOIN_EVENTS_JOIN_COMPETITORS_JOIN_MARKS;
+            case LEADERBOARDS_EVENTS_COMPETITORS_MARKS_BOATS_JOINED:
+                table = Tables.LEADERBOARDS_JOIN_EVENTS_JOIN_COMPETITORS_JOIN_MARKS_JOINS_BOATS;
                 break;
 
             default:
@@ -223,7 +225,7 @@ public class AnalyticsProvider extends ContentProvider {
         }
 
         long id = db.insertOrThrow(table, null, values);
-        notifyChange(AnalyticsContract.LeaderboardsEventsCompetitorsMarksJoined.CONTENT_URI);
+        notifyChange(AnalyticsContract.LeaderboardsEventsCompetitorsMarksBoatsJoined.CONTENT_URI);
         notifyChange(uri);
         return uri.buildUpon().appendPath(String.valueOf(id)).build();
     }
@@ -268,7 +270,7 @@ public class AnalyticsProvider extends ContentProvider {
         }
 
         int rowsDeleted = db.delete(table, selection, selectionArgs);
-        notifyChange(AnalyticsContract.LeaderboardsEventsCompetitorsMarksJoined.CONTENT_URI);
+        notifyChange(AnalyticsContract.LeaderboardsEventsCompetitorsMarksBoatsJoined.CONTENT_URI);
         notifyChange(uri);
         return rowsDeleted;
     }

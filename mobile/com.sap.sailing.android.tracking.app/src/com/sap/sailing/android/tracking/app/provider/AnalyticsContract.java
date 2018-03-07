@@ -8,7 +8,7 @@ import android.provider.BaseColumns;
 
 public class AnalyticsContract {
 
-    public final static String VND_STRING = "/vnd.sap.sailing_analytics";
+    final static String VND_STRING = "/vnd.sap.sailing_analytics";
 
     interface CompetitorColumns {
         String COMPETITOR_ID = "competitor_id";
@@ -57,9 +57,9 @@ public class AnalyticsContract {
 
     static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
-    public static class LeaderboardsEventsCompetitorsMarksJoined {
+    public static class LeaderboardsEventsCompetitorsMarksBoatsJoined {
         public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
-            .appendPath("leaderboards_events_competitors_marks_joined").build();
+            .appendPath(AnalyticsProvider.ALL_JOINED).build();
     }
 
     public static class EventLeaderboardCompetitorJoined {

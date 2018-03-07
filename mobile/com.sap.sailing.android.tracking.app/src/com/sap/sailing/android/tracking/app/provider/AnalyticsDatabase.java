@@ -57,7 +57,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
                 + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.COMPETITORS + "."
                 + Competitor.COMPETITOR_CHECKIN_DIGEST + ") ";
 
-        String LEADERBOARDS_JOIN_EVENTS_JOIN_COMPETITORS_JOIN_MARKS = Tables.LEADERBOARDS + " INNER JOIN " + Tables.EVENTS
+        String LEADERBOARDS_JOIN_EVENTS_JOIN_COMPETITORS_JOIN_MARKS_JOINS_BOATS = Tables.LEADERBOARDS + " INNER JOIN " + Tables.EVENTS
             + " ON (" + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.EVENTS
             + "." + Event.EVENT_CHECKIN_DIGEST + ") " + " INNER JOIN " + Tables.CHECKIN_URIS + " ON ("
             + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.CHECKIN_URIS + "."
@@ -67,7 +67,10 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
             + Competitor.COMPETITOR_CHECKIN_DIGEST + ") "
             + " LEFT OUTER JOIN " + Tables.MARKS + " ON ("
             + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.MARKS + "."
-            + AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + ") ";
+            + AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + ") "
+            + " LEFT OUTER JOIN " + Tables.BOATS + " ON ("
+            + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.BOATS + "."
+            + AnalyticsContract.Boat.BOAT_CHECKIN_DIGEST + ") ";
     }
 
     public AnalyticsDatabase(Context context) {
