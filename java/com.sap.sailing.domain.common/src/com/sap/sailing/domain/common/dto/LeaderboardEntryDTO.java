@@ -132,74 +132,8 @@ public class LeaderboardEntryDTO implements Serializable {
      * entry
      */
     public FleetDTO fleet;
-
-    public Double expeditionAWA;
-
-    public Double expeditionAWS;
-
-    public Double expeditionBoatSpeed;
-
-    public Double expeditionCOG;
-
-    public Double expeditionDistanceBelowLine;
-
-    public Double expeditionDistanceToCommitteeBoat;
-
-    public Double expeditionDistToPortLayline;
-
-    public Double expeditionDistToStbLayline;
-
-    public Double expeditionVMG;
-
-    public Double expeditionTWS;
-
-    public Double expeditionTWD;
-
-    public Double expeditionTWA;
-
-    public Double expeditionTimeToStbLayline;
-
-    public Double expeditionTimeToPortLayline;
-
-    public Double expeditionTimeToPin;
-
-    public Duration expeditionTimeToGun;
-
-    public Double expeditionTimeToCommitteeBoat;
-
-    public Double expeditionTimeToBurnToPin;
-
-    public Double expeditionTargTWA;
-
-    public Double expeditionTimeToBurnToCommitteeBoat;
-
-    public Duration expeditionTimeToBurnToLine;
-
-    public Double expeditionTargetHeel;
-
-    public Double expeditionTargBoatSpeed;
-
-    public Double expeditionSOG;
-
-    public Double expeditionRudderAngle;
-
-    public Double expeditionRateOfTurn;
-
-    public Double expeditionRake;
-
-    public Double expeditionLineSquareForWindDirection;
-
-    public Double expeditionHeading;
-
-    public Double expeditionForestayLoad;
-
-    public Double expeditionHeel;
-
-    public Double expeditionCourseDetail;
-
-    public Double expeditionDistanceToPinDetail;
-
-    public Double expeditionVMGTargVMGDelta;
+    
+    public ExpeditionDataHolder expeditionDataHolder;
 
     public Bearing heel;
 
@@ -324,49 +258,13 @@ public class LeaderboardEntryDTO implements Serializable {
                 : distanceToStartLineAtStartOfRaceInMeters.hashCode());
         result = prime * result + ((distanceToStartLineFiveSecondsBeforeStartInMeters == null) ? 0
                 : distanceToStartLineFiveSecondsBeforeStartInMeters.hashCode());
-        result = prime * result + ((expeditionAWA == null) ? 0 : expeditionAWA.hashCode());
-        result = prime * result + ((expeditionAWS == null) ? 0 : expeditionAWS.hashCode());
-        result = prime * result + ((expeditionBoatSpeed == null) ? 0 : expeditionBoatSpeed.hashCode());
-        result = prime * result + ((expeditionCOG == null) ? 0 : expeditionCOG.hashCode());
-        result = prime * result + ((expeditionCourseDetail == null) ? 0 : expeditionCourseDetail.hashCode());
-        result = prime * result + ((expeditionDistToPortLayline == null) ? 0 : expeditionDistToPortLayline.hashCode());
-        result = prime * result + ((expeditionDistToStbLayline == null) ? 0 : expeditionDistToStbLayline.hashCode());
-        result = prime * result + ((expeditionDistanceBelowLine == null) ? 0 : expeditionDistanceBelowLine.hashCode());
-        result = prime * result
-                + ((expeditionDistanceToCommitteeBoat == null) ? 0 : expeditionDistanceToCommitteeBoat.hashCode());
-        result = prime * result
-                + ((expeditionDistanceToPinDetail == null) ? 0 : expeditionDistanceToPinDetail.hashCode());
-        result = prime * result + ((expeditionForestayLoad == null) ? 0 : expeditionForestayLoad.hashCode());
-        result = prime * result + ((expeditionHeading == null) ? 0 : expeditionHeading.hashCode());
-        result = prime * result + ((expeditionHeel == null) ? 0 : expeditionHeel.hashCode());
-        result = prime * result + ((expeditionLineSquareForWindDirection == null) ? 0
-                : expeditionLineSquareForWindDirection.hashCode());
-        result = prime * result + ((expeditionRake == null) ? 0 : expeditionRake.hashCode());
-        result = prime * result + ((expeditionRateOfTurn == null) ? 0 : expeditionRateOfTurn.hashCode());
-        result = prime * result + ((expeditionRudderAngle == null) ? 0 : expeditionRudderAngle.hashCode());
-        result = prime * result + ((expeditionSOG == null) ? 0 : expeditionSOG.hashCode());
-        result = prime * result + ((expeditionTWA == null) ? 0 : expeditionTWA.hashCode());
-        result = prime * result + ((expeditionTWD == null) ? 0 : expeditionTWD.hashCode());
-        result = prime * result + ((expeditionTWS == null) ? 0 : expeditionTWS.hashCode());
-        result = prime * result + ((expeditionTargBoatSpeed == null) ? 0 : expeditionTargBoatSpeed.hashCode());
-        result = prime * result + ((expeditionTargTWA == null) ? 0 : expeditionTargTWA.hashCode());
-        result = prime * result + ((expeditionTargetHeel == null) ? 0 : expeditionTargetHeel.hashCode());
-        result = prime * result
-                + ((expeditionTimeToBurnToCommitteeBoat == null) ? 0 : expeditionTimeToBurnToCommitteeBoat.hashCode());
-        result = prime * result + ((expeditionTimeToBurnToLine == null) ? 0 : expeditionTimeToBurnToLine.hashCode());
-        result = prime * result + ((expeditionTimeToBurnToPin == null) ? 0 : expeditionTimeToBurnToPin.hashCode());
-        result = prime * result
-                + ((expeditionTimeToCommitteeBoat == null) ? 0 : expeditionTimeToCommitteeBoat.hashCode());
-        result = prime * result + ((expeditionTimeToGun == null) ? 0 : expeditionTimeToGun.hashCode());
-        result = prime * result + ((expeditionTimeToPin == null) ? 0 : expeditionTimeToPin.hashCode());
-        result = prime * result + ((expeditionTimeToPortLayline == null) ? 0 : expeditionTimeToPortLayline.hashCode());
-        result = prime * result + ((expeditionTimeToStbLayline == null) ? 0 : expeditionTimeToStbLayline.hashCode());
-        result = prime * result + ((expeditionVMG == null) ? 0 : expeditionVMG.hashCode());
-        result = prime * result + ((expeditionVMGTargVMGDelta == null) ? 0 : expeditionVMGTargVMGDelta.hashCode());
+        result = prime * result + ((expeditionDataHolder == null) ? 0 : expeditionDataHolder.hashCode());
         result = prime * result + ((fleet == null) ? 0 : fleet.hashCode());
         result = prime * result + ((gapToLeaderInOwnTime == null) ? 0 : gapToLeaderInOwnTime.hashCode());
+        result = prime * result + ((heel == null) ? 0 : heel.hashCode());
         result = prime * result + ((legDetails == null) ? 0 : legDetails.hashCode());
         result = prime * result + ((netPoints == null) ? 0 : netPoints.hashCode());
+        result = prime * result + ((pitch == null) ? 0 : pitch.hashCode());
         result = prime * result + ((race == null) ? 0 : race.hashCode());
         result = prime * result + ((reasonForMaxPoints == null) ? 0 : reasonForMaxPoints.hashCode());
         result = prime * result + ((speedOverGroundAtPassingStartWaypointInKnots == null) ? 0
@@ -446,175 +344,10 @@ public class LeaderboardEntryDTO implements Serializable {
         } else if (!distanceToStartLineFiveSecondsBeforeStartInMeters
                 .equals(other.distanceToStartLineFiveSecondsBeforeStartInMeters))
             return false;
-        if (expeditionAWA == null) {
-            if (other.expeditionAWA != null)
+        if (expeditionDataHolder == null) {
+            if (other.expeditionDataHolder != null)
                 return false;
-        } else if (!expeditionAWA.equals(other.expeditionAWA))
-            return false;
-        if (expeditionAWS == null) {
-            if (other.expeditionAWS != null)
-                return false;
-        } else if (!expeditionAWS.equals(other.expeditionAWS))
-            return false;
-        if (expeditionBoatSpeed == null) {
-            if (other.expeditionBoatSpeed != null)
-                return false;
-        } else if (!expeditionBoatSpeed.equals(other.expeditionBoatSpeed))
-            return false;
-        if (expeditionCOG == null) {
-            if (other.expeditionCOG != null)
-                return false;
-        } else if (!expeditionCOG.equals(other.expeditionCOG))
-            return false;
-        if (expeditionCourseDetail == null) {
-            if (other.expeditionCourseDetail != null)
-                return false;
-        } else if (!expeditionCourseDetail.equals(other.expeditionCourseDetail))
-            return false;
-        if (expeditionDistToPortLayline == null) {
-            if (other.expeditionDistToPortLayline != null)
-                return false;
-        } else if (!expeditionDistToPortLayline.equals(other.expeditionDistToPortLayline))
-            return false;
-        if (expeditionDistToStbLayline == null) {
-            if (other.expeditionDistToStbLayline != null)
-                return false;
-        } else if (!expeditionDistToStbLayline.equals(other.expeditionDistToStbLayline))
-            return false;
-        if (expeditionDistanceBelowLine == null) {
-            if (other.expeditionDistanceBelowLine != null)
-                return false;
-        } else if (!expeditionDistanceBelowLine.equals(other.expeditionDistanceBelowLine))
-            return false;
-        if (expeditionDistanceToCommitteeBoat == null) {
-            if (other.expeditionDistanceToCommitteeBoat != null)
-                return false;
-        } else if (!expeditionDistanceToCommitteeBoat.equals(other.expeditionDistanceToCommitteeBoat))
-            return false;
-        if (expeditionDistanceToPinDetail == null) {
-            if (other.expeditionDistanceToPinDetail != null)
-                return false;
-        } else if (!expeditionDistanceToPinDetail.equals(other.expeditionDistanceToPinDetail))
-            return false;
-        if (expeditionForestayLoad == null) {
-            if (other.expeditionForestayLoad != null)
-                return false;
-        } else if (!expeditionForestayLoad.equals(other.expeditionForestayLoad))
-            return false;
-        if (expeditionHeading == null) {
-            if (other.expeditionHeading != null)
-                return false;
-        } else if (!expeditionHeading.equals(other.expeditionHeading))
-            return false;
-        if (expeditionHeel == null) {
-            if (other.expeditionHeel != null)
-                return false;
-        } else if (!expeditionHeel.equals(other.expeditionHeel))
-            return false;
-        if (expeditionLineSquareForWindDirection == null) {
-            if (other.expeditionLineSquareForWindDirection != null)
-                return false;
-        } else if (!expeditionLineSquareForWindDirection.equals(other.expeditionLineSquareForWindDirection))
-            return false;
-        if (expeditionRake == null) {
-            if (other.expeditionRake != null)
-                return false;
-        } else if (!expeditionRake.equals(other.expeditionRake))
-            return false;
-        if (expeditionRateOfTurn == null) {
-            if (other.expeditionRateOfTurn != null)
-                return false;
-        } else if (!expeditionRateOfTurn.equals(other.expeditionRateOfTurn))
-            return false;
-        if (expeditionRudderAngle == null) {
-            if (other.expeditionRudderAngle != null)
-                return false;
-        } else if (!expeditionRudderAngle.equals(other.expeditionRudderAngle))
-            return false;
-        if (expeditionSOG == null) {
-            if (other.expeditionSOG != null)
-                return false;
-        } else if (!expeditionSOG.equals(other.expeditionSOG))
-            return false;
-        if (expeditionTWA == null) {
-            if (other.expeditionTWA != null)
-                return false;
-        } else if (!expeditionTWA.equals(other.expeditionTWA))
-            return false;
-        if (expeditionTWD == null) {
-            if (other.expeditionTWD != null)
-                return false;
-        } else if (!expeditionTWD.equals(other.expeditionTWD))
-            return false;
-        if (expeditionTWS == null) {
-            if (other.expeditionTWS != null)
-                return false;
-        } else if (!expeditionTWS.equals(other.expeditionTWS))
-            return false;
-        if (expeditionTargBoatSpeed == null) {
-            if (other.expeditionTargBoatSpeed != null)
-                return false;
-        } else if (!expeditionTargBoatSpeed.equals(other.expeditionTargBoatSpeed))
-            return false;
-        if (expeditionTargTWA == null) {
-            if (other.expeditionTargTWA != null)
-                return false;
-        } else if (!expeditionTargTWA.equals(other.expeditionTargTWA))
-            return false;
-        if (expeditionTargetHeel == null) {
-            if (other.expeditionTargetHeel != null)
-                return false;
-        } else if (!expeditionTargetHeel.equals(other.expeditionTargetHeel))
-            return false;
-        if (expeditionTimeToBurnToCommitteeBoat == null) {
-            if (other.expeditionTimeToBurnToCommitteeBoat != null)
-                return false;
-        } else if (!expeditionTimeToBurnToCommitteeBoat.equals(other.expeditionTimeToBurnToCommitteeBoat))
-            return false;
-        if (expeditionTimeToBurnToLine == null) {
-            if (other.expeditionTimeToBurnToLine != null)
-                return false;
-        } else if (!expeditionTimeToBurnToLine.equals(other.expeditionTimeToBurnToLine))
-            return false;
-        if (expeditionTimeToBurnToPin == null) {
-            if (other.expeditionTimeToBurnToPin != null)
-                return false;
-        } else if (!expeditionTimeToBurnToPin.equals(other.expeditionTimeToBurnToPin))
-            return false;
-        if (expeditionTimeToCommitteeBoat == null) {
-            if (other.expeditionTimeToCommitteeBoat != null)
-                return false;
-        } else if (!expeditionTimeToCommitteeBoat.equals(other.expeditionTimeToCommitteeBoat))
-            return false;
-        if (expeditionTimeToGun == null) {
-            if (other.expeditionTimeToGun != null)
-                return false;
-        } else if (!expeditionTimeToGun.equals(other.expeditionTimeToGun))
-            return false;
-        if (expeditionTimeToPin == null) {
-            if (other.expeditionTimeToPin != null)
-                return false;
-        } else if (!expeditionTimeToPin.equals(other.expeditionTimeToPin))
-            return false;
-        if (expeditionTimeToPortLayline == null) {
-            if (other.expeditionTimeToPortLayline != null)
-                return false;
-        } else if (!expeditionTimeToPortLayline.equals(other.expeditionTimeToPortLayline))
-            return false;
-        if (expeditionTimeToStbLayline == null) {
-            if (other.expeditionTimeToStbLayline != null)
-                return false;
-        } else if (!expeditionTimeToStbLayline.equals(other.expeditionTimeToStbLayline))
-            return false;
-        if (expeditionVMG == null) {
-            if (other.expeditionVMG != null)
-                return false;
-        } else if (!expeditionVMG.equals(other.expeditionVMG))
-            return false;
-        if (expeditionVMGTargVMGDelta == null) {
-            if (other.expeditionVMGTargVMGDelta != null)
-                return false;
-        } else if (!expeditionVMGTargVMGDelta.equals(other.expeditionVMGTargVMGDelta))
+        } else if (!expeditionDataHolder.equals(other.expeditionDataHolder))
             return false;
         if (fleet == null) {
             if (other.fleet != null)
@@ -626,6 +359,11 @@ public class LeaderboardEntryDTO implements Serializable {
                 return false;
         } else if (!gapToLeaderInOwnTime.equals(other.gapToLeaderInOwnTime))
             return false;
+        if (heel == null) {
+            if (other.heel != null)
+                return false;
+        } else if (!heel.equals(other.heel))
+            return false;
         if (legDetails == null) {
             if (other.legDetails != null)
                 return false;
@@ -635,6 +373,11 @@ public class LeaderboardEntryDTO implements Serializable {
             if (other.netPoints != null)
                 return false;
         } else if (!netPoints.equals(other.netPoints))
+            return false;
+        if (pitch == null) {
+            if (other.pitch != null)
+                return false;
+        } else if (!pitch.equals(other.pitch))
             return false;
         if (race == null) {
             if (other.race != null)
@@ -694,5 +437,511 @@ public class LeaderboardEntryDTO implements Serializable {
         return true;
     }
 
+    private void ensureExpeditionHolder() {
+        if (expeditionDataHolder == null) {
+            expeditionDataHolder = new ExpeditionDataHolder();
+        }
+    }
+
+    public void setExpeditionAWA(Double expeditionAWA) {
+        if (expeditionAWA != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionAWA = expeditionAWA;
+        }
+    }
+
+    public void setExpeditionAWS(Double expeditionAWS) {
+        if (expeditionAWS != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionAWS = expeditionAWS;
+        }
+    }
+
+    public void setExpeditionTWA(Double expeditionTWA) {
+        if (expeditionTWA != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionTWA = expeditionTWA;
+        }
+    }
+
+    public void setExpeditionTWS(Double expeditionTWS) {
+        if (expeditionTWS != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionTWS = expeditionTWS;
+        }
+    }
+
+    public void setExpeditionTWD(Double expeditionTWD) {
+        if (expeditionTWD != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionTWD = expeditionTWD;
+        }
+    }
+
+    public void setExpeditionBoatSpeed(Double expeditionBSP) {
+        if (expeditionBSP != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionBoatSpeed = expeditionBSP;
+        }
+    }
+
+    public void setExpeditionTargBoatSpeed(Double expeditionBSP_TR) {
+        if (expeditionBSP_TR != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionTargBoatSpeed = expeditionBSP_TR;
+        }
+    }
+
+    public void setExpeditionSOG(Double expeditionSOG) {
+        if (expeditionSOG != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionSOG = expeditionSOG;
+        }
+    }
+
+    public void setExpeditionCOG(Double expeditionCOG) {
+        if (expeditionCOG != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionCOG = expeditionCOG;
+        }
+    }
+
+    public void setExpeditionForestayLoad(Double expeditionForestayLoad) {
+        if (expeditionForestayLoad != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionForestayLoad = expeditionForestayLoad;
+        }
+    }
+
+    public void setExpeditionRake(Double expeditionRake) {
+        if (expeditionRake != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionRake = expeditionRake;
+        }
+    }
+
+    public void setExpeditionHeading(Double expeditionHDG) {
+        if (expeditionHDG != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionHeading = expeditionHDG;
+        }
+    }
+
+    public void setExpeditionHeel(Double expeditionHeel) {
+        if (expeditionHeel != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionHeel = expeditionHeel;
+        }
+    }
+
+    public void setExpeditionTargetHeel(Double expeditionTG_Heell) {
+        if (expeditionTG_Heell != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionTargetHeel = expeditionTG_Heell;
+        }
+    }
+
+    public void setExpeditionTimeToGun(Duration expeditionTmToGun) {
+        if (expeditionTmToGun != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionTimeToGun = expeditionTmToGun;
+        }
+    }
+
+    public void setExpeditionTimeToBurnToLine(Duration expeditionTmToBurn) {
+        if (expeditionTmToBurn != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionTimeToBurnToLine = expeditionTmToBurn;
+        }
+    }
+
+    public void setExpeditionDistanceBelowLine(Double expeditionBelowLn) {
+        if (expeditionBelowLn != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionDistanceBelowLine = expeditionBelowLn;
+        }
+    }
+
+    public void setExpeditionCourseDetail(Double expeditionCourse) {
+        if (expeditionCourse != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionCourseDetail = expeditionCourse;
+        }
+    }
     
+    public Double getExpeditionAWA() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionAWA;
+    }
+    public Double getExpeditionAWS() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionAWS;
+    }
+    public Double getExpeditionBoatSpeed() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionBoatSpeed;
+    }
+    public Double getExpeditionCOG() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionCOG;
+    }
+    public Double getExpeditionDistanceBelowLine() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionDistanceBelowLine;
+    }
+    public Double getExpeditionDistanceToCommitteeBoat() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionDistanceToCommitteeBoat;
+    }
+    public Double getExpeditionDistToPortLayline() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionDistToPortLayline;
+    }
+    public Double getExpeditionDistToStbLayline() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionDistToStbLayline;
+    }
+    public Double getExpeditionVMG() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionVMG;
+    }
+    public Double getExpeditionTWS() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTWS;
+    }
+    public Double getExpeditionTWD() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTWD;
+    }
+    public Double getExpeditionTWA() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTWA;
+    }
+    public Double getExpeditionTimeToStbLayline() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToStbLayline;
+    }
+    public Double getExpeditionTimeToPortLayline() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToPortLayline;
+    }
+    public Double getExpeditionTimeToPin() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToPin;
+    }
+    public Duration getExpeditionTimeToGun() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToGun;
+    }
+    public Double getExpeditionTimeToCommitteeBoat() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToCommitteeBoat;
+    }
+    public Double getExpeditionTimeToBurnToPin() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToBurnToPin;
+    }
+    public Double getExpeditionTargTWA() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTargTWA;
+    }
+    public Double getExpeditionTimeToBurnToCommitteeBoat() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToBurnToCommitteeBoat;
+    }
+    public Duration getExpeditionTimeToBurnToLine() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToBurnToLine;
+    }
+    public Double getExpeditionTargetHeel() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTargetHeel;
+    }
+    public Double getExpeditionTargBoatSpeed() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTargBoatSpeed;
+    }
+    public Double getExpeditionSOG() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionSOG;
+    }
+    public Double getExpeditionRudderAngle() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionRudderAngle;
+    }
+    public Double getExpeditionRateOfTurn() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionRateOfTurn;
+    }
+    public Double getExpeditionRake() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionRake;
+    }
+    public Double getExpeditionLineSquareForWindDirection() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionLineSquareForWindDirection;
+    }
+    public Double getExpeditionHeading() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionHeading;
+    }
+    public Double getExpeditionForestayLoad() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionForestayLoad;
+    }
+    public Double getExpeditionHeel() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionHeel;
+    }
+    public Double getExpeditionCourseDetail() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionCourseDetail;
+    }
+    public Double getExpeditionDistanceToPinDetail() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionDistanceToPinDetail;
+    }
+    public Double getExpeditionVMGTargVMGDelta() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionVMGTargVMGDelta;
+    }
+    
+    /**
+     * Used to ensure that only one null value needs to be transmitted, if no expedition data exists 
+     */
+    public static class ExpeditionDataHolder implements Serializable{
+        private static final long serialVersionUID = 1L;
+        public Double expeditionAWA;
+        public Double expeditionAWS;
+        public Double expeditionBoatSpeed;
+        public Double expeditionCOG;
+        public Double expeditionDistanceBelowLine;
+        public Double expeditionDistanceToCommitteeBoat;
+        public Double expeditionDistToPortLayline;
+        public Double expeditionDistToStbLayline;
+        public Double expeditionVMG;
+        public Double expeditionTWS;
+        public Double expeditionTWD;
+        public Double expeditionTWA;
+        public Double expeditionTimeToStbLayline;
+        public Double expeditionTimeToPortLayline;
+        public Double expeditionTimeToPin;
+        public Duration expeditionTimeToGun;
+        public Double expeditionTimeToCommitteeBoat;
+        public Double expeditionTimeToBurnToPin;
+        public Double expeditionTargTWA;
+        public Double expeditionTimeToBurnToCommitteeBoat;
+        public Duration expeditionTimeToBurnToLine;
+        public Double expeditionTargetHeel;
+        public Double expeditionTargBoatSpeed;
+        public Double expeditionSOG;
+        public Double expeditionRudderAngle;
+        public Double expeditionRateOfTurn;
+        public Double expeditionRake;
+        public Double expeditionLineSquareForWindDirection;
+        public Double expeditionHeading;
+        public Double expeditionForestayLoad;
+        public Double expeditionHeel;
+        public Double expeditionCourseDetail;
+        public Double expeditionDistanceToPinDetail;
+        public Double expeditionVMGTargVMGDelta;
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((expeditionAWA == null) ? 0 : expeditionAWA.hashCode());
+            result = prime * result + ((expeditionAWS == null) ? 0 : expeditionAWS.hashCode());
+            result = prime * result + ((expeditionBoatSpeed == null) ? 0 : expeditionBoatSpeed.hashCode());
+            result = prime * result + ((expeditionCOG == null) ? 0 : expeditionCOG.hashCode());
+            result = prime * result + ((expeditionCourseDetail == null) ? 0 : expeditionCourseDetail.hashCode());
+            result = prime * result
+                    + ((expeditionDistToPortLayline == null) ? 0 : expeditionDistToPortLayline.hashCode());
+            result = prime * result
+                    + ((expeditionDistToStbLayline == null) ? 0 : expeditionDistToStbLayline.hashCode());
+            result = prime * result
+                    + ((expeditionDistanceBelowLine == null) ? 0 : expeditionDistanceBelowLine.hashCode());
+            result = prime * result
+                    + ((expeditionDistanceToCommitteeBoat == null) ? 0 : expeditionDistanceToCommitteeBoat.hashCode());
+            result = prime * result
+                    + ((expeditionDistanceToPinDetail == null) ? 0 : expeditionDistanceToPinDetail.hashCode());
+            result = prime * result + ((expeditionForestayLoad == null) ? 0 : expeditionForestayLoad.hashCode());
+            result = prime * result + ((expeditionHeading == null) ? 0 : expeditionHeading.hashCode());
+            result = prime * result + ((expeditionHeel == null) ? 0 : expeditionHeel.hashCode());
+            result = prime * result + ((expeditionLineSquareForWindDirection == null) ? 0
+                    : expeditionLineSquareForWindDirection.hashCode());
+            result = prime * result + ((expeditionRake == null) ? 0 : expeditionRake.hashCode());
+            result = prime * result + ((expeditionRateOfTurn == null) ? 0 : expeditionRateOfTurn.hashCode());
+            result = prime * result + ((expeditionRudderAngle == null) ? 0 : expeditionRudderAngle.hashCode());
+            result = prime * result + ((expeditionSOG == null) ? 0 : expeditionSOG.hashCode());
+            result = prime * result + ((expeditionTWA == null) ? 0 : expeditionTWA.hashCode());
+            result = prime * result + ((expeditionTWD == null) ? 0 : expeditionTWD.hashCode());
+            result = prime * result + ((expeditionTWS == null) ? 0 : expeditionTWS.hashCode());
+            result = prime * result + ((expeditionTargBoatSpeed == null) ? 0 : expeditionTargBoatSpeed.hashCode());
+            result = prime * result + ((expeditionTargTWA == null) ? 0 : expeditionTargTWA.hashCode());
+            result = prime * result + ((expeditionTargetHeel == null) ? 0 : expeditionTargetHeel.hashCode());
+            result = prime * result + ((expeditionTimeToBurnToCommitteeBoat == null) ? 0
+                    : expeditionTimeToBurnToCommitteeBoat.hashCode());
+            result = prime * result
+                    + ((expeditionTimeToBurnToLine == null) ? 0 : expeditionTimeToBurnToLine.hashCode());
+            result = prime * result + ((expeditionTimeToBurnToPin == null) ? 0 : expeditionTimeToBurnToPin.hashCode());
+            result = prime * result
+                    + ((expeditionTimeToCommitteeBoat == null) ? 0 : expeditionTimeToCommitteeBoat.hashCode());
+            result = prime * result + ((expeditionTimeToGun == null) ? 0 : expeditionTimeToGun.hashCode());
+            result = prime * result + ((expeditionTimeToPin == null) ? 0 : expeditionTimeToPin.hashCode());
+            result = prime * result
+                    + ((expeditionTimeToPortLayline == null) ? 0 : expeditionTimeToPortLayline.hashCode());
+            result = prime * result
+                    + ((expeditionTimeToStbLayline == null) ? 0 : expeditionTimeToStbLayline.hashCode());
+            result = prime * result + ((expeditionVMG == null) ? 0 : expeditionVMG.hashCode());
+            result = prime * result + ((expeditionVMGTargVMGDelta == null) ? 0 : expeditionVMGTargVMGDelta.hashCode());
+            return result;
+        }
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            ExpeditionDataHolder other = (ExpeditionDataHolder) obj;
+            if (expeditionAWA == null) {
+                if (other.expeditionAWA != null)
+                    return false;
+            } else if (!expeditionAWA.equals(other.expeditionAWA))
+                return false;
+            if (expeditionAWS == null) {
+                if (other.expeditionAWS != null)
+                    return false;
+            } else if (!expeditionAWS.equals(other.expeditionAWS))
+                return false;
+            if (expeditionBoatSpeed == null) {
+                if (other.expeditionBoatSpeed != null)
+                    return false;
+            } else if (!expeditionBoatSpeed.equals(other.expeditionBoatSpeed))
+                return false;
+            if (expeditionCOG == null) {
+                if (other.expeditionCOG != null)
+                    return false;
+            } else if (!expeditionCOG.equals(other.expeditionCOG))
+                return false;
+            if (expeditionCourseDetail == null) {
+                if (other.expeditionCourseDetail != null)
+                    return false;
+            } else if (!expeditionCourseDetail.equals(other.expeditionCourseDetail))
+                return false;
+            if (expeditionDistToPortLayline == null) {
+                if (other.expeditionDistToPortLayline != null)
+                    return false;
+            } else if (!expeditionDistToPortLayline.equals(other.expeditionDistToPortLayline))
+                return false;
+            if (expeditionDistToStbLayline == null) {
+                if (other.expeditionDistToStbLayline != null)
+                    return false;
+            } else if (!expeditionDistToStbLayline.equals(other.expeditionDistToStbLayline))
+                return false;
+            if (expeditionDistanceBelowLine == null) {
+                if (other.expeditionDistanceBelowLine != null)
+                    return false;
+            } else if (!expeditionDistanceBelowLine.equals(other.expeditionDistanceBelowLine))
+                return false;
+            if (expeditionDistanceToCommitteeBoat == null) {
+                if (other.expeditionDistanceToCommitteeBoat != null)
+                    return false;
+            } else if (!expeditionDistanceToCommitteeBoat.equals(other.expeditionDistanceToCommitteeBoat))
+                return false;
+            if (expeditionDistanceToPinDetail == null) {
+                if (other.expeditionDistanceToPinDetail != null)
+                    return false;
+            } else if (!expeditionDistanceToPinDetail.equals(other.expeditionDistanceToPinDetail))
+                return false;
+            if (expeditionForestayLoad == null) {
+                if (other.expeditionForestayLoad != null)
+                    return false;
+            } else if (!expeditionForestayLoad.equals(other.expeditionForestayLoad))
+                return false;
+            if (expeditionHeading == null) {
+                if (other.expeditionHeading != null)
+                    return false;
+            } else if (!expeditionHeading.equals(other.expeditionHeading))
+                return false;
+            if (expeditionHeel == null) {
+                if (other.expeditionHeel != null)
+                    return false;
+            } else if (!expeditionHeel.equals(other.expeditionHeel))
+                return false;
+            if (expeditionLineSquareForWindDirection == null) {
+                if (other.expeditionLineSquareForWindDirection != null)
+                    return false;
+            } else if (!expeditionLineSquareForWindDirection.equals(other.expeditionLineSquareForWindDirection))
+                return false;
+            if (expeditionRake == null) {
+                if (other.expeditionRake != null)
+                    return false;
+            } else if (!expeditionRake.equals(other.expeditionRake))
+                return false;
+            if (expeditionRateOfTurn == null) {
+                if (other.expeditionRateOfTurn != null)
+                    return false;
+            } else if (!expeditionRateOfTurn.equals(other.expeditionRateOfTurn))
+                return false;
+            if (expeditionRudderAngle == null) {
+                if (other.expeditionRudderAngle != null)
+                    return false;
+            } else if (!expeditionRudderAngle.equals(other.expeditionRudderAngle))
+                return false;
+            if (expeditionSOG == null) {
+                if (other.expeditionSOG != null)
+                    return false;
+            } else if (!expeditionSOG.equals(other.expeditionSOG))
+                return false;
+            if (expeditionTWA == null) {
+                if (other.expeditionTWA != null)
+                    return false;
+            } else if (!expeditionTWA.equals(other.expeditionTWA))
+                return false;
+            if (expeditionTWD == null) {
+                if (other.expeditionTWD != null)
+                    return false;
+            } else if (!expeditionTWD.equals(other.expeditionTWD))
+                return false;
+            if (expeditionTWS == null) {
+                if (other.expeditionTWS != null)
+                    return false;
+            } else if (!expeditionTWS.equals(other.expeditionTWS))
+                return false;
+            if (expeditionTargBoatSpeed == null) {
+                if (other.expeditionTargBoatSpeed != null)
+                    return false;
+            } else if (!expeditionTargBoatSpeed.equals(other.expeditionTargBoatSpeed))
+                return false;
+            if (expeditionTargTWA == null) {
+                if (other.expeditionTargTWA != null)
+                    return false;
+            } else if (!expeditionTargTWA.equals(other.expeditionTargTWA))
+                return false;
+            if (expeditionTargetHeel == null) {
+                if (other.expeditionTargetHeel != null)
+                    return false;
+            } else if (!expeditionTargetHeel.equals(other.expeditionTargetHeel))
+                return false;
+            if (expeditionTimeToBurnToCommitteeBoat == null) {
+                if (other.expeditionTimeToBurnToCommitteeBoat != null)
+                    return false;
+            } else if (!expeditionTimeToBurnToCommitteeBoat.equals(other.expeditionTimeToBurnToCommitteeBoat))
+                return false;
+            if (expeditionTimeToBurnToLine == null) {
+                if (other.expeditionTimeToBurnToLine != null)
+                    return false;
+            } else if (!expeditionTimeToBurnToLine.equals(other.expeditionTimeToBurnToLine))
+                return false;
+            if (expeditionTimeToBurnToPin == null) {
+                if (other.expeditionTimeToBurnToPin != null)
+                    return false;
+            } else if (!expeditionTimeToBurnToPin.equals(other.expeditionTimeToBurnToPin))
+                return false;
+            if (expeditionTimeToCommitteeBoat == null) {
+                if (other.expeditionTimeToCommitteeBoat != null)
+                    return false;
+            } else if (!expeditionTimeToCommitteeBoat.equals(other.expeditionTimeToCommitteeBoat))
+                return false;
+            if (expeditionTimeToGun == null) {
+                if (other.expeditionTimeToGun != null)
+                    return false;
+            } else if (!expeditionTimeToGun.equals(other.expeditionTimeToGun))
+                return false;
+            if (expeditionTimeToPin == null) {
+                if (other.expeditionTimeToPin != null)
+                    return false;
+            } else if (!expeditionTimeToPin.equals(other.expeditionTimeToPin))
+                return false;
+            if (expeditionTimeToPortLayline == null) {
+                if (other.expeditionTimeToPortLayline != null)
+                    return false;
+            } else if (!expeditionTimeToPortLayline.equals(other.expeditionTimeToPortLayline))
+                return false;
+            if (expeditionTimeToStbLayline == null) {
+                if (other.expeditionTimeToStbLayline != null)
+                    return false;
+            } else if (!expeditionTimeToStbLayline.equals(other.expeditionTimeToStbLayline))
+                return false;
+            if (expeditionVMG == null) {
+                if (other.expeditionVMG != null)
+                    return false;
+            } else if (!expeditionVMG.equals(other.expeditionVMG))
+                return false;
+            if (expeditionVMGTargVMGDelta == null) {
+                if (other.expeditionVMGTargVMGDelta != null)
+                    return false;
+            } else if (!expeditionVMGTargVMGDelta.equals(other.expeditionVMGTargVMGDelta))
+                return false;
+            return true;
+        }
+    }
 }
