@@ -200,10 +200,6 @@ public enum DetailType implements Serializable {
         this.defaultSortingOrder = defaultSortingOrder;
     }
 
-    public String[] getOldNames() {
-        return oldNames;
-    }
-
     public int getPrecision() {
         return precision;
     }
