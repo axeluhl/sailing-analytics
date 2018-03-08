@@ -349,9 +349,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         setWidget(chart);
         for (CompetitorDTO competitor : chartData.getCompetitors()) {
             Series competitorDataSeries = getOrCreateCompetitorDataSeries(retrievedDataType, competitor);
-            Series markPassingSeries = getOrCreateCompetitorMarkPassingSeries(competitorDataSeries, retrievedDataType,
-                    competitor);
-            
+            Series markPassingSeries = getOrCreateCompetitorMarkPassingSeries(competitorDataSeries, retrievedDataType, competitor);
             CompetitorRaceDataDTO competitorData = chartData.getCompetitorData(competitor);
             if (competitorData != null) {
                 Date toDate = timer.getLiveTimePointAsDate();
@@ -368,23 +366,20 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                     }
                 }
                 markPassingSeries.setPoints(markPassingPoints.toArray(new Point[0]), false);
-
                 Point[] oldRaceDataPoints = competitorDataSeries.getPoints();
                 List<com.sap.sse.common.Util.Pair<Date, Double>> raceData = competitorData.getRaceData();
-
                 Point[] raceDataPointsToAdd = new Point[raceData.size()];
                 int currentPointIndex = 0;
                 for (com.sap.sse.common.Util.Pair<Date, Double> raceDataPoint : raceData) {
                     Double dataPointValue = raceDataPoint.getB();
-                    if(dataPointValue != null) {
+                    if (dataPointValue != null) {
                         long dataPointTimeAsMillis = raceDataPoint.getA().getTime();
-                        if(append == false || (tholder.timeOfEarliestRequestInMillis == null || dataPointTimeAsMillis < tholder.timeOfEarliestRequestInMillis) || 
+                        if (append == false || (tholder.timeOfEarliestRequestInMillis == null || dataPointTimeAsMillis < tholder.timeOfEarliestRequestInMillis) || 
                                 tholder.timeOfLatestRequestInMillis == null || dataPointTimeAsMillis > tholder.timeOfLatestRequestInMillis) {
                             raceDataPointsToAdd[currentPointIndex++] = new Point(dataPointTimeAsMillis, dataPointValue);
                         }
                     }
                 }
-
                 Point[] newRaceDataPoints;
                 if (append) {
                     newRaceDataPoints = new Point[oldRaceDataPoints.length + currentPointIndex];
@@ -394,7 +389,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                     newRaceDataPoints = new Point[currentPointIndex];
                     System.arraycopy(raceDataPointsToAdd, 0, newRaceDataPoints, 0, currentPointIndex);
                 }
-                
                 setSeriesPoints(competitorDataSeries, newRaceDataPoints);
                 // Adding the series if chart doesn't contain it
                 List<Series> chartSeries = Arrays.asList(chart.getSeries());
