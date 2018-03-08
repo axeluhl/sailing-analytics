@@ -57,7 +57,7 @@ public class ExpeditionDataImportTest {
     @Test
     public void simpleFileReadWithMissingColumns() throws FormatNotSupportedException, IOException {
         testImport(ImportData.FILE_EXPEDITION_PARTIAL);
-        assertTrue(forestayValueSum/callbackCallCount > 0.7 && forestayValueSum/callbackCallCount < 7.0);
+        assertTrue(forestayValueSum/callbackCallCount > 0.5 && forestayValueSum/callbackCallCount < 7.0);
     }
     
     private enum ImportData implements ImportDataDefinition {
@@ -69,7 +69,7 @@ public class ExpeditionDataImportTest {
                 return getClass().getResourceAsStream("/2017Nov08_Expedition.csv");
             }
         },
-        FILE_EXPEDITION_PARTIAL(198) {
+        FILE_EXPEDITION_PARTIAL(199) {
             @Override
             public InputStream getInputStream() {
                 return getClass().getResourceAsStream("/2018Feb10_clean_short_columns_removed.csv");
