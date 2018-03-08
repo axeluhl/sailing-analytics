@@ -245,13 +245,12 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     private void doLoadDataForCompetitorsAndDataType(final Date from, final Date to, final boolean append,
-            ArrayList<CompetitorDTO> competitorsToLoad, final DetailType selectedDataTypeToRetrieve,final TimingHolder tholder) {
+            ArrayList<CompetitorDTO> competitorsToLoad, final DetailType selectedDataTypeToRetrieve, final TimingHolder tholder) {
         long stepSize = Math.max(getStepSizeInMillis(),
                 from==null||to==null ? 0 : Math.abs(to.getTime()-from.getTime())/SailingServiceConstants.MAX_NUMBER_OF_FIXES_TO_QUERY);
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
                 selectedRaceIdentifier, competitorsToLoad, from, to, stepSize, selectedDataTypeToRetrieve,
                 leaderboardGroupName, leaderboardName);
-
         AsyncCallback<CompetitorsRaceDataDTO> dataLoadedCallback = new AsyncCallback<CompetitorsRaceDataDTO>() {
             @Override
             public void onSuccess(final CompetitorsRaceDataDTO result) {
@@ -276,7 +275,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                         timer.getPlayMode() == PlayModes.Live);
             }
         };
-
         if (append) {
             // this call is repeated, allow it to be throttled and dropped
             asyncActionsExecutor.execute(getCompetitorsRaceDataAction, LOAD_COMPETITOR_CHART_DATA_CATEGORY,
@@ -286,7 +284,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             // asyncActionExecutor
             getCompetitorsRaceDataAction.execute(dataLoadedCallback);
         }
-
     }
     
     private boolean chartContainsNoData() {
@@ -775,11 +772,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         if (!isVisible()) {
             return;
         }
-
         if (allowTimeAdjust) {
             updateTimePlotLine(newTime);
         }
-        
         switch (timer.getPlayMode()) {
         case Live: {
             // is date before first cache entry or is cache empty?
