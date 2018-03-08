@@ -1,5 +1,7 @@
 package com.sap.sailing.server.trackfiles.test;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -7,6 +9,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.sensordata.ExpeditionExtendedSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.trackfiles.impl.ExpeditionExtendedDataImporterImpl;
@@ -14,6 +17,7 @@ import com.sap.sailing.server.trackfiles.impl.ExpeditionExtendedDataImporterImpl
 public class ExpeditionDataImportTest {
     
     private int callbackCallCount;
+    private double forestayValueSum;
 
     protected ExpeditionExtendedDataImporterImpl expeditionDataImporter;
     
@@ -33,6 +37,10 @@ public class ExpeditionDataImportTest {
                 for (DoubleVectorFix fix : fixes) {
                     if (fix != null) {
                         callbackCallCount++;
+                        final Double forestay = fix.get(ExpeditionExtendedSensorDataMetadata.FORESTAY_LOAD.getColumnIndex());
+                        if (forestay != null) {
+                            forestayValueSum += forestay;
+                        }
                     }
                 }
             }, "filename.csv", "source", /* downsample */ false);
@@ -43,11 +51,13 @@ public class ExpeditionDataImportTest {
     @Test
     public void simpleFileRead() throws FormatNotSupportedException, IOException {
         testImport(ImportData.FILE_EXPEDITION_FULL);
+        assertTrue(forestayValueSum/callbackCallCount > 0.7 && forestayValueSum/callbackCallCount < 7.0);
     }
     
     @Test
     public void simpleFileReadWithMissingColumns() throws FormatNotSupportedException, IOException {
         testImport(ImportData.FILE_EXPEDITION_PARTIAL);
+        assertTrue(forestayValueSum/callbackCallCount > 0.7 && forestayValueSum/callbackCallCount < 7.0);
     }
     
     private enum ImportData implements ImportDataDefinition {
