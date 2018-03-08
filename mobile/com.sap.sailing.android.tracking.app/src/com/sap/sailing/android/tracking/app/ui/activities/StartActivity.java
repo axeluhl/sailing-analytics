@@ -120,7 +120,7 @@ public class StartActivity extends AbstractStartActivity<CheckinData> {
                 try {
                     DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinData.getCheckinUrl().checkinDigest);
                     DatabaseHelper.getInstance()
-                        .storeCompetitorCheckinRow(this, checkinData.getEvent(), competitorCheckinData.getCompetitor(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
+                        .storeCompetitorCheckinRow(this, competitorCheckinData);
                 } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
                     ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
                     displayDatabaseError();
@@ -130,7 +130,7 @@ public class StartActivity extends AbstractStartActivity<CheckinData> {
                 try {
                     DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinData.getCheckinUrl().checkinDigest);
                     DatabaseHelper.getInstance()
-                        .storeMarkCheckinRow(this, checkinData.getEvent(), markCheckinData.getMark(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
+                        .storeMarkCheckinRow(this, markCheckinData);
                 } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
                     ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
                     displayDatabaseError();
@@ -139,8 +139,7 @@ public class StartActivity extends AbstractStartActivity<CheckinData> {
                 BoatCheckinData boatCheckinData = (BoatCheckinData) checkinData;
                 try {
                     DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinData.getCheckinUrl().checkinDigest);
-                    DatabaseHelper.getInstance()
-                        .storeBoatCheckinRow(this, checkinData.getEvent(), boatCheckinData.getBoat(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
+                    DatabaseHelper.getInstance().storeBoatCheckinRow(this, boatCheckinData);
                 } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
                     ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
                     displayDatabaseError();

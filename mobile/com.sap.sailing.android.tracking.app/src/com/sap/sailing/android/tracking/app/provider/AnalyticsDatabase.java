@@ -33,7 +33,8 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
         + AnalyticsContract.Boat.BOAT_ID + " TEXT, "
         + AnalyticsContract.Boat.BOAT_NAME + " TEXT, "
-        + AnalyticsContract.Boat.BOAT_CHECKIN_DIGEST + " TEXT);" ;
+        + AnalyticsContract.Boat.BOAT_CHECKIN_DIGEST + " TEXT,"
+        + AnalyticsContract.Boat.BOAT_COLOR + " TEXT );" ;
 
     private final Context mContext;
 

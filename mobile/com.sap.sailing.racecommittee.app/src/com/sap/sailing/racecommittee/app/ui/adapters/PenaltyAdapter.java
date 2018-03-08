@@ -99,9 +99,7 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
             if (boat != null) {
                 holder.mItemVessel.setVisibility(View.VISIBLE);
                 holder.mItemVessel.setText(boat.getSailID());
-                float color = (1 - boat.getColor().getAsHSV().getC()) * 255f;
-                holder.mItemVessel.setTextColor(Color.argb(255, (int) color, (int) color, (int) color));
-                holder.mItemVessel.setBackgroundColor(Color.parseColor(boat.getColor().getAsHtml()));
+                ViewHelper.setColors(holder.mItemVessel, boat.getColor().getAsHtml());
             }
         }
         Drawable mergeIcon;

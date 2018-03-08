@@ -137,8 +137,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     private void storeCompetitorCheckinData(CompetitorCheckinData checkinData) {
         if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombinationAvailable(getActivity(), checkinData.checkinDigest)) {
             try {
-                DatabaseHelper.getInstance().storeCompetitorCheckinRow(getActivity(), checkinData.getEvent(), checkinData.getCompetitor(), checkinData
-                    .getLeaderboard(), checkinData.getCheckinUrl());
+                DatabaseHelper.getInstance().storeCompetitorCheckinRow(getActivity(), checkinData);
                 adapter.notifyDataSetChanged();
             } catch (GeneralDatabaseHelperException e) {
                 ExLog.e(getActivity(), TAG, "Batch insert failed: " + e.getMessage());
@@ -160,10 +159,9 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             try {
                 if (checkinData instanceof MarkCheckinData) {
                     DatabaseHelper.getInstance()
-                        .storeMarkCheckinRow(getActivity(), checkinData.getEvent(), ((MarkCheckinData)checkinData).getMark(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
+                        .storeMarkCheckinRow(getActivity(), (MarkCheckinData) checkinData);
                 } else {
-                    DatabaseHelper.getInstance()
-                        .storeBoatCheckinRow(getActivity(), checkinData.getEvent(), ((BoatCheckinData)checkinData).getBoat(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
+                    DatabaseHelper.getInstance().storeBoatCheckinRow(getActivity(), (BoatCheckinData) checkinData);
                 }
                 adapter.notifyDataSetChanged();
             } catch (GeneralDatabaseHelperException e) {
@@ -294,7 +292,8 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
                     AnalyticsDatabase.Tables.COMPETITORS + "." + AnalyticsContract.Competitor.COMPETITOR_DISPLAY_NAME,
                     AnalyticsDatabase.Tables.MARKS + "." + AnalyticsContract.Mark.MARK_NAME,
                     AnalyticsDatabase.Tables.CHECKIN_URIS + "." + AnalyticsContract.Checkin.CHECKIN_TYPE,
-                    AnalyticsDatabase.Tables.BOATS + "." + AnalyticsContract.Boat.BOAT_NAME };
+                    AnalyticsDatabase.Tables.BOATS + "." + AnalyticsContract.Boat.BOAT_NAME,
+                    AnalyticsDatabase.Tables.BOATS + "." + AnalyticsContract.Boat.BOAT_COLOR };
                 return new CursorLoader(getActivity(), AnalyticsContract.LeaderboardsEventsCompetitorsMarksBoatsJoined.CONTENT_URI, projection, null, null, null);
 
             default:

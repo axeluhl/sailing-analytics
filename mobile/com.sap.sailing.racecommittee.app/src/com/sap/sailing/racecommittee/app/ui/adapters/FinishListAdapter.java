@@ -13,7 +13,6 @@ import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
@@ -59,9 +58,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         if (mCanBoatsOfCompetitorsChangePerRace && item.getBoat() != null) {
             holder.vesselId.setVisibility(View.VISIBLE);
             holder.vesselId.setText(item.getBoat().getSailID());
-            float color = (1 - item.getBoat().getColor().getAsHSV().getC()) * 255f;
-            holder.vesselId.setTextColor(Color.argb(255, (int) color, (int) color, (int) color));
-            holder.vesselId.setBackgroundColor(Color.parseColor(item.getBoat().getColor().getAsHtml()));
+            ViewHelper.setColors(holder.vesselId, item.getBoat().getColor().getAsHtml());
         }
         holder.competitor.setText(item.getCompetitorDisplayName());
         int dragState = holder.getDragStateFlags();

@@ -69,9 +69,9 @@ public class BuoyActivity extends AbstractBaseActivity {
             }
         }
         if (TextUtils.isEmpty(mark.markId)) {
-            replaceFragment(R.id.content_frame, BuoyFragment.newInstance(boat.boatName));
+            replaceFragment(R.id.content_frame, BuoyFragment.newInstance(boat.boatName, boat.boatColor));
         } else {
-            replaceFragment(R.id.content_frame, BuoyFragment.newInstance(mark.markName));
+            replaceFragment(R.id.content_frame, BuoyFragment.newInstance(mark.markName, null));
         }
     }
 

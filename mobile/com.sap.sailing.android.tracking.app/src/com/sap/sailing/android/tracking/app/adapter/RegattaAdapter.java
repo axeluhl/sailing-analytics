@@ -40,6 +40,7 @@ public class RegattaAdapter extends AbstractRegattaAdapter {
                 detailText += cursor.getString(cursor.getColumnIndex(AnalyticsContract.Mark.MARK_NAME));
             } else if (type == CheckinUrlInfo.TYPE_BOAT) {
                 detailText += cursor.getString(cursor.getColumnIndex(AnalyticsContract.Boat.BOAT_NAME));
+                ViewHelper.setColors(detail, cursor.getString(cursor.getColumnIndex(AnalyticsContract.Boat.BOAT_COLOR)));
             }
             detail.setText(detailText);
         }

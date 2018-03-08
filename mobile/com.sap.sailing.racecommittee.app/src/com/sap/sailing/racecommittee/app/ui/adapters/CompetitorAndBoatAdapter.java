@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.racecommittee.app.R;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,9 +44,7 @@ public class CompetitorAndBoatAdapter extends RecyclerView.Adapter<CompetitorAnd
         if (competitor != null) {
             if (mCanBoatsOfCompetitorsChangePerRace && boat != null) {
                 holder.vesselId.setText(boat.getSailID());
-                float color = (1 - boat.getColor().getAsHSV().getC()) * 255f;
-                holder.vesselId.setTextColor(Color.argb(255, (int) color, (int) color, (int) color));
-                holder.vesselId.setBackgroundColor(Color.parseColor(boat.getColor().getAsHtml()));
+                ViewHelper.setColors(holder.vesselId, boat.getColor().getAsHtml());
             }
             String name = "";
             if (competitor.getShortInfo() != null) {

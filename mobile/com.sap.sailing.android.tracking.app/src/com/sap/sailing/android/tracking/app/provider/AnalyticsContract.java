@@ -45,6 +45,7 @@ public class AnalyticsContract {
         String BOAT_ID = "boat_id";
         String BOAT_NAME = "boat_name";
         String BOAT_CHECKIN_DIGEST = "boat_checkin_digest";
+        String BOAT_COLOR = "boat_color";
     }
 
     interface CheckinColumns {
