@@ -94,11 +94,11 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             TimeRangeWithZoomModel timeRangeWithZoomProvider, LeaderBoardStyle style, UserService userService) {
         super(parent, context);
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
-            
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-                hasCanReplayDuringLiveRacesPermission = user != null && user.hasPermission(
-                        Permission.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission(), SailingPermissionsForRoleProvider.INSTANCE);
+                hasCanReplayDuringLiveRacesPermission = user != null
+                        && user.hasPermission(Permission.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission(),
+                                SailingPermissionsForRoleProvider.INSTANCE);
             }
         });
         this.resources.css().ensureInjected();
@@ -131,7 +131,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 final SingleManeuverDTO selected = selectionModel.getSelectedObject();
-                if (selected != null && (timer.getPlayMode() == PlayModes.Replay || hasCanReplayDuringLiveRacesPermission)) {
+                if (selected != null
+                        && (timer.getPlayMode() == PlayModes.Replay || hasCanReplayDuringLiveRacesPermission)) {
                     timer.pause();
                     timer.setTime(selected.getTime().getTime());
                 } else if (selected != null) {
@@ -151,8 +152,9 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 this.stringMessages.speedOut(), this.stringMessages.knotsUnit()));
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getMinSpeedAsKnots,
                 this.stringMessages.minSpeed(), this.stringMessages.knotsUnit()));
-        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getTurnRate,
-                this.stringMessages.turnRate(), this.stringMessages.degreesUnit()));
+        this.maneuverCellTable
+                .addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getTurnRate, this.stringMessages.turnRate(),
+                        this.stringMessages.degreesUnit() + "/" + this.stringMessages.secondsUnit()));
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getLoss,
                 this.stringMessages.maneuverLoss(), stringMessages.metersUnit()));
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getDirectionChangeInDegrees,
@@ -166,7 +168,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             Function<SingleManeuverDTO, Double> extractor, String title, String unit) {
         final SortableColumn<SingleManeuverDTO, String> col = new AbstractSortableColumnWithMinMax<SingleManeuverDTO, String>(
                 new TextCell(), SortingOrder.ASCENDING) {
-
             final InvertibleComparator<SingleManeuverDTO> comparatorWithAbs = new InvertibleComparatorAdapter<SingleManeuverDTO>() {
                 @Override
                 public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
@@ -186,7 +187,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             };
 
             final HasStringAndDoubleValue<SingleManeuverDTO> dataProvider = new HasStringAndDoubleValue<SingleManeuverDTO>() {
-
                 @Override
                 public String getStringValueToRender(SingleManeuverDTO row) {
                     Double value = extractor.apply(row);
@@ -324,7 +324,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private void rerender() {
         if (isVisible()) {
             if (Util.isEmpty(competitorSelectionModel.getSelectedCompetitors())) {
-                this.importantMessageLabel.setText(stringMessages.selectCompetitor());
+                this.importantMessageLabel.setText(stringMessages.selectAtLeastOneCompetitorManeuver());
                 this.contentPanel.setWidget(importantMessageLabel);
             } else if (lastResult.isEmpty()) {
                 this.importantMessageLabel.setText(stringMessages.noDataFound());
