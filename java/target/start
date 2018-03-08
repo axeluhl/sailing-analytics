@@ -62,7 +62,7 @@ sed $SED_ARGS "/replication.exchangeName/d" ./configuration/config.ini
 sed $SED_ARGS "/replication.exchangeHost/d" ./configuration/config.ini
 
 # Ensure that Jetty Port is set correctly
-sed $SED_ARGS "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" ./configuration/jetty/etc/jetty-selector.xml
+sed $SED_ARGS "s/^.*jetty.http.port.*$/<Set name=\"port\"><Property name=\"jetty.http.port\" deprecated=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" ./configuration/jetty/etc/jetty-http.xml
 
 # Update monitoring with the right ports
 sed $SED_ARGS "s/127.0.0.1:[0-9][0-9][0-9][0-9]\//127.0.0.1:$SERVER_PORT\//g" ./configuration/monitoring.properties

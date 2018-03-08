@@ -82,10 +82,22 @@ fi
 for utility_file in "${SOURCEPATH}"/*.sh
 do
   if [ -e "${utility_file}" ]; then
+
     # Don't source self
     if [[ "${utility_file}" == *"utils.sh"* ]]; then
       continue
     fi
+
+    # Don't source configurator
+    if [[ "${utility_file}" == *"build-config.sh"* ]]; then
+      continue
+    fi
+
+    # Don't source resources file (will be sourced later)
+    if [[ "${utility_file}" == *"resources"* ]]; then
+      continue
+    fi
+
     source "$utility_file"
   fi
 done
