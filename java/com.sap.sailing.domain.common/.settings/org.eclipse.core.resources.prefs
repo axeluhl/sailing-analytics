@@ -2,6 +2,7 @@ eclipse.preferences.version=1
 encoding//src/com/sap/sailing/domain/common/AbstractBearing.java=UTF-8
 encoding//src/com/sap/sailing/domain/common/AbstractPosition.java=UTF-8
 encoding//src/com/sap/sailing/domain/common/LegType.java=UTF-8
+encoding//src/com/sap/sailing/domain/common/Position.java=UTF-8
 encoding//src/com/sap/sailing/domain/common/confidence/impl/ConfidenceBasedAveragerImpl.java=utf-8
 encoding//src/com/sap/sailing/domain/common/impl/AbstractSpeedWithAbstractBearingImpl.java=UTF-8
 encoding//src/com/sap/sailing/domain/common/tracking/impl/AbstractCompactGPSFixMovingImpl.java=UTF-8

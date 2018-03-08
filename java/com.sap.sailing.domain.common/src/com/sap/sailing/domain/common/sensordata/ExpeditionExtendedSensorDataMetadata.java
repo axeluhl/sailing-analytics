@@ -21,37 +21,33 @@ import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 public enum ExpeditionExtendedSensorDataMetadata {
     HEEL("Heel", BravoExtendedSensorDataMetadata.HEEL), //
     TRIM("Trim", BravoExtendedSensorDataMetadata.PITCH), //
-    LEEWAY("Leeway", BravoExtendedSensorDataMetadata.LEEWAY, /* expected in logfile */ true), //
-    SET("Set", BravoExtendedSensorDataMetadata.SET, /* expected in logfile */ true), //
-    DRIFT("Drift", BravoExtendedSensorDataMetadata.DRIFT, /* expected in logfile */ true), //
-    DEPTH("Depth", BravoExtendedSensorDataMetadata.DEPTH, /* expected in logfile */ true), //
-    RUDDER("Rudder", BravoExtendedSensorDataMetadata.RUDDER, /* expected in logfile */ true), //
-    FORESTAY_LOAD("Forestay", BravoExtendedSensorDataMetadata.FORESTAY_LOAD, /* expected in logfile */ true), //
-    FORESTAY_PRESSURE("ForestayPres", BravoExtendedSensorDataMetadata.FORESTAY_PRESSURE, /* expected in logfile */ true), //
-    TACK_ANGLE(null, BravoExtendedSensorDataMetadata.TACK_ANGLE), //
-    RAKE_DEG("RakeDeg", BravoExtendedSensorDataMetadata.RAKE_DEG, /* expected in logfile */ true), //
-    DEFLECTOR_PERCENTAGE("DflectrPP", BravoExtendedSensorDataMetadata.DEFLECTOR_PERCENTAGE, /* expected in logfile */ true), //
-    TARGET_HEEL("TG Heell", BravoExtendedSensorDataMetadata.TARGET_HEEL, /* expected in logfile */ true), //
-    DEFLECTOR_MILLIMETERS("DflectrMM", BravoExtendedSensorDataMetadata.DEFLECTOR_MILLIMETERS, /* expected in logfile */ true), //
-    TARGET_BOATSPEED_P("BspTr", BravoExtendedSensorDataMetadata.TARGET_BOATSPEED_P, /* expected in logfile */ true), //
-    EXPEDITION_AWA("Awa", BravoExtendedSensorDataMetadata.EXPEDITION_AWA, /* expected in logfile */ true), //
-    EXPEDITION_AWS("Aws", BravoExtendedSensorDataMetadata.EXPEDITION_AWS, /* expected in logfile */ true), //
-    EXPEDITION_TWA("Twa", BravoExtendedSensorDataMetadata.EXPEDITION_TWA, /* expected in logfile */ true), //
-    EXPEDITION_TWS("Tws", BravoExtendedSensorDataMetadata.EXPEDITION_TWS, /* expected in logfile */ true), //
-    EXPEDITION_TWD("Twd", BravoExtendedSensorDataMetadata.EXPEDITION_TWD, /* expected in logfile */ true), //
-    EXPEDITION_BSP("Bsp", BravoExtendedSensorDataMetadata.EXPEDITION_BSP, /* expected in logfile */ true), //
-    EXPEDITION_BSP_TR("BspTr", BravoExtendedSensorDataMetadata.EXPEDITION_BSP_TR, /* expected in logfile */ true), //
-    EXPEDITION_SOG("Sog", BravoExtendedSensorDataMetadata.EXPEDITION_SOG, /* expected in logfile */ true), //
-    EXPEDITION_COG("Cog", BravoExtendedSensorDataMetadata.EXPEDITION_COG, /* expected in logfile */ true), //
-    EXPEDITION_FORESTAY("Forestay", BravoExtendedSensorDataMetadata.EXPEDITION_FORESTAY, /* expected in logfile */ true), //
-    EXPEDITION_RAKE("Rake", BravoExtendedSensorDataMetadata.EXPEDITION_RAKE, /* expected in logfile */ true), //
-    EXPEDITION_HDG("Hdg", BravoExtendedSensorDataMetadata.EXPEDITION_HDG, /* expected in logfile */ true), //
-    EXPEDITION_HEEL("Heel", BravoExtendedSensorDataMetadata.EXPEDITION_HEEL, /* expected in logfile */ true), //
-    EXPEDITION_TGHEEL("TG Heell", BravoExtendedSensorDataMetadata.EXPEDITION_TGHEEL, /* expected in logfile */ true), //
-    EXPEDITION_TMTOGUN("TmToGun", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOGUN, /* expected in logfile */ true), //
-    EXPEDITION_TMTOBURN("TmToBurn", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN, /* expected in logfile */ true), //
-    EXPEDITION_BELOWLN("BelowLn", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN, /* expected in logfile */ true), //
-    EXPEDITION_RATE_OF_TURN("ROT", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN, /* expected in logfile */ true), //
+    LEEWAY("Leeway", BravoExtendedSensorDataMetadata.LEEWAY), //
+    SET("Set", BravoExtendedSensorDataMetadata.SET), //
+    DRIFT("Drift", BravoExtendedSensorDataMetadata.DRIFT), //
+    DEPTH("Depth", BravoExtendedSensorDataMetadata.DEPTH), //
+    RUDDER("Rudder", BravoExtendedSensorDataMetadata.RUDDER), //
+    FORESTAY_LOAD("Forestay", BravoExtendedSensorDataMetadata.FORESTAY_LOAD), //
+    FORESTAY_PRESSURE("ForestayPres", BravoExtendedSensorDataMetadata.FORESTAY_PRESSURE), //
+    TACK_ANGLE("TackAngle", BravoExtendedSensorDataMetadata.TACK_ANGLE), //
+    RAKE_DEG("RakeDeg", BravoExtendedSensorDataMetadata.RAKE_DEG), //
+    DEFLECTOR_PERCENTAGE("DflectrPP", BravoExtendedSensorDataMetadata.DEFLECTOR_PERCENTAGE), //
+    TARGET_HEEL("TG Heell", BravoExtendedSensorDataMetadata.TARGET_HEEL), //
+    DEFLECTOR_MILLIMETERS("DflectrMM", BravoExtendedSensorDataMetadata.DEFLECTOR_MILLIMETERS), //
+    TARGET_BOATSPEED_P("BspTr", BravoExtendedSensorDataMetadata.TARGET_BOATSPEED_P), //
+    EXPEDITION_AWA("Awa", BravoExtendedSensorDataMetadata.EXPEDITION_AWA), //
+    EXPEDITION_AWS("Aws", BravoExtendedSensorDataMetadata.EXPEDITION_AWS), //
+    EXPEDITION_TWA("Twa", BravoExtendedSensorDataMetadata.EXPEDITION_TWA), //
+    EXPEDITION_TWS("Tws", BravoExtendedSensorDataMetadata.EXPEDITION_TWS), //
+    EXPEDITION_TWD("Twd", BravoExtendedSensorDataMetadata.EXPEDITION_TWD), //
+    EXPEDITION_BSP("Bsp", BravoExtendedSensorDataMetadata.EXPEDITION_BSP), //
+    EXPEDITION_SOG("Sog", BravoExtendedSensorDataMetadata.EXPEDITION_SOG), //
+    EXPEDITION_COG("Cog", BravoExtendedSensorDataMetadata.EXPEDITION_COG), //
+    EXPEDITION_RAKE("Rake", BravoExtendedSensorDataMetadata.EXPEDITION_RAKE), //
+    EXPEDITION_HDG("Hdg", BravoExtendedSensorDataMetadata.EXPEDITION_HDG), //
+    EXPEDITION_TMTOGUN("TmToGun", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOGUN), //
+    EXPEDITION_TMTOBURN("TmToBurn", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN), //
+    EXPEDITION_BELOWLN("BelowLn", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN), //
+    EXPEDITION_RATE_OF_TURN("ROT", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN), //
     ;
 
     private String columnName;
@@ -118,9 +114,7 @@ public enum ExpeditionExtendedSensorDataMetadata {
     public static Map<String, Integer> getColumnNamesToIndexInDoubleFix() {
         final Map<String, Integer> columnNamesToIndexInDoubleFix = new HashMap<>();
         for (final ExpeditionExtendedSensorDataMetadata column : ExpeditionExtendedSensorDataMetadata.values()) {
-            if (column.isExpectedInLogFile()) {
-                columnNamesToIndexInDoubleFix.put(column.getColumnName(), column.getColumnIndex());
-            }
+            columnNamesToIndexInDoubleFix.put(column.getColumnName(), column.getColumnIndex());
         }
         return columnNamesToIndexInDoubleFix;
     }
