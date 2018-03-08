@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.configs.impl;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -24,8 +25,6 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
     private AutoPlayClientFactory cf;
-
-    private Collection<DetailType> availableDetailTypes;
 
     @Override
     public void startRootNode(AutoPlayClientFactory cf, AutoPlayContextDefinition context,
@@ -78,7 +77,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
             public void cancel() {
             }
         };
-        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, cf.getUserService(), availableDetailTypes);
+        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, cf.getUserService(), Arrays.asList(DetailType.values()));
         PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplayPerspectiveSettings = autoplayLifecycle
                 .createDefaultSettings();
         LinkWithSettingsGenerator<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> settingsGenerator = new LinkWithSettingsGenerator<>(Window.Location.getPath(), autoplayLifecycle::createDefaultSettings, apcd);
@@ -89,7 +88,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
     @Override
     public void loadSettingsDefault(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard,
             OnSettingsCallback settingsCallback) {
-        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, cf.getUserService(), availableDetailTypes);
+        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, cf.getUserService(), Arrays.asList(DetailType.values()));
         settingsCallback.newSettings(autoplayLifecycle.createDefaultSettings());
     }
 
