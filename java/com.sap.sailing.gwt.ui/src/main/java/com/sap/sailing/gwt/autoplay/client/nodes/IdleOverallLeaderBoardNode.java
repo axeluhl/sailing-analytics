@@ -44,7 +44,6 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
         overallDetails.add(DetailType.REGATTA_RANK);
 
         List<DetailType> raceDetails = new ArrayList<>();
-        // raceDetails.add(DetailType.RACE_RANK);
 
         final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(
                 /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, raceDetails, overallDetails,
