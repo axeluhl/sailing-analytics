@@ -40,8 +40,10 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
- * Importer for CSV data files from Expedition log files, as used, e.g., by Team
- * Phoenix.
+ * Importer for CSV data files from Expedition log files, as used, e.g., by Team Phoenix. Note that this importer so far
+ * ignores the {@code downsample} parameter of the
+ * {@link #importFixes(InputStream, com.sap.sailing.domain.trackimport.BaseDoubleVectorFixImporter.Callback, String, String, boolean)}
+ * method.
  */
 public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixImporter
         implements DoubleVectorFixImporter {
