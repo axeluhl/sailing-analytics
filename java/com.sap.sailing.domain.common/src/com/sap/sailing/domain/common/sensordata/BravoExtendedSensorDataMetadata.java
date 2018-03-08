@@ -65,7 +65,13 @@ public enum BravoExtendedSensorDataMetadata implements ColumnMetadata {
     EXPEDITION_TGHEEL(null, /* expectedInLogfile */ false), //
     EXPEDITION_TMTOGUN(null, /* expectedInLogfile */ false), //
     EXPEDITION_TMTOBURN(null, /* expectedInLogfile */ false),  //
-    EXPEDITION_BELOWLN(null, /* expectedInLogfile */ false), 
+    EXPEDITION_BELOWLN(null, /* expectedInLogfile */ false), //
+    EXPEDITION_BARO(null, /* expectedInLogfile */ false), //
+    EXPEDITION_LOAD_P(null, /* expectedInLogfile */ false), //
+    EXPEDITION_LOAD_S(null, /* expectedInLogfile */ false), //
+    EXPEDITION_JIB_CAR_PORT(null, /* expectedInLogfile */ false), //
+    EXPEDITION_JIB_CAR_STBD(null, /* expectedInLogfile */ false), //
+    EXPEDITION_MAST_BUTT(null, /* expectedInLogfile */ false) //
     ;
 
     private final String columnName;
