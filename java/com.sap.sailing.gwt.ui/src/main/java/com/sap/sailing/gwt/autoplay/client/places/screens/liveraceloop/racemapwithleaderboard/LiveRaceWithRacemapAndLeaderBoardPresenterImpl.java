@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.core.client.Scheduler;
@@ -43,7 +43,6 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
     private int selected = -1;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
     private com.sap.sse.gwt.client.player.Timer timer;
-    private Collection<DetailType> availableDetailTypes;
 
     public LiveRaceWithRacemapAndLeaderBoardPresenterImpl(LiveRaceWithRacemapAndLeaderBoardPlace place,
             AutoPlayClientFactory clientFactory, LiveRaceWithRacemapAndLeaderBoardView LifeRaceWithRacemapViewImpl) {
@@ -166,7 +165,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
                 true, lifeRace, getPlace().getRaceMapSelectionProvider(), timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(true),
-                FlagImageResolverImpl.get(), availableDetailTypes);
+                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
         
         getPlace().getRaceMap().setQuickRanksDTOProvider(new QuickRanksDTOFromLeaderboardDTOProvider(new RaceCompetitorSet(getPlace().getRaceMapSelectionProvider()), lifeRace));
         
