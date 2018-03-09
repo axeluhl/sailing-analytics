@@ -314,19 +314,6 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
    
     @Override
     public void setVisible(boolean visible) {
-        if(visible && !isVisible()){
-            sailingService.checkIfRaceIsTracked(raceIdentifier, new AsyncCallback<Boolean>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                }
-                @Override
-                public void onSuccess(Boolean result) {
-                    if (Boolean.FALSE.equals(result)) {
-                        Window.alert(stringMessages.markEditOnNonTrackingRace());
-                    }
-                }
-            });
-        }
         processCompetitorSelectionChange(visible);
         refreshWaypoints();
         super.setVisible(visible);
