@@ -572,7 +572,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 maneuvers.add(maneuver);
             }
         }
-        return new ManeuverSpot(new ArrayList<>(douglasPeuckerFixesGroup), maneuverDirection, maneuvers,
+       return new ManeuverSpot(new ArrayList<>(douglasPeuckerFixesGroup), maneuverDirection, maneuvers,
                 new WindMeasurement(maneuverDetails.getTimePoint(), maneuverPosition,
                         wind == null ? null : wind.getBearing()));
     }
