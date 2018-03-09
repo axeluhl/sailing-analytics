@@ -109,10 +109,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         this.stringMessages = stringMessages;
         this.timer = timer;
         this.timeRangeWithZoomProvider = timeRangeWithZoomProvider;
-
         this.competitorSelectionModel.addCompetitorSelectionChangeListener(this);
         this.timer.addTimeListener(this);
-
         final FlowPanel rootPanel = new FlowPanel();
         rootPanel.addStyleName(resources.css().maneuverPanel());
         this.contentPanel.addStyleName(resources.css().contentContainer());
@@ -120,11 +118,9 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         final Button settingsButton = SettingsDialog.createSettingsButton(this, stringMessages);
         settingsButton.setStyleName(resources.css().settingsButton());
         rootPanel.add(settingsButton);
-
         this.importantMessageLabel.addStyleName(resources.css().importantMessage());
         this.maneuverCellTable = new SortedCellTableWithStylableHeaders<>(Integer.MAX_VALUE, style.getTableresources());
         this.maneuverCellTable.addStyleName(resources.css().maneuverTable());
-
         final SingleSelectionModel<SingleManeuverDTO> selectionModel = new SingleSelectionModel<>();
         this.maneuverCellTable.setSelectionModel(selectionModel);
         selectionModel.addSelectionChangeHandler(new Handler() {
@@ -140,7 +136,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 }
             }
         });
-
         this.maneuverCellTable.addColumn(competitorColumn = createCompetitorColumn());
         this.maneuverCellTable.addColumn(createManeuverTypeColumn());
         this.maneuverCellTable.addColumn(timeColumn = createTimeColumn());
@@ -158,8 +153,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getLoss,
                 this.stringMessages.maneuverLoss(), stringMessages.metersUnit()));
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(SingleManeuverDTO::getDirectionChangeInDegrees,
-                "i18n directionchange", this.stringMessages.degreesUnit()));
-
+                stringMessages.maneuverAngle(), this.stringMessages.degreesUnit()));
         initWidget(rootPanel);
         setVisible(false);
     }

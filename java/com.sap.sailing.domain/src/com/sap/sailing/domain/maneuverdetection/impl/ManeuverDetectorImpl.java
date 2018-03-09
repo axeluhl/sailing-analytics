@@ -587,7 +587,6 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                     minSpeed = speed;
                 }
             }
-
         } catch (Throwable e) {
             logger.log(Level.SEVERE, "Could not determine MinSpeed", e);
         } finally {

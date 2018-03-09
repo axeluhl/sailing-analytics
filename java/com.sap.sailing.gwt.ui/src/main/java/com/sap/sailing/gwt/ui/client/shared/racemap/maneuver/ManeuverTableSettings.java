@@ -25,6 +25,9 @@ public class ManeuverTableSettings extends AbstractGenericSerializableSettings {
      * The default settings
      */
     public ManeuverTableSettings() {
+        selectedManeuverTypes.addValue(ManeuverType.TACK);
+        selectedManeuverTypes.addValue(ManeuverType.JIBE);
+        selectedManeuverTypes.addValue(ManeuverType.PENALTY_CIRCLE);
     }
 
     public ManeuverTableSettings(Set<ManeuverType> selectedManeuverTypes) {
