@@ -122,7 +122,7 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
 
     @Override
     public Competitor migrateToCompetitorWithoutBoat(CompetitorWithBoat competitorWithBoat) {
-        logger.log(Level.INFO, "Bug2822 DB-Migration: Migrate competitor " + competitorWithBoat.toString() + " to have a separate boat"); 
+        logger.log(Level.INFO, "Bug2822 DB-Migration: Migrate competitor " + competitorWithBoat.getName() + " with ID " + competitorWithBoat.getId().toString() + " to have a separate boat"); 
         Competitor migratedCompetitor = super.migrateToCompetitorWithoutBoat(competitorWithBoat);
         storeTo.storeCompetitor(migratedCompetitor);
         return migratedCompetitor; 

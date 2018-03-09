@@ -713,10 +713,7 @@ public class DomainFactoryImpl implements DomainFactory {
                         MigratableRegatta migratableRegatta = (MigratableRegatta) regatta;
                         migratableRegatta.migrateCanBoatsOfCompetitorsChangePerRace();
                         if (!leaderboardGroupConsistencyChecked.get()) {
-                            if (!checkConsistencyOfRegattaTypeInSeries(leaderboardGroup, regatta)) {
-                                logger.log(Level.SEVERE, "Bug2822 DB-Migration: Regatta " + regatta.getName() +
-                                        " has different value of 'canBoatsOfCompetitorsChangePerRace' than other regattas in leaderboardGroup " + leaderboardGroup.getName());
-                            }
+                            checkConsistencyOfRegattaTypeInSeries(leaderboardGroup, regatta);
                             leaderboardGroupConsistencyChecked.set(true);
                         }
                     } else {
@@ -725,10 +722,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     }
                 } else {
                     if (!leaderboardGroupConsistencyChecked.get()) {
-                        if (!checkConsistencyOfRegattaTypeInSeries(leaderboardGroup, regatta)) {
-                            logger.log(Level.SEVERE, "Bug2822 DB-Migration: Regatta " + regatta.getName() +
-                                    " has different value of 'canBoatsOfCompetitorsChangePerRace' than other regattas in leaderboardGroup " + leaderboardGroup.getName());
-                        }
+                        checkConsistencyOfRegattaTypeInSeries(leaderboardGroup, regatta);
                         leaderboardGroupConsistencyChecked.set(true);
                     }
                 }
@@ -793,11 +787,15 @@ public class DomainFactoryImpl implements DomainFactory {
     private boolean checkConsistencyOfRegattaTypeInSeries(LeaderboardGroup leaderboardGroup, Regatta regatta) {
         boolean result = true;
         final boolean canBoatsOfCompetitorsChangePerRace = regatta.canBoatsOfCompetitorsChangePerRace();
+        String boatsCanChangelogMessage = "";
         if (leaderboardGroup != null) {
             for (Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
                 if (leaderboard instanceof RegattaLeaderboard) {
                     RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
                     boolean hasTrackedRaces = Util.size(regattaLeaderboard.getTrackedRaces()) > 0;
+                    boatsCanChangelogMessage += regattaLeaderboard.getName();
+                    boatsCanChangelogMessage += ": trackedRaces=" + hasTrackedRaces;
+                    boatsCanChangelogMessage += ": canBoatsChange=" + canBoatsOfCompetitorsChangePerRace + "; ";
                     if (hasTrackedRaces && canBoatsOfCompetitorsChangePerRace != regattaLeaderboard.getRegatta().canBoatsOfCompetitorsChangePerRace()) {
                         result = false;
                         break;
@@ -805,6 +803,11 @@ public class DomainFactoryImpl implements DomainFactory {
                      
                 }
             }
+        }
+        if (result == false) {
+            logger.log(Level.SEVERE, "Bug2822 DB-Migration: Regatta " + regatta.getName() +
+                    " has different value of 'canBoatsOfCompetitorsChangePerRace' than other regattas in leaderboardGroup " + leaderboardGroup.getName());
+            logger.log(Level.SEVERE, "Bug2822 DB-Migration: leaderboardGroup state: " + boatsCanChangelogMessage);
         }
         return result; 
     }
