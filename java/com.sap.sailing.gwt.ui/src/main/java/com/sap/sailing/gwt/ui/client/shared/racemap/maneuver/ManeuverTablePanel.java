@@ -264,8 +264,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         };
 
         final SortableColumn<SingleManeuverDTO, String> col = new SortableColumn<SingleManeuverDTO, String>(
-                new TextCell(), SortingOrder.DESCENDING) {
-
+                new TextCell(), SortingOrder.ASCENDING) {
             @Override
             public InvertibleComparator<SingleManeuverDTO> getComparator() {
                 return comparator;
