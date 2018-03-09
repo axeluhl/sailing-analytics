@@ -768,7 +768,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 && lowestSpeed.compareTo(beforeManeuverSectionExtension.getLowestSpeedWithinExtensionArea()) > 0) {
             lowestSpeed = beforeManeuverSectionExtension.getLowestSpeedWithinExtensionArea();
         }
-        if (lowestSpeed == null || afterManeuverSectionExtension != null
+        if (lowestSpeed == null || afterManeuverSectionExtension.getLowestSpeedWithinExtensionArea() != null
                 && lowestSpeed.compareTo(afterManeuverSectionExtension.getLowestSpeedWithinExtensionArea()) > 0) {
             lowestSpeed = afterManeuverSectionExtension.getLowestSpeedWithinExtensionArea();
         }
