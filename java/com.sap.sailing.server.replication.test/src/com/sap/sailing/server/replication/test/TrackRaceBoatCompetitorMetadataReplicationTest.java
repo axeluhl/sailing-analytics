@@ -122,16 +122,16 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
     @Test
     public void testStartTrackingRaceReplication() throws Exception {
         final String boat1CompetitorName = "CYC"; 
-        final String boat1Name = "Boot 1"; 
-        final String boat1Color = "#FF0000"; 
+        final String boat1Name = "Boot 1";
+        final String boat1Color = "#141414";
 
         final String boat2CompetitorName = "SVI"; 
-        final String boat2Name = "Boot 2"; 
-        final String boat2Color = "#FFFF00"; 
+        final String boat2Name = "Boot 2";
+        final String boat2Color = "#606060";
 
         final String boat3CompetitorName = "BYCÜ"; 
-        final String boat3Name = "Boot 3"; 
-        final String boat3Color = "#FF00FF"; 
+        final String boat3Name = "Boot 3";
+        final String boat3Color = "#0169EF";
         
         startTracking();
         Thread.sleep(5000);
