@@ -321,10 +321,9 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                 }
                 @Override
                 public void onSuccess(Boolean result) {
-                    if(Boolean.FALSE.equals(result)){
+                    if (Boolean.FALSE.equals(result)) {
                         Window.alert(stringMessages.markEditOnNonTrackingRace());
                     }
-                    
                 }
             });
         }

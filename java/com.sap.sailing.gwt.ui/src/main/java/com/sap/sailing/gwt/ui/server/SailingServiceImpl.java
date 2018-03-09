@@ -7357,9 +7357,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public Boolean checkIfRaceIsTracked(RegattaAndRaceIdentifier race) {
         boolean result = false;
         DynamicTrackedRace trace = getService().getTrackedRace(race);
-        if(trace != null){
+        if (trace != null) {
             final TrackedRaceStatusEnum status = trace.getStatus().getStatus();
-            if(status == TrackedRaceStatusEnum.LOADING || status == TrackedRaceStatusEnum.TRACKING){
+            if (status == TrackedRaceStatusEnum.LOADING || status == TrackedRaceStatusEnum.TRACKING) {
                 result = true;
             }
         }
