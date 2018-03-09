@@ -6,7 +6,7 @@ import com.sap.sailing.windestimation.impl.WindTrackCandidate;
 
 public interface ManeuverBasedWindDirectionEstimator {
 
-    Iterable<WindTrackCandidate> computeWindDirectionCandidates(BoatClass boatClass,
+    Iterable<WindTrackCandidate> computeWindTrackCandidates(BoatClass boatClass,
             Iterable<Maneuver> competitorManeuvers);
 
 }

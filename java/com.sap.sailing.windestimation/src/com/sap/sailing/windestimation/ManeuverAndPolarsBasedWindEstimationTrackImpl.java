@@ -2,6 +2,7 @@ package com.sap.sailing.windestimation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import com.sap.sailing.windestimation.impl.CompetitorManeuverGraphBasedWindDirec
 import com.sap.sailing.windestimation.impl.IManeuverSpeedRetriever;
 import com.sap.sailing.windestimation.impl.WindDirectionCandidatesForManeuver;
 import com.sap.sailing.windestimation.impl.WindDirectionCandidatesForTimePointIterationHelper;
+import com.sap.sailing.windestimation.impl.WindTrackCandidate;
 import com.sap.sailing.windestimation.impl.maneuvergraph.CoarseGrainedPointOfSail;
 import com.sap.sse.common.TimePoint;
 
@@ -39,7 +41,7 @@ public class ManeuverAndPolarsBasedWindEstimationTrackImpl extends WindTrackImpl
 
     private final PolarDataService polarService;
     private final TrackedRace trackedRace;
-
+    
     public ManeuverAndPolarsBasedWindEstimationTrackImpl(PolarDataService polarService, TrackedRace trackedRace,
             long millisecondsOverWhichToAverage, boolean waitForLatest) {
         super(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE, /* useSpeed */true,
@@ -49,73 +51,93 @@ public class ManeuverAndPolarsBasedWindEstimationTrackImpl extends WindTrackImpl
     }
 
     public void analyzeRace() {
+        Map<Maneuver, ManeuverWithEstimationData> maneuverWithEstimationDataMapping = new HashMap<>();
         Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
         CompetitorManeuverGraphBasedWindDirectionEstimator competitorManeuverBasedWindEstimator = new CompetitorManeuverGraphBasedWindDirectionEstimator(
                 polarService, new IManeuverSpeedRetriever() {
 
                     @Override
                     public SpeedWithBearing getLowestSpeedWithinManeuverMainCurve(Maneuver maneuver) {
-                        return ((ManeuverWithEstimationData) maneuver).getLowestSpeedWithinMainCurve();
+                        return maneuverWithEstimationDataMapping.get(maneuver).getLowestSpeedWithinMainCurve();
                     }
 
                     @Override
                     public SpeedWithBearing getHighestSpeedWithinManeuverMainCurve(Maneuver maneuver) {
-                        return ((ManeuverWithEstimationData) maneuver).getHighestSpeedWithinMainCurve();
+                        return maneuverWithEstimationDataMapping.get(maneuver).getHighestSpeedWithinMainCurve();
                     }
                 });
-        Map<Competitor, WindDirectionCandidatesForTimePointIterationHelper> windDirectionCandidatesPerCompetitorTrack = new HashMap<>();
+        Map<Competitor, Iterable<WindTrackCandidate>> windTrackCandidatesPerCompetitor = new HashMap<>();
         ManeuverWithEstimationDataCalculator maneuverWithEstimationDataCalculator = new ManeuverWithEstimationDataCalculatorImpl();
         for (Competitor competitor : competitors) {
             Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, false);
             Iterable<ManeuverWithEstimationData> maneuversWithEstimationData = maneuverWithEstimationDataCalculator
                     .computeEstimationDataForManeuvers(trackedRace, competitor, maneuvers, false);
-            //TODO next
-//            competitorManeuverBasedWindEstimator
-//                    .computeWindDirectionCandidates(competitor.getBoat().getBoatClass(), maneuversWithEstimationData);
-//            windDirectionCandidatesPerCompetitorTrack.put(competitor,
-//                    new WindDirectionCandidatesForTimePointIterationHelper(windDirectionCandidates));
+            for(ManeuverWithEstimationData maneuverWithEstimationData : maneuversWithEstimationData) {
+                maneuverWithEstimationDataMapping.put(maneuverWithEstimationData.getManeuver(), maneuverWithEstimationData);
+            }
+            Iterable<WindTrackCandidate> windTrackCandidates = competitorManeuverBasedWindEstimator
+                    .computeWindTrackCandidates(competitor.getBoat().getBoatClass(), maneuvers);
+            if(windTrackCandidates.iterator().hasNext()) {
+                windTrackCandidatesPerCompetitor.put(competitor,
+                        windTrackCandidates);
+            }
         }
-
-        for (WindDirectionCandidatesForTimePointIterationHelper currentCandidates : windDirectionCandidatesPerCompetitorTrack
+        
+        List<WindTrackCandidate> bestWindTrackCandidates = new ArrayList<>();
+        for (Iterable<WindTrackCandidate> currentCandidates : windTrackCandidatesPerCompetitor
                 .values()) {
-            for (WindDirectionCandidatesForManeuver currentTrackCandidatesForCurrentTimePoint : currentCandidates
-                    .getWindDirectionCandidatesForTimePoints()) {
-                List<WindDirectionCandidatesForManeuver> candidatesForCurrentTimePointFromAllTracks = new ArrayList<>(
-                        windDirectionCandidatesPerCompetitorTrack.size());
-                candidatesForCurrentTimePointFromAllTracks.add(currentTrackCandidatesForCurrentTimePoint);
-                for (WindDirectionCandidatesForTimePointIterationHelper candidatesOfOtherTrack : windDirectionCandidatesPerCompetitorTrack
-                        .values()) {
-                    if (candidatesOfOtherTrack != currentCandidates) {
-                        WindDirectionCandidatesForManeuver otherCandidatesForCurrentTimePoint = candidatesOfOtherTrack
-                                .getWindDirectionCandidatesWithTimePointClosestTo(
-                                        currentTrackCandidatesForCurrentTimePoint.getTimePoint());
-                        if (otherCandidatesForCurrentTimePoint != null) {
-                            candidatesForCurrentTimePointFromAllTracks.add(otherCandidatesForCurrentTimePoint);
+            for (Iterable<WindTrackCandidate> otherCandidates : windTrackCandidatesPerCompetitor
+                    .values()) {
+                if(currentCandidates != otherCandidates) {
+                    for(WindTrackCandidate currentCandidate : currentCandidates) {
+                        for(WindTrackCandidate otherCandidate : otherCandidates) {
+                            
                         }
                     }
                 }
-                // determine best wind course for current time point
-                BearingWithConfidence<TimePoint> windCourseWithConfidence = determineBestWindCourseFromWindCourseCandidatesForTimePoint(
-                        candidatesForCurrentTimePointFromAllTracks,
-                        currentTrackCandidatesForCurrentTimePoint.getTimePoint());
-                if (windCourseWithConfidence != null) {
-                    Iterable<BoatClassWithSpeedAndPointOfSail> speedsAndCoursesOfBoats = determineReferenceBoatSpeedForTimePoint(
-                            candidatesForCurrentTimePointFromAllTracks,
-                            currentTrackCandidatesForCurrentTimePoint.getTimePoint());
-                    SpeedWithConfidence<TimePoint> windSpeed = estimateWindSpeedByBoatSpeedAndTwa(
-                            speedsAndCoursesOfBoats);
-                    KnotSpeedWithBearingImpl windSpeedWithBearing = new KnotSpeedWithBearingImpl(
-                            windSpeed.getObject().getKnots(), windCourseWithConfidence.getObject());
-                    Wind wind = new WindImpl(currentTrackCandidatesForCurrentTimePoint.getManeuver().getPosition(),
-                            currentTrackCandidatesForCurrentTimePoint.getTimePoint(), windSpeedWithBearing);
-                    // TODO merge confidences
-                    // WindWithConfidence<TimePoint> wind = new WindWithConfidenceImpl<TimePoint>(wind, confidence,
-                    // relativeTo, useSpeed)
-                    // TODO rethink how to make different confidences for each fix
-                    add(wind);
-                }
             }
         }
+
+//        for (Iterator<WindTrackCandidate> currentCandidates : windTrackCandidatesPerCompetitor
+//                .values()) {
+//            for (Iterator<WindTrackCandidate> currentTrackCandidatesForCurrentTimePoint : currentCandidates
+//                    .getWindDirectionCandidatesForTimePoints()) {
+//                List<WindDirectionCandidatesForManeuver> candidatesForCurrentTimePointFromAllTracks = new ArrayList<>(
+//                        windTrackCandidatesPerCompetitor.size());
+//                candidatesForCurrentTimePointFromAllTracks.add(currentTrackCandidatesForCurrentTimePoint);
+//                for (WindDirectionCandidatesForTimePointIterationHelper candidatesOfOtherTrack : windTrackCandidatesPerCompetitor
+//                        .values()) {
+//                    if (candidatesOfOtherTrack != currentCandidates) {
+//                        WindDirectionCandidatesForManeuver otherCandidatesForCurrentTimePoint = candidatesOfOtherTrack
+//                                .getWindDirectionCandidatesWithTimePointClosestTo(
+//                                        currentTrackCandidatesForCurrentTimePoint.getTimePoint());
+//                        if (otherCandidatesForCurrentTimePoint != null) {
+//                            candidatesForCurrentTimePointFromAllTracks.add(otherCandidatesForCurrentTimePoint);
+//                        }
+//                    }
+//                }
+//                // determine best wind course for current time point
+//                BearingWithConfidence<TimePoint> windCourseWithConfidence = determineBestWindCourseFromWindCourseCandidatesForTimePoint(
+//                        candidatesForCurrentTimePointFromAllTracks,
+//                        currentTrackCandidatesForCurrentTimePoint.getTimePoint());
+//                if (windCourseWithConfidence != null) {
+//                    Iterable<BoatClassWithSpeedAndPointOfSail> speedsAndCoursesOfBoats = determineReferenceBoatSpeedForTimePoint(
+//                            candidatesForCurrentTimePointFromAllTracks,
+//                            currentTrackCandidatesForCurrentTimePoint.getTimePoint());
+//                    SpeedWithConfidence<TimePoint> windSpeed = estimateWindSpeedByBoatSpeedAndTwa(
+//                            speedsAndCoursesOfBoats);
+//                    KnotSpeedWithBearingImpl windSpeedWithBearing = new KnotSpeedWithBearingImpl(
+//                            windSpeed.getObject().getKnots(), windCourseWithConfidence.getObject());
+//                    Wind wind = new WindImpl(currentTrackCandidatesForCurrentTimePoint.getManeuver().getPosition(),
+//                            currentTrackCandidatesForCurrentTimePoint.getTimePoint(), windSpeedWithBearing);
+//                    // TODO merge confidences
+//                    // WindWithConfidence<TimePoint> wind = new WindWithConfidenceImpl<TimePoint>(wind, confidence,
+//                    // relativeTo, useSpeed)
+//                    // TODO rethink how to make different confidences for each fix
+//                    add(wind);
+//                }
+//            }
+//        }
     }
 
     private SpeedWithConfidence<TimePoint> estimateWindSpeedByBoatSpeedAndTwa(

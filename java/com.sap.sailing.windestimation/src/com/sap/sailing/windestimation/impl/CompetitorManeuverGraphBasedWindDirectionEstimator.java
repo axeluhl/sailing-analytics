@@ -22,7 +22,7 @@ public class CompetitorManeuverGraphBasedWindDirectionEstimator implements Maneu
     }
 
     @Override
-    public Iterable<WindTrackCandidate> computeWindDirectionCandidates(BoatClass boatClass, Iterable<Maneuver> competitorManeuvers) {
+    public Iterable<WindTrackCandidate> computeWindTrackCandidates(BoatClass boatClass, Iterable<Maneuver> competitorManeuvers) {
         ManeuverSequenceGraph maneuverSequenceGraph = new ManeuverSequenceGraph(boatClass, polarService, maneuverSpeedRetriever, competitorManeuvers);
         maneuverSequenceGraph.computePossiblePathsWithDistances();
         return maneuverSequenceGraph.computeWindDirectionCandidates();
