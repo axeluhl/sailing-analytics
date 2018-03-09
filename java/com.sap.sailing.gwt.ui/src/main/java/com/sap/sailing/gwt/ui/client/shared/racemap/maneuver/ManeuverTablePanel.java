@@ -356,7 +356,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                         if (maneuver.duration != null) {
                             turnRate = Math.abs(maneuver.directionChangeInDegrees) / maneuver.duration.asSeconds();
                         }
-
                         data.add(new SingleManeuverDTO(res.getKey(), maneuver.timepoint, maneuver.type,
                                 maneuver.duration, maneuver.speedWithBearingBefore, maneuver.speedWithBearingAfter,
                                 maneuver.minSpeed, turnRate, maneuver.maneuverLossInMeters,
@@ -375,10 +374,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             from.put(comp, timeRangeWithZoomProvider.getFromTime());
             to.put(comp, timeRangeWithZoomProvider.getToTime());
         }
-
         sailingService.getManeuvers(raceIdentifier, from, to,
                 new AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>>() {
-
                     @Override
                     public void onSuccess(Map<CompetitorDTO, List<ManeuverDTO>> result) {
                         lastResult.clear();
