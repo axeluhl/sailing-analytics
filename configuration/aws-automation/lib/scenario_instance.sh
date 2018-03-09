@@ -43,9 +43,9 @@ function instance_preview(){
 	local_echo "To be implemented..."
 	seek_confirmation "Do you want to continue?"
   if is_confirmed; then
-		break
+		:
   else
-		break
+		safeExit
 	fi
 }
 
@@ -65,10 +65,10 @@ function instance_execute() {
 
 	local port="8888"
 	configure_application $public_dns_name $port $event_name $new_admin_password $user_username $user_pass
-	append_environment_to_env_sh "live-server" $ssh_user $public_dns_name
+	append_to_env_sh "MONGODB_HOST=${4:-'/home/sailing/servers/server/env.sh'}"
 	header "Conclusion"
 
-	success "Instance should be reachable through $public_dns_name."
+	success "Instance should be reachable through $public_dns_name:8888."
 }
 
 function build_user_data(){

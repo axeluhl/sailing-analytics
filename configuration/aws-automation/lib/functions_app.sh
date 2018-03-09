@@ -143,13 +143,25 @@ function append_macro_to_001_events_conf(){
 # @param $4  path to env.sh file
 # -----------------------------------------------------------
 function append_environment_to_env_sh(){
-	local env_file=${4:-'/home/sailing/servers/server'}
-	local_echo "Appending environment '$environment' to env.sh..."
+	local env_file=${4:-'/home/sailing/servers/server/env.sh'}
+	local_echo "Appending environment '$1' to env.sh..."
 	env_content=$(wget -qO- http://releases.sapsailing.com/environments/$1)
 
-	exit_on_fail ssh_wrapper $2@$3 "echo -e \"# START Environment: $environment \" >> $env_file"
+	exit_on_fail ssh_wrapper $2@$3 "echo -e \"# START Environment: $1 \" >> $env_file"
 	exit_on_fail ssh_wrapper $2@$3 "echo -e \"$env_content\" >> $env_file"
-	exit_on_fail ssh_wrapper $2@$3 "echo -e \"# END Environment: $environment \" >> $env_file"
+	exit_on_fail ssh_wrapper $2@$3 "echo -e \"# END Environment: $1 \" >> $env_file"
+}
+
+# -----------------------------------------------------------
+# Append string to env.sh
+# @param $1  ssh user
+# @param $2  dns name of instance
+# @param $3  string value
+# @param $4 path to env.sh file
+# -----------------------------------------------------------
+function append_to_env_sh(){
+	local env_file=${4:-'/home/sailing/servers/server/env.sh'}
+	exit_on_fail ssh_wrapper $1@$2 "echo -e \"$3\" >> $env_file"
 }
 
 # -----------------------------------------------------------

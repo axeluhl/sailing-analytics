@@ -21,6 +21,8 @@ function master_instance_require(){
 	require_image
 	require_instance_name
 	require_instance_short_name
+	require_mongodb_host
+	require_mongodb_port
 	require_instance_security_group
 	require_ssh_user
 	require_build_version
@@ -40,7 +42,7 @@ function master_instance_execute() {
 	event_name=$instance_name
 	image_id=$(get_resource_id $image)
 	instance_security_group_id=$(get_resource_id $instance_security_group)
-	
+
 	local user_data_master=$(build_configuration "MONGODB_HOST=$mongodb_host" "MONGODB_PORT=$mongodb_port" "MONGODB_NAME=$(alphanumeric $instance_name)" \
 	"REPLICATION_CHANNEL=$(alphanumeric $instance_name)" "SERVER_NAME=$(alphanumeric $instance_name)" "USE_ENVIRONMENT=live-master-server" \
 	"INSTALL_FROM_RELEASE=$build_version" "SERVER_STARTUP_NOTIFY=$default_server_startup_notify")

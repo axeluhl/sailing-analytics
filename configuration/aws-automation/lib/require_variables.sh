@@ -11,7 +11,7 @@
 
 image_ask_message="Please select an image to use: "
 instance_ask_message="Please enter an instance to use: "
-event_name_ask_message="Please enter an event name  (leave blank to skip event creation):"
+event_name_ask_message="Please enter an event name  (leave blank to skip event creation): "
 instance_security_group_ask_message="Please select the security group for the instance: "
 load_balancer_ask_message="Please select or enter the load balancer dns name: "
 region_ask_message="Please enter the region you want to use (e.g. eu-west-2): "
@@ -49,11 +49,13 @@ NOT_A_PARAMETER=""
 # -----------------------------------------------------------
 
 function require_launch_template(){
-	require_variable "$launch_template_param" launch_template "$NO_DEFAULT_VALUE" "$launch_tempate_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidLaunchTemplateIdRegex
+	fill_resource_map_with_resources_of_type "ec2:launch-template"
+	require_variable "$launch_template_param" launch_template "$NO_DEFAULT_VALUE" "$launch_tempate_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT"
 }
 
 function require_image(){
-	require_variable "$image_param" image "$NO_DEFAULT_VALUE" "$image_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidImageARNRegex
+	fill_resource_map_with_resources_of_type "ec2:image"
+	require_variable "$image_param" image "$NO_DEFAULT_VALUE" "$image_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT"
 }
 
 function require_event_name(){
@@ -61,15 +63,18 @@ function require_event_name(){
 }
 
 function require_instance_security_group(){
-	require_variable "$security_group_param" instance_security_group "$NO_DEFAULT_VALUE" "$instance_security_group_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidSecurityGroupARNRegex
+	fill_resource_map_with_resources_of_type "ec2:security-group"
+	require_variable "$security_group_param" instance_security_group "$NO_DEFAULT_VALUE" "$instance_security_group_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT"
 }
 
 function require_load_balancer(){
+	fill_resource_map_with_resources_of_type "elasticloadbalancing:loadbalancer"
 	require_variable "$load_balancer_param" load_balancer "$NO_DEFAULT_VALUE" "$load_balancer_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidLoadBalancerARNRegex
 }
 
 function require_instance(){
-	require_variable "$instance_param" instance "$NO_DEFAULT_VALUE" "$instance_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidInstanceARNRegex
+	fill_resource_map_with_resources_of_type "ec2:instance"
+	require_variable "$instance_param" instance "$NO_DEFAULT_VALUE" "$instance_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT"
 }
 
 function require_region(){
@@ -106,14 +111,14 @@ function require_user_username(){
 }
 
 function require_mongodb_port(){
-	if [ "$region" != "eu-west-1 "]; then
-	  require_variable "$mongodb_port_param" mongodb_port "$default_mongodb_port" "$mongodb_port_ask_message" "$IS_OPTIONAL" "$HIDE_INPUT"
+	if [ "$region" != "eu-west-1" ]; then
+	  require_variable "$mongodb_port_param" mongodb_port "$default_mongodb_port" "$mongodb_port_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT"
 	fi
 }
 
 function require_mongodb_host(){
-	if [ "$region" != "eu-west-1 "]; then
-	  require_variable "$mongodb_host_param" mongodb_host "$default_mongodb_hostd" "$mongodb_host_ask_message" "$IS_OPTIONAL" "$HIDE_INPUT"
+	if [ "$region" != "eu-west-1" ]; then
+	  require_variable "$mongodb_host_param" mongodb_host "$default_mongodb_host" "$mongodb_host_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT"
 	fi
 }
 
@@ -126,7 +131,8 @@ function require_ssh_user(){
 }
 
 function require_super_instance(){
-	require_variable "$super_instance_param" super_instance "$NO_DEFAULT_VALUE" "$super_instance_message"  "$IS_NOT_OPTIONAL" "$SHOW_INPUT" $ValidInstanceARNRegex
+	fill_resource_map_with_resources_of_type "ec2:instance"
+	require_variable "$super_instance_param" super_instance "$NO_DEFAULT_VALUE" "$super_instance_message"  "$IS_NOT_OPTIONAL" "$SHOW_INPUT"
 }
 
 function require_description(){

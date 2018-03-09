@@ -19,9 +19,24 @@ function get_public_dns_name(){
 # Get resources all resources from aws
 # @return  json array of resourceARNs
 # -----------------------------------------------------------
-function get_resources(){
-	aws_wrapper resourcegroupstaggingapi get-resources --resource-type-filters elasticloadbalancing:loadbalancer ec2:instance ec2:image ec2:security-group acm:certificate | jq -c ".ResourceTagMappingList[] | select(.ResourceARN)" -r | sanitize
+function get_array_with_resource_of_type(){
+	disable_aws_success_output
+	# RESOURCE_ARRAY=($(aws_wrapper resourcegroupstaggingapi get-resources --resource-type-filters elasticloadbalancing:loadbalancer ec2:instance ec2:image ec2:security-group acm:certificate | jq -c ".ResourceTagMappingList[] | select(.ResourceARN)" -r | sanitize))
+	aws_wrapper resourcegroupstaggingapi get-resources --resource-type-filters $1 | jq -c ".ResourceTagMappingList[] | select(.ResourceARN)" -r | sanitize
+	enable_aws_success_output
 }
+
+# -----------------------------------------------------------
+# Get launch templates as json
+# param $1 public dns name
+# @return  json array of launch templates
+# -----------------------------------------------------------
+function get_array_with_launch_templates(){
+	disable_aws_success_output
+	aws_wrapper ec2 describe-launch-templates | jq -c ".LaunchTemplates[]" -r | sanitize
+	enable_aws_success_output
+}
+
 
 # -----------------------------------------------------------
 # Get tag value of specified key of instance
@@ -52,14 +67,7 @@ function get_instance_id(){
 	exit_on_fail validate_instance_id $instance_id
 }
 
-# -----------------------------------------------------------
-# Get launch templates as json
-# param $1 public dns name
-# @return  json array of launch templates
-# -----------------------------------------------------------
-function get_launch_templates(){
-	aws_wrapper ec2 describe-launch-templates | jq -c ".LaunchTemplates[]" -r | sanitize
-}
+
 # -----------------------------------------------------------
 # Returns the instance id part of e.g. arn:aws:ec2:eu-west-2:017363970217:instance/i-096a32ca8c28bedbb
 # param $1 resource arn
@@ -153,7 +161,7 @@ function create_instance(){
 	local_echo -e "Creating instance with following specifications:\n\nRegion: $region\nName: $instance_name\nShort name: $instance_short_name\nType: $instance_type\nBuild: $build_version\n\nUser data:\n${1}\n"
 	instance_id=$(run_instance "$1")
 	wait_instance_exists $instance_id
-	$(print_instance_description $instance_id)
+	null=$(print_instance_description $instance_id)
 	echo $instance_id
 }
 
