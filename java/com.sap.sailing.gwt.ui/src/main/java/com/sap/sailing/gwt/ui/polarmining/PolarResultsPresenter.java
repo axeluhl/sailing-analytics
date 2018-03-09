@@ -88,7 +88,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
         polarChartWrapperPanel.add(polarChart);
 
         dataCountHistogramChart = ChartFactory.createDataCountHistogramChart(
-                stringMessages.beatAngle() + " (" + stringMessages.degreesShort() + ")", stringMessages);
+                stringMessages.TWA() + " (" + stringMessages.degreesShort() + ")", stringMessages);
         dataCountPerAngleHistogramChart = ChartFactory.createDataCountHistogramChart(stringMessages.windSpeed(),
                 stringMessages);
         histogramChartsWrapperPanel = new DockLayoutPanel(Unit.PCT) {

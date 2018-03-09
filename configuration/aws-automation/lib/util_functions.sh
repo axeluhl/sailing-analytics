@@ -1,36 +1,42 @@
 #!/usr/bin/env bash
 
 # -----------------------------------------------------------
-# Creates a parameter from a key and value
-# @param $1  key
-# @param $2  value
-# @return    result ("--key value")
+# Appends multiple parameters (e.g. "SERVER_NAME=Test")
+# Also includes parameters starting with "#" as comments.
+# @param $@  variable key and value (e.g. "MONGODB_HOST=123.123.123.123")
 # -----------------------------------------------------------
-function add_param() {
-	if [ ! -z "$2" ]; then
-		local result=" --$1 $2"
-	fi
-	echo "$result"
-}
-
-# -----------------------------------------------------------
-# Constructs string of user data variable name and value plus linebreak
-# @param $1  user data variable name
-# @param $2  user data variable value
-# @return    name=value (linebreak) if value not empty else nothing
-# -----------------------------------------------------------
-function add_user_data_variable(){
-		if ! [ -z "$2" ]; then
-			local CR_LF=$'\r'$'\n'
-			local content="$1=$2"
-			content+=$CR_LF
-			echo "$content"
+function build_configuration(){
+	for var in "$@"
+	do
+		# if parameters starts with #, add parameters to content
+		if [[ $var == \#* ]]; then
+			content+="$var\n"
+			continue
 		fi
+
+		key=${var%=*}
+		value=${var#*=}
+
+		if [[ ! -z "$key"  && ! -z "$value" ]]; then
+			content+="$key=$value\n"
+	  fi
+	done
+	echo -e $content
 }
 
 function command_was_successful(){
 	[ $1 -eq 0 ]
 }
+
+# -----------------------------------------------------------
+# Uncomments a line starting with a specific pattern
+# @param $1  pattern
+# @param $2  file
+# -----------------------------------------------------------
+function uncomment_line_starting_with(){
+	sed -i '/$1/s/^#//g' $2
+}
+
 
 # -----------------------------------------------------------
 # Checks if variable is a number
@@ -40,6 +46,8 @@ function command_was_successful(){
 function is_number(){
 	[[ $1 =~ ^-?[0-9]+$ ]]
 }
+
+
 
 # -----------------------------------------------------------
 # Check if variable is a number and its value is 200
@@ -65,6 +73,15 @@ function get_attribute(){
 function sanitize(){
 	tr -d '\r'
 }
+
+function alphanumeric(){
+	lower_trim $1 | only_letters_and_numbers
+}
+
+function only_letters_numbers_dash(){
+	echo $1 | trim | tr -d -c '[:alnum:]-'
+}
+
 
 # ------------------------------------------------------
 # The following functions were part of a bash template
@@ -234,41 +251,6 @@ function is_not_empty() {
   return 1
 }
 
-# Test whether a command exists
-# ------------------------------------------------------
-# Usage:
-#    if type_exists 'git'; then
-#      some action
-#    else
-#      some other action
-#    fi
-# ------------------------------------------------------
-
-function type_exists() {
-  if [ "$(type -P "$1")" ]; then
-    return 0
-  fi
-  return 1
-}
-
-function type_not_exists() {
-  if [ ! "$(type -P "$1")" ]; then
-    return 0
-  fi
-  return 1
-}
-
-# Test which OS the user runs
-# $1 = OS to test
-# Usage: if is_os 'darwin'; then
-
-function is_os() {
-  if [[ "${OSTYPE}" == $1* ]]; then
-    return 0
-  fi
-  return 1
-}
-
 
 # SEEKING CONFIRMATION
 # ------------------------------------------------------
@@ -364,16 +346,6 @@ function pauseScript() {
   fi
 }
 
-function in_array() {
-    # Determine if a value is in an array.
-    # Usage: if in_array "VALUE" "${ARRAY[@]}"; then ...
-    local value="$1"; shift
-    for arrayItem in "$@"; do
-        [[ "${arrayItem}" == "${value}" ]] && return 0
-    done
-    return 1
-}
-
 # Text Transformations
 # -----------------------------------
 # Transform text using these functions.
@@ -387,13 +359,6 @@ lower() {
   tr '[:upper:]' '[:lower:]'
 }
 
-upper() {
-  # Convert stdin to uppercase.
-  # usage:  text=$(upper <<<"$1")
-  #         echo "MAKETHISUPPERCASE" | upper
-  tr '[:lower:]' '[:upper:]'
-}
-
 function lower_trim(){
 	echo $1 | lower | trim
 }
@@ -403,242 +368,10 @@ trim() {
 	tr -d '[:space:]'
 }
 
-ltrim() {
-  # Removes all leading whitespace (from the left).
-  local char=${1:-[:space:]}
-    sed "s%^[${char//%/\\%}]*%%"
-}
-
-rtrim() {
-  # Removes all trailing whitespace (from the right).
-  local char=${1:-[:space:]}
-  sed "s%[${char//%/\\%}]*$%%"
-}
-
-lttrim() {
-  # Removes all leading/trailing whitespace
-  # Usage examples:
-  #     echo "  foo  bar baz " | trim  #==> "foo  bar baz"
-  ltrim "$1" | rtrim "$1"
-}
-
 only_letters_and_numbers(){
   tr -d -c '[:alnum:]'
 }
 
-squeeze() {
-  # Removes leading/trailing whitespace and condenses all other consecutive
-  # whitespace into a single space.
-  #
-  # Usage examples:
-  #     echo "  foo  bar   baz  " | squeeze  #==> "foo bar baz"
-
-  local char=${1:-[[:space:]]}
-  sed "s%\(${char//%/\\%}\)\+%\1%g" | trim "$char"
-}
-
-squeeze_lines() {
-    # <doc:squeeze_lines> {{{
-    #
-    # Removes all leading/trailing blank lines and condenses all other
-    # consecutive blank lines into a single blank line.
-    #
-    # </doc:squeeze_lines> }}}
-
-    sed '/^[[:space:]]\+$/s/.*//g' | cat -s | trim_lines
-}
-
-progressBar() {
-  # progressBar
-  # -----------------------------------
-  # Prints a progress bar within a for/while loop.
-  # To use this function you must pass the total number of
-  # times the loop will run to the function.
-  #
-  # usage:
-  #   for number in $(seq 0 100); do
-  #     sleep 1
-  #     progressBar 100
-  #   done
-  # -----------------------------------
-  if [[ "${quiet}" = "true" ]] || [ "${quiet}" == "1" ]; then
-    return
-  fi
-
-  local width
-  width=30
-  bar_char="#"
-
-  # Don't run this function when scripts are running in verbose mode
-  if ${verbose}; then return; fi
-
-  # Reset the count
-  if [ -z "${progressBarProgress}" ]; then
-    progressBarProgress=0
-  fi
-
-  # Do nothing if the output is not a terminal
-  if [ ! -t 1 ]; then
-      echo "Output is not a terminal" 1>&2
-      return
-  fi
-  # Hide the cursor
-    tput civis
-    trap 'tput cnorm; exit 1' SIGINT
-
-  if [ ! "${progressBarProgress}" -eq $(( $1 - 1 )) ]; then
-    # Compute the percentage.
-    perc=$(( progressBarProgress * 100 / $1 ))
-    # Compute the number of blocks to represent the percentage.
-    num=$(( progressBarProgress * width / $1 ))
-    # Create the progress bar string.
-    bar=
-    if [ ${num} -gt 0 ]; then
-        bar=$(printf "%0.s${bar_char}" $(seq 1 ${num}))
-    fi
-    # Print the progress bar.
-    progressBarLine=$(printf "%s [%-${width}s] (%d%%)" "Running Process" "${bar}" "${perc}")
-    echo -en "${progressBarLine}\r"
-    progressBarProgress=$(( progressBarProgress + 1 ))
-  else
-    # Clear the progress bar when complete
-    echo -ne "${width}%\033[0K\r"
-    unset progressBarProgress
-  fi
-
-  tput cnorm
-}
-
-htmlDecode() {
-  # Decode HTML characters with sed
-  # Usage: htmlDecode <string>
-  echo "${1}" | sed -f "${SOURCEPATH}/htmlDecode.sed"
-}
-
-htmlEncode() {
-  # Encode HTML characters with sed
-  # Usage: htmlEncode <string>
-  echo "${1}" | sed -f "${SOURCEPATH}/htmlEncode.sed"
-}
-
-urlencode() {
-  # URL encoding/decoding from: https://gist.github.com/cdown/1163649
-  # Usage: urlencode <string>
-
-  local length="${#1}"
-  for (( i = 0; i < length; i++ )); do
-      local c="${1:i:1}"
-      case $c in
-          [a-zA-Z0-9.~_-]) printf "%s" "$c" ;;
-          *) printf '%%%02X' "'$c"
-      esac
-  done
-}
-
-urldecode() {
-    # Usage: urldecode <string>
-
-    local url_encoded="${1//+/ }"
-    printf '%b' "${url_encoded//%/\x}"
-}
-
-parse_yaml() {
-  # Function to parse YAML files and add values to variables. Send it to a temp file and source it
-  # https://gist.github.com/DinoChiesa/3e3c3866b51290f31243 which is derived from
-  # https://gist.github.com/epiloque/8cf512c6d64641bde388
-  #
-  # Usage:
-  #     $ parse_yaml sample.yml > /some/tempfile
-  #
-  # parse_yaml accepts a prefix argument so that imported settings all have a common prefix
-  # (which will reduce the risk of name-space collisions).
-  #
-  #     $ parse_yaml sample.yml "CONF_"
-
-    local prefix=$2
-    local s
-    local w
-    local fs
-    s='[[:space:]]*'
-    w='[a-zA-Z0-9_]*'
-    fs="$(echo @|tr @ '\034')"
-    sed -ne "s|^\($s\)\($w\)$s:$s\"\(.*\)\"$s\$|\1$fs\2$fs\3|p" \
-        -e "s|^\($s\)\($w\)$s[:-]$s\(.*\)$s\$|\1$fs\2$fs\3|p" "$1" |
-    awk -F"$fs" '{
-      indent = length($1)/2;
-      if (length($2) == 0) { conj[indent]="+";} else {conj[indent]="";}
-      vname[indent] = $2;
-      for (i in vname) {if (i > indent) {delete vname[i]}}
-      if (length($3) > 0) {
-              vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
-              printf("%s%s%s%s=(\"%s\")\n", "'"$prefix"'",vn, $2, conj[indent-1],$3);
-      }
-    }' | sed 's/_=/+=/g'
-}
-
-httpStatus() {
-  # -----------------------------------
-  # Shamelessly taken from: https://gist.github.com/rsvp/1171304
-  #
-  # Usage:  httpStatus URL [timeout] [--code or --status] [see 4.]
-  #                                             ^message with code (default)
-  #                                     ^code (numeric only)
-  #                           ^in secs (default: 3)
-  #                   ^URL without "http://" prefix works fine.
-  #
-  #  4. curl options: e.g. use -L to follow redirects.
-  #
-  #  Dependencies: curl
-  #
-  #         Example:  $ httpStatus bit.ly
-  #                   301 Redirection: Moved Permanently
-  #
-  #         Example: $ httpStatus www.google.com 100 -c
-  #                  200
-  #
-  # -----------------------------------
-  local curlops
-  local arg4
-  local arg5
-  local arg6
-  local arg7
-  local flag
-  local timeout
-  local url
-
-  saveIFS=${IFS}
-  IFS=$' \n\t'
-
-  url=${1}
-  timeout=${2:-'3'}
-  #            ^in seconds
-  flag=${3:-'--status'}
-  #    curl options, e.g. -L to follow redirects
-  arg4=${4:-''}
-  arg5=${5:-''}
-  arg6=${6:-''}
-  arg7=${7:-''}
-  curlops="${arg4} ${arg5} ${arg6} ${arg7}"
-
-  #      __________ get the CODE which is numeric:
-  code=`echo $(curl --write-out %{http_code} --silent --connect-timeout ${timeout} \
-                  --no-keepalive ${curlops} --output /dev/null  ${url})`
-
-  #      __________ get the STATUS (from code) which is human interpretable:
-
-  status=$(get_http_code_message $code)
-
-  # _______________ MAIN
-  case ${flag} in
-       --status) echo "${code} ${status}" ;;
-       -s)       echo "${code} ${status}" ;;
-       --code)   echo "${code}"         ;;
-       -c)       echo "${code}"         ;;
-       *)        echo " !!  httpstatus: bad flag" && safeExit;;
-  esac
-
-  IFS="${saveIFS}"
-}
 
 function get_http_code_message(){
 	case $1 in
@@ -687,52 +420,4 @@ function get_http_code_message(){
        *)   status="status not defined." ;;
   esac
   echo "$status"
-}
-
-
-function makeCSV() {
-  # Creates a new CSV file if one does not already exist.
-  # Takes passed arguments and writes them as a header line to the CSV
-  # Usage 'makeCSV column1 column2 column3'
-
-  # Set the location and name of the CSV File
-  if [ -z "${csvLocation}" ]; then
-    csvLocation="${HOME}/Desktop"
-  fi
-  if [ -z "${csvName}" ]; then
-    csvName="$(LC_ALL=C date +%Y-%m-%d)-${FUNCNAME[1]}.csv"
-  fi
-  csvFile="${csvLocation}/${csvName}"
-
-  # Overwrite existing file? If not overwritten, new content is added
-  # to the bottom of the existing file
-  if [ -f "${csvFile}" ]; then
-    seek_confirmation "${csvFile} already exists. Overwrite?"
-    if is_confirmed; then
-      rm "${csvFile}"
-      writeCSV "$@"
-    fi
-  fi
-}
-
-function writeCSV() {
-  # Takes passed arguments and writes them as a comma separated line
-  # Usage 'writeCSV column1 column2 column3'
-
-  csvInput=($@)
-  saveIFS=$IFS
-  IFS=','
-  echo "${csvInput[*]}" >> "${csvFile}"
-  IFS=$saveIFS
-
-}
-
-function json2yaml() {
-  # convert json files to yaml using python and PyYAML
-  python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' < "$1"
-}
-
-function yaml2json() {
-  # convert yaml files to json using python and PyYAML
-  python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, indent=4)' < "$1"
 }

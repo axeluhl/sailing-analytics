@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -40,6 +41,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
+import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
@@ -79,6 +81,7 @@ import com.sap.sailing.gwt.ui.shared.SailingServiceConstants;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
+import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
@@ -428,7 +431,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,
             String baseURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
-            Iterable<VideoDTO> videos, AsyncCallback<EventDTO> callback);
+            Iterable<VideoDTO> videos, Iterable<String> windFinderReviewedSpotCollectionIds, AsyncCallback<EventDTO> callback);
 
     void resolveImageDimensions(String imageUrlAsString, AsyncCallback<Pair<Integer, Integer>> callback);
 
@@ -926,5 +929,22 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier,
             final Iterable<String> selectedFlightNames,PairingListDTO pairingListDTO, AsyncCallback<Void> callback);
     
-    void getRaceDisplayNamesFromLeaderboard(final String leaderboardName,List<String> raceColumnNames, AsyncCallback<List<String>> callback);
+    void getRaceDisplayNamesFromLeaderboard(final String leaderboardName, List<String> raceColumnNames, AsyncCallback<List<String>> callback);
+
+    void canSliceRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> callback);
+
+    void sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo,
+            AsyncCallback<RegattaAndRaceIdentifier> callback);
+
+    void prepareForSlicingOfRace(RegattaAndRaceIdentifier raceIdentifier,
+            AsyncCallback<SliceRacePreperationDTO> callback);
+    
+    /**
+     * For a given WindFinder spot ID provides a {@link URL} that a web UI can use to link
+     * to the WindFinder web site with the content most appropriate given the time point.
+     * This could be the report page if the time is about now; the forecast page if the time point
+     * is up to ten days in the future, or the statistics page if the time point is out of any
+     * of the scopes above.
+     */
+    void getWindFinderSpot(String spotId, AsyncCallback<SpotDTO> callback);
 }

@@ -66,6 +66,7 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.security.ui.client.UserService;
 
 public class SimulatorMainPanel extends SimplePanel {
 
@@ -237,7 +238,7 @@ public class SimulatorMainPanel extends SimplePanel {
     SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter,
             int xRes, int yRes, int border, StreamletParameters streamletPars, boolean autoUpdate, char mode,
             char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows,
-            boolean showLineGuides, boolean showStreamlets, boolean showMapControls) {
+            boolean showLineGuides, boolean showStreamlets, boolean showMapControls, UserService userService) {
        super();
        this.formatter = new WindPatternFormatter(stringMessages);
         this.macroWeather = streamletPars.macroWeather;
@@ -317,7 +318,7 @@ public class SimulatorMainPanel extends SimplePanel {
         timer.setPlaySpeedFactor(secondsTimeStep);
         timePanel = new TimePanel<TimePanelSettings>(null, null, timer, timeRangeProvider, stringMessages, false,
                 /* isScreenLargeEnoughToOfferChartSupport: no wind or competitor chart is shown; use full horizontal
-                 * extension of time panel */ false);
+                 * extension of time panel */ false, userService);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, border, streamletPars,
                 timer, timePanel, windParams, busyIndicator, mode, this, showMapControls,

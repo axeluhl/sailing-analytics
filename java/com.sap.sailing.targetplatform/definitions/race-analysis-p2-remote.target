@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="107">
+<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="114">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
@@ -8,10 +8,6 @@
 <unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.jackson.feature.group" version="1.0.0"/>
 <repository location="https://p2.sapsailing.com/p2/sailing/"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.2.2.201407241931"/>
-<repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-9.x/9.2.2.v20140723/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.osgi" version="3.10.2.v20150203-1939"/>
@@ -90,6 +86,10 @@
 <unit id="com.fasterxml.jackson.core.jackson-databind" version="2.5.0.v201504151636"/>
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/"/>
 </location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.8.201802270002"/>
+<repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-9.x/"/>
+</location>
 </locations>
 <includeBundles>
 <plugin id="com.fasterxml.jackson.core.jackson-annotations"/>
@@ -165,8 +165,6 @@
 <plugin id="org.eclipse.jetty.annotations.source"/>
 <plugin id="org.eclipse.jetty.client"/>
 <plugin id="org.eclipse.jetty.client.source"/>
-<plugin id="org.eclipse.jetty.continuation"/>
-<plugin id="org.eclipse.jetty.continuation.source"/>
 <plugin id="org.eclipse.jetty.deploy"/>
 <plugin id="org.eclipse.jetty.deploy.source"/>
 <plugin id="org.eclipse.jetty.http"/>
@@ -174,23 +172,12 @@
 <plugin id="org.eclipse.jetty.io"/>
 <plugin id="org.eclipse.jetty.io.source"/>
 <plugin id="org.eclipse.jetty.jaas"/>
-<plugin id="org.eclipse.jetty.jaspi"/>
-<plugin id="org.eclipse.jetty.jaspi.source"/>
 <plugin id="org.eclipse.jetty.jmx"/>
 <plugin id="org.eclipse.jetty.jmx.source"/>
-<plugin id="org.eclipse.jetty.jndi"/>
-<plugin id="org.eclipse.jetty.jndi.source"/>
 <plugin id="org.eclipse.jetty.osgi.boot"/>
-<plugin id="org.eclipse.jetty.osgi.boot.jsp"/>
-<plugin id="org.eclipse.jetty.osgi.boot.jsp.source"/>
 <plugin id="org.eclipse.jetty.osgi.boot.source"/>
 <plugin id="org.eclipse.jetty.osgi.boot.warurl"/>
 <plugin id="org.eclipse.jetty.osgi.boot.warurl.source"/>
-<plugin id="org.eclipse.jetty.osgi.httpservice"/>
-<plugin id="org.eclipse.jetty.osgi.httpservice.source"/>
-<plugin id="org.eclipse.jetty.osgi.npn.fragment"/>
-<plugin id="org.eclipse.jetty.plus"/>
-<plugin id="org.eclipse.jetty.plus.source"/>
 <plugin id="org.eclipse.jetty.proxy"/>
 <plugin id="org.eclipse.jetty.rewrite"/>
 <plugin id="org.eclipse.jetty.rewrite.source"/>
@@ -200,18 +187,7 @@
 <plugin id="org.eclipse.jetty.server.source"/>
 <plugin id="org.eclipse.jetty.servlet"/>
 <plugin id="org.eclipse.jetty.servlet.source"/>
-<plugin id="org.eclipse.jetty.servlets"/>
 <plugin id="org.eclipse.jetty.servlets.source"/>
-<plugin id="org.eclipse.jetty.spdy.client"/>
-<plugin id="org.eclipse.jetty.spdy.client.source"/>
-<plugin id="org.eclipse.jetty.spdy.core"/>
-<plugin id="org.eclipse.jetty.spdy.core.source"/>
-<plugin id="org.eclipse.jetty.spdy.http.common"/>
-<plugin id="org.eclipse.jetty.spdy.http.common.source"/>
-<plugin id="org.eclipse.jetty.spdy.http.server"/>
-<plugin id="org.eclipse.jetty.spdy.http.server.source"/>
-<plugin id="org.eclipse.jetty.spdy.server"/>
-<plugin id="org.eclipse.jetty.spdy.server.source"/>
 <plugin id="org.eclipse.jetty.util"/>
 <plugin id="org.eclipse.jetty.util.ajax"/>
 <plugin id="org.eclipse.jetty.util.ajax.source"/>
@@ -224,14 +200,6 @@
 <plugin id="org.eclipse.jetty.websocket.client.source"/>
 <plugin id="org.eclipse.jetty.websocket.common"/>
 <plugin id="org.eclipse.jetty.websocket.common.source"/>
-<plugin id="org.eclipse.jetty.websocket.javax.websocket"/>
-<plugin id="org.eclipse.jetty.websocket.javax.websocket.server"/>
-<plugin id="org.eclipse.jetty.websocket.javax.websocket.server.source"/>
-<plugin id="org.eclipse.jetty.websocket.javax.websocket.source"/>
-<plugin id="org.eclipse.jetty.websocket.server"/>
-<plugin id="org.eclipse.jetty.websocket.server.source"/>
-<plugin id="org.eclipse.jetty.websocket.servlet"/>
-<plugin id="org.eclipse.jetty.websocket.servlet.source"/>
 <plugin id="org.eclipse.jetty.xml"/>
 <plugin id="org.eclipse.jetty.xml.source"/>
 <plugin id="org.eclipse.osgi"/>
