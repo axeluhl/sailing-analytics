@@ -288,15 +288,6 @@ public interface TrackedLegOfCompetitor extends Serializable {
      */
     Distance getAverageSignedCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
 
-    /**
-     * Computes the maneuver loss as the distance projected onto the average course between entering and exiting the
-     * maneuver that the boat lost compared to not having maneuvered. With this distance measure, the competitors speed
-     * and bearing before the maneuver, as defined by <code>timePointBeforeManeuver</code> is extrapolated until
-     * <code>timePointAfterManeuver</code>, and the resulting extrapolated position's "windward distance" is compared to
-     * the competitor's actual position at that time. This distance is returned as the result of this method.
-     */
-    Distance getManeuverLoss(TimePoint timePointBeforeManeuver, TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver);
-
     TrackedLeg getTrackedLeg();
 
     /**

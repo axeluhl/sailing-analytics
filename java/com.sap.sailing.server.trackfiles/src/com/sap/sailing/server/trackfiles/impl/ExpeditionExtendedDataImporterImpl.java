@@ -12,10 +12,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,12 +37,13 @@ import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
- * Importer for CSV data files from Expedition log files, as used, e.g., by Team
- * Phoenix.
+ * Importer for CSV data files from Expedition log files, as used, e.g., by Team Phoenix. Note that this importer so far
+ * ignores the {@code downsample} parameter of the
+ * {@link #importFixes(InputStream, com.sap.sailing.domain.trackimport.BaseDoubleVectorFixImporter.Callback, String, String, boolean)}
+ * method.
  */
 public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixImporter
         implements DoubleVectorFixImporter {
@@ -63,7 +62,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     private static final Pattern BOAT_CHECK_PATTERN = Pattern.compile("[1-9]?[0-9]");
     private final Map<String, Integer> columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix;
     /**
-     * The maximum index into the double vector fix from the
+     * The maximum index + 1 into the double vector fix from the
      * {@link #columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix}
      * values
      */
@@ -115,15 +114,15 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
                         if (!line.trim().isEmpty()) {
                             parseLine(lineNr.get(), filename, line, colIndices,
                                     (timePoint, lineContentTokens, columnsInFileFromHeader) -> {
-                                        Double[] trackFixData = new Double[trackColumnCount];
-                                        for (final Entry<String, Integer> columnNameToSearchForInFile : columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix
-                                                .entrySet()) {
-                                            Integer columnsInFileIdx = columnsInFileFromHeader
-                                                    .get(columnNameToSearchForInFile.getKey());
-                                            trackFixData[columnNameToSearchForInFile
-                                                         .getValue()] = columnsInFileIdx >= lineContentTokens.length ? null
-                                                                 : lineContentTokens[columnsInFileIdx].trim().isEmpty() ? null
-                                                                         : Double.parseDouble(lineContentTokens[columnsInFileIdx]);
+                                        final Double[] trackFixData = new Double[trackColumnCount];
+                                        for (final Entry<String, Integer> columnFromFile : columnsInFileFromHeader.entrySet()) {
+                                            final Double value = columnFromFile.getValue() >= lineContentTokens.length ? null
+                                                    : lineContentTokens[columnFromFile.getValue()].trim().isEmpty() ? null
+                                                            : Double.parseDouble(lineContentTokens[columnFromFile.getValue()]);
+                                            final Integer indexInDoubleVectorFix = columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.get(columnFromFile.getKey());
+                                            if (indexInDoubleVectorFix != null) {
+                                                trackFixData[indexInDoubleVectorFix] = value;
+                                            }
                                         }
                                         importedFixes.set(true);
                                         callback.addFixes(
@@ -171,13 +170,22 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
      * exception is thrown that reports the columns missing.
      */
     private void validateHeader(Map<String, Integer> colIndicesInFile) throws FormatNotSupportedException {
-        Iterable<String> requiredColumnsInFix = columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.keySet();
-        if (!Util.containsAll(colIndicesInFile.keySet(), requiredColumnsInFix)) {
-            final Set<String> missingColumns = new HashSet<>();
-            Util.addAll(requiredColumnsInFix, missingColumns);
-            missingColumns.removeAll(colIndicesInFile.keySet());
-            logger.log(Level.SEVERE, "Missing headers: " + missingColumns);
-            throw new FormatNotSupportedException("Missing headers " + missingColumns + " in import files");
+        final boolean dateTimeFormatOk;
+        if (colIndicesInFile.containsKey(UTC_COLUMN)) {
+            dateTimeFormatOk = true;
+        } else if (colIndicesInFile.containsKey(DATE_COLUMN_1)
+                || colIndicesInFile.containsKey(DATE_COLUMN_2)) {
+            dateTimeFormatOk = colIndicesInFile.containsKey(TIME_COLUMN);
+        } else {
+            // assume that "GPS Time" is present:
+            dateTimeFormatOk = colIndicesInFile.containsKey(GPS_TIME_COLUMN);
+        }
+        if (!dateTimeFormatOk) {
+            final String msg = "Missing date/time headers; expect either "+UTC_COLUMN+" or "+
+                    DATE_COLUMN_1+" with "+TIME_COLUMN+" or "+DATE_COLUMN_2+" with "+TIME_COLUMN+
+                    " or "+GPS_TIME_COLUMN;
+            logger.log(Level.SEVERE, msg);
+            throw new FormatNotSupportedException(msg);
         }
     }
 
