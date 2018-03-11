@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.maneuverdetection.impl;
 
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.domain.tracking.impl.ManeuverCurveBoundariesImpl;
@@ -17,8 +18,9 @@ public class ManeuverCurveDetails extends ManeuverCurveBoundariesImpl {
 
     public ManeuverCurveDetails(TimePoint timePointBefore, TimePoint timePointAfter, TimePoint timePoint,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            double directionChangeInDegrees, double maxAngularVelocityInDegreesPerSecond) {
-        super(timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees);
+            double directionChangeInDegrees, double maxAngularVelocityInDegreesPerSecond, Speed lowestSpeed) {
+        super(timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees,
+                lowestSpeed);
         this.timePoint = timePoint;
         this.maxAngularVelocityInDegreesPerSecond = maxAngularVelocityInDegreesPerSecond;
     }
@@ -34,7 +36,7 @@ public class ManeuverCurveDetails extends ManeuverCurveBoundariesImpl {
     }
 
     /**
-     * The maximal angular velocity recorded within the curve which was recorded at {@link #getTimePoint()}.
+     * Gets the maximal angular velocity recorded within the curve which was recorded at {@link #getTimePoint()}.
      * 
      * @return The maximal angular velocity in degrees per second
      */
@@ -42,8 +44,8 @@ public class ManeuverCurveDetails extends ManeuverCurveBoundariesImpl {
         return maxAngularVelocityInDegreesPerSecond;
     }
 
-    public ManeuverCurveBoundaries extractEnteringAndExistingDetailsOnly() {
-        return new ManeuverCurveBoundariesImpl(getTimePointBefore(), getTimePointAfter(),
-                getSpeedWithBearingBefore(), getSpeedWithBearingAfter(), getDirectionChangeInDegrees());
+    public ManeuverCurveBoundaries extractCurveBoundariesOnly() {
+        return new ManeuverCurveBoundariesImpl(getTimePointBefore(), getTimePointAfter(), getSpeedWithBearingBefore(),
+                getSpeedWithBearingAfter(), getDirectionChangeInDegrees(), getLowestSpeed());
     }
 }
