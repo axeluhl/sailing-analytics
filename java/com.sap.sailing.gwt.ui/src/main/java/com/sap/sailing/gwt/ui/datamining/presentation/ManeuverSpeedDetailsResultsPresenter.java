@@ -101,7 +101,7 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
         };
 
         dataCountHistogramChart = ChartFactory.createDataCountHistogramChart(
-                stringMessages.beatAngle() + " (" + stringMessages.degreesShort() + ")", stringMessages);
+                stringMessages.TWA() + " (" + stringMessages.degreesShort() + ")", stringMessages);
         dataCountHistogramChart.getXAxis().setMin(-179);
         dataCountHistogramChart.getXAxis().setMax(180);
         rightSideChartsWrapperPanel = new DockLayoutPanel(Unit.PCT) {
@@ -138,7 +138,7 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
         polarChart = ChartFactory.createPolarChart();
         lineChart = ChartFactory.createLineChartForPolarData(stringMessages);
         dataCountHistogramChart = ChartFactory.createDataCountHistogramChart(
-                stringMessages.beatAngle() + " (" + stringMessages.degreesShort() + ")", stringMessages);
+                stringMessages.TWA() + " (" + stringMessages.degreesShort() + ")", stringMessages);
         polarChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
         lineChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
         dataCountHistogramChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);

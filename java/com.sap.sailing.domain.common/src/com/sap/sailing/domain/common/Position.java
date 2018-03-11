@@ -13,7 +13,7 @@ public interface Position extends Serializable {
     double getLngDeg();
     
     /**
-     * Generates a string representation of the form S03°45.235' E003°22.837'
+     * Generates a string representation of the form S03Â°45.235' E003Â°22.837'
      */
     String getAsDegreesAndDecimalMinutesWithCardinalPoints();
     
