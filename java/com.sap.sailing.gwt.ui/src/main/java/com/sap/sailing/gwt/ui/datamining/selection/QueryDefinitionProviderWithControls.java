@@ -130,7 +130,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             addControl(predefinedQueryRunner.getEntryWidget());
         }
         
-        ListBoxStatisticProvider statisticProvider = new ListBoxStatisticProvider(parent, context, getStringMessages(),
+        SuggestBoxStatisticProvider statisticProvider = new SuggestBoxStatisticProvider(parent, context, getStringMessages(),
                                                              getDataMiningService(), getErrorReporter(), settingsControl);
         retrieverChainProvider = statisticProvider;
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(providerListener);

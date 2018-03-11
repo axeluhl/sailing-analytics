@@ -60,7 +60,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * 
  * @author Lennart Hensler
  */
-public class ListBoxStatisticProvider extends AbstractComponent<CompositeSettings> implements StatisticProvider {
+public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSettings> implements StatisticProvider {
     
     private static final String STATISTIC_PROVIDER_ELEMENT_STYLE = "statisticProviderElement";
 
@@ -83,7 +83,7 @@ public class ListBoxStatisticProvider extends AbstractComponent<CompositeSetting
     private final ExtractionFunctionSuggestBox extractionFunctionSuggestBox;
     private final ValueListBox<AggregationProcessorDefinitionDTO> aggregatorListBox;
 
-    public ListBoxStatisticProvider(Component<?> parent, ComponentContext<?> componentContext,
+    public SuggestBoxStatisticProvider(Component<?> parent, ComponentContext<?> componentContext,
             StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, DataMiningSettingsControl settingsControl) {
         super(parent, componentContext);
@@ -209,10 +209,7 @@ public class ListBoxStatisticProvider extends AbstractComponent<CompositeSetting
         
         awaitingRetrieverChainStatistics--;
         if (awaitingRetrieverChainStatistics == 0) {
-            Collections.sort(availableExtractionFunctions, (p1, p2) -> {
-                int retrieverChainComparison = p1.getA().compareTo(p2.getA());
-                return retrieverChainComparison != 0 ? retrieverChainComparison : p1.getB().compareTo(p2.getB());
-            });
+            Collections.sort(availableExtractionFunctions, (p1, p2) -> p1.getB().getDisplayName().compareTo(p2.getB().getDisplayName()));
             extractionFunctionSuggestBox.setSelectableValues(availableExtractionFunctions);
             
             Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> currentValue = extractionFunctionSuggestBox.getExtractionFunction();
