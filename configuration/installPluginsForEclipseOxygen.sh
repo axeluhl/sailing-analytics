@@ -45,8 +45,8 @@ installPlugins http://download.eclipse.org/mat/1.7/update-site/ org.eclipse.mat.
 echo "Installing latest version of Code Recommenders..."
 updatePlugins http://download.eclipse.org/recommenders/updates/stable/ org.eclipse.recommenders.rcp.feature.feature.group,org.eclipse.recommenders.mylyn.rcp.feature.feature.group,org.eclipse.recommenders.snipmatch.rcp.feature.feature.group,org.eclipse.recommenders.news.rcp.feature.feature.group
 
-echo "Installing latest version of EGit (Neon release version has bugs)..."
-updatePlugins http://download.eclipse.org/egit/updates org.eclipse.jgit.feature.group,org.eclipse.jgit.http.apache.feature.group,org.eclipse.egit.feature.group,org.eclipse.egit.mylyn.feature.group
+echo "Installing latest version of EGit..."
+updatePlugins http://download.eclipse.org/egit/updates org.eclipse.jgit.feature.group,org.eclipse.jgit.http.apache.feature.group,org.eclipse.egit.feature.group,org.eclipse.egit.mylyn.feature.group,org.eclipse.egit.gitflow.feature.feature.group
 
 echo "Installing latest version of Mylyn ..."
 updatePlugins http://download.eclipse.org/mylyn/releases/latest org.eclipse.mylyn_feature.feature.group,org.eclipse.mylyn.bugzilla_feature.feature.group,org.eclipse.mylyn.builds.feature.group,org.eclipse.mylyn.commons.feature.group,org.eclipse.mylyn.commons.identity.feature.group,org.eclipse.mylyn.commons.notifications.feature.group,org.eclipse.mylyn.commons.repositories.feature.group,org.eclipse.mylyn.commons.repositories.http.feature.group,org.eclipse.mylyn.context_feature.feature.group,org.eclipse.mylyn.discovery.feature.group,org.eclipse.mylyn.gerrit.feature.feature.group,org.eclipse.mylyn.git.feature.group,org.eclipse.mylyn.hudson.feature.group,org.eclipse.mylyn.java_feature.feature.group,org.eclipse.mylyn.monitor.feature.group,org.eclipse.mylyn.reviews.feature.feature.group,org.eclipse.mylyn.team_feature.feature.group,org.eclipse.mylyn.versions.feature.group,org.eclipse.mylyn.wikitext_feature.feature.group
