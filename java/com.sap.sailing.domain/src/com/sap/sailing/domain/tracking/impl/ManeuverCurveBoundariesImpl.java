@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sse.common.TimePoint;
@@ -14,15 +15,17 @@ public class ManeuverCurveBoundariesImpl implements ManeuverCurveBoundaries {
     private final SpeedWithBearing speedWithBearingBefore;
     private final SpeedWithBearing speedWithBearingAfter;
     private final double directionChangeInDegrees;
+    private final Speed lowestSpeed;
 
     public ManeuverCurveBoundariesImpl(TimePoint timePointBefore, TimePoint timePointAfter,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            double directionChangeInDegrees) {
+            double directionChangeInDegrees, Speed lowestSpeed) {
         this.timePointBefore = timePointBefore;
         this.timePointAfter = timePointAfter;
         this.speedWithBearingBefore = speedWithBearingBefore;
         this.speedWithBearingAfter = speedWithBearingAfter;
         this.directionChangeInDegrees = directionChangeInDegrees;
+        this.lowestSpeed = lowestSpeed;
     }
 
     @Override
@@ -51,9 +54,15 @@ public class ManeuverCurveBoundariesImpl implements ManeuverCurveBoundaries {
     }
 
     @Override
+    public Speed getLowestSpeed() {
+        return lowestSpeed;
+    }
+
+    @Override
     public String toString() {
         return "Starting at time point " + timePointBefore + ", ending at time point " + timePointAfter
                 + ". Speed before curve " + speedWithBearingBefore + " speed after curve " + speedWithBearingAfter
-                + ". Course changed by " + directionChangeInDegrees + "deg.";
+                + ". Lowest speed within curve: " + lowestSpeed + ". Course changed by " + directionChangeInDegrees
+                + "deg.";
     }
 }
