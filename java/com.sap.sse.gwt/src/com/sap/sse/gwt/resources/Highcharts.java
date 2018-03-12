@@ -2,7 +2,6 @@ package com.sap.sse.gwt.resources;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.ScriptInjector;
-import com.google.gwt.dom.client.StyleInjector;
 
 /**
  * Convinience class to inject common control css content
@@ -25,7 +24,6 @@ public final class Highcharts {
      */
     public static void ensureInjected() {
         if (!isInjected) {
-            StyleInjector.inject(HIGHCHARTS_RESSOURCES.highchartsCss().getText());
             ScriptInjector.fromString(HIGHCHARTS_RESSOURCES.highcharts().getText()).setWindow(ScriptInjector.TOP_WINDOW).inject();
             ScriptInjector.fromString(HIGHCHARTS_RESSOURCES.highchartsThemeGrid().getText()).setWindow(ScriptInjector.TOP_WINDOW)
                     .inject();

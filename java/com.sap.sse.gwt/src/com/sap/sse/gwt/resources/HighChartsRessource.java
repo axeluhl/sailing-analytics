@@ -1,8 +1,6 @@
 package com.sap.sse.gwt.resources;
 
 import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.CssResource.NotStrict;
 import com.google.gwt.resources.client.TextResource;
 
 public interface HighChartsRessource extends ClientBundle {
@@ -15,12 +13,8 @@ public interface HighChartsRessource extends ClientBundle {
     @Source("css/CommonControls.css")
     TextResource commonControls();
 
-    @Source("highcharts/js/highcharts.js")
+    @Source("highcharts/highcharts.js")
     TextResource highcharts();
-    
-    @NotStrict
-    @Source("highcharts/css/highcharts.css")
-    CssResource highchartsCss();
     
     @Source("highcharts/js/themes/grid.js")
     TextResource highchartsThemeGrid();
