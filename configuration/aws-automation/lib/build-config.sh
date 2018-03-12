@@ -1,5 +1,9 @@
 #!/bin/bash
-#
+
+# -----------------------------------------------------------
+# Scrpt for reading and writing variables to a file.
+# -----------------------------------------------------------
+
 # https://github.com/brbsix/bash-config
 # Read and write config files from Bash
 
