@@ -111,15 +111,11 @@ function require_user_username(){
 }
 
 function require_mongodb_port(){
-	if [ "$region" != "eu-west-1" ]; then
 	  require_variable "$mongodb_port_param" mongodb_port "$default_mongodb_port" "$mongodb_port_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT"
-	fi
 }
 
 function require_mongodb_host(){
-	if [ "$region" != "eu-west-1" ]; then
 	  require_variable "$mongodb_host_param" mongodb_host "$default_mongodb_host" "$mongodb_host_ask_message" "$IS_NOT_OPTIONAL" "$SHOW_INPUT"
-	fi
 }
 
 function require_user_password(){

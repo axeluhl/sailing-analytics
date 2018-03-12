@@ -110,7 +110,7 @@ function fill_resource_map_with_resources_of_type(){
 	declare -a RESOURCE_ARRAY
 
 	if [ "$1" == "ec2:launch-template" ]; then
-		RESOURCE_ARRAY=($(get_launch_templates))
+		RESOURCE_ARRAY=($(get_array_with_launch_templates))
 	else
 		RESOURCE_ARRAY=($(get_array_with_resource_of_type $1))
 	fi
@@ -124,8 +124,8 @@ function fill_resource_map_with_resources_of_type(){
     local id=""
 
     if [ "$1" == "ec2:launch-template" ]; then
-      id=$(echo "$lt" | jq -c ".LaunchTemplateId" -r | sanitize)
-      tmp_name=$(echo "$lt" | jq -c ".LaunchTemplateName" -r | sanitize)
+      id=$(echo "$resource" | jq -c ".LaunchTemplateId" -r | sanitize)
+      tmp_name=$(echo "$resource" | jq -c ".LaunchTemplateName" -r | sanitize)
     else
       id=$(echo $resource | jq -c ".ResourceARN" -r | sanitize)
       tmp_name=$(echo $resource | jq -c ".Tags[] | select(.Key==\"Name\") | .Value" -r | sanitize)

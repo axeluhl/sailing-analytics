@@ -81,6 +81,11 @@ fi
 
 init_resources
 
+if $force; then
+  error "--force option is currently not working."
+  safeExit
+fi
+
 if $instance_scenario; then
 	instance_start
 	safeExit
@@ -134,39 +139,34 @@ usage() {
   -w, --description             Description of sub instance
   -c, --contact-person          Contact person
   -e, --contact-email           Email of contact person
-  -f, --force                   Skip user input and use default variables
   -d, --debug                   Debug mode
 
   ${bold}Scenarios:${reset}
   --instance                    Create instance
   --shared-instance             Create sub instance
   --master-instance             Create master instance
-  --associate-alb               Associate instance with existing application load balancer whos
-                                listener is defined in variables_aws.sh. Automatically
-                                create necessary target group and host name rule.
+  --replica-instance            Create replica instance
+  --associate-alb               Associate instance with existing application load balancer.
 
   ${bold}Other:${reset}
-  --version                  Output version information and exit
+  --version                     Output version information and exit
 
 
   ${bold}Examples:${reset}
   Create instance:
   > ./aws-setup.sh --instance
 
-  Associate application load balancer:
-  > ./aws-setup.sh --instance --associate-alb
+  Create shared instance:
+  > ./aws-setup.sh --shared-instance
 
   Associate instance with application load balancer:
-  > ./aws-setup.sh --instance --associate-alb
+  > ./aws-setup.sh --associate-alb
 
-  Create instance and use default values:
-  > ./aws-setup.sh --instance --force
+  Create master instance:
+  > ./aws-setup.sh --master-instance
 
-  Create instance and use default values except instance name
-  and instance short name. Also activate debug mode.
-  > ./aws-setup.sh --instance --instance-name Test --instance-short-name t --force -d
-
-
+  Create replica instance:
+  > ./aws-setup.sh --replica-instance
 "
 }
 

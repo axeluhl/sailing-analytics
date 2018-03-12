@@ -148,7 +148,7 @@ function append_environment_to_env_sh(){
 	env_content=$(wget -qO- http://releases.sapsailing.com/environments/$1)
 
 	exit_on_fail ssh_wrapper $2@$3 "echo -e \"# START Environment: $1 \" >> $env_file"
-	exit_on_fail ssh_wrapper $2@$3 "echo -e \"$env_content\" >> $env_file"
+	exit_on_fail ssh_wrapper $2@$3 "export ADDITIONAL_JAVA_ARGS='\$ADDITIONAL_JAVA_ARGS'; export MEMORY='$MEMORY'; echo \"$env_content\" >> $env_file"
 	exit_on_fail ssh_wrapper $2@$3 "echo -e \"# END Environment: $1 \" >> $env_file"
 }
 

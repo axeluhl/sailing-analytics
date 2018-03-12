@@ -24,6 +24,8 @@ function instance_require(){
 	require_image
 	require_instance_name
 	require_instance_short_name
+	require_mongodb_host
+	require_mongodb_port
 	require_ssh_user
 	require_build_version
 	require_key_name
@@ -65,14 +67,14 @@ function instance_execute() {
 
 	local port="8888"
 	configure_application $public_dns_name $port $event_name $new_admin_password $user_username $user_pass
-	append_to_env_sh "MONGODB_HOST=${4:-'/home/sailing/servers/server/env.sh'}"
+
 	header "Conclusion"
 
 	success "Instance should be reachable through $public_dns_name:8888."
 }
 
 function build_user_data(){
-	build_configuration "MONGODB_HOST=$default_mongodb_host" "MONGODB_PORT=$default_mongodb_port" "MONGODB_NAME=$(alphanumeric $instance_name)" \
+	build_configuration "MONGODB_HOST=$mongodb_host" "MONGODB_PORT=$mongodb_port" "MONGODB_NAME=$(alphanumeric $instance_name)" \
 	"REPLICATION_CHANNEL=$(alphanumeric $instance_name)" "SERVER_NAME=$(alphanumeric $instance_name)" "USE_ENVIRONMENT=live-server" \
 	"INSTALL_FROM_RELEASE=$build_version" "SERVER_STARTUP_NOTIFY=$default_server_startup_notify"
 }

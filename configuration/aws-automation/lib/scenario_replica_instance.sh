@@ -35,5 +35,8 @@ function replica_instance_execute() {
 	public_dns_name=$(get_public_dns_name $instance_id)
 	user_data=$(get_user_data_from_instance $instance_id | base64 --decode)
 	echo "$user_data"
-	wait_for_ssh_connection $ssh_user $public_dns_name
+
+	header "Conclusion"
+
+	success "Instance should be reachable through $public_dns_name:8888."
 }
