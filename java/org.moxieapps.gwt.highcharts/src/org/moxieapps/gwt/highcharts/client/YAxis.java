@@ -56,7 +56,9 @@ public class YAxis extends Axis<YAxis> {
      * @since 1.6.0
      */
     public YAxis setHeight(Number height) {
-        return this.setOption("height", height);
+        this.setOption("height", height);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return this;
     }
 
     /**
@@ -72,7 +74,9 @@ public class YAxis extends Axis<YAxis> {
      * @since 1.6.0
      */
     public YAxis setTop(Number top) {
-        return this.setOption("top", top);
+        this.setOption("top", top);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return this;
     }
 
     private YAxisLabels yAxisLabels;
@@ -99,7 +103,9 @@ public class YAxis extends Axis<YAxis> {
      */
     public YAxis setLabels(YAxisLabels labels) {
         this.yAxisLabels = labels;
-        return this.setOption("labels", labels != null ? labels.getOptions() : null);
+        this.setOption("labels", labels != null ? labels.getOptions() : null);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return this;
     }
 
     // Purposefully restricted to package scope
@@ -135,12 +141,13 @@ public class YAxis extends Axis<YAxis> {
      */
     public YAxis setStackLabels(StackLabels stackLabels) {
         this.stackLabels = stackLabels;
-        return this.setOption("stackLabels", stackLabels != null ? stackLabels.getOptions() : null);
+        this.setOption("stackLabels", stackLabels != null ? stackLabels.getOptions() : null);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return this;
     }
 
     // Purposefully restricted to package scope
     StackLabels getStackLabels() {
         return stackLabels;
     }
-
 }

@@ -25,11 +25,8 @@ public final class Highcharts {
      */
     public static void ensureInjected() {
         if (!isInjected) {
-            String css = HIGHCHARTS_RESSOURCES.highchartsCss().getText();
-            String mainScript = HIGHCHARTS_RESSOURCES.highcharts().getText();
-            GWT.debugger();
-            StyleInjector.inject(css);
-            ScriptInjector.fromString(mainScript).setWindow(ScriptInjector.TOP_WINDOW).inject();
+            StyleInjector.inject(HIGHCHARTS_RESSOURCES.highchartsCss().getText());
+            ScriptInjector.fromString(HIGHCHARTS_RESSOURCES.highcharts().getText()).setWindow(ScriptInjector.TOP_WINDOW).inject();
             ScriptInjector.fromString(HIGHCHARTS_RESSOURCES.highchartsThemeGrid().getText()).setWindow(ScriptInjector.TOP_WINDOW)
                     .inject();
             isInjected = true;

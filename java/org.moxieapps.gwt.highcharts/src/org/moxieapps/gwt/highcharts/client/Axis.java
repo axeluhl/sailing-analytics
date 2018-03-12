@@ -216,7 +216,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setAllowDecimals(boolean allowDecimals) {
-        return this.setOption("allowDecimals", allowDecimals);
+        T rv = this.setOption("allowDecimals", allowDecimals);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return rv;
     }
 
     /**
@@ -231,7 +233,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setAlternateGridColor(String alternateGridColor) {
-        return this.setOption("alternateGridColor", alternateGridColor);
+        T rv = this.setOption("alternateGridColor", alternateGridColor);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return rv;
     }
 
     /**
@@ -265,7 +269,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setDateTimeLabelFormats(DateTimeLabelFormats dateTimeLabelFormats) {
-        return this.setOption("dateTimeLabelFormats", dateTimeLabelFormats != null ? dateTimeLabelFormats.getOptions() : null);
+        T rv = this.setOption("dateTimeLabelFormats", dateTimeLabelFormats != null ? dateTimeLabelFormats.getOptions() : null);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return rv;
     }
 
     /**
@@ -280,7 +286,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setEndOnTick(boolean endOnTick) {
-        return this.setOption("endOnTick", endOnTick);
+        T rv = this.setOption("endOnTick", endOnTick);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return rv;
     }
 
     // TODO: Add support for events
@@ -435,7 +443,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setGridLineColor(String gridLineColor) {
-        return this.setOption("gridLineColor", gridLineColor);
+        this.setOption("gridLineColor", gridLineColor);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -451,7 +461,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setGridLineDashStyle(PlotLine.DashStyle gridLineDashStyle) {
-        return this.setOption("gridLineDashStyle", gridLineDashStyle != null ? gridLineDashStyle.toString() : null);
+        this.setOption("gridLineDashStyle", gridLineDashStyle != null ? gridLineDashStyle.toString() : null);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -465,7 +477,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setGridLineWidth(Number gridLineWidth) {
-        return this.setOption("gridLineWidth", gridLineWidth);
+        this.setOption("gridLineWidth", gridLineWidth);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -479,7 +493,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setLineColor(String lineColor) {
-        return this.setOption("lineColor", lineColor);
+        this.setOption("lineColor", lineColor);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -493,7 +509,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setLineWidth(Number lineWidth) {
-        return this.setOption("lineWidth", lineWidth);
+        this.setOption("lineWidth", lineWidth);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -511,7 +529,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setLinkedTo(Number linkedTo) {
-        return this.setOption("linkedTo", linkedTo);
+        this.setOption("linkedTo", linkedTo);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     private Number max;
@@ -535,7 +555,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setMax(Number max) {
         this.max = max;
-        return this.setOption("max", max);
+        this.setOption("max", max);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -552,7 +574,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setMaxPadding(Number maxPadding) {
-        return this.setOption("maxPadding", maxPadding);
+        this.setOption("maxPadding", maxPadding);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -568,7 +592,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setMaxZoom(Number maxZoom) {
-        return this.setOption("maxZoom", maxZoom);
+        this.setOption("maxZoom", maxZoom);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     private Number min;
@@ -591,7 +617,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setMin(Number min) {
         this.min = min;
-        return this.setOption("min", min);
+        this.setOption("min", min);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -605,7 +633,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setMinorGridLineColor(String minorGridLineColor) {
-        return this.setOption("minorGridLineColor", minorGridLineColor);
+        this.setOption("minorGridLineColor", minorGridLineColor);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -621,7 +651,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setMinorGridLineDashStyle(PlotLine.DashStyle minorGridLineDashStyle) {
-        return this.setOption("minorGridLineDashStyle", minorGridLineDashStyle != null ? minorGridLineDashStyle.toString() : null);
+        this.setOption("minorGridLineDashStyle", minorGridLineDashStyle != null ? minorGridLineDashStyle.toString() : null);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -635,7 +667,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setMinorGridLineWidth(Number minorGridLineWidth) {
-        return this.setOption("minorGridLineWidth", minorGridLineWidth);
+        this.setOption("minorGridLineWidth", minorGridLineWidth);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -649,7 +683,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setMinorTickColor(String minorTickColor) {
-        return this.setOption("minorTickColor", minorTickColor);
+        this.setOption("minorTickColor", minorTickColor);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -665,7 +701,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setMinorTickInterval(Number minorTickInterval) {
-        return this.setOption("minorTickInterval", minorTickInterval);
+        this.setOption("minorTickInterval", minorTickInterval);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -679,7 +717,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setMinorTickIntervalAuto() {
-        return this.setOption("minorTickInterval", "auto");
+        this.setOption("minorTickInterval", "auto");
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -693,7 +733,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setMinorTickLength(Number minorTickLength) {
-        return this.setOption("minorTickLength", minorTickLength);
+        this.setOption("minorTickLength", minorTickLength);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -708,7 +750,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setMinorTickPosition(TickPosition minorTickPosition) {
-        return this.setOption("minorTickPosition", minorTickPosition != null ? minorTickPosition.toString() : null);
+        this.setOption("minorTickPosition", minorTickPosition != null ? minorTickPosition.toString() : null);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -722,7 +766,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setMinorTickWidth(Number minorTickWidth) {
-        return this.setOption("minorTickWidth", minorTickWidth);
+        this.setOption("minorTickWidth", minorTickWidth);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -739,7 +785,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setMinPadding(Number minPadding) {
-        return this.setOption("minPadding", minPadding);
+        this.setOption("minPadding", minPadding);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -755,7 +803,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setOffset(Number offset) {
-        return this.setOption("offset", offset);
+        this.setOption("offset", offset);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -772,7 +822,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setOpposite(boolean opposite) {
-        return this.setOption("opposite", opposite);
+        this.setOption("opposite", opposite);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -796,7 +848,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setPlotLines(PlotLine... plotLines) {
-        return this.setOption("plotLines", plotLines);
+        this.setOption("plotLines", plotLines);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -821,7 +875,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setPlotBands(PlotBand... plotBands) {
-        return this.setOption("plotBands", plotBands);
+        T rv = this.setOption("plotBands", plotBands);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return rv;
     }
 
     /**
@@ -837,7 +893,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setReversed(boolean reversed) {
-        return this.setOption("reversed", reversed);
+        this.setOption("reversed", reversed);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -851,7 +909,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setShowFirstLabel(boolean showFirstLabel) {
-        return this.setOption("showFirstLabel", showFirstLabel);
+        this.setOption("showFirstLabel", showFirstLabel);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -865,7 +925,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setShowLastLabel(boolean showLastLabel) {
-        return this.setOption("showLastLabel", showLastLabel);
+        this.setOption("showLastLabel", showLastLabel);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -879,7 +941,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setStartOfWeek(WeekDay startOfWeek) {
-        return this.setOption("startOfWeek", startOfWeek != null ? startOfWeek.toNumber() : null);
+        this.setOption("startOfWeek", startOfWeek != null ? startOfWeek.toNumber() : null);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -894,7 +958,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setStartOnTick(boolean startOnTick) {
-        return this.setOption("startOnTick", startOnTick);
+        this.setOption("startOnTick", startOnTick);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -908,7 +974,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setTickColor(String tickColor) {
-        return this.setOption("tickColor", tickColor);
+        this.setOption("tickColor", tickColor);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -925,7 +993,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setTickInterval(Number tickInterval) {
-        return this.setOption("tickInterval", tickInterval);
+        this.setOption("tickInterval", tickInterval);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -939,7 +1009,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setTickLength(Number tickLength) {
-        return this.setOption("tickLength", tickLength);
+        this.setOption("tickLength", tickLength);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -954,7 +1026,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setTickPixelInterval(Number tickPixelInterval) {
-        return this.setOption("tickPixelInterval", tickPixelInterval);
+        this.setOption("tickPixelInterval", tickPixelInterval);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -968,7 +1042,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setTickPosition(TickPosition tickPosition) {
-        return this.setOption("tickPosition", tickPosition != null ? tickPosition.toString() : null);
+        this.setOption("tickPosition", tickPosition != null ? tickPosition.toString() : null);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -982,7 +1058,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setTickWidth(Number tickWidth) {
-        return this.setOption("tickWidth", tickWidth);
+        this.setOption("tickWidth", tickWidth);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -1009,7 +1087,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setAxisTitleText(String title) {
-        return this.setAxisTitleText(title, true);
+        this.setAxisTitleText(title, true);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return getThis();
     }
 
     /**
@@ -1103,10 +1183,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @since 1.2.0
      */
     public T setAxisTitle(AxisTitle title, boolean redraw) {
-        if(getNativeAxis() != null) {
-            nativeSetTitle(getNativeAxis(), title != null ? title.getOptions().getJavaScriptObject() : null, redraw);
-        }
-        return this.setOption("/title", title != null ? title.getOptions() : null);
+         T rv = this.setOption("/title", title != null ? title.getOptions() : null);
+         updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+         return rv;
     }
 
     /**
@@ -1122,7 +1201,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setType(Type type) {
-        return this.setOption("type", type != null ? type.toString() : null);
+        T rv = this.setOption("type", type != null ? type.toString() : null);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
+        return rv;
     }
 
     /**
@@ -1135,13 +1216,8 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @since 1.1.3
      */
     public T addPlotLines(PlotLine... plotLines) {
-        if (getNativeAxis() != null) {
-            for (PlotLine plotLine : plotLines) {
-                nativeAddPlotLine(getNativeAxis(), plotLine.getOptions().getJavaScriptObject());
-            }
-        } else {
-            setPlotLines(plotLines);
-        }
+        setPlotLines(plotLines);
+        updateNativeSettings(getNativeAxis(), getOptions().getJavaScriptObject());
         return getThis();
     }
 
@@ -1155,13 +1231,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @since 1.1.3
      */
     public T addPlotBands(PlotBand... plotBands) {
-        if (getNativeAxis() != null) {
-            for (PlotBand plotBand : plotBands) {
-                nativeAddPlotBand(getNativeAxis(), plotBand.getOptions().getJavaScriptObject());
-            }
-        } else {
-            setPlotBands(plotBands);
-        }
+        setPlotBands(plotBands);
         return getThis();
     }
 
@@ -1234,8 +1304,10 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
     private native void nativeRemovePlotBand(JavaScriptObject axis, String id)/*-{
         axis.removePlotBand(id);
     }-*/;
-
-    private native void nativeSetTitle(JavaScriptObject axis, JavaScriptObject titleOptions, boolean redraw)/*-{
-        axis.setTitle(titleOptions, redraw);
+    
+    public native void updateNativeSettings(JavaScriptObject nativeobject, JavaScriptObject options)/*-{
+        if(nativeobject) {
+            nativeobject.update(options);  
+        }
     }-*/;
 }

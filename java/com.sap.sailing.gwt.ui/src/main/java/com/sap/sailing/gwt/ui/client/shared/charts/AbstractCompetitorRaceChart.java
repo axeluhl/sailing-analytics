@@ -123,7 +123,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         noCompetitorsSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         noDataFoundLabel = new Label(stringMessages.noDataFound() + ".");
         noDataFoundLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
-        createChart();
+        chart = createChart();
         setSelectedDetailTypes(firstDetailType, secondDetailType);
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
         clearChart();
@@ -618,23 +618,18 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         boolean hasDetailTypeChanged = !Util.equalsWithNull(newSelectedFirstDetailType, this.selectedFirstDetailType)
                 || !Util.equalsWithNull(newSelectedSecondDetailType, this.selectedSecondDetailType);
         if (hasDetailTypeChanged) {
-            // final boolean oldReversedY0Axis = isY0AxisReversed();
-            // final boolean oldReversedY1Axis = isY1AxisReversed();
             this.selectedFirstDetailType = newSelectedFirstDetailType;
             this.selectedSecondDetailType = newSelectedSecondDetailType;
-            // TODO There is a bug in the highcharts library which prevents to change the reverse property of the YAxis
-            // Because we need this functionality we need to recreate the chart each time the YAxis changes
-            // if (oldReversedY0Axis != isY0AxisReversed() || oldReversedY1Axis != isY1AxisReversed()) {
-            // WORKAROUND: re-creating chart every time since introduction of dual y-axis, since there is no way to
-            // reset/ delete axis.
-                chart = createChart();
-                if (isZoomed) {
-                    com.sap.sse.common.Util.Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
-                    onTimeZoomChanged(zoomRange.getA(), zoomRange.getB());
-                } else {
-                    resetMinMaxAndExtremesInterval(/* redraw */ true);
-                }
-            // }
+            
+            chart.getYAxis(0).setReversed(isY0AxisReversed());
+            chart.getYAxis(1).setReversed(isY1AxisReversed());
+            
+            if (isZoomed) {
+                com.sap.sse.common.Util.Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
+                onTimeZoomChanged(zoomRange.getA(), zoomRange.getB());
+            } else {
+                resetMinMaxAndExtremesInterval(/* redraw */ true);
+            }
 
             final String unitY0 = DetailTypeFormatter.getUnit(getSelectedFirstDetailType());
             final String labelY0 = unitY0.isEmpty() ? "" : "[" + unitY0 + "]";
@@ -650,22 +645,18 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 chart.getYAxis(0).setAxisTitleText(DetailTypeFormatter.format(selectedFirstDetailType) + " " + labelY0);
                 chart.getYAxis(1)
                         .setAxisTitleText(DetailTypeFormatter.format(selectedSecondDetailType) + " " + labelY1);
+                chart.getYAxis(0).setOpposite(false)
+                .setGridLineWidth(1)
+                .setMinorGridLineWidth(0).setMinorGridLineColor("transparent");
+                
+                chart.getYAxis(1).setOpposite(true)
+                .setGridLineWidth(1)
+                .setGridLineDashStyle(DashStyle.LONG_DASH)
+                .setMinorGridLineWidth(0).setMinorGridLineColor("transparent")
+                .setMinorTickIntervalAuto();
             } else {
                 chart.getYAxis(0).setAxisTitleText(labelY0);
-            }
-            
-            if (hasSecondYAxis()) {
-                chart.getYAxis(0).setReversed(isY0AxisReversed()).setOpposite(false)
-                        .setGridLineWidth(1)
-                        .setMinorGridLineWidth(0).setMinorGridLineColor("transparent");
-                
-                chart.getYAxis(1).setReversed(isY1AxisReversed()).setOpposite(true)
-                        .setGridLineWidth(1)
-                        .setGridLineDashStyle(DashStyle.LONG_DASH)
-                        .setMinorGridLineWidth(0).setMinorGridLineColor("transparent")
-                        .setMinorTickIntervalAuto();
-            } else {
-                chart.getYAxis(0).setReversed(isY0AxisReversed());
+                chart.getYAxis(1).setAxisTitle(null);
             }
             chart.setAlignTicks(hasSecondYAxis());
             final NumberFormat numberFormatY0 = DetailTypeFormatter.getNumberFormat(selectedFirstDetailType);
