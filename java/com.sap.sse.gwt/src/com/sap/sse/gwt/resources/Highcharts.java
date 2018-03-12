@@ -2,6 +2,7 @@ package com.sap.sse.gwt.resources;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.ScriptInjector;
+import com.google.gwt.dom.client.StyleInjector;
 
 /**
  * Convinience class to inject common control css content
@@ -10,7 +11,7 @@ import com.google.gwt.core.client.ScriptInjector;
  *
  */
 public final class Highcharts {
-    public static LegacyResources LEGACY = GWT.create(LegacyResources.class);
+    public static HighChartsRessource HIGHCHARTS_RESSOURCES = GWT.create(HighChartsRessource.class);
 
     private static boolean isInjected = false;
     private static boolean isMoreInjected = false;
@@ -24,8 +25,12 @@ public final class Highcharts {
      */
     public static void ensureInjected() {
         if (!isInjected) {
-            ScriptInjector.fromString(LEGACY.highcharts().getText()).setWindow(ScriptInjector.TOP_WINDOW).inject();
-            ScriptInjector.fromString(LEGACY.highchartsThemeGrid().getText()).setWindow(ScriptInjector.TOP_WINDOW)
+            String css = HIGHCHARTS_RESSOURCES.highchartsCss().getText();
+            String mainScript = HIGHCHARTS_RESSOURCES.highcharts().getText();
+            GWT.debugger();
+            StyleInjector.inject(css);
+            ScriptInjector.fromString(mainScript).setWindow(ScriptInjector.TOP_WINDOW).inject();
+            ScriptInjector.fromString(HIGHCHARTS_RESSOURCES.highchartsThemeGrid().getText()).setWindow(ScriptInjector.TOP_WINDOW)
                     .inject();
             isInjected = true;
         }
@@ -37,7 +42,7 @@ public final class Highcharts {
     public static void ensureInjectedWithMore() {
         ensureInjected();
         if (!isMoreInjected) {
-            ScriptInjector.fromString(LEGACY.highchartsMore().getText()).setWindow(ScriptInjector.TOP_WINDOW).inject();
+            ScriptInjector.fromString(HIGHCHARTS_RESSOURCES.highchartsMore().getText()).setWindow(ScriptInjector.TOP_WINDOW).inject();
             isMoreInjected = true;
         }
     }
@@ -49,7 +54,7 @@ public final class Highcharts {
     public static void ensureInjectedWithExport() {
         ensureInjectedWithMore();
         if (!isExportInjected) {
-            ScriptInjector.fromString(LEGACY.highchartsModuleExport().getText()).setWindow(ScriptInjector.TOP_WINDOW)
+            ScriptInjector.fromString(HIGHCHARTS_RESSOURCES.highchartsModuleExport().getText()).setWindow(ScriptInjector.TOP_WINDOW)
                     .inject();
             isExportInjected = true;
         }
