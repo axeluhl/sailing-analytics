@@ -45,19 +45,54 @@ extension UIButton {
 
 // MARK: - UIColor
 
-extension UIColor { // Set color to RGB hex value. See http://stackoverflow.com/a/24263296
+extension UIColor {
+
+    // Set color to RGB hex value
+    // See http://stackoverflow.com/a/24263296
+    // See https://cocoacasts.com/from-hex-to-uicolor-and-back-in-swift/
     
-    convenience init(hex:Int) {
+    convenience init(hex: Int) {
         self.init(hex: hex, alpha: 1)
     }
     
-    convenience init(hex:Int, alpha: CGFloat) {
+    convenience init(hex: Int, alpha: CGFloat) {
         let red = CGFloat((hex >> 16) & 0xff) / 255
         let green = CGFloat((hex >> 8) & 0xff) / 255
         let blue = CGFloat(hex & 0xff) / 255
         self.init(red: red, green: green, blue: blue, alpha: alpha)
     }
-    
+
+    convenience init?(hexString: String) {
+        var hexSanitized = hexString.trimmingCharacters(in: .whitespacesAndNewlines)
+        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+        var rgb: UInt32 = 0
+        var r: CGFloat = 0.0
+        var g: CGFloat = 0.0
+        var b: CGFloat = 0.0
+        var a: CGFloat = 1.0
+        let length = hexSanitized.count
+        guard Scanner(string: hexSanitized).scanHexInt32(&rgb) else { return nil }
+        if length == 6 {
+            r = CGFloat((rgb & 0xFF0000) >> 16) / 255.0
+            g = CGFloat((rgb & 0x00FF00) >> 8) / 255.0
+            b = CGFloat(rgb & 0x0000FF) / 255.0
+        } else if length == 8 {
+            r = CGFloat((rgb & 0xFF000000) >> 24) / 255.0
+            g = CGFloat((rgb & 0x00FF0000) >> 16) / 255.0
+            b = CGFloat((rgb & 0x0000FF00) >> 8) / 255.0
+            a = CGFloat(rgb & 0x000000FF) / 255.0
+        } else {
+            return nil
+        }
+        self.init(red: r, green: g, blue: b, alpha: a)
+    }
+
+    convenience init(contrastColorFor color: UIColor) {
+        var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        color.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
+        self.init(hue: h, saturation: s, brightness: 1 - b, alpha: a)
+    }
+
 }
 
 // MARK: - UIImage

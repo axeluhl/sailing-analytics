@@ -15,7 +15,13 @@ class BoatCheckIn: CheckIn {
     override func updateWithCheckInData(checkInData: CheckInData) {
         super.updateWithCheckInData(checkInData: checkInData)
         boatID = checkInData.boatData.boatID
+        color = checkInData.boatData.color
         name = checkInData.boatData.name
+        sailID = checkInData.boatData.sailID
+    }
+
+    func displayName() -> String {
+        return name.count > 0 ? name : sailID
     }
 
 }

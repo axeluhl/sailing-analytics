@@ -11,12 +11,18 @@ import Foundation
 class BoatData: BaseData {
 
     fileprivate enum Keys {
+        static let Color = "color"
         static let ID = "id"
         static let Name = "name"
+        static let SailID = "sailId"
     }
 
     var boatID: String { get { return stringValue(forKey: Keys.ID) } }
 
+    var color: String { get { return stringValue(forKey: Keys.Color) } }
+
     var name: String { get { return stringValue(forKey: Keys.Name) } }
+
+    var sailID: String { get { return stringValue(forKey: Keys.SailID) } }
 
 }

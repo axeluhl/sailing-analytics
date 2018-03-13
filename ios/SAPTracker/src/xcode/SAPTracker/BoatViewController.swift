@@ -14,6 +14,7 @@ class BoatViewController: UIViewController {
     weak var boatCoreDataManager: CoreDataManager!
     weak var boatSessionController: BoatSessionController!
 
+    @IBOutlet weak var boatNameView: UIView!
     @IBOutlet weak var boatNameLabel: UILabel!
 
     // MARK: - Refresh
@@ -31,7 +32,11 @@ class BoatViewController: UIViewController {
     }
 
     fileprivate func refreshBoatNameLabel() {
-        boatNameLabel.text = boatCheckIn.name
+        boatNameLabel.text = boatCheckIn.displayName()
+        if let color = UIColor.init(hexString: boatCheckIn.color) {
+            boatNameView.backgroundColor = color
+            boatNameLabel.textColor = UIColor.init(contrastColorFor: color)
+        }
     }
 
 }

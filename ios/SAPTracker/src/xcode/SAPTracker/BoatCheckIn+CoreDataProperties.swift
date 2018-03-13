@@ -12,6 +12,8 @@ import CoreData
 
 extension BoatCheckIn {
 
-    @NSManaged public var boatID: String?
+    @NSManaged public var boatID: String
+    @NSManaged public var color: String
+    @NSManaged public var sailID: String
 
 }

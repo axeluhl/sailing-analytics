@@ -488,7 +488,15 @@ extension CheckInTableViewController: UITableViewDataSource {
         guard let regattaCheckInTableViewCell = cell as? CheckInTableViewCell else { return }
         regattaCheckInTableViewCell.eventLabel.text = checkIn.event.name
         regattaCheckInTableViewCell.leaderboardLabel.text = checkIn.leaderboard.name
-        regattaCheckInTableViewCell.competitorLabel.text = checkIn.name
+        if let boatCheckIn = checkIn as? BoatCheckIn {
+            regattaCheckInTableViewCell.competitorLabel.text = boatCheckIn.displayName()
+            if let color = UIColor.init(hexString: boatCheckIn.color) {
+                regattaCheckInTableViewCell.competitorLabel.backgroundColor = color
+                regattaCheckInTableViewCell.competitorLabel.textColor = UIColor.init(contrastColorFor: color)
+            }
+        } else {
+            regattaCheckInTableViewCell.competitorLabel.text = checkIn.name
+        }
     }
 
 }
