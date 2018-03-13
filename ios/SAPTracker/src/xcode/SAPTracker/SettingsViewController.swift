@@ -106,7 +106,11 @@ class SettingsViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableViewAutomaticDimension
     }
-    
+
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        return 2
+    }
+
 }
 
 // MARK: - <UITextFieldDelegate>

@@ -88,8 +88,11 @@
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Competitor Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sNr-Dr-sM5">
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Competitor Label" textAlignment="right" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sNr-Dr-sM5">
                                                     <rect key="frame" x="236.5" y="31.5" width="118.5" height="18"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="Xx3-9r-7YJ"/>
+                                                    </constraints>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleSubhead"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
@@ -264,10 +267,10 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1Mu-Vc-Su5" userLabel="Regatta View">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="301.5"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Va6-mt-ivf" userLabel="Button View">
-                                        <rect key="frame" x="0.0" y="50.5" width="375" height="200.5"/>
+                                        <rect key="frame" x="0.0" y="201.5" width="375" height="200.5"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="MzN-ph-jih">
                                                 <rect key="frame" x="20" y="20" width="335" height="82"/>
@@ -344,10 +347,10 @@
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="quX-s6-Cxp" userLabel="Training View">
-                                <rect key="frame" x="0.0" y="301.5" width="375" height="301.5"/>
+                                <rect key="frame" x="0.0" y="603" width="375" height="0.0"/>
                                 <subviews>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rd2-7J-myc">
-                                        <rect key="frame" x="0.0" y="90.5" width="375" height="122"/>
+                                    <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rd2-7J-myc">
+                                        <rect key="frame" x="0.0" y="-61" width="375" height="122"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="H8Q-vV-g5D">
                                                 <rect key="frame" x="20" y="20" width="335" height="82"/>
@@ -374,6 +377,7 @@
                                 <constraints>
                                     <constraint firstItem="rd2-7J-myc" firstAttribute="centerY" secondItem="quX-s6-Cxp" secondAttribute="centerY" id="Pnr-oM-qAO"/>
                                     <constraint firstAttribute="trailing" secondItem="rd2-7J-myc" secondAttribute="trailing" id="Z4a-Je-c7l"/>
+                                    <constraint firstAttribute="height" id="dCg-ou-Zla"/>
                                     <constraint firstItem="rd2-7J-myc" firstAttribute="leading" secondItem="quX-s6-Cxp" secondAttribute="leading" id="xwE-1P-gTE"/>
                                 </constraints>
                             </view>
@@ -381,7 +385,6 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="quX-s6-Cxp" firstAttribute="top" secondItem="1Mu-Vc-Su5" secondAttribute="bottom" id="0vv-ox-lbK"/>
-                            <constraint firstItem="quX-s6-Cxp" firstAttribute="height" secondItem="1Mu-Vc-Su5" secondAttribute="height" id="4U0-x3-c3N"/>
                             <constraint firstItem="1Mu-Vc-Su5" firstAttribute="top" secondItem="Pik-8E-4rk" secondAttribute="bottom" id="EtL-B8-XHu"/>
                             <constraint firstAttribute="trailing" secondItem="quX-s6-Cxp" secondAttribute="trailing" id="Jiy-mq-Bcv"/>
                             <constraint firstItem="1Mu-Vc-Su5" firstAttribute="leading" secondItem="k8H-S9-2Ah" secondAttribute="leading" id="Pn2-gs-aL1"/>
@@ -1629,13 +1632,13 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Battery Saving Description Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uqK-uV-1FP">
-                                                    <rect key="frame" x="14" y="36" width="502" height="55"/>
+                                                    <rect key="frame" x="14" y="36" width="281" height="55"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleSubhead"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WvA-dL-zOH">
-                                                    <rect key="frame" x="524" y="34" width="51" height="31"/>
+                                                    <rect key="frame" x="303" y="34" width="51" height="31"/>
                                                     <connections>
                                                         <action selector="batterySavingChanged:" destination="H1Q-9y-gn2" eventType="valueChanged" id="6fN-hp-Ux5"/>
                                                     </connections>
@@ -1671,7 +1674,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Device Identifier Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IHy-Ae-s1D">
-                                                    <rect key="frame" x="14" y="36" width="570" height="55"/>
+                                                    <rect key="frame" x="14" y="36" width="345" height="55"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleSubhead"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
@@ -1705,10 +1708,10 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aU0-oe-2Xq">
-                                                    <rect key="frame" x="14" y="36" width="572" height="55.5"/>
+                                                    <rect key="frame" x="14" y="36" width="347" height="55.5"/>
                                                     <subviews>
                                                         <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="bezel" textAlignment="natural" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="0Vg-eG-ZcW">
-                                                            <rect key="frame" x="0.0" y="15" width="572" height="26"/>
+                                                            <rect key="frame" x="0.0" y="15" width="347" height="26"/>
                                                             <nil key="textColor"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <textInputTraits key="textInputTraits" returnKeyType="done"/>
@@ -2223,18 +2226,18 @@
                         <viewControllerLayoutGuide type="bottom" id="hrK-ty-jic"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="vV5-mZ-1WQ">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="303.5"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="301.5"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" image="profile_placeholder" translatesAutoresizingMaskIntoConstraints="NO" id="KlN-FI-d4m">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="303.5"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="301.5"/>
                                 <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </imageView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iwM-mY-oZT" userLabel="Button View">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="265.5"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="263.5"/>
                                 <subviews>
                                     <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NN8-QQ-TQB">
-                                        <rect key="frame" x="307" y="207.5" width="56" height="56"/>
+                                        <rect key="frame" x="307" y="205.5" width="56" height="56"/>
                                         <state key="normal" image="edit"/>
                                         <state key="highlighted" image="edit_pressed"/>
                                         <connections>
@@ -2242,7 +2245,7 @@
                                         </connections>
                                     </button>
                                     <button hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1" verticalHuggingPriority="1" horizontalCompressionResistancePriority="999" verticalCompressionResistancePriority="999" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="clip" translatesAutoresizingMaskIntoConstraints="NO" id="bhL-2M-5XL">
-                                        <rect key="frame" x="41.5" y="113.5" width="293" height="40"/>
+                                        <rect key="frame" x="41.5" y="112.5" width="293" height="40"/>
                                         <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                         <inset key="contentEdgeInsets" minX="8" minY="8" maxX="8" maxY="8"/>
                                         <state key="normal" title="Team Image Upload Retry Button" image="refresh"/>
@@ -2251,7 +2254,7 @@
                                         </connections>
                                     </button>
                                     <button hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1" verticalHuggingPriority="1" horizontalCompressionResistancePriority="999" verticalCompressionResistancePriority="999" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="clip" translatesAutoresizingMaskIntoConstraints="NO" id="LGR-3t-JL4">
-                                        <rect key="frame" x="76" y="113.5" width="224" height="40"/>
+                                        <rect key="frame" x="76" y="112.5" width="224" height="40"/>
                                         <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                         <inset key="contentEdgeInsets" minX="8" minY="8" maxX="8" maxY="8"/>
                                         <state key="normal" title="Team Image Add Button" image="camera"/>
@@ -2274,7 +2277,7 @@
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pAh-lZ-ZxJ" userLabel="Competitor View">
-                                <rect key="frame" x="0.0" y="265.5" width="375" height="38"/>
+                                <rect key="frame" x="0.0" y="263.5" width="375" height="38"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sail ID Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="k06-sH-apv">
                                         <rect key="frame" x="257.5" y="9.5" width="97.5" height="20.5"/>
@@ -2417,9 +2420,9 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="cVT-Os-RxU"/>
-        <segue reference="rUr-Ta-FZ1"/>
-        <segue reference="Uh5-BJ-t8l"/>
+        <segue reference="LhS-FE-OSU"/>
+        <segue reference="GZT-j1-DBW"/>
         <segue reference="K7i-f6-Gr5"/>
-        <segue reference="eex-WZ-awp"/>
+        <segue reference="gEw-ml-Ejg"/>
     </inferredMetricsTieBreakers>
 </document>
