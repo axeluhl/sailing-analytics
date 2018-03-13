@@ -38,7 +38,6 @@ public class AsyncActionsExecutor {
         }
         
         public void execute() {
-            GWT.log("Action name " + action.getClass().getName());
             this.action.execute(new MarkedAsyncCallback<T>(this, getCategory()));
         }
         
