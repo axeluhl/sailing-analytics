@@ -254,6 +254,9 @@ class CheckInRequestManager: NSObject {
         body[BodyKeys.PushDeviceID] = "" as AnyObject?
         body[BodyKeys.FromMillis] = millisSince1970()
         switch checkInData.type {
+        case .boat:
+            // TODO
+            break
         case .competitor:
             body[BodyKeys.CompetitorID] = checkInData.competitorData.competitorID as AnyObject?
             break

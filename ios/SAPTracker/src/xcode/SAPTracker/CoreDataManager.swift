@@ -51,6 +51,9 @@ class CoreDataManager: NSObject {
     
     func fetchCheckIn(checkInData: CheckInData) -> CheckIn? {
         switch checkInData.type {
+        case .boat:
+            // TODO
+            return nil
         case .competitor:
             return fetchCompetitorCheckIn(
                 eventID: checkInData.eventID,

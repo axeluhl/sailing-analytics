@@ -100,6 +100,9 @@ class CheckInController : NSObject {
         failure: @escaping (_ error: Error) -> Void)
     {
         switch checkInData.type {
+        case .boat:
+            // TODO
+            break
         case .competitor:
             delegate?.checkInController(self, postCompetitorCheckIn: checkInData, success: success, failure: failure)
             break
@@ -132,6 +135,9 @@ class CheckInController : NSObject {
         success: (_ checkIn: CheckIn) -> Void)
     {
         switch checkInData.type {
+        case .boat:
+            // TODO
+            break
         case .competitor:
             let competitorCheckIn = coreDataManager.fetchCompetitorCheckIn(
                 eventID: checkInData.eventID,

@@ -11,6 +11,7 @@ import Foundation
 class CheckInData: NSObject {
     
     fileprivate struct ItemNames {
+        static let BoatID = "boat_id"
         static let EventID = "event_id"
         static let LeaderboardName = "leaderboard_name"
         static let CompetitorID = "competitor_id"
@@ -18,6 +19,7 @@ class CheckInData: NSObject {
     }
     
     public enum CheckInDataType {
+        case boat
         case competitor
         case mark
     }
@@ -25,6 +27,7 @@ class CheckInData: NSObject {
     let serverURL: String
     let eventID: String
     let leaderboardName: String
+    let boatID: String?
     let competitorID: String?
     let markID: String?
     let isTraining: Bool
@@ -42,6 +45,7 @@ class CheckInData: NSObject {
          competitorID: String,
          isTraining: Bool)
     {
+        self.boatID = nil
         self.competitorID = competitorID
         self.eventID = eventID
         self.leaderboardName = leaderboardName
@@ -58,6 +62,7 @@ class CheckInData: NSObject {
          markID: String,
          isTraining: Bool)
     {
+        self.boatID = nil
         self.competitorID = nil
         self.eventID = eventID
         self.leaderboardName = leaderboardName
@@ -65,6 +70,23 @@ class CheckInData: NSObject {
         self.serverURL = serverURL
         self.isTraining = isTraining
         type = CheckInDataType.mark
+        super.init()
+    }
+
+    init(serverURL: String,
+         eventID: String,
+         leaderboardName: String,
+         boatID: String,
+         isTraining: Bool)
+    {
+        self.boatID = boatID
+        self.competitorID = nil
+        self.eventID = eventID
+        self.leaderboardName = leaderboardName
+        self.markID = nil
+        self.serverURL = serverURL
+        self.isTraining = isTraining
+        type = CheckInDataType.boat
         super.init()
     }
 
@@ -116,6 +138,14 @@ class CheckInData: NSObject {
                 eventID: eventID,
                 leaderboardName: leaderboardName,
                 markID: markID,
+                isTraining: false
+            )
+        } else if let boatID = CheckInData.queryItemValue(queryItems: queryItems, itemName: ItemNames.BoatID) {
+            self.init(
+                serverURL: serverURL,
+                eventID: eventID,
+                leaderboardName: leaderboardName,
+                boatID: boatID,
                 isTraining: false
             )
         } else {
