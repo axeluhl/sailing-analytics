@@ -60,6 +60,7 @@ class CheckInRequestManager: NSObject {
     fileprivate let basePathString = "/sailingserver/api/v1"
     
     fileprivate enum BodyKeys {
+        static let BoatID = "boatId"
         static let CompetitorID = "competitorId"
         static let DeviceType = "deviceType"
         static let DeviceUUID = "deviceUuid"
@@ -285,7 +286,7 @@ class CheckInRequestManager: NSObject {
         body[BodyKeys.FromMillis] = millisSince1970()
         switch checkInData.type {
         case .boat:
-            // TODO
+            body[BodyKeys.BoatID] = checkInData.boatData.boatID as AnyObject?
             break
         case .competitor:
             body[BodyKeys.CompetitorID] = checkInData.competitorData.competitorID as AnyObject?
