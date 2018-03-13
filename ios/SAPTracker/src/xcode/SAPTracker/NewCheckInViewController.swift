@@ -104,6 +104,7 @@ class NewCheckInViewController: UIViewController {
 
     // MARK: - Segues
 
+    // TODO: Activate Training Feature -> Show training view in IB
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
         if segue.identifier == Segue.Scan {

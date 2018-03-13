@@ -88,7 +88,8 @@ class CheckInTableViewController: UIViewController {
 
     fileprivate func setupNavigationBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
-        navigationItem.titleView = titleView
+        // TODO: Activate Training Feature -> Use this custom title view:
+        // navigationItem.titleView = titleView
         navigationController?.navigationBar.setNeedsLayout()
     }
 
@@ -402,6 +403,7 @@ class CheckInTableViewController: UIViewController {
         present(alertController, animated: true, completion: nil)
     }
 
+    // TODO: Activate Training Feature -> Set sort button visible in IB
     @IBAction func sortButtonTapped(_ sender: Any) {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         if let popoverController = alertController.popoverPresentationController {

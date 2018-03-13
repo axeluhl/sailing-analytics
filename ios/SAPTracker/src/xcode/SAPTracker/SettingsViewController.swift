@@ -107,6 +107,7 @@ class SettingsViewController: UITableViewController {
         return UITableViewAutomaticDimension
     }
 
+    // TODO: Activate Training Feature -> Delete this method
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 2
     }
