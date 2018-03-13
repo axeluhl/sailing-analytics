@@ -557,7 +557,9 @@ public class LegEntryDTO implements Serializable {
         return expeditionHolder == null ? null : expeditionHolder.expeditionVMGTargVMGDelta;
     }
     
-    public static class ExpeditionLegHolder {
+    public static class ExpeditionLegHolder implements Serializable {
+        private static final long serialVersionUID = -2507536984016949734L;
+        
         public Double expeditionAWA;
         public Double expeditionAWS;
         public Double expeditionBoatSpeed;
