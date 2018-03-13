@@ -3043,7 +3043,12 @@ public abstract class BaseChart<T> extends Widget {
      */
     public native void showResetZoom() /*-{
         var chart = this.@org.moxieapps.gwt.highcharts.client.BaseChart::chart;
-        if (chart) chart.showResetZoom();
+        if (chart){
+            //workaround for multi zoom
+            if(!chart.resetZoomButton){
+                chart.showResetZoom();
+            }
+        }
     }-*/;
 
 
@@ -3054,7 +3059,10 @@ public abstract class BaseChart<T> extends Widget {
         var chart = this.@org.moxieapps.gwt.highcharts.client.BaseChart::chart;
         if (chart) {
             if (chart.resetZoomButton) {
-                chart.resetZoomButton.hide();
+                chart.resetZoomButton.destroy();
+                chart.resetZoomButton = null;
+            }else {
+                console.print("Could not remove zoombutton");
             }
         }
     }-*/;

@@ -184,11 +184,14 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         Long xAxisMin = chartSelectionEvent.getXAxisMinAsLongOrNull();
         Long xAxisMax = chartSelectionEvent.getXAxisMaxAsLongOrNull();
         ;
-        if (xAxisMax != null && xAxisMin != null && (xAxisMax - xAxisMin > MINUTE_IN_MILLIS)) {
-            Date rangeStart = new Date(xAxisMin);
-            Date rangeEnd = new Date(xAxisMax);
-            timeRangeWithZoomProvider.setTimeZoom(rangeStart, rangeEnd);
-            return true;
+        if (xAxisMax != null && xAxisMin != null) {
+            if(xAxisMax - xAxisMin > MINUTE_IN_MILLIS){
+                Date rangeStart = new Date(xAxisMin);
+                Date rangeEnd = new Date(xAxisMax);
+                timeRangeWithZoomProvider.setTimeZoom(rangeStart, rangeEnd);
+                return true;
+            }
+            return false;
         } else {
             ignoreNextClickEvent = true;
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
