@@ -404,9 +404,9 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                 if (newMaxTimepoint == null || wind.requestTimepoint > newMaxTimepoint) {
                     newMaxTimepoint = wind.requestTimepoint;
                 }
-     
-                if ((timeOfEarliestRequestInMillis == null || wind.requestTimepoint < timeOfEarliestRequestInMillis) || 
-                    timeOfLatestRequestInMillis == null || wind.requestTimepoint > timeOfLatestRequestInMillis) {
+                //if we are in non appending mode, the data is the truth, use all of it without filtering
+                if (!append || ((timeOfEarliestRequestInMillis == null || wind.requestTimepoint < timeOfEarliestRequestInMillis) || 
+                    timeOfLatestRequestInMillis == null || wind.requestTimepoint > timeOfLatestRequestInMillis)) {
                     Point newDirectionPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindFromDeg);
                     if (wind.dampenedTrueWindSpeedInKnots != null) {
                         String name = numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+ stringMessages.knotsUnit();
@@ -518,7 +518,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         if (isVisible()) {
             if (selectedRaceIdentifier == null) {
                 clearChart();
-            } else if (needsDataLoading() && from != null && to != null) {
+            } else if (from != null && to != null) {
                 setWidget(chart);
                 // if not playing or empty show loading message
                 if (shouldShowLoading(timeOfLatestRequestInMillis)) {
@@ -617,10 +617,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         chart.redraw();
     }
 
-    private boolean needsDataLoading() {
-        return isVisible();
-    }
-    
     /**
      * Prints basic data and points of a WindInfoForRaceDTO object to a formatted string.
      * Can be used for debugging
