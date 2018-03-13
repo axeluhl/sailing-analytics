@@ -113,7 +113,10 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public Competitor migrateToCompetitorWithoutBoat(CompetitorWithBoat competitorWithBoat) {
+    public synchronized Competitor migrateToCompetitorWithoutBoat(CompetitorWithBoat competitorWithBoat) {
+        // It should not be possible to call this for a competitor which has already been migrated.
+        assert competitorWithBoat.hasBoat();
+
         // We can't create a new competitor without boat here as the existing competitorWithBoat might be already referenced.
         // Therefore we only clear the 'boat' property and make sure that 
         removeBoat(competitorWithBoat.getBoat());

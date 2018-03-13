@@ -741,39 +741,41 @@ public class DomainFactoryImpl implements DomainFactory {
                 }
                 Boat existingBoat = competitorAndBoatStore.getExistingBoatById(boatId);
                 Competitor existingCompetitor = competitorAndBoatStore.getExistingCompetitorById(competitorId);
-                boolean competitorMigrationRequired = existingCompetitor != null && existingCompetitor.hasBoat();
-                // Now we check if we already have a separate competitor and boat for this competitor in the store
-                if (existingCompetitor != null && existingBoat != null && !competitorMigrationRequired) {                    
-                    competitorsAndBoats.put(existingCompetitor, existingBoat);
-                } else {
-                    Competitor competitorToUse = existingCompetitor;
-                    if (existingCompetitor == null) {
-                        competitorToUse = getOrCreateCompetitor(rc.getCompetitor());
-                    } else if (competitorMigrationRequired) {
-                        competitorToUse = competitorAndBoatStore.migrateToCompetitorWithoutBoat((CompetitorWithBoat) existingCompetitor);
-                        // we might also want to update the shortName field of the competitor during migration (instead of using sailID)
-                        if (competitorToUse.getShortName() != rc.getCompetitor().getShortName()) {
-                            boolean savedIsCompetitorToUpdateDuringGetOrCreate = competitorAndBoatStore.isCompetitorToUpdateDuringGetOrCreate(competitorToUse);
-                            competitorAndBoatStore.allowCompetitorResetToDefaults(competitorToUse);
-                            competitorAndBoatStore.updateCompetitor(competitorToUse.getId().toString(), competitorToUse.getName(),
-                                    rc.getCompetitor().getShortName(), competitorToUse.getColor(),
-                                    competitorToUse.getEmail(), competitorToUse.getNationality(), competitorToUse.getTeam().getImage(), 
-                                    competitorToUse.getFlagImage(), competitorToUse.getTimeOnTimeFactor(),
-                                    competitorToUse.getTimeOnDistanceAllowancePerNauticalMile(), competitorToUse.getSearchTag());
-                            if (savedIsCompetitorToUpdateDuringGetOrCreate) {
+                synchronized (existingCompetitor) {
+                    boolean competitorMigrationRequired = existingCompetitor != null && existingCompetitor.hasBoat();
+                    // Now we check if we already have a separate competitor and boat for this competitor in the store
+                    if (existingCompetitor != null && existingBoat != null && !competitorMigrationRequired) {                    
+                        competitorsAndBoats.put(existingCompetitor, existingBoat);
+                    } else {
+                        Competitor competitorToUse = existingCompetitor;
+                        if (existingCompetitor == null) {
+                            competitorToUse = getOrCreateCompetitor(rc.getCompetitor());
+                        } else if (competitorMigrationRequired) {
+                            competitorToUse = competitorAndBoatStore.migrateToCompetitorWithoutBoat((CompetitorWithBoat) existingCompetitor);
+                            // we might also want to update the shortName field of the competitor during migration (instead of using sailID)
+                            if (competitorToUse.getShortName() != rc.getCompetitor().getShortName()) {
+                                boolean savedIsCompetitorToUpdateDuringGetOrCreate = competitorAndBoatStore.isCompetitorToUpdateDuringGetOrCreate(competitorToUse);
                                 competitorAndBoatStore.allowCompetitorResetToDefaults(competitorToUse);
+                                competitorAndBoatStore.updateCompetitor(competitorToUse.getId().toString(), competitorToUse.getName(),
+                                        rc.getCompetitor().getShortName(), competitorToUse.getColor(),
+                                        competitorToUse.getEmail(), competitorToUse.getNationality(), competitorToUse.getTeam().getImage(), 
+                                        competitorToUse.getFlagImage(), competitorToUse.getTimeOnTimeFactor(),
+                                        competitorToUse.getTimeOnDistanceAllowancePerNauticalMile(), competitorToUse.getSearchTag());
+                                if (savedIsCompetitorToUpdateDuringGetOrCreate) {
+                                    competitorAndBoatStore.allowCompetitorResetToDefaults(competitorToUse);
+                                }
                             }
                         }
-                    }
-                    Boat boatToUse = existingBoat;
-                    if (existingBoat == null) {
-                        if (competitorBoatInfo != null) {
-                            boatToUse = getOrCreateBoat(boatId, competitorBoatInfo.getName(), defaultBoatClass, sailId, AbstractColor.getCssColor(competitorBoatInfo.getColor()));
-                        } else {
-                            boatToUse = getOrCreateBoat(boatId, /* boat name*/ null, defaultBoatClass, sailId, null);
+                        Boat boatToUse = existingBoat;
+                        if (existingBoat == null) {
+                            if (competitorBoatInfo != null) {
+                                boatToUse = getOrCreateBoat(boatId, competitorBoatInfo.getName(), defaultBoatClass, sailId, AbstractColor.getCssColor(competitorBoatInfo.getColor()));
+                            } else {
+                                boatToUse = getOrCreateBoat(boatId, /* boat name*/ null, defaultBoatClass, sailId, null);
+                            }
                         }
+                        competitorsAndBoats.put(competitorToUse, boatToUse);
                     }
-                    competitorsAndBoats.put(competitorToUse, boatToUse);
                 }
             } else {
                 // Case 2 we assume here that the boat is contained in competitor as it's always the same
