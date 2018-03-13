@@ -155,7 +155,14 @@ class CheckInController : NSObject {
     {
         switch checkInData.type {
         case .boat:
-            // TODO
+            let boatCheckIn = coreDataManager.fetchBoatCheckIn(
+                eventID: checkInData.eventID,
+                leaderboardName: checkInData.leaderboardName,
+                boatID: checkInData.boatID!
+            ) ?? coreDataManager.newBoatCheckIn()
+            boatCheckIn.updateWithCheckInData(checkInData: checkInData)
+            coreDataManager.saveContext()
+            didFinishCheckIn(boatCheckIn, success: success)
             break
         case .competitor:
             let competitorCheckIn = coreDataManager.fetchCompetitorCheckIn(

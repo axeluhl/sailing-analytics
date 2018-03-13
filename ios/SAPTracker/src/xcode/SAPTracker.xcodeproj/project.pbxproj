@@ -349,6 +349,8 @@
 		C88F6D2F1FEACD7400A616BE /* RegattaRaceCourseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2E1FEACD7400A616BE /* RegattaRaceCourseData.swift */; };
 		C88F6D311FFBC35F00A616BE /* ErrorHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D301FFBC35F00A616BE /* ErrorHelper.swift */; };
 		C891886E2057DB4A00E37CC3 /* BoatData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C891886D2057DB4A00E37CC3 /* BoatData.swift */; };
+		C89188712057E7D700E37CC3 /* BoatCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C891886F2057E7D700E37CC3 /* BoatCheckIn.swift */; };
+		C89188722057E7D700E37CC3 /* BoatCheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89188702057E7D700E37CC3 /* BoatCheckIn+CoreDataProperties.swift */; };
 		C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC41D06A289002AAAD2 /* GradientView.swift */; };
 		C89C5FCA1D06CECD002AAAD2 /* TrackingViewStatusCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */; };
 		C89C5FCC1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */; };
@@ -764,6 +766,8 @@
 		C88F6D2E1FEACD7400A616BE /* RegattaRaceCourseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegattaRaceCourseData.swift; sourceTree = "<group>"; };
 		C88F6D301FFBC35F00A616BE /* ErrorHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHelper.swift; sourceTree = "<group>"; };
 		C891886D2057DB4A00E37CC3 /* BoatData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BoatData.swift; sourceTree = "<group>"; };
+		C891886F2057E7D700E37CC3 /* BoatCheckIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoatCheckIn.swift; sourceTree = "<group>"; };
+		C89188702057E7D700E37CC3 /* BoatCheckIn+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BoatCheckIn+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C89C5FC41D06A289002AAAD2 /* GradientView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GradientView.swift; sourceTree = "<group>"; };
 		C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewStatusCell.swift; sourceTree = "<group>"; };
 		C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewGPSAccuracyCell.swift; sourceTree = "<group>"; };
@@ -882,6 +886,8 @@
 		7F06590019F7FE750077FF95 /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
+				C891886F2057E7D700E37CC3 /* BoatCheckIn.swift */,
+				C89188702057E7D700E37CC3 /* BoatCheckIn+CoreDataProperties.swift */,
 				C843D47E1EBC54A300250F01 /* CheckIn.swift */,
 				C843D47D1EBC54A300250F01 /* CheckIn+CoreDataProperties.swift */,
 				C843D47A1EBC54A300250F01 /* CompetitorCheckIn.swift */,
@@ -2064,10 +2070,12 @@
 				C8F71EDE1D8691F700826DE4 /* AFSecurityPolicy.m in Sources */,
 				C8F71EDB1D8691F700826DE4 /* AFHTTPRequestOperationManager.m in Sources */,
 				7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */,
+				C89188712057E7D700E37CC3 /* BoatCheckIn.swift in Sources */,
 				C843D48F1EC099EB00250F01 /* CoreData2-3.xcmappingmodel in Sources */,
 				C8CF22B81F68133000A01E0A /* TrainingRaceData.swift in Sources */,
 				C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */,
 				7F99DE3C1A126554009B3619 /* RegattaCompetitorViewController.swift in Sources */,
+				C89188722057E7D700E37CC3 /* BoatCheckIn+CoreDataProperties.swift in Sources */,
 				C843D4841EBC54A300250F01 /* CheckIn.swift in Sources */,
 				C8BFCCCC1D523C5D00FC1A27 /* TitleView.swift in Sources */,
 				C8CF22C01F6926E500A01E0A /* CompetitorSessionViewController.swift in Sources */,

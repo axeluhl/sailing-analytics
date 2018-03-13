@@ -12,6 +12,7 @@ import CoreData
 class CoreDataManager: NSObject {
     
     fileprivate enum Entities: String {
+        case BoatCheckIn
         case CheckIn
         case CompetitorCheckIn
         case Event
@@ -52,8 +53,11 @@ class CoreDataManager: NSObject {
     func fetchCheckIn(checkInData: CheckInData) -> CheckIn? {
         switch checkInData.type {
         case .boat:
-            // TODO
-            return nil
+            return fetchBoatCheckIn(
+                eventID: checkInData.eventID,
+                leaderboardName: checkInData.leaderboardName,
+                boatID: checkInData.boatID!
+            )
         case .competitor:
             return fetchCompetitorCheckIn(
                 eventID: checkInData.eventID,
@@ -68,7 +72,32 @@ class CoreDataManager: NSObject {
             )
         }
     }
-    
+
+    func fetchBoatCheckIn(eventID: String, leaderboardName: String, boatID: String) -> BoatCheckIn? {
+        let fetchRequest = NSFetchRequest<BoatCheckIn>()
+        fetchRequest.entity = NSEntityDescription.entity(
+            forEntityName: Entities.BoatCheckIn.rawValue,
+            in: managedObjectContext
+        )
+        fetchRequest.predicate = NSPredicate(
+            format: "event.eventID = %@ AND leaderboard.name = %@ AND boatID = %@",
+            eventID,
+            leaderboardName,
+            boatID
+        )
+        do {
+            let checkIns = try managedObjectContext.fetch(fetchRequest)
+            if checkIns.count == 0 {
+                return nil
+            } else {
+                return checkIns[0]
+            }
+        } catch {
+            logError(name: "\(#function)", error: error)
+        }
+        return nil
+    }
+
     func fetchCompetitorCheckIn(serverURL: String, boatClassName: String) -> [CompetitorCheckIn]? {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>()
         fetchRequest.entity = NSEntityDescription.entity(forEntityName: Entities.CompetitorCheckIn.rawValue, in: managedObjectContext)
@@ -141,7 +170,14 @@ class CoreDataManager: NSObject {
     }
     
     // MARK: - Insert
-    
+
+    func newBoatCheckIn() -> BoatCheckIn {
+        let checkIn = NSEntityDescription.insertNewObject(forEntityName: Entities.BoatCheckIn.rawValue, into: managedObjectContext) as! BoatCheckIn
+        checkIn.event = newEvent(checkIn: checkIn)
+        checkIn.leaderboard = newLeaderboard(checkIn: checkIn)
+        return checkIn
+    }
+
     func newCompetitorCheckIn() -> CompetitorCheckIn {
         let checkIn = NSEntityDescription.insertNewObject(forEntityName: Entities.CompetitorCheckIn.rawValue, into: managedObjectContext) as! CompetitorCheckIn
         checkIn.event = newEvent(checkIn: checkIn)
