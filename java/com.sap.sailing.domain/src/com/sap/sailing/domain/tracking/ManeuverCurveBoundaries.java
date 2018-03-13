@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -57,5 +58,12 @@ public interface ManeuverCurveBoundaries {
         long differenceInMs = getTimePointAfter().asMillis()-getTimePointBefore().asMillis();
         return new MillisecondsDurationImpl(differenceInMs);
     }
+
+    /**
+     * Gets the lowest speed sailed within the maneuver curve.
+     * 
+     * @return The lowest speed within maneuver curve
+     */
+    Speed getLowestSpeed();
 
 }

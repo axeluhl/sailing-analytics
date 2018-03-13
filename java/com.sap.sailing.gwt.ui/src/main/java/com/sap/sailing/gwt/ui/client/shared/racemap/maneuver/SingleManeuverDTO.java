@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.shared.SpeedDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sse.common.Duration;
 
@@ -14,13 +15,13 @@ public class SingleManeuverDTO {
     private final Duration duration;
     private final SpeedWithBearingDTO speedIn;
     private final SpeedWithBearingDTO speedOut;
-    private final SpeedWithBearingDTO minSpeed;
+    private final SpeedDTO minSpeed;
     private final double turnRate;
     private final Double loss;
     private final double directionChangeInDegrees;
 
     public SingleManeuverDTO(CompetitorDTO competitor, Date time, ManeuverType maneuverType, Duration duration,
-            SpeedWithBearingDTO speedIn, SpeedWithBearingDTO speedOut, SpeedWithBearingDTO minSpeed, double turnRate,
+            SpeedWithBearingDTO speedIn, SpeedWithBearingDTO speedOut, SpeedDTO minSpeed, double turnRate,
             Double loss, double directionChangeInDegrees) {
         super();
         this.competitor = competitor;

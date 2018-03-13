@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.tracking.impl.AbstractGPSFixImpl;
@@ -26,12 +27,11 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     private final ManeuverCurveBoundaries mainCurveBoundaries;
     private final ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries;
     private final Duration duration;
-    private final SpeedWithBearing minSpeed;
 
     public ManeuverImpl(ManeuverType type, Tack newTack, Position position, Distance maneuverLoss, TimePoint timePoint,
             ManeuverCurveBoundaries mainCurveBoundaries,
             ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries,
-            double maxAngularVelocityInDegreesPerSecond, Duration duration, SpeedWithBearing minSpeed) {
+            double maxAngularVelocityInDegreesPerSecond, Duration duration) {
         this.type = type;
         this.newTack = newTack;
         this.position = position;
@@ -41,7 +41,6 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
         this.maneuverCurveWithStableSpeedAndCourseBoundaries = maneuverCurveWithStableSpeedAndCourseBoundaries;
         this.maxAngularVelocityInDegreesPerSecond = maxAngularVelocityInDegreesPerSecond;
         this.duration = duration;
-        this.minSpeed = minSpeed;
     }
     
     @Override
@@ -98,10 +97,10 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     public SpeedWithBearing getSpeedWithBearingAfter() {
         return getManeuverBoundaries().getSpeedWithBearingAfter();
     }
-    
+
     @Override
-    public SpeedWithBearing getMinSpeed() {
-        return minSpeed;
+    public Speed getLowestSpeed() {
+        return getManeuverBoundaries().getLowestSpeed();
     }
 
     @Override

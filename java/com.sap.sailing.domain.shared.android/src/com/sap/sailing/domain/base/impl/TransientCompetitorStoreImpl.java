@@ -283,7 +283,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
 
     @Override
     public void addNewCompetitors(Iterable<Competitor> competitors) {
-        for (Competitor competitor: competitors) {
+        for (Competitor competitor : competitors) {
             addNewCompetitor(competitor);
         }
     }

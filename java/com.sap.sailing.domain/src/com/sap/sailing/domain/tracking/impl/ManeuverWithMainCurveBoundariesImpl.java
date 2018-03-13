@@ -3,7 +3,6 @@ package com.sap.sailing.domain.tracking.impl;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
@@ -23,9 +22,9 @@ public class ManeuverWithMainCurveBoundariesImpl extends ManeuverImpl {
     public ManeuverWithMainCurveBoundariesImpl(ManeuverType type, Tack newTack, Position position,
             Distance maneuverLoss, TimePoint timePoint, ManeuverCurveBoundaries mainCurveBoundaries,
             ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries,
-            double maxAngularVelocityInDegreesPerSecond, Duration duration, SpeedWithBearing minSpeed) {
+            double maxAngularVelocityInDegreesPerSecond, Duration duration) {
         super(type, newTack, position, maneuverLoss, timePoint, mainCurveBoundaries,
-                maneuverCurveWithStableSpeedAndCourseBoundaries, maxAngularVelocityInDegreesPerSecond, duration, minSpeed);
+                maneuverCurveWithStableSpeedAndCourseBoundaries, maxAngularVelocityInDegreesPerSecond, duration);
     }
 
     @Override

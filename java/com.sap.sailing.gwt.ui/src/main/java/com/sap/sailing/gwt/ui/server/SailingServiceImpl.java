@@ -223,6 +223,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.UnableToCloseDeviceMappingException;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
@@ -422,6 +423,7 @@ import com.sap.sailing.gwt.ui.shared.SidelineDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
+import com.sap.sailing.gwt.ui.shared.SpeedDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
@@ -2001,6 +2003,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return new MillisecondsTimePoint(timePoint.asMillis() / resolutionInMilliseconds * resolutionInMilliseconds);
     }
 
+    private SpeedDTO createSpeedDTO(Speed speedWithBearing) {
+        return new SpeedDTO(speedWithBearing.getKnots());
+    }
+    
     private SpeedWithBearingDTO createSpeedWithBearingDTO(SpeedWithBearing speedWithBearing) {
         return new SpeedWithBearingDTO(speedWithBearing.getKnots(), speedWithBearing
                 .getBearing().getDegrees());
@@ -3428,8 +3434,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Double maneuverLossInMeters = maneuver.getManeuverLoss() == null ? null
                     : maneuver.getManeuverLoss().getMeters();
             final Duration duration = maneuver.getDuration();
-            final SpeedWithBearingDTO minSpeed = maneuver.getMinSpeed() == null ? null
-                    : createSpeedWithBearingDTO(maneuver.getMinSpeed());
+            final SpeedDTO minSpeed = maneuver.getLowestSpeed() == null ? null
+                    : createSpeedDTO(maneuver.getLowestSpeed());
             if (type == ManeuverType.MARK_PASSING) {
                 maneuverDTO = new MarkpassingManeuverDTO(type, newTack, position, timepoint, speedBefore, speedAfter,
                         directionChangeInDegrees, maneuverLossInMeters, ((MarkPassingManeuver) maneuver).getSide(),
@@ -7354,5 +7360,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } catch (Exception e) {
             throw new RuntimeException("Error while slicing race", e);
         }
+    }
+
+    @Override
+    public Boolean checkIfRaceIsTracked(RegattaAndRaceIdentifier race) {
+        boolean result = false;
+        DynamicTrackedRace trace = getService().getTrackedRace(race);
+        if (trace != null) {
+            final TrackedRaceStatusEnum status = trace.getStatus().getStatus();
+            if (status == TrackedRaceStatusEnum.LOADING || status == TrackedRaceStatusEnum.TRACKING) {
+                result = true;
+            }
+        }
+        return result;
     }
 }
