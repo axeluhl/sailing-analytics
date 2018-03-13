@@ -138,6 +138,9 @@ class Translation: NSObject {
         struct CommunicationFailed { private static let Key = "\(CheckInRequestManagerError.Key).\(CommunicationFailed.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
+        struct GetBoatFailed { private static let Key = "\(CheckInRequestManagerError.Key).\(GetBoatFailed.self)"
+            static let String = NSLocalizedString(Key, comment: "")
+        }
         struct GetCompetitorFailed { private static let Key = "\(CheckInRequestManagerError.Key).\(GetCompetitorFailed.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }

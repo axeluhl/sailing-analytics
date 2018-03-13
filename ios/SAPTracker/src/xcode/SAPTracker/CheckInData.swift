@@ -35,6 +35,7 @@ class CheckInData: NSObject {
 
     var eventData = EventData()
     var leaderboardData = LeaderboardData()
+    var boatData = BoatData()
     var competitorData = CompetitorData()
     var markData = MarkData()
     var teamImageURL: String?

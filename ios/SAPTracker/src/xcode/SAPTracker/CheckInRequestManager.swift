@@ -11,6 +11,7 @@ import UIKit
 
 enum CheckInRequestManagerError: Error {
     case communicationFailed
+    case getBoatFailed
     case getCompetitorFailed
     case getEventFailed
     case getLeaderboardFailed
@@ -28,6 +29,8 @@ extension CheckInRequestManagerError: LocalizedError {
         switch self {
         case .communicationFailed:
             return Translation.CheckInRequestManagerError.CommunicationFailed.String
+        case .getBoatFailed:
+            return Translation.CheckInRequestManagerError.GetBoatFailed.String
         case .getCompetitorFailed:
             return Translation.CheckInRequestManagerError.GetCompetitorFailed.String
         case .getEventFailed:
@@ -148,7 +151,34 @@ class CheckInRequestManager: NSObject {
         logError(name: "\(#function)", error: error)
         failure(CheckInRequestManagerError.getLeaderboardFailed)
     }
-    
+
+    // MARK: - Boat
+
+    func getBoat(
+        boatID: String,
+        success: @escaping (_ boatData: BoatData) -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        let encodedBoatID = boatID.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlPathAllowed) ?? ""
+        let urlString = "\(basePathString)/boats/\(encodedBoatID)"
+        manager.get(
+            urlString,
+            parameters: nil,
+            success: { (requestOperation, responseObject) in self.getBoatSuccess(responseObject: responseObject, success: success) },
+            failure: { (requestOperation, error) in self.getBoatFailure(error: error, failure: failure) }
+        )
+    }
+
+    fileprivate func getBoatSuccess(responseObject: Any, success: (_ boatData: BoatData) -> Void) {
+        logInfo(name: "\(#function)", info: responseObjectToString(responseObject: responseObject))
+        success(BoatData(dictionary: responseObject as? [String: AnyObject]))
+    }
+
+    fileprivate func getBoatFailure(error: Error, failure: (_ error: Error) -> Void) {
+        logError(name: "\(#function)", error: error)
+        failure(CheckInRequestManagerError.getBoatFailed)
+    }
+
     // MARK: - Competitor
     
     func getCompetitor(

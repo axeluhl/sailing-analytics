@@ -348,6 +348,7 @@
 		C88F6D2D1FEACC5700A616BE /* LeaderboardGroupData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2C1FEACC5700A616BE /* LeaderboardGroupData.swift */; };
 		C88F6D2F1FEACD7400A616BE /* RegattaRaceCourseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2E1FEACD7400A616BE /* RegattaRaceCourseData.swift */; };
 		C88F6D311FFBC35F00A616BE /* ErrorHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D301FFBC35F00A616BE /* ErrorHelper.swift */; };
+		C891886E2057DB4A00E37CC3 /* BoatData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C891886D2057DB4A00E37CC3 /* BoatData.swift */; };
 		C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC41D06A289002AAAD2 /* GradientView.swift */; };
 		C89C5FCA1D06CECD002AAAD2 /* TrackingViewStatusCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */; };
 		C89C5FCC1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */; };
@@ -762,6 +763,7 @@
 		C88F6D2C1FEACC5700A616BE /* LeaderboardGroupData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardGroupData.swift; sourceTree = "<group>"; };
 		C88F6D2E1FEACD7400A616BE /* RegattaRaceCourseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegattaRaceCourseData.swift; sourceTree = "<group>"; };
 		C88F6D301FFBC35F00A616BE /* ErrorHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHelper.swift; sourceTree = "<group>"; };
+		C891886D2057DB4A00E37CC3 /* BoatData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BoatData.swift; sourceTree = "<group>"; };
 		C89C5FC41D06A289002AAAD2 /* GradientView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GradientView.swift; sourceTree = "<group>"; };
 		C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewStatusCell.swift; sourceTree = "<group>"; };
 		C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewGPSAccuracyCell.swift; sourceTree = "<group>"; };
@@ -1333,6 +1335,7 @@
 		C8739E101D2BF13200A89F3C /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				C891886D2057DB4A00E37CC3 /* BoatData.swift */,
 				C8739E171D2BF2DC00A89F3C /* BaseData.swift */,
 				7F0658FE19F7EE910077FF95 /* CheckInData.swift */,
 				C87A74E91F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift */,
@@ -2053,6 +2056,7 @@
 				C8F71EDC1D8691F700826DE4 /* AFHTTPSessionManager.m in Sources */,
 				C8F71EE91D8691F700826DE4 /* AFNetworkActivityIndicatorManager.m in Sources */,
 				C84936291D47645F000F30E8 /* CheckInTableViewCell.swift in Sources */,
+				C891886E2057DB4A00E37CC3 /* BoatData.swift in Sources */,
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,
 				C89C5FCC1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift in Sources */,
 				C89C5FCA1D06CECD002AAAD2 /* TrackingViewStatusCell.swift in Sources */,

@@ -73,7 +73,9 @@ class CheckInDataCollector: NSObject {
         success: @escaping (_ collector: CheckInData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        if let competitorID = collector.competitorID {
+        if let boatID = collector.boatID {
+            getBoatData(collector: collector, boatID: boatID, success: success, failure: failure)
+        } else if let competitorID = collector.competitorID {
             getCompetitorData(collector: collector, competitorID: competitorID, success: success, failure: failure)
         } else if let markID = collector.markID {
             getMarkData(collector: collector, markID: markID, success: success, failure: failure)
@@ -81,7 +83,25 @@ class CheckInDataCollector: NSObject {
             failure(CheckInDataCollectorError.checkInDataIsIncomplete)
         }
     }
-    
+
+    // MARK: - Boat
+
+    fileprivate func getBoatData(
+        collector: CheckInData,
+        boatID: String,
+        success: @escaping (_ collector: CheckInData) -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        checkInRequestManager.getBoat(boatID: boatID, success: { (boatData) in
+            collector.boatData = boatData
+            success(collector)
+        }) { error in
+            failure(error)
+        }
+    }
+
+    // MARK: - Competitor
+
     fileprivate func getCompetitorData(
         collector: CheckInData,
         competitorID: String,
