@@ -609,7 +609,6 @@
                                             <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
                                         <connections>
-                                            <action selector="startTrackingButtonTapped:" destination="G3a-SV-Maf" eventType="touchUpInside" id="kU3-5M-fso"/>
                                             <action selector="startTrackingButtonTapped:" destination="dMx-RA-QpG" eventType="touchUpInside" id="qcg-1Y-akf"/>
                                         </connections>
                                     </button>
@@ -1872,37 +1871,129 @@
             </objects>
             <point key="canvasLocation" x="4951" y="578"/>
         </scene>
-        <!--View Controller-->
+        <!--Training Boat View Controller-->
         <scene sceneID="KjJ-Gf-L6D">
             <objects>
-                <viewController id="y7p-M3-tB3" sceneMemberID="viewController">
+                <viewController id="y7p-M3-tB3" customClass="TrainingBoatViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="ewO-N8-zLq"/>
                         <viewControllerLayoutGuide type="bottom" id="10B-q1-rjQ"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="0xp-SF-Pb4">
+                    <view key="view" contentMode="scaleToFill" id="0xp-SF-Pb4" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lt3-7z-HgQ">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="301.5"/>
+                                <connections>
+                                    <segue destination="45p-eX-fmU" kind="embed" identifier="EmbedBoat" id="cVT-Os-RxU"/>
+                                </connections>
+                            </containerView>
+                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="orh-Ip-L0o">
+                                <rect key="frame" x="0.0" y="301.5" width="375" height="301.5"/>
+                                <connections>
+                                    <segue destination="E6A-nT-WFd" kind="embed" identifier="EmbedTraining" id="Uh5-BJ-t8l"/>
+                                </connections>
+                            </containerView>
+                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="orh-Ip-L0o" firstAttribute="height" secondItem="lt3-7z-HgQ" secondAttribute="height" id="2jo-eq-C1Z"/>
+                            <constraint firstItem="orh-Ip-L0o" firstAttribute="leading" secondItem="0xp-SF-Pb4" secondAttribute="leading" id="EO7-Wm-5kz"/>
+                            <constraint firstAttribute="trailing" secondItem="lt3-7z-HgQ" secondAttribute="trailing" id="Oqz-WP-Pgp"/>
+                            <constraint firstItem="orh-Ip-L0o" firstAttribute="top" secondItem="lt3-7z-HgQ" secondAttribute="bottom" id="TeD-cx-vYF"/>
+                            <constraint firstAttribute="trailing" secondItem="orh-Ip-L0o" secondAttribute="trailing" id="fVF-aY-LOU"/>
+                            <constraint firstItem="10B-q1-rjQ" firstAttribute="top" secondItem="orh-Ip-L0o" secondAttribute="bottom" id="gDr-5y-Dcu"/>
+                            <constraint firstItem="lt3-7z-HgQ" firstAttribute="leading" secondItem="0xp-SF-Pb4" secondAttribute="leading" id="kg8-Xr-Yrc"/>
+                            <constraint firstItem="lt3-7z-HgQ" firstAttribute="top" secondItem="ewO-N8-zLq" secondAttribute="bottom" id="pbu-aK-Uds"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="color" keyPath="secondColor">
+                                <color key="value" red="0.86274509803921573" green="0.8901960784313725" blue="0.92156862745098034" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="color" keyPath="firstColor">
+                                <color key="value" red="0.87058823529411766" green="0.94509803921568625" blue="0.94509803921568625" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
                     </view>
+                    <connections>
+                        <segue destination="I54-NN-JAf" kind="presentation" identifier="Tracking" id="eex-WZ-awp"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="OX1-gW-3RO" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3172" y="-4354"/>
+            <point key="canvasLocation" x="3172" y="-4354.2728635682161"/>
         </scene>
-        <!--View Controller-->
+        <!--Regatta Boat View Controller-->
         <scene sceneID="3AO-vw-zZt">
             <objects>
-                <viewController id="Y5o-Nm-utL" sceneMemberID="viewController">
+                <viewController id="Y5o-Nm-utL" customClass="RegattaBoatViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="SLG-lw-Y58"/>
                         <viewControllerLayoutGuide type="bottom" id="d7B-ph-XjQ"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="S5X-OF-4pC">
+                    <view key="view" contentMode="scaleToFill" id="S5X-OF-4pC" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Llx-dw-jhM">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="481"/>
+                                <connections>
+                                    <segue destination="45p-eX-fmU" kind="embed" identifier="EmbedBoat" id="Wtz-5C-LB8"/>
+                                </connections>
+                            </containerView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dCN-yF-0OZ" userLabel="Event View">
+                                <rect key="frame" x="0.0" y="481" width="375" height="122"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3VK-IG-R56">
+                                        <rect key="frame" x="20" y="20" width="335" height="82"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="82" id="8Ro-TB-T3x">
+                                                <variation key="heightClass=compact" constant="62"/>
+                                            </constraint>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="system" pointSize="21"/>
+                                        <state key="normal" title="Start Tracking Button">
+                                            <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="startTrackingButtonTapped:" destination="Y5o-Nm-utL" eventType="touchUpInside" id="XM4-hk-g8Q"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="3VK-IG-R56" secondAttribute="trailing" constant="20" id="Djg-rz-QHe"/>
+                                    <constraint firstAttribute="bottom" secondItem="3VK-IG-R56" secondAttribute="bottom" constant="20" id="NTn-TA-FIJ"/>
+                                    <constraint firstItem="3VK-IG-R56" firstAttribute="leading" secondItem="dCN-yF-0OZ" secondAttribute="leading" constant="20" id="kgf-iK-9qG"/>
+                                    <constraint firstItem="3VK-IG-R56" firstAttribute="top" secondItem="dCN-yF-0OZ" secondAttribute="top" constant="20" id="sdB-G7-xTl"/>
+                                </constraints>
+                            </view>
+                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="dCN-yF-0OZ" firstAttribute="top" secondItem="Llx-dw-jhM" secondAttribute="bottom" id="EGB-QC-g4s"/>
+                            <constraint firstItem="Llx-dw-jhM" firstAttribute="leading" secondItem="S5X-OF-4pC" secondAttribute="leading" id="Hpp-Nm-c0b"/>
+                            <constraint firstAttribute="trailing" secondItem="Llx-dw-jhM" secondAttribute="trailing" id="Hux-AY-P8q"/>
+                            <constraint firstItem="dCN-yF-0OZ" firstAttribute="top" secondItem="Llx-dw-jhM" secondAttribute="bottom" id="SG3-ZK-OY0"/>
+                            <constraint firstItem="Llx-dw-jhM" firstAttribute="top" secondItem="SLG-lw-Y58" secondAttribute="bottom" id="gAF-un-WTL"/>
+                            <constraint firstAttribute="trailing" secondItem="dCN-yF-0OZ" secondAttribute="trailing" id="gei-bU-GZJ"/>
+                            <constraint firstItem="dCN-yF-0OZ" firstAttribute="leading" secondItem="S5X-OF-4pC" secondAttribute="leading" id="kpR-jP-H1h"/>
+                            <constraint firstItem="d7B-ph-XjQ" firstAttribute="top" secondItem="dCN-yF-0OZ" secondAttribute="bottom" id="lgU-tu-wyT"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="color" keyPath="firstColor">
+                                <color key="value" red="0.87058823529411766" green="0.94509803921568625" blue="0.94509803921568625" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="color" keyPath="secondColor">
+                                <color key="value" red="0.86274509803921573" green="0.8901960784313725" blue="0.92156862745098034" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
                     </view>
+                    <connections>
+                        <outlet property="startTrackingButton" destination="3VK-IG-R56" id="I3X-nt-Foh"/>
+                        <segue destination="I54-NN-JAf" kind="presentation" identifier="Tracking" id="hpV-45-8J9"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="boI-kC-ANU" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -1983,6 +2074,7 @@
                     </navigationItem>
                     <connections>
                         <outlet property="optionButton" destination="MF0-Id-Lx7" id="NIO-Zv-lTa"/>
+                        <segue destination="I54-NN-JAf" kind="presentation" identifier="Tracking" id="R4p-Rp-nUz"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7zr-QD-wnW" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -2084,7 +2176,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3Oh-L0-8dT">
-                                <rect key="frame" x="331" y="14.5" width="24" height="24"/>
+                                <rect key="frame" x="331" y="15" width="24" height="24"/>
                                 <state key="normal" image="refresh"/>
                                 <connections>
                                     <action selector="refreshButtonTapped:" destination="E6A-nT-WFd" eventType="touchUpInside" id="2Ee-rr-qgN"/>
@@ -2133,18 +2225,18 @@
                         <viewControllerLayoutGuide type="bottom" id="hrK-ty-jic"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="vV5-mZ-1WQ">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="301.5"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="303.5"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" image="profile_placeholder" translatesAutoresizingMaskIntoConstraints="NO" id="KlN-FI-d4m">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="301.5"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="303.5"/>
                                 <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </imageView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iwM-mY-oZT" userLabel="Button View">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="263.5"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="265.5"/>
                                 <subviews>
                                     <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NN8-QQ-TQB">
-                                        <rect key="frame" x="307" y="205.5" width="56" height="56"/>
+                                        <rect key="frame" x="307" y="207.5" width="56" height="56"/>
                                         <state key="normal" image="edit"/>
                                         <state key="highlighted" image="edit_pressed"/>
                                         <connections>
@@ -2152,7 +2244,7 @@
                                         </connections>
                                     </button>
                                     <button hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1" verticalHuggingPriority="1" horizontalCompressionResistancePriority="999" verticalCompressionResistancePriority="999" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="clip" translatesAutoresizingMaskIntoConstraints="NO" id="bhL-2M-5XL">
-                                        <rect key="frame" x="41.5" y="112.5" width="293" height="40"/>
+                                        <rect key="frame" x="41.5" y="113.5" width="293" height="40"/>
                                         <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                         <inset key="contentEdgeInsets" minX="8" minY="8" maxX="8" maxY="8"/>
                                         <state key="normal" title="Team Image Upload Retry Button" image="refresh"/>
@@ -2161,7 +2253,7 @@
                                         </connections>
                                     </button>
                                     <button hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1" verticalHuggingPriority="1" horizontalCompressionResistancePriority="999" verticalCompressionResistancePriority="999" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="clip" translatesAutoresizingMaskIntoConstraints="NO" id="LGR-3t-JL4">
-                                        <rect key="frame" x="76" y="112.5" width="224" height="40"/>
+                                        <rect key="frame" x="76" y="113.5" width="224" height="40"/>
                                         <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                         <inset key="contentEdgeInsets" minX="8" minY="8" maxX="8" maxY="8"/>
                                         <state key="normal" title="Team Image Add Button" image="camera"/>
@@ -2184,7 +2276,7 @@
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pAh-lZ-ZxJ" userLabel="Competitor View">
-                                <rect key="frame" x="0.0" y="263.5" width="375" height="38"/>
+                                <rect key="frame" x="0.0" y="265.5" width="375" height="38"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sail ID Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="k06-sH-apv">
                                         <rect key="frame" x="257.5" y="9.5" width="97.5" height="20.5"/>
@@ -2263,6 +2355,38 @@
             </objects>
             <point key="canvasLocation" x="201" y="-313"/>
         </scene>
+        <!--Boat View Controller-->
+        <scene sceneID="eu6-4J-Gmg">
+            <objects>
+                <viewController id="45p-eX-fmU" customClass="BoatViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="9T8-mk-vcr"/>
+                        <viewControllerLayoutGuide type="bottom" id="hO6-PY-Dfm"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="jAl-lC-iGg">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="301.5"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Boat Name Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsLetterSpacingToFitWidth="YES" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="nSs-zx-Gsu">
+                                <rect key="frame" x="122.5" y="140.5" width="130.5" height="20.5"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="nSs-zx-Gsu" firstAttribute="centerY" secondItem="jAl-lC-iGg" secondAttribute="centerY" id="PgM-WG-diS"/>
+                            <constraint firstItem="nSs-zx-Gsu" firstAttribute="centerX" secondItem="jAl-lC-iGg" secondAttribute="centerX" id="xdT-BQ-UHe"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="boatNameLabel" destination="nSs-zx-Gsu" id="s73-4u-RU4"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="kII-W3-hIZ" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="5476" y="-3360"/>
+        </scene>
     </scenes>
     <resources>
         <image name="DE.png" width="64" height="64"/>
@@ -2277,9 +2401,10 @@
         <image name="settings" width="24" height="24"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="LhS-FE-OSU"/>
-        <segue reference="ipS-aD-UN6"/>
+        <segue reference="cVT-Os-RxU"/>
+        <segue reference="rUr-Ta-FZ1"/>
+        <segue reference="Uh5-BJ-t8l"/>
         <segue reference="K7i-f6-Gr5"/>
-        <segue reference="gEw-ml-Ejg"/>
+        <segue reference="eex-WZ-awp"/>
     </inferredMetricsTieBreakers>
 </document>

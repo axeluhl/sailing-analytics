@@ -351,6 +351,11 @@
 		C891886E2057DB4A00E37CC3 /* BoatData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C891886D2057DB4A00E37CC3 /* BoatData.swift */; };
 		C89188712057E7D700E37CC3 /* BoatCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C891886F2057E7D700E37CC3 /* BoatCheckIn.swift */; };
 		C89188722057E7D700E37CC3 /* BoatCheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89188702057E7D700E37CC3 /* BoatCheckIn+CoreDataProperties.swift */; };
+		C89188742057F32300E37CC3 /* RegattaBoatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89188732057F32300E37CC3 /* RegattaBoatViewController.swift */; };
+		C89188762057F36300E37CC3 /* BoatSessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89188752057F36300E37CC3 /* BoatSessionViewController.swift */; };
+		C89188782057F44200E37CC3 /* BoatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89188772057F44200E37CC3 /* BoatViewController.swift */; };
+		C891887A2057F55100E37CC3 /* BoatSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89188792057F55100E37CC3 /* BoatSessionController.swift */; };
+		C891887C20580A4100E37CC3 /* TrainingBoatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C891887B20580A4100E37CC3 /* TrainingBoatViewController.swift */; };
 		C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC41D06A289002AAAD2 /* GradientView.swift */; };
 		C89C5FCA1D06CECD002AAAD2 /* TrackingViewStatusCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */; };
 		C89C5FCC1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */; };
@@ -768,6 +773,11 @@
 		C891886D2057DB4A00E37CC3 /* BoatData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BoatData.swift; sourceTree = "<group>"; };
 		C891886F2057E7D700E37CC3 /* BoatCheckIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoatCheckIn.swift; sourceTree = "<group>"; };
 		C89188702057E7D700E37CC3 /* BoatCheckIn+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BoatCheckIn+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C89188732057F32300E37CC3 /* RegattaBoatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegattaBoatViewController.swift; sourceTree = "<group>"; };
+		C89188752057F36300E37CC3 /* BoatSessionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoatSessionViewController.swift; sourceTree = "<group>"; };
+		C89188772057F44200E37CC3 /* BoatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoatViewController.swift; sourceTree = "<group>"; };
+		C89188792057F55100E37CC3 /* BoatSessionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoatSessionController.swift; sourceTree = "<group>"; };
+		C891887B20580A4100E37CC3 /* TrainingBoatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingBoatViewController.swift; sourceTree = "<group>"; };
 		C89C5FC41D06A289002AAAD2 /* GradientView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GradientView.swift; sourceTree = "<group>"; };
 		C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewStatusCell.swift; sourceTree = "<group>"; };
 		C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewGPSAccuracyCell.swift; sourceTree = "<group>"; };
@@ -1443,6 +1453,8 @@
 				C8CF22B11F669DA700A01E0A /* Regatta */,
 				C89C5FC61D06CE62002AAAD2 /* Tracking */,
 				C8CF22B21F669DB100A01E0A /* Training */,
+				C89188752057F36300E37CC3 /* BoatSessionViewController.swift */,
+				C89188772057F44200E37CC3 /* BoatViewController.swift */,
 			);
 			name = Session;
 			sourceTree = "<group>";
@@ -1471,6 +1483,7 @@
 				C843D4871EBCADDC00250F01 /* CompetitorSessionController.swift */,
 				C843D4891EBCADF500250F01 /* MarkSessionController.swift */,
 				C8739E0E1D2BEE7900A89F3C /* SessionController.swift */,
+				C89188792057F55100E37CC3 /* BoatSessionController.swift */,
 			);
 			name = Session;
 			sourceTree = "<group>";
@@ -1518,6 +1531,7 @@
 			children = (
 				7F99DE3B1A126554009B3619 /* RegattaCompetitorViewController.swift */,
 				C843D4851EBC927800250F01 /* RegattaMarkViewController.swift */,
+				C89188732057F32300E37CC3 /* RegattaBoatViewController.swift */,
 			);
 			name = Regatta;
 			sourceTree = "<group>";
@@ -1528,6 +1542,7 @@
 				C867BD081F4B0274007E78E0 /* TrainingCompetitorViewController.swift */,
 				C8CF22AC1F668BAB00A01E0A /* TrainingMarkViewController.swift */,
 				C8CF22C51F694EB900A01E0A /* TrainingViewController.swift */,
+				C891887B20580A4100E37CC3 /* TrainingBoatViewController.swift */,
 			);
 			name = Training;
 			sourceTree = "<group>";
@@ -2025,6 +2040,7 @@
 				C8739E121D2BF14F00A89F3C /* EventData.swift in Sources */,
 				C843D4881EBCADDC00250F01 /* CompetitorSessionController.swift in Sources */,
 				C8F71EDF1D8691F700826DE4 /* AFURLConnectionOperation.m in Sources */,
+				C891887A2057F55100E37CC3 /* BoatSessionController.swift in Sources */,
 				C8F71EE31D8691F700826DE4 /* SVIndefiniteAnimatedView.m in Sources */,
 				C8739E0F1D2BEE7900A89F3C /* SessionController.swift in Sources */,
 				C8739E1C1D2D5F1700A89F3C /* LocationData.swift in Sources */,
@@ -2036,7 +2052,9 @@
 				C8739E0C1D2AA2A500A89F3C /* Event+CoreDataProperties.swift in Sources */,
 				C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */,
 				C8E0BD0D1F39ADAD002FCCA5 /* KeychainPasswordItem.swift in Sources */,
+				C891887C20580A4100E37CC3 /* TrainingBoatViewController.swift in Sources */,
 				C87A74E11F4EE570003DE396 /* TrainingRequestManager.swift in Sources */,
+				C89188762057F36300E37CC3 /* BoatSessionViewController.swift in Sources */,
 				C843D4811EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift in Sources */,
 				C843D532201F3050003725F0 /* NewCheckInViewController.swift in Sources */,
 				C8F71EEE1D8691F700826DE4 /* UIProgressView+AFNetworking.m in Sources */,
@@ -2056,6 +2074,7 @@
 				C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */,
 				C8BFCCC41D51C53500FC1A27 /* TeamData.swift in Sources */,
 				C843D4911EC0A93600250F01 /* CoreData1-3.xcmappingmodel in Sources */,
+				C89188742057F32300E37CC3 /* RegattaBoatViewController.swift in Sources */,
 				C88F6D2B1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift in Sources */,
 				7F23F0881A1A3DEF00F03F1C /* CheckInController.swift in Sources */,
 				C843D47F1EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift in Sources */,
@@ -2087,6 +2106,7 @@
 				7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */,
 				9E95C3D61C723AB30016632B /* Constants.swift in Sources */,
 				C8CF22A51F61965C00A01E0A /* TrainingCheckInController.swift in Sources */,
+				C89188782057F44200E37CC3 /* BoatViewController.swift in Sources */,
 				C8F71EF01D8691F700826DE4 /* UIWebView+AFNetworking.m in Sources */,
 				C87A74E81F504EBB003DE396 /* CreateEventData.swift in Sources */,
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,

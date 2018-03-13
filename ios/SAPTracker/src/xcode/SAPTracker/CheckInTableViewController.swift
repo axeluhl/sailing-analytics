@@ -22,6 +22,7 @@ class CheckInTableViewController: UIViewController {
     }
 
     struct CheckInSegues {
+        static let boat = [CheckInSegue.RegattaBoat, CheckInSegue.TrainingBoat]
         static let competitor = [CheckInSegue.RegattaCompetitor, CheckInSegue.TrainingCompetitor]
         static let mark = [CheckInSegue.RegattaMark, CheckInSegue.TrainingMark]
     }
@@ -329,7 +330,9 @@ class CheckInTableViewController: UIViewController {
     }
     
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
-        if CheckInSegues.competitor.contains(identifier) {
+        if CheckInSegues.boat.contains(identifier) {
+            return segueCheckIn != nil && segueCheckIn is BoatCheckIn
+        } else if CheckInSegues.competitor.contains(identifier) {
             return segueCheckIn != nil && segueCheckIn is CompetitorCheckIn
         } else if CheckInSegues.mark.contains(identifier) {
             return segueCheckIn != nil && segueCheckIn is MarkCheckIn
@@ -340,7 +343,17 @@ class CheckInTableViewController: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
         if let identifier = segue.identifier {
-            if CheckInSegues.competitor.contains(identifier) {
+            if CheckInSegues.boat.contains(identifier) {
+                if let boatCheckIn = segueCheckIn as? BoatCheckIn {
+                    if let regattaBoatVC = segue.destination as? RegattaBoatViewController {
+                        regattaBoatVC.boatCheckIn = boatCheckIn
+                        regattaBoatVC.boatCoreDataManager = coreDataManager
+                    } else if let trainingBoatVC = segue.destination as? TrainingBoatViewController {
+                        trainingBoatVC.boatCheckIn = boatCheckIn
+                        trainingBoatVC.boatCoreDataManager = coreDataManager
+                    }
+                }
+            } else if CheckInSegues.competitor.contains(identifier) {
                 if let competitorCheckIn = segueCheckIn as? CompetitorCheckIn {
                     if let regattaCompetitorVC = segue.destination as? RegattaCompetitorViewController {
                         regattaCompetitorVC.competitorCheckIn = competitorCheckIn
