@@ -10,8 +10,16 @@ import Foundation
 import UIKit
 import AVFoundation
 
+// MARK: CheckInControllerDelegate
+
 protocol CheckInControllerDelegate: class {
-    
+
+    func checkInController(
+        _ controller: CheckInController, postBoatCheckIn
+        checkInData: CheckInData,
+        success: @escaping (_ checkIn: CheckIn) -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+
     func checkInController(
         _ controller: CheckInController, postCompetitorCheckIn
         checkInData: CheckInData,
@@ -26,8 +34,19 @@ protocol CheckInControllerDelegate: class {
     
 }
 
+// MARK: CheckInControllerDelegate (default implementation)
+
 extension CheckInControllerDelegate {
-    
+
+    func checkInController(
+        _ controller: CheckInController, postBoatCheckIn
+        checkInData: CheckInData,
+        success: @escaping (_ checkIn: CheckIn) -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        controller.postCheckIn(checkInData: checkInData, success: success, failure: failure)
+    }
+
     func checkInController(
         _ controller: CheckInController, postCompetitorCheckIn
         checkInData: CheckInData,
@@ -101,7 +120,7 @@ class CheckInController : NSObject {
     {
         switch checkInData.type {
         case .boat:
-            // TODO
+            delegate?.checkInController(self, postBoatCheckIn: checkInData, success: success, failure: failure)
             break
         case .competitor:
             delegate?.checkInController(self, postCompetitorCheckIn: checkInData, success: success, failure: failure)
