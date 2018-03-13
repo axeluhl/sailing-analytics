@@ -71,6 +71,15 @@ public class ImportCompetitorCallback implements DialogCallback<Pair<Map<Competi
                 competitorsForRegisteringAndSearchTag.getA().values().stream().filter(e->e!=null).collect(Collectors.toList()), competitorsForRegisteringAndSearchTag.getB());
     }
 
+    /**
+     * @param competitorsForSaving
+     *            the descriptors of those competitors from the import source that the user selected and for which no
+     *            existing competitor was mapped
+     * @param competitorsForRegistration
+     *            the existing competitors to which competitors from the import were mapped; this collection is logically
+     *            disjoint from {@code competitorsForSaving} which only contains "net-new" competitors that will be
+     *            created with a new ID on the server
+     */
     private void registerCompetitorsAfterSaving(final List<CompetitorDescriptor> competitorsForSaving,
             final Iterable<CompetitorDTO> competitorsForRegistration, String searchTag) {
         sailingService.addCompetitors(competitorsForSaving, searchTag, new AsyncCallback<List<CompetitorDTO>>() {
@@ -83,9 +92,7 @@ public class ImportCompetitorCallback implements DialogCallback<Pair<Map<Competi
             public void onSuccess(List<CompetitorDTO> result) {
                 final Set<CompetitorDTO> competitorsToAddWithNewOnesReplacedBySavedOnesWithId = new HashSet<>();
                 Util.addAll(competitorsForRegistration, competitorsToAddWithNewOnesReplacedBySavedOnesWithId);
-                // remove the locally constructed CompetitorDTOs that had null as their ID...
-                competitorsToAddWithNewOnesReplacedBySavedOnesWithId.removeAll(competitorsForSaving);
-                // ...and replace by those returned by the server after saving to the competitor store where they received an ID:
+                // add those competitors returned by the server after saving to the competitor store where they received an ID:
                 competitorsToAddWithNewOnesReplacedBySavedOnesWithId.addAll(result);
                 registerCompetitors(competitorsToAddWithNewOnesReplacedBySavedOnesWithId);
             }

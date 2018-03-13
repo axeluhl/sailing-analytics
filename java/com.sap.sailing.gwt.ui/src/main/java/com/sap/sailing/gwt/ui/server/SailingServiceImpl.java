@@ -224,6 +224,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.UnableToCloseDeviceMappingException;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
@@ -7409,5 +7410,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } catch (Exception e) {
             throw new RuntimeException("Error while slicing race", e);
         }
+    }
+
+    @Override
+    public Boolean checkIfRaceIsTracked(RegattaAndRaceIdentifier race) {
+        boolean result = false;
+        DynamicTrackedRace trace = getService().getTrackedRace(race);
+        if (trace != null) {
+            final TrackedRaceStatusEnum status = trace.getStatus().getStatus();
+            if (status == TrackedRaceStatusEnum.LOADING || status == TrackedRaceStatusEnum.TRACKING) {
+                result = true;
+            }
+        }
+        return result;
     }
 }
