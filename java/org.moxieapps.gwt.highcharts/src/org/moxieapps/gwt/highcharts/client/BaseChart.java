@@ -3054,7 +3054,7 @@ public abstract class BaseChart<T> extends Widget {
         var chart = this.@org.moxieapps.gwt.highcharts.client.BaseChart::chart;
         if (chart) {
             if (chart.resetZoomButton) {
-                chart.zoomOut();
+                chart.resetZoomButton.hide();
             }
         }
     }-*/;

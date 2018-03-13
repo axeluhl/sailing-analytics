@@ -187,17 +187,14 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         if (xAxisMax != null && xAxisMin != null && (xAxisMax - xAxisMin > MINUTE_IN_MILLIS)) {
             Date rangeStart = new Date(xAxisMin);
             Date rangeEnd = new Date(xAxisMax);
-            timeRangeWithZoomProvider.setTimeZoom(rangeStart, rangeEnd, this);
-            fireEvent(new ChartZoomChangedEvent(rangeStart, rangeEnd));
+            timeRangeWithZoomProvider.setTimeZoom(rangeStart, rangeEnd);
             return true;
         } else {
+            ignoreNextClickEvent = true;
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                 @Override
                 public void execute() {
-                    isZoomed = false;
                     timeRangeWithZoomProvider.resetTimeZoom();
-                    ignoreNextClickEvent = true;
-                    fireEvent(new ChartZoomResetEvent());
                 }
             });
             return false;
@@ -251,8 +248,9 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
 
     @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+        isZoomed = true;
+        chart.showResetZoom();
         changeMinMaxAndExtremesInterval(zoomStartTimepoint, zoomEndTimepoint, true);
-        chart.showResetZoom(); // Patched method
         fireEvent(new ChartZoomChangedEvent(zoomStartTimepoint, zoomEndTimepoint));
     }
 

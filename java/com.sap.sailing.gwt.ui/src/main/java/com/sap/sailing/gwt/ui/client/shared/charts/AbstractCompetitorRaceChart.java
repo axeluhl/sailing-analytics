@@ -35,7 +35,6 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
@@ -684,15 +683,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 }
             }));
         }
-        
-        GWT.debugger();
-        if (isZoomed) {
-            com.sap.sse.common.Util.Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
-            onTimeZoomChanged(zoomRange.getA(), zoomRange.getB());
-        } else {
-            resetMinMaxAndExtremesInterval(/* redraw */ true);
-        }
-        
         return hasDetailTypeChanged;
     }
     
