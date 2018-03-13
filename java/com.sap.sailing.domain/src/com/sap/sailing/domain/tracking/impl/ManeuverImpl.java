@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.tracking.impl.AbstractGPSFixImpl;
@@ -87,6 +88,11 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     @Override
     public SpeedWithBearing getSpeedWithBearingAfter() {
         return getManeuverBoundaries().getSpeedWithBearingAfter();
+    }
+
+    @Override
+    public Speed getLowestSpeed() {
+        return getManeuverBoundaries().getLowestSpeed();
     }
 
     @Override

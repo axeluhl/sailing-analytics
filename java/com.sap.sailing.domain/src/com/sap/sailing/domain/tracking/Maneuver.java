@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -81,7 +82,7 @@ public interface Maneuver extends GPSFix {
      * Gets time points and speeds with bearings before and after the maneuver, such that the speed and course before
      * and after the maneuver are considered as stable.
      * 
-     * @return Entering and existing details of maneuver section, with stable speed and bearing before and after that
+     * @return Entering and exiting details of maneuver section, with stable speed and bearing before and after that
      *         section
      * @see Maneuver
      */
@@ -93,7 +94,7 @@ public interface Maneuver extends GPSFix {
      * {@link #getManeuverCurveWithStableSpeedAndCourseBoundaries()}. The former is considered for HEAD_UP and BEAR_AWAY
      * maneuvers, whereas the latter is considered for the remainder.
      * 
-     * @return Entering and existing details of maneuver
+     * @return Entering and exiting details of maneuver
      */
     ManeuverCurveBoundaries getManeuverBoundaries();
 
@@ -134,5 +135,10 @@ public interface Maneuver extends GPSFix {
      */
     @Statistic(messageKey = "DirectionChange", resultDecimals = 2, ordinal = 2)
     double getDirectionChangeInDegrees();
+
+    /**
+     * Gets lowest speed recorded within {@link #getManeuverBoundaries()}.
+     */
+    Speed getLowestSpeed();
 
 }

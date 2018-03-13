@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.maneuverdetection.impl;
 
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
 import com.sap.sse.common.TimePoint;
@@ -13,15 +14,16 @@ import com.sap.sse.common.TimePoint;
 public class ManeuverCurveDetailsWithBearingSteps extends ManeuverCurveDetails {
 
     private final SpeedWithBearingStepsIterable speedWithBearingSteps;
-    
+
     public ManeuverCurveDetailsWithBearingSteps(TimePoint timePointBefore, TimePoint timePointAfter,
             TimePoint timePoint, SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            double directionChangeInDegrees, double maxAngularVelocityInDegreesPerSecond, SpeedWithBearingStepsIterable speedWithBearingSteps) {
+            double directionChangeInDegrees, double maxAngularVelocityInDegreesPerSecond, Speed lowestSpeed,
+            SpeedWithBearingStepsIterable speedWithBearingSteps) {
         super(timePointBefore, timePointAfter, timePoint, speedWithBearingBefore, speedWithBearingAfter,
-                directionChangeInDegrees, maxAngularVelocityInDegreesPerSecond);
+                directionChangeInDegrees, maxAngularVelocityInDegreesPerSecond, lowestSpeed);
         this.speedWithBearingSteps = speedWithBearingSteps;
     }
-    
+
     /**
      * Gets the list of bearing steps which was used for computation of curve details.
      * 
