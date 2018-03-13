@@ -7006,7 +7006,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             abort: for (RaceColumn race : leaderboard.getRaceColumns()) {
                 for (Fleet fleet : race.getFleets()) {
                     TrackedRace trace = race.getTrackedRace(fleet);
-                    if(trace != null){
+                    if (trace != null) {
                         final DynamicTrackedRace trackedRace = getService().getTrackedRace(trace.getRaceIdentifier());
                         if (trackedRace != null) {
                             for (BravoFixTrack<Competitor> track : trackedRace
@@ -7021,12 +7021,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     }
                 }
             }
-            if(hasBravoTrack){
+            if (hasBravoTrack) {
                 allowed.addAll(DetailType.getRaceBravoDetailTypes());
                 allowed.addAll(DetailType.getLegBravoDetailTypes());
                 allowed.addAll(DetailType.getOverallBravoDetailTypes());
             }
-            if(hasExtendedBravoFixes){
+            if (hasExtendedBravoFixes) {
                 allowed.addAll(DetailType.getRaceExpeditionDetailTypes());
                 allowed.addAll(DetailType.getLegExpeditionDetailColumnTypes());
             }

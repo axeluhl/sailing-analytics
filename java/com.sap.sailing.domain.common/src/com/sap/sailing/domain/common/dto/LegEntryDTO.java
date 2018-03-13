@@ -114,6 +114,7 @@ public class LegEntryDTO implements Serializable {
                 + ((windwardDistanceToGoInMeters == null) ? 0 : windwardDistanceToGoInMeters.hashCode());
         return result;
     }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -241,218 +242,249 @@ public class LegEntryDTO implements Serializable {
         return true;
     }
     
-    
     private void ensureExpeditionHolder() {
-        if(expeditionHolder == null){
+        if (expeditionHolder == null) {
             expeditionHolder = new ExpeditionLegHolder();
         }
     }
-    
+
     public void setExpeditionAWA(Double expeditionAWA) {
-        if(expeditionAWA != null){
+        if (expeditionAWA != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionAWA = expeditionAWA;
         }
     }
+
     public void setExpeditionAWS(Double expeditionAWS) {
-        if(expeditionAWS != null){
+        if (expeditionAWS != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionAWS = expeditionAWS;
-        }        
+        }
     }
+
     public void setExpeditionTWA(Double expeditionTWA) {
-        if(expeditionTWA != null){
+        if (expeditionTWA != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionTWA = expeditionTWA;
-        }         
+        }
     }
+
     public void setExpeditionTWS(Double expeditionTWS) {
-        if(expeditionTWS != null){
+        if (expeditionTWS != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionTWS = expeditionTWS;
-        }         
+        }
     }
+
     public void setExpeditionTWD(Double expeditionTWD) {
-        if(expeditionTWD != null){
+        if (expeditionTWD != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionTWD = expeditionTWD;
-        }          
+        }
     }
+
     public void setExpeditionTargTWA(Double expeditionTWA) {
-        if(expeditionTWA != null){
+        if (expeditionTWA != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionTWA = expeditionTWA;
-        }         
+        }
     }
+
     public void setExpeditionBoatSpeed(Double expeditionBoatSpeed) {
-        if(expeditionBoatSpeed != null){
+        if (expeditionBoatSpeed != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionBoatSpeed = expeditionBoatSpeed;
-        }          
+        }
     }
+
     public void setExpeditionTargBoatSpeed(Double expeditionTargBoatSpeed) {
-        if(expeditionTargBoatSpeed != null){
+        if (expeditionTargBoatSpeed != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionTargBoatSpeed = expeditionTargBoatSpeed;
-        }        
+        }
     }
+
     public void setExpeditionSOG(Double expeditionSOG) {
-        if(expeditionSOG != null){
+        if (expeditionSOG != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionSOG = expeditionSOG;
-        }           
+        }
     }
+
     public void setExpeditionCOG(Double expeditionCOG) {
-        if(expeditionCOG != null){
+        if (expeditionCOG != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionCOG = expeditionCOG;
-        }            
+        }
     }
+
     public void setExpeditionForestayLoad(Double expeditionForestayLoad) {
-        if(expeditionForestayLoad != null){
+        if (expeditionForestayLoad != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionForestayLoad = expeditionForestayLoad;
-        }            
+        }
     }
+
     public void setExpeditionRake(Double expeditionRake) {
-        if(expeditionRake != null){
+        if (expeditionRake != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionRake = expeditionRake;
-        }           
+        }
     }
+
     public void setExpeditionCourseDetail(Double expeditionCourseDetail) {
-        if(expeditionCourseDetail != null){
+        if (expeditionCourseDetail != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionCourseDetail = expeditionCourseDetail;
-        }          
+        }
     }
+
     public void setExpeditionHeading(Double expeditionHeading) {
-        if(expeditionHeading != null){
+        if (expeditionHeading != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionHeading = expeditionHeading;
-        }          
+        }
     }
+
     public void setExpeditionVMG(Double expeditionVMG) {
-        if(expeditionVMG != null){
+        if (expeditionVMG != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionVMG = expeditionVMG;
-        }           
+        }
     }
+
     public void setExpeditionVMGTargVMGDelta(Double expeditionVMGTargVMGDelta) {
-        if(expeditionVMGTargVMGDelta != null){
+        if (expeditionVMGTargVMGDelta != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionVMGTargVMGDelta = expeditionVMGTargVMGDelta;
-        }           
+        }
     }
+
     public void setExpeditionRateOfTurn(Double expeditionRateOfTurn) {
-        if(expeditionRateOfTurn != null){
+        if (expeditionRateOfTurn != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionRateOfTurn = expeditionRateOfTurn;
-        }          
+        }
     }
+
     public void setExpeditionRudderAngle(Double expeditionRudderAngle) {
-        if(expeditionRudderAngle != null){
+        if (expeditionRudderAngle != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionRudderAngle = expeditionRudderAngle;
-        }           
+        }
     }
+
     public void setExpeditionHeel(Double expeditionHeel) {
-        if(expeditionHeel != null){
+        if (expeditionHeel != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionHeel = expeditionHeel;
-        }           
+        }
     }
+
     public void setExpeditionTargetHeel(Double expeditionTargetHeel) {
-        if(expeditionTargetHeel != null){
+        if (expeditionTargetHeel != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionTargetHeel = expeditionTargetHeel;
-        }          
+        }
     }
+
     public void setExpeditionTimeToPortLayline(Double expeditionTimeToPortLayline) {
-        if(expeditionTimeToPortLayline != null){
+        if (expeditionTimeToPortLayline != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionTimeToPortLayline = expeditionTimeToPortLayline;
-        }        
+        }
     }
+
     public void setExpeditionTimeToStbLayline(Double expeditionTimeToStbLayline) {
-        if(expeditionTimeToStbLayline != null){
+        if (expeditionTimeToStbLayline != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionTimeToStbLayline = expeditionTimeToStbLayline;
-        }         
+        }
     }
+
     public void setExpeditionDistToPortLayline(Double expeditionDistToPortLayline) {
-        if(expeditionDistToPortLayline != null){
+        if (expeditionDistToPortLayline != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionDistToPortLayline = expeditionDistToPortLayline;
-        }         
+        }
     }
+
     public void setExpeditionDistToStbLayline(Double expeditionDistToStbLayline) {
-        if(expeditionDistToStbLayline != null){
+        if (expeditionDistToStbLayline != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionDistToStbLayline = expeditionDistToStbLayline;
-        }          
+        }
     }
+
     public void setExpeditionTimeToGUN(Duration expeditionTimeToGUN) {
-        if(expeditionTimeToGUN != null){
+        if (expeditionTimeToGUN != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionTimeToGUN = expeditionTimeToGUN;
-        }          
+        }
     }
+
     public void setExpeditionTimeToCommitteeBoat(Double expeditionTimeToCommitteeBoat) {
-        if(expeditionTimeToCommitteeBoat != null){
+        if (expeditionTimeToCommitteeBoat != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionTimeToCommitteeBoat = expeditionTimeToCommitteeBoat;
-        }          
+        }
     }
+
     public void setExpeditionTimeToPin(Double expeditionTimeToPin) {
-        if(expeditionTimeToPin != null){
+        if (expeditionTimeToPin != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionTimeToPin = expeditionTimeToPin;
-        }          
+        }
     }
+
     public void setExpeditionTimeToBurnToLine(Duration expeditionTimeToBurnToLine) {
-        if(expeditionTimeToBurnToLine != null){
+        if (expeditionTimeToBurnToLine != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionTimeToBurnToLine = expeditionTimeToBurnToLine;
-        }        
+        }
     }
+
     public void setExpeditionTimeToBurnToCommitteeBoat(Double expeditionTimeToCommitteeBoat) {
-        if(expeditionTimeToCommitteeBoat != null){
+        if (expeditionTimeToCommitteeBoat != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionTimeToCommitteeBoat = expeditionTimeToCommitteeBoat;
-        }          
+        }
     }
+
     public void setExpeditionTimeToBurnToPin(Double expeditionTimeToBurnToPin) {
-        if(expeditionTimeToBurnToPin != null){
+        if (expeditionTimeToBurnToPin != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionTimeToBurnToPin = expeditionTimeToBurnToPin;
-        }         
+        }
     }
+
     public void setExpeditionDistanceToCommitteeBoat(Double expeditionDistanceToCommitteeBoat) {
-        if(expeditionDistanceToCommitteeBoat != null){
+        if (expeditionDistanceToCommitteeBoat != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionDistanceToCommitteeBoat = expeditionDistanceToCommitteeBoat;
-        }          
+        }
     }
+
     public void setExpeditionDistanceToPinDetail(Double expeditionDistanceToPinDetail) {
-        if(expeditionDistanceToPinDetail != null){
+        if (expeditionDistanceToPinDetail != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionDistanceToPinDetail = expeditionDistanceToPinDetail;
-        }        
+        }
     }
+
     public void setExpeditionDistanceBelowLine(Double expeditionDistanceBelowLine) {
-        if(expeditionDistanceBelowLine != null){
+        if (expeditionDistanceBelowLine != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionDistanceBelowLine = expeditionDistanceBelowLine;
-        }         
+        }
     }
+
     public void setExpeditionLineSquareForWindDirection(Double expeditionLineSquareForWindDirection) {
-        if(expeditionLineSquareForWindDirection != null){
+        if (expeditionLineSquareForWindDirection != null) {
             ensureExpeditionHolder();
             expeditionHolder.expeditionLineSquareForWindDirection = expeditionLineSquareForWindDirection;
-        }        
+        }
     }
-    
 
     public Double getExpeditionAWA() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionAWA;
