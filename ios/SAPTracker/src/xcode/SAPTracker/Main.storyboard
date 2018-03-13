@@ -185,6 +185,8 @@
                         <segue destination="dMx-RA-QpG" kind="show" identifier="RegattaMark" id="Kjg-G3-mig"/>
                         <segue destination="smT-3p-ZYf" kind="show" identifier="TrainingCompetitor" id="vbb-MJ-oKl"/>
                         <segue destination="IkV-3c-dLR" kind="show" identifier="TrainingMark" id="6TY-am-edb"/>
+                        <segue destination="Y5o-Nm-utL" kind="show" identifier="RegattaBoat" id="YkF-IV-h2T"/>
+                        <segue destination="y7p-M3-tB3" kind="show" identifier="TrainingBoat" id="P9y-5K-qbn"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
@@ -1869,6 +1871,42 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="FtQ-wM-zha" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="4951" y="578"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="KjJ-Gf-L6D">
+            <objects>
+                <viewController id="y7p-M3-tB3" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="ewO-N8-zLq"/>
+                        <viewControllerLayoutGuide type="bottom" id="10B-q1-rjQ"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="0xp-SF-Pb4">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="OX1-gW-3RO" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3172" y="-4354"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="3AO-vw-zZt">
+            <objects>
+                <viewController id="Y5o-Nm-utL" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="SLG-lw-Y58"/>
+                        <viewControllerLayoutGuide type="bottom" id="d7B-ph-XjQ"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="S5X-OF-4pC">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="boI-kC-ANU" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3172" y="-3618"/>
         </scene>
         <!--Training Mark View Controller-->
         <scene sceneID="Mys-dP-aQE">

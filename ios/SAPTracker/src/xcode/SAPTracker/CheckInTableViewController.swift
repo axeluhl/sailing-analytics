@@ -13,8 +13,10 @@ class CheckInTableViewController: UIViewController {
 
     struct CheckInSegue {
         static let NewCheckIn = "NewCheckIn"
+        static let RegattaBoat = "RegattaBoat"
         static let RegattaCompetitor = "RegattaCompetitor"
         static let RegattaMark = "RegattaMark"
+        static let TrainingBoat = "TrainingBoat"
         static let TrainingCompetitor = "TrainingCompetitor"
         static let TrainingMark = "TrainingMark"
     }
@@ -303,7 +305,13 @@ class CheckInTableViewController: UIViewController {
             logInfo(name: "\(#function)", info: "check-in is nil")
             return
         }
-        if checkIn is CompetitorCheckIn {
+        if checkIn is BoatCheckIn {
+            if checkIn.isTraining.boolValue {
+                performSegue(withIdentifier: CheckInSegue.TrainingBoat, sender: self)
+            } else {
+                performSegue(withIdentifier: CheckInSegue.RegattaBoat, sender: self)
+            }
+        } else if checkIn is CompetitorCheckIn {
             if checkIn.isTraining.boolValue {
                 performSegue(withIdentifier: CheckInSegue.TrainingCompetitor, sender: self)
             } else {
