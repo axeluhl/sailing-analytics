@@ -130,7 +130,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 if (selected != null
                         && (timer.getPlayMode() == PlayModes.Replay || hasCanReplayDuringLiveRacesPermission)) {
                     timer.pause();
-                    timer.setTime(selected.getTime().getTime());
+                    timer.setTime(selected.getTimePointBefore().getTime());
                 } else if (selected != null) {
                     selectionModel.clear();
                 }
@@ -259,7 +259,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         final InvertibleComparator<SingleManeuverDTO> comparator = new InvertibleComparatorAdapter<SingleManeuverDTO>() {
             @Override
             public int compare(SingleManeuverDTO o1, SingleManeuverDTO o2) {
-                return o1.getTime().compareTo(o2.getTime());
+                return o1.getTimePoint().compareTo(o2.getTimePoint());
             }
         };
 
@@ -277,7 +277,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
             @Override
             public String getValue(SingleManeuverDTO object) {
-                return dateformat.format(object.getTime());
+                return dateformat.format(object.getTimePoint());
             }
         };
         col.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -356,10 +356,10 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                         if (maneuver.duration != null) {
                             turnRate = Math.abs(maneuver.directionChangeInDegrees) / maneuver.duration.asSeconds();
                         }
-                        data.add(new SingleManeuverDTO(res.getKey(), maneuver.timepoint, maneuver.type,
-                                maneuver.duration, maneuver.speedWithBearingBefore, maneuver.speedWithBearingAfter,
-                                maneuver.minSpeed, turnRate, maneuver.maneuverLossInMeters,
-                                maneuver.directionChangeInDegrees));
+                        data.add(new SingleManeuverDTO(res.getKey(), maneuver.timePoint, maneuver.timePointBefore,
+                                maneuver.type, maneuver.duration, maneuver.speedWithBearingBefore,
+                                maneuver.speedWithBearingAfter, maneuver.minSpeed, turnRate,
+                                maneuver.maneuverLossInMeters, maneuver.directionChangeInDegrees));
                     }
                 }
             }

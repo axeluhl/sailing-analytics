@@ -3428,6 +3428,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Tack newTack = maneuver.getNewTack();
             final Position position = maneuver.getPosition();
             final Date timepoint = maneuver.getTimePoint().asDate();
+            final Date timePointBefore = maneuver.getManeuverBoundaries().getTimePointBefore().asDate();
             final SpeedWithBearingDTO speedBefore = createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore());
             final SpeedWithBearingDTO speedAfter = createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter());
             final double directionChangeInDegrees = maneuver.getDirectionChangeInDegrees();
@@ -3437,12 +3438,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final SpeedDTO minSpeed = maneuver.getLowestSpeed() == null ? null
                     : createSpeedDTO(maneuver.getLowestSpeed());
             if (type == ManeuverType.MARK_PASSING) {
-                maneuverDTO = new MarkpassingManeuverDTO(type, newTack, position, timepoint, speedBefore, speedAfter,
-                        directionChangeInDegrees, maneuverLossInMeters, ((MarkPassingManeuver) maneuver).getSide(),
-                        duration, minSpeed);
+                maneuverDTO = new MarkpassingManeuverDTO(type, newTack, position, timepoint, timePointBefore,
+                        speedBefore, speedAfter, directionChangeInDegrees, maneuverLossInMeters,
+                        ((MarkPassingManeuver) maneuver).getSide(), duration, minSpeed);
             } else  {
-                maneuverDTO = new ManeuverDTO(type, newTack, position, timepoint, speedBefore, speedAfter,
-                        directionChangeInDegrees, maneuverLossInMeters, duration, minSpeed);
+                maneuverDTO = new ManeuverDTO(type, newTack, position, timepoint, timePointBefore, speedBefore,
+                        speedAfter, directionChangeInDegrees, maneuverLossInMeters, duration, minSpeed);
             }
             result.add(maneuverDTO);
         }

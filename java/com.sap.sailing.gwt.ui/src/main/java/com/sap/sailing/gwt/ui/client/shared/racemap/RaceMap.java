@@ -2172,7 +2172,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverType(),
                 ManeuverTypeFormatter.format(maneuver.type, stringMessages)));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.time(),
-                DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(maneuver.timepoint)));
+                DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(maneuver.timePoint)));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.directionChange(),
                 ((int) Math.round(maneuver.directionChangeInDegrees)) + " " + stringMessages.degreesShort() + " ("
                         + ((int) Math.round(before.bearingInDegrees)) + " " + stringMessages.degreesShort() + " -> "

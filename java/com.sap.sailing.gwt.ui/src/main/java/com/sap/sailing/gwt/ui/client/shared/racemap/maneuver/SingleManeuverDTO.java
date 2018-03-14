@@ -10,7 +10,8 @@ import com.sap.sse.common.Duration;
 
 public class SingleManeuverDTO {
     private final CompetitorDTO competitor;
-    private final Date time;
+    private final Date timePoint;
+    private final Date timePointBefore;
     private final ManeuverType maneuverType;
     private final Duration duration;
     private final SpeedWithBearingDTO speedIn;
@@ -20,12 +21,13 @@ public class SingleManeuverDTO {
     private final Double loss;
     private final double directionChangeInDegrees;
 
-    public SingleManeuverDTO(CompetitorDTO competitor, Date time, ManeuverType maneuverType, Duration duration,
-            SpeedWithBearingDTO speedIn, SpeedWithBearingDTO speedOut, SpeedDTO minSpeed, double turnRate,
-            Double loss, double directionChangeInDegrees) {
+    public SingleManeuverDTO(CompetitorDTO competitor, Date timePoint, Date timePointBefore,
+            ManeuverType maneuverType, Duration duration, SpeedWithBearingDTO speedIn, SpeedWithBearingDTO speedOut,
+            SpeedDTO minSpeed, double turnRate, Double loss, double directionChangeInDegrees) {
         super();
         this.competitor = competitor;
-        this.time = time;
+        this.timePoint = timePoint;
+        this.timePointBefore = timePointBefore;
         this.maneuverType = maneuverType;
         this.duration = duration;
         this.speedIn = speedIn;
@@ -40,8 +42,12 @@ public class SingleManeuverDTO {
         return competitor;
     }
 
-    public Date getTime() {
-        return time;
+    public Date getTimePoint() {
+        return timePoint;
+    }
+
+    public Date getTimePointBefore() {
+        return timePointBefore;
     }
 
     public ManeuverType getManeuverType() {

@@ -14,11 +14,12 @@ public class MarkpassingManeuverDTO extends ManeuverDTO {
 
     MarkpassingManeuverDTO() {}
 
-    public MarkpassingManeuverDTO(ManeuverType type, Tack newTack, Position position, Date timepoint,
-            SpeedWithBearingDTO speedWithBearingBefore, SpeedWithBearingDTO speedWithBearingAfter,
-            double directionChangeInDegrees, Double maneuverLossInMeters, NauticalSide side, Duration duration, SpeedDTO minSpeed) {
-        super(type, newTack, position, timepoint, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees,
-                maneuverLossInMeters, duration, minSpeed);
+    public MarkpassingManeuverDTO(ManeuverType type, Tack newTack, Position position, Date timePoint,
+            Date timePointBefore, SpeedWithBearingDTO speedWithBearingBefore, SpeedWithBearingDTO speedWithBearingAfter,
+            double directionChangeInDegrees, Double maneuverLossInMeters, NauticalSide side, Duration duration,
+            SpeedDTO minSpeed) {
+        super(type, newTack, position, timePoint, timePointBefore, speedWithBearingBefore, speedWithBearingAfter,
+                directionChangeInDegrees, maneuverLossInMeters, duration, minSpeed);
         this.side = side;
     }
 
