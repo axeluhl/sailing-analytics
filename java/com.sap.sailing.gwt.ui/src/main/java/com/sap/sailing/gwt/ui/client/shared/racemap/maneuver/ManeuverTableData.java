@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.ui.shared.SpeedDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sse.common.Duration;
 
-public class SingleManeuverDTO {
+class ManeuverTableData {
     private final CompetitorDTO competitor;
     private final Date timePoint;
     private final Date timePointBefore;
@@ -21,9 +21,9 @@ public class SingleManeuverDTO {
     private final Double loss;
     private final double directionChangeInDegrees;
 
-    public SingleManeuverDTO(CompetitorDTO competitor, Date timePoint, Date timePointBefore,
-            ManeuverType maneuverType, Duration duration, SpeedWithBearingDTO speedIn, SpeedWithBearingDTO speedOut,
-            SpeedDTO minSpeed, double turnRate, Double loss, double directionChangeInDegrees) {
+    ManeuverTableData(CompetitorDTO competitor, Date timePoint, Date timePointBefore, ManeuverType maneuverType,
+            Duration duration, SpeedWithBearingDTO speedIn, SpeedWithBearingDTO speedOut, SpeedDTO minSpeed,
+            double turnRate, Double loss, double directionChangeInDegrees) {
         super();
         this.competitor = competitor;
         this.timePoint = timePoint;
