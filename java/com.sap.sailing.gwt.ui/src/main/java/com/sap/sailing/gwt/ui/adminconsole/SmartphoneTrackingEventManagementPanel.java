@@ -228,7 +228,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                                     }
                                 }).show();
                     } else {
-                        Window.alert("Boats can only registered here when they can change per race, otherwise the are registered together with the competitor");
+                        Window.alert(stringMessages.canNotRegisterBoats());
                     }
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
                     new RegattaLogTrackingDeviceMappingsDialog(sailingService, stringMessages, errorReporter,
