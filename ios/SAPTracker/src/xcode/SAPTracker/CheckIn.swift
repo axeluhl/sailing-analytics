@@ -12,12 +12,8 @@ import CoreData
 @objc(CheckIn)
 class CheckIn: NSManagedObject {
 
-    func initialize() {
-        event = CoreDataManager.sharedManager.newEvent(checkIn: self)
-        leaderboard = CoreDataManager.sharedManager.newLeaderboard(checkIn: self)
-    }
-
     func updateWithCheckInData(checkInData: CheckInData) {
+        isTraining = NSNumber(booleanLiteral: checkInData.isTraining)
         serverURL = checkInData.serverURL
         event.updateWithEventData(eventData: checkInData.eventData)
         leaderboard.updateWithLeaderboardData(leaderboardData: checkInData.leaderboardData)
