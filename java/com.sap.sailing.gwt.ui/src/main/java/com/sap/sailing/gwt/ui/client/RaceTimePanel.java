@@ -334,7 +334,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 timer.setTime(newRaceTimesInfo.startOfRace.getTime() +
                         (initialTimeAfterRaceStartInReplayMode == null ? 0l : initialTimeAfterRaceStartInReplayMode.asMillis()));
             } else if (newRaceTimesInfo.startOfTracking != null) {
-                timer.setTime(newRaceTimesInfo.startOfTracking.getTime());
+                timer.setTime(newRaceTimesInfo.startOfTracking.getTime() +
+                        (initialTimeAfterRaceStartInReplayMode == null ? 0l : initialTimeAfterRaceStartInReplayMode.asMillis()));
             }
             break;
         }

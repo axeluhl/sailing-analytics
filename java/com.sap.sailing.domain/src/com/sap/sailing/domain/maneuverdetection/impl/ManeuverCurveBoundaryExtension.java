@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.maneuverdetection.impl;
 
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sse.common.TimePoint;
 
@@ -14,12 +15,15 @@ public class ManeuverCurveBoundaryExtension {
     private final TimePoint extensionTimePoint;
     private final SpeedWithBearing speedWithBearingAtExtensionTimePoint;
     private final double courseChangeInDegreesWithinExtensionArea;
+    private final Speed lowestSpeedWithinExtensionArea;
 
-    public ManeuverCurveBoundaryExtension(TimePoint extensionTimePoint, SpeedWithBearing speedWithBearingAtExtensionTimePoint,
-            double totalCourseChangeInDegreesExtension) {
+    public ManeuverCurveBoundaryExtension(TimePoint extensionTimePoint,
+            SpeedWithBearing speedWithBearingAtExtensionTimePoint, double totalCourseChangeInDegreesExtension,
+            Speed lowestSpeedWithinExtensionArea) {
         this.extensionTimePoint = extensionTimePoint;
         this.speedWithBearingAtExtensionTimePoint = speedWithBearingAtExtensionTimePoint;
         this.courseChangeInDegreesWithinExtensionArea = totalCourseChangeInDegreesExtension;
+        this.lowestSpeedWithinExtensionArea = lowestSpeedWithinExtensionArea;
     }
 
     /**
@@ -49,5 +53,12 @@ public class ManeuverCurveBoundaryExtension {
      */
     public double getCourseChangeInDegreesWithinExtensionArea() {
         return courseChangeInDegreesWithinExtensionArea;
+    }
+
+    /**
+     * Gets lowest speed within extension area.
+     */
+    public Speed getLowestSpeedWithinExtensionArea() {
+        return lowestSpeedWithinExtensionArea;
     }
 }

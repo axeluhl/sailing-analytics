@@ -20,6 +20,7 @@ public class ManeuverCurveBoundariesJsonSerializer implements JsonSerializer<Man
     public static final String COG_AFTER_IN_TRUE_DEGREES = "cogAfterInTrueDegrees";
     public static final String DIRECTION_CHANGE_IN_DEGREES = "directionChangeInDegrees";
     public static final String DURATION_IN_MILLIS = "durationInMillis";
+    public static final String LOWEST_SPEED_IN_KNOTS = "lowestSpeedInKnots";
 
     @Override
     public JSONObject serialize(ManeuverCurveBoundaries curveBoundaries) {
@@ -36,6 +37,7 @@ public class ManeuverCurveBoundariesJsonSerializer implements JsonSerializer<Man
                 : curveBoundaries.getSpeedWithBearingAfter().getBearing().getDegrees());
         result.put(DIRECTION_CHANGE_IN_DEGREES, curveBoundaries.getDirectionChangeInDegrees());
         result.put(DURATION_IN_MILLIS, curveBoundaries.getTimePointBefore().until(curveBoundaries.getTimePointAfter()).asMillis());
+        result.put(LOWEST_SPEED_IN_KNOTS, curveBoundaries.getLowestSpeed().getKnots());
         return result;
     }
 
