@@ -492,12 +492,14 @@ extension CheckInTableViewController: UITableViewDataSource {
         regattaCheckInTableViewCell.leaderboardLabel.text = checkIn.leaderboard.name
         if let boatCheckIn = checkIn as? BoatCheckIn {
             regattaCheckInTableViewCell.competitorLabel.text = boatCheckIn.displayName()
+            regattaCheckInTableViewCell.competitorLabel.textAlignment = .center
             if let color = UIColor.init(hexString: boatCheckIn.color) {
                 regattaCheckInTableViewCell.competitorLabel.backgroundColor = color
                 regattaCheckInTableViewCell.competitorLabel.textColor = UIColor.init(contrastColorFor: color)
             }
         } else {
             regattaCheckInTableViewCell.competitorLabel.text = checkIn.name
+            regattaCheckInTableViewCell.competitorLabel.textAlignment = .right
         }
     }
 
