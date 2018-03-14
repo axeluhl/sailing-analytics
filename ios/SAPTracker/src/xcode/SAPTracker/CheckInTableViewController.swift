@@ -490,6 +490,8 @@ extension CheckInTableViewController: UITableViewDataSource {
         guard let regattaCheckInTableViewCell = cell as? CheckInTableViewCell else { return }
         regattaCheckInTableViewCell.eventLabel.text = checkIn.event.name
         regattaCheckInTableViewCell.leaderboardLabel.text = checkIn.leaderboard.name
+        regattaCheckInTableViewCell.competitorLabel.textAlignment = .right
+        regattaCheckInTableViewCell.competitorLabel.backgroundColor = nil
         if let boatCheckIn = checkIn as? BoatCheckIn {
             regattaCheckInTableViewCell.competitorLabel.text = boatCheckIn.displayName()
             regattaCheckInTableViewCell.competitorLabel.textAlignment = .center
@@ -499,7 +501,6 @@ extension CheckInTableViewController: UITableViewDataSource {
             }
         } else {
             regattaCheckInTableViewCell.competitorLabel.text = checkIn.name
-            regattaCheckInTableViewCell.competitorLabel.textAlignment = .right
         }
     }
 
