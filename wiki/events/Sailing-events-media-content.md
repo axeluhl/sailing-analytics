@@ -39,6 +39,8 @@ Contact: Anneloes Krikhaar anneloes@eredivisiezeilen.nl
 * [Videos](https://www.youtube.com/channel/UCQbA1IRh15t4BpU64lb6WaA) 
 
 ## Extreme Sailing Series
+Contact: Julian Mayland j.mayland@appweeve.com
+
 * [Images](http://www.extremesailingseries.com/gallery)
 * Coypright: Check the image details!
 * [Videos](https://www.youtube.com/user/ExtremeSailingSeries)
