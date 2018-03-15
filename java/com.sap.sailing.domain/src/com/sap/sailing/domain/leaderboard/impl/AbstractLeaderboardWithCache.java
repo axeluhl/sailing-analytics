@@ -842,7 +842,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 // without wind information, use null meaning "unknown"
                 averageSignedCrossTrackError = null;
             }
-            
             final CompetitorRankingInfo competitorRankingInfo = rankingInfo.getCompetitorRankingInfo().apply(competitor);
             return new RaceDetails(legDetails, windwardDistanceToCompetitorFarthestAhead, averageAbsoluteCrossTrackError, averageSignedCrossTrackError,
                     trackedRace.getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache),

@@ -105,7 +105,6 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         super(trackedItem, trackName, BravoFixTrack.TRACK_NAME + " for " + trackedItem);
         this.hasExtendedFixes = hasExtendedFixes;
         initCaches(trackedItem);
-        
         setGpsTrack(gpsTrack);
     }
 
@@ -189,7 +188,6 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         final boolean added = super.add(fix, replace);
         if (added) {
             final TimePoint fixTimePoint = fix.getTimePoint();
-            
             invalidateAllAtOrLaterThanForCaches(fixTimePoint, averageRideHeightCache, foilingDistanceCache,
                     foilingTimeCache, expeditionAWACache, expeditionAWSCache, expeditionTWACache, expeditionTWSCache,
                     expeditionTWDCache, expeditionBoatSpeedCache, expeditionTargBoatSpeedCache, expeditionSOGCache,
