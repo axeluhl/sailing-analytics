@@ -768,7 +768,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             List<DetailType> allRaceDetailsTypes = new ArrayList<>();
             allRaceDetailsTypes.addAll(DetailType.getAllRaceDetailTypes());
             allRaceDetailsTypes.addAll(DetailType.getRaceStartAnalysisColumnTypes());
-            GWT.log("selected race details " + selectedRaceDetails);
             setValuesWithReferenceOrder(reduceToAvailableTypes(newSettings.getRaceDetailsToShow()), allRaceDetailsTypes, selectedRaceDetails);
         }
     }
@@ -2406,7 +2405,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     public void updateLeaderboard(LeaderboardDTO leaderboard) {
         if (leaderboard != null) {
-            GWT.log("Leaderboard " + leaderboard);
             Collection<RaceColumn<?>> columnsToCollapseAndExpandAgain = getExpandedRaceColumnsWhoseDisplayedLegCountChanged(
                     leaderboard);
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
@@ -3112,7 +3110,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
-        GWT.log("tchange" + newTime) ;
         loadCompleteLeaderboard(/* showProgress */ false);
     }
 

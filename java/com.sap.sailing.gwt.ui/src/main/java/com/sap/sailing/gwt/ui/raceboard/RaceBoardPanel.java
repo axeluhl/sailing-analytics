@@ -558,7 +558,6 @@ public class RaceBoardPanel
     
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-        GWT.log("Leaderboard update " + leaderboard);
         leaderboardAndMapViewer.setLeftComponentWidth(leaderboardPanel.getContentPanel().getOffsetWidth());
         if (editMarkPassingPanel != null) {
             editMarkPassingPanel.setLeaderboard(leaderboard);
