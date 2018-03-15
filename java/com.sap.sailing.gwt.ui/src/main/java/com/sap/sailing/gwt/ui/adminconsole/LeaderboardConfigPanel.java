@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -77,6 +79,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattasDisplayer,
 TrackedRaceChangedListener, LeaderboardsDisplayer {
+    private static final Logger logger = Logger.getLogger(LeaderboardConfigPanel.class.getName());
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     
     private final boolean showRaceDetails;
@@ -327,7 +330,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            caught.printStackTrace();
+                            logger.log(Level.WARNING, "Could not load detailtypes for leaderboard", caught);
                         }
 
                         @Override

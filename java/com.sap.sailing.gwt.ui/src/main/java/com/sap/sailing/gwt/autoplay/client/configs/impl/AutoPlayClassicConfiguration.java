@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.autoplay.client.configs.impl;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -24,6 +26,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
+    private static final Logger logger = Logger.getLogger(AutoPlayClassicConfiguration.class.getName());
     private AutoPlayClientFactory cf;
 
     @Override
@@ -38,7 +41,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
                 cf.getSailingService().getAvailableDetailTypesForLeaderboard(context.getLeaderboardName(), new AsyncCallback<Collection<DetailType>>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        caught.printStackTrace();
+                        logger.log(Level.WARNING, "Could not load detailtypes for leaderboard", caught);
                     }
 
                     @Override
@@ -58,7 +61,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
 
             @Override
             public void onFailure(Throwable caught) {
-                caught.printStackTrace();
+                logger.log(Level.WARNING, "Could not load eventById", caught);
             }
         };
         cf.getSailingService().getEventById(eventUUID, true, getEventByIdAsyncCallback);
