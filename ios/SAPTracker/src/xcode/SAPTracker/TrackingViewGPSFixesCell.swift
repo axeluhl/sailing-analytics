@@ -10,7 +10,7 @@ import UIKit
 
 class TrackingViewGPSFixesCell: UITableViewCell {
 
-    var checkIn: CheckIn?
+    weak var checkIn: CheckIn?
     
     @IBOutlet weak var gpsFixesTitleLabel: UILabel!
     @IBOutlet weak var gpsFixesLabel: UILabel!

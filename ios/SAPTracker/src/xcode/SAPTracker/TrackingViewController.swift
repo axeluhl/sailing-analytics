@@ -10,8 +10,8 @@ import Foundation
 
 class TrackingViewController : UIViewController {
     
-    var checkIn: CheckIn!
-    var sessionController: SessionController!
+    weak var checkIn: CheckIn!
+    weak var sessionController: SessionController!
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
@@ -36,7 +36,7 @@ class TrackingViewController : UIViewController {
     }
     
     fileprivate func setupButtons() {
-        stopTrackingButton.setBackgroundImage(Images.RedHighlighted, for: .highlighted)
+        makeRed(button: stopTrackingButton)
     }
     
     fileprivate func setupLocalization() {
@@ -51,23 +51,32 @@ class TrackingViewController : UIViewController {
     
     // MARK: - Actions
     
-    @IBAction func stopTrackingButtonTapped(_ sender: AnyObject) {
-        let alertController = UIAlertController(title: Translation.TrackingView.StopTrackingAlert.Title.String,
-                                                message: Translation.TrackingView.StopTrackingAlert.Message.String,
-                                                preferredStyle: .alert
+    @IBAction func stopTrackingButtonTapped(_ sender: Any) {
+        let alertController = UIAlertController(
+            title: Translation.TrackingView.StopTrackingAlert.Title.String,
+            message: Translation.TrackingView.StopTrackingAlert.Message.String,
+            preferredStyle: .alert
         )
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { action in
-            LocationManager.sharedManager.stopTracking()
-            SVProgressHUD.show()
-            self.sessionController.gpsFixController.sendAll(completion: { (withSuccess) in
-                SVProgressHUD.popActivity()
-                self.dismiss(animated: true, completion: nil)
-            })
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] (action) in
+            self?.stopTracking()
         }
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel)
         alertController.addAction(okAction)
         alertController.addAction(cancelAction)
         present(alertController, animated: true, completion: nil)
+    }
+    
+    fileprivate func stopTracking() {
+        LocationManager.sharedManager.stopTracking()
+        SVProgressHUD.show()
+        self.sessionController.gpsFixController.sendAll(completion: { (withSuccess) in
+            SVProgressHUD.popActivity()
+            self.dismiss(animated: true, completion: nil)
+        })
+    }
+    
+    @IBAction func optionButtonTapped(_ sender: Any) {
+        presentSettingsViewController()
     }
     
 }

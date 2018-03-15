@@ -10,12 +10,14 @@ import Foundation
 
 class SettingsViewController: UITableViewController {
     
-    @IBOutlet weak var batterySavingTitleLabel: UILabel!
-    @IBOutlet weak var batterySavingDescriptionLabel: UILabel!
-    @IBOutlet weak var batterySavingSwitch: UISwitch!
-    @IBOutlet weak var deviceIdentifierTitleLabel: UILabel!
-    @IBOutlet weak var deviceIdentifierLabel: UILabel!
-    
+    @IBOutlet var batterySavingTitleLabel: UILabel!
+    @IBOutlet var batterySavingDescriptionLabel: UILabel!
+    @IBOutlet var batterySavingSwitch: UISwitch!
+    @IBOutlet var deviceIdentifierTitleLabel: UILabel!
+    @IBOutlet var deviceIdentifierLabel: UILabel!
+    @IBOutlet var trainingServerTitleLabel: UILabel!
+    @IBOutlet var trainingEndpointTextField: UITextField!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
@@ -30,6 +32,7 @@ class SettingsViewController: UITableViewController {
         setupLocalization()
         setupNavigationBar()
         setupTableView()
+        setupTrainingEndpointTextField()
     }
     
     fileprivate func setupBatterySavingSwitch() {
@@ -51,6 +54,8 @@ class SettingsViewController: UITableViewController {
         navigationItem.title = Translation.SettingsView.Title.String
         batterySavingTitleLabel.text = Translation.SettingsView.BatterySavingTitleLabel.Text.String
         deviceIdentifierTitleLabel.text = Translation.SettingsView.DeviceIdentifierTitleLabel.Text.String
+        trainingServerTitleLabel.text = Translation.SettingsView.TrainingServerTitleLabel.Text.String
+        trainingEndpointTextField.placeholder = Preferences.trainingEndpoint
     }
     
     fileprivate func setupNavigationBar() {
@@ -61,7 +66,12 @@ class SettingsViewController: UITableViewController {
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 140
     }
-    
+
+    fileprivate func setupTrainingEndpointTextField() {
+        trainingEndpointTextField.text = Preferences.trainingEndpoint
+        trainingEndpointTextField.delegate = self
+    }
+
     // MARK: - Actions
     
     @IBAction func batterySavingChanged(_ sender: UISwitch) {
@@ -70,8 +80,13 @@ class SettingsViewController: UITableViewController {
         setupBatterySavingDescriptionLabel()
         tableView.endUpdates()
     }
-    
-    @IBAction func doneButtonTapped(_ sender: AnyObject) {
+
+    @IBAction func trainingEndpointEditingDidEnd(_ sender: Any) {
+        guard let trainingEndpoint = trainingEndpointTextField.text else { return }
+        Preferences.trainingEndpoint = trainingEndpoint
+    }
+
+    @IBAction func doneButtonTapped(_ sender: Any) {
         presentingViewController!.dismiss(animated: true, completion: nil)
     }
     
@@ -80,7 +95,8 @@ class SettingsViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
         case 0: return Translation.SettingsView.TableView.BatterySavingSection.Title.String
-        case 1: return Translation.SettingsView.TableView.OtherSettingsSection.Title.String
+        case 1: return Translation.SettingsView.TableView.DeviceSection.Title.String
+        case 2: return Translation.SettingsView.TableView.TrainingSection.Title.String
         default: return ""
         }
     }
@@ -90,5 +106,21 @@ class SettingsViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableViewAutomaticDimension
     }
-    
+
+    // TODO: Activate Training Feature -> Delete this method
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        return 2
+    }
+
+}
+
+// MARK: - <UITextFieldDelegate>
+
+extension SettingsViewController: UITextFieldDelegate {
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return false
+    }
+
 }
