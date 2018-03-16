@@ -8,6 +8,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -135,10 +136,22 @@ public class DomainFactoryImpl implements DomainFactory {
     private final WeakValueCache<UUID, RaceDefinition> raceCache = new WeakValueCache<>(new ConcurrentHashMap<>());
     
     private final MetadataParser metadataParser;
+    
+    /**
+     * A synchronized set that holds those competitors that are currently being migrated from having a boat directly
+     * assigned to having a boat assignment per race (see bug 2822). The migration procedure ensures that it enters
+     * a competitor into this set before starting to check whether migration is required; it keeps the competitor
+     * in this set until either the test shows migration is not necessary or until migration has finished in case
+     * it was necessary. Checking whether a competitor is in this set, deciding about the migration need and adding
+     * the competitor to this set all have to happen in a single {@code synchronized} block using this set as
+     * monitor.
+     */
+    private final Set<Competitor> competitorsCurrentlyBeingMigrated;
 
     public DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory baseDomainFactory) {
         this.baseDomainFactory = baseDomainFactory;
         this.metadataParser = new MetadataParserImpl();
+        competitorsCurrentlyBeingMigrated = Collections.synchronizedSet(new HashSet<>());
     }
     
     @Override
@@ -704,8 +717,10 @@ public class DomainFactoryImpl implements DomainFactory {
             BoatMetaData competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
             // If the tractrac race contains boat metadata we assume the regatta can have changing boats per race.
             // As the attribute 'canBoatsOfCompetitorsChangePerRace' is new and 'false' is the default value 
-            // we need to set it's value to true for the regatta, but only if the regatta is of type MigratableRegattaImpl
-            // the check for migration needs to obtain the lock for check and possible migration
+            // we need to set it's value to true for the regatta, but only if the regatta is of type MigratableRegattaImpl.
+            // For the check for migration we obtain the monitor on the regatta here; the
+            // migrateCanBoatsOfCompetitorsChangePerRace() method is "synchronized" and this way we guarantee that
+            // the regatta will not be migrated from anywhere else while we're checking for its migration here.
             synchronized (regatta) {
                 if (competitorBoatInfo != null && regatta.canBoatsOfCompetitorsChangePerRace() == false) {
                     // we need to set this to true for the regatta to make it possible to create the boat/competitor mappings
@@ -743,27 +758,42 @@ public class DomainFactoryImpl implements DomainFactory {
                 Competitor existingCompetitor = competitorAndBoatStore.getExistingCompetitorById(competitorId);
                 Competitor competitorToUse;
                 if (existingCompetitor != null) {
-                    synchronized (existingCompetitor) {
-                        // we need to check if we need to migrate the competitor to have a separate boat
-                        if (existingCompetitor.hasBoat()) {
-                            competitorToUse = competitorAndBoatStore.migrateToCompetitorWithoutBoat((CompetitorWithBoat) existingCompetitor);
-                            // we might also want to update the shortName field of the competitor during migration (instead of using sailID)
-                            if (competitorToUse.getShortName() != rc.getCompetitor().getShortName()) {
-                                boolean savedIsCompetitorToUpdateDuringGetOrCreate = competitorAndBoatStore.isCompetitorToUpdateDuringGetOrCreate(competitorToUse);
-                                competitorAndBoatStore.allowCompetitorResetToDefaults(competitorToUse);
-                                competitorAndBoatStore.updateCompetitor(competitorToUse.getId().toString(), competitorToUse.getName(),
-                                        rc.getCompetitor().getShortName(), competitorToUse.getColor(),
-                                        competitorToUse.getEmail(), competitorToUse.getNationality(), competitorToUse.getTeam().getImage(), 
-                                        competitorToUse.getFlagImage(), competitorToUse.getTimeOnTimeFactor(),
-                                        competitorToUse.getTimeOnDistanceAllowancePerNauticalMile(), competitorToUse.getSearchTag());
-                                if (savedIsCompetitorToUpdateDuringGetOrCreate) {
-                                    competitorAndBoatStore.allowCompetitorResetToDefaults(competitorToUse);
-                                }
+                    // ensure that check for and execution of migration for existingCompetitor happens at most once:
+                    final boolean needToMigrate;
+                    synchronized (competitorsCurrentlyBeingMigrated) {
+                        if (!competitorsCurrentlyBeingMigrated.contains(existingCompetitor)) {
+                            // we need to check if we need to migrate the competitor to have a separate boat
+                            needToMigrate = existingCompetitor.hasBoat();
+                            if (needToMigrate) {
+                                competitorsCurrentlyBeingMigrated.add(existingCompetitor);
                             }
                         } else {
-                            competitorToUse = existingCompetitor;
+                            // migration is already underway
+                            needToMigrate = false;
+                            logger.fine("Bug2822 DB-Migration: Not migrating competitor "+existingCompetitor.getName()+" because a migration for it is already ongoing");
                         }
-                    }                    
+                    }
+                    if (needToMigrate) {
+                        competitorToUse = competitorAndBoatStore.migrateToCompetitorWithoutBoat((CompetitorWithBoat) existingCompetitor);
+                        // we might also want to update the shortName field of the competitor during migration (instead of using sailID)
+                        if (competitorToUse.getShortName() != rc.getCompetitor().getShortName()) {
+                            boolean savedIsCompetitorToUpdateDuringGetOrCreate = competitorAndBoatStore.isCompetitorToUpdateDuringGetOrCreate(competitorToUse);
+                            competitorAndBoatStore.allowCompetitorResetToDefaults(competitorToUse);
+                            competitorAndBoatStore.updateCompetitor(competitorToUse.getId().toString(), competitorToUse.getName(),
+                                    rc.getCompetitor().getShortName(), competitorToUse.getColor(),
+                                    competitorToUse.getEmail(), competitorToUse.getNationality(), competitorToUse.getTeam().getImage(), 
+                                    competitorToUse.getFlagImage(), competitorToUse.getTimeOnTimeFactor(),
+                                    competitorToUse.getTimeOnDistanceAllowancePerNauticalMile(), competitorToUse.getSearchTag());
+                            if (savedIsCompetitorToUpdateDuringGetOrCreate) {
+                                competitorAndBoatStore.allowCompetitorResetToDefaults(competitorToUse);
+                            }
+                        }
+                        // It's safe to modify the competitor contents between addition and removal to a HashSet
+                        // because CompetitorImpl.hashCode/equals are based solely on Java object identity
+                        competitorsCurrentlyBeingMigrated.remove(existingCompetitor);
+                    } else {
+                        competitorToUse = existingCompetitor;
+                    }
                 } else {
                     competitorToUse = getOrCreateCompetitor(rc.getCompetitor());
                 }
