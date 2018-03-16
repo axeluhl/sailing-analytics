@@ -3424,7 +3424,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore()),
                         createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter()),
                         maneuver.getDirectionChangeInDegrees(), maneuver.getManeuverLoss()==null?null:maneuver.getManeuverLoss().getMeters(),
-                                maneuver.getSide());
+                                maneuver.getToSide());
             } else  {
                 maneuverDTO = new ManeuverDTO(maneuver.getType(), maneuver.getNewTack(),
                         maneuver.getPosition(), 
