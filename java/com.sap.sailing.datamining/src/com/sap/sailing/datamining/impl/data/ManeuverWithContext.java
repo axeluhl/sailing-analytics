@@ -4,8 +4,6 @@ import com.sap.sailing.datamining.data.HasManeuverContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.ManeuverType;
-import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Wind;
@@ -86,16 +84,6 @@ public class ManeuverWithContext implements HasManeuverContext {
     @Override
     public Maneuver getManeuver() {
         return maneuver;
-    }
-
-    @Override
-    public ManeuverType getManeuverType() {
-        return getManeuver().getType();
-    }
-
-    @Override
-    public NauticalSide getToSide() {
-        return getDirectionChangeInDegreesForAnalysis() >= 0 ? NauticalSide.STARBOARD : NauticalSide.PORT;
     }
 
     @Override

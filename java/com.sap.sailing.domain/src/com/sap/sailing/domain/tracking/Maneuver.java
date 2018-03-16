@@ -43,6 +43,7 @@ public interface Maneuver extends GPSFix {
      * 
      * @return The type of maneuver
      */
+    @Dimension(messageKey = "ManeuverType", ordinal = 12)
     ManeuverType getType();
 
     /**
@@ -51,7 +52,7 @@ public interface Maneuver extends GPSFix {
      * 
      * @return The new tack after the performed maneuver
      */
-    @Dimension(messageKey = "Tack", ordinal = 13)
+    @Dimension(messageKey = "Tack", ordinal = 14)
     Tack getNewTack();
 
     /**
@@ -151,11 +152,13 @@ public interface Maneuver extends GPSFix {
     /**
      * Determines whether the maneuver is mark passing maneuver.
      */
+    @Dimension(messageKey = "MarkPassing", ordinal = 13)
     boolean isMarkPassing();
 
     /**
      * Gets the direction of the maneuver. It corresponds to the direction of mark passing side.
      */
-    NauticalSide getSide();
+    @Dimension(messageKey = "ToSide", ordinal = 16)
+    NauticalSide getToSide();
 
 }

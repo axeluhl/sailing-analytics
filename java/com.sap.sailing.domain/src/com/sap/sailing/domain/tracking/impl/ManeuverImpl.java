@@ -121,7 +121,7 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
         return markPassing != null;
     }
 
-    public NauticalSide getSide() {
+    public NauticalSide getToSide() {
         return getMainCurveBoundaries().getDirectionChangeInDegrees() < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
     }
 

@@ -42,7 +42,7 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
     
     @Override
     public NauticalSide getPassingSide() {
-        return getManeuver().getSide();
+        return getManeuver().getToSide();
     }
 
     @Override

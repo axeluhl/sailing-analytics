@@ -958,7 +958,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                             // analyze all mark passings, not only those after this leg's start, to catch the mark passing
                             // maneuver starting this leg, even if its time point is slightly before the mark passing starting this leg
                             if (maneuver.getMarkPassing().getWaypoint() == trackedLeg.getLeg().getFrom()) {
-                                result.sideToWhichMarkAtLegStartWasRounded = maneuver.getSide();
+                                result.sideToWhichMarkAtLegStartWasRounded = maneuver.getToSide();
                             }
                         }
                     }
