@@ -76,6 +76,7 @@ public class TimePointTest {
     }
 
     @Test
+    @SuppressWarnings("unlikely-arg-type")
     public void testEqualForString() {
         TimePoint t = new MillisecondsTimePoint(Long.MIN_VALUE);
         assertFalse(t.equals("s"));

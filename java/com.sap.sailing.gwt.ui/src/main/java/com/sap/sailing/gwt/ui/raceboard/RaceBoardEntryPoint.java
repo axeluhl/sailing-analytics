@@ -53,17 +53,14 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
-
         raceboardContextDefinition = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new RaceboardContextDefinition());
-
         final RaceBoardModes finalMode;
         if (raceboardContextDefinition.getMode() != null) {
             finalMode = RaceBoardModes.valueOf(raceboardContextDefinition.getMode());
         } else {
             finalMode = null;
         }
-
         if (raceboardContextDefinition.getRegattaName() == null || raceboardContextDefinition.getRegattaName().isEmpty()
                 || raceboardContextDefinition.getRaceName() == null || raceboardContextDefinition.getRaceName().isEmpty()
                 || raceboardContextDefinition.getLeaderboardName() == null
@@ -71,7 +68,6 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
             createErrorPage(getStringMessages().requiresRegattaRaceAndLeaderboard());
             return;
         }
-        
         AsyncCallback<RaceboardDataDTO> asyncCallback = new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO raceboardData) {
@@ -144,7 +140,6 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 reportError("Error trying to create the raceboard: " + caught.getMessage());
             }
         };
-        
         sailingService.getRaceboardData(raceboardContextDefinition.getRegattaName(),
                 raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getLeaderboardName(),
                 raceboardContextDefinition.getLeaderboardGroupName(), raceboardContextDefinition.getEventId(),
