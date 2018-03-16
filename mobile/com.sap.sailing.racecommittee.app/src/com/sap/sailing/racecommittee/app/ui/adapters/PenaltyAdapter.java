@@ -20,7 +20,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
