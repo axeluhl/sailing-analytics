@@ -7432,7 +7432,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     public void visit(RaceLogRegisterCompetitorEvent event) {
                         raceLog.add(new RaceLogRegisterCompetitorEventImpl(event.getCreatedAt(),
                                 event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                raceLog.getCurrentPassId(), (CompetitorWithBoat) event.getCompetitor()));
+                                raceLog.getCurrentPassId(), event.getCompetitor(), event.getBoat()));
                     }
     
                     @Override
