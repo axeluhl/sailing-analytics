@@ -69,7 +69,6 @@ import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.MarkPassingManeuver;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -950,18 +949,17 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                                 }
                             }
                             break;
-                        case MARK_PASSING:
-                            // analyze all mark passings, not only those after this leg's start, to catch the mark passing
-                            // maneuver starting this leg, even if its time point is slightly before the mark passing starting this leg
-                            MarkPassingManeuver mpm = (MarkPassingManeuver) maneuver;
-                            if (mpm.getWaypointPassed() == trackedLeg.getLeg().getFrom()) {
-                                result.sideToWhichMarkAtLegStartWasRounded = mpm.getSide();
-                            }
-                            break;
                         default:
                             /* Do nothing here.
                              * Throwing an exception destroys the toggling (and maybe other behaviour) of the leaderboard.
                              */
+                        }
+                        if(maneuver.isMarkPassing()) {
+                            // analyze all mark passings, not only those after this leg's start, to catch the mark passing
+                            // maneuver starting this leg, even if its time point is slightly before the mark passing starting this leg
+                            if (maneuver.getMarkPassing().getWaypoint() == trackedLeg.getLeg().getFrom()) {
+                                result.sideToWhichMarkAtLegStartWasRounded = maneuver.getSide();
+                            }
                         }
                     }
                     result.averageManeuverLossInMeters = new HashMap<ManeuverType, Double>();
