@@ -94,7 +94,7 @@ public class RaceLogRegisterCompetitorEventImpl extends BaseRegisterCompetitorEv
 
     private static void checkBoat(Boat boat) throws IllegalArgumentException {
         if (boat == null) {
-            throw new IllegalArgumentException("Boat may not be null");
+            throw new IllegalArgumentException("Boat must not be null");
         }
     }
     
