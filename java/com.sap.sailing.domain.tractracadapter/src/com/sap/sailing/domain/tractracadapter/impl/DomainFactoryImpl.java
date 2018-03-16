@@ -741,16 +741,11 @@ public class DomainFactoryImpl implements DomainFactory {
                 }
                 Boat existingBoat = competitorAndBoatStore.getExistingBoatById(boatId);
                 Competitor existingCompetitor = competitorAndBoatStore.getExistingCompetitorById(competitorId);
-                synchronized (existingCompetitor) {
-                    boolean competitorMigrationRequired = existingCompetitor != null && existingCompetitor.hasBoat();
-                    // Now we check if we already have a separate competitor and boat for this competitor in the store
-                    if (existingCompetitor != null && existingBoat != null && !competitorMigrationRequired) {                    
-                        competitorsAndBoats.put(existingCompetitor, existingBoat);
-                    } else {
-                        Competitor competitorToUse = existingCompetitor;
-                        if (existingCompetitor == null) {
-                            competitorToUse = getOrCreateCompetitor(rc.getCompetitor());
-                        } else if (competitorMigrationRequired) {
+                Competitor competitorToUse;
+                if (existingCompetitor != null) {
+                    synchronized (existingCompetitor) {
+                        // we need to check if we need to migrate the competitor to have a separate boat
+                        if (existingCompetitor.hasBoat()) {
                             competitorToUse = competitorAndBoatStore.migrateToCompetitorWithoutBoat((CompetitorWithBoat) existingCompetitor);
                             // we might also want to update the shortName field of the competitor during migration (instead of using sailID)
                             if (competitorToUse.getShortName() != rc.getCompetitor().getShortName()) {
@@ -765,18 +760,24 @@ public class DomainFactoryImpl implements DomainFactory {
                                     competitorAndBoatStore.allowCompetitorResetToDefaults(competitorToUse);
                                 }
                             }
+                        } else {
+                            competitorToUse = existingCompetitor;
                         }
-                        Boat boatToUse = existingBoat;
-                        if (existingBoat == null) {
-                            if (competitorBoatInfo != null) {
-                                boatToUse = getOrCreateBoat(boatId, competitorBoatInfo.getName(), defaultBoatClass, sailId, AbstractColor.getCssColor(competitorBoatInfo.getColor()));
-                            } else {
-                                boatToUse = getOrCreateBoat(boatId, /* boat name*/ null, defaultBoatClass, sailId, null);
-                            }
-                        }
-                        competitorsAndBoats.put(competitorToUse, boatToUse);
+                    }                    
+                } else {
+                    competitorToUse = getOrCreateCompetitor(rc.getCompetitor());
+                }
+                Boat boatToUse;
+                if (existingBoat != null) {
+                    boatToUse = existingBoat;
+                } else {
+                    if (competitorBoatInfo != null) {
+                        boatToUse = getOrCreateBoat(boatId, competitorBoatInfo.getName(), defaultBoatClass, sailId, AbstractColor.getCssColor(competitorBoatInfo.getColor()));
+                    } else {
+                        boatToUse = getOrCreateBoat(boatId, /* boat name*/ null, defaultBoatClass, sailId, null);
                     }
                 }
+                competitorsAndBoats.put(competitorToUse, boatToUse);
             } else {
                 // Case 2 we assume here that the boat is contained in competitor as it's always the same
                 CompetitorWithBoat competitorWithBoat = getOrCreateCompetitorWithBoat(rc.getCompetitor());
