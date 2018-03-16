@@ -18,7 +18,7 @@ class CompetitorSessionController: SessionController {
         success: @escaping (_ teamImageURL: String) -> Void,
         failure: @escaping (_ error: Error) -> Void
     ) {
-        requestManager.postTeamImageData(
+        checkInRequestManager.postTeamImageData(
             imageData: imageData,
             competitorID: competitorID,
             success: success,
