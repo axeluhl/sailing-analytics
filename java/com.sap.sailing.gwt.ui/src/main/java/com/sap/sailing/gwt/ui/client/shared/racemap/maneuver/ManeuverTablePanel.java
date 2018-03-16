@@ -152,7 +152,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                         this.stringMessages.degreesUnit() + "/" + this.stringMessages.secondsUnit()));
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getLoss,
                 this.stringMessages.maneuverLoss(), stringMessages.metersUnit()));
-        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getDirectionChangeInDegrees,
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getDirectionChange,
                 stringMessages.maneuverAngle(), this.stringMessages.degreesUnit()));
         initWidget(rootPanel);
         setVisible(false);
@@ -352,14 +352,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             if (competitorSelectionModel.isSelected(res.getKey())) {
                 for (ManeuverDTO maneuver : res.getValue()) {
                     if (settings.getSelectedManeuverTypes().contains(maneuver.type)) {
-                        double turnRate = 0;
-                        if (maneuver.duration != null) {
-                            turnRate = Math.abs(maneuver.directionChangeInDegrees) / maneuver.duration.asSeconds();
-                        }
-                        data.add(new ManeuverTableData(res.getKey(), maneuver.timePoint, maneuver.timePointBefore,
-                                maneuver.type, maneuver.duration, maneuver.speedWithBearingBefore,
-                                maneuver.speedWithBearingAfter, maneuver.minSpeed, turnRate,
-                                maneuver.maneuverLossInMeters, maneuver.directionChangeInDegrees));
+                        data.add(new ManeuverTableData(res.getKey(), maneuver));
                     }
                 }
             }
