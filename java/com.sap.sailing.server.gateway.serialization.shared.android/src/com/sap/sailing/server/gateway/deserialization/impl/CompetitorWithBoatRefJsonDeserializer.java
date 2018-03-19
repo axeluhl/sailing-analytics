@@ -60,7 +60,6 @@ public class CompetitorWithBoatRefJsonDeserializer implements JsonDeserializer<C
             String displayColorAsString = (String) object.get(CompetitorJsonConstants.FIELD_DISPLAY_COLOR);
             String email = (String) object.get(CompetitorJsonConstants.FIELD_EMAIL);
             String searchTag = (String) object.get(CompetitorJsonConstants.FIELD_SEARCHTAG);
-            
             URI flagImageURI = null;
             String flagImageURIAsString = (String) object.get(CompetitorJsonConstants.FIELD_FLAG_IMAGE_URI);
             if (flagImageURIAsString != null) {
@@ -70,7 +69,6 @@ public class CompetitorWithBoatRefJsonDeserializer implements JsonDeserializer<C
                     logger.warning("Illegal flag image URI " + e.getMessage());
                 }
             }
-
             final Color displayColor;
             if (displayColorAsString == null || displayColorAsString.isEmpty()) {
                 displayColor = null;
@@ -85,7 +83,6 @@ public class CompetitorWithBoatRefJsonDeserializer implements JsonDeserializer<C
             final Double timeOnTimeFactor = (Double) object.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR);
             final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = (Double) object
                     .get(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
-
             // if we find a boat identifier we try to find the boat with the boatfactory
             Serializable boatId = (Serializable) object.get(CompetitorJsonConstants.FIELD_BOAT_ID);
             if (boatId != null) {
@@ -97,9 +94,7 @@ public class CompetitorWithBoatRefJsonDeserializer implements JsonDeserializer<C
                     boatId = Helpers.tryUuidConversion(boatId);
                 }
             }
-
             final Boat existingBoat = boatId != null ? boatFactory.getExistingBoatById(boatId) : null;
-
             if (existingBoat != null) {
                 return competitorFactory.getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email,
                         flagImageURI, team, timeOnTimeFactor,

@@ -128,7 +128,11 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     protected void addNewCompetitor(Competitor competitor) {
         LockUtil.lockForWrite(lock);
         try {
-            competitorCache.put(competitor.getId(), competitor);
+            final Competitor existingCompetitorWithEqualId = competitorCache.put(competitor.getId(), competitor);
+            if (existingCompetitorWithEqualId != null && existingCompetitorWithEqualId != competitor) {
+                logger.severe("Replaced competitor "+existingCompetitorWithEqualId+" by another object that has an equal ID: "+competitor+
+                        ". This is a pretty bad thing because we expect each competitor to be represented by exactly one Java object.");
+            }
             competitorsByIdAsString.put(competitor.getId().toString(), competitor);
         } finally {
             LockUtil.unlockAfterWrite(lock);
