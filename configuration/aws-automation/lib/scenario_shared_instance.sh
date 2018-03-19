@@ -20,6 +20,8 @@ function shared_instance_require(){
 
 	require_instance_name
 	require_instance_short_name
+	require_mongodb_host
+	require_mongodb_port
 	require_build_version
 	require_key_file
 	require_event_name
@@ -98,13 +100,10 @@ function shared_instance_execute() {
 	local_echo "Commenting out $comment_out_line_in_env_with_pattern inside $server_env_file..."
 	execute_remote "sed -i '/$comment_out_line_in_env_with_pattern/s/^/#/g' $server_env_file"
 
-	local_echo "Configuring $server_env_file..."
-	environment="live-server"
-	env_content=$(wget -qO- http://releases.sapsailing.com/environments/$environment)
+	local MEMORY="10000m"
+	exit_on_fail execute_remote "echo -e \"MEMORY=$MEMORY\" >> $server_env_file"
 
-	exit_on_fail execute_remote "echo -e \"# START Environment: $environment \" >> $server_env_file"
-	exit_on_fail execute_remote "echo -e \"$env_content\" >> $server_env_file"
-	exit_on_fail execute_remote "echo -e \"# END Environment: $environment \" >> $server_env_file"
+	append_environment_to_env_sh "live-server" $ssh_user $super_instance $server_env_file $env_file
 
 	local env_patch=$(build_configuration "# START Script $script_start_time" "SERVER_NAME=$(alphanumeric $instance_name)" "TELNET_PORT=$telnet_port" \
 	"SERVER_PORT=$server_port" "EXPEDITION_PORT=$expedition_port" "MONGODB_NAME=$(alphanumeric $instance_name)" "MONGODB_HOST=$default_mongodb_host" \
@@ -113,8 +112,7 @@ function shared_instance_execute() {
 
 	exit_on_fail execute_remote "echo -e \"$env_patch\" >> $server_env_file"
 
-	local memory="10000m"
-	exit_on_fail execute_remote "echo -e \"MEMORY=$memory\" >> $server_env_file"
+
 
 	local_echo "Creating README file if it does not exist already..."
 	execute_remote touch $readme_file
@@ -144,7 +142,7 @@ function shared_instance_execute() {
 
 	execute_remote_root "echo -e \"\n# $instance_short_name (${description:-"Unknown"}, ${contact_person:-"Unknown"}, ${contact_email:-"Unknown"})\" >> $events_conf"
 	append_macro_to_001_events_conf "$domain" "$event_id" "root" "$super_instance" "$server_port"
-
+	reload_httpd "root" $super_instance
 	header "Conclusion"
 
 	success "Sub instance should be reachable through https://$domain."

@@ -79,16 +79,15 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         boolean settingsChanged = updateSettingsOnly(newSettings);
         DetailType firstType = newSettings.getFirstDetailType();
         DetailType secondType = newSettings.getSecondDetailType();
-        if(!lifecycle.getAllowedDetailTypes().contains(firstType)){
-            //if the first type is not allowed here, choose a different valid value
+        if (!lifecycle.getAllowedDetailTypes().contains(firstType)){
+            // if the first type is not allowed here, choose a different valid value
             firstType = DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD;
         }
-        if(!lifecycle.getAllowedDetailTypes().contains(firstType)){
+        if (!lifecycle.getAllowedDetailTypes().contains(firstType)){
             //if the second type is not allowed here, do not set it.
             secondType = null;
         }
-        boolean selectedDetailTypeChanged = setSelectedDetailTypes(firstType,
-                secondType);
+        boolean selectedDetailTypeChanged = setSelectedDetailTypes(firstType, secondType);
         if (selectedDetailTypeChanged || settingsChanged) {
             clearChart();
             timeChanged(timer.getTime(), null);
