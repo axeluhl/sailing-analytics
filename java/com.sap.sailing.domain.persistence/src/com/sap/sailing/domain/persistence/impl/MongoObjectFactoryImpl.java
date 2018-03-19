@@ -1328,7 +1328,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void storeCompetitors(Iterable<Competitor> competitors) {
+    public void storeCompetitors(Iterable<? extends Competitor> competitors) {
         if (competitors != null && !Util.isEmpty(competitors)) {
             List<Competitor> competitorsWithoutBoat = new ArrayList<>();
             List<CompetitorWithBoat> competitorsWithBoat = new ArrayList<>();

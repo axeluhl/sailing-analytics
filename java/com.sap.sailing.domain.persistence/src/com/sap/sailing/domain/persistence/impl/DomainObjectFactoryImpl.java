@@ -2370,7 +2370,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Collection<CompetitorWithBoat> migrateLegacyCompetitorsIfRequired() {
+    public Iterable<CompetitorWithBoat> migrateLegacyCompetitorsIfRequired() {
         Map<Serializable, CompetitorWithBoat> competitorsById = null;
         boolean competitorsCollectionExist = database.collectionExists(CollectionNames.COMPETITORS.name());
         boolean boatsCollectionCollectionExist = database.collectionExists(CollectionNames.BOATS.name());

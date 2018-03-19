@@ -715,7 +715,7 @@ public class DomainFactoryImpl implements DomainFactory {
         getCompetingCompetitors(race).forEach(rc->{
             Serializable competitorId = rc.getCompetitor().getId(); 
             BoatMetaData competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
-            // If the tractrac race contains boat metadata we assume the regatta can have changing boats per race.
+            // If the TracTrac race contains boat metadata we assume the regatta can have changing boats per race.
             // As the attribute 'canBoatsOfCompetitorsChangePerRace' is new and 'false' is the default value 
             // we need to set it's value to true for the regatta, but only if the regatta is of type MigratableRegattaImpl.
             // For the check for migration we obtain the monitor on the regatta here; the

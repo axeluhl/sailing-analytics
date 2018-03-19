@@ -137,7 +137,7 @@ public interface DomainObjectFactory {
      * The old COLLECTION is will be renamed to COMPETITORS_BAK for deveopment and test purposes
      * @return a collection of the old type where all competitors contain their boats or null if migration was not required.
      */
-    Collection<CompetitorWithBoat> migrateLegacyCompetitorsIfRequired();
+    Iterable<CompetitorWithBoat> migrateLegacyCompetitorsIfRequired();
 
     /**
      * Loads all competitors (with and without embedded boats) and resolves them via the domain factory.
