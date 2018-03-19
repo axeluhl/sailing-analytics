@@ -3106,6 +3106,167 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 result = getBravoDoubleValue(BravoFixTrack::getTargetBoatspeedPIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
+            
+            case EXPEDITION_RACE_AWA: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionAWAIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_AWS: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionAWSIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_BARO: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionBaroIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_BOAT_SPEED: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionBoatSpeedIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_COG: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionCOGIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_COURSE: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionCourseDetailIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_DIST_TO_PORT_LAYLINE: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionDistToPortLaylineIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_DIST_TO_STB_LAYLINE: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionDistToStbLaylineIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_DISTANCE_BELOW_LINE: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionDistanceBelowLineIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionDistanceToCommitteeBoatIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_DISTANCE_TO_PIN: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionDistanceToPinDetailIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_FORESTAY_LOAD: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionForestayLoadIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_HEADING: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionHeadingIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_HEEL: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionHeelIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_JIB_CAR_PORT: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionJibCarPortIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_JIB_CAR_STBD: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionJibCarStbdIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionLineSquareForWindIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_LOAD_P: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionLoadPIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_LOAD_S: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionLoadSIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_MAST_BUTT: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionMastButtIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_RAKE: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionRakeIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_RATE_OF_TURN: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionRateOfTurnIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_RUDDER_ANGLE: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionRudderAngleIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_SOG: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionSOGIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_TARG_BOAT_SPEED: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTargBoatSpeedIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_TARG_TWA: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTargTWAIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_TARGET_HEEL: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTargetHeelIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToBurnToCommitteeBoatIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_TIME_TO_BURN_TO_LINE: {
+                result = getBravoDurationValue(BravoFixTrack::getExpeditionTimeToBurnToLineIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_TIME_TO_BURN_TO_PIN: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToBurnToPinIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToCommitteeBoatIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_TIME_TO_GUN: {
+                result = getBravoDurationValue(BravoFixTrack::getExpeditionTimeToGUNIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_TIME_TO_PIN: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToPinIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_TIME_TO_PORT_LAYLINE: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToPortLaylineIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_TIME_TO_STB_LAYLINE: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToStbLaylineIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_TWA: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTWAIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_TWD: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTWDIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_TWS: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTWSIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_VMG: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionVMGIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
+            case EXPEDITION_RACE_VMG_TARG_VMG_DELTA: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionVMGTargVMGDeltaIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("There is currently no support for the enum value '" + dataType
                         + "' in this method.");
@@ -3116,6 +3277,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
 
+    private Double getBravoDurationValue(BiFunction<BravoFixTrack<Competitor>, TimePoint, Duration> valueGetter,
+            TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
+        return getBravoValue(valueGetter, d->d.asSeconds(), trackedRace, competitor, timePoint);
+    }
+    
     private Double getBravoDoubleValue(BiFunction<BravoFixTrack<Competitor>, TimePoint, Double> valueGetter,
             TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
         return getBravoValue(valueGetter, d->d, trackedRace, competitor, timePoint);
@@ -6757,17 +6923,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier) {
         List<DetailType> availableDetailsTypes1 = new ArrayList<>();
-        availableDetailsTypes1.add(DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD);
-        availableDetailsTypes1.add(DetailType.LEG_DISTANCE_TRAVELED);
-        availableDetailsTypes1.add(DetailType.LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START);
-        availableDetailsTypes1.add(DetailType.LEG_VELOCITY_MADE_GOOD_IN_KNOTS);
-        availableDetailsTypes1.add(DetailType.LEG_GAP_TO_LEADER_IN_SECONDS);
-        availableDetailsTypes1.add(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
-        availableDetailsTypes1.add(DetailType.RACE_RANK);
-        availableDetailsTypes1.add(DetailType.REGATTA_RANK);
-        availableDetailsTypes1.add(DetailType.CHART_DISTANCE_TO_START_LINE);
-        availableDetailsTypes1.add(DetailType.CHART_BEAT_ANGLE);
-        availableDetailsTypes1.add(DetailType.CHART_COURSE_OVER_GROUND_TRUE_DEGREES);
+
         List<DetailType> availableDetailsTypes = availableDetailsTypes1;
         final DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);
         if (trackedRace != null) {
@@ -6785,6 +6941,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             if (hasExtendedBravoFixes) {
                 availableDetailsTypes.addAll(DetailType.getRaceExtendedBravoDetailTypes());
+                availableDetailsTypes.addAll(DetailType.getRaceExpeditionDetailTypes());
             }
         }
         if (leaderboardGroupName != null) {
