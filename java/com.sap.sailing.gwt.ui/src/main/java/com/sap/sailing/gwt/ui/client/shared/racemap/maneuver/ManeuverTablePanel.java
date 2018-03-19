@@ -507,7 +507,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             }
             sailingService.getManeuvers(raceIdentifier, compToFromDateMap, compToToDateMap,
                     new AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>>() {
-
                         @Override
                         public void onSuccess(Map<CompetitorDTO, List<ManeuverDTO>> result) {
                             for (final Entry<CompetitorDTO, List<ManeuverDTO>> entry : result.entrySet()) {
@@ -534,19 +533,21 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         private List<ManeuverDTO> maneuvers = new ArrayList<>();
 
         private Optional<TimeRange> requiresUpdate(final Date newTime) {
+            final Optional<TimeRange> result;
             if (isReplaying() && latestRequest == null) {
-                return Optional.of(getFullTimeRange());
-            }
-            if (earliestRequest == null || newTime.getTime() < earliestRequest) {
+                result = Optional.of(getFullTimeRange());
+            } else if (earliestRequest == null || newTime.getTime() < earliestRequest) {
                 final TimePoint from = new MillisecondsTimePoint(timeRangeWithZoomProvider.getFromTime());
                 final TimePoint to = new MillisecondsTimePoint(newTime);
-                return Optional.of(new TimeRangeImpl(from, to, true));
+                result = Optional.of(new TimeRangeImpl(from, to, true));
             } else if (latestRequest != null && newTime.getTime() > latestRequest) {
                 final TimePoint from = new MillisecondsTimePoint(latestRequest);
                 final TimePoint to = new MillisecondsTimePoint(timeRangeWithZoomProvider.getToTime());
-                return Optional.of(new TimeRangeImpl(from, to, true));
+                result = Optional.of(new TimeRangeImpl(from, to, true));
+            } else {
+                result = Optional.empty();
             }
-            return Optional.empty();
+            return result;
         }
     }
 
