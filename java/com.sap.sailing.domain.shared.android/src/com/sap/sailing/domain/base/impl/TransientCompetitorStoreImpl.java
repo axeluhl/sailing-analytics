@@ -124,14 +124,22 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
      * Adds the <code>competitor</code> to this transient competitor collection so that it is available in
      * {@link #getExistingCompetitorById(Serializable)}. Subclasses may override in case they need to take additional
      * measures such as durably storing the competitor. Overriding implementations must call this implementation.
+     * <p>
+     * 
+     * If a competitor with an ID equal to that of {@code competitor} already exists in this store, an
+     * {@link IllegalArgumentException} will be thrown. This is necessary because there is a rule in place saying each
+     * competitor entity can be represented in the scope of the VM by at most one Java {@link Competitor} object, and
+     * replacing an object in this store would leave us with at least two.
      */
     protected void addNewCompetitor(Competitor competitor) {
         LockUtil.lockForWrite(lock);
         try {
             final Competitor existingCompetitorWithEqualId = competitorCache.put(competitor.getId(), competitor);
             if (existingCompetitorWithEqualId != null && existingCompetitorWithEqualId != competitor) {
-                logger.severe("Replaced competitor "+existingCompetitorWithEqualId+" by another object that has an equal ID: "+competitor+
-                        ". This is a pretty bad thing because we expect each competitor to be represented by exactly one Java object.");
+                final String msg = "Replaced competitor "+existingCompetitorWithEqualId+" by another object that has an equal ID: "+competitor+
+                        ". This is a pretty bad thing because we expect each competitor to be represented by exactly one Java object.";
+                logger.severe(msg);
+                throw new IllegalArgumentException(msg);
             }
             competitorsByIdAsString.put(competitor.getId().toString(), competitor);
         } finally {
