@@ -194,6 +194,10 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                 }
             } catch (InterruptedException e) {
                 logger.log(Level.INFO, "Interrupted while taking element from queue", e);
+            } catch (Exception e) {
+                // before this thread terminates abnormally, at least log it:
+                logger.log(Level.SEVERE, "Receiver "+this+" is terminating abnormally; the race will probably be left at LOADING (100%).", e);
+                throw e;
             }
         }
         unsubscribe();

@@ -124,7 +124,6 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
     public synchronized Competitor migrateToCompetitorWithoutBoat(CompetitorWithBoat competitorWithBoat) {
         // It should not be possible to call this for a competitor which has already been migrated.
         assert competitorWithBoat.hasBoat();
-
         logger.log(Level.INFO, "Bug2822 DB-Migration: Migrate competitor " + competitorWithBoat.getName() + " with ID " + competitorWithBoat.getId().toString() + " to have a separate boat"); 
         Competitor migratedCompetitor = super.migrateToCompetitorWithoutBoat(competitorWithBoat);
         storeTo.storeCompetitor(migratedCompetitor);

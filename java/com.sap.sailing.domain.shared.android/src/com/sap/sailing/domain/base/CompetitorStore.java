@@ -164,10 +164,13 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
     Iterable<? extends Boat> getStandaloneBoats();
 
     /**
-     * Migrates an existing competitor with contained boat to a competitor without a boat.
-     * The contained boat will be removed from the store
-     * @param competitorWithBoat the existing competitor with a contained boat
-     * @return the new created competitor without boat
+     * Migrates an existing competitor with contained boat to a competitor without a boat. The contained boat will be
+     * removed from the store.
+     * 
+     * @param competitorWithBoat
+     *            the existing competitor with a contained boat
+     * @return the same {@code competitorWithBoat} with the {@link CompetitorWithBoat#getBoat() boat} reference set to
+     *         {@code null}
      */
     Competitor migrateToCompetitorWithoutBoat(CompetitorWithBoat competitorWithBoat);
     
