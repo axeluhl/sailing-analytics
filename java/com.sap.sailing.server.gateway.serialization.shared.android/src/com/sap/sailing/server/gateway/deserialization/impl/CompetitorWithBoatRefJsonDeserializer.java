@@ -48,12 +48,14 @@ public class CompetitorWithBoatRefJsonDeserializer implements JsonDeserializer<C
     public Competitor deserialize(JSONObject object) throws JsonDeserializationException {
         Serializable competitorId = (Serializable) object.get(CompetitorJsonSerializer.FIELD_ID);
         try {
-            Class<?> idClass = Class.forName((String) object.get(CompetitorJsonConstants.FIELD_ID_TYPE));
-            if (Number.class.isAssignableFrom(idClass)) {
-                Constructor<?> constructorFromString = idClass.getConstructor(String.class);
-                competitorId = (Serializable) constructorFromString.newInstance(competitorId.toString());
-            } else if (UUID.class.isAssignableFrom(idClass)) {
-                competitorId = Helpers.tryUuidConversion(competitorId);
+            {
+                Class<?> idClass = Class.forName((String) object.get(CompetitorJsonConstants.FIELD_ID_TYPE));
+                if (Number.class.isAssignableFrom(idClass)) {
+                    Constructor<?> constructorFromString = idClass.getConstructor(String.class);
+                    competitorId = (Serializable) constructorFromString.newInstance(competitorId.toString());
+                } else if (UUID.class.isAssignableFrom(idClass)) {
+                    competitorId = Helpers.tryUuidConversion(competitorId);
+                }
             }
             String name = (String) object.get(CompetitorJsonConstants.FIELD_NAME);
             String shortName = (String) object.get(CompetitorJsonConstants.FIELD_SHORT_NAME);
@@ -90,7 +92,7 @@ public class CompetitorWithBoatRefJsonDeserializer implements JsonDeserializer<C
                 if (Number.class.isAssignableFrom(boatIdClass)) {
                     Constructor<?> constructorFromString = boatIdClass.getConstructor(String.class);
                     boatId = (Serializable) constructorFromString.newInstance(boatId.toString());
-                } else if (UUID.class.isAssignableFrom(idClass)) {
+                } else if (UUID.class.isAssignableFrom(boatIdClass)) {
                     boatId = Helpers.tryUuidConversion(boatId);
                 }
             }
