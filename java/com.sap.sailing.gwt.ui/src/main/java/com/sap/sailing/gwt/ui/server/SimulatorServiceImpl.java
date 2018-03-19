@@ -935,7 +935,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         if (mode == SailingSimulatorConstants.ModeMeasured) {
             // Adding the polyline
-            pathDTOs[0] = this.getPolylinePathDTO(pathsAndNames.get("6#GPS Poly"), pathsAndNames.get("7#GPS Track"));
+            // TODO bug4427: Eclipse Oxygen warnings have pointed at the strange get(String) invocations below; it turns out the whole mode=m set-up in the standalone simulator seems broken; Christopher to clarify
+//            pathDTOs[0] = this.getPolylinePathDTO(pathsAndNames.get("6#GPS Poly"), pathsAndNames.get("7#GPS Track"));
+            pathDTOs[0] = this.getPolylinePathDTO(pathsAndNames.get(null), pathsAndNames.get(null)); // TODO bug4427: the above expressions evaluate to null anyway, provoking an NPE; however, mode=m fails much earlier because the SimulatorMap.regattaAreaCanvasOverlay field is null, causing an NPE even earlier
         }
 
         for (Entry<PathType, Path> entry : pathsAndNames.entrySet()) {

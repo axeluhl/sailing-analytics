@@ -111,14 +111,17 @@ public class NamedTracingScheduledThreadPoolExecutor extends ScheduledThreadPool
         if (logger.isLoggable(Level.FINE)) {
             final TimePoint end = MillisecondsTimePoint.now();
             final TimePoint startTime = startTimePoints.remove(r);
-            Runnable theRunnableToLog = wrappedRunnables.get(r);
+            Runnable theRunnableToLog = null;
+            if (r instanceof ScheduledFuture<?>) {
+                theRunnableToLog = wrappedRunnables.get((ScheduledFuture<?>) r);
+            }
             if (theRunnableToLog == null) {
                 theRunnableToLog = r;
             }
             if (startTime != null) {
                 final Duration duration = startTime.until(end);
                 if (duration.compareTo(DURATION_LOGGING_THRESHOLD) > 0) {
-                    logger.fine("Runnable "+theRunnableToLog+" took "+duration+" to complete in executor "+this+(t==null?"":("It failed with exception "+t)));
+                    logger.fine("Runnable "+theRunnableToLog+" took "+duration+" to complete in executor "+this+(t==null?"":(". It failed with exception "+t)));
                 }
             } else {
                 logger.fine("Strange internal problem: had expected to find start time for "+r);

@@ -29,9 +29,15 @@ class AboutViewController: UIViewController {
     // MARK: - Setup
     
     fileprivate func setup() {
+        setupButtons()
         setupLocalization()
         setupNavigationBar()
         setupVersion()
+    }
+    
+    fileprivate func setupButtons() {
+        makeBlue(button: licenseInformationButton)
+        makeBlue(button: termsButton)
     }
     
     fileprivate func setupLocalization() {
@@ -52,11 +58,11 @@ class AboutViewController: UIViewController {
     
     // MARK: - Actions
     
-    @IBAction func doneButtonTapped(_ sender: AnyObject) {
+    @IBAction func doneButtonTapped(_ sender: Any) {
         presentingViewController!.dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func termsButtonTapped(_ sender: AnyObject) {
+    @IBAction func termsButtonTapped(_ sender: Any) {
         UIApplication.shared.openURL(URLs.Terms)
     }
     

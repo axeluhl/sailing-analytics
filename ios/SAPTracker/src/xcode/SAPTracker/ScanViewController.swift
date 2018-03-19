@@ -9,9 +9,16 @@
 import UIKit
 import AVFoundation
 
+protocol ScanViewControllerDelegate: class {
+    
+    func scanViewController(_ controller: ScanViewController, didCheckIn checkIn: CheckIn)
+    
+}
+
 class ScanViewController: UIViewController {
     
-    weak var homeViewController: HomeViewController?
+    weak var coreDataManager: CoreDataManager!
+    weak var delegate: ScanViewControllerDelegate?
     
     @IBOutlet weak var previewView: UIView!
     @IBOutlet weak var targetImageView: UIImageView!
@@ -105,14 +112,14 @@ class ScanViewController: UIViewController {
                 message: error.localizedFailureReason,
                 preferredStyle: .alert
             )
-            let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .default) { (action) in
+            let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .default) { [weak self] action in
                 if let settingsURL = URL(string: UIApplicationOpenSettingsURLString) {
                     UIApplication.shared.openURL(settingsURL)
                 }
-                _ = self.navigationController?.popViewController(animated: true)
+                _ = self?.navigationController?.popViewController(animated: true)
             }
-            let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel) { (action) in
-                _ = self.navigationController?.popViewController(animated: true)
+            let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel) { [weak self] action in
+                _ = self?.navigationController?.popViewController(animated: true)
             }
             alertController.addAction(settingsAction)
             alertController.addAction(cancelAction)
@@ -136,10 +143,8 @@ class ScanViewController: UIViewController {
     
     // MARK: - Properties
     
-    fileprivate lazy var checkInController: CheckInController = {
-        let checkInController = CheckInController()
-        checkInController.delegate = self
-        return checkInController
+    fileprivate lazy var regattaCheckInController: RegattaCheckInController = {
+        return RegattaCheckInController(coreDataManager: self.coreDataManager)
     }()
     
     // MARK: - Helper
@@ -152,16 +157,6 @@ class ScanViewController: UIViewController {
         case .portraitUpsideDown: return .portraitUpsideDown
         case .unknown: return .portrait
         }
-    }
-    
-}
-
-// MARK: - CheckInControllerDelegate
-
-extension ScanViewController: CheckInControllerDelegate {
-    
-    func checkInController(_ sender: CheckInController, show alertController: UIAlertController) {
-        present(alertController, animated: true, completion: nil)
     }
     
 }
@@ -191,33 +186,37 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
     }
     
     fileprivate func captureOutputSuccess(checkInData: CheckInData) {
-        checkInController.checkIn(checkInData: checkInData, completion: { (withSuccess) in
-            if withSuccess {
-                self.homeViewController?.selectedCheckIn = CoreDataManager.sharedManager.fetchCheckIn(checkInData: checkInData)
-                _ = self.navigationController?.popViewController(animated: true)
-            } else {
-                self.startScanning()
-            }
-        })
+        checkIn(withCheckInData: checkInData)
     }
     
     fileprivate func captureOutputFailure() {
-        showIncorrectCodeAlert()
-    }
-    
-    // MARK: - Alerts
-    
-    fileprivate func showIncorrectCodeAlert() {
-        let alertController = UIAlertController(
-            title: Translation.Common.Error.String,
-            message: Translation.ScanView.IncorrectCodeAlert.Message.String,
-            preferredStyle: .alert
-        )
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { (action) in
-            self.startScanning()
+        let title = Translation.Common.Error.String
+        let message = Translation.ScanView.IncorrectCodeAlert.Message.String
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] action in
+            self?.startScanning()
         }
         alertController.addAction(okAction)
         present(alertController, animated: true, completion: nil)
+    }
+    
+    // MARK: - CheckIn
+    
+    fileprivate func checkIn(withCheckInData checkInData: CheckInData) {
+        regattaCheckInController.checkInWithViewController(self, checkInData: checkInData, success: { [weak self] (checkIn) in
+            self?.checkInSuccess(checkIn: checkIn)
+        }) { [weak self] (error) in
+            self?.checkInFailure(error: error)
+        }
+    }
+    
+    fileprivate func checkInSuccess(checkIn: CheckIn) {
+        _ = navigationController?.popViewController(animated: true)
+        delegate?.scanViewController(self, didCheckIn: checkIn)
+    }
+    
+    fileprivate func checkInFailure(error: Error) {
+        startScanning()
     }
     
 }

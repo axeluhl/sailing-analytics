@@ -206,7 +206,7 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
-       final TimePoint startOfRace = race.getStartOfRace(/* inference */ false);
+        final TimePoint startOfRace = race.getStartOfRace(/* inference */ false);
         if (startOfRace != null) {
             final boolean startTimeUpdated;
             synchronized (this) { // protect raceStartTime check and update

@@ -75,6 +75,13 @@ while [ -h "${SOURCE}" ]; do # resolve ${SOURCE} until the file is no longer a s
 done
 SOURCEPATH="$( cd -P "$( dirname "${SOURCE}" )" && pwd )"
 
+wget -q --spider releases.sapsailing.com --timeout=5
+
+if [ ! $? -eq 0 ]; then
+  error "No internet connection. Exiting."
+  safeExit
+fi
+
 if [ ! -d "${SOURCEPATH}" ]
 then
   die "Failed to find library files expected in: ${SOURCEPATH}"
