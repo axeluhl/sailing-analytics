@@ -511,8 +511,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                         public void onSuccess(Map<CompetitorDTO, List<ManeuverDTO>> result) {
                             for (final Entry<CompetitorDTO, List<ManeuverDTO>> entry : result.entrySet()) {
                                 final CompetitorManeuverData data = getData(entry.getKey());
-                                data.earliestRequest = compToFromDateMap.get(entry.getKey()).getTime();
-                                data.latestRequest = compToToDateMap.get(entry.getKey()).getTime();
+                                data.earliestRequestMillis = compToFromDateMap.get(entry.getKey()).getTime();
+                                data.latestRequestMillis = compToToDateMap.get(entry.getKey()).getTime();
                                 data.maneuvers.addAll(entry.getValue());
                             }
                             ManeuverTablePanel.this.rerender();
@@ -529,19 +529,37 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     }
 
     private class CompetitorManeuverData {
-        private Long earliestRequest, latestRequest;
+        /**
+         * The time point, as millisecond time stamp, of the start of the time range for which
+         * maneuvers have been requested; or {@code null} in case ...
+         * TODO When can this be null? Upon an uninitialized TimePanel? Upon an open-ended time range? Or only if no request has been made yet?
+         */
+        private Long earliestRequestMillis;
+
+        /**
+         * The time point, as millisecond time stamp, of the end of the time range for which
+         * maneuvers have been requested; or {@code null} in case ...
+         * TODO When can this be null? Upon an uninitialized TimePanel? Upon an open-ended time range? Or only if no request has been made yet?
+         */
+        private Long latestRequestMillis;
+        
+        /**
+         * The maneuvers retrieved for one specific competitor for the time range between {@link #earliestRequestMillis} and
+         * {@link #latestRequestMillis} so far. Note that the order of maneuvers in this list is not defined; in particular,
+         * they will not necessarily be represented in the order of ascending {@link ManeuverDTO#timePoint time points}.
+         */
         private List<ManeuverDTO> maneuvers = new ArrayList<>();
 
         private Optional<TimeRange> requiresUpdate(final Date newTime) {
             final Optional<TimeRange> result;
-            if (isReplaying() && latestRequest == null) {
+            if (isReplaying() && latestRequestMillis == null) {
                 result = Optional.of(getFullTimeRange());
-            } else if (earliestRequest == null || newTime.getTime() < earliestRequest) {
+            } else if (earliestRequestMillis == null || newTime.getTime() < earliestRequestMillis) {
                 final TimePoint from = new MillisecondsTimePoint(timeRangeWithZoomProvider.getFromTime());
                 final TimePoint to = new MillisecondsTimePoint(newTime);
                 result = Optional.of(new TimeRangeImpl(from, to, true));
-            } else if (latestRequest != null && newTime.getTime() > latestRequest) {
-                final TimePoint from = new MillisecondsTimePoint(latestRequest);
+            } else if (latestRequestMillis != null && newTime.getTime() > latestRequestMillis) {
+                final TimePoint from = new MillisecondsTimePoint(latestRequestMillis);
                 final TimePoint to = new MillisecondsTimePoint(timeRangeWithZoomProvider.getToTime());
                 result = Optional.of(new TimeRangeImpl(from, to, true));
             } else {
