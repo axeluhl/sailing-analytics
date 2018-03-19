@@ -565,9 +565,13 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             final Optional<TimeRange> result;
             if (isReplaying() && latestRequestMillis == null) {
                 result = Optional.of(getFullTimeRange());
-            } else if (earliestRequestMillis == null || newTime.getTime() < earliestRequestMillis) {
+            } else if (earliestRequestMillis == null) {
                 final TimePoint from = new MillisecondsTimePoint(timeRangeWithZoomProvider.getFromTime());
                 final TimePoint to = new MillisecondsTimePoint(newTime);
+                result = Optional.of(new TimeRangeImpl(from, to, true));
+            } else if (newTime.getTime() < earliestRequestMillis) {
+                final TimePoint from = new MillisecondsTimePoint(timeRangeWithZoomProvider.getFromTime());
+                final TimePoint to = new MillisecondsTimePoint(earliestRequestMillis);
                 result = Optional.of(new TimeRangeImpl(from, to, true));
             } else if (latestRequestMillis != null && newTime.getTime() > latestRequestMillis) {
                 final TimePoint from = new MillisecondsTimePoint(latestRequestMillis);
