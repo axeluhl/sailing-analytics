@@ -822,7 +822,7 @@ public class DomainFactoryImpl implements DomainFactory {
         final boolean canBoatsOfCompetitorsChangePerRace = regatta.canBoatsOfCompetitorsChangePerRace();
         String boatsCanChangelogMessage = "";
         if (leaderboardGroup != null) {
-            for (Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
+            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 if (leaderboard instanceof RegattaLeaderboard) {
                     RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
                     boolean regattaHasTrackedRaces = Util.size(regattaLeaderboard.getTrackedRaces()) > 0;
@@ -834,7 +834,6 @@ public class DomainFactoryImpl implements DomainFactory {
                         result = false;
                         break;
                     }
-                     
                 }
             }
         }
