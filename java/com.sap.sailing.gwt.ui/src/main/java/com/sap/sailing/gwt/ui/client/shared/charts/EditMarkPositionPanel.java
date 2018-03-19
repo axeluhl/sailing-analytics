@@ -515,7 +515,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         Point[] points = markSeries.getPoints();
         if (points.length > index) {
             setRedPoint(points, index);
-            setSeriesPoints(markSeries, points);
+            setSeriesPoints(markSeries, points, /* manageZoom */ true);
         }
     }
     
@@ -524,7 +524,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
             Point[] points = getSeriesPoints(marks.get(selectedMark).keySet());
             if (points.length > index) {
                 setRedPoint(points, index);
-                setSeriesPoints(markSeries, points);
+                setSeriesPoints(markSeries, points, /* manageZoom */ true);
                 chart.redraw();
             }
         }
@@ -534,7 +534,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         Point[] points = markSeries.getPoints();
         if (points.length > index) {
             points[index].setMarker(new Marker().setFillColor(selectedMark.color==null?null:selectedMark.color.getAsHtml()));
-            setSeriesPoints(markSeries, points);
+            setSeriesPoints(markSeries, points, /* manageZoom */ true);
         }
     }
         
@@ -701,11 +701,11 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     }
     
     private void setSeriesPoints(MarkDTO mark) {
-        setSeriesPoints(markSeries, getSeriesPoints(marks.get(mark).keySet()));
+        setSeriesPoints(markSeries, getSeriesPoints(marks.get(mark).keySet()), /* manageZoom */ true);
     }
     
     public void setSeriesPoints(Point[] points) {
-        setSeriesPoints(markSeries, points);
+        setSeriesPoints(markSeries, points, /* manageZoom */ true);
     }
 
     public void setVisible(boolean visible) {
