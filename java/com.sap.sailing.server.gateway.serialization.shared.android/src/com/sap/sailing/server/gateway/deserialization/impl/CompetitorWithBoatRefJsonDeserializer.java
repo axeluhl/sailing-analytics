@@ -49,11 +49,11 @@ public class CompetitorWithBoatRefJsonDeserializer implements JsonDeserializer<C
         Serializable competitorId = (Serializable) object.get(CompetitorJsonSerializer.FIELD_ID);
         try {
             {
-                Class<?> idClass = Class.forName((String) object.get(CompetitorJsonConstants.FIELD_ID_TYPE));
-                if (Number.class.isAssignableFrom(idClass)) {
-                    Constructor<?> constructorFromString = idClass.getConstructor(String.class);
+                Class<?> competitorIdClass = Class.forName((String) object.get(CompetitorJsonConstants.FIELD_ID_TYPE));
+                if (Number.class.isAssignableFrom(competitorIdClass)) {
+                    Constructor<?> constructorFromString = competitorIdClass.getConstructor(String.class);
                     competitorId = (Serializable) constructorFromString.newInstance(competitorId.toString());
-                } else if (UUID.class.isAssignableFrom(idClass)) {
+                } else if (UUID.class.isAssignableFrom(competitorIdClass)) {
                     competitorId = Helpers.tryUuidConversion(competitorId);
                 }
             }
