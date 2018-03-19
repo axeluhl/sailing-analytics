@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.net.URI;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 
@@ -23,6 +24,13 @@ public class CompetitorWithBoatImpl extends CompetitorImpl implements DynamicCom
         this(competitor.getId(), competitor.getName(), competitor.getShortName(), competitor.getColor(), competitor.getEmail(), 
                 competitor.getFlagImage(), (DynamicTeam) competitor.getTeam(), competitor.getTimeOnTimeFactor(),
                 competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(), boat);
+    }
+
+    public Competitor resolve(SharedDomainFactory domainFactory) {
+        Competitor result = domainFactory
+                .getOrCreateCompetitorWithBoat(getId(), getName(), getShortName(), getColor(), getEmail(), getFlagImage(), getTeam(),
+                        getTimeOnTimeFactor(), getTimeOnDistanceAllowancePerNauticalMile(), getSearchTag(), getBoat());
+        return result;
     }
 
     @Override
