@@ -318,9 +318,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         };
     }
 
-    /**
-     * Recreate the view, this is meant to save us a remote call if only competitor is changed
-     */
     private void rerender() {
         if (isVisible()) {
             if (Util.isEmpty(competitorSelectionModel.getSelectedCompetitors())) {
@@ -332,13 +329,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             } else {
                 this.contentPanel.setWidget(maneuverCellTable);
                 this.showCompetitorColumn(Util.size(competitorSelectionModel.getSelectedCompetitors()) != 1);
-                this.maneuverCellTable.setList(convertToTableFormat());
-                for (int i = 0; i < maneuverCellTable.getColumnCount(); i++) {
-                    final Column<ManeuverTableData, ?> column = maneuverCellTable.getColumn(i);
-                    if (column instanceof AbstractSortableColumnWithMinMax) {
-                        ((AbstractSortableColumnWithMinMax<ManeuverTableData, ?>) column).updateMinMax();
-                    }
-                }
+                this.updateManeuverTableData();
+                this.updateManeuverTableColumnsWithMinMax();
                 this.maneuverCellTable.restoreColumnSortInfos(timeColumn);
                 this.maneuverCellTable.redraw();
             }
@@ -353,16 +345,25 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         }
     }
 
-    private ArrayList<ManeuverTableData> convertToTableFormat() {
+    private void updateManeuverTableData() {
         final ArrayList<ManeuverTableData> data = new ArrayList<>();
-        for (Entry<CompetitorDTO, CompetitorManeuverData> res : competitorManeuverDataCache.entrySet()) {
-            for (ManeuverDTO maneuver : res.getValue().maneuvers) {
+        for (final Entry<CompetitorDTO, CompetitorManeuverData> entry : competitorManeuverDataCache.getCachedData()) {
+            for (ManeuverDTO maneuver : entry.getValue().getManeuvers()) {
                 if (settings.getSelectedManeuverTypes().contains(maneuver.type)) {
-                    data.add(new ManeuverTableData(res.getKey(), maneuver));
+                    data.add(new ManeuverTableData(entry.getKey(), maneuver));
                 }
             }
         }
-        return data;
+        this.maneuverCellTable.setList(data);
+    }
+
+    private void updateManeuverTableColumnsWithMinMax() {
+        for (int i = 0; i < maneuverCellTable.getColumnCount(); i++) {
+            final Column<ManeuverTableData, ?> column = maneuverCellTable.getColumn(i);
+            if (column instanceof AbstractSortableColumnWithMinMax) {
+                ((AbstractSortableColumnWithMinMax<ManeuverTableData, ?>) column).updateMinMax();
+            }
+        }
     }
 
     @Override
@@ -383,6 +384,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     @Override
     public void removedFromSelection(CompetitorDTO competitor) {
         this.competitorManeuverDataCache.reset(competitor);
+        this.rerender();
     }
 
     @Override
@@ -486,18 +488,12 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             return this.cache.isEmpty();
         }
 
-        private Set<Entry<CompetitorDTO, CompetitorManeuverData>> entrySet() {
-            return this.cache.entrySet();
-        }
-
         private CompetitorManeuverData getData(final CompetitorDTO competitor) {
             return this.cache.computeIfAbsent(competitor, c -> new CompetitorManeuverData());
         }
 
         private void loadData(final Iterable<CompetitorDTO> competitors,
                 final Function<CompetitorDTO, Optional<TimeRange>> timeRangeProvider) {
-            // final Map<CompetitorDTO, TimeRange> competitorToTimeRangeMap = new HashMap<>();
-            // competitors.forEach(c -> competitorToTimeRangeMap.put(c, timeRangeProvider.apply(c)));
             final Map<CompetitorDTO, Date> compToFromDateMap = new HashMap<>(), compToToDateMap = new HashMap<>();
             for (CompetitorDTO competitor : competitors) {
                 timeRangeProvider.apply(competitor).ifPresent(timeRange -> {
@@ -507,13 +503,14 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             }
             sailingService.getManeuvers(raceIdentifier, compToFromDateMap, compToToDateMap,
                     new AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>>() {
+
                         @Override
                         public void onSuccess(Map<CompetitorDTO, List<ManeuverDTO>> result) {
                             for (final Entry<CompetitorDTO, List<ManeuverDTO>> entry : result.entrySet()) {
                                 final CompetitorManeuverData data = getData(entry.getKey());
-                                data.earliestRequestMillis = compToFromDateMap.get(entry.getKey()).getTime();
-                                data.latestRequestMillis = compToToDateMap.get(entry.getKey()).getTime();
-                                data.maneuvers.addAll(entry.getValue());
+                                final Date earliest = compToFromDateMap.get(entry.getKey());
+                                final Date latest = compToToDateMap.get(entry.getKey());
+                                data.update(earliest, latest, entry.getValue());
                             }
                             ManeuverTablePanel.this.rerender();
                         }
@@ -524,6 +521,10 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                             ManeuverTablePanel.this.rerender();
                         }
                     });
+        }
+
+        private Set<Entry<CompetitorDTO, CompetitorManeuverData>> getCachedData() {
+            return this.cache.entrySet();
         }
 
     }
@@ -549,6 +550,16 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
          * they will not necessarily be represented in the order of ascending {@link ManeuverDTO#timePoint time points}.
          */
         private List<ManeuverDTO> maneuvers = new ArrayList<>();
+
+        private void update(final Date earliest, final Date latest, final List<ManeuverDTO> maneuvers) {
+            this.earliestRequestMillis = earliest.getTime();
+            this.latestRequestMillis = latest.getTime();
+            this.maneuvers.addAll(maneuvers);
+        }
+
+        private Iterable<ManeuverDTO> getManeuvers() {
+            return this.maneuvers;
+        }
 
         private Optional<TimeRange> requiresUpdate(final Date newTime) {
             final Optional<TimeRange> result;
