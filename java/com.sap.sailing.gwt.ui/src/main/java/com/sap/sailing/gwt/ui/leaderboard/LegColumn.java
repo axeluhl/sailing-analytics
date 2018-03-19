@@ -301,6 +301,18 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_DISTANCE_BELOW_LINE, new DoubleDetailTypeExtractor(LegEntryDTO::getExpeditionDistanceBelowLine), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION, 
                 new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION, new DoubleDetailTypeExtractor(LegEntryDTO::getExpeditionLineSquareForWindDirection), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_BARO, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_BARO, new DoubleDetailTypeExtractor(LegEntryDTO::getExpeditionBaro), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_LOAD_S, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_LOAD_S, new DoubleDetailTypeExtractor(LegEntryDTO::getExpeditionLoadS), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_LOAD_P, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_LOAD_P, new DoubleDetailTypeExtractor(LegEntryDTO::getExpeditionLoadP), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_JIB_CAR_PORT, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_JIB_CAR_PORT, new DoubleDetailTypeExtractor(LegEntryDTO::getExpeditionJibCarPort), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_JIB_CAR_STBD, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_JIB_CAR_STBD, new DoubleDetailTypeExtractor(LegEntryDTO::getExpeditionJibCarStbd), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.EXPEDITION_LEG_MAST_BUTT, 
+                new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_MAST_BUTT, new DoubleDetailTypeExtractor(LegEntryDTO::getExpeditionMastButt), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         return result;
     }
     

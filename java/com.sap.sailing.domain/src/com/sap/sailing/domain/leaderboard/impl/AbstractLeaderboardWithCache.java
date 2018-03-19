@@ -625,6 +625,13 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         entryDTO.setExpeditionTimeToBurnToLine(fix.getExpeditionTmToBurn());
                         entryDTO.setExpeditionDistanceBelowLine(fix.getExpeditionBelowLn());
                         entryDTO.setExpeditionCourseDetail(fix.getExpeditionCourse());
+                        entryDTO.setExpeditionBaro(fix.getExpeditionBARO());
+                        entryDTO.setExpeditionLoadP(fix.getExpeditionLoadP());
+                        entryDTO.setExpeditionLoadS(fix.getExpeditionLoadS());
+                        entryDTO.setExpeditionJibCarPort(fix.getExpeditionJibCarPort());
+                        entryDTO.setExpeditionJibCarStbd(fix.getExpeditionJibCarStbd());
+                        entryDTO.setExpeditionMastButt(fix.getExpeditionMastButt());
+                        
                         entryDTO.heel = fix.getHeel();
                         entryDTO.pitch = fix.getPitch();
                     }
@@ -1048,6 +1055,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             result.setExpeditionDistanceToPinDetail(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceToPinDetail, TrackedLegOfCompetitor::getAverageExpeditionDistanceToPinDetail));
             result.setExpeditionDistanceBelowLine(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceBelowLine, TrackedLegOfCompetitor::getAverageExpeditionDistanceBelowLine));
             result.setExpeditionLineSquareForWindDirection(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionLineSquareForWindDirection, TrackedLegOfCompetitor::getAverageExpeditionLineSquareForWindDirection));
+            result.setExpeditionBaroIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionBaroIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionBaroIfAvailable));
+            result.setExpeditionLoadSIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionLoadSIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionLoadSIfAvailable));
+            result.setExpeditionLoadPIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionLoadPIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionLoadPIfAvailable));
+            result.setExpeditionJibCarPortIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionJibCarPortIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionJibCarPortIfAvailable));
+            result.setExpeditionJibCarStbdIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionJibCarStbdIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionJibCarStbdIfAvailable));
+            result.setExpeditionMastButtIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionMastButtIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionMastButtIfAvailable));
         }
         return result;
     }

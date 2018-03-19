@@ -133,6 +133,12 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
     Double getExpeditionDistanceToPinDetailIfAvailable(TimePoint at);
     Double getExpeditionDistanceBelowLineIfAvailable(TimePoint at);
     Double getExpeditionLineSquareForWindIfAvailable(TimePoint at);
+    Double getExpeditionBaroIfAvailable(TimePoint at);
+    Double getExpeditionLoadSIfAvailable(TimePoint at);
+    Double getExpeditionLoadPIfAvailable(TimePoint at);
+    Double getExpeditionJibCarPortIfAvailable(TimePoint at);
+    Double getExpeditionJibCarStbdIfAvailable(TimePoint at);
+    Double getExpeditionMastButtIfAvailable(TimePoint at);
     Double getAverageExpeditionAWAIfAvailable(TimePoint start, TimePoint endTimePoint);
     Double getAverageExpeditionAWSIfAvailable(TimePoint start, TimePoint endTimePoint);
     Double getAverageExpeditionTWAIfAvailable(TimePoint start, TimePoint endTimePoint);
@@ -167,4 +173,10 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
     Double getAverageExpeditionDistanceToPinDetailIfAvailable(TimePoint start, TimePoint endTimePoint);
     Double getAverageExpeditionDistanceBelowLineIfAvailable(TimePoint start, TimePoint endTimePoint);
     Double getAverageExpeditionLineSquareForWindIfAvailable(TimePoint start, TimePoint endTimePoint);
+    Double getAverageExpeditionBaroIfAvailable(TimePoint start, TimePoint endTimePoint);
+    Double getAverageExpeditionLoadSIfAvailable(TimePoint start, TimePoint endTimePoint);
+    Double getAverageExpeditionLoadPIfAvailable(TimePoint start, TimePoint endTimePoint);
+    Double getAverageExpeditionJibCarPortIfAvailable(TimePoint start, TimePoint endTimePoint);
+    Double getAverageExpeditionJibCarStbdIfAvailable(TimePoint start, TimePoint endTimePoint);
+    Double getAverageExpeditionMastButtIfAvailable(TimePoint start, TimePoint endTimePoint);
 }

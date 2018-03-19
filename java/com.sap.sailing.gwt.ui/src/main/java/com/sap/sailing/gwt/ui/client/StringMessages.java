@@ -2102,4 +2102,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String expeditionDistanceToPin();
     String expeditionDistanceBelowLine();
     String expeditionLineSquareForWindDirection();
+    String expeditionBaro();
+    String expeditionRaceLoadS();
+    String expeditionRaceLoadP();
+    String expeditionRaceJibCarPort();
+    String expeditionRaceJibCarStbd();
+    String expeditionRaceMastButt();
+    String milliBarUnits();
 }

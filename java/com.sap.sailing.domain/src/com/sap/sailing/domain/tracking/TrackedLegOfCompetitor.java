@@ -336,6 +336,12 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Double getExpeditionDistanceToPinDetail(TimePoint at);
     Double getExpeditionDistanceBelowLine(TimePoint at);
     Double getExpeditionLineSquareForWindDirection(TimePoint at);
+    Double getExpeditionBaroIfAvailable(TimePoint at);
+    Double getExpeditionLoadSIfAvailable(TimePoint at);
+    Double getExpeditionLoadPIfAvailable(TimePoint at);
+    Double getExpeditionJibCarPortIfAvailable(TimePoint at);
+    Double getExpeditionJibCarStbdIfAvailable(TimePoint at);
+    Double getExpeditionMastButtIfAvailable(TimePoint at);
     Double getAverageExpeditionAWA(TimePoint at);
     Double getAverageExpeditionAWS(TimePoint at);
     Double getAverageExpeditionTWA(TimePoint at);
@@ -370,5 +376,10 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Double getAverageExpeditionDistanceToPinDetail(TimePoint at);
     Double getAverageExpeditionDistanceBelowLine(TimePoint at);
     Double getAverageExpeditionLineSquareForWindDirection(TimePoint at);
-
+    Double getAverageExpeditionBaroIfAvailable(TimePoint at);
+    Double getAverageExpeditionLoadSIfAvailable(TimePoint at);
+    Double getAverageExpeditionLoadPIfAvailable(TimePoint at);
+    Double getAverageExpeditionJibCarPortIfAvailable(TimePoint at);
+    Double getAverageExpeditionJibCarStbdIfAvailable(TimePoint at);
+    Double getAverageExpeditionMastButtIfAvailable(TimePoint at);
 }

@@ -1315,6 +1315,18 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionLineSquareForWindDirection), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_BARO, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_BARO, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionBaro), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_LOAD_S, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_LOAD_S, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionLoadS), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_LOAD_P, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_LOAD_P, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionLoadP), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_JIB_CAR_PORT, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_JIB_CAR_PORT, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionJibCarPort), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_JIB_CAR_STBD, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_JIB_CAR_STBD, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionJibCarStbd), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_MAST_BUTT, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_MAST_BUTT, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionJibCarStbd), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.BRAVO_RACE_HEEL_IN_DEGREES, new FormattedDoubleDetailTypeColumn(DetailType.BRAVO_RACE_HEEL_IN_DEGREES, new BearingAsDegreeDetailTypeExtractor(e -> e.heel), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.BRAVO_RACE_PITCH_IN_DEGREES, new FormattedDoubleDetailTypeColumn(DetailType.BRAVO_RACE_PITCH_IN_DEGREES, new BearingAsDegreeDetailTypeExtractor(e -> e.pitch), LEG_COLUMN_HEADER_STYLE,

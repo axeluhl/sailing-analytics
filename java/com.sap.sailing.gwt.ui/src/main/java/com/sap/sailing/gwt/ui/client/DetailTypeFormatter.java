@@ -270,6 +270,18 @@ public class DetailTypeFormatter {
             return stringMessages.expeditionDistanceBelowLine();
         case EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION:
             return stringMessages.expeditionLineSquareForWindDirection();
+        case EXPEDITION_RACE_BARO:
+            return stringMessages.expeditionBaro();
+        case EXPEDITION_RACE_LOAD_S:
+            return stringMessages.expeditionRaceLoadS();
+        case EXPEDITION_RACE_LOAD_P:
+            return stringMessages.expeditionRaceLoadP();
+        case EXPEDITION_RACE_JIB_CAR_PORT:
+            return stringMessages.expeditionRaceJibCarPort();
+        case EXPEDITION_RACE_JIB_CAR_STBD:
+            return stringMessages.expeditionRaceJibCarStbd();
+        case EXPEDITION_RACE_MAST_BUTT:
+            return stringMessages.expeditionRaceMastButt();
         case EXPEDITION_LEG_AWA:
             return "\u2205 " + stringMessages.expeditionAwa();
         case EXPEDITION_LEG_AWS:
@@ -338,6 +350,18 @@ public class DetailTypeFormatter {
             return "\u2205 " + stringMessages.expeditionVmg();
         case EXPEDITION_LEG_VMG_TARG_VMG_DELTA:
             return "\u2205 " + stringMessages.expeditionVmgTargVmgDelta();
+        case EXPEDITION_LEG_BARO:
+            return "\u2205 " + stringMessages.expeditionBaro();
+        case EXPEDITION_LEG_LOAD_S:
+            return "\u2205 " + stringMessages.expeditionRaceLoadS();
+        case EXPEDITION_LEG_LOAD_P:
+            return "\u2205 " + stringMessages.expeditionRaceLoadP();
+        case EXPEDITION_LEG_JIB_CAR_PORT:
+            return "\u2205 " + stringMessages.expeditionRaceJibCarPort();
+        case EXPEDITION_LEG_JIB_CAR_STBD:
+            return "\u2205 " + stringMessages.expeditionRaceJibCarStbd();
+        case EXPEDITION_LEG_MAST_BUTT:
+            return "\u2205 " + stringMessages.expeditionRaceMastButt();
         case BRAVO_RACE_HEEL_IN_DEGREES:
             return stringMessages.currentHeelInDegree();
         case BRAVO_RACE_PITCH_IN_DEGREES:
@@ -459,7 +483,14 @@ public class DetailTypeFormatter {
         case RACE_CURRENT_DURATION_FOILED_IN_SECONDS:
         case OVERALL_TOTAL_DURATION_FOILED_IN_SECONDS:
             return stringMessages.hhmmssUnit();
-
+        case EXPEDITION_RACE_BARO:
+            return stringMessages.milliBarUnits();
+        case EXPEDITION_RACE_JIB_CAR_PORT:
+            return stringMessages.degreesUnit();
+        case EXPEDITION_RACE_JIB_CAR_STBD:
+            return stringMessages.degreesUnit();
+        case EXPEDITION_RACE_MAST_BUTT:
+            return stringMessages.millimetersUnit();
         // Cases for detail types without unit, so that an empty string is returned.
         case RACE_RANK:
         case REGATTA_RANK:
@@ -547,6 +578,8 @@ public class DetailTypeFormatter {
         case EXPEDITION_LEG_DISTANCE_TO_PIN:
         case EXPEDITION_LEG_DISTANCE_BELOW_LINE:
         case EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION:
+        case EXPEDITION_RACE_LOAD_S:
+        case EXPEDITION_RACE_LOAD_P:
             return "";
         default:
             break;

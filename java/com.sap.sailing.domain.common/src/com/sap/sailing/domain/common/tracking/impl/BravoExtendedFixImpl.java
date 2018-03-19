@@ -193,6 +193,36 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
     public Double getExpeditionTG_Heell() {
         return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TGHEEL.getColumnIndex());
     }
+    
+    @Override
+    public Double getExpeditionBARO() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_BARO.getColumnIndex());
+    }
+    
+    @Override
+    public Double getExpeditionLoadP() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_LOAD_P.getColumnIndex());
+    }
+    
+    @Override
+    public Double getExpeditionLoadS() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_LOAD_S.getColumnIndex());
+    }
+    
+    @Override
+    public Double getExpeditionJibCarPort() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_JIB_CAR_PORT.getColumnIndex());
+    }
+    
+    @Override
+    public Double getExpeditionJibCarStbd() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_JIB_CAR_STBD.getColumnIndex());
+    }
+    
+    @Override
+    public Double getExpeditionMastButt() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_MAST_BUTT.getColumnIndex());
+    }
 
     @Override
     public Duration getExpeditionTmToGun() {

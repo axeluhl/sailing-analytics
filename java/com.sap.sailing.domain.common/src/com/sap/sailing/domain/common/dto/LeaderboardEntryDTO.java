@@ -569,6 +569,49 @@ public class LeaderboardEntryDTO implements Serializable {
         }
     }
     
+    public void setExpeditionBaro(Double expeditionBARO) {
+        if (expeditionBARO != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionBARO = expeditionBARO;
+        }        
+    }
+
+    public void setExpeditionLoadP(Double expeditionLoadP) {
+        if (expeditionLoadP != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionLoadP = expeditionLoadP;
+        }        
+    }
+
+    public void setExpeditionLoadS(Double expeditionLoadS) {
+        if (expeditionLoadS != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionLoadS = expeditionLoadS;
+        }        
+    }
+
+    public void setExpeditionJibCarPort(Double expeditionJibCarPort) {
+        if (expeditionJibCarPort != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionJibCarPort = expeditionJibCarPort;
+        }        
+    }
+
+    public void setExpeditionJibCarStbd(Double expeditionJibCarStbd) {
+        if (expeditionJibCarStbd != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionJibCarStbd = expeditionJibCarStbd;
+        }        
+    }
+    
+
+    public void setExpeditionMastButt(Double expeditionMastButt) {
+        if (expeditionMastButt != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionMastButt = expeditionMastButt;
+        }           
+    }
+    
     public Double getExpeditionAWA() {
         return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionAWA;
     }
@@ -670,12 +713,36 @@ public class LeaderboardEntryDTO implements Serializable {
     }
     public Double getExpeditionVMGTargVMGDelta() {
         return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionVMGTargVMGDelta;
+    }   
+    public Double getExpeditionBaro() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionBARO;
+    }
+    public Double getExpeditionLoadP() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionLoadP;
+    }
+    public Double getExpeditionLoadS() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionLoadS;
+    }
+    public Double getExpeditionJibCarPort() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionJibCarPort;
+    }
+    public Double getExpeditionJibCarStbd() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionJibCarStbd;
+    }
+    public Double getExpeditionMastButt() {
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionMastButt;
     }
     
     /**
      * Used to ensure that only one null value needs to be transmitted, if no expedition data exists 
      */
     public static class ExpeditionDataHolder implements Serializable{
+        public Double expeditionMastButt;
+        public Double expeditionJibCarStbd;
+        public Double expeditionJibCarPort;
+        public Double expeditionLoadS;
+        public Double expeditionLoadP;
+        public Double expeditionBARO;
         private static final long serialVersionUID = 1L;
         public Double expeditionAWA;
         public Double expeditionAWS;
@@ -717,6 +784,7 @@ public class LeaderboardEntryDTO implements Serializable {
             int result = 1;
             result = prime * result + ((expeditionAWA == null) ? 0 : expeditionAWA.hashCode());
             result = prime * result + ((expeditionAWS == null) ? 0 : expeditionAWS.hashCode());
+            result = prime * result + ((expeditionBARO == null) ? 0 : expeditionBARO.hashCode());
             result = prime * result + ((expeditionBoatSpeed == null) ? 0 : expeditionBoatSpeed.hashCode());
             result = prime * result + ((expeditionCOG == null) ? 0 : expeditionCOG.hashCode());
             result = prime * result + ((expeditionCourseDetail == null) ? 0 : expeditionCourseDetail.hashCode());
@@ -733,8 +801,13 @@ public class LeaderboardEntryDTO implements Serializable {
             result = prime * result + ((expeditionForestayLoad == null) ? 0 : expeditionForestayLoad.hashCode());
             result = prime * result + ((expeditionHeading == null) ? 0 : expeditionHeading.hashCode());
             result = prime * result + ((expeditionHeel == null) ? 0 : expeditionHeel.hashCode());
+            result = prime * result + ((expeditionJibCarPort == null) ? 0 : expeditionJibCarPort.hashCode());
+            result = prime * result + ((expeditionJibCarStbd == null) ? 0 : expeditionJibCarStbd.hashCode());
             result = prime * result + ((expeditionLineSquareForWindDirection == null) ? 0
                     : expeditionLineSquareForWindDirection.hashCode());
+            result = prime * result + ((expeditionLoadP == null) ? 0 : expeditionLoadP.hashCode());
+            result = prime * result + ((expeditionLoadS == null) ? 0 : expeditionLoadS.hashCode());
+            result = prime * result + ((expeditionMastButt == null) ? 0 : expeditionMastButt.hashCode());
             result = prime * result + ((expeditionRake == null) ? 0 : expeditionRake.hashCode());
             result = prime * result + ((expeditionRateOfTurn == null) ? 0 : expeditionRateOfTurn.hashCode());
             result = prime * result + ((expeditionRudderAngle == null) ? 0 : expeditionRudderAngle.hashCode());
@@ -780,6 +853,11 @@ public class LeaderboardEntryDTO implements Serializable {
                 if (other.expeditionAWS != null)
                     return false;
             } else if (!expeditionAWS.equals(other.expeditionAWS))
+                return false;
+            if (expeditionBARO == null) {
+                if (other.expeditionBARO != null)
+                    return false;
+            } else if (!expeditionBARO.equals(other.expeditionBARO))
                 return false;
             if (expeditionBoatSpeed == null) {
                 if (other.expeditionBoatSpeed != null)
@@ -836,10 +914,35 @@ public class LeaderboardEntryDTO implements Serializable {
                     return false;
             } else if (!expeditionHeel.equals(other.expeditionHeel))
                 return false;
+            if (expeditionJibCarPort == null) {
+                if (other.expeditionJibCarPort != null)
+                    return false;
+            } else if (!expeditionJibCarPort.equals(other.expeditionJibCarPort))
+                return false;
+            if (expeditionJibCarStbd == null) {
+                if (other.expeditionJibCarStbd != null)
+                    return false;
+            } else if (!expeditionJibCarStbd.equals(other.expeditionJibCarStbd))
+                return false;
             if (expeditionLineSquareForWindDirection == null) {
                 if (other.expeditionLineSquareForWindDirection != null)
                     return false;
             } else if (!expeditionLineSquareForWindDirection.equals(other.expeditionLineSquareForWindDirection))
+                return false;
+            if (expeditionLoadP == null) {
+                if (other.expeditionLoadP != null)
+                    return false;
+            } else if (!expeditionLoadP.equals(other.expeditionLoadP))
+                return false;
+            if (expeditionLoadS == null) {
+                if (other.expeditionLoadS != null)
+                    return false;
+            } else if (!expeditionLoadS.equals(other.expeditionLoadS))
+                return false;
+            if (expeditionMastButt == null) {
+                if (other.expeditionMastButt != null)
+                    return false;
+            } else if (!expeditionMastButt.equals(other.expeditionMastButt))
                 return false;
             if (expeditionRake == null) {
                 if (other.expeditionRake != null)

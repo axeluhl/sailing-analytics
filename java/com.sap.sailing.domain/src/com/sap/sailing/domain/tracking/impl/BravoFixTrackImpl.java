@@ -58,6 +58,12 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     private transient TimeRangeCache<Pair<Double, Long>> expeditionForestayLoadCache;
     private transient TimeRangeCache<Pair<Double, Long>> expeditionRakeCache;
     private transient TimeRangeCache<Pair<Double, Long>> expeditionCourseDetailCache;
+    private transient TimeRangeCache<Pair<Double, Long>> expeditionBaroCache;
+    private transient TimeRangeCache<Pair<Double, Long>> expeditionLoadSCache;
+    private transient TimeRangeCache<Pair<Double, Long>> expeditionLoadPCache;
+    private transient TimeRangeCache<Pair<Double, Long>> expeditionJibCarPortCache;
+    private transient TimeRangeCache<Pair<Double, Long>> expeditionJibCarStbdCache;
+    private transient TimeRangeCache<Pair<Double, Long>> expeditionMastButtCache;
     
     /**
      * If a GPS track was provided at construction time, remember it non-transiently. It is needed when restoring
@@ -124,6 +130,12 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         this.expeditionForestayLoadCache= createTimeRangeCache(trackedItem, "expeditionForestayLoadCache");
         this.expeditionRakeCache= createTimeRangeCache(trackedItem, "expeditionRakeCache");
         this.expeditionCourseDetailCache= createTimeRangeCache(trackedItem, "expeditionCourseDetailCache");
+        this.expeditionBaroCache= createTimeRangeCache(trackedItem, "expeditionBaroCache");
+        this.expeditionLoadSCache= createTimeRangeCache(trackedItem, "expeditionLoadSCache");
+        this.expeditionLoadPCache= createTimeRangeCache(trackedItem, "expeditionLoadPCache");
+        this.expeditionJibCarPortCache= createTimeRangeCache(trackedItem, "expeditionJibCarPortCache");
+        this.expeditionJibCarStbdCache= createTimeRangeCache(trackedItem, "expeditionJibCarStbdCache");
+        this.expeditionMastButtCache= createTimeRangeCache(trackedItem, "expeditionMastButtCache");
     }
 
     public GPSFixTrack<ItemType, GPSFixMoving> getGpsTrack() {
@@ -191,7 +203,9 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
             invalidateAllAtOrLaterThanForCaches(fixTimePoint, averageRideHeightCache, foilingDistanceCache,
                     foilingTimeCache, expeditionAWACache, expeditionAWSCache, expeditionTWACache, expeditionTWSCache,
                     expeditionTWDCache, expeditionBoatSpeedCache, expeditionTargBoatSpeedCache, expeditionSOGCache,
-                    expeditionCOGCache, expeditionForestayLoadCache, expeditionRakeCache, expeditionCourseDetailCache);
+                    expeditionCOGCache, expeditionForestayLoadCache, expeditionRakeCache, expeditionCourseDetailCache,
+                    expeditionBaroCache, expeditionJibCarPortCache, expeditionJibCarStbdCache, expeditionLoadPCache,
+                    expeditionLoadSCache, expeditionMastButtCache);
         }
         return added;
     }
@@ -493,6 +507,36 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     public Double getAverageExpeditionCourseDetailIfAvailable(TimePoint start, TimePoint endTimePoint){
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionCourse, expeditionCourseDetailCache);
     }
+    
+    @Override
+    public Double getAverageExpeditionBaroIfAvailable(TimePoint start, TimePoint endTimePoint){
+        return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionBARO, expeditionBaroCache);
+    }
+    
+    @Override
+    public Double getAverageExpeditionLoadSIfAvailable(TimePoint start, TimePoint endTimePoint){
+        return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionLoadS, expeditionLoadSCache);
+    }
+    
+    @Override
+    public Double getAverageExpeditionLoadPIfAvailable(TimePoint start, TimePoint endTimePoint){
+        return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionLoadP, expeditionLoadPCache);
+    }
+    
+    @Override
+    public Double getAverageExpeditionJibCarPortIfAvailable(TimePoint start, TimePoint endTimePoint){
+        return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionJibCarPort, expeditionJibCarPortCache);
+    }
+    
+    @Override
+    public Double getAverageExpeditionJibCarStbdIfAvailable(TimePoint start, TimePoint endTimePoint){
+        return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionJibCarStbd, expeditionJibCarStbdCache);
+    }
+    
+    @Override
+    public Double getAverageExpeditionMastButtIfAvailable(TimePoint start, TimePoint endTimePoint){
+        return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionMastButt, expeditionMastButtCache);
+    }
 
     @Override
     public Double getAverageExpeditionHeadingIfAvailable(TimePoint start, TimePoint endTimePoint){
@@ -690,6 +734,36 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     @Override
     public Double getExpeditionCourseDetailIfAvailable(TimePoint at){
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionCourse);
+    }
+    
+    @Override
+    public Double getExpeditionBaroIfAvailable(TimePoint at) {
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionBARO);
+    }
+
+    @Override
+    public Double getExpeditionLoadSIfAvailable(TimePoint at) {
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionLoadS);
+    }
+
+    @Override
+    public Double getExpeditionLoadPIfAvailable(TimePoint at) {
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionLoadP);
+    }
+
+    @Override
+    public Double getExpeditionJibCarPortIfAvailable(TimePoint at) {
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionJibCarPort);
+    }
+
+    @Override
+    public Double getExpeditionJibCarStbdIfAvailable(TimePoint at) {
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionJibCarStbd);
+    }
+
+    @Override
+    public Double getExpeditionMastButtIfAvailable(TimePoint at) {
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionMastButt);
     }
     
     @Override

@@ -44,4 +44,10 @@ public interface BravoExtendedFix extends BravoFix {
     Duration getExpeditionTmToBurn();
     Double getExpeditionBelowLn();
     Double getExpeditionCourse();
+    Double getExpeditionJibCarStbd();
+    Double getExpeditionJibCarPort();
+    Double getExpeditionLoadS();
+    Double getExpeditionLoadP();
+    Double getExpeditionBARO();
+    Double getExpeditionMastButt();
 }
