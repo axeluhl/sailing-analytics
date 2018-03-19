@@ -469,54 +469,59 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 // we create a PENALTY_CIRCLE maneuver and recurse for the time interval after the first penalty circle
                 // has
                 // completed.
-                TimePoint firstPenaltyCircleCompletedAt = getTimePointOfCompletionOfFirstPenaltyCircle(
-                        maneuverMainCurveDetails.getTimePointBefore(), courseBeforeManeuver,
-                        maneuverMainCurveDetails.getSpeedWithBearingSteps(), wind);
-                if (firstPenaltyCircleCompletedAt == null) {
-                    // This should really not happen!
-                    logger.warning(
-                            "Maneuver detection has failed to process penalty circle maneuver correctly, because getTimePointOfCompletionOfFirstPenaltyCircle() returned null. Race-Id: "
-                                    + trackedRace.getRace().getId() + ", Competitor: " + competitor.getName()
-                                    + ", Time point before maneuver: " + maneuverDetails.getTimePointBefore());
-                    // Use already detected maneuver details as fallback data to prevent Nullpointer
-                    firstPenaltyCircleCompletedAt = maneuverDetails.getTimePointAfter();
+                List<Maneuver> additionalManeuversAfterFirstPenaltyCircle = null;
+                if (numberOfTacks > 1 || numberOfJibes > 1) {
+                    TimePoint firstPenaltyCircleCompletedAt = getTimePointOfCompletionOfFirstPenaltyCircle(
+                            maneuverMainCurveDetails.getTimePointBefore(), courseBeforeManeuver,
+                            maneuverMainCurveDetails.getSpeedWithBearingSteps(), wind);
+                    final ManeuverCurveDetailsWithBearingSteps refinedPenaltyMainCurveDetails;
+                    final ManeuverCurveDetails refinedPenaltyDetails;
+                    if (firstPenaltyCircleCompletedAt == null) {
+                        // This should really not happen!
+                        logger.warning(
+                                "Maneuver detection has failed to process penalty circle maneuver correctly, because getTimePointOfCompletionOfFirstPenaltyCircle() returned null. Race-Id: "
+                                        + trackedRace.getRace().getId() + ", Competitor: " + competitor.getName()
+                                        + ", Time point before maneuver: " + maneuverDetails.getTimePointBefore());
+                        // Use already detected maneuver details as fallback data to prevent Nullpointer
+                    } else {
+                        refinedPenaltyMainCurveDetails = computeManeuverMainCurveDetails(
+                                maneuverMainCurveDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt,
+                                maneuverDirection);
+                        if (refinedPenaltyMainCurveDetails == null) {
+                            // This should really not happen!
+                            logger.warning(
+                                    "Maneuver detection has failed to process penalty circle maneuver correctly, because refinedPenaltyMainCurveDetails computation returned null. Race-Id: "
+                                            + trackedRace.getRace().getId() + ", Competitor: " + competitor.getName()
+                                            + ", Time point before maneuver: " + maneuverDetails.getTimePointBefore());
+                            // Use already detected maneuver main curve as fallback data to prevent Nullpointer
+                        } else {
+                            refinedPenaltyDetails = computeManeuverDetails(refinedPenaltyMainCurveDetails,
+                                    maneuverDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt);
+                            // after we've "consumed" one tack and one jibe, recursively find more maneuvers if tacks
+                            // and/or jibes
+                            // remain
+                            List<ManeuverSpot> maneuverSpots = detectManeuvers(firstPenaltyCircleCompletedAt,
+                                    maneuverDetails.getTimePointAfter());
+                            additionalManeuversAfterFirstPenaltyCircle = getAllManeuversFromManeuverSpots(
+                                    maneuverSpots);
+                            maneuverMainCurveDetails = refinedPenaltyMainCurveDetails;
+                            maneuverDetails = refinedPenaltyDetails;
+                        }
+                    }
                 }
                 maneuverType = ManeuverType.PENALTY_CIRCLE;
-                ManeuverCurveDetailsWithBearingSteps refinedPenaltyMainCurveDetails = computeManeuverMainCurveDetails(
-                        maneuverMainCurveDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt,
-                        maneuverDirection);
-
-                ManeuverCurveDetails refinedPenaltyDetails;
-                if (refinedPenaltyMainCurveDetails == null) {
-                    // This should really not happen!
-                    logger.warning(
-                            "Maneuver detection has failed to process penalty circle maneuver correctly, because refinedPenaltyMainCurveDetails computation returned null. Race-Id: "
-                                    + trackedRace.getRace().getId() + ", Competitor: " + competitor.getName()
-                                    + ", Time point before maneuver: " + maneuverDetails.getTimePointBefore());
-                    // Use already detected maneuver main curve as fallback data to prevent Nullpointer
-                    refinedPenaltyMainCurveDetails = maneuverMainCurveDetails;
-                    refinedPenaltyDetails = maneuverDetails;
-                    firstPenaltyCircleCompletedAt = maneuverDetails.getTimePointAfter();
-                } else {
-                    refinedPenaltyDetails = computeManeuverDetails(refinedPenaltyMainCurveDetails,
-                            maneuverDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt);
-                }
                 maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(), maneuverDetails.getTimePoint(),
-                        firstPenaltyCircleCompletedAt);
-                Position penaltyPosition = competitorTrack.getEstimatedPosition(refinedPenaltyDetails.getTimePoint(),
+                        maneuverDetails.getTimePointAfter());
+                Position penaltyPosition = competitorTrack.getEstimatedPosition(maneuverDetails.getTimePoint(),
                         /* extrapolate */ false);
                 final Maneuver maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType,
-                        tackAfterManeuver, penaltyPosition, maneuverLoss, refinedPenaltyDetails.getTimePoint(),
-                        refinedPenaltyMainCurveDetails.extractCurveBoundariesOnly(),
-                        refinedPenaltyDetails.extractCurveBoundariesOnly(),
-                        refinedPenaltyMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(), markPassing);
+                        tackAfterManeuver, penaltyPosition, maneuverLoss, maneuverDetails.getTimePoint(),
+                        maneuverMainCurveDetails.extractCurveBoundariesOnly(),
+                        maneuverDetails.extractCurveBoundariesOnly(),
+                        maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(), markPassing);
                 maneuvers.add(maneuver);
-                // after we've "consumed" one tack and one jibe, recursively find more maneuvers if tacks and/or jibes
-                // remain
-                if (numberOfTacks > 1 || numberOfJibes > 1) {
-                    List<ManeuverSpot> maneuverSpots = detectManeuvers(firstPenaltyCircleCompletedAt,
-                            maneuverDetails.getTimePointAfter());
-                    maneuvers.addAll(getAllManeuversFromManeuverSpots(maneuverSpots));
+                if (additionalManeuversAfterFirstPenaltyCircle != null) {
+                    maneuvers.addAll(additionalManeuversAfterFirstPenaltyCircle);
                 }
             }
         } else {
