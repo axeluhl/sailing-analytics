@@ -54,11 +54,9 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     
     private transient WeakHashMap<Competitor, CompetitorWithoutBoatDTO> weakCompetitorDTOCache;
 
-
     private final Set<Boat> boatsToUpdateDuringGetOrCreate;
     
     private transient WeakHashMap<Boat, BoatDTO> weakBoatDTOCache;
- 
     
     private final NamedReentrantReadWriteLock lock;
 
@@ -69,7 +67,6 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         competitorsToUpdateDuringGetOrCreate = new HashSet<Competitor>();
         weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorWithoutBoatDTO>();
         competitorUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorUpdateListener>());
-
         boatCache = new HashMap<Serializable, Boat>();
         boatsByIdAsString = new HashMap<String, Boat>();
         boatsToUpdateDuringGetOrCreate = new HashSet<Boat>();

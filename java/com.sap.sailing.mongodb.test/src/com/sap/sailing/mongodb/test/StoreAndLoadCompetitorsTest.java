@@ -72,11 +72,14 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
         domainFactory = new DomainFactoryImpl((srlid)->null);
     }
     
-    private void dropCompetitorCollection() {
+    private void dropCompetitorAndBoatsCollection() {
         DB db = getMongoService().getDB();
-        DBCollection competitorCollection = db.getCollection(CollectionNames.COMPETITORS_BAK.name());
+        DBCollection competitorCollection = db.getCollection(CollectionNames.COMPETITORS.name());
         competitorCollection.setWriteConcern(WriteConcern.SAFE); // ensure that the drop() has happened
         competitorCollection.drop();
+        DBCollection boatsCollection = db.getCollection(CollectionNames.BOATS.name());
+        boatsCollection.setWriteConcern(WriteConcern.SAFE); // ensure that the drop() has happened
+        boatsCollection.drop();
     }
     
     @Test
@@ -90,7 +93,7 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
 
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
-        dropCompetitorCollection();
+        dropCompetitorAndBoatsCollection();
         
         DynamicCompetitor c = (DynamicCompetitor) createCompetitor(competitorName1);
         c.setShortName(competitorShortName1);
@@ -121,7 +124,7 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
     public void testStoreAndUpdateCompetitorWithUUIDAsId() {
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
-        dropCompetitorCollection();
+        dropCompetitorAndBoatsCollection();
 
         DynamicCompetitor c = (DynamicCompetitor) createCompetitor("Hasso", UUID.randomUUID());
         mongoObjectFactory.storeCompetitor(c);
@@ -135,7 +138,7 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
     public void testStoreAndRemoveCompetitor() {
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
-        dropCompetitorCollection();
+        dropCompetitorAndBoatsCollection();
         
         DynamicCompetitor c = (DynamicCompetitor) createCompetitor("Hasso");
         mongoObjectFactory.storeCompetitor(c);
@@ -149,7 +152,7 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
     public void testStoreAndRemoveCompetitorWithUUIDAsId() {
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
-        dropCompetitorCollection();
+        dropCompetitorAndBoatsCollection();
         
         DynamicCompetitor c = (DynamicCompetitor) createCompetitor("Hasso", UUID.randomUUID());
         mongoObjectFactory.storeCompetitor(c);
