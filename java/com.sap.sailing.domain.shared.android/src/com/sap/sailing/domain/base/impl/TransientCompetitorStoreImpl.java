@@ -601,9 +601,9 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     public Iterable<Boat> getStandaloneBoats() {
         LockUtil.lockForRead(lock);
         try {
-            List<Boat> boats = new ArrayList<>(boatCache.values());
+            Set<Boat> boats = new HashSet<>(boatCache.values());
             Set<Boat> boatsEmbeddedInCompetitors = new HashSet<>();
-            for (Competitor competitor: competitorCache.values()) {
+            for (Competitor competitor : competitorCache.values()) {
                 if (isValidCompetitorWithBoat(competitor)) {
                     boatsEmbeddedInCompetitors.add(((CompetitorWithBoat) competitor).getBoat()); 
                 }
@@ -613,7 +613,6 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         } finally {
             LockUtil.unlockAfterRead(lock);
         }
-
     }
 
     protected void removeBoat(Boat boat) {
