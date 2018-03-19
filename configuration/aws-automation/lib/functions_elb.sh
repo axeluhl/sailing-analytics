@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 # -----------------------------------------------------------
+# Functions that are relevant for the configuration of load balancers.
+# -----------------------------------------------------------
+
+# -----------------------------------------------------------
 # Create target group for load balancer
 # @param $1  target group name
 # @return    json result
