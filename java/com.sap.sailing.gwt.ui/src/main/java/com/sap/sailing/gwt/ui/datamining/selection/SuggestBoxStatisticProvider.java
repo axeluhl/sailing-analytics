@@ -36,7 +36,6 @@ import com.sap.sailing.gwt.ui.datamining.ExtractionFunctionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -79,7 +78,7 @@ public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSett
     private final List<Component<?>> retrieverLevelSettingsComponents;
     
     private final FlowPanel mainPanel;
-    private final List<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>> availableExtractionFunctions;
+    private final List<ExtractionFunctionWithContext> availableExtractionFunctions;
     private final ExtractionFunctionSuggestBox extractionFunctionSuggestBox;
     private final ValueListBox<AggregationProcessorDefinitionDTO> aggregatorListBox;
 
@@ -202,20 +201,29 @@ public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSett
         );
     }
     
-    private void collectStatistics(DataRetrieverChainDefinitionDTO retrieverChain, Iterable<FunctionDTO> statistics) {
-        for (FunctionDTO statistic : statistics) {
-            availableExtractionFunctions.add(new Pair<>(retrieverChain, statistic));
+    private void collectStatistics(DataRetrieverChainDefinitionDTO retrieverChain, Iterable<FunctionDTO> extractionFunctions) {
+        for (FunctionDTO extractionFunction : extractionFunctions) {
+            availableExtractionFunctions.add(new ExtractionFunctionWithContext(retrieverChain, extractionFunction));
         }
         
         awaitingRetrieverChainStatistics--;
         if (awaitingRetrieverChainStatistics == 0) {
-            Collections.sort(availableExtractionFunctions, (p1, p2) -> p1.getB().getDisplayName().compareTo(p2.getB().getDisplayName()));
+            Collections.sort(availableExtractionFunctions);
+            Map<String, ExtractionFunctionWithContext> displayDuplicates = new HashMap<>();
+            for (ExtractionFunctionWithContext statistic : availableExtractionFunctions) {
+                ExtractionFunctionWithContext duplicate = displayDuplicates.get(statistic.getExtractionFunction().getDisplayName());
+                if (duplicate == null) {
+                    displayDuplicates.put(statistic.getExtractionFunction().getDisplayName(), statistic);
+                } else {
+                    statistic.setVerbose(true);
+                    duplicate.setVerbose(true);
+                }
+            }
             extractionFunctionSuggestBox.setSelectableValues(availableExtractionFunctions);
             
-            Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> currentValue = extractionFunctionSuggestBox.getExtractionFunction();
-            Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> valueToBeSelected =
-                    availableExtractionFunctions.contains(currentValue) ? currentValue: Util.first(availableExtractionFunctions);
-            extractionFunctionSuggestBox.getValueBox().setValue(valueToBeSelected.getB().getDisplayName(), false);
+            ExtractionFunctionWithContext currentValue = extractionFunctionSuggestBox.getExtractionFunction();
+            ExtractionFunctionWithContext valueToBeSelected = availableExtractionFunctions.contains(currentValue) ? currentValue: Util.first(availableExtractionFunctions);
+            extractionFunctionSuggestBox.getValueBox().setValue(valueToBeSelected.getDisplayString(), false);
             extractionFunctionSuggestBox.setExtractionFunction(valueToBeSelected);
         }
     }
@@ -341,8 +349,24 @@ public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSett
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
         DataRetrieverChainDefinitionDTO retrieverChain = queryDefinition.getDataRetrieverChainDefinition();
         FunctionDTO extractionFunction = queryDefinition.getStatisticToCalculate();
-        extractionFunctionSuggestBox.getValueBox().setValue(extractionFunction.getDisplayName(), false);
-        extractionFunctionSuggestBox.setExtractionFunction(new Pair<>(retrieverChain, extractionFunction));
+        ExtractionFunctionWithContext statistic = new ExtractionFunctionWithContext(retrieverChain, extractionFunction);
+        int index = availableExtractionFunctions.indexOf(statistic);
+        if (index != -1) {
+            statistic = availableExtractionFunctions.get(index);
+        } else {
+            String displayName = extractionFunction.getDisplayName();
+            for (ExtractionFunctionWithContext availableStatistic : availableExtractionFunctions) {
+                if (availableStatistic.getExtractionFunction().getDisplayName().equals(displayName)) {
+                    statistic.setVerbose(true);
+                    availableStatistic.setVerbose(true);
+                }
+            }
+            availableExtractionFunctions.add(statistic);
+            extractionFunctionSuggestBox.setSelectableValues(availableExtractionFunctions);
+        }
+        
+        extractionFunctionSuggestBox.getValueBox().setValue(statistic.getDisplayString(), false);
+        extractionFunctionSuggestBox.setExtractionFunction(statistic);
         aggregatorListBox.setValue(queryDefinition.getAggregatorDefinition());
     }
     
@@ -391,14 +415,14 @@ public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSett
 
     @Override
     public DataRetrieverChainDefinitionDTO getDataRetrieverChainDefinition() {
-        Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> extractionFunction = extractionFunctionSuggestBox.getExtractionFunction();
-        return extractionFunction == null ? null : extractionFunction.getA();
+        ExtractionFunctionWithContext extractionFunction = extractionFunctionSuggestBox.getExtractionFunction();
+        return extractionFunction == null ? null : extractionFunction.getRetrieverChain();
     }
     
     @Override
     public FunctionDTO getExtractionFunction() {
-        Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> extractionFunction = extractionFunctionSuggestBox.getExtractionFunction();
-        return extractionFunction == null ? null : extractionFunction.getB();
+        ExtractionFunctionWithContext extractionFunction = extractionFunctionSuggestBox.getExtractionFunction();
+        return extractionFunction == null ? null : extractionFunction.getExtractionFunction();
     }
     
     @Override
@@ -436,48 +460,131 @@ public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSett
         return "GlobalStatisticProvider";
     }
     
-    private static abstract class ExtractionFunctionSuggestBox extends CustomSuggestBox<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>> {
+    private class ExtractionFunctionWithContext implements Comparable<ExtractionFunctionWithContext> {
         
-        private final AbstractListSuggestOracle<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>> suggestOracle;
-        private Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> extractionFunction;
+        private final DataRetrieverChainDefinitionDTO retrieverChain;
+        private final FunctionDTO extractionFunction;
+        private final Collection<String> matchingStrings;
+        private boolean verbose;
+        
+        public ExtractionFunctionWithContext(DataRetrieverChainDefinitionDTO retrieverChain, FunctionDTO extractionFunction) {
+            this.retrieverChain = retrieverChain;
+            this.extractionFunction = extractionFunction;
+            matchingStrings = new ArrayList<>(2);
+            matchingStrings.add(retrieverChain.getName());
+            matchingStrings.add(extractionFunction.getDisplayName());
+        }
+
+        public DataRetrieverChainDefinitionDTO getRetrieverChain() {
+            return retrieverChain;
+        }
+
+        public FunctionDTO getExtractionFunction() {
+            return extractionFunction;
+        }
+        
+        public Iterable<String> getMatchingStrings() {
+            return matchingStrings;
+        }
+
+        public boolean isVerbose() {
+            return verbose;
+        }
+
+        public void setVerbose(boolean verbose) {
+            this.verbose = verbose;
+        }
+        
+        public String getDisplayString() {
+            StringBuilder builder = new StringBuilder(extractionFunction.getDisplayName());
+            if (isVerbose()) {
+                builder.append(" (").append(stringMessages.basedOn()).append(" ")
+                       .append(retrieverChain.getName()).append(")");
+            }
+            return builder.toString();
+        }
+        
+        @Override
+        public int compareTo(ExtractionFunctionWithContext o) {
+            int comparedDisplayName = extractionFunction.getDisplayName().compareTo(o.getExtractionFunction().getDisplayName());
+            if (comparedDisplayName != 0) return comparedDisplayName;
+            
+            return retrieverChain.compareTo(o.getRetrieverChain());
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((extractionFunction == null) ? 0 : extractionFunction.hashCode());
+            result = prime * result + ((retrieverChain == null) ? 0 : retrieverChain.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            ExtractionFunctionWithContext other = (ExtractionFunctionWithContext) obj;
+            if (extractionFunction == null) {
+                if (other.extractionFunction != null)
+                    return false;
+            } else if (!extractionFunction.equals(other.extractionFunction))
+                return false;
+            if (retrieverChain == null) {
+                if (other.retrieverChain != null)
+                    return false;
+            } else if (!retrieverChain.equals(other.retrieverChain))
+                return false;
+            return true;
+        }
+        
+    }
+    
+    private abstract class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFunctionWithContext> {
+        
+        private final AbstractListSuggestOracle<ExtractionFunctionWithContext> suggestOracle;
+        private ExtractionFunctionWithContext extractionFunction;
         
         @SuppressWarnings("unchecked")
         public ExtractionFunctionSuggestBox() {
-            super(new AbstractListSuggestOracle<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>>() {
+            super(new AbstractListSuggestOracle<ExtractionFunctionWithContext>() {
 
                 @Override
-                protected Iterable<String> getMatchingStrings(
-                        Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> value) {
-                    return Collections.singleton(value.getB().getDisplayName());
+                protected Iterable<String> getMatchingStrings(ExtractionFunctionWithContext value) {
+                    return value.getMatchingStrings();
                 }
 
                 @Override
-                protected String createSuggestionKeyString(Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> value) {
-                    return value.getB().getDisplayName();
+                protected String createSuggestionKeyString(ExtractionFunctionWithContext value) {
+                    return value.getDisplayString();
                 }
 
                 @Override
-                protected String createSuggestionAdditionalDisplayString(
-                        Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> value) {
+                protected String createSuggestionAdditionalDisplayString(ExtractionFunctionWithContext value) {
                     return null;
                 }
             }, new ScrollableSuggestionDisplay());
-            suggestOracle = (AbstractListSuggestOracle<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>>) getSuggestOracle();
+            suggestOracle = (AbstractListSuggestOracle<ExtractionFunctionWithContext>) getSuggestOracle();
             addSuggestionSelectionHandler(this::setExtractionFunction);
         }
         
-        public void setSelectableValues(Collection<Pair<DataRetrieverChainDefinitionDTO, FunctionDTO>> selectableValues) {
+        public void setSelectableValues(Collection<ExtractionFunctionWithContext> selectableValues) {
             suggestOracle.setSelectableValues(selectableValues);
         }
         
-        public void setExtractionFunction(Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> extractionFunction) {
+        public void setExtractionFunction(ExtractionFunctionWithContext extractionFunction) {
             if (!Objects.equals(this.extractionFunction, extractionFunction)) {
                 this.extractionFunction = extractionFunction;
                 onValueChange();
             }
         }
         
-        public Pair<DataRetrieverChainDefinitionDTO, FunctionDTO> getExtractionFunction() {
+        public ExtractionFunctionWithContext getExtractionFunction() {
             return extractionFunction;
         }
         
