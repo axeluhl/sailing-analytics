@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-CHOOSE_FROM_INSTANCES=":instance"
-CHOOSE_FROM_SECURITY_GROUPS=":security-group"
-CHOOSE_FROM_IMAGES=":image"
-CHOOSE_FROM_CERTIFICATES=":certificate"
-CHOOSE_FROM_LOAD_BALANCERS=":loadbalancer"
+# -----------------------------------------------------------
+# Functions that are relevant for the treatment of user input and user configuration.
+# -----------------------------------------------------------
 
 # -----------------------------------------------------------
 # Prompt user for input and save value to variable
@@ -12,53 +10,37 @@ CHOOSE_FROM_LOAD_BALANCERS=":loadbalancer"
 # @param $2  default value
 # @param $3  variable that is receiving the value
 # @param $4  hide text
-# @param $5  filter
 # -----------------------------------------------------------
 function require_input(){
-
-  if [ ! -z "$5" ]; then
-		declare -a option_keys=()
-		declare -a option_values=()
-		number_of_tagged_resources=0
-		default_tagged_resource=""
-		o=0
-		for key in "${!RESOURCE_MAP[@]}"; do
-			if [[ $key = *"$5"* ]]; then
-				# if resource is tagged
-				option_keys[o]=$key
-				local tagged=$(echo ${RESOURCE_MAP[$key]} | cut -d, -f2)
-				local name=$(echo ${RESOURCE_MAP[$key]} | cut -d, -f1)
-				if [ $tagged == "true" ]; then
-					option_values[o]="$(tput setaf 3)$name ($key)$(tput sgr0)"
-					default_tagged_resource=$key
-					((number_of_tagged_resources++))
-				else
-					option_values[o]="$name ($key)"
-				fi
-			fi
-			((o++))
-		done
-
-		if [ $number_of_tagged_resources -eq 1 ] && [ "$force" == "true" ] || [ ${#option_keys[@]} -eq 1 ]; then
-			read -r $3 <<< $default_tagged_resource
-			return 0
-		elif [ $number_of_tagged_resources -gt 0 ]; then
+  if [ ${#RESOURCE_MAP[@]} -eq 0 ]; then
+		if [[ ( $NUMBER_OF_TAGGED_RESOURCES -eq 1 || ${#OPTION_KEYS[@]} -eq 1 ) && "$force" == "true" ]]; then
+      local_echo "$1"
+      if [ ! -z "$DEFAULT_TAGGED_RESOURCE" ]; then
+        read -r $3 <<< $DEFAULT_TAGGED_RESOURCE
+      else
+        read -r $3 <<< ${OPTION_KEYS[0]}
+      fi
+		elif [ ${#OPTION_KEYS[@]} -gt 0 ]; then
+      local_echo "$1"
 			selectedValue=""
-			select option in ${option_values[@]}; do
+			select option in ${OPTION_VALUES[@]}; do
 				selectedValue=$option
-				break
+        break
 			done
 			# workaround cant access option_keys from within select
 			read -r $3 <<< $(echo $selectedValue  | sed  's/.*(\(.*\)).*/\1/')
-			return 0
+
 		else
 			read_input_normal "$1" "$2" $3 $4
-			return 0
 		fi
 
 	else
 		read_input_normal "$1" "$2" $3 $4
 	fi
+
+	unset OPTION_KEYS
+	unset OPTION_VALUES
+  unset RESOURCE_MAP
 }
 
 function read_input_normal(){
@@ -92,7 +74,7 @@ function require_variable(){
 		# if required variable value is empty
 		if [ -z "${!2}" ]; then
 			# if force is enabled
-			if [ "$force" = true ] && [ -z "$7" ]; then
+			if [ "$force" = true ] && [ ${#RESOURCE_MAP[@]} -eq 0 ]; then
 				# if variable is optional
 				if [ "$5" == "true" ]; then
 					# variable should be empty
@@ -107,12 +89,12 @@ function require_variable(){
 			# if force not enabled or filter is set
 			# if variable value is optional, then value of "" is possible
 			if [ "$5" == "true" ]; then
-				require_input "$4" "$3" $2 $6 $7
+				require_input "$4" "$3" $2 $6
 			else
 				# if variable value is not optional, repeat until value is set for variable
 				while [[ -z "${!2}" ]]
 				do
-				  require_input "$4" "$3" $2 $6 $7
+				  require_input "$4" "$3" $2 $6
 				done
 			fi
 		fi
@@ -123,6 +105,61 @@ function require_variable(){
 	fi
 }
 
+
+function fill_resource_map_with_resources_of_type(){
+	declare -a RESOURCE_ARRAY
+
+	if [ "$1" == "ec2:launch-template" ]; then
+		RESOURCE_ARRAY=($(get_array_with_launch_templates))
+	else
+		RESOURCE_ARRAY=($(get_array_with_resource_of_type $1))
+	fi
+
+	NUMBER_OF_TAGGED_RESOURCES=0
+	DEFAULT_TAGGED_RESOURCE=""
+	local o=0
+	declare -A RESOURCE_MAP
+
+	for resource in "${RESOURCE_ARRAY[@]}"; do
+    local id=""
+
+    if [ "$1" == "ec2:launch-template" ]; then
+      id=$(echo "$resource" | jq -c ".LaunchTemplateId" -r | sanitize)
+      tmp_name=$(echo "$resource" | jq -c ".LaunchTemplateName" -r | sanitize)
+    else
+      id=$(echo $resource | jq -c ".ResourceARN" -r | sanitize)
+      tmp_name=$(echo $resource | jq -c ".Tags[] | select(.Key==\"Name\") | .Value" -r | sanitize)
+    fi
+
+		local name=${tmp_name:-"Unnamed"}
+		local tagged=$(echo $resource | jq -c ".Tags[] | select(.Key==\"AutoDiscover\") | .Value" -r | sanitize)
+		local display_name="$name ($id)"
+
+
+		OPTION_KEYS[$o]=$id
+
+		if [ ! -z "$tagged" ] && [ "$tagged" == "true" ] || [ "$tagged" == "True" ]; then
+			DEFAULT_TAGGED_RESOURCE=$id
+			option_value=$(highlight $display_name)
+			((NUMBER_OF_TAGGED_RESOURCES++))
+		else
+			tagged="false"
+			option_value=$display_name
+		fi
+
+		OPTION_VALUES[$o]=$option_value
+		((o++))
+
+		RESOURCE_MAP[$id]="$name,$tagged"
+	done
+}
+
+function highlight(){
+  local highlight_start=$(tput setaf 3)
+  local reset=$(tput sgr0)
+  echo $highlight_start$1$reset
+}
+
 # -----------------------------------------------------------
 # Workaround: use stderr stream for console output
 # @param $1  message
@@ -131,45 +168,7 @@ function local_echo(){
 	echo "$@" >&2
 }
 
-function update_resources(){
-	local resources_file=./lib/resources-$region.sh
-	> $resources_file
-
-	OLD_RESOURCE_JSON=$RESOURCE_JSON
-	typeset -p OLD_RESOURCE_JSON >> $resources_file
-
-	RESOURCES_ARRAY=($(get_resources))
-
-	declare -A RESOURCE_MAP
-
-	for resource in ${RESOURCES_ARRAY[@]}; do
-		local arn=$(echo $resource | jq -c ".ResourceARN" -r | sanitize)
-		local name=$(echo $resource | jq -c ".Tags[] | select(.Key==\"Name\") | .Value" -r | sanitize)
-		local tagged=$(echo $resource | jq -c ".Tags[] | select(.Key==\"AutoDiscover\") | .Value" -r | sanitize)
-
-		if [ ! -z "$tagged" ] && [ "$tagged" == "true" ] || [ "$tagged" == "True" ]; then
-			tagged="true"
-		else
-			tagged="false"
-		fi
-
-		RESOURCE_MAP[$arn]="${name:-"Unnamed"},$tagged"
-	done
-
-	typeset -p RESOURCE_MAP >> $resources_file
-}
-
 function init_resources(){
-	local_echo "Checking if aws resources with tag key 'AutoDiscover' and value 'true' were added or removed in region $region..."
-	RESOURCE_JSON=$(get_resources)
-
-	if [ "$RESOURCE_JSON" != "$OLD_RESOURCE_JSON" ]; then
-		  local_echo "Updating tagged aws resources..."
-			update_resources
-	else
-		local_echo "Stored aws resources are up to date."
-	fi
-
 	if ! is_exists ~/.aws-automation/config-$region; then
 		local_echo "Creating ~/.aws-automation/config-$region..."
 		create_region_configuration

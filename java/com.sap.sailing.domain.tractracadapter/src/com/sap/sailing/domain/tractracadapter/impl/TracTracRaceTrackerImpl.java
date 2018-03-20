@@ -556,7 +556,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                 }
             }
             if (!stopReceiversPreemtively) {
-                // wait for their queues to be worked down before signalling the FINISHED state.
+                // wait for their queues to be worked down before signaling the FINISHED state.
                 new AbstractLoadingQueueDoneCallBack(receivers) {
                     @Override
                     protected void executeWhenAllReceiversAreDoneLoading() {
