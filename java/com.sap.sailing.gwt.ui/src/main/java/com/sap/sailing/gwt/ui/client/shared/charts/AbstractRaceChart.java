@@ -78,7 +78,6 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     protected final SailingServiceAsync sailingService;
 
     protected boolean isLoading = false;
-    protected boolean isZoomed = false;
 
     protected static ChartsCss chartsCss = ChartCssResources.INSTANCE.css();
 
@@ -261,7 +260,6 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
 
     @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
-        isZoomed = true;
         changeMinMaxAndExtremesInterval(zoomStartTimepoint, zoomEndTimepoint, true);
         chart.showResetZoom(); // Patched method
         fireEvent(new ChartZoomChangedEvent(zoomStartTimepoint, zoomEndTimepoint));
@@ -269,7 +267,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
 
     @Override
     public void onTimeRangeChanged(Date fromTime, Date toTime) {
-        if (!(isZoomed && timer.getPlayMode() == PlayModes.Live)) {
+        if (!(timer.getPlayMode() == PlayModes.Live)) {
             resetMinMaxAndExtremesInterval(/* redraw */ true);
         }
     }
