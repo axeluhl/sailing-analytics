@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,6 +32,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -469,17 +471,17 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         private final Map<CompetitorDTO, CompetitorManeuverData> cache = new HashMap<>();
 
         private void updateAll(final Iterable<CompetitorDTO> competitors, final Date newTime) {
-            this.loadData(competitors, c -> getData(c).requiresUpdate(newTime));
+            this.loadData(competitors, c -> getData(c).requiresUpdate(newTime), true);
         }
 
         private void updateAll(final Iterable<CompetitorDTO> competitors) {
             final TimeRange timeRange = getFullTimeRange();
-            this.loadData(competitors, c -> Optional.of(timeRange));
+            this.loadData(competitors, c -> Optional.of(timeRange), false);
         }
 
         private void update(final CompetitorDTO competitor) {
             final TimeRange timeRange = getFullTimeRange();
-            this.loadData(Collections.singleton(competitor), c -> Optional.of(timeRange));
+            this.loadData(Collections.singleton(competitor), c -> Optional.of(timeRange), false);
         }
 
         private void resetAll() {
@@ -499,7 +501,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         }
 
         private void loadData(final Iterable<CompetitorDTO> competitors,
-                final Function<CompetitorDTO, Optional<TimeRange>> timeRangeProvider) {
+                final Function<CompetitorDTO, Optional<TimeRange>> timeRangeProvider, boolean incremental) {
             if (!Util.isEmpty(competitors)) {
                 final Map<CompetitorDTO, TimeRange> competitorToTimeRange = new HashMap<>();
                 competitors.forEach(c -> timeRangeProvider.apply(c).ifPresent(tr -> competitorToTimeRange.put(c, tr)));
@@ -509,12 +511,25 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                             @Override
                             public void onSuccess(Map<CompetitorDTO, List<ManeuverDTO>> result) {
                                 if (isVisible()) {
+                                    final Set<CompetitorDTO> competitorsToRefresh = new HashSet<>();
                                     for (final Entry<CompetitorDTO, List<ManeuverDTO>> entry : result.entrySet()) {
-                                        final CompetitorManeuverData data = getData(entry.getKey());
-                                        final TimeRange timeRange = competitorToTimeRange.get(entry.getKey());
-                                        data.update(timeRange.from(), timeRange.to(), entry.getValue());
+                                        final CompetitorDTO competitor = entry.getKey();
+                                        if (!incremental) {
+                                            reset(competitor);
+                                        }
+                                        final CompetitorManeuverData data = getData(competitor);
+                                        final TimeRange timeRange = competitorToTimeRange.get(competitor);
+                                        final List<ManeuverDTO> maneuvers = entry.getValue();
+                                        data.update(timeRange.from(), timeRange.to(), maneuvers);
+                                        if (incremental && maneuvers.stream().anyMatch(
+                                                maneuver -> (maneuver.type == ManeuverType.MARK_PASSING))) {
+                                            competitorsToRefresh.add(competitor);
+                                        }
                                     }
                                     ManeuverTablePanel.this.rerender();
+                                    if (incremental && !competitorsToRefresh.isEmpty()) {
+                                        updateAll(competitorsToRefresh);
+                                    }
                                 }
                             }
 
