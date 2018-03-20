@@ -794,7 +794,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         Speed result = null;
         final Duration totalTimeSailed = this.getTotalTimeSailed(competitor, timePoint);
         final Distance totalDistanceSailed = this.getTotalDistanceTraveled(competitor, timePoint);
-        if (totalDistanceSailed != null && totalTimeSailed != null && !totalTimeSailed.equals(Distance.NULL)) {
+        if (totalDistanceSailed != null && totalTimeSailed != null && !totalTimeSailed.equals(Duration.NULL)) {
             result = totalDistanceSailed.inTime(totalTimeSailed);
         }
         return result;

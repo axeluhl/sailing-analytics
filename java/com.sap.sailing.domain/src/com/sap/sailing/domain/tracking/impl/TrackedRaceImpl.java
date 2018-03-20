@@ -1907,7 +1907,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } finally {
             LockUtil.unlockAfterRead(getSerializationLock());
         }
-        if (!old.equals(this.windSourcesToExclude)) {
+        if (!old.equals(new HashSet<>(getWindSourcesToExclude()))) {
             clearAllCachesExceptManeuvers();
             triggerManeuverCacheRecalculationForAllCompetitors();
         }
