@@ -35,6 +35,7 @@ public class MigratableRegattaImpl extends RegattaImpl implements MigratableRega
                 persistent, scoringScheme, id, courseArea, buoyZoneRadiusInHullLengths, useStartTimeInference,
                 controlTrackingFromStartAndFinishTimes, rankingMetricConstructor);
         this.mongoObjectFactory = mongoObjectFactory;
+        mongoObjectFactory.storeRegatta(this); // make sure the canBoatsOfCompetitorsChangePerRace flag makes it into the DB
     }
     
     public synchronized void migrateCanBoatsOfCompetitorsChangePerRace() {
