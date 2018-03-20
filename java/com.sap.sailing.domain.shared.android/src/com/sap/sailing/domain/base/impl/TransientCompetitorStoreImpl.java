@@ -213,14 +213,16 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
 
     @Override
     public CompetitorWithBoat getExistingCompetitorWithBoatById(Serializable competitorId) {
+        final CompetitorWithBoat result;
         LockUtil.lockForRead(lock);
         try {
             Competitor competitor = competitorCache.get(competitorId);
             if (competitor != null && isValidCompetitorWithBoat(competitor)) {
-                return (CompetitorWithBoat) competitor;
+                result = (CompetitorWithBoat) competitor;
             } else {
-                return null;
-            }        
+                result = null;
+            }
+            return result;
         } finally {
             LockUtil.unlockAfterRead(lock);
         }
