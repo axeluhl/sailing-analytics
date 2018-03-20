@@ -20,7 +20,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.CandlestickPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.OHLCPlotOptions;
 
 /**
- * BETA!  The main GWT widget that can be constructed and then configured in order to add a Highstock
+ * The main GWT widget that can be constructed and then configured in order to add a Highstock
  * chart into a GWT layout container.  Note that for more basic chart types just make use of the
  * {@link Chart} widget instead.
  * Basic usage is as follows:
