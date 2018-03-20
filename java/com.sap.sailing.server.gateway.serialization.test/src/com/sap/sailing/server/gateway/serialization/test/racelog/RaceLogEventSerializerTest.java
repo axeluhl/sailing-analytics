@@ -236,21 +236,17 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testRegisterCompetitorEventSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        Competitor c = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", "c", null, null, null, null, /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */
-                null, null);
+        Competitor c = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", "c", null, null, null, null,
+                /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Boat b = DomainFactory.INSTANCE.getOrCreateBoat("boat", "b", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null, null);
-
         RaceLogEvent event = new RaceLogRegisterCompetitorEventImpl(null, author, 0, c, b);
         serializer.serialize(event);
         verify(registerCompetitorEventSerializer).serialize(event);
-        
         Boat b2 = new BoatImpl("boat", "b", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null, null);
-        CompetitorWithBoat c2 = DomainFactory.INSTANCE.getOrCreateCompetitorWithBoat("comp", "comp", "c", null, null, null, null, /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */
-                null, null, (DynamicBoat) b2);
-
+        CompetitorWithBoat c2 = DomainFactory.INSTANCE.getOrCreateCompetitorWithBoat("comp2", "comp", "c", null, null,
+                null, null, /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, (DynamicBoat) b2);
         RaceLogEvent event2 = new RaceLogRegisterCompetitorEventImpl(null, author, 0, c2, b2);
         serializer.serialize(event2);
         verify(registerCompetitorEventSerializer).serialize(event2);        
     }
-
 }
