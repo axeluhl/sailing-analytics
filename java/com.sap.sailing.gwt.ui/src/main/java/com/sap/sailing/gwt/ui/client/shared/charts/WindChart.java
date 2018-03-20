@@ -447,10 +447,10 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                 newDirectionPoints = directionPoints;
                 newSpeedPoints = speedPoints;
             }
-            setSeriesPoints(directionSeries, newDirectionPoints);
+            setSeriesPoints(directionSeries, newDirectionPoints, /* manageZoom */ true);
             windSourceDirectionPoints.put(windSource, newDirectionPoints);
             if (windSource.getType().useSpeed()) {
-                setSeriesPoints(speedSeries, newSpeedPoints);
+                setSeriesPoints(speedSeries, newSpeedPoints, /* manageZoom */ true);
                 windSourceSpeedPoints.put(windSource, newSpeedPoints);
             }
             
