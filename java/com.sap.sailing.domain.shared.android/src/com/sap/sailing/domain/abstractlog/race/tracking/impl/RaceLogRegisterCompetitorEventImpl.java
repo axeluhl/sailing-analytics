@@ -15,10 +15,22 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Links a competitor to the boat it sails with in the race. The {@link #boat} field refers to the
+ * {@link CompetitorWithBoat#getBoat() competitor's boat} if the competitor has a fixed boat attached.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class RaceLogRegisterCompetitorEventImpl extends BaseRegisterCompetitorEventImpl<RaceLogEventVisitor> implements
         RaceLogRegisterCompetitorEvent {
     private static final long serialVersionUID = -5114645637316367845L;
     private final RaceLogEventData raceLogEventData;
+    
+    /**
+     * The boat the competitor sails with in the race to which the race log containing this event belongs.
+     * Never {@code null}.
+     */
     private final Boat boat;
 
     /**
@@ -97,7 +109,7 @@ public class RaceLogRegisterCompetitorEventImpl extends BaseRegisterCompetitorEv
             throw new IllegalArgumentException("Boat must not be null");
         }
     }
-    
+
     @Override
     public String getShortInfo() {
         return "competitor: " + getCompetitor().toString() + " with boat " + getBoat().toString();
