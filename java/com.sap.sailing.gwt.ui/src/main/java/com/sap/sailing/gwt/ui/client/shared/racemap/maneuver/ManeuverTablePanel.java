@@ -380,13 +380,17 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
-        this.competitorManeuverDataCache.update(competitor);
+        if (isVisible()) {
+            this.competitorManeuverDataCache.update(competitor);
+        }
     }
 
     @Override
     public void removedFromSelection(CompetitorDTO competitor) {
-        this.competitorManeuverDataCache.reset(competitor);
-        this.rerender();
+        if (isVisible()) {
+            this.competitorManeuverDataCache.reset(competitor);
+            this.rerender();
+        }
     }
 
     @Override
@@ -504,12 +508,14 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
                             @Override
                             public void onSuccess(Map<CompetitorDTO, List<ManeuverDTO>> result) {
-                                for (final Entry<CompetitorDTO, List<ManeuverDTO>> entry : result.entrySet()) {
-                                    final CompetitorManeuverData data = getData(entry.getKey());
-                                    final TimeRange timeRange = competitorToTimeRange.get(entry.getKey());
-                                    data.update(timeRange.from(), timeRange.to(), entry.getValue());
+                                if (isVisible()) {
+                                    for (final Entry<CompetitorDTO, List<ManeuverDTO>> entry : result.entrySet()) {
+                                        final CompetitorManeuverData data = getData(entry.getKey());
+                                        final TimeRange timeRange = competitorToTimeRange.get(entry.getKey());
+                                        data.update(timeRange.from(), timeRange.to(), entry.getValue());
+                                    }
+                                    ManeuverTablePanel.this.rerender();
                                 }
-                                ManeuverTablePanel.this.rerender();
                             }
 
                             @Override
