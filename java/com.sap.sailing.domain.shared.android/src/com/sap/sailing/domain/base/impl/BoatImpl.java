@@ -117,4 +117,9 @@ public class BoatImpl extends RenamableImpl implements DynamicBoat {
             return new HashSet<BoatChangeListener>(listeners);
         }
     }
+
+    @Override
+    public String toString() {
+        return getName()==null?getSailID():getName();
+    }
 }
