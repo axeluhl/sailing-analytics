@@ -3288,7 +3288,7 @@ public abstract class BaseChart<T> extends Widget {
                 chart.resetZoomButton.destroy();
                 chart.resetZoomButton = null;
             }else {
-                console.print("Could not remove zoombutton");
+                console.log("Could not remove zoombutton");
             }
         }
     }-*/;
