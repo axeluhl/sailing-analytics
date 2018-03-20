@@ -3,13 +3,11 @@ package com.sap.sailing.gwt.home.communication.event.minileaderboard;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.google.gwt.http.client.URL;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
+import com.sap.sailing.gwt.home.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
-import com.sap.sailing.gwt.home.shared.utils.SailingTransportRoutingUtils;
-import com.sap.sse.gwt.dispatch.client.system.routing.ProvidesDispatchRoutingKey;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
@@ -24,7 +22,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
  * otherwise.
  * </p>
  */
-public class GetMiniLeaderbordAction implements SailingAction<ResultWithTTL<GetMiniLeaderboardDTO>>, IsClientCacheable, ProvidesDispatchRoutingKey {
+public class GetMiniLeaderbordAction implements SailingAction<ResultWithTTL<GetMiniLeaderboardDTO>>, IsClientCacheable, ProvidesLeaderboardRouting {
     private UUID eventId;
     private String leaderboardName;
     private int limit = 0;
@@ -79,7 +77,7 @@ public class GetMiniLeaderbordAction implements SailingAction<ResultWithTTL<GetM
     }
 
     @Override
-    public String routingPath() {
-        return SailingTransportRoutingUtils.pathForEvent(eventId, leaderboardName);
+    public String getLeaderboardname() {
+        return leaderboardName;
     }
 }

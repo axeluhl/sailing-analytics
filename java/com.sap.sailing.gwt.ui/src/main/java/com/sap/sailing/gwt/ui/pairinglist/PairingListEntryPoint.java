@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.home.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -32,19 +33,21 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
-public class PairingListEntryPoint extends AbstractSailingEntryPoint {
+public class PairingListEntryPoint extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
 
     private PairingListContextDefinition pairingListContextDefinition;
 
     private StringMessages stringmessages = StringMessages.INSTANCE;
     private StrippedLeaderboardDTO strippedLeaderboardDTO;
-
+    private String leaderboardName;
+    
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         pairingListContextDefinition = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new PairingListContextDefinition());
-        this.sailingService.getLeaderboard(pairingListContextDefinition.getLeaderboardName(),
+        leaderboardName = pairingListContextDefinition.getLeaderboardName();
+        getSailingService().getLeaderboard(leaderboardName,
                 new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -76,13 +79,13 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         contentPanel.getElement().getStyle().setProperty("marginTop", "15px");
         contentPanel.getElement().getStyle().setProperty("marginBottom", "15px");
         scrollPanel.add(contentPanel);
-        sailingService.getPairingListFromRaceLogs(pairingListContextDefinition.getLeaderboardName(),
+        getSailingService().getPairingListFromRaceLogs(pairingListContextDefinition.getLeaderboardName(),
                 new AsyncCallback<PairingListDTO>() {
 
                     @Override
                     public void onSuccess(PairingListDTO result) {
                         if (strippedLeaderboardDTO != null) {
-                            sailingService.getRaceDisplayNamesFromLeaderboard(strippedLeaderboardDTO.getName(),
+                            getSailingService().getRaceDisplayNamesFromLeaderboard(strippedLeaderboardDTO.getName(),
                                     result.getRaceColumnNames(), new AsyncCallback<List<String>>() {
                                         @Override
                                         public void onFailure(Throwable caught) {
@@ -221,6 +224,11 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         pairingListPanel.getElement().getStyle().setProperty("marginTop", "15px");
 
         return pairingListPanel;
+    }
+    
+    @Override
+    public String getLeaderboardname() {
+        return leaderboardName;
     }
 
     private native void printPairingListGrid(String pageHTMLContent) /*-{

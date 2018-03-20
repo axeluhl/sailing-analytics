@@ -8,9 +8,9 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.gwt.client.ServiceRoutingProvider;
 import com.sap.sse.gwt.dispatch.client.system.batching.AutomaticBatchingDispatch;
 import com.sap.sse.gwt.dispatch.client.system.caching.CachingDispatch;
-import com.sap.sse.gwt.dispatch.client.system.routing.ProvidesDispatchRoutingKey;
 import com.sap.sse.gwt.dispatch.client.transport.DefaultTransport;
 import com.sap.sse.gwt.dispatch.shared.commands.Action;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
@@ -88,9 +88,9 @@ public abstract class DispatchSystemDefaultImpl<CTX extends DispatchContext> imp
             }
         };
         final DispatchSystemAsync<CTX> dispatchToUse;
-        if (action instanceof ProvidesDispatchRoutingKey) {
-            ProvidesDispatchRoutingKey providesDispatchRoutingKey = (ProvidesDispatchRoutingKey) action;
-            String routingPath = providesDispatchRoutingKey.routingPath();
+        if (action instanceof ServiceRoutingProvider) {
+            ServiceRoutingProvider providesDispatchRoutingKey = (ServiceRoutingProvider) action;
+            String routingPath = providesDispatchRoutingKey.routingSuffixPath();
             
             dispatchToUse = routingRegistry.computeIfAbsent(routingPath, this::createDispatchFor);
             

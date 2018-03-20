@@ -106,7 +106,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                         .createStoredSettingsLocatorForRaceBoard(raceboardContextDefinition,
                                 finalMode != null ? finalMode.name() : null);
-                sailingService.determineDetailTypesForCompetitorChart(raceboardContextDefinition.getLeaderboardGroupName(),
+                getSailingService().determineDetailTypesForCompetitorChart(raceboardContextDefinition.getLeaderboardGroupName(),
                         raceboardData.getRace().getRaceIdentifier(), new AsyncCallback<List<DetailType>>() {
 
                             @Override
@@ -146,7 +146,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
             }
         };
         
-        sailingService.getRaceboardData(raceboardContextDefinition.getRegattaName(),
+        getSailingService().getRaceboardData(raceboardContextDefinition.getRegattaName(),
                 raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getLeaderboardName(),
                 raceboardContextDefinition.getLeaderboardGroupName(), raceboardContextDefinition.getEventId(),
                 asyncCallback);
@@ -172,13 +172,13 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
-        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this,
+        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(getSailingService(), asyncActionsExecutor, this,
                 Collections.singletonList(selectedRace.getRaceIdentifier()), 5000l /* requestInterval*/);
   
         RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(parent, context,
                 raceLifeCycle,
                 settings,
-                sailingService, mediaService, getUserService(), asyncActionsExecutor,
+                getSailingService(), mediaService, getUserService(), asyncActionsExecutor,
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(),
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
                 raceboardContextDefinition.getEventId(), RaceBoardEntryPoint.this, getStringMessages(), userAgent,

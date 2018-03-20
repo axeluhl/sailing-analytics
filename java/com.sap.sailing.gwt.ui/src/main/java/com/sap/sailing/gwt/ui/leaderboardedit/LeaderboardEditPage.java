@@ -30,7 +30,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         
-        sailingService.getLeaderboardNames(new MarkedAsyncCallback<List<String>>(
+        getSailingService().getLeaderboardNames(new MarkedAsyncCallback<List<String>>(
                 new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> leaderboardNames) {
@@ -46,7 +46,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
                     authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
                         @Override
                         public Widget get() {
-                            EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardName, null,
+                            EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(getSailingService(), new AsyncActionsExecutor(), leaderboardName, null,
                                     LeaderboardEditPage.this, getStringMessages(), userAgent);
                             leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
                             return leaderboardPanel;

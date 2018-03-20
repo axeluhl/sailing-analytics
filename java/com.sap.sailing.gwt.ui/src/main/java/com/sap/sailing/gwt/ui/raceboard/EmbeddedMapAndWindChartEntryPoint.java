@@ -121,13 +121,13 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                 defaultRaceMapSettings.isShowMapControls(), defaultRaceMapSettings.getManeuverTypesToShow(),
                 defaultRaceMapSettings.isShowDouglasPeuckerPoints(), true);
         
-        sailingService.getRaceIdentifier(regattaLikeName, raceColumnName, fleetName, new AsyncCallback<RegattaAndRaceIdentifier>() {
+        getSailingService().getRaceIdentifier(regattaLikeName, raceColumnName, fleetName, new AsyncCallback<RegattaAndRaceIdentifier>() {
             @Override
             public void onSuccess(final RegattaAndRaceIdentifier selectedRaceIdentifier) {
                 if (selectedRaceIdentifier == null) {
                     createErrorPage(getStringMessages().couldNotObtainRace(regattaLikeName, raceColumnName, fleetName, /* technicalErrorMessage */ ""));
                 } else {
-                    sailingService.getCompetitorBoats(selectedRaceIdentifier, new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
+                    getSailingService().getCompetitorBoats(selectedRaceIdentifier, new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
                         @Override
                         public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
                             createEmbeddedMap(selectedRaceIdentifier, result, raceboardPerspectiveSettings, raceMapSettings, 
@@ -186,7 +186,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                 return true;
             }
         };
-        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, /* errorReporter */ this,
+        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(getSailingService(), asyncActionsExecutor, /* errorReporter */ this,
                 Collections.singleton(selectedRaceIdentifier), 30000l /* requestInterval*/);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(new RaceTimesInfoProviderListener() {
             @Override
@@ -207,7 +207,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
             competitorSelection = createEmptyFilterCompetitorModel(colorProvider); // show no competitors
         }
         final RaceMap raceMap = new RaceMap(null, null, new RaceMapLifecycle(getStringMessages()), raceMapSettings,
-                sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
+                getSailingService(), asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                 competitorSelection, new RaceCompetitorSet(competitorSelection), getStringMessages(), selectedRaceIdentifier,
                 raceMapResources, /* showHeaderPanel */ false, new DefaultQuickRanksDTOProvider()) {
             @Override
@@ -218,7 +218,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         };
         final WindChart windChart;
         if (raceboardPerspectiveSettings.isShowWindChart()) {
-            windChart = new WindChart(null, null, new WindChartLifecycle(getStringMessages()), sailingService,
+            windChart = new WindChart(null, null, new WindChartLifecycle(getStringMessages()), getSailingService(),
                     selectedRaceIdentifier, timer,
                     timeRangeWithZoomProvider, new WindChartSettings(), getStringMessages(),
                     asyncActionsExecutor, /* errorReporter */

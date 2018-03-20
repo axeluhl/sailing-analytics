@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.home.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
@@ -38,10 +39,11 @@ import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
-public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
+public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
     public static final long DEFAULT_REFRESH_INTERVAL_MILLIS = 3000l;
 
     private StringMessages stringmessages = StringMessages.INSTANCE;
+    private UUID eventId;
     private String leaderboardName;
     private String leaderboardGroupName;
     private AbstractLeaderboardDTO leaderboardDTO;
@@ -54,7 +56,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         leaderboardContextDefinition = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new LeaderboardContextDefinition());
 
-        final UUID eventId = leaderboardContextDefinition.getEventId();
+        eventId = leaderboardContextDefinition.getEventId();
 
         leaderboardName = leaderboardContextDefinition.getLeaderboardName();
         leaderboardGroupName = leaderboardContextDefinition.getLeaderboardGroupName();
@@ -64,7 +66,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                 checkLeaderboardNameAndCreateUI(); // use null-initialized event field
             } else {
                 // TODO it seems we do not really need the EventDTO. What's the intention of loading it? Should we visualize some information in the header?
-                sailingService.getEventById(eventId, /* withStatisticalData */false,
+                getSailingService().getEventById(eventId, /* withStatisticalData */false,
                         new MarkedAsyncCallback<EventDTO>(new AsyncCallback<EventDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -87,7 +89,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     
     private void checkLeaderboardNameAndCreateUI() {
         if(leaderboardDTO == null) {
-            sailingService.getLeaderboard(leaderboardName, new MarkedAsyncCallback<StrippedLeaderboardDTO>(
+            getSailingService().getLeaderboard(leaderboardName, new MarkedAsyncCallback<StrippedLeaderboardDTO>(
                         new AsyncCallback<StrippedLeaderboardDTO>() {
                             @Override
                             public void onSuccess(
@@ -134,7 +136,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                             configureWithSettings(defaultSettings, timer);
                             
                             final MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(null, context,
-                                    rootComponentLifeCycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
+                                    rootComponentLifeCycle, defaultSettings, getSailingService(), new AsyncActionsExecutor(),
                                     timer, null, leaderboardGroupName, leaderboardName,
                                     LeaderboardEntryPoint.this, getStringMessages(),
                                     getActualChartDetailType(defaultSettings));
@@ -162,7 +164,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                             configureWithSettings(defaultSettings, timer);
                             
                             final MultiRaceLeaderboardViewer leaderboardViewer = new MultiRaceLeaderboardViewer(null, context,
-                                    rootComponentLifeCycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
+                                    rootComponentLifeCycle, defaultSettings, getSailingService(), new AsyncActionsExecutor(),
                                     timer, leaderboardGroupName, leaderboardName,
                                     LeaderboardEntryPoint.this, getStringMessages(), getActualChartDetailType(defaultSettings));
                             createUi(leaderboardViewer, defaultSettings, timer, leaderboardContextDefinition);
@@ -226,4 +228,8 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         }
     }
     
+    @Override
+    public String getLeaderboardname() {
+        return leaderboardName;
+    }
 }
