@@ -105,7 +105,7 @@ public class YAxis extends Axis<YAxis> {
      */
     public YAxis setHeight(Number height) {
         this.setOption("height", height);
-        nativeUpdateAxis(getNativeAxis(), getOptions().getJavaScriptObject(), false);
+        update(this);
         return this;
     }
 
@@ -123,7 +123,7 @@ public class YAxis extends Axis<YAxis> {
      */
     public YAxis setTop(Number top) {
         this.setOption("top", top);
-        nativeUpdateAxis(getNativeAxis(), getOptions().getJavaScriptObject(), false);
+        update(this);
         return this;
     }
 
@@ -152,7 +152,7 @@ public class YAxis extends Axis<YAxis> {
     public YAxis setLabels(YAxisLabels labels) {
         this.yAxisLabels = labels;
         this.setOption("labels", labels != null ? labels.getOptions() : null);
-        nativeUpdateAxis(getNativeAxis(), getOptions().getJavaScriptObject(), false);
+        update(this);
         return this;
     }
 
@@ -190,7 +190,7 @@ public class YAxis extends Axis<YAxis> {
     public YAxis setStackLabels(StackLabels stackLabels) {
         this.stackLabels = stackLabels;
         this.setOption("stackLabels", stackLabels != null ? stackLabels.getOptions() : null);
-        nativeUpdateAxis(getNativeAxis(), getOptions().getJavaScriptObject(), false);
+        update(this);
         return this;
     }
 
