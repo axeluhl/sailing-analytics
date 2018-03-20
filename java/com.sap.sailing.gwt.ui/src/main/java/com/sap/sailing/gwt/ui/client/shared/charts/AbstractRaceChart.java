@@ -183,7 +183,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     protected boolean onXAxisSelectionChange(ChartSelectionEvent chartSelectionEvent) {
         Long xAxisMin = chartSelectionEvent.getXAxisMinAsLongOrNull();
         Long xAxisMax = chartSelectionEvent.getXAxisMaxAsLongOrNull();
-        ;
+        // Set a minute as max time zoom just as for chart
         if (xAxisMax != null && xAxisMin != null) {
             if(xAxisMax - xAxisMin > MINUTE_IN_MILLIS){
                 Date rangeStart = new Date(xAxisMin);
