@@ -494,23 +494,17 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
         private void loadData(final Iterable<CompetitorDTO> competitors,
                 final Function<CompetitorDTO, Optional<TimeRange>> timeRangeProvider) {
-            final Map<CompetitorDTO, Date> compToFromDateMap = new HashMap<>(), compToToDateMap = new HashMap<>();
-            for (CompetitorDTO competitor : competitors) {
-                timeRangeProvider.apply(competitor).ifPresent(timeRange -> {
-                    compToFromDateMap.put(competitor, timeRange.from().asDate());
-                    compToToDateMap.put(competitor, timeRange.to().asDate());
-                });
-            }
-            sailingService.getManeuvers(raceIdentifier, compToFromDateMap, compToToDateMap,
+            final Map<CompetitorDTO, TimeRange> competitorToTimeRangeMap = new HashMap<>();
+            competitors.forEach(c -> timeRangeProvider.apply(c).ifPresent(tr -> competitorToTimeRangeMap.put(c, tr)));
+            sailingService.getManeuvers(raceIdentifier, competitorToTimeRangeMap,
                     new AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>>() {
 
                         @Override
                         public void onSuccess(Map<CompetitorDTO, List<ManeuverDTO>> result) {
                             for (final Entry<CompetitorDTO, List<ManeuverDTO>> entry : result.entrySet()) {
                                 final CompetitorManeuverData data = getData(entry.getKey());
-                                final Date earliest = compToFromDateMap.get(entry.getKey());
-                                final Date latest = compToToDateMap.get(entry.getKey());
-                                data.update(earliest, latest, entry.getValue());
+                                final TimeRange timeRange = competitorToTimeRangeMap.get(entry.getKey());
+                                data.update(timeRange.from(), timeRange.to(), entry.getValue());
                             }
                             ManeuverTablePanel.this.rerender();
                         }
@@ -545,15 +539,16 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         private Long latestRequestMillis;
         
         /**
-         * The maneuvers retrieved for one specific competitor for the time range between {@link #earliestRequestMillis} and
-         * {@link #latestRequestMillis} so far. Note that the order of maneuvers in this list is not defined; in particular,
-         * they will not necessarily be represented in the order of ascending {@link ManeuverDTO#timePoint time points}.
+         * The maneuvers retrieved for one specific competitor for the time range between {@link #earliestRequestMillis}
+         * and {@link #latestRequestMillis} so far. Note that the order of maneuvers in this list is not defined; in
+         * particular, they will not necessarily be represented in the order of ascending {@link ManeuverDTO#timePoint
+         * time points}.
          */
-        private List<ManeuverDTO> maneuvers = new ArrayList<>();
+        private final List<ManeuverDTO> maneuvers = new ArrayList<>();
 
-        private void update(final Date earliest, final Date latest, final List<ManeuverDTO> maneuvers) {
-            this.earliestRequestMillis = earliest.getTime();
-            this.latestRequestMillis = latest.getTime();
+        private void update(final TimePoint earliest, final TimePoint latest, final List<ManeuverDTO> maneuvers) {
+            this.earliestRequestMillis = earliest.asMillis();
+            this.latestRequestMillis = latest.asMillis();
             this.maneuvers.addAll(maneuvers);
         }
 

@@ -133,6 +133,8 @@ import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
 import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -140,6 +142,7 @@ import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -2258,11 +2261,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (raceIdentifier != null) {
             RegattaAndRaceIdentifier race = raceIdentifier;
             if (race != null) {
-                Map<CompetitorDTO, Date> from = new HashMap<CompetitorDTO, Date>();
-                from.put(competitorDTO, fixesAndTails.getFixes(competitorDTO).get(fixesAndTails.getFirstShownFix(competitorDTO)).timepoint);
-                Map<CompetitorDTO, Date> to = new HashMap<CompetitorDTO, Date>();
-                to.put(competitorDTO, getBoatFix(competitorDTO, timer.getTime()).timepoint);
-                sailingService.getDouglasPoints(race, from, to, 3,
+                final Map<CompetitorDTO, TimeRange> timeRange = new HashMap<>();
+                final TimePoint from = new MillisecondsTimePoint(fixesAndTails.getFixes(competitorDTO)
+                        .get(fixesAndTails.getFirstShownFix(competitorDTO)).timepoint);
+                final TimePoint to = new MillisecondsTimePoint(getBoatFix(competitorDTO, timer.getTime()).timepoint);
+                timeRange.put(competitorDTO, new TimeRangeImpl(from, to, true));
+                sailingService.getDouglasPoints(race, timeRange, 3,
                         new AsyncCallback<Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -2282,7 +2286,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 }
                             }
                         });
-                sailingService.getManeuvers(race, from, to,
+                sailingService.getManeuvers(race, timeRange,
                         new AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>>() {
                             @Override
                             public void onFailure(Throwable caught) {
