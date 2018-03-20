@@ -11,6 +11,10 @@ import com.sap.sse.common.Util;
 
 public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements TimeRange {
     private static final long serialVersionUID = 8710198176227507300L;
+
+    // required for some serialization frameworks such as GWT RPC
+    protected TimeRangeImpl() {
+    }
     
     public static TimeRange create(long fromMillis, long toMillisExclusive) {
         return new TimeRangeImpl(new MillisecondsTimePoint(fromMillis), new MillisecondsTimePoint(toMillisExclusive));
