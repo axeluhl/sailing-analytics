@@ -176,8 +176,8 @@ public class CheckinManager {
                     final EventBase event = deserializer.deserialize((org.json.simple.JSONObject) new JSONParser().parse(response.toString()));
                     urlData.eventId = event.getId().toString();
                     urlData.eventName = event.getName();
-                    urlData.eventStartDateStr = ""+event.getStartDate().asMillis();
-                    urlData.eventEndDateStr = ""+event.getEndDate().asMillis();
+                    urlData.eventStartDateStr = (event.getStartDate() != null) ? "" + event.getStartDate().asMillis() : "0";
+                    urlData.eventEndDateStr = (event.getEndDate() != null) ? "" + event.getEndDate().asMillis() : "0";
                     Iterable<ImageDescriptor> imageUrls = event.getImages();
                     if (!Util.isEmpty(imageUrls)) {
                         urlData.eventFirstImageUrl = imageUrls.iterator().next().getURL().toString();

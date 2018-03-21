@@ -81,6 +81,11 @@ fi
 
 init_resources
 
+if $force; then
+  error "--force option is currently not working."
+  safeExit
+fi
+
 if $instance_scenario; then
 	instance_start
 	safeExit
@@ -93,6 +98,11 @@ fi
 
 if $master_instance_scenario; then
   master_instance_start
+	safeExit
+fi
+
+if $replica_instance_scenario; then
+  replica_instance_start
 	safeExit
 fi
 
@@ -123,43 +133,40 @@ usage() {
   -p, --public-dns-name         Dns name of instance (e.g. \"ec2-35-176...amazonaws.com\")
   -z, --super-instance          Dns name of superior instance (e.g. base instance for sub instances)
   -m, --event-name              Name of event
+  -x, --mongodb-host            Ip adress or dns of mongodb host
+  -y  --mongodb-port            Port of mongodb
   -b, --build                   Build version to use (leave empty for latest)
   -w, --description             Description of sub instance
   -c, --contact-person          Contact person
   -e, --contact-email           Email of contact person
-  -f, --force                   Skip user input and use default variables
   -d, --debug                   Debug mode
 
   ${bold}Scenarios:${reset}
   --instance                    Create instance
   --shared-instance             Create sub instance
   --master-instance             Create master instance
-  --associate-alb               Associate instance with existing application load balancer whos
-                                listener is defined in variables_aws.sh. Automatically
-                                create necessary target group and host name rule.
+  --replica-instance            Create replica instance
+  --associate-alb               Associate instance with existing application load balancer.
 
   ${bold}Other:${reset}
-  --version                  Output version information and exit
+  --version                     Output version information and exit
 
 
   ${bold}Examples:${reset}
   Create instance:
   > ./aws-setup.sh --instance
 
-  Associate application load balancer:
-  > ./aws-setup.sh --instance --associate-alb
+  Create shared instance:
+  > ./aws-setup.sh --shared-instance
 
   Associate instance with application load balancer:
-  > ./aws-setup.sh --instance --associate-alb
+  > ./aws-setup.sh --associate-alb
 
-  Create instance and use default values:
-  > ./aws-setup.sh --instance --force
+  Create master instance:
+  > ./aws-setup.sh --master-instance
 
-  Create instance and use default values except instance name
-  and instance short name. Also activate debug mode.
-  > ./aws-setup.sh --instance --instance-name Test --instance-short-name t --force -d
-
-
+  Create replica instance:
+  > ./aws-setup.sh --replica-instance
 "
 }
 
@@ -208,6 +215,7 @@ associate_alb_scenario=false
 instance_scenario=false
 shared_instance_scenario=false
 master_instance_scenario=false
+replica_instance_scenario=false
 
 # Read the options and set variables
 while [[ $1 = -?* ]]; do
@@ -227,6 +235,8 @@ while [[ $1 = -?* ]]; do
 	-p|--public-dns-name) shift; public_dns_name_param=${1} ;;
   -b|--super-instance) shift; super_instance_param=${1} ;;
   -m|--event-name) shift; event_name_param=${1} ;;
+  -x|--mongodb-host) shift; mongodb_host_param=${1} ;;
+  -y|--mongodb-port) shift; mongodb_name_param=${1} ;;
   -z|--build) shift; build_version_param=${1} ;;
   -w|--description) shift; description_param=${1} ;;
   -c|--contact-person) shift; contact_person_param=${1} ;;
@@ -236,6 +246,7 @@ while [[ $1 = -?* ]]; do
   --instance) instance_scenario=true ;;
   --shared-instance) shared_instance_scenario=true ;;
   --master-instance) master_instance_scenario=true ;;
+  --replica-instance) replica_instance_scenario=true ;;
   --associate-alb) associate_alb_scenario=true ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;
