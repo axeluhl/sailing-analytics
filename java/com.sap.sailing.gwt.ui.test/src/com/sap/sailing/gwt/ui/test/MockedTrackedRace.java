@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Future;
 
@@ -76,6 +77,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.util.ThreadLocalTransporter;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
     private static final long serialVersionUID = 5827912985564121181L;
@@ -295,15 +297,15 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public void addTrackedRace(TrackedRace trackedRace) {
+            public void addTrackedRace(TrackedRace trackedRace, Optional<ThreadLocalTransporter> threadLocalTransporter) {
             }
 
             @Override
-            public void removeTrackedRace(TrackedRace trackedRace) {
+            public void removeTrackedRace(TrackedRace trackedRace, Optional<ThreadLocalTransporter> threadLocalTransporter) {
             }
 
             @Override
-            public void addRaceListener(RaceListener listener) {
+            public void addRaceListener(RaceListener listener, Optional<ThreadLocalTransporter> threadLocalTransporter) {
             }
 
             @Override
@@ -325,7 +327,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
                     long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
                     long millisecondsOverWhichToAverageSpeed, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-                    boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver) {
+                    boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter) {
                 return null;
             }
 
