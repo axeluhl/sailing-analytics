@@ -185,26 +185,25 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         Long xAxisMax = chartSelectionEvent.getXAxisMaxAsLongOrNull();
         // Set a minute as max time zoom just as for chart
         if (xAxisMax != null && xAxisMin != null) {
-            if (timer.getPlayMode() == PlayModes.Live) {
-                // no zoom in livemode, until proper solution for timeslider out of zoomed bounds
-                // why zoom out every timeChange (old solution), just prevent zooming in in the first place
-                return false;
-            }
             if (xAxisMax - xAxisMin > MINUTE_IN_MILLIS) {
                 Date rangeStart = new Date(xAxisMin);
                 Date rangeEnd = new Date(xAxisMax);
-                timeRangeWithZoomProvider.setTimeZoom(rangeStart, rangeEnd);
+                if(timer.getPlayMode() == PlayModes.Live) {
+                    timer.pause();
+                }
+                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                    
+                    @Override
+                    public void execute() {
+                        timeRangeWithZoomProvider.setTimeZoom(rangeStart, rangeEnd);
+                    }
+                });
                 return true;
             }
             return false;
         } else {
             ignoreNextClickEvent = true;
-            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                @Override
-                public void execute() {
-                    timeRangeWithZoomProvider.resetTimeZoom();
-                }
-            });
+            timeRangeWithZoomProvider.resetTimeZoom();
             return false;
         }
     }
@@ -231,6 +230,16 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     protected void changeMinMaxAndExtremesInterval(Date minTimepoint, Date maxTimepoint, boolean redraw) {
         if (chart != null) {
             XAxis xAxis = chart.getXAxis();
+            //if we are zoomed, and in livemode, reset the zoom, as this cannot be handled by the timesliders expected behaviour
+            if(timeRangeWithZoomProvider.isZoomed() && timer.getPlayMode() == PlayModes.Live) {
+                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        timeRangeWithZoomProvider.resetTimeZoom();
+                    }
+                });
+                return;
+            }
             if (minTimepoint != null && maxTimepoint != null) {
                 xAxis.setExtremes(minTimepoint.getTime(), maxTimepoint.getTime(), /* redraw */ false, false);
                 long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / TICKCOUNT;
