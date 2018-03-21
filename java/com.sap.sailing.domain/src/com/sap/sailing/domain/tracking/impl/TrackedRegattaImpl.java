@@ -149,6 +149,12 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         enqueEvent(listener -> listener.raceAdded(trackedRace), threadLocalTransporter);
     }
     
+    /**
+     * Firing events is handled through {@link #eventQueue} to ensure that events are fired in order. This method
+     * enqueues an event while ensuring that the set of listeners is freezed to prevent events to be fired twice to a
+     * specific listener. Any Listener attached after will receive a consistent set of already added {@link TrackedRace
+     * TrackedRaces}. Firing events may not be done directly but only by using this method.
+     */
     protected void enqueEvent(Consumer<RaceListener> fireEventCallback, Optional<ThreadLocalTransporter> threadLocalTransporter) {
         final Set<RaceListener> listenersToInform = new HashSet<>(raceListeners.keySet());
         threadLocalTransporter.ifPresent(ThreadLocalTransporter::rememberThreadLocalStates);
