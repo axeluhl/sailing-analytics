@@ -1637,8 +1637,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors,
             DBObject dbObject) {
         final RaceLogRegisterCompetitorEvent result;
-        Serializable competitorId = (Serializable) dbObject.get(FieldNames.RACE_LOG_COMPETITOR_ID.name());
-        Serializable boatId = (Serializable) dbObject.get(FieldNames.RACE_LOG_BOAT_ID.name());
+        final Serializable competitorId = (Serializable) dbObject.get(FieldNames.RACE_LOG_COMPETITOR_ID.name());
+        final Serializable boatId = (Serializable) dbObject.get(FieldNames.RACE_LOG_BOAT_ID.name());
         // legacy RaceLogRegisterCompetitorEvent's do not have a boatId, it's expected that the
         // corresponding competitors have the type CompetitorWithBoat
         Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
@@ -1658,8 +1658,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 // which is the only case we know of where a few events had boat metadata provided by TracTrac, and other events
                 // were tracked using smartphones. We will simply look for the boats of that season that we know the IDs of
                 // and cycle through them, six by six, assuming that regatta loading does not happen in parallel
-                boatId = "b2567e08-26d9-45c1-b5e0-8c410c8db18b#"+(secondLeagueBoatCounter++ % 6 + 1);
-                result = createRaceLogRegisterCompetitorEventImpl(createdAt, author, logicalTimePoint, id, passId, boatId, competitor);
+                final String auxiliaryBoatId = "b2567e08-26d9-45c1-b5e0-8c410c8db18b#"+(secondLeagueBoatCounter++ % 6 + 1);
+                result = createRaceLogRegisterCompetitorEventImpl(createdAt, author, logicalTimePoint, id, passId, auxiliaryBoatId, competitor);
             }
             // now update the event in the DB:
             dbObject.put(FieldNames.RACE_LOG_BOAT_ID.name(), result.getBoat().getId());
