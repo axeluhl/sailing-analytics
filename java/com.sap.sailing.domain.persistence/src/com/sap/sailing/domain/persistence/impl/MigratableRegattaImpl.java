@@ -24,7 +24,7 @@ public class MigratableRegattaImpl extends RegattaImpl implements MigratableRega
     /**
      * To be used for storing a migrated regatta
      */
-    private final MongoObjectFactory mongoObjectFactory;
+    private transient final MongoObjectFactory mongoObjectFactory;
 
     public <S extends Series> MigratableRegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name,
             BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, TimePoint startDate, TimePoint endDate,
@@ -42,7 +42,9 @@ public class MigratableRegattaImpl extends RegattaImpl implements MigratableRega
         // It should not be possible to call this after races have been already added to this regatta.
         assert !canBoatsOfCompetitorsChangePerRace() && Util.size(getAllRaces()) == 0;
         super.setCanBoatsOfCompetitorsChangePerRace(true);
-        logger.log(Level.INFO, "Bug2822 DB-Migration: Store migrated regatta '" + getName() + "' having now canBoatsOfCompetitorsChangePerRace=true.");
-        mongoObjectFactory.storeRegatta(this);
+        if (mongoObjectFactory != null) {
+            logger.log(Level.INFO, "Bug2822 DB-Migration: Store migrated regatta '" + getName() + "' having now canBoatsOfCompetitorsChangePerRace=true.");
+            mongoObjectFactory.storeRegatta(this);
+        }
     }
 }
