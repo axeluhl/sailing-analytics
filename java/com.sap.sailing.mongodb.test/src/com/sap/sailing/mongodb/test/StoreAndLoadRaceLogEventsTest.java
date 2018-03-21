@@ -219,8 +219,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         } catch (InterruptedException ie) {
             fail(ie.toString());
         }
-        RaceLogEvent dbEvent = domainFactory
-                .loadRaceLogEvent((DBObject) dbObject.get(FieldNames.RACE_LOG_EVENT.name()));
+        RaceLogEvent dbEvent = domainFactory.loadRaceLogEvent((DBObject) dbObject.get(FieldNames.RACE_LOG_EVENT.name())).getA();
         T actualEvent = (T) dbEvent;
         return actualEvent;
     }

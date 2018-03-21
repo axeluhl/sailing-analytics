@@ -14,5 +14,4 @@ public interface LeaderboardGroupResolver {
     LeaderboardGroup getLeaderboardGroupByID(UUID leaderboardGroupID);
     
     LeaderboardGroup resolveLeaderboardGroupByRegattaName(String regattaName);
-   
 }
