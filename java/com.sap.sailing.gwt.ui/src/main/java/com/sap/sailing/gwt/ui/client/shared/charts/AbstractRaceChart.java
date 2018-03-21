@@ -44,7 +44,8 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public abstract class AbstractRaceChart<SettingsType extends Settings> extends AbstractCompositeComponent<SettingsType> implements TimeListener, TimeZoomChangeListener, TimeRangeChangeListener {
+public abstract class AbstractRaceChart<SettingsType extends Settings> extends AbstractCompositeComponent<SettingsType>
+        implements TimeListener, TimeZoomChangeListener, TimeRangeChangeListener {
     /**
      * Used as the turboThreshold for the Highcharts series; this is basically the maximum number of points in a series
      * to be displayed. Default is 1000. See also bug 1742.
@@ -95,8 +96,8 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
 
     protected AbstractRaceChart(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
-            TimeRangeWithZoomProvider timeRangeWithZoomProvider,
-            final StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
+            TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
+            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
         super(parent, context);
         this.sailingService = sailingService;
         this.selectedRaceIdentifier = selectedRaceIdentifier;
@@ -123,8 +124,10 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     }
 
     /**
-     * Subclasses implement this, e.g., by calling {@link SettingsDialog#createSettingsButton(com.sap.sse.gwt.client.shared.components.Component, StringMessages)}.
-     * This class's constructor will add the {@link ChartsCss#settingsButtonStyle()} and the {@link ChartsCss#settingsButtonBackgroundImage()}.
+     * Subclasses implement this, e.g., by calling
+     * {@link SettingsDialog#createSettingsButton(com.sap.sse.gwt.client.shared.components.Component, StringMessages)}.
+     * This class's constructor will add the {@link ChartsCss#settingsButtonStyle()} and the
+     * {@link ChartsCss#settingsButtonBackgroundImage()}.
      */
     protected abstract Button createSettingsButton();
 
@@ -139,11 +142,11 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     private Button getSettingsButton() {
         return settingsButton;
     }
-    
+
     /**
-     * Simulates a {@link SimplePanel} behavior by replacing all widgets but the {@link #getSettingsButton() settings button} which is always
-     * supposed to be visible. If <code>widget</code> is already a child of this panel, it is left unchanged, and all other widgets except for
-     * the settings button are removed.
+     * Simulates a {@link SimplePanel} behavior by replacing all widgets but the {@link #getSettingsButton() settings
+     * button} which is always supposed to be visible. If <code>widget</code> is already a child of this panel, it is
+     * left unchanged, and all other widgets except for the settings button are removed.
      */
     protected void setWidget(Widget widget) {
         Button settingsButton = getSettingsButton();
@@ -181,7 +184,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         Long xAxisMax = chartSelectionEvent.getXAxisMaxAsLongOrNull();
         // Set a minute as max time zoom just as for chart
         if (xAxisMax != null && xAxisMin != null) {
-            if(xAxisMax - xAxisMin > MINUTE_IN_MILLIS){
+            if (xAxisMax - xAxisMin > MINUTE_IN_MILLIS) {
                 Date rangeStart = new Date(xAxisMin);
                 Date rangeEnd = new Date(xAxisMax);
                 timeRangeWithZoomProvider.setTimeZoom(rangeStart, rangeEnd);
@@ -211,10 +214,10 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         }
         return true;
     }
-    
+
     /**
-     * Does nothing here; subclasses have the possibility to override if they need to re-load data
-     * based on changes in the visible area that may lead to step size / resolution adjustments
+     * Does nothing here; subclasses have the possibility to override if they need to re-load data based on changes in
+     * the visible area that may lead to step size / resolution adjustments
      */
     protected void updateChartIfEffectiveStepSizeChanged(Date minTimepoint, Date maxTimepoint) {
     }
@@ -253,9 +256,8 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     }
 
     protected void resetMinMaxAndExtremesInterval(boolean redraw) {
-        changeMinMaxAndExtremesInterval(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), redraw);
-        fireEvent(new ChartZoomResetEvent());
-        chart.hideResetZoom();
+        changeMinMaxAndExtremesInterval(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(),
+                redraw);
     }
 
     @Override
@@ -267,14 +269,16 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
 
     @Override
     public void onTimeRangeChanged(Date fromTime, Date toTime) {
-        if (!(timer.getPlayMode() == PlayModes.Live)) {
-            resetMinMaxAndExtremesInterval(/* redraw */ true);
+        if (timer.getPlayMode() == PlayModes.Live) {
+            resetMinMaxAndExtremesInterval(true);
         }
     }
 
     @Override
     public void onTimeZoomReset() {
         resetMinMaxAndExtremesInterval(true);
+        fireEvent(new ChartZoomResetEvent());
+        chart.hideResetZoom();
     }
 
     protected void updateTimePlotLine(Date date) {
@@ -284,7 +288,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     }
 
     public void add(Widget widget) {
-      rootPanel.add(widget);
+        rootPanel.add(widget);
     }
 
     public boolean remove(Widget widget) {
@@ -294,7 +298,6 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     public WidgetCollection getChildren() {
         return rootPanel.getChildren();
     }
-
 
     /**
      * Determines if a standard loading message is allowed to appear over the chart or not.

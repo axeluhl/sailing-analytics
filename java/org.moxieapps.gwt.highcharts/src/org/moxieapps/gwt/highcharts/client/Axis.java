@@ -1232,8 +1232,13 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @since 1.1.3
      */
     public T addPlotLines(PlotLine... plotLines) {
-        setPlotLines(plotLines);
-        update(this);
+        if (getNativeAxis() != null) {
+            for (PlotLine plotLine : plotLines) {
+                nativeAddPlotLine(getNativeAxis(), plotLine.getOptions().getJavaScriptObject());
+            }
+        } else {
+            setPlotLines(plotLines);
+        }
         return getThis();
     }
 
