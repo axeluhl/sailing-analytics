@@ -27,9 +27,18 @@ public class CompetitorWithBoatImpl extends CompetitorImpl implements DynamicCom
     }
 
     public Competitor resolve(SharedDomainFactory domainFactory) {
-        Competitor result = domainFactory
-                .getOrCreateCompetitorWithBoat(getId(), getName(), getShortName(), getColor(), getEmail(), getFlagImage(), getTeam(),
-                        getTimeOnTimeFactor(), getTimeOnDistanceAllowancePerNauticalMile(), getSearchTag(), getBoat());
+        final Competitor result;
+        if (!hasBoat()) {
+            // bug2822: this is a migrated competitor that had its default boat removed because it occurs in a boats-can-change regatta.
+            // De-serialize as a CompetitorImpl, not as a CompetitorWithBoatImpl; here we can, other than during the migration itself
+            // because there references to the CompetitorWithBoatImpl object may already exist that cannot easily be found and replaced.
+            // Here, we at least must make sure not to force a CompetitorWithBoatImpl and allow for a CompetitorImpl.
+            result = super.resolve(domainFactory);
+        } else {
+            result = domainFactory.getOrCreateCompetitorWithBoat(getId(), getName(), getShortName(), getColor(),
+                    getEmail(), getFlagImage(), getTeam(), getTimeOnTimeFactor(),
+                    getTimeOnDistanceAllowancePerNauticalMile(), getSearchTag(), getBoat());
+        }
         return result;
     }
 
