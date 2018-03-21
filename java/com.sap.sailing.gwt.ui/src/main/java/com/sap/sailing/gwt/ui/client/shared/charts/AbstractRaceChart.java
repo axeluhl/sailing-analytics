@@ -13,6 +13,7 @@ import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -184,6 +185,11 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         Long xAxisMax = chartSelectionEvent.getXAxisMaxAsLongOrNull();
         // Set a minute as max time zoom just as for chart
         if (xAxisMax != null && xAxisMin != null) {
+            if (timer.getPlayMode() == PlayModes.Live) {
+                // no zoom in livemode, until proper solution for timeslider out of zoomed bounds
+                // why zoom out every timeChange (old solution), just prevent zooming in in the first place
+                return false;
+            }
             if (xAxisMax - xAxisMin > MINUTE_IN_MILLIS) {
                 Date rangeStart = new Date(xAxisMin);
                 Date rangeEnd = new Date(xAxisMax);
@@ -276,9 +282,9 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
 
     @Override
     public void onTimeZoomReset() {
-        resetMinMaxAndExtremesInterval(true);
         fireEvent(new ChartZoomResetEvent());
         chart.hideResetZoom();
+        resetMinMaxAndExtremesInterval(true);
     }
 
     protected void updateTimePlotLine(Date date) {
