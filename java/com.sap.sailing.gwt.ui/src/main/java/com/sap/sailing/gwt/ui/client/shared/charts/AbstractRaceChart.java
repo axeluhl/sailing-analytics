@@ -13,7 +13,6 @@ import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -227,11 +226,15 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     protected void updateChartIfEffectiveStepSizeChanged(Date minTimepoint, Date maxTimepoint) {
     }
 
+    /**
+     * @param allowZoomProcessing if true, in livemode and zoomed, reset the zoom
+     */
     protected void changeMinMaxAndExtremesInterval(Date minTimepoint, Date maxTimepoint, boolean redraw) {
         if (chart != null) {
             XAxis xAxis = chart.getXAxis();
-            //if we are zoomed, and in livemode, reset the zoom, as this cannot be handled by the timesliders expected behaviour
-            if(timeRangeWithZoomProvider.isZoomed() && timer.getPlayMode() == PlayModes.Live) {
+            // if we are zoomed, and in livemode, reset the zoom, as this cannot be handled by the timesliders expected
+            // behaviour
+            if (timeRangeWithZoomProvider.isZoomed() && timer.getPlayMode() == PlayModes.Live) {
                 Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                     @Override
                     public void execute() {
@@ -284,9 +287,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
 
     @Override
     public void onTimeRangeChanged(Date fromTime, Date toTime) {
-        if (timer.getPlayMode() == PlayModes.Live) {
-            resetMinMaxAndExtremesInterval(true);
-        }
+        resetMinMaxAndExtremesInterval(true);
     }
 
     @Override
