@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelogtracking.impl;
+package com.sap.sailing.expeditionconnector.persistence.impl;
 
 import com.sap.sse.MasterDataImportClassLoaderService;
 
