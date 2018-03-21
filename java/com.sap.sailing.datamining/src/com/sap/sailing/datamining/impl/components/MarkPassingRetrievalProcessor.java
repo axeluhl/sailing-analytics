@@ -7,10 +7,8 @@ import java.util.concurrent.ExecutorService;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.impl.data.MarkPassingWithContext;
-import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sailing.domain.tracking.MarkPassingManeuver;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
@@ -30,8 +28,8 @@ public class MarkPassingRetrievalProcessor extends AbstractRetrievalProcessor<Ha
             try {
                 Iterable<Maneuver> maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
                 for (Maneuver maneuver : maneuvers) {
-                    if (maneuver.getType() == ManeuverType.MARK_PASSING) {
-                        maneuversWithContext.add(new MarkPassingWithContext(element, (MarkPassingManeuver) maneuver));
+                    if (maneuver.isMarkPassing()) {
+                        maneuversWithContext.add(new MarkPassingWithContext(element, maneuver));
                     }
                 }
             } catch (NoWindException e) {

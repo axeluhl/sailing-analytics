@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -9,6 +10,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.tracking.impl.AbstractGPSFixImpl;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -25,11 +27,12 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     private final double maxAngularVelocityInDegreesPerSecond;
     private final ManeuverCurveBoundaries mainCurveBoundaries;
     private final ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries;
+    private final MarkPassing markPassing;
 
     public ManeuverImpl(ManeuverType type, Tack newTack, Position position, Distance maneuverLoss, TimePoint timePoint,
             ManeuverCurveBoundaries mainCurveBoundaries,
             ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries,
-            double maxAngularVelocityInDegreesPerSecond) {
+            double maxAngularVelocityInDegreesPerSecond, MarkPassing markPassing) {
         this.type = type;
         this.newTack = newTack;
         this.position = position;
@@ -38,6 +41,7 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
         this.mainCurveBoundaries = mainCurveBoundaries;
         this.maneuverCurveWithStableSpeedAndCourseBoundaries = maneuverCurveWithStableSpeedAndCourseBoundaries;
         this.maxAngularVelocityInDegreesPerSecond = maxAngularVelocityInDegreesPerSecond;
+        this.markPassing = markPassing;
     }
 
     @Override
@@ -100,12 +104,25 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
         return super.toString() + " " + type + " on new tack " + newTack + " on position " + position
                 + " at time point " + timePoint + ", " + getManeuverBoundaries() + ", max. angular velocity: "
                 + maxAngularVelocityInDegreesPerSecond
-                + (getManeuverLoss() == null ? "" : " Lost approximately " + getManeuverLoss());
+                + (getManeuverLoss() == null ? "" : ", Lost approximately " + getManeuverLoss()) + ", Mark passing: "
+                + markPassing;
     }
 
     @Override
     public double getMaxAngularVelocityInDegreesPerSecond() {
         return maxAngularVelocityInDegreesPerSecond;
+    }
+
+    public MarkPassing getMarkPassing() {
+        return markPassing;
+    }
+
+    public boolean isMarkPassing() {
+        return markPassing != null;
+    }
+
+    public NauticalSide getToSide() {
+        return getMainCurveBoundaries().getDirectionChangeInDegrees() < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
     }
 
 }
