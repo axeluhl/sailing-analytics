@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
-import java.util.Collection;
-
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -12,7 +10,7 @@ public class MetaLeaderboardPerspectiveLifecycle extends AbstractLeaderboardPers
     
     private final MultipleMultiLeaderboardPanelLifecycle multiLeaderboardPanelLifecycle;
     
-    public MetaLeaderboardPerspectiveLifecycle(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard, Collection<DetailType> availableDetailTypes) {
+    public MetaLeaderboardPerspectiveLifecycle(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard, Iterable<DetailType> availableDetailTypes) {
         super(stringMessages, leaderboard, true, availableDetailTypes);
         multiLeaderboardPanelLifecycle = new MultipleMultiLeaderboardPanelLifecycle(null, stringMessages, availableDetailTypes);
         addLifeCycle(multiLeaderboardPanelLifecycle);

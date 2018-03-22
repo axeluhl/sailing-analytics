@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.leaderboardedit;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,7 +44,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
                         .deserializeFromCurrentLocation(new LeaderboardEditContextDefinition());
                 final String leaderboardName = settings.getLeaderboardName();
                 if (leaderboardNames.contains(leaderboardName)) {
-                    sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<Collection<DetailType>>() {
+                    sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<Iterable<DetailType>>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -53,7 +52,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
                         }
 
                         @Override
-                        public void onSuccess(Collection<DetailType> result) {
+                        public void onSuccess(Iterable<DetailType> result) {
                             SAPHeaderWithAuthentication header = initHeader();
                             GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
                             AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);

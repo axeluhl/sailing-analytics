@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
-import java.util.Collection;
-
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithZoomingPerspectiveLifecycle;
@@ -20,7 +18,7 @@ public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<A
     private LeaderboardWithZoomingPerspectiveLifecycle leaderboardLifecycle;
     private RaceBoardPerspectiveLifecycle raceboardLifecycle;
 
-    public AutoplayPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, UserService userService, Collection<DetailType> availableDetailTypes) {
+    public AutoplayPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, UserService userService, Iterable<DetailType> availableDetailTypes) {
         leaderboardLifecycle = new LeaderboardWithZoomingPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE, availableDetailTypes);
         //As we cannot know, if Bravo data is available later on, we will offer DetailTypes, that might be relevant despite not having data for them yet
         raceboardLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE, DetailType.getAutoplayDetailTypesForChart(), userService, availableDetailTypes);

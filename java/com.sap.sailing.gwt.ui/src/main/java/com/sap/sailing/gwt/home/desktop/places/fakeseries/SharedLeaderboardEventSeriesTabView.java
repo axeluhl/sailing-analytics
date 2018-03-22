@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.places.fakeseries;
 
-import java.util.Collection;
-
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.ui.Composite;
@@ -32,7 +30,7 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
 
     protected void createSharedLeaderboardPanel(String leaderboardName,
             EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager, UserService userService,
-            String placeToken, final Consumer<MultiRaceLeaderboardPanel> consumer, Collection<DetailType> availableDetailTypes) {
+            String placeToken, final Consumer<MultiRaceLeaderboardPanel> consumer, Iterable<DetailType> availableDetailTypes) {
         
         // FIXME remove
         boolean autoExpandLastRaceColumn = GwtHttpRequestUtils
@@ -64,7 +62,7 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
     }
 
     protected ComponentContext<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
-            String placeToken, Collection<DetailType> availableDetailTypes) {
+            String placeToken, Iterable<DetailType> availableDetailTypes) {
         final MultiRaceLeaderboardPanelLifecycle lifecycle = new MultiRaceLeaderboardPanelLifecycle(null, StringMessages.INSTANCE, availableDetailTypes);
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForSeriesOverallLeaderboard(leaderboardName);
 

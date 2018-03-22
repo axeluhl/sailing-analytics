@@ -531,166 +531,207 @@ public class LegEntryDTO implements Serializable {
     public Double getExpeditionAWA() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionAWA;
     }
+
     public Double getExpeditionAWS() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionAWS;
     }
+
     public Double getExpeditionBoatSpeed() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionBoatSpeed;
     }
+
     public Double getExpeditionCOG() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionCOG;
     }
+
     public Double getExpeditionDistanceBelowLine() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionDistanceBelowLine;
     }
+
     public Double getExpeditionDistanceToCommitteeBoat() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionDistanceToCommitteeBoat;
     }
+
     public Double getExpeditionDistToPortLayline() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionDistToPortLayline;
     }
+
     public Double getExpeditionDistToStbLayline() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionDistToStbLayline;
     }
+
     public Double getExpeditionVMG() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionVMG;
     }
+
     public Double getExpeditionTWS() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionTWS;
     }
+
     public Double getExpeditionTWD() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionTWD;
     }
+
     public Double getExpeditionTWA() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionTWA;
     }
+
     public Double getExpeditionTimeToStbLayline() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionTimeToStbLayline;
     }
+
     public Double getExpeditionTimeToPortLayline() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionTimeToPortLayline;
     }
+
     public Double getExpeditionTimeToPin() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionTimeToPin;
     }
+
     public Duration getExpeditionTimeToGUN() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionTimeToGUN;
     }
+
     public Double getExpeditionTimeToCommitteeBoat() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionTimeToCommitteeBoat;
     }
+
     public Double getExpeditionTimeToBurnToPin() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionTimeToBurnToPin;
     }
+
     public Double getExpeditionTargTWA() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionTargTWA;
     }
+
     public Double getExpeditionTimeToBurnToCommitteeBoat() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionTimeToBurnToCommitteeBoat;
     }
+
     public Duration getExpeditionTimeToBurnToLine() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionTimeToBurnToLine;
     }
+
     public Double getExpeditionTargetHeel() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionTargetHeel;
     }
+
     public Double getExpeditionTargBoatSpeed() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionTargBoatSpeed;
     }
+
     public Double getExpeditionSOG() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionSOG;
     }
+
     public Double getExpeditionRudderAngle() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionRudderAngle;
     }
+
     public Double getExpeditionRateOfTurn() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionRateOfTurn;
     }
+
     public Double getExpeditionRake() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionRake;
     }
+
     public Double getExpeditionLineSquareForWindDirection() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionLineSquareForWindDirection;
     }
+
     public Double getExpeditionHeading() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionHeading;
     }
+
     public Double getExpeditionForestayLoad() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionForestayLoad;
     }
+
     public Double getExpeditionHeel() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionHeel;
     }
+
     public Double getExpeditionCourseDetail() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionCourseDetail;
     }
+
     public Double getExpeditionDistanceToPinDetail() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionDistanceToPinDetail;
     }
+
     public Double getExpeditionVMGTargVMGDelta() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionVMGTargVMGDelta;
     }
+
     public Double getExpeditionBaro() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionBaro;
     }
+
     public Double getExpeditionLoadS() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionLoadS;
     }
+
     public Double getExpeditionLoadP() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionLoadP;
     }
+
     public Double getExpeditionJibCarPort() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionJibCarPort;
     }
+
     public Double getExpeditionJibCarStbd() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionJibCarStbd;
     }
+
     public Double getExpeditionMastButt() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionMastButt;
     }
     
-    public static class ExpeditionLegHolder implements Serializable {
+    private static class ExpeditionLegHolder implements Serializable {
         private static final long serialVersionUID = -2507536984016949734L;
-        public Double expeditionMastButt;
-        public Double expeditionJibCarStbd;
-        public Double expeditionJibCarPort;
-        public Double expeditionLoadP;
-        public Double expeditionLoadS;
-        public Double expeditionBaro;
-        public Double expeditionAWA;
-        public Double expeditionAWS;
-        public Double expeditionBoatSpeed;
-        public Double expeditionCOG;
-        public Double expeditionDistanceBelowLine;
-        public Double expeditionDistanceToCommitteeBoat;
-        public Double expeditionDistToPortLayline;
-        public Double expeditionDistToStbLayline;
-        public Double expeditionVMG;
-        public Double expeditionTWS;
-        public Double expeditionTWD;
-        public Double expeditionTWA;
-        public Double expeditionTimeToStbLayline;
-        public Double expeditionTimeToPortLayline;
-        public Double expeditionTimeToPin;
-        public Duration expeditionTimeToGUN;
-        public Double expeditionTimeToCommitteeBoat;
-        public Double expeditionTimeToBurnToPin;
-        public Double expeditionTargTWA;
-        public Double expeditionTimeToBurnToCommitteeBoat;
-        public Duration expeditionTimeToBurnToLine;
-        public Double expeditionTargetHeel;
-        public Double expeditionTargBoatSpeed;
-        public Double expeditionSOG;
-        public Double expeditionRudderAngle;
-        public Double expeditionRateOfTurn;
-        public Double expeditionRake;
-        public Double expeditionLineSquareForWindDirection;
-        public Double expeditionHeading;
-        public Double expeditionForestayLoad;
-        public Double expeditionHeel;
-        public Double expeditionCourseDetail;
-        public Double expeditionDistanceToPinDetail;
-        public Double expeditionVMGTargVMGDelta;
+        
+        private Double expeditionMastButt;
+        private Double expeditionJibCarStbd;
+        private Double expeditionJibCarPort;
+        private Double expeditionLoadP;
+        private Double expeditionLoadS;
+        private Double expeditionBaro;
+        private Double expeditionAWA;
+        private Double expeditionAWS;
+        private Double expeditionBoatSpeed;
+        private Double expeditionCOG;
+        private Double expeditionDistanceBelowLine;
+        private Double expeditionDistanceToCommitteeBoat;
+        private Double expeditionDistToPortLayline;
+        private Double expeditionDistToStbLayline;
+        private Double expeditionVMG;
+        private Double expeditionTWS;
+        private Double expeditionTWD;
+        private Double expeditionTWA;
+        private Double expeditionTimeToStbLayline;
+        private Double expeditionTimeToPortLayline;
+        private Double expeditionTimeToPin;
+        private Duration expeditionTimeToGUN;
+        private Double expeditionTimeToCommitteeBoat;
+        private Double expeditionTimeToBurnToPin;
+        private Double expeditionTargTWA;
+        private Double expeditionTimeToBurnToCommitteeBoat;
+        private Duration expeditionTimeToBurnToLine;
+        private Double expeditionTargetHeel;
+        private Double expeditionTargBoatSpeed;
+        private Double expeditionSOG;
+        private Double expeditionRudderAngle;
+        private Double expeditionRateOfTurn;
+        private Double expeditionRake;
+        private Double expeditionLineSquareForWindDirection;
+        private Double expeditionHeading;
+        private Double expeditionForestayLoad;
+        private Double expeditionHeel;
+        private Double expeditionCourseDetail;
+        private Double expeditionDistanceToPinDetail;
+        private Double expeditionVMGTargVMGDelta;
+        
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -748,6 +789,7 @@ public class LegEntryDTO implements Serializable {
             result = prime * result + ((expeditionVMGTargVMGDelta == null) ? 0 : expeditionVMGTargVMGDelta.hashCode());
             return result;
         }
+        
         @Override
         public boolean equals(Object obj) {
             if (this == obj)

@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
-import java.util.List;
-
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -28,10 +26,10 @@ public class MultiCompetitorRaceChartSettingsComponent extends
     private ListBox chartSecondTypeSelectionListBox;
     private final DetailType initialFirstDetailType;
     private final DetailType initialSecondDetailType;
-    private final List<DetailType> availableDetailsTypes;
+    private final Iterable<DetailType> availableDetailsTypes;
     
     public MultiCompetitorRaceChartSettingsComponent(MultiCompetitorRaceChartSettings settings,
-            StringMessages stringMessages, List<DetailType> availableDetailTypes) {
+            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
         super(settings, stringMessages);
         this.initialFirstDetailType = settings.getFirstDetailType();
         this.initialSecondDetailType = settings.getSecondDetailType();

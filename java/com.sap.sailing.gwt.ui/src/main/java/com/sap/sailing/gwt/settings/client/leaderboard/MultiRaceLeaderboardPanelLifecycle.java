@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
@@ -13,7 +12,8 @@ public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycl
 
     protected final List<String> namesOfRaceColumns;
     
-    public MultiRaceLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages, Collection<DetailType> availableDetailTypes) {
+    public MultiRaceLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages,
+            Iterable<DetailType> availableDetailTypes) {
         super(stringMessages, availableDetailTypes);
         this.namesOfRaceColumns = leaderboard != null ? leaderboard.getNamesOfRaceColumns() : new ArrayList<String>();
     }

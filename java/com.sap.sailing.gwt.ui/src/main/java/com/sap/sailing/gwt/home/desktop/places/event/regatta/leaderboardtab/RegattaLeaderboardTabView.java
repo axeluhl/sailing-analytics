@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab;
 
-import java.util.Collection;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -9,6 +7,7 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -90,87 +89,87 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         contentArea.setWidget(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         String regattaId = currentPresenter.getRegattaId();
         if (regattaId != null && !regattaId.isEmpty()) {
-            RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
-            String leaderboardName = regattaId;
-            currentPresenter.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
-                    new AsyncCallback<Collection<DetailType>>() {
-
-                        @Override
-                        public void onSuccess(Collection<DetailType> result) {
-                            MultiRaceLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel();
-                            final Consumer<MultiRaceLeaderboardPanel> leaderboardConsumer = new Consumer<MultiRaceLeaderboardPanel>() {
-                                @Override
-                                public void consume(MultiRaceLeaderboardPanel leaderboardPanel) {
-                                    leaderboardUpdateProvider = leaderboardPanel;
-                                    leaderboardUpdateProvider
-                                            .addLeaderboardUpdateListener(RegattaLeaderboardTabView.this);
-                                    OldLeaderboardDelegateFullscreenViewer leaderboardDelegate = new OldLeaderboardDelegateFullscreenViewer();
-                                    leaderboard = new OldLeaderboard(leaderboardDelegate);
-                                    liveRaces = new LiveRacesList(currentPresenter, false);
-                                    initWidget(ourUiBinder.createAndBindUi(RegattaLeaderboardTabView.this));
-                                    style.ensureInjected();
-                                    leaderboardAndLiveRacesPresenter = new OldLeaderboardAndLiveRacesPresenter(
-                                            leaderboard, liveRaces, buttonContainer, liveRacesContainer,
-                                            leaderboardDelegate);
-                                    RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(
-                                            RegattaLeaderboardTabView.this, contentArea, currentPresenter.getDispatch(),
-                                            currentPresenter.getErrorAndBusyClientFactory());
-                                    refreshManager.add(
-                                            leaderboardAndLiveRacesPresenter.getLiveRacesRefreshableWrapper(),
-                                            new GetLiveRacesForRegattaAction(currentPresenter.getEventDTO().getId(),
-                                                    regattaId));
-                                    leaderboard.setLeaderboard(leaderboardPanel,
-                                            currentPresenter.getAutoRefreshTimer());
-                                    if (currentPresenter.getEventDTO().getState() == EventState.RUNNING) {
-                                        // TODO: start autorefresh?
-                                    }
-                                    regattaAnalyticsManager.hideCompetitorChart();
-                                    contentArea.setWidget(RegattaLeaderboardTabView.this);
-                                    if (leaderboardPanel.getLeaderboard() != null) {
-                                        leaderboard.updatedLeaderboard(leaderboardPanel.getLeaderboard());
-                                    }
-                                }
-                            };
-                            if (leaderboardPanel == null) {
-                                createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager,
-                                        currentPresenter.getUserService(), /* FIXME placeToken */ null,
-                                        leaderboardConsumer, result);
-                            } else if ( /* FIXME placeToken not empty */ false) {
-                                createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(),
-                                        /* FIXME placeToken */ null, result).getInitialSettings(
-                                                new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
-                                                    @Override
-                                                    public void onSuccess(MultiRaceLeaderboardSettings settings) {
-                                                        leaderboardPanel.updateSettings(settings);
-                                                        leaderboardConsumer.consume(leaderboardPanel);
-                                                    }
-                                                });
-                            } else {
-                                leaderboardPanel.loadCompleteLeaderboard(false);
-                                leaderboardConsumer.consume(leaderboardPanel);
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            contentArea.setWidget(new Label("Could not load detaillist"));
-                            new com.google.gwt.user.client.Timer() {
-                                @Override
-                                public void run() {
-                                    currentPresenter.getHomeNavigation().goToPlace();
-                                }
-                            }.schedule(3000);
-                        }
-                    });
-        } else {
-            contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));
-            new com.google.gwt.user.client.Timer() {
+            final RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx()
+                    .getRegattaAnalyticsManager();
+            final String leaderboardName = regattaId;
+            final MultiRaceLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel();
+            final Consumer<MultiRaceLeaderboardPanel> leaderboardConsumer = new Consumer<MultiRaceLeaderboardPanel>() {
                 @Override
-                public void run() {
-                    currentPresenter.getHomeNavigation().goToPlace();
+                public void consume(MultiRaceLeaderboardPanel leaderboardPanel) {
+                    leaderboardUpdateProvider = leaderboardPanel;
+                    leaderboardUpdateProvider.addLeaderboardUpdateListener(RegattaLeaderboardTabView.this);
+                    OldLeaderboardDelegateFullscreenViewer leaderboardDelegate = new OldLeaderboardDelegateFullscreenViewer();
+                    leaderboard = new OldLeaderboard(leaderboardDelegate);
+                    liveRaces = new LiveRacesList(currentPresenter, false);
+                    initWidget(ourUiBinder.createAndBindUi(RegattaLeaderboardTabView.this));
+                    style.ensureInjected();
+                    leaderboardAndLiveRacesPresenter = new OldLeaderboardAndLiveRacesPresenter(leaderboard, liveRaces,
+                            buttonContainer, liveRacesContainer, leaderboardDelegate);
+                    RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(RegattaLeaderboardTabView.this,
+                            contentArea, currentPresenter.getDispatch(),
+                            currentPresenter.getErrorAndBusyClientFactory());
+                    refreshManager.add(leaderboardAndLiveRacesPresenter.getLiveRacesRefreshableWrapper(),
+                            new GetLiveRacesForRegattaAction(currentPresenter.getEventDTO().getId(), regattaId));
+                    leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
+                    if (currentPresenter.getEventDTO().getState() == EventState.RUNNING) {
+                        // TODO: start autorefresh?
+                    }
+                    regattaAnalyticsManager.hideCompetitorChart();
+                    contentArea.setWidget(RegattaLeaderboardTabView.this);
+                    if (leaderboardPanel.getLeaderboard() != null) {
+                        leaderboard.updatedLeaderboard(leaderboardPanel.getLeaderboard());
+                    }
                 }
-            }.schedule(3000);
+            };
+            if (leaderboardPanel == null) {
+                loadAvailableDetailTypes(leaderboardName, contentArea, result -> 
+                createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager,
+                        currentPresenter.getUserService(), /* FIXME placeToken */ null, leaderboardConsumer, result));
+            } else if ( /* FIXME placeToken not empty */ false) {
+                loadAvailableDetailTypes(leaderboardName, contentArea,
+                        result -> createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(),
+                                /* FIXME placeToken */ null, result).getInitialSettings(
+                                        new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
+                                            @Override
+                                            public void onSuccess(MultiRaceLeaderboardSettings settings) {
+                                                leaderboardPanel.updateSettings(settings);
+                                                leaderboardConsumer.consume(leaderboardPanel);
+                                            }
+                                        }));
+            } else {
+                leaderboardPanel.loadCompleteLeaderboard(false);
+                leaderboardConsumer.consume(leaderboardPanel);
+            }
+        } else {
+            showMessageLabelAndGoToHome("No leaderboard specified, cannot proceed to leaderboardpage", contentArea);
         }
+    }
+    
+    private void loadAvailableDetailTypes(final String leaderboardName, final AcceptsOneWidget contentArea,
+            final Consumer<Iterable<DetailType>> callback) {
+        currentPresenter.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
+                new AsyncCallback<Iterable<DetailType>>() {
+
+                    @Override
+                    public void onSuccess(Iterable<DetailType> result) {
+                        callback.consume(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        showMessageLabelAndGoToHome("Could not load detaillist", contentArea);
+                    }
+                });
+    }
+    
+    private void showMessageLabelAndGoToHome(final String message, final AcceptsOneWidget contentArea) {
+        contentArea.setWidget(new Label(message));
+        new Timer() {
+            @Override
+            public void run() {
+                currentPresenter.getHomeNavigation().goToPlace();
+            }
+        }.schedule(3000);
     }
 
     @Override

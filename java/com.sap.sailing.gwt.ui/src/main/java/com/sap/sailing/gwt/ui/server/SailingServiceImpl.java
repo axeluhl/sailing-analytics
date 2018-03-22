@@ -6919,7 +6919,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier) {
+    public Iterable<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier) {
         final List<DetailType> availableDetailsTypes = new ArrayList<>();
         availableDetailsTypes.addAll(DetailType.getAutoplayDetailTypesForChart());
         final DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);
@@ -7150,10 +7150,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Collection<DetailType> getAvailableDetailTypesForLeaderboard(String leaderboardName) {
-        Set<DetailType> allowed = new HashSet<>();
+    public Iterable<DetailType> getAvailableDetailTypesForLeaderboard(String leaderboardName) {
+        final Set<DetailType> allowed = new HashSet<>();
         allowed.addAll(DetailType.getAllNonRestrictedDetailTypes());
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             boolean hasBravoTrack = false;
             boolean hasExtendedBravoFixes = false;

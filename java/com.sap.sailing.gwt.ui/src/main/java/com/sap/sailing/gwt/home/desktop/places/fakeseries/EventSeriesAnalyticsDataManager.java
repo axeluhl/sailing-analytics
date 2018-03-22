@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.places.fakeseries;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -68,7 +67,7 @@ public class EventSeriesAnalyticsDataManager {
     public MultiRaceLeaderboardPanel createMultiRaceOverallLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             final MultiRaceLeaderboardSettings leaderboardSettings,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
-            boolean autoExpandLastRaceColumn, Collection<DetailType> availableDetailTypes) {
+            boolean autoExpandLastRaceColumn, Iterable<DetailType> availableDetailTypes) {
         if(overallLeaderboardPanel == null) {
             overallLeaderboardPanel = new MultiRaceLeaderboardPanel(parent, context, sailingService, asyncActionsExecutor,
                     leaderboardSettings, true, 
@@ -98,7 +97,7 @@ public class EventSeriesAnalyticsDataManager {
     public MultiLeaderboardProxyPanel createMultiLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             MultiRaceLeaderboardSettings leaderboardSettings,
             String preselectedLeaderboardName,  String leaderboardGroupName,
-            String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn, Collection<DetailType> availableDetailTypes) {
+            String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn, Iterable<DetailType> availableDetailTypes) {
         if(multiLeaderboardPanel == null) {
             multiLeaderboardPanel = new MultiLeaderboardProxyPanel(parent, context, sailingService, metaLeaderboardName,
                     asyncActionsExecutor, timer, true /* isEmbedded */,

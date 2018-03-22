@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
-import java.util.Collection;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Widget;
@@ -10,7 +9,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class OverallLeaderboardSettingsDialogComponent extends MultiRaceLeaderboardSettingsDialogComponent {
 
-    public OverallLeaderboardSettingsDialogComponent(MultiRaceLeaderboardSettings initialSettings, List<String> allRaceColumnNames, StringMessages stringMessages, Collection<DetailType> availableDetailTypes) {
+    public OverallLeaderboardSettingsDialogComponent(MultiRaceLeaderboardSettings initialSettings,
+            List<String> allRaceColumnNames, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
         super(initialSettings, allRaceColumnNames, stringMessages, availableDetailTypes);
     }
 

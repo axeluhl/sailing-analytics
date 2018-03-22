@@ -1,9 +1,7 @@
 
 package com.sap.sailing.gwt.ui.raceboard;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -104,7 +102,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                         .createStoredSettingsLocatorForRaceBoard(raceboardContextDefinition,
                                 finalMode != null ? finalMode.name() : null);
                 sailingService.determineDetailTypesForCompetitorChart(raceboardContextDefinition.getLeaderboardGroupName(),
-                        raceboardData.getRace().getRaceIdentifier(), new AsyncCallback<List<DetailType>>() {
+                        raceboardData.getRace().getRaceIdentifier(), new AsyncCallback<Iterable<DetailType>>() {
 
                             @Override
                             public void onFailure(Throwable caught) {
@@ -112,10 +110,10 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                             }
 
                             @Override
-                            public void onSuccess(List<DetailType> result) {
+                            public void onSuccess(Iterable<DetailType> result) {
                                 sailingService.getAvailableDetailTypesForLeaderboard(
                                         raceboardContextDefinition.getLeaderboardName(),
-                                        new AsyncCallback<Collection<DetailType>>() {
+                                        new AsyncCallback<Iterable<DetailType>>() {
 
                                             @Override
                                             public void onFailure(Throwable caught) {
@@ -124,7 +122,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                                             }
 
                                             @Override
-                                            public void onSuccess(Collection<DetailType> availableDetailTypes) {
+                                            public void onSuccess(Iterable<DetailType> availableDetailTypes) {
                                                 final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(
                                                         StringMessages.INSTANCE, result, getUserService(), availableDetailTypes);
                                                 RaceBoardComponentContext componentContext = new RaceBoardComponentContext(
@@ -179,16 +177,15 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private RaceBoardPanel createPerspectivePage(Component<?> parent,
             ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, RaceboardDataDTO raceboardData,
-            boolean showChartMarkEditMediaButtonsAndVideo, RaceBoardPerspectiveLifecycle raceLifeCycle, Timer timer, Collection<DetailType> availableDetailTypes) {
+            boolean showChartMarkEditMediaButtonsAndVideo, RaceBoardPerspectiveLifecycle raceLifeCycle, Timer timer,
+            Iterable<DetailType> availableDetailTypes) {
         selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this,
                 Collections.singletonList(selectedRace.getRaceIdentifier()), 5000l /* requestInterval*/);
   
-        RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(parent, context,
-                raceLifeCycle,
-                settings,
+        RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(parent, context, raceLifeCycle, settings,
                 sailingService, mediaService, getUserService(), asyncActionsExecutor,
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(),
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),

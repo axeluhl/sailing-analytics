@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
@@ -79,11 +80,11 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         boolean settingsChanged = updateSettingsOnly(newSettings);
         DetailType firstType = newSettings.getFirstDetailType();
         DetailType secondType = newSettings.getSecondDetailType();
-        if (!lifecycle.getAllowedDetailTypes().contains(firstType)){
+        if (!Util.contains(lifecycle.getAllowedDetailTypes(), firstType)) {
             // if the first type is not allowed here, choose a different valid value
             firstType = DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD;
         }
-        if (!lifecycle.getAllowedDetailTypes().contains(firstType)){
+        if (!Util.contains(lifecycle.getAllowedDetailTypes(), secondType)) {
             //if the second type is not allowed here, do not set it.
             secondType = null;
         }

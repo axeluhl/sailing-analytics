@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.places.fakeseries.leaderboardstab;
 
-import java.util.Collection;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
@@ -79,10 +77,10 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
                     .getAnalyticsManager();
 
             regattaAnalyticsManager.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
-                    new AsyncCallback<Collection<DetailType>>() {
+                    new AsyncCallback<Iterable<DetailType>>() {
 
                         @Override
-                        public void onSuccess(Collection<DetailType> result) {
+                        public void onSuccess(Iterable<DetailType> result) {
 
                             final boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
                                     LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
@@ -163,7 +161,7 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
     }
     
     private ComponentContext<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
-            String placeToken, Collection<DetailType> availableDetailTypes) {
+            String placeToken, Iterable<DetailType> availableDetailTypes) {
         final MultipleMultiLeaderboardPanelLifecycle lifecycle = new MultipleMultiLeaderboardPanelLifecycle(null, StringMessages.INSTANCE, availableDetailTypes);
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForSeriesRegattaLeaderboards(leaderboardName);
 

@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ManeuverCountRaceColumn;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -42,9 +42,9 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected CheckBox showCompetitorFullNameColumnCheckBox;
     protected CheckBox isCompetitorNationalityColumnVisible;
     protected T initialSettings;
-    protected Collection<DetailType> availableDetailTypes;
+    protected Iterable<DetailType> availableDetailTypes;
 
-    public LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages, Collection<DetailType> availableDetailTypes) {
+    public LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
         
@@ -52,13 +52,13 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         overallDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
-        this.availableDetailTypes = Collections.unmodifiableCollection(availableDetailTypes);
+        this.availableDetailTypes = availableDetailTypes;
     }
     
     public List<DetailType> reduceToAvailableTypes(Collection<DetailType> toFilter) {
         //keeping this function pure
         ArrayList<DetailType> returnValue = new ArrayList<>(toFilter);
-        returnValue.retainAll(availableDetailTypes);
+        returnValue.retainAll(Util.asList(availableDetailTypes));
         return returnValue;
     }
 

@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.Collection;
-
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -42,7 +40,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
             Timer timer, String preselectedLeaderboardName,
             String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
-            StringMessages stringMessages, DetailType chartDetailType, Collection<DetailType> availableDetailTypes) {
+            StringMessages stringMessages, DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         this(parent, componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
                 sailingService, asyncActionsExecutor, timer,
                 preselectedLeaderboardName, leaderboardGroupName, metaLeaderboardName,
@@ -57,7 +55,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
             AsyncActionsExecutor asyncActionsExecutor, Timer timer,
             String preselectedLeaderboardName, String leaderboardGroupName,
             String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
-            DetailType chartDetailType, Collection<DetailType> availableDetailTypes) {
+            DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
 

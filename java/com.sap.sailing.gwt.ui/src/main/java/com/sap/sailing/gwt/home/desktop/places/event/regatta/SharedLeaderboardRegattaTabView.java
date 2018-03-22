@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta;
 
-import java.util.Collection;
-
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
@@ -37,7 +35,7 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
     }
 
     public void createSharedLeaderboardPanel(String leaderboardName, RegattaAnalyticsDataManager regattaAnalyticsManager, UserService userService,
-            String placeToken, final Consumer<MultiRaceLeaderboardPanel> consumer, Collection<DetailType> availableDetailTypes) {
+            String placeToken, final Consumer<MultiRaceLeaderboardPanel> consumer, Iterable<DetailType> availableDetailTypes) {
         
         // FIXME remove
         boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
@@ -98,8 +96,9 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
         });
     }
     
-    protected PlaceBasedComponentContextWithSettingsStorage<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
-            String placeToken, Collection<DetailType> availableDetailTypes) {
+    protected PlaceBasedComponentContextWithSettingsStorage<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(
+            String leaderboardName, UserService userService, String placeToken,
+            Iterable<DetailType> availableDetailTypes) {
         final MultiRaceLeaderboardPanelLifecycle lifecycle = new MultiRaceLeaderboardPanelLifecycle(null, StringMessages.INSTANCE, availableDetailTypes);
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForEventRegattaLeaderboard(leaderboardName);
 

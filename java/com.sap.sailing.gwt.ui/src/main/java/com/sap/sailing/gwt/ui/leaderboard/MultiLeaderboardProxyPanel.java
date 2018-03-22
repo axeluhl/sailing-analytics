@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,7 +69,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
     private HashMap<String, MultiRaceLeaderboardSettings> contextStore;
     private MultiRaceLeaderboardSettings loadedSettings;
     private final FlagImageResolver flagImageResolver;
-    private Collection<DetailType> availableDetailTypes;
+    private final Iterable<DetailType> availableDetailTypes;
 
     public MultiLeaderboardProxyPanel(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService, String metaLeaderboardName,
@@ -78,7 +77,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
             Timer timer, boolean isEmbedded, String preselectedLeaderboardName,  
             ErrorReporter errorReporter, StringMessages stringMessages,
             boolean showRaceDetails, boolean autoExpandLastRaceColumn,
-            MultiRaceLeaderboardSettings settings, FlagImageResolver flagImageResolver, Collection<DetailType> availableDetailTypes) {
+            MultiRaceLeaderboardSettings settings, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
         super(parent, context);
 
         loadedSettings = settings;

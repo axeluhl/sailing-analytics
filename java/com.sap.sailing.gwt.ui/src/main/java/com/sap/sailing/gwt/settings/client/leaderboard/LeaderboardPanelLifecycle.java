@@ -2,11 +2,11 @@ package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public abstract class LeaderboardPanelLifecycle<T extends LeaderboardSettings>
@@ -15,17 +15,17 @@ public abstract class LeaderboardPanelLifecycle<T extends LeaderboardSettings>
 
     protected final StringMessages stringMessages;
 
-    protected Collection<DetailType> availableDetailTypes;
+    protected Iterable<DetailType> availableDetailTypes;
     
-    public LeaderboardPanelLifecycle(StringMessages stringMessages, Collection<DetailType> availableDetailTypes) {
+    public LeaderboardPanelLifecycle(StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
         this.stringMessages = stringMessages;
-        this.availableDetailTypes = Collections.unmodifiableCollection(availableDetailTypes);
+        this.availableDetailTypes = availableDetailTypes;
     }
     
     public List<DetailType> reduceToAvailableTypes(Collection<DetailType> toFilter) {
         //keeping this function pure
         ArrayList<DetailType> returnValue = new ArrayList<>(toFilter);
-        returnValue.retainAll(availableDetailTypes);
+        returnValue.retainAll(Util.asList(availableDetailTypes));
         return returnValue;
     }
     

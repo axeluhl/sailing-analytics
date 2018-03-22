@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta.analyticstab;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -22,7 +21,6 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorCharts;
 import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorChartsDelegateFullscreenViewer;
-import com.sap.sailing.gwt.home.desktop.places.Consumer;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDataManager;
@@ -33,7 +31,6 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.common.Util;
 
 /**
@@ -71,56 +68,54 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
 
     @Override
     public void start(RegattaCompetitorAnalyticsPlace myPlace, AcceptsOneWidget contentArea) {
-        if(currentPresenter.getRegattaMetadata() == null) {
+        if (currentPresenter.getRegattaMetadata() == null) {
             contentArea.setWidget(new InfoPlaceholder(StringMessages.INSTANCE.noDataForEvent()));
             return;
         }
-        
+
         contentArea.setWidget(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         String regattaId = currentPresenter.getRegattaId();
 
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;
-            RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
-            currentPresenter.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<Collection<DetailType>>() {
-                
+            RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx()
+                    .getRegattaAnalyticsManager();
+            final Runnable callback = new Runnable() {
                 @Override
-                public void onSuccess(Collection<DetailType> result) {
-                    final Runnable callback = new Runnable() {
-                        @Override
-                        public void run() {
-                            leaderboardUpdateProvider = regattaAnalyticsManager.getLeaderboardPanel();
-                            leaderboardUpdateProvider.addLeaderboardUpdateListener(RegattaCompetitorAnalyticsTabView.this);
-                            initWidget(ourUiBinder.createAndBindUi(RegattaCompetitorAnalyticsTabView.this));
-                            
-                            DetailType initialDetailType = DetailType.REGATTA_RANK;
-                            if (regattaAnalyticsManager.getMultiCompetitorChart() == null) {
-                                regattaAnalyticsManager.createMultiCompetitorChart(leaderboardName, initialDetailType);
-                            }
-                            competitorCharts.setChart(regattaAnalyticsManager.getMultiCompetitorChart(), getAvailableDetailsTypes(),
-                                    initialDetailType);
-                            
-                            regattaAnalyticsManager.showCompetitorChart(competitorCharts.getSelectedChartDetailType());
-                            contentArea.setWidget(RegattaCompetitorAnalyticsTabView.this);
-                        }
-                    };
-                    if(regattaAnalyticsManager.getLeaderboardPanel() == null) {
-                        createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager, currentPresenter.getUserService(), null, new Consumer<MultiRaceLeaderboardPanel>() {
+                public void run() {
+                    leaderboardUpdateProvider = regattaAnalyticsManager.getLeaderboardPanel();
+                    leaderboardUpdateProvider.addLeaderboardUpdateListener(RegattaCompetitorAnalyticsTabView.this);
+                    initWidget(ourUiBinder.createAndBindUi(RegattaCompetitorAnalyticsTabView.this));
+
+                    DetailType initialDetailType = DetailType.REGATTA_RANK;
+                    if (regattaAnalyticsManager.getMultiCompetitorChart() == null) {
+                        regattaAnalyticsManager.createMultiCompetitorChart(leaderboardName, initialDetailType);
+                    }
+                    competitorCharts.setChart(regattaAnalyticsManager.getMultiCompetitorChart(),
+                            getAvailableDetailsTypes(), initialDetailType);
+
+                    regattaAnalyticsManager.showCompetitorChart(competitorCharts.getSelectedChartDetailType());
+                    contentArea.setWidget(RegattaCompetitorAnalyticsTabView.this);
+                }
+            };
+            if (regattaAnalyticsManager.getLeaderboardPanel() == null) {
+                currentPresenter.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
+                        new AsyncCallback<Iterable<DetailType>>() {
+
                             @Override
-                            public void consume(MultiRaceLeaderboardPanel object) {
-                                callback.run();
+                            public void onSuccess(Iterable<DetailType> result) {
+                                createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager,
+                                        currentPresenter.getUserService(), null, panel -> callback.run(), result);
                             }
-                        }, result);
-                    } else {
-                        callback.run();
-                    }                    
-                }
-                
-                @Override
-                public void onFailure(Throwable caught) {
-                    logger.log(Level.SEVERE, "Could not load detailtypes", caught);
-                }
-            });
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                logger.log(Level.SEVERE, "Could not load detailtypes", caught);
+                            }
+                        });
+            } else {
+                callback.run();
+            }
         }
     }
 

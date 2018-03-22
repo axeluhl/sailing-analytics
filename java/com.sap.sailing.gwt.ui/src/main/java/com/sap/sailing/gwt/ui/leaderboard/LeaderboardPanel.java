@@ -234,7 +234,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private final TotalRankColumn totalRankColumn;
     
-    protected Collection<DetailType> availableDetailTypes;
+    protected Iterable<DetailType> availableDetailTypes;
 
     private final SelectionCheckboxColumn<LeaderboardRowDTO> selectionCheckboxColumn;
 
@@ -406,7 +406,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             AsyncActionsExecutor asyncActionsExecutor, LS settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
             ErrorReporter errorReporter, final StringMessages stringMessages, boolean showRaceDetails,
-            LeaderBoardStyle style, FlagImageResolver flagImageResolver, Collection<DetailType> availableDetailTypes) {
+            LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
         this(parent, context, sailingService, asyncActionsExecutor, settings, false, competitorSelectionProvider, null,
                 leaderboardName, errorReporter, stringMessages, showRaceDetails, style, flagImageResolver, availableDetailTypes);
     }
@@ -415,7 +415,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             AsyncActionsExecutor asyncActionsExecutor, LS settings, boolean isEmbedded,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Collection<DetailType> availableDetailTypes) {
+            boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
         this(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
                 new Timer(
                         // perform the first request as "live" but don't by default auto-play
@@ -435,7 +435,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
-            boolean enableSyncScroller, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Collection<DetailType> availableDetailTypes) {
+            boolean enableSyncScroller, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
         super(parent, context);
         this.style = style;
         this.showSelectionCheckbox = showSelectionCheckbox;
@@ -557,7 +557,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         mainPanel.setWidget(contentPanel);
         this.setTitle(stringMessages.leaderboard());
         
-        this.availableDetailTypes = Collections.unmodifiableCollection(availableDetailTypes);
+        this.availableDetailTypes = availableDetailTypes;
     }
 
     protected abstract void openSettingsDialog();
@@ -575,7 +575,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     public List<DetailType> reduceToAvailableTypes(Collection<DetailType> toFilter) {
         //keeping this function pure
         ArrayList<DetailType> returnValue = new ArrayList<>(toFilter);
-        returnValue.retainAll(availableDetailTypes);
+        returnValue.retainAll(Util.asList(availableDetailTypes));
         return returnValue;
     }
 

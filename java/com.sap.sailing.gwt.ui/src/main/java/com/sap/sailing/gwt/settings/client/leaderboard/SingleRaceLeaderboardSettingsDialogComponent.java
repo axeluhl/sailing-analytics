@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
-import java.util.Collection;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.CheckBox;
@@ -17,7 +16,7 @@ public class SingleRaceLeaderboardSettingsDialogComponent
     protected CheckBox showRaceRankColumn;
     
     public SingleRaceLeaderboardSettingsDialogComponent(SingleRaceLeaderboardSettings initialSettings,
-            StringMessages stringMessages, Collection<DetailType> availableDetailTypes) {
+            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
         super(initialSettings, stringMessages, availableDetailTypes);
         
     }

@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.Collection;
 import java.util.List;
 
 import com.google.gwt.dom.client.Style.Unit;
@@ -40,7 +39,7 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
             final Timer timer, 
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, DetailType chartDetailType, Collection<DetailType> availableDetailTypes) {
+            final StringMessages stringMessages, DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         this(parent, componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
                 sailingService, asyncActionsExecutor, timer,
                 leaderboardGroupName, leaderboardName, errorReporter,
@@ -55,7 +54,7 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
             final Timer timer, 
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, DetailType chartDetailType, Collection<DetailType> availableDetailTypes) {
+            final StringMessages stringMessages, DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
         init(new MultiRaceLeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,

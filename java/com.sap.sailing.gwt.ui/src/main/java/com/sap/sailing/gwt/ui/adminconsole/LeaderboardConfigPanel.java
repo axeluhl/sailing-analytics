@@ -326,7 +326,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     editCompetitorsDialog.show();
 
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
-                    sailingService.getAvailableDetailTypesForLeaderboard(leaderboardDTO.name, new AsyncCallback<Collection<DetailType>>() {
+                    sailingService.getAvailableDetailTypesForLeaderboard(leaderboardDTO.name, new AsyncCallback<Iterable<DetailType>>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -334,7 +334,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                         }
 
                         @Override
-                        public void onSuccess(Collection<DetailType> result) {
+                        public void onSuccess(Iterable<DetailType> result) {
                             openLeaderboardUrlConfigDialog(leaderboardDTO, result);
                         }
                     });
@@ -601,7 +601,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
      * 
      * @see LeaderboardEntryPoint#getUrl(String, LeaderboardSettings, boolean)
      */
-    private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard, Collection<DetailType> availableDetailType) {
+    private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard, Iterable<DetailType> availableDetailType) {
         final AbstractLeaderboardPerspectiveLifecycle lifeCycle;
         if (leaderboard.type.isMetaLeaderboard()) {
             lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType);
