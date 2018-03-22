@@ -199,7 +199,6 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.NotFoundException;
@@ -334,7 +333,6 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.MarkPassingManeuver;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.Track;
@@ -3419,14 +3417,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<ManeuverDTO> result = new ArrayList<ManeuverDTO>();
         for (Maneuver maneuver : maneuvers) {
             final ManeuverDTO maneuverDTO;
-            if (maneuver.getType() == ManeuverType.MARK_PASSING) {
+            if (maneuver.isMarkPassing()) {
                 maneuverDTO = new MarkpassingManeuverDTO(maneuver.getType(), maneuver.getNewTack(),
                         maneuver.getPosition(), 
                         maneuver.getTimePoint().asDate(),
                         createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore()),
                         createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter()),
                         maneuver.getDirectionChangeInDegrees(), maneuver.getManeuverLoss()==null?null:maneuver.getManeuverLoss().getMeters(),
-                                ((MarkPassingManeuver) maneuver).getSide());
+                                maneuver.getToSide());
             } else  {
                 maneuverDTO = new ManeuverDTO(maneuver.getType(), maneuver.getNewTack(),
                         maneuver.getPosition(), 

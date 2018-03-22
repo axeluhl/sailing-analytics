@@ -132,6 +132,7 @@ public class DurationTest {
         assertFalse(MillisecondsDurationImpl.ONE_HOUR.equals(null));
     }
 
+    @SuppressWarnings("unlikely-arg-type") // this is what we're testing here
     @Test
     public void testEqualForString() {
         assertFalse(MillisecondsDurationImpl.ONE_HOUR.equals("s"));
