@@ -354,9 +354,9 @@ public enum DetailType implements Serializable {
         allowed.add(RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS);
         allowed.add(RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL);
         allowed.add(RACE_CURRENT_LEG);
-        allowed.addAll(getRaceExpeditionDetailTypes());
         allowed.addAll(getRaceBravoDetailTypes());
         allowed.addAll(getRaceExtendedBravoDetailTypes());
+        allowed.addAll(getRaceExpeditionDetailTypes());
         return allowed;
     }
 
