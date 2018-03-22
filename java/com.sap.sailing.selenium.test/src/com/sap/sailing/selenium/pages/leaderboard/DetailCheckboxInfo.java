@@ -24,7 +24,7 @@ public enum DetailCheckboxInfo {
     private final String label;
     
     private DetailCheckboxInfo(DetailType id, String label) {
-        this.id = DebugIdHelper.createDebugId(id)+CHECK_BOX_DEBUGID_CONSTANT;
+        this.id = DebugIdHelper.createDebugId(id) + CHECK_BOX_DEBUGID_CONSTANT;
         this.label = label;
     }
     
