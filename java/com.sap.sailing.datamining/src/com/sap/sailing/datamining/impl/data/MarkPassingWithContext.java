@@ -7,22 +7,22 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.tracking.MarkPassingManeuver;
+import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Util;
 
 public class MarkPassingWithContext implements HasMarkPassingContext {
     private static final long serialVersionUID = -337042113749307686L;
     private final HasTrackedLegOfCompetitorContext trackedLegOfCompetitor;
-    private final MarkPassingManeuver maneuver;
+    private final Maneuver maneuver;
     
     private Double absoluteRank;
     private boolean rankHasBeenInitialized;
     private Wind wind;
 
-    public MarkPassingWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitor, MarkPassingManeuver maneuver) {
+    public MarkPassingWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitor, Maneuver markPassingManeuver) {
         this.trackedLegOfCompetitor = trackedLegOfCompetitor;
-        this.maneuver = maneuver;
+        this.maneuver = markPassingManeuver;
     }
 
     @Override
@@ -31,18 +31,18 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
     }
 
     @Override
-    public MarkPassingManeuver getManeuver() {
+    public Maneuver getManeuver() {
         return maneuver;
     }
     
     @Override
     public Waypoint getWaypoint() {
-        return getManeuver().getWaypointPassed();
+        return getManeuver().getMarkPassing().getWaypoint();
     }
     
     @Override
     public NauticalSide getPassingSide() {
-        return getManeuver().getSide();
+        return getManeuver().getToSide();
     }
 
     @Override

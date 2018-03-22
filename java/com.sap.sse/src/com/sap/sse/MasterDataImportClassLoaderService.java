@@ -1,4 +1,4 @@
-package com.sap.sailing.server;
+package com.sap.sse;
 
 /**
  * Bundles which com.sap.sailing.server has no dependency to can use this service to let the master data importer
@@ -13,7 +13,5 @@ package com.sap.sailing.server;
  *
  */
 public interface MasterDataImportClassLoaderService {
-    
     ClassLoader getClassLoader();
-
 }

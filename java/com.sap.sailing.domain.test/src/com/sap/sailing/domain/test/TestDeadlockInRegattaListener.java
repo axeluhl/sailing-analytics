@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
@@ -33,6 +34,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sse.util.ThreadLocalTransporter;
 
 public class TestDeadlockInRegattaListener {
     @Rule
@@ -56,13 +58,14 @@ public class TestDeadlockInRegattaListener {
             private static final long serialVersionUID = -3599667964201700780L;
 
             @Override
-            protected void notifyListenersAboutTrackedRaceRemoved(TrackedRace trackedRace) {
+            protected void notifyListenersAboutTrackedRaceRemoved(TrackedRace trackedRace,
+                    Optional<ThreadLocalTransporter> threadLocalTransporter) {
                 try {
                     latch.await();
                 } catch (InterruptedException | BrokenBarrierException e) {
                     throw new RuntimeException(e);
                 }
-                super.notifyListenersAboutTrackedRaceRemoved(trackedRace);
+                super.notifyListenersAboutTrackedRaceRemoved(trackedRace, Optional.empty());
             }
         };
         RacingEventServiceImpl racingEventService = new RacingEventServiceImpl() {
@@ -125,10 +128,10 @@ public class TestDeadlockInRegattaListener {
                 throw new RuntimeException(e);
             }
         }).start();
-        trackedRegatta.addTrackedRace(trackedRace1);
+        trackedRegatta.addTrackedRace(trackedRace1, Optional.empty());
         // the following runs into RacingEventService.getRaceTrackerByRegattaAndRaceIdentifier
         // which waits for the latch based on the override above while in synchronized RegattaListener.raceAdded
-        new Thread(()->trackedRegatta.addTrackedRace(trackedRace2)).start();
+        new Thread(()->trackedRegatta.addTrackedRace(trackedRace2, Optional.empty())).start();
         monitorOnRegattaListenerLatch.await();
         // the following awaits the latch in TrackedRegattaImpl.notifyListenersAboutTrackedRaceRemoved
         // after the write lock has been obtained but before the synchronized RegattaListener.raceRemoved method

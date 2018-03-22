@@ -21,6 +21,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -39,7 +40,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
@@ -84,6 +84,13 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
     private static EditableLeaderboardResources resources = GWT.create(EditableLeaderboardResources.class);
 
+    private static final Template TEMPLATE = GWT.create(Template.class);
+    
+    interface Template extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<div style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:{1}px;height:{2}px;background-image:url({0})'></div>")
+        SafeHtml image(String imageUri,int width, int height);
+    }
+    
     final DateBox lastScoreCorrectionTimeBox;
     final TextBox lastScoreCorrectionCommentBox;
 
@@ -150,7 +157,6 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
 
         @Override
         public void render(Context context, CompetitorDTO object, SafeHtmlBuilder sb) {
-            ImageResourceRenderer renderer = new ImageResourceRenderer();
             final String twoLetterIsoCountryCode = object.getTwoLetterIsoCountryCode();
             final ImageResource flagImageResource;
             if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
@@ -159,7 +165,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 flagImageResource = FlagImageResolverImpl.get().getFlagImageResource(twoLetterIsoCountryCode);
             }
             if (flagImageResource != null) {
-                sb.append(renderer.render(flagImageResource));
+                sb.append(TEMPLATE.image(flagImageResource.getSafeUri().asString(), 18, 12));
                 sb.appendHtmlConstant("&nbsp;");
             }
             sb.appendEscaped(object.getSailID());

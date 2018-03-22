@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
@@ -42,6 +43,7 @@ public interface Maneuver extends GPSFix {
      * 
      * @return The type of maneuver
      */
+    @Dimension(messageKey = "ManeuverType", ordinal = 12)
     ManeuverType getType();
 
     /**
@@ -50,7 +52,7 @@ public interface Maneuver extends GPSFix {
      * 
      * @return The new tack after the performed maneuver
      */
-    @Dimension(messageKey = "Tack", ordinal = 13)
+    @Dimension(messageKey = "Tack", ordinal = 14)
     Tack getNewTack();
 
     /**
@@ -140,5 +142,23 @@ public interface Maneuver extends GPSFix {
      * Gets lowest speed recorded within {@link #getManeuverBoundaries()}.
      */
     Speed getLowestSpeed();
+
+    /**
+     * Gets the mark passing which is contained within maneuver. In case if no mark passing was passed, {@code null} is
+     * returned.
+     */
+    MarkPassing getMarkPassing();
+
+    /**
+     * Determines whether the maneuver is mark passing maneuver.
+     */
+    @Dimension(messageKey = "MarkPassing", ordinal = 13)
+    boolean isMarkPassing();
+
+    /**
+     * Gets the direction of the maneuver. It corresponds to the direction of mark passing side.
+     */
+    @Dimension(messageKey = "ToSide", ordinal = 16)
+    NauticalSide getToSide();
 
 }

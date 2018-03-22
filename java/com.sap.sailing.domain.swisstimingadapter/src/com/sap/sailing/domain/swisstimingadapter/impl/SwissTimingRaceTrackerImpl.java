@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -487,7 +488,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
                         // we already know our single RaceDefinition
                         assert SwissTimingRaceTrackerImpl.this.race == race;
                     }
-                }, useInternalMarkPassingAlgorithm, raceLogResolver);
+                }, useInternalMarkPassingAlgorithm, raceLogResolver,
+                /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
         notifyRaceCreationListeners();
         logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());
     }
