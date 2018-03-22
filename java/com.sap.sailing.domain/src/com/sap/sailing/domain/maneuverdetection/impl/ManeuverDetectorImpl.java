@@ -400,14 +400,6 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         Position maneuverPosition = competitorTrack.getEstimatedPosition(maneuverDetails.getTimePoint(),
                 /* extrapolate */false);
         final Wind wind = trackedRace.getWind(maneuverPosition, maneuverDetails.getTimePoint());
-        Tack tackAfterManeuver;
-        try {
-            tackAfterManeuver = wind == null ? null
-                    : trackedRace.getTack(maneuverPosition, maneuverDetails.getTimePointAfter(),
-                            maneuverDetails.getSpeedWithBearingAfter().getBearing());
-        } catch (NoWindException e) {
-            tackAfterManeuver = null;
-        }
         ManeuverType maneuverType;
         Distance maneuverLoss = null;
         // the TrackedLegOfCompetitor variables may be null, e.g., in case the time points are before or after the race
@@ -509,6 +501,14 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         }
                     }
                 }
+                Tack tackAfterManeuver;
+                try {
+                    tackAfterManeuver = wind == null ? null
+                            : trackedRace.getTack(maneuverPosition, maneuverDetails.getTimePointAfter(),
+                                    maneuverDetails.getSpeedWithBearingAfter().getBearing());
+                } catch (NoWindException e) {
+                    tackAfterManeuver = null;
+                }
                 maneuverType = ManeuverType.PENALTY_CIRCLE;
                 maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(), maneuverDetails.getTimePoint(),
                         maneuverDetails.getTimePointAfter());
@@ -528,6 +528,14 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             final Maneuver maneuver;
             if (numberOfTacks > 0 || numberOfJibes > 0) {
                 maneuverType = numberOfTacks > 0 ? ManeuverType.TACK : ManeuverType.JIBE;
+                Tack tackAfterManeuver;
+                try {
+                    tackAfterManeuver = wind == null ? null
+                            : trackedRace.getTack(maneuverPosition, maneuverDetails.getTimePointAfter(),
+                                    maneuverDetails.getSpeedWithBearingAfter().getBearing());
+                } catch (NoWindException e) {
+                    tackAfterManeuver = null;
+                }
                 maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(), maneuverDetails.getTimePoint(),
                         maneuverDetails.getTimePointAfter());
                 maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, tackAfterManeuver,
@@ -544,6 +552,13 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                         .getDifferenceTo(maneuverMainCurveDetails.getSpeedWithBearingAfter().getBearing());
                 maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees())
                         ? ManeuverType.HEAD_UP : ManeuverType.BEAR_AWAY;
+                Tack tackAfterManeuver;
+                try {
+                    tackAfterManeuver = trackedRace.getTack(maneuverPosition, maneuverMainCurveDetails.getTimePointAfter(),
+                                    maneuverDetails.getSpeedWithBearingAfter().getBearing());
+                } catch (NoWindException e) {
+                    tackAfterManeuver = null;
+                }
                 // treat maneuver main curve details as main maneuver details, because the detected maneuver is
                 // either HEAD_UP or BEAR_AWAY
                 maneuver = new ManeuverWithMainCurveBoundariesImpl(maneuverType, tackAfterManeuver, maneuverPosition,
@@ -556,7 +571,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 maneuverType = ManeuverType.UNKNOWN;
                 maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(), maneuverDetails.getTimePoint(),
                         maneuverDetails.getTimePointAfter());
-                maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, tackAfterManeuver,
+                maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, null,
                         maneuverPosition, maneuverLoss, maneuverDetails.getTimePoint(),
                         maneuverMainCurveDetails.extractCurveBoundariesOnly(),
                         maneuverDetails.extractCurveBoundariesOnly(),
