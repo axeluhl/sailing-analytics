@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -87,7 +88,7 @@ public class StatisticsTest {
         trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(END_OF_TRACKING));
         trackedRace.setStartTimeReceived(new MillisecondsTimePoint(START_OF_RACE));
 
-        regatta.addTrackedRace(trackedRace);
+        regatta.addTrackedRace(trackedRace, Optional.empty());
     }
 
     private TrackedRaceStatisticsCacheImpl getStatisticsCacheWithRegattaAdded() throws Exception {
@@ -104,7 +105,7 @@ public class StatisticsTest {
             public void raceAdded(TrackedRace trackedRace) {
             }
         };
-        regatta.addRaceListener(raceListener);
+        regatta.addRaceListener(raceListener, Optional.empty());
         regatta.removeRaceListener(raceListener).get();
         
         return trackedRaceStatisticsCache;

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -283,7 +284,7 @@ public class SimulationServiceImpl implements SimulationService {
                 DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
                 SimulationRaceListener raceListener = new SimulationRaceListener(); 
                 raceListeners.put(legIdentifier.getRegattaName(), raceListener);
-                trackedRegatta.addRaceListener(raceListener);
+                trackedRegatta.addRaceListener(raceListener, /* Not replicated */ Optional.empty());
             }
             if (!legListeners.containsKey(legIdentifier.getRaceIdentifier())) {
                 TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);

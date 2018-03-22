@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -75,7 +76,7 @@ public class FetchTracksAndStoreLocallyTest extends OnlineTracTracBasedTest {
             @Override
             public void raceRemoved(TrackedRace trackedRace) {
             }
-        });
+        }, Optional.empty());
         super.completeSetupLaunchingControllerAndWaitForRaceDefinition(ReceiverType.RACECOURSE,
                 ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
     }

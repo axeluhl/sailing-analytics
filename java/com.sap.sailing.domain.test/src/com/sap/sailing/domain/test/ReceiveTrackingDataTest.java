@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -78,7 +79,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             @Override
             public void raceRemoved(TrackedRace trackedRace) {
             }
-        });
+        }, Optional.empty());
         for (Receiver receiver : domainFactory
                 .getUpdateReceivers(trackedRegatta, /* delayToLiveInMillis */0l,
                         /* simulator */null, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
