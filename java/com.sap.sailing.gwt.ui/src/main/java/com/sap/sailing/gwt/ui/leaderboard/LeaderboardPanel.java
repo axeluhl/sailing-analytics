@@ -677,8 +677,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
 
         if (newSettings.getOverallDetailsToShow() != null) {
-            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), DetailType.getAvailableOverallDetailColumnTypes(),
-                    selectedOverallDetailColumns);
+            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(),
+                    DetailType.getAvailableOverallDetailColumnTypes(), selectedOverallDetailColumns);
         }
         setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
         setShowAddedScores(newSettings.isShowAddedScores());
@@ -738,8 +738,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private void applyDetailSettings(final LeaderboardSettings newSettings) {
         if (newSettings.getOverallDetailsToShow() != null) {
-            setValuesWithReferenceOrder(Util.retainCopy(newSettings.getOverallDetailsToShow(), availableDetailTypes), DetailType.getAvailableOverallDetailColumnTypes(),
-                    selectedOverallDetailColumns);
+            setValuesWithReferenceOrder(Util.retainCopy(newSettings.getOverallDetailsToShow(), availableDetailTypes),
+                    DetailType.getAvailableOverallDetailColumnTypes(), selectedOverallDetailColumns);
         }
 
         setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
@@ -752,14 +752,15 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes(), selectedManeuverDetails);
         }
         if (newSettings.getLegDetailsToShow() != null) {
-            setValuesWithReferenceOrder(Util.retainCopy(newSettings.getLegDetailsToShow(), availableDetailTypes), DetailType.getAllLegDetailColumnTypes(),
-                    selectedLegDetails);
+            setValuesWithReferenceOrder(Util.retainCopy(newSettings.getLegDetailsToShow(), availableDetailTypes),
+                    DetailType.getAllLegDetailColumnTypes(), selectedLegDetails);
         }
         if (newSettings.getRaceDetailsToShow() != null) {
             List<DetailType> allRaceDetailsTypes = new ArrayList<>();
             allRaceDetailsTypes.addAll(DetailType.getAllRaceDetailTypes());
             allRaceDetailsTypes.addAll(DetailType.getRaceStartAnalysisColumnTypes());
-            setValuesWithReferenceOrder(Util.retainCopy(newSettings.getRaceDetailsToShow(), availableDetailTypes), allRaceDetailsTypes, selectedRaceDetails);
+            setValuesWithReferenceOrder(Util.retainCopy(newSettings.getRaceDetailsToShow(), availableDetailTypes),
+                    allRaceDetailsTypes, selectedRaceDetails);
         }
     }
 

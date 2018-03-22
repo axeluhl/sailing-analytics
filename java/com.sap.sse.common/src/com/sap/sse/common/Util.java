@@ -818,9 +818,13 @@ public class Util {
         return sb.toString();
     }
 
-    public static <T> Iterable<T> retainCopy(Iterable<T> toFilter, Iterable<T> availableDetailTypes) {
-        List<T> returnValue = Util.createList(toFilter);
-        returnValue.retainAll(Util.asList(availableDetailTypes));
+    /**
+     * Retains a copy of only the elements in {@link Iterable toFilter} that are contained in the specified
+     * {@link Iterable toRetain}. In other words, removes all elements of toFilter that are not contained in toRetain.
+     */
+    public static <T> Iterable<T> retainCopy(Iterable<T> toFilter, Iterable<T> toRetain) {
+        final List<T> returnValue = Util.asList(toFilter);
+        returnValue.retainAll(Util.asList(toRetain));
         return returnValue;
     }
 }
