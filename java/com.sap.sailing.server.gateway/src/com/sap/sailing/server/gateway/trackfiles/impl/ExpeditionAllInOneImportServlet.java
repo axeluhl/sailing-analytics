@@ -17,6 +17,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.server.gateway.impl.AbstractFileUploadServlet;
+import com.sap.sailing.server.gateway.trackfiles.impl.ExpeditionAllInOneImporter.ImportMode;
 import com.sap.sailing.server.gateway.trackfiles.impl.ExpeditionAllInOneImporter.ImporterResult;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -29,8 +30,11 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
     private static final Logger logger = Logger.getLogger(ExpeditionAllInOneImportServlet.class.getName());
 
     private static final String REQUEST_PARAMETER_BOAT_CLASS = "boatClass";
+    private static final String REQUEST_PARAMETER_REGATTA_NAME = "regattaName";
+    private static final String REQUEST_PARAMETER_IMPORT_MODE = "importMode";
     private static final String ERROR_MESSAGE_IMPORT_FILE_MISSING = "No file to import found!";
     private static final String ERROR_MESSAGE_BOAT_CLASS_MISSING = "No boat class name found!";
+    private static final String ERROR_MESSAGE_UNKNOWN_IMPORT_MODE = "Unkonwn import mode!";
 
     private ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> raceLogTrackingAdapterTracker;
 
@@ -53,6 +57,8 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
             String fileName = null;
             FileItem fileItem = null;
             String boatClassName = null;
+            String regattaName = null;
+            String importModeName = null;
             for (FileItem fi : fileItems) {
                 if (!fi.isFormField()) {
                     fileName = fi.getName();
@@ -60,6 +66,12 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
                 } else if (fi.getFieldName() != null) {
                     if (REQUEST_PARAMETER_BOAT_CLASS.equals(fi.getFieldName())) {
                         boatClassName = fi.getString();
+                    }
+                    if (REQUEST_PARAMETER_REGATTA_NAME.equals(fi.getFieldName())) {
+                        regattaName = fi.getString();
+                    }
+                    if (REQUEST_PARAMETER_IMPORT_MODE.equals(fi.getFieldName())) {
+                        importModeName = fi.getString();
                     }
                 }
             }
@@ -69,9 +81,19 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
             if (boatClassName == null || boatClassName.isEmpty()) {
                 throw new AllinOneImportException(ERROR_MESSAGE_BOAT_CLASS_MISSING);
             }
+            final ImportMode importMode;
+            if (importModeName == null) {
+                importMode = ImportMode.NEW_EVENT;
+            } else {
+                try {
+                    importMode = ImportMode.valueOf(importModeName);
+                } catch (Exception e) {
+                    throw new AllinOneImportException(ERROR_MESSAGE_UNKNOWN_IMPORT_MODE);
+                }
+            }
             importerResult = new ExpeditionAllInOneImporter(getService(),
                     raceLogTrackingAdapterTracker.getService().getAdapter(getService().getBaseDomainFactory()),
-                    getServiceFinderFactory(), getContext()).importFiles(fileName, fileItem, boatClassName);
+                    getServiceFinderFactory(), getContext()).importFiles(fileName, fileItem, boatClassName, importMode, regattaName);
         } catch (AllinOneImportException e) {
             importerResult = new ImporterResult(e, e.additionalErrors);
             logger.log(Level.SEVERE, e.getMessage());

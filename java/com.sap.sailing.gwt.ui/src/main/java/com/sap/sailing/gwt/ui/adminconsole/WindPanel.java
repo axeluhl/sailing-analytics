@@ -37,6 +37,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -44,6 +45,7 @@ import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -469,7 +471,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
                 Window.alert(StringMessages.INSTANCE.unexpectedErrorDuringFileImport());
             } else if (response.hasEventId()) {
                 new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
-                        response.getLeaderboardGroupName(), response.getLeaderboardName(), response.getRaceName(),
+                        response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getRaceName(),
                         response.getRaceColumnName(), response.getFleetName(), response.getGpsDeviceIds(),
                         response.getSensorDeviceIds(), response.getSensorFixImporterType(), sailingService,
                         errorReporter, stringMessages);
@@ -483,6 +485,37 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         final FileUpload fileUpload = new FileUpload();
         fileUpload.setName("upload");
         contentPanel.add(fileUpload);
+        
+        final FlowPanel importModePanel = new FlowPanel();
+        contentPanel.add(importModePanel);
+        final FlowPanel regattaNamePanel = new FlowPanel();
+        regattaNamePanel.setVisible(false);
+        contentPanel.add(regattaNamePanel);
+        final RadioButton newEventImport = new RadioButton("importMode", "TODO new event");
+        newEventImport.setFormValue("NEW_EVENT");
+        newEventImport.setValue(true);
+        importModePanel.add(newEventImport);
+        newEventImport.addClickHandler(event -> {
+            regattaNamePanel.setVisible(false);
+        });
+        final RadioButton newCompetitorImport = new RadioButton("importMode", "TODO new competitor");
+        newCompetitorImport.setFormValue("NEW_COMPETITOR");
+        importModePanel.add(newCompetitorImport);
+        newCompetitorImport.addClickHandler(event -> {
+            regattaNamePanel.setVisible(true);
+        });
+        final RadioButton newRaceImport = new RadioButton("importMode", "TODO new race");
+        newRaceImport.setFormValue("NEW_RACE");
+        importModePanel.add(newRaceImport);
+        newRaceImport.addClickHandler(event -> {
+            regattaNamePanel.setVisible(true);
+        });
+        final Label regattaNameLabel = new Label("TODO: regatta name" + ":");
+        regattaNamePanel.add(regattaNameLabel);
+        final TextBox regattaName = new TextBox();
+        regattaName.setName("regattaName");
+        regattaNamePanel.add(regattaName);
+        
         final HorizontalPanel boatClassPanel = new HorizontalPanel();
         boatClassPanel.setSpacing(5);
         contentPanel.add(boatClassPanel);
