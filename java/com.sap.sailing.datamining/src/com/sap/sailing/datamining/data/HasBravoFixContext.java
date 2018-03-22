@@ -25,6 +25,9 @@ public interface HasBravoFixContext extends HasWindOnTrackedLeg {
         return HasWindOnTrackedLeg.super.getWind();
     }
     
+    @Statistic(messageKey="TrueWindAngle")
+    Bearing getTrueWindAngle() throws NoWindException;
+
     @Statistic(messageKey="AbsoluteTrueWindAngle")
     Bearing getAbsoluteTrueWindAngle() throws NoWindException;
 

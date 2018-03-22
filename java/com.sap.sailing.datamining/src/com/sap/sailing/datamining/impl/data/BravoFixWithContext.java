@@ -62,6 +62,11 @@ public class BravoFixWithContext implements HasBravoFixContext {
     }
 
     @Override
+    public Bearing getTrueWindAngle() {
+        return getTrackedRace().getTWA(getCompetitor(), getTimePoint());
+    }
+
+    @Override
     public Bearing getAbsoluteTrueWindAngle() {
         return getTrackedRace().getTWA(getCompetitor(), getTimePoint()).abs();
     }
