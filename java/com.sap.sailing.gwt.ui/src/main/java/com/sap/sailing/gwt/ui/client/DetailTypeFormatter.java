@@ -580,6 +580,12 @@ public class DetailTypeFormatter {
         case EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION:
         case EXPEDITION_RACE_LOAD_S:
         case EXPEDITION_RACE_LOAD_P:
+        case EXPEDITION_LEG_BARO:
+        case EXPEDITION_LEG_LOAD_S:
+        case EXPEDITION_LEG_LOAD_P:
+        case EXPEDITION_LEG_JIB_CAR_PORT:
+        case EXPEDITION_LEG_JIB_CAR_STBD:
+        case EXPEDITION_LEG_MAST_BUTT:
             return "";
         default:
             break;
