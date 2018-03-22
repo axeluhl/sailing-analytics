@@ -2,9 +2,6 @@ package com.sap.sailing.selenium.pages.leaderboard;
 
 /**
  * <p>Helper class for generating debug identifiers.</p>
- * 
- * @author
- *   Riccardo Nimser
  */
 public class DebugIdHelper {
     /**

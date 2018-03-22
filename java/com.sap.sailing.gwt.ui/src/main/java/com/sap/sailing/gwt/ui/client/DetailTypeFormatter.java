@@ -6,6 +6,8 @@ import com.sap.sailing.domain.common.DetailType;
 
 public class DetailTypeFormatter {
     
+    private static final String AVERAGE_SYMBOL = "\u2205 ";
+
     private DetailTypeFormatter() { }
 	
     private static final StringMessages stringMessages = GWT.create(StringMessages.class);
@@ -283,85 +285,85 @@ public class DetailTypeFormatter {
         case EXPEDITION_RACE_MAST_BUTT:
             return stringMessages.expeditionRaceMastButt();
         case EXPEDITION_LEG_AWA:
-            return "\u2205 " + stringMessages.expeditionAwa();
+            return AVERAGE_SYMBOL + stringMessages.expeditionAwa();
         case EXPEDITION_LEG_AWS:
-            return "\u2205 " + stringMessages.expeditionAws();
+            return AVERAGE_SYMBOL + stringMessages.expeditionAws();
         case EXPEDITION_LEG_BOAT_SPEED:
-            return "\u2205 " + stringMessages.expeditionBoatSpeed();
+            return AVERAGE_SYMBOL + stringMessages.expeditionBoatSpeed();
         case EXPEDITION_LEG_COG:
-            return "\u2205 " + stringMessages.expeditionCOG();
+            return AVERAGE_SYMBOL + stringMessages.expeditionCOG();
         case EXPEDITION_LEG_COURSE:
-            return "\u2205 " + stringMessages.expeditionCourse();
+            return AVERAGE_SYMBOL + stringMessages.expeditionCourse();
         case EXPEDITION_LEG_DISTANCE_BELOW_LINE:
-            return "\u2205 " + stringMessages.expeditionDistanceBelowLine();
+            return AVERAGE_SYMBOL + stringMessages.expeditionDistanceBelowLine();
         case EXPEDITION_LEG_DISTANCE_TO_COMMITTEE_BOAT:
-            return "\u2205 " + stringMessages.expeditionDistanceToCommitteeBoat();
+            return AVERAGE_SYMBOL + stringMessages.expeditionDistanceToCommitteeBoat();
         case EXPEDITION_LEG_DISTANCE_TO_PIN:
-            return "\u2205 " + stringMessages.expeditionDistanceToPin();
+            return AVERAGE_SYMBOL + stringMessages.expeditionDistanceToPin();
         case EXPEDITION_LEG_DIST_TO_PORT_LAYLINE:
-            return "\u2205 " + stringMessages.expeditionDistToPortLayline();
+            return AVERAGE_SYMBOL + stringMessages.expeditionDistToPortLayline();
         case EXPEDITION_LEG_DIST_TO_STB_LAYLINE:
-            return "\u2205 " + stringMessages.expeditionDistToStbLayline();
+            return AVERAGE_SYMBOL + stringMessages.expeditionDistToStbLayline();
         case EXPEDITION_LEG_FORESTAY_LOAD:
-            return "\u2205 " + stringMessages.expeditionForestayLoad();
+            return AVERAGE_SYMBOL + stringMessages.expeditionForestayLoad();
         case EXPEDITION_LEG_HEADING:
-            return "\u2205 " + stringMessages.expeditionHeading();
+            return AVERAGE_SYMBOL + stringMessages.expeditionHeading();
         case EXPEDITION_LEG_HEEL:
-            return "\u2205 " + stringMessages.expeditionTargetHeel();
+            return AVERAGE_SYMBOL + stringMessages.expeditionTargetHeel();
         case EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION:
-            return "\u2205 " + stringMessages.expeditionLineSquareForWindDirection();
+            return AVERAGE_SYMBOL + stringMessages.expeditionLineSquareForWindDirection();
         case EXPEDITION_LEG_RAKE:
-            return "\u2205 " + stringMessages.expeditionRake();
+            return AVERAGE_SYMBOL + stringMessages.expeditionRake();
         case EXPEDITION_LEG_RATE_OF_TURN:
-            return "\u2205 " + stringMessages.expeditionRateOfTurn();
+            return AVERAGE_SYMBOL + stringMessages.expeditionRateOfTurn();
         case EXPEDITION_LEG_RUDDER_ANGLE:
-            return "\u2205 " + stringMessages.expeditionRudderAngle();
+            return AVERAGE_SYMBOL + stringMessages.expeditionRudderAngle();
         case EXPEDITION_LEG_SOG:
-            return "\u2205 " + stringMessages.expeditionSOG();
+            return AVERAGE_SYMBOL + stringMessages.expeditionSOG();
         case EXPEDITION_LEG_TARGET_HEEL:
-            return "\u2205 " + stringMessages.expeditionTargetHeel();
+            return AVERAGE_SYMBOL + stringMessages.expeditionTargetHeel();
         case EXPEDITION_LEG_TARG_BOAT_SPEED:
-            return "\u2205 " + stringMessages.expeditionTargBoatSpeed();
+            return AVERAGE_SYMBOL + stringMessages.expeditionTargBoatSpeed();
         case EXPEDITION_LEG_TARG_TWA:
-            return "\u2205 " + stringMessages.expeditionTargTwa();
+            return AVERAGE_SYMBOL + stringMessages.expeditionTargTwa();
         case EXPEDITION_LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT:
-            return "\u2205 " + stringMessages.expeditionTimeToBurnToCommitteeBoat();
+            return AVERAGE_SYMBOL + stringMessages.expeditionTimeToBurnToCommitteeBoat();
         case EXPEDITION_LEG_TIME_TO_BURN_TO_LINE:
-            return "\u2205 " + stringMessages.expeditionTimeToBurnToLine();
+            return AVERAGE_SYMBOL + stringMessages.expeditionTimeToBurnToLine();
         case EXPEDITION_LEG_TIME_TO_BURN_TO_PIN:
-            return "\u2205 " + stringMessages.expeditionTimeToBurnToPin();
+            return AVERAGE_SYMBOL + stringMessages.expeditionTimeToBurnToPin();
         case EXPEDITION_LEG_TIME_TO_COMMITTEE_BOAT:
-            return "\u2205 " + stringMessages.expeditionTimeToCommitteeBoat();
+            return AVERAGE_SYMBOL + stringMessages.expeditionTimeToCommitteeBoat();
         case EXPEDITION_LEG_TIME_TO_GUN:
-            return "\u2205 " + stringMessages.expeditionTimeToGun();
+            return AVERAGE_SYMBOL + stringMessages.expeditionTimeToGun();
         case EXPEDITION_LEG_TIME_TO_PIN:
-            return "\u2205 " + stringMessages.expeditionTimeToPin();
+            return AVERAGE_SYMBOL + stringMessages.expeditionTimeToPin();
         case EXPEDITION_LEG_TIME_TO_PORT_LAYLINE:
-            return "\u2205 " + stringMessages.expeditionDistToPortLayline();
+            return AVERAGE_SYMBOL + stringMessages.expeditionDistToPortLayline();
         case EXPEDITION_LEG_TIME_TO_STB_LAYLINE:
-            return "\u2205 " + stringMessages.expeditionDistToStbLayline();
+            return AVERAGE_SYMBOL + stringMessages.expeditionDistToStbLayline();
         case EXPEDITION_LEG_TWA:
-            return "\u2205 " + stringMessages.expeditionTwa();
+            return AVERAGE_SYMBOL + stringMessages.expeditionTwa();
         case EXPEDITION_LEG_TWD:
-            return "\u2205 " + stringMessages.expeditionTwd();
+            return AVERAGE_SYMBOL + stringMessages.expeditionTwd();
         case EXPEDITION_LEG_TWS:
-            return "\u2205 " + stringMessages.expeditionTws();
+            return AVERAGE_SYMBOL + stringMessages.expeditionTws();
         case EXPEDITION_LEG_VMG:
-            return "\u2205 " + stringMessages.expeditionVmg();
+            return AVERAGE_SYMBOL + stringMessages.expeditionVmg();
         case EXPEDITION_LEG_VMG_TARG_VMG_DELTA:
-            return "\u2205 " + stringMessages.expeditionVmgTargVmgDelta();
+            return AVERAGE_SYMBOL + stringMessages.expeditionVmgTargVmgDelta();
         case EXPEDITION_LEG_BARO:
-            return "\u2205 " + stringMessages.expeditionBaro();
+            return AVERAGE_SYMBOL + stringMessages.expeditionBaro();
         case EXPEDITION_LEG_LOAD_S:
-            return "\u2205 " + stringMessages.expeditionRaceLoadS();
+            return AVERAGE_SYMBOL + stringMessages.expeditionRaceLoadS();
         case EXPEDITION_LEG_LOAD_P:
-            return "\u2205 " + stringMessages.expeditionRaceLoadP();
+            return AVERAGE_SYMBOL + stringMessages.expeditionRaceLoadP();
         case EXPEDITION_LEG_JIB_CAR_PORT:
-            return "\u2205 " + stringMessages.expeditionRaceJibCarPort();
+            return AVERAGE_SYMBOL + stringMessages.expeditionRaceJibCarPort();
         case EXPEDITION_LEG_JIB_CAR_STBD:
-            return "\u2205 " + stringMessages.expeditionRaceJibCarStbd();
+            return AVERAGE_SYMBOL + stringMessages.expeditionRaceJibCarStbd();
         case EXPEDITION_LEG_MAST_BUTT:
-            return "\u2205 " + stringMessages.expeditionRaceMastButt();
+            return AVERAGE_SYMBOL + stringMessages.expeditionRaceMastButt();
         case BRAVO_RACE_HEEL_IN_DEGREES:
             return stringMessages.currentHeelInDegree();
         case BRAVO_RACE_PITCH_IN_DEGREES:

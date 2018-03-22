@@ -472,7 +472,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         if (settings.getOverallDetailsToShow() != null) {
             selectedOverallDetailColumns.addAll(settings.getOverallDetailsToShow());
         }
-        
         timer.addPlayStateListener(this);
         timer.addTimeListener(this);
 
@@ -556,7 +555,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         initWidget(mainPanel);
         mainPanel.setWidget(contentPanel);
         this.setTitle(stringMessages.leaderboard());
-        
         this.availableDetailTypes = availableDetailTypes;
     }
 
@@ -572,13 +570,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         style.afterConstructorHook(contentPanel, this);
     }
     
-    public List<DetailType> reduceToAvailableTypes(Collection<DetailType> toFilter) {
-        //keeping this function pure
-        ArrayList<DetailType> returnValue = new ArrayList<>(toFilter);
-        returnValue.retainAll(Util.asList(availableDetailTypes));
-        return returnValue;
-    }
-
     public void scrollRowIntoView(int selected) {
         leaderboardTable.getRowElement(selected).scrollIntoView();
     }
@@ -747,7 +738,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private void applyDetailSettings(final LeaderboardSettings newSettings) {
         if (newSettings.getOverallDetailsToShow() != null) {
-            setValuesWithReferenceOrder(reduceToAvailableTypes(newSettings.getOverallDetailsToShow()), DetailType.getAvailableOverallDetailColumnTypes(),
+            setValuesWithReferenceOrder(Util.retainCopy(newSettings.getOverallDetailsToShow(), availableDetailTypes), DetailType.getAvailableOverallDetailColumnTypes(),
                     selectedOverallDetailColumns);
         }
 
@@ -757,28 +748,28 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         setShowCompetitorFullName(newSettings.isShowCompetitorFullNameColumn());
 
         if (newSettings.getManeuverDetailsToShow() != null) {
-            setValuesWithReferenceOrder(reduceToAvailableTypes(newSettings.getManeuverDetailsToShow()),
+            setValuesWithReferenceOrder(Util.retainCopy(newSettings.getManeuverDetailsToShow(), availableDetailTypes),
                     ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes(), selectedManeuverDetails);
         }
         if (newSettings.getLegDetailsToShow() != null) {
-            setValuesWithReferenceOrder(reduceToAvailableTypes(newSettings.getLegDetailsToShow()), DetailType.getAllLegDetailColumnTypes(),
+            setValuesWithReferenceOrder(Util.retainCopy(newSettings.getLegDetailsToShow(), availableDetailTypes), DetailType.getAllLegDetailColumnTypes(),
                     selectedLegDetails);
         }
         if (newSettings.getRaceDetailsToShow() != null) {
             List<DetailType> allRaceDetailsTypes = new ArrayList<>();
             allRaceDetailsTypes.addAll(DetailType.getAllRaceDetailTypes());
             allRaceDetailsTypes.addAll(DetailType.getRaceStartAnalysisColumnTypes());
-            setValuesWithReferenceOrder(reduceToAvailableTypes(newSettings.getRaceDetailsToShow()), allRaceDetailsTypes, selectedRaceDetails);
+            setValuesWithReferenceOrder(Util.retainCopy(newSettings.getRaceDetailsToShow(), availableDetailTypes), allRaceDetailsTypes, selectedRaceDetails);
         }
     }
 
     protected abstract void setDefaultRaceColumnSelection(LS settings);
 
-    private void setValuesWithReferenceOrder(Collection<DetailType> valuesToSet, List<DetailType> referenceOrder,
+    private void setValuesWithReferenceOrder(Iterable<DetailType> valuesToSet, List<DetailType> referenceOrder,
             List<DetailType> collectionToSetValuesTo) {
         collectionToSetValuesTo.clear();
         collectionToSetValuesTo.addAll(referenceOrder);
-        collectionToSetValuesTo.retainAll(valuesToSet);
+        collectionToSetValuesTo.retainAll(Util.asList(valuesToSet));
     }
 
     /**
@@ -1247,90 +1238,180 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                             DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
                             new RaceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_AWA, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_AWA, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionAWA), LEG_COLUMN_HEADER_STYLE,
-                        LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_AWS, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_AWS, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionAWS), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TWA, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TWA, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTWA), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TWS, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TWS, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTWS), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TWD, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TWD, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTWD), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TARG_TWA, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TARG_TWA, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTargTWA), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_BOAT_SPEED, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_BOAT_SPEED, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionBoatSpeed), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TARG_BOAT_SPEED, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TARG_BOAT_SPEED, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTargBoatSpeed), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_SOG, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_SOG, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionSOG), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_COG, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_COG, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionCOG), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_FORESTAY_LOAD, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_FORESTAY_LOAD, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionForestayLoad), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_RAKE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_RAKE, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionRake), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_COURSE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_COURSE, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionCourseDetail), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_HEADING, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_HEADING, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionHeading), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_VMG, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_VMG, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionVMG), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_VMG_TARG_VMG_DELTA, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_VMG_TARG_VMG_DELTA, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionVMGTargVMGDelta), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_RATE_OF_TURN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_RATE_OF_TURN, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionRateOfTurn), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_RUDDER_ANGLE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_RUDDER_ANGLE, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionRudderAngle), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_HEEL, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_HEEL,new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionHeel), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TARGET_HEEL, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TARGET_HEEL, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTargetHeel), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_PORT_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_PORT_LAYLINE, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToPortLayline), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_STB_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_STB_LAYLINE, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToStbLayline), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_DIST_TO_PORT_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DIST_TO_PORT_LAYLINE, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionDistToPortLayline), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_DIST_TO_STB_LAYLINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DIST_TO_STB_LAYLINE, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionDistToStbLayline), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_GUN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_GUN, new DurationAsSecondsDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToGun), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToCommitteeBoat), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_PIN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_PIN, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToPin), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_LINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_LINE, new DurationAsSecondsDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToBurnToLine), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToBurnToCommitteeBoat), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_PIN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_PIN, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToBurnToPin), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionDistanceToCommitteeBoat), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_DISTANCE_TO_PIN, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DISTANCE_TO_PIN, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionDistanceToPinDetail), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_DISTANCE_BELOW_LINE, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DISTANCE_BELOW_LINE, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionDistanceBelowLine), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionLineSquareForWindDirection), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_BARO, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_BARO, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionBaro), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_LOAD_S, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_LOAD_S, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionLoadS), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_LOAD_P, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_LOAD_P, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionLoadP), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_JIB_CAR_PORT, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_JIB_CAR_PORT, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionJibCarPort), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_JIB_CAR_STBD, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_JIB_CAR_STBD, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionJibCarStbd), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_MAST_BUTT, new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_MAST_BUTT, new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionJibCarStbd), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.BRAVO_RACE_HEEL_IN_DEGREES, new FormattedDoubleDetailTypeColumn(DetailType.BRAVO_RACE_HEEL_IN_DEGREES, new BearingAsDegreeDetailTypeExtractor(e -> e.heel), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.BRAVO_RACE_PITCH_IN_DEGREES, new FormattedDoubleDetailTypeColumn(DetailType.BRAVO_RACE_PITCH_IN_DEGREES, new BearingAsDegreeDetailTypeExtractor(e -> e.pitch), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_AWA,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_AWA,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionAWA),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_AWS,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_AWS,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionAWS),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TWA,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TWA,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTWA),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TWS,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TWS,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTWS),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TWD,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TWD,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTWD),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TARG_TWA,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TARG_TWA,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTargTWA),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_BOAT_SPEED,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_BOAT_SPEED,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionBoatSpeed),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TARG_BOAT_SPEED,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TARG_BOAT_SPEED,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTargBoatSpeed),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_SOG,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_SOG,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionSOG),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_COG,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_COG,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionCOG),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_FORESTAY_LOAD,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_FORESTAY_LOAD,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionForestayLoad),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_RAKE,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_RAKE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionRake),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_COURSE,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_COURSE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionCourseDetail),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_HEADING,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_HEADING,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionHeading),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_VMG,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_VMG,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionVMG),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_VMG_TARG_VMG_DELTA,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_VMG_TARG_VMG_DELTA,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionVMGTargVMGDelta),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_RATE_OF_TURN,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_RATE_OF_TURN,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionRateOfTurn),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_RUDDER_ANGLE,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_RUDDER_ANGLE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionRudderAngle),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_HEEL,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_HEEL,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionHeel),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TARGET_HEEL,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TARGET_HEEL,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTargetHeel),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_PORT_LAYLINE,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_PORT_LAYLINE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToPortLayline),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_STB_LAYLINE,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_STB_LAYLINE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToStbLayline),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_DIST_TO_PORT_LAYLINE,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DIST_TO_PORT_LAYLINE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionDistToPortLayline),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_DIST_TO_STB_LAYLINE,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DIST_TO_STB_LAYLINE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionDistToStbLayline),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_GUN,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_GUN,
+                            new DurationAsSecondsDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToGun),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT,
+                            new DoubleTextRaceDetailTypeExtractor(
+                                    LeaderboardEntryDTO::getExpeditionTimeToCommitteeBoat),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_PIN,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_PIN,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToPin),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_LINE,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_LINE,
+                            new DurationAsSecondsDetailTypeExtractor(
+                                    LeaderboardEntryDTO::getExpeditionTimeToBurnToLine),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT,
+                            new DoubleTextRaceDetailTypeExtractor(
+                                    LeaderboardEntryDTO::getExpeditionTimeToBurnToCommitteeBoat),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_PIN,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_PIN,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToBurnToPin),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT,
+                            new DoubleTextRaceDetailTypeExtractor(
+                                    LeaderboardEntryDTO::getExpeditionDistanceToCommitteeBoat),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_DISTANCE_TO_PIN,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DISTANCE_TO_PIN,
+                            new DoubleTextRaceDetailTypeExtractor(
+                                    LeaderboardEntryDTO::getExpeditionDistanceToPinDetail),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_DISTANCE_BELOW_LINE,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_DISTANCE_BELOW_LINE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionDistanceBelowLine),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION,
+                            new DoubleTextRaceDetailTypeExtractor(
+                                    LeaderboardEntryDTO::getExpeditionLineSquareForWindDirection),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_BARO,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_BARO,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionBaro),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_LOAD_S,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_LOAD_S,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionLoadS),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_LOAD_P,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_LOAD_P,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionLoadP),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_JIB_CAR_PORT,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_JIB_CAR_PORT,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionJibCarPort),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_JIB_CAR_STBD,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_JIB_CAR_STBD,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionJibCarStbd),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_MAST_BUTT,
+                    new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_MAST_BUTT,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionJibCarStbd),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.BRAVO_RACE_HEEL_IN_DEGREES,
+                    new FormattedDoubleDetailTypeColumn(DetailType.BRAVO_RACE_HEEL_IN_DEGREES,
+                            new BearingAsDegreeDetailTypeExtractor(e -> e.heel), LEG_COLUMN_HEADER_STYLE,
+                            LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.BRAVO_RACE_PITCH_IN_DEGREES,
+                    new FormattedDoubleDetailTypeColumn(DetailType.BRAVO_RACE_PITCH_IN_DEGREES,
+                            new BearingAsDegreeDetailTypeExtractor(e -> e.pitch), LEG_COLUMN_HEADER_STYLE,
+                            LEG_COLUMN_STYLE, LeaderboardPanel.this));
             return result;
         }
         
@@ -1693,7 +1774,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 return result;
             }
         }
-        
+
         /**
          * Accumulates the distance traveled over all legs of a race and considers the specifics of a gate start. The
          * first leg of a gate start gets as additional distance traveled the distance from the port side of the line to

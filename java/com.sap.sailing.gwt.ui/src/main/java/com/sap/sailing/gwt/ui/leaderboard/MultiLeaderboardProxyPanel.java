@@ -237,7 +237,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
                 toMerge = loadedSettings;
             }
 
-            MultiMultiRaceLeaderboardPanel newSelectedLeaderboardPanel = new MultiMultiRaceLeaderboardPanel(this, getComponentContext(),
+            MultiRaceLeaderboardPanel newSelectedLeaderboardPanel = new MultiRaceLeaderboardPanel(this, getComponentContext(),
                     sailingService,
                     asyncActionsExecutor, toMerge, isEmbedded,
                     new CompetitorSelectionModel(true), timer,

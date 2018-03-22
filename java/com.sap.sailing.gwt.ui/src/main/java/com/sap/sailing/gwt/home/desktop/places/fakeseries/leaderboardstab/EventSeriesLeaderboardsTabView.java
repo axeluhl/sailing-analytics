@@ -5,6 +5,7 @@ import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
@@ -94,7 +95,6 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
                                             MultiLeaderboardProxyPanel leaderboardPanel = regattaAnalyticsManager
                                                     .createMultiLeaderboardPanel(null, componentContext, settings, null, // TODO:
                                                                                                                          // preselectedLeaderboardName
-
                                                             "leaderboardGroupName", leaderboardName, true, // TODO @FM
                                                                                                            // this
                                                                                                            // information
@@ -140,26 +140,24 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            contentArea.setWidget(new Label("Could not load detaillist"));
-                            new com.google.gwt.user.client.Timer() {
-                                @Override
-                                public void run() {
-                                    currentPresenter.getHomeNavigation().goToPlace();
-                                }
-                            }.schedule(3000);
+                            showMessageLabelAndGoToHome("Could not load detaillist", contentArea);
                         }
                     });
         } else {
-            contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));
-            new com.google.gwt.user.client.Timer() {
-                @Override
-                public void run() {
-                    currentPresenter.getHomeNavigation().goToPlace();
-                }
-            }.schedule(3000);
+            showMessageLabelAndGoToHome("No leaderboard specified, cannot proceed to leaderboardpage", contentArea);
         }
     }
-    
+
+    private void showMessageLabelAndGoToHome(final String message, final AcceptsOneWidget contentArea) {
+        contentArea.setWidget(new Label(message));
+        new Timer() {
+            @Override
+            public void run() {
+                currentPresenter.getHomeNavigation().goToPlace();
+            }
+        }.schedule(3000);
+    }
+
     private ComponentContext<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
             String placeToken, Iterable<DetailType> availableDetailTypes) {
         final MultipleMultiLeaderboardPanelLifecycle lifecycle = new MultipleMultiLeaderboardPanelLifecycle(null, StringMessages.INSTANCE, availableDetailTypes);

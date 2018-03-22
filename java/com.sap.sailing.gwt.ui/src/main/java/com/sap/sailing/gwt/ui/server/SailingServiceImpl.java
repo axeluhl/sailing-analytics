@@ -3277,22 +3277,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private Double getBravoDurationValue(BiFunction<BravoFixTrack<Competitor>, TimePoint, Duration> valueGetter,
             TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
-        return getBravoValue(valueGetter, d->d.asSeconds(), trackedRace, competitor, timePoint);
+        return getBravoValue(valueGetter, Duration::asSeconds, trackedRace, competitor, timePoint);
     }
     
     private Double getBravoDoubleValue(BiFunction<BravoFixTrack<Competitor>, TimePoint, Double> valueGetter,
             TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
-        return getBravoValue(valueGetter, d->d, trackedRace, competitor, timePoint);
+        return getBravoValue(valueGetter, Function.identity(), trackedRace, competitor, timePoint);
     }
     
     private Double getBravoBearingInDegrees(BiFunction<BravoFixTrack<Competitor>, TimePoint, Bearing> valueGetter,
             TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
-        return getBravoValue(valueGetter, b->b.getDegrees(), trackedRace, competitor, timePoint);
+        return getBravoValue(valueGetter, Bearing::getDegrees, trackedRace, competitor, timePoint);
     }
     
     private Double getBravoDistanceInMeters(BiFunction<BravoFixTrack<Competitor>, TimePoint, Distance> valueGetter,
             TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
-        return getBravoValue(valueGetter, d->d.getMeters(), trackedRace, competitor, timePoint);
+        return getBravoValue(valueGetter, Distance::getMeters, trackedRace, competitor, timePoint);
     }
     
     private <T> Double getBravoValue(BiFunction<BravoFixTrack<Competitor>, TimePoint, T> valueGetter,

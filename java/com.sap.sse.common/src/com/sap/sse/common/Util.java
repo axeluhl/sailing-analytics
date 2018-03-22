@@ -817,4 +817,10 @@ public class Util {
         }
         return sb.toString();
     }
+
+    public static <T> Iterable<T> retainCopy(Iterable<T> toFilter, Iterable<T> availableDetailTypes) {
+        List<T> returnValue = Util.createList(toFilter);
+        returnValue.retainAll(Util.asList(availableDetailTypes));
+        return returnValue;
+    }
 }

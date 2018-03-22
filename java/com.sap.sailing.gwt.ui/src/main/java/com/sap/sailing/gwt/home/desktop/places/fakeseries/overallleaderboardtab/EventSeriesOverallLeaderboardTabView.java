@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -98,25 +99,22 @@ public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEvent
                 
                 @Override
                 public void onFailure(Throwable caught) {
-                    caught.printStackTrace();
-                    contentArea.setWidget(new Label("Could not load detailType list"));
-                    new com.google.gwt.user.client.Timer() {
-                        @Override
-                        public void run() {
-                            currentPresenter.getHomeNavigation().goToPlace();
-                        }
-                    }.schedule(3000);
+                    showMessageLabelAndGoToHome("Could not load detailType list", contentArea);
                 }
             });
         } else {
-            contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));
-            new com.google.gwt.user.client.Timer() {
-                @Override
-                public void run() {
-                    currentPresenter.getHomeNavigation().goToPlace();
-                }
-            }.schedule(3000);
+            showMessageLabelAndGoToHome("No leaderboard specified, cannot proceed to leaderboardpage", contentArea);
         }
+    }
+
+    private void showMessageLabelAndGoToHome(final String message, final AcceptsOneWidget contentArea) {
+        contentArea.setWidget(new Label(message));
+        new Timer() {
+            @Override
+            public void run() {
+                currentPresenter.getHomeNavigation().goToPlace();
+            }
+        }.schedule(3000);
     }
 
     @Override

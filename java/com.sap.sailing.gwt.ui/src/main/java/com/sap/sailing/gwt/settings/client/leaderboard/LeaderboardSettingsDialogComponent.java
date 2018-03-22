@@ -55,13 +55,6 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         this.availableDetailTypes = availableDetailTypes;
     }
     
-    public List<DetailType> reduceToAvailableTypes(Collection<DetailType> toFilter) {
-        //keeping this function pure
-        ArrayList<DetailType> returnValue = new ArrayList<>(toFilter);
-        returnValue.retainAll(Util.asList(availableDetailTypes));
-        return returnValue;
-    }
-
     protected FlowPanel createManeuverDetailsPanel(DataEntryDialog<?> dialog) {
         FlowPanel meneuverPanel = new FlowPanel();
         meneuverPanel.ensureDebugId("ManeuverSettingsPanel");
@@ -70,7 +63,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         FlowPanel meneuverContent = new FlowPanel();
         meneuverContent.addStyleName("dialogInnerContent");
         Collection<DetailType> currentMeneuverDetailSelection = initialSettings.getManeuverDetailsToShow();
-        for (DetailType detailType : reduceToAvailableTypes(ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes())) {
+        for (DetailType detailType : Util.retainCopy(ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes(), availableDetailTypes)) {
             CheckBox checkbox = createAndRegisterCheckbox(dialog, detailType,
                     currentMeneuverDetailSelection.contains(detailType), maneuverDetailCheckboxes);
             
@@ -113,7 +106,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         int detailCountInCurrentFlowPanel = 0;
         Collection<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceDetailDialogContent = null;
-        for (DetailType type : reduceToAvailableTypes(DetailType.getAllRaceDetailTypes())) {
+        for (DetailType type : Util.retainCopy(DetailType.getAllRaceDetailTypes(), availableDetailTypes)) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 raceDetailDialogContent = new FlowPanel();
                 raceDetailDialogContent.addStyleName("dialogInnerContent");
@@ -143,7 +136,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         int detailCountInCurrentFlowPanel = 0;
         Collection<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceStartAnalysisDialogContent = null;
-        for (DetailType type : reduceToAvailableTypes(DetailType.getRaceStartAnalysisColumnTypes())) {
+        for (DetailType type : Util.retainCopy(DetailType.getRaceStartAnalysisColumnTypes(), availableDetailTypes)) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 raceStartAnalysisDialogContent = new FlowPanel();
                 raceStartAnalysisDialogContent.addStyleName("dialogInnerContent");
@@ -165,7 +158,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         FlowPanel overallDetailDialogContent = new FlowPanel();
         overallDetailDialogContent.addStyleName("dialogInnerContent");
         Collection<DetailType> currentOverallDetailSelection = initialSettings.getOverallDetailsToShow();
-        for (DetailType type : reduceToAvailableTypes(DetailType.getAvailableOverallDetailColumnTypes())) {
+        for (DetailType type : Util.retainCopy(DetailType.getAvailableOverallDetailColumnTypes(), availableDetailTypes)) {
             CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentOverallDetailSelection.contains(type),
                     overallDetailCheckboxes);
             overallDetailDialogContent.add(checkbox);
@@ -198,7 +191,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         FlowPanel legDetailsContent = null;
         Collection<DetailType> currentLegDetailSelection = initialSettings.getLegDetailsToShow();
         int detailCountInCurrentFlowPanel = 0;
-        for (DetailType type : reduceToAvailableTypes(DetailType.getAllLegDetailColumnTypes())) {
+        for (DetailType type : Util.retainCopy(DetailType.getAllLegDetailColumnTypes(), availableDetailTypes)) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 legDetailsContent = new FlowPanel();
                 legDetailsContent.addStyleName("dialogInnerContent");
