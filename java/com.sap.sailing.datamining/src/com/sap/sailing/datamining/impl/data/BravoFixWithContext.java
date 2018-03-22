@@ -11,7 +11,6 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 
 public class BravoFixWithContext implements HasBravoFixContext {
@@ -78,9 +77,5 @@ public class BravoFixWithContext implements HasBravoFixContext {
 
     private GPSFixTrack<Competitor, GPSFixMoving> getGpsFixTrack() {
         return getTrackedRace().getTrack(getTrackedLegOfCompetitorContext().getCompetitor());
-    }
-
-    private TrackedRace getTrackedRace() {
-        return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getTrackedLeg().getTrackedRace();
     }
 }
