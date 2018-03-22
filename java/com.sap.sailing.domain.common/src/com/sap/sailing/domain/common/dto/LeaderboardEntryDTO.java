@@ -737,13 +737,14 @@ public class LeaderboardEntryDTO implements Serializable {
      * Used to ensure that only one null value needs to be transmitted, if no expedition data exists 
      */
     public static class ExpeditionDataHolder implements Serializable{
+        private static final long serialVersionUID = 1L;
+        
         public Double expeditionMastButt;
         public Double expeditionJibCarStbd;
         public Double expeditionJibCarPort;
         public Double expeditionLoadS;
         public Double expeditionLoadP;
         public Double expeditionBARO;
-        private static final long serialVersionUID = 1L;
         public Double expeditionAWA;
         public Double expeditionAWS;
         public Double expeditionBoatSpeed;
