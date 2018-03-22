@@ -58,7 +58,7 @@ public class BravoFixWithContext implements HasBravoFixContext {
 
     @Override
     public Wind getWind() {
-        return getTrackedRace().getWind(getGpsFixTrack().getEstimatedPosition(getTimePoint(), /* extrapolate */ true), getTimePoint());
+        return HasBravoFixContext.super.getWind();
     }
 
     @Override
