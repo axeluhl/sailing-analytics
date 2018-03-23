@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
@@ -99,6 +100,16 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
         if (lastManeuverDetectionResult != null) {
             return getAllManeuversFromManeuverSpots(lastManeuverDetectionResult.getManeuverSpots());
+        }
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public List<ManeuverCurve> getAlreadyDetectedManeuverCurves() {
+        ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
+        if (lastManeuverDetectionResult != null) {
+            return lastManeuverDetectionResult.getManeuverSpots().stream().filter(maneuverSpot -> maneuverSpot.getManeuverCurve() != null)
+                    .map(maneuverSpot -> maneuverSpot.getManeuverCurve()).collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
