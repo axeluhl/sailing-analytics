@@ -222,7 +222,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     }
 
     @Override
-    protected void internalShowNumericResult(Map<GroupKey, Number> resultValues, Map<GroupKey, Triple<Number, Number, Long>> errorMargins) {
+    protected void internalShowNumericResults(Map<GroupKey, Number> resultValues, Map<GroupKey, Triple<Number, Number, Long>> errorMargins) {
         this.currentResultValues = resultValues;
         this.currentResultErrorMargins = errorMargins;
         decimalsListBox.setValue(getCurrentResult().getValueDecimals(), false);

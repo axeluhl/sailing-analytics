@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining;
 
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 
 public interface DataMiningComponentProvider<SettingsType extends Settings> extends Component<SettingsType> {
@@ -17,5 +18,7 @@ public interface DataMiningComponentProvider<SettingsType extends Settings> exte
     public boolean isAwatingReload();
     
     public void reloadComponents();
+    
+    public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition);
     
 }

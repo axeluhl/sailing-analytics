@@ -69,9 +69,14 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
         return new ClusterDTO(clusterGroups.getPercentageClusterFormatter().format(cluster));
     }
     
-    private <R> R getSomethingForLegTrackingInterval(BiFunction<TimePoint, TimePoint, R> resultSupplier) {
+    protected <R> R getSomethingForLegTrackingInterval(BiFunction<TimePoint, TimePoint, R> resultSupplier) {
         final TimePoint startTime = getTrackedLegOfCompetitor().getStartTime();
         final TimePoint finishTime = getTrackedLegOfCompetitor().getFinishTime();
+        return getSomethingForInterval(resultSupplier, startTime, finishTime);
+    }
+
+    protected <R> R getSomethingForInterval(BiFunction<TimePoint, TimePoint, R> resultSupplier,
+            final TimePoint startTime, final TimePoint finishTime) {
         final R result;
         if (startTime != null) {
             final TrackedRace trackedRace = getTrackedLegContext().getTrackedLeg().getTrackedRace();
@@ -194,6 +199,11 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
         return timepoint;
     }
 
+    /**
+     * Picks the time point that is in the middle between the time point when the competitor entered
+     * the leg and the time point the competitor finished the leg. If no leg start/finish time exists
+     * for the competitor, start/end of race and then start/end of tracking are used as fall-back values.
+     */
     @Override
     public TimePoint getTimePoint() {
         final TrackedLeg trackedLeg = getTrackedLegContext().getTrackedLeg();
