@@ -121,25 +121,9 @@ usage() {
 
  ${bold}Parameter:${reset}
   -r, --region                  AWS region (e.g. \"eu-west-2\" for London)
-  -t, --instance-type           Instance type (e.g. \"t2.medium\")
-  -k, --key-name                IAM keypair name (e.g. \"leonradeck-keypair\")
-  -i, --key-file                Path to keypair file
-  -s, --ssh-user                SSH user to connect to instance (e.g. \"root\")
-  -u, --user-username           Username of user to create
-  -q, --user-password           Password of user to create
-  -n, --instance-name           Name for instance (e.g. \"WC Santander 2017\")
-  -l, --instance-short-name     Short name for instance (e.g. subdomain \"wcs17\")
-  -a, --new-admin-password      New password for the admin user
-  -p, --public-dns-name         Dns name of instance (e.g. \"ec2-35-176...amazonaws.com\")
-  -z, --super-instance          Dns name of superior instance (e.g. base instance for sub instances)
-  -m, --event-name              Name of event
-  -x, --mongodb-host            Ip adress or dns of mongodb host
-  -y  --mongodb-port            Port of mongodb
-  -b, --build                   Build version to use (leave empty for latest)
-  -w, --description             Description of sub instance
-  -c, --contact-person          Contact person
-  -e, --contact-email           Email of contact person
   -d, --debug                   Debug mode
+
+  // other parameters disabled for now
 
   ${bold}Scenarios:${reset}
   --instance                    Create instance
@@ -227,8 +211,6 @@ while [[ $1 = -?* ]]; do
 	-k|--key-name) shift; key_name_param=${1} ;;
 	-i|--key-file) shift; key_file_param=${1} ;;
 	-s|--ssh-user) shift; ssh_user_param=${1} ;;
-	-u|--user-username) shift; user_username_param=${1} ;;
-	-q|--user-password) shift; user_password_param=${1} ;;
 	-n|--instance-name) shift; instance_name_param=${1} ;;
 	-l|--instance-short-name) shift; instance_short_name_param=${1} ;;
 	-a|--new-admin-password) shift; new_admin_password_param=${1} ;;
