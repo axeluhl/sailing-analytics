@@ -3,6 +3,7 @@ package com.sap.sailing.domain.maneuverdetection.impl;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.ManeuverCurve;
 
 /**
  * Represents a spot within the track of competitor, where maneuvers have been detected by analysis of a douglas peucker
@@ -16,12 +17,14 @@ public class ManeuverSpot {
 
     private final Iterable<GPSFixMoving> douglasPeuckerFixes;
     private final NauticalSide maneuverSpotDirection;
+    private final ManeuverCurve maneuverCurve;
     private final Iterable<Maneuver> maneuvers;
     private final WindMeasurement windMeasurement;
 
     public ManeuverSpot(Iterable<GPSFixMoving> douglasPeuckerFixes, NauticalSide maneuverSpotDirection,
-            Iterable<Maneuver> maneuvers, WindMeasurement windMeasurement) {
+            ManeuverCurve maneuverCurve, Iterable<Maneuver> maneuvers, WindMeasurement windMeasurement) {
         this.douglasPeuckerFixes = douglasPeuckerFixes;
+        this.maneuverCurve = maneuverCurve;
         this.maneuvers = maneuvers;
         this.maneuverSpotDirection = maneuverSpotDirection;
         this.windMeasurement = windMeasurement;
@@ -39,6 +42,10 @@ public class ManeuverSpot {
      */
     public NauticalSide getManeuverSpotDirection() {
         return maneuverSpotDirection;
+    }
+
+    public ManeuverCurve getManeuverCurve() {
+        return maneuverCurve;
     }
 
     /**

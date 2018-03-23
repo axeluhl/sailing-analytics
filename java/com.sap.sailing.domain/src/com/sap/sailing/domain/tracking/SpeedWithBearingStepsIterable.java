@@ -18,7 +18,7 @@ import java.util.Iterator;
  */
 public class SpeedWithBearingStepsIterable implements Iterable<SpeedWithBearingStep> {
 
-    private Iterable<SpeedWithBearingStep> steps;
+    private final Iterable<SpeedWithBearingStep> steps;
 
     public SpeedWithBearingStepsIterable(Iterable<SpeedWithBearingStep> steps) {
         this.steps = steps;

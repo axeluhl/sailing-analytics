@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.ManeuverCurve;
 
 /**
  * Determines maneuvers performed within a tracked race.
@@ -32,5 +33,9 @@ public interface ManeuverDetector {
      *         <code>to</code>, or else the list of maneuvers detected.
      */
     List<Maneuver> detectManeuvers();
+
+    List<Maneuver> detectManeuvers(Iterable<ManeuverCurve> maneuverCurves);
+
+    List<ManeuverCurve> detectManeuverCurves();
 
 }

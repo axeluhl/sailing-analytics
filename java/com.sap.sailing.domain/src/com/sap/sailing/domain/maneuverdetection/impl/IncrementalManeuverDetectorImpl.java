@@ -14,6 +14,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.ApproximatedFixesCalculator;
 import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.ManeuverCurve;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -110,7 +111,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
     }
 
     @Override
-    public List<Maneuver> detectManeuvers() {
+    protected List<ManeuverSpot> detectManeuverSpots() {
         TrackTimeInfo trackTimeInfo = getTrackTimeInfo();
         if (trackTimeInfo != null) {
             TimePoint earliestManeuverStart = trackTimeInfo.getTrackStartTimePoint();
@@ -131,7 +132,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                             ? lastManeuverDetectionResult.getIncrementalRunsCount() + 1 : Integer.MAX_VALUE);
             this.lastManeuverDetectionResult = new ManeuverDetectionResult(latestRawFixTimePoint, maneuverSpots,
                     incrementalRunsCount);
-            return getAllManeuversFromManeuverSpots(maneuverSpots);
+            return maneuverSpots;
         }
         return Collections.emptyList();
     }
@@ -187,11 +188,26 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                                 result.add(matchingManeuverSpotFromState);
                             } else {
                                 // New wind information has been received which considerably differs from previous
-                                // maneuver spot calculation => recalculate existing maneuver spot maneuvers
-                                ManeuverSpot maneuverSpot = createManeuverFromFixesGroup(
-                                        fixesGroupForManeuverSpotAnalysis,
-                                        matchingManeuverSpotFromState.getManeuverSpotDirection(), earliestManeuverStart,
-                                        latestManeuverEnd);
+                                // maneuver spot calculation => recalculate maneuvers of existing maneuver curve
+                                ManeuverCurve maneuverCurve = matchingManeuverSpotFromState.getManeuverCurve();
+                                ManeuverSpot maneuverSpot;
+                                if (maneuverCurve != null) {
+                                    WindMeasurement windMeasurement = matchingManeuverSpotFromState
+                                            .getWindMeasurement();
+                                    Wind wind = trackedRace.getWind(windMeasurement.getPosition(),
+                                            windMeasurement.getTimePoint());
+                                    List<Maneuver> maneuvers = determineManeuversFromManeuverCurve(
+                                            maneuverCurve.getMainCurveBoundaries(),
+                                            maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries(), wind,
+                                            maneuverCurve.getMarkPassing());
+                                    maneuverSpot = new ManeuverSpot(
+                                            matchingManeuverSpotFromState.getDouglasPeuckerFixes(),
+                                            matchingManeuverSpotFromState.getManeuverSpotDirection(), maneuverCurve,
+                                            maneuvers, new WindMeasurement(windMeasurement.getTimePoint(),
+                                                    windMeasurement.getPosition(), wind.getBearing()));
+                                } else {
+                                    maneuverSpot = matchingManeuverSpotFromState;
+                                }
                                 result.add(maneuverSpot);
                             }
                             fixesGroupForManeuverSpotAnalysis.clear();
@@ -210,8 +226,9 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                                     courseChangeDirectionOnOriginalFixes, previous, current)) {
                         // current fix does not belong to the existing fixes group; determine maneuvers of recent fixes
                         // group, then start a new list
-                        ManeuverSpot maneuverSpot = createManeuverFromFixesGroup(fixesGroupForManeuverSpotAnalysis,
-                                lastCourseChangeDirection, earliestManeuverStart, latestManeuverEnd);
+                        ManeuverSpot maneuverSpot = createManeuverSpotWithManeuversFromFixesGroup(
+                                fixesGroupForManeuverSpotAnalysis, lastCourseChangeDirection, earliestManeuverStart,
+                                latestManeuverEnd);
                         result.add(maneuverSpot);
                         fixesGroupForManeuverSpotAnalysis.clear();
                     }
@@ -262,8 +279,9 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 current = next;
             } while (approximationPointsIter.hasNext());
             if (!fixesGroupForManeuverSpotAnalysis.isEmpty()) {
-                ManeuverSpot maneuverSpot = createManeuverFromFixesGroup(fixesGroupForManeuverSpotAnalysis,
-                        lastCourseChangeDirection, earliestManeuverStart, latestManeuverEnd);
+                ManeuverSpot maneuverSpot = createManeuverSpotWithManeuversFromFixesGroup(
+                        fixesGroupForManeuverSpotAnalysis, lastCourseChangeDirection, earliestManeuverStart,
+                        latestManeuverEnd);
                 result.add(maneuverSpot);
             }
         }
