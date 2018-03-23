@@ -548,7 +548,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     markPassingCalculator.stop();
                 }
                 }
-            });
+            }, /* Not relevant For replication */ Optional.empty());
         } else {
             markPassingCalculator = null;
         }
@@ -1888,7 +1888,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } finally {
             LockUtil.unlockAfterRead(getSerializationLock());
         }
-        if (!old.equals(this.windSourcesToExclude)) {
+        if (!old.equals(new HashSet<>(getWindSourcesToExclude()))) {
             clearAllCachesExceptManeuvers();
             triggerManeuverCacheRecalculationForAllCompetitors();
         }

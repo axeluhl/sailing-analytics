@@ -17,6 +17,7 @@ public class ManeuverWithEstimationDataJsonSerializer implements JsonSerializer<
     public static final String NEW_TACK = "newTack";
     public static final String POSITION_AND_TIME = "positionAndTime";
     public static final String MAX_ANGULAR_VELOCITY_IN_DEGREES_PER_SECOND = "maxAngularVelocityInDegreesPerSecond";
+    public final static String MARK_PASSING = "markPassing";
     public static final String MANEUVER_LOSS_IN_METERS = "maneuverLossInMeters";
     public static final String MAIN_CURVE_BOUNDARIES = "mainCurveBoundaries";
     public static final String MANEUVER_BOUNDARIES = "maneuverBoundaries";
@@ -51,6 +52,7 @@ public class ManeuverWithEstimationDataJsonSerializer implements JsonSerializer<
         result.put(MANEUVER_TYPE, maneuver.getType() == null ? null : maneuver.getType().name());
         result.put(NEW_TACK, maneuver.getNewTack() == null ? null : maneuver.getNewTack().name());
         result.put(MAX_ANGULAR_VELOCITY_IN_DEGREES_PER_SECOND, maneuver.getMaxAngularVelocityInDegreesPerSecond());
+        result.put(MARK_PASSING, maneuver.isMarkPassing());
         result.put(MANEUVER_LOSS_IN_METERS,
                 maneuver.getManeuverLoss() == null ? null : maneuver.getManeuverLoss().getMeters());
         result.put(POSITION_AND_TIME, gpsFixSerializer.serialize(maneuver));

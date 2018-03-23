@@ -334,7 +334,6 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.MarkPassingManeuver;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.Track;
@@ -3432,15 +3431,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final SpeedWithBearingDTO speedBefore = createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore());
             final SpeedWithBearingDTO speedAfter = createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter());
             final double directionChangeInDegrees = maneuver.getDirectionChangeInDegrees();
-            final Double maneuverLossInMeters = maneuver.getManeuverLoss() == null ? null
-                    : maneuver.getManeuverLoss().getMeters();
+            final Double maneuverLossInMeters = maneuver.getManeuverLoss() == null ? null : maneuver.getManeuverLoss().getMeters();
             final Duration duration = maneuver.getDuration();
-            final SpeedDTO minSpeed = maneuver.getLowestSpeed() == null ? null
-                    : createSpeedDTO(maneuver.getLowestSpeed());
-            if (type == ManeuverType.MARK_PASSING) {
+            final SpeedDTO minSpeed = maneuver.getLowestSpeed() == null ? null : createSpeedDTO(maneuver.getLowestSpeed());
+            if (maneuver.isMarkPassing()) {
                 maneuverDTO = new MarkpassingManeuverDTO(type, newTack, position, timepoint, timePointBefore,
                         speedBefore, speedAfter, directionChangeInDegrees, maneuverLossInMeters,
-                        ((MarkPassingManeuver) maneuver).getSide(), duration, minSpeed);
+                        maneuver.getToSide(), duration, minSpeed);
             } else  {
                 maneuverDTO = new ManeuverDTO(type, newTack, position, timepoint, timePointBefore, speedBefore,
                         speedAfter, directionChangeInDegrees, maneuverLossInMeters, duration, minSpeed);

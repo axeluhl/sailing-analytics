@@ -35,7 +35,6 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.ManeuverWithMainCurveBoundariesImpl;
 import com.sap.sailing.domain.tracking.impl.ManeuverWithStableSpeedAndCourseBoundariesImpl;
-import com.sap.sailing.domain.tracking.impl.MarkPassingManeuverImpl;
 import com.sap.sailing.domain.tracking.impl.SpeedWithBearingStepImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -416,30 +415,15 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 maneuverMainCurveDetails.getTimePointBefore());
         TrackedLegOfCompetitor legAfterManeuver = trackedRace.getTrackedLeg(competitor,
                 maneuverMainCurveDetails.getTimePointAfter());
-        Waypoint waypointPassed = null; // set for MARK_PASSING maneuvers only
-        NauticalSide sideToWhichWaypointWasPassed = null; // set for MARK_PASSING maneuvers only
-        // check for mask passing first; a tacking / jibe-setting mark rounding thus takes precedence over being
-        // detected as a penalty circle
-        final TimePoint markPassingTimePoint;
+        MarkPassing markPassing = null; // will remain null if no mark passing has been recorded within maneuver
+                                        // boundaries
+        // check whether a waypoint has been passed within maneuver
         if (legBeforeManeuver != legAfterManeuver
                 // a maneuver at the start line is not to be considered a MARK_PASSING maneuver; show a tack as a tack
                 && legAfterManeuver != null
                 && legAfterManeuver.getLeg().getFrom() != trackedRace.getRace().getCourse().getFirstWaypoint()) {
-            waypointPassed = legAfterManeuver.getLeg().getFrom();
-            MarkPassing markPassing = trackedRace.getMarkPassing(competitor, waypointPassed);
-            markPassingTimePoint = markPassing != null ? markPassing.getTimePoint() : maneuverDetails.getTimePoint();
-            Position markPassingPosition = markPassing != null
-                    ? competitorTrack.getEstimatedPosition(markPassingTimePoint, /* extrapolate */false)
-                    : maneuverPosition;
-            sideToWhichWaypointWasPassed = maneuverDirection;
-            // produce an additional mark passing maneuver; continue to analyze to catch jibe sets and kiwi drops
-            maneuvers.add(new MarkPassingManeuverImpl(ManeuverType.MARK_PASSING, tackAfterManeuver, markPassingPosition,
-                    maneuverLoss, markPassingTimePoint, maneuverMainCurveDetails.extractCurveBoundariesOnly(),
-                    maneuverDetails.extractCurveBoundariesOnly(),
-                    maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(), waypointPassed,
-                    sideToWhichWaypointWasPassed, maneuverMainCurveDetails.getDuration()));
-        } else {
-            markPassingTimePoint = null;
+            Waypoint waypointPassed = legAfterManeuver.getLeg().getFrom();
+            markPassing = trackedRace.getMarkPassing(competitor, waypointPassed);
         }
         BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
         final Bearing courseBeforeManeuver = maneuverMainCurveDetails.getSpeedWithBearingBefore().getBearing();
@@ -451,123 +435,164 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         int numberOfTacks = wind == null ? 0
                 : bearingChangeAnalyzer.didPass(courseBeforeManeuver, mainCurveTotalCourseChangeInDegrees,
                         courseAfterManeuver, wind.getFrom());
-        if (markPassingTimePoint != null && (numberOfTacks + numberOfJibes > 0)) {
-            // In case of a mark passing we need to split the maneuver analysis into the phase before and after
-            // the mark passing. First of all, this is important to identify the correct maneuver time point for
-            // each tack and jibe, second it is essential to call a penalty which is only the case if the tack and
-            // the jibe are on the same side of the mark passing; otherwise this may have been a jibe set or a
-            // kiwi drop.
-            // Therefore, we recursively detect the maneuvers for the segment before and the segment after the
-            // mark passing and add the results to our result.
-            List<ManeuverSpot> maneuverSpots = detectManeuvers(maneuverDetails.getTimePointBefore(),
-                    markPassingTimePoint.minus(1));
-            maneuverSpots.addAll(detectManeuvers(markPassingTimePoint.plus(1), maneuverDetails.getTimePointAfter()));
-            maneuvers.addAll(getAllManeuversFromManeuverSpots(maneuverSpots));
-        } else {
-            // Either there was no mark passing, or the mark passing was not accompanied by a tack or a jibe.
-            // For the first tack/jibe combination (they must alternate because the course changes in the same direction
-            // and
-            // the wind is considered sufficiently stable to not allow for two successive tacks or two successive jibes)
-            // we create a PENALTY_CIRCLE maneuver and recurse for the time interval after the first penalty circle has
-            // completed.
-            if (numberOfTacks > 0 && numberOfJibes > 0 && markPassingTimePoint == null) {
-                TimePoint firstPenaltyCircleCompletedAt = getTimePointOfCompletionOfFirstPenaltyCircle(
-                        maneuverMainCurveDetails.getTimePointBefore(), courseBeforeManeuver,
-                        maneuverMainCurveDetails.getSpeedWithBearingSteps(), wind);
-                if (firstPenaltyCircleCompletedAt == null) {
-                    // This should really not happen!
-                    logger.warning(
-                            "Maneuver detection has failed to process penalty circle maneuver correctly, because getTimePointOfCompletionOfFirstPenaltyCircle() returned null. Race-Id: "
-                                    + trackedRace.getRace().getId() + ", Competitor: " + competitor.getName()
-                                    + ", Time point before maneuver: " + maneuverDetails.getTimePointBefore());
-                    // Use already detected maneuver details as fallback data to prevent Nullpointer
-                    firstPenaltyCircleCompletedAt = maneuverDetails.getTimePointAfter();
+        if (numberOfTacks > 0 && numberOfJibes > 0) {
+            boolean performPenaltyCircleAnalysis = true;
+            if (markPassing != null) {
+                // In case of a mark passing we need to split the maneuver analysis into the phase before and after
+                // the mark passing to catch kiwi drops. First of all, this is important to identify the correct
+                // maneuver time point for
+                // each tack and jibe, second it is essential to call a penalty which is only the case if the tack and
+                // the jibe are on the same side of the mark passing; otherwise this may have been a
+                // kiwi drop.
+                // Therefore, we recursively detect the maneuvers for the segment before and the segment after the
+                // mark passing and add the results to our result.
+                List<ManeuverSpot> maneuverSpotsBeforeMarkPassing = detectManeuvers(
+                        maneuverDetails.getTimePointBefore(), markPassing.getTimePoint().minus(1));
+                List<ManeuverSpot> maneuverSpotsAfterMarkPassing = detectManeuvers(markPassing.getTimePoint().plus(1),
+                        maneuverDetails.getTimePointAfter());
+                // split the penalty circle maneuver only by mark passing time point if tacks or jibes are present on
+                // both legs
+                if (getNumberOfTacksAndJibesFromManeuverSpots(maneuverSpotsAfterMarkPassing) != 0
+                        && getNumberOfTacksAndJibesFromManeuverSpots(maneuverSpotsAfterMarkPassing) != 0) {
+                    performPenaltyCircleAnalysis = false;
+                    maneuverSpotsBeforeMarkPassing.addAll(maneuverSpotsAfterMarkPassing);
+                    maneuvers.addAll(getAllManeuversFromManeuverSpots(maneuverSpotsBeforeMarkPassing));
+                }
+            }
+            if (performPenaltyCircleAnalysis) {
+                // Either there was no mark passing, or the mark passing was not accompanied by a tack or a jibe.
+                // For the first tack/jibe combination (they must alternate because the course changes in the same
+                // direction
+                // and
+                // the wind is considered sufficiently stable to not allow for two successive tacks or two successive
+                // jibes)
+                // we create a PENALTY_CIRCLE maneuver and recurse for the time interval after the first penalty circle
+                // has
+                // completed.
+                List<Maneuver> additionalManeuversAfterFirstPenaltyCircle = null;
+                if (numberOfTacks > 1 || numberOfJibes > 1) {
+                    TimePoint firstPenaltyCircleCompletedAt = getTimePointOfCompletionOfFirstPenaltyCircle(
+                            maneuverMainCurveDetails.getTimePointBefore(), courseBeforeManeuver,
+                            maneuverMainCurveDetails.getSpeedWithBearingSteps(), wind);
+                    final ManeuverCurveDetailsWithBearingSteps refinedPenaltyMainCurveDetails;
+                    final ManeuverCurveDetails refinedPenaltyDetails;
+                    if (firstPenaltyCircleCompletedAt == null) {
+                        // This should really not happen!
+                        logger.warning(
+                                "Maneuver detection has failed to process penalty circle maneuver correctly, because getTimePointOfCompletionOfFirstPenaltyCircle() returned null. Race-Id: "
+                                        + trackedRace.getRace().getId() + ", Competitor: " + competitor.getName()
+                                        + ", Time point before maneuver: " + maneuverDetails.getTimePointBefore());
+                        // Use already detected maneuver details as fallback data to prevent Nullpointer
+                    } else {
+                        refinedPenaltyMainCurveDetails = computeManeuverMainCurveDetails(
+                                maneuverMainCurveDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt,
+                                maneuverDirection);
+                        if (refinedPenaltyMainCurveDetails == null) {
+                            // This should really not happen!
+                            logger.warning(
+                                    "Maneuver detection has failed to process penalty circle maneuver correctly, because refinedPenaltyMainCurveDetails computation returned null. Race-Id: "
+                                            + trackedRace.getRace().getId() + ", Competitor: " + competitor.getName()
+                                            + ", Time point before maneuver: " + maneuverDetails.getTimePointBefore());
+                            // Use already detected maneuver main curve as fallback data to prevent Nullpointer
+                        } else {
+                            refinedPenaltyDetails = computeManeuverDetails(refinedPenaltyMainCurveDetails,
+                                    maneuverDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt);
+                            // after we've "consumed" one tack and one jibe, recursively find more maneuvers if tacks
+                            // and/or jibes
+                            // remain
+                            List<ManeuverSpot> maneuverSpots = detectManeuvers(firstPenaltyCircleCompletedAt,
+                                    maneuverDetails.getTimePointAfter());
+                            additionalManeuversAfterFirstPenaltyCircle = getAllManeuversFromManeuverSpots(
+                                    maneuverSpots);
+                            maneuverMainCurveDetails = refinedPenaltyMainCurveDetails;
+                            maneuverDetails = refinedPenaltyDetails;
+                        }
+                    }
                 }
                 maneuverType = ManeuverType.PENALTY_CIRCLE;
-                ManeuverCurveDetailsWithBearingSteps refinedPenaltyMainCurveDetails = computeManeuverMainCurveDetails(
-                        maneuverMainCurveDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt,
-                        maneuverDirection);
-
-                ManeuverCurveDetails refinedPenaltyDetails;
-                if (refinedPenaltyMainCurveDetails == null) {
-                    // This should really not happen!
-                    logger.warning(
-                            "Maneuver detection has failed to process penalty circle maneuver correctly, because refinedPenaltyMainCurveDetails computation returned null. Race-Id: "
-                                    + trackedRace.getRace().getId() + ", Competitor: " + competitor.getName()
-                                    + ", Time point before maneuver: " + maneuverDetails.getTimePointBefore());
-                    // Use already detected maneuver main curve as fallback data to prevent Nullpointer
-                    refinedPenaltyMainCurveDetails = maneuverMainCurveDetails;
-                    refinedPenaltyDetails = maneuverDetails;
-                    firstPenaltyCircleCompletedAt = maneuverDetails.getTimePointAfter();
-                } else {
-                    refinedPenaltyDetails = computeManeuverDetails(refinedPenaltyMainCurveDetails,
-                            maneuverDetails.getTimePointBefore(), firstPenaltyCircleCompletedAt);
-                }
                 maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(), maneuverDetails.getTimePoint(),
-                        firstPenaltyCircleCompletedAt);
-                Position penaltyPosition = competitorTrack.getEstimatedPosition(refinedPenaltyDetails.getTimePoint(),
+                        maneuverDetails.getTimePointAfter());
+                Position penaltyPosition = competitorTrack.getEstimatedPosition(maneuverDetails.getTimePoint(),
                         /* extrapolate */ false);
                 final Maneuver maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType,
-                        tackAfterManeuver, penaltyPosition, maneuverLoss, refinedPenaltyDetails.getTimePoint(),
-                        refinedPenaltyMainCurveDetails.extractCurveBoundariesOnly(),
-                        refinedPenaltyDetails.extractCurveBoundariesOnly(),
-                        refinedPenaltyMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(),
-                        refinedPenaltyMainCurveDetails.getDuration());
+                        tackAfterManeuver, penaltyPosition, maneuverLoss, maneuverDetails.getTimePoint(),
+                        maneuverMainCurveDetails.extractCurveBoundariesOnly(),
+                        maneuverDetails.extractCurveBoundariesOnly(),
+                        maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(),
+                        maneuverMainCurveDetails.getDuration(), markPassing);
                 maneuvers.add(maneuver);
-                // after we've "consumed" one tack and one jibe, recursively find more maneuvers if tacks and/or jibes
-                // remain
-                if (numberOfTacks > 1 || numberOfJibes > 1) {
-                    List<ManeuverSpot> maneuverSpots = detectManeuvers(firstPenaltyCircleCompletedAt,
-                            maneuverDetails.getTimePointAfter());
-                    maneuvers.addAll(getAllManeuversFromManeuverSpots(maneuverSpots));
+                if (additionalManeuversAfterFirstPenaltyCircle != null) {
+                    maneuvers.addAll(additionalManeuversAfterFirstPenaltyCircle);
                 }
-            } else {
-                final Maneuver maneuver;
-                if (numberOfTacks > 0 || numberOfJibes > 0) {
-                    maneuverType = numberOfTacks > 0 ? ManeuverType.TACK : ManeuverType.JIBE;
-                    maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(), maneuverDetails.getTimePoint(),
-                            maneuverDetails.getTimePointAfter());
-                    maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, tackAfterManeuver,
-                            maneuverPosition, maneuverLoss, maneuverDetails.getTimePoint(),
-                            maneuverMainCurveDetails.extractCurveBoundariesOnly(),
-                            maneuverDetails.extractCurveBoundariesOnly(),
-                            maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(),
-                            maneuverMainCurveDetails.getDuration());
-                } else if (wind != null) {
-                    // heading up or bearing away
-                    Bearing windBearing = wind.getBearing();
-                    Bearing toWindBeforeManeuver = windBearing
-                            .getDifferenceTo(maneuverMainCurveDetails.getSpeedWithBearingBefore().getBearing());
-                    Bearing toWindAfterManeuver = windBearing
-                            .getDifferenceTo(maneuverMainCurveDetails.getSpeedWithBearingAfter().getBearing());
-                    maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math
-                            .abs(toWindAfterManeuver.getDegrees()) ? ManeuverType.HEAD_UP : ManeuverType.BEAR_AWAY;
-                    // treat maneuver main curve details as main maneuver details, because the detected maneuver is
-                    // either HEAD_UP or BEAR_AWAY
-                    maneuver = new ManeuverWithMainCurveBoundariesImpl(maneuverType, tackAfterManeuver,
-                            maneuverPosition, maneuverLoss, maneuverDetails.getTimePoint(),
-                            maneuverMainCurveDetails.extractCurveBoundariesOnly(),
-                            maneuverDetails.extractCurveBoundariesOnly(),
-                            maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(),
-                            maneuverMainCurveDetails.getDuration());
-                } else {
-                    // no wind information; marking as UNKNOWN
-                    maneuverType = ManeuverType.UNKNOWN;
-                    maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(), maneuverDetails.getTimePoint(),
-                            maneuverDetails.getTimePointAfter());
-                    maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, tackAfterManeuver,
-                            maneuverPosition, maneuverLoss, maneuverDetails.getTimePoint(),
-                            maneuverMainCurveDetails.extractCurveBoundariesOnly(),
-                            maneuverDetails.extractCurveBoundariesOnly(),
-                            maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(),
-                            maneuverMainCurveDetails.getDuration());
-                }
-                maneuvers.add(maneuver);
             }
+        } else {
+            final Maneuver maneuver;
+            if (numberOfTacks > 0 || numberOfJibes > 0) {
+                maneuverType = numberOfTacks > 0 ? ManeuverType.TACK : ManeuverType.JIBE;
+                maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(), maneuverDetails.getTimePoint(),
+                        maneuverDetails.getTimePointAfter());
+                maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, tackAfterManeuver,
+                        maneuverPosition, maneuverLoss, maneuverDetails.getTimePoint(),
+                        maneuverMainCurveDetails.extractCurveBoundariesOnly(),
+                        maneuverDetails.extractCurveBoundariesOnly(),
+                            maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(),
+                            maneuverMainCurveDetails.getDuration(), markPassing);
+            } else if (wind != null) {
+                // heading up or bearing away
+                Bearing windBearing = wind.getBearing();
+                Bearing toWindBeforeManeuver = windBearing
+                        .getDifferenceTo(maneuverMainCurveDetails.getSpeedWithBearingBefore().getBearing());
+                Bearing toWindAfterManeuver = windBearing
+                        .getDifferenceTo(maneuverMainCurveDetails.getSpeedWithBearingAfter().getBearing());
+                maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees())
+                        ? ManeuverType.HEAD_UP : ManeuverType.BEAR_AWAY;
+                // treat maneuver main curve details as main maneuver details, because the detected maneuver is
+                // either HEAD_UP or BEAR_AWAY
+                maneuver = new ManeuverWithMainCurveBoundariesImpl(maneuverType, tackAfterManeuver, maneuverPosition,
+                        maneuverLoss, maneuverDetails.getTimePoint(),
+                        maneuverMainCurveDetails.extractCurveBoundariesOnly(),
+                        maneuverDetails.extractCurveBoundariesOnly(),
+                        maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(),
+                        maneuverMainCurveDetails.getDuration(), markPassing);
+            } else {
+                // no wind information; marking as UNKNOWN
+                maneuverType = ManeuverType.UNKNOWN;
+                maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(), maneuverDetails.getTimePoint(),
+                        maneuverDetails.getTimePointAfter());
+                maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, tackAfterManeuver,
+                        maneuverPosition, maneuverLoss, maneuverDetails.getTimePoint(),
+                        maneuverMainCurveDetails.extractCurveBoundariesOnly(),
+                        maneuverDetails.extractCurveBoundariesOnly(),
+                        maneuverMainCurveDetails.getMaxAngularVelocityInDegreesPerSecond(),
+                        maneuverMainCurveDetails.getDuration(), markPassing);
+            }
+            maneuvers.add(maneuver);
         }
         return new ManeuverSpot(new ArrayList<>(douglasPeuckerFixesGroup), maneuverDirection, maneuvers,
                 new WindMeasurement(maneuverDetails.getTimePoint(), maneuverPosition,
                         wind == null ? null : wind.getBearing()));
+    }
+
+    private int getNumberOfTacksAndJibesFromManeuverSpots(List<ManeuverSpot> maneuverSpots) {
+        int tackAndJibeCount = 0;
+        for (ManeuverSpot maneuverSpot : maneuverSpots) {
+            for (Maneuver maneuver : maneuverSpot.getManeuvers()) {
+                switch (maneuver.getType()) {
+                case JIBE:
+                case TACK:
+                    ++tackAndJibeCount;
+                    break;
+                case PENALTY_CIRCLE:
+                    tackAndJibeCount += 2;
+                    break;
+                case BEAR_AWAY:
+                case HEAD_UP:
+                case UNKNOWN:
+                    break;
+                }
+            }
+        }
+        return tackAndJibeCount;
     }
 
     /**

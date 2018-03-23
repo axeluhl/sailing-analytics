@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -241,7 +242,8 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         DynamicTrackedRace trackedRace = getTrackedRegatta().createTrackedRace(race, sidelines,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                raceDefinitionSetToUpdate, useInternalMarkPassingAlgorithm, raceLogResolver);
+                raceDefinitionSetToUpdate, useInternalMarkPassingAlgorithm, raceLogResolver,
+                /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
         if (runAfterCreatingTrackedRace != null) {
         	runAfterCreatingTrackedRace.accept(trackedRace);
         }

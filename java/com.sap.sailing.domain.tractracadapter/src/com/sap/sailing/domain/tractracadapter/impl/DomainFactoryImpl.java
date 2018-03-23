@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
@@ -616,7 +617,7 @@ public class DomainFactoryImpl implements DomainFactory {
         return trackedRegatta.createTrackedRace(race, sidelines,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver);
+                raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, Optional.empty());
     }
 
     @Override

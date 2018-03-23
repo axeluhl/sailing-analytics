@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -477,7 +478,8 @@ public class ImportMasterDataOperation extends
                                     trackedRegatta.unlockTrackedRacesAfterRead();
                                 }
                                 for (TrackedRace raceToRemove : toRemove) {
-                                    trackedRegatta.removeTrackedRace(raceToRemove);
+                                    trackedRegatta.removeTrackedRace(raceToRemove, Optional.of(toState
+                                            .getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()));
                                     RaceDefinition race = existingRegatta.getRaceByName(raceToRemove
                                             .getRaceIdentifier().getRaceName());
                                     if (race != null) {

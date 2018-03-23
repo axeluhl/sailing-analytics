@@ -2,6 +2,8 @@ package com.sap.sailing.datamining.impl.data;
 
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 
@@ -36,5 +38,15 @@ public class GPSFixWithContext implements HasGPSFixContext {
     @Override
     public void setWindInternal(Wind wind) {
         this.wind = wind;
+    }
+    
+    @Override
+    public Bearing getTrueWindAngle() throws NoWindException {
+        return getTrackedRace().getTWA(getTrackedLegOfCompetitorContext().getCompetitor(), getTimePoint());
+    }
+
+    @Override
+    public Bearing getAbsoluteTrueWindAngle() throws NoWindException {
+        return getTrackedRace().getTWA(getTrackedLegOfCompetitorContext().getCompetitor(), getTimePoint()).abs();
     }
 }
