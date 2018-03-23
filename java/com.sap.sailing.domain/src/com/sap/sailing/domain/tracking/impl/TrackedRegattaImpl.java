@@ -216,7 +216,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
                 
                 @Override
                 public void raceAdded(TrackedRace trackedRace) {
-                    synchronized (mutex) {
+                    synchronized (mutex) { // TODO possible improvement: only notify if trackedRace.getRace() == race; otherwise it cannot have made a difference for getExistingTrackedRace(race)...
                         mutex.notifyAll();
                     }
                 }
