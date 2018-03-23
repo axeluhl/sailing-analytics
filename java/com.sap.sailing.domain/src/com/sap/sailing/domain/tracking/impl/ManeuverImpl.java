@@ -28,13 +28,12 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     private final double maxAngularVelocityInDegreesPerSecond;
     private final ManeuverCurveBoundaries mainCurveBoundaries;
     private final ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries;
-    private final Duration duration;
     private final MarkPassing markPassing;
 
     public ManeuverImpl(ManeuverType type, Tack newTack, Position position, Distance maneuverLoss, TimePoint timePoint,
             ManeuverCurveBoundaries mainCurveBoundaries,
             ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries,
-            double maxAngularVelocityInDegreesPerSecond, Duration duration, MarkPassing markPassing) {
+            double maxAngularVelocityInDegreesPerSecond, MarkPassing markPassing) {
         this.type = type;
         this.newTack = newTack;
         this.position = position;
@@ -43,13 +42,7 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
         this.mainCurveBoundaries = mainCurveBoundaries;
         this.maneuverCurveWithStableSpeedAndCourseBoundaries = maneuverCurveWithStableSpeedAndCourseBoundaries;
         this.maxAngularVelocityInDegreesPerSecond = maxAngularVelocityInDegreesPerSecond;
-        this.duration = duration;
         this.markPassing = markPassing;
-    }
-    
-    @Override
-    public Duration getDuration() {
-        return duration;
     }
 
     @Override
@@ -131,6 +124,11 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
 
     public NauticalSide getToSide() {
         return getMainCurveBoundaries().getDirectionChangeInDegrees() < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
+    }
+    
+    @Override
+    public Duration getDuration() {
+        return getManeuverBoundaries().getDuration();
     }
 
 }

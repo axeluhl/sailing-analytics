@@ -4,7 +4,6 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
  * Represents the entering and exiting time point of a maneuver curve with corresponding speeds and courses.
@@ -51,12 +50,11 @@ public interface ManeuverCurveBoundaries {
      */
     double getDirectionChangeInDegrees();
 
+    /**
+     * Gets the duration of the curve.
+     */
     default Duration getDuration(){
-        if(getTimePointAfter() == null && getTimePointBefore() == null){
-            return null;
-        }
-        long differenceInMs = getTimePointAfter().asMillis()-getTimePointBefore().asMillis();
-        return new MillisecondsDurationImpl(differenceInMs);
+        return getTimePointBefore().until(getTimePointAfter());
     }
 
     /**

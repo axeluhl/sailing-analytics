@@ -37,7 +37,6 @@ public class ManeuverCurveBoundariesImpl implements ManeuverCurveBoundaries {
     public TimePoint getTimePointAfter() {
         return timePointAfter;
     }
-    
 
     @Override
     public SpeedWithBearing getSpeedWithBearingBefore() {

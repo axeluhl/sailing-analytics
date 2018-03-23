@@ -139,6 +139,12 @@ public interface Maneuver extends GPSFix {
     @Statistic(messageKey = "DirectionChange", resultDecimals = 2, ordinal = 2)
     double getDirectionChangeInDegrees();
 
+    /**
+     * Gets the duration of the maneuver which lasts from {@link #getManeuverBoundaries()}.getTimePointBefore() until
+     * {@link #getManeuverBoundaries()}.getTimePointAfter().
+     * 
+     * @return
+     */
     Duration getDuration();
 
     /**
