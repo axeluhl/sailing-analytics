@@ -36,7 +36,7 @@ import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.impl.ManeuverCurveImpl;
+import com.sap.sailing.domain.tracking.impl.CompleteManeuverCurveImpl;
 import com.sap.sailing.domain.tracking.impl.ManeuverWithMainCurveBoundariesImpl;
 import com.sap.sailing.domain.tracking.impl.ManeuverWithStableSpeedAndCourseBoundariesImpl;
 import com.sap.sailing.domain.tracking.impl.SpeedWithBearingStepImpl;
@@ -134,7 +134,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     }
 
     @Override
-    public List<CompleteManeuverCurve> detectManeuverCurves() {
+    public List<CompleteManeuverCurve> detectCompleteManeuverCurves() {
         List<ManeuverSpot> maneuverSpots = detectManeuverSpots();
         return maneuverSpots.stream().filter(maneuverSpot -> maneuverSpot.getManeuverCurve() != null)
                 .map(maneuverSpot -> maneuverSpot.getManeuverCurve()).collect(Collectors.toList());
@@ -394,7 +394,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      */
     protected ManeuverSpot createManeuverSpotWithManeuversFromFixesGroup(List<GPSFixMoving> douglasPeuckerFixesGroup,
             NauticalSide maneuverDirection, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
-        CompleteManeuverCurve maneuverCurve = createManeuverCurveFromFixesGroup(douglasPeuckerFixesGroup,
+        CompleteManeuverCurve maneuverCurve = createCompleteManeuverCurveFromFixesGroup(douglasPeuckerFixesGroup,
                 maneuverDirection, earliestManeuverStart, latestManeuverEnd);
         if (maneuverCurve == null) {
             return new ManeuverSpot(new ArrayList<>(douglasPeuckerFixesGroup), maneuverDirection, null,
@@ -429,7 +429,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      *            maneuver duration after the maneuver time point were after this time point.
      * @return The derived list maneuver spots with corresponding maneuvers. The maneuver spot count {@code >= 0}.
      */
-    private CompleteManeuverCurve createManeuverCurveFromFixesGroup(List<GPSFixMoving> douglasPeuckerFixesGroup,
+    private CompleteManeuverCurve createCompleteManeuverCurveFromFixesGroup(List<GPSFixMoving> douglasPeuckerFixesGroup,
             NauticalSide maneuverDirection, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
         long durationForDouglasPeuckerExtensionForMainCurveAnalysisInMillis = getDurationForDouglasPeuckerExtensionForMainCurveAnalysis(
                 getApproximateManeuverDuration()).asMillis();
@@ -453,7 +453,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         ManeuverCurveDetails maneuverDetails = computeManeuverDetails(maneuverMainCurveDetails, earliestManeuverStart,
                 latestManeuverEnd);
         MarkPassing markPassing = getMarkPassingIfPresent(maneuverMainCurveDetails);
-        CompleteManeuverCurve maneuverCurve = new ManeuverCurveImpl(maneuverMainCurveDetails, maneuverDetails,
+        CompleteManeuverCurve maneuverCurve = new CompleteManeuverCurveImpl(maneuverMainCurveDetails, maneuverDetails,
                 markPassing);
         return maneuverCurve;
     }

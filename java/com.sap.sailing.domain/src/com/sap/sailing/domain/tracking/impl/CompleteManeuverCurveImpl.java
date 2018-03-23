@@ -9,13 +9,13 @@ import com.sap.sailing.domain.tracking.MarkPassing;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverCurveImpl implements CompleteManeuverCurve {
+public class CompleteManeuverCurveImpl implements CompleteManeuverCurve {
 
     private final ManeuverCurveDetailsWithBearingSteps mainCurveBoundaries;
     private final ManeuverCurveDetails maneuverCurveWithStableSpeedAndCourseBoundaries;
     private final MarkPassing markPassing;
 
-    public ManeuverCurveImpl(ManeuverCurveDetailsWithBearingSteps mainCurveBoundaries,
+    public CompleteManeuverCurveImpl(ManeuverCurveDetailsWithBearingSteps mainCurveBoundaries,
             ManeuverCurveDetails maneuverCurveWithStableSpeedAndCourseBoundaries, MarkPassing markPassing) {
         this.mainCurveBoundaries = mainCurveBoundaries;
         this.maneuverCurveWithStableSpeedAndCourseBoundaries = maneuverCurveWithStableSpeedAndCourseBoundaries;
@@ -32,10 +32,12 @@ public class ManeuverCurveImpl implements CompleteManeuverCurve {
         return maneuverCurveWithStableSpeedAndCourseBoundaries;
     }
 
+    @Override
     public MarkPassing getMarkPassing() {
         return markPassing;
     }
 
+    @Override
     public boolean isMarkPassing() {
         return markPassing != null;
     }

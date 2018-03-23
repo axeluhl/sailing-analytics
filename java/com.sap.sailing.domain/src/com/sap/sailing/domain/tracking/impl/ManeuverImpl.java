@@ -113,14 +113,17 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
         return maxAngularVelocityInDegreesPerSecond;
     }
 
+    @Override
     public MarkPassing getMarkPassing() {
         return markPassing;
     }
 
+    @Override
     public boolean isMarkPassing() {
         return markPassing != null;
     }
 
+    @Override
     public NauticalSide getToSide() {
         return getMainCurveBoundaries().getDirectionChangeInDegrees() < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
     }

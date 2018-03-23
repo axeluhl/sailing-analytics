@@ -18,13 +18,13 @@ public interface IncrementalManeuverDetector extends ManeuverDetector {
 
     /**
      * Gets the already detected maneuvers by previous calls of {@link #detectManeuvers()} and
-     * {@link #detectManeuverCurves()}.
+     * {@link #detectCompleteManeuverCurves()}.
      */
     List<Maneuver> getAlreadyDetectedManeuvers();
 
     /**
      * Gets the already detected maneuver curves by previous calls of {@link #detectManeuvers()} and
-     * {@link #detectManeuverCurves()}.
+     * {@link #detectCompleteManeuverCurves()}.
      */
     List<CompleteManeuverCurve> getAlreadyDetectedManeuverCurves();
 

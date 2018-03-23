@@ -58,6 +58,6 @@ public interface ManeuverDetector {
      * @see CompleteManeuverCurve
      * @see ManeuverDetector
      */
-    List<CompleteManeuverCurve> detectManeuverCurves();
+    List<CompleteManeuverCurve> detectCompleteManeuverCurves();
 
 }
