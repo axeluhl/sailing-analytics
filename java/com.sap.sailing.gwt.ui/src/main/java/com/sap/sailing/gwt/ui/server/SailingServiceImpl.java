@@ -3324,41 +3324,38 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getDouglasPoints(RegattaAndRaceIdentifier raceIdentifier,
-            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
-            double meters) throws NoWindException {
-        Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>();
-        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+    public Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getDouglasPoints(
+            RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, TimeRange> competitorTimeRanges, double meters)
+            throws NoWindException {
+        final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<>();
+        final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
-            MeterDistance maxDistance = new MeterDistance(meters);
+            final MeterDistance maxDistance = new MeterDistance(meters);
             for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
-                if (from.containsKey(competitorDTO)) {
+                final CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+                if (competitorTimeRanges.containsKey(competitorDTO)) {
                     // get Track of competitor
-                    GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack = trackedRace.getTrack(competitor);
+                    final GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack = trackedRace.getTrack(competitor);
                     // Distance for DouglasPeucker
-                    TimePoint timePointFrom = new MillisecondsTimePoint(from.get(competitorDTO));
-                    TimePoint timePointTo = new MillisecondsTimePoint(to.get(competitorDTO));
-                    Iterable<GPSFixMoving> gpsFixApproximation = trackedRace.approximate(competitor, maxDistance,
-                            timePointFrom, timePointTo);
-                    List<GPSFixDTOWithSpeedWindTackAndLegType> gpsFixDouglasList = new ArrayList<GPSFixDTOWithSpeedWindTackAndLegType>();
+                    final TimeRange timeRange = competitorTimeRanges.get(competitorDTO);
+                    final Iterable<GPSFixMoving> gpsFixApproximation = trackedRace.approximate(competitor, maxDistance,
+                            timeRange.from(), timeRange.to());
+                    final List<GPSFixDTOWithSpeedWindTackAndLegType> gpsFixDouglasList = new ArrayList<>();
                     GPSFix fix = null;
                     for (GPSFix next : gpsFixApproximation) {
                         if (fix != null) {
-                            Bearing bearing = fix.getPosition().getBearingGreatCircle(next.getPosition());
-                            Speed speed = fix.getPosition().getDistance(next.getPosition())
+                            final Bearing bearing = fix.getPosition().getBearingGreatCircle(next.getPosition());
+                            final Speed speed = fix.getPosition().getDistance(next.getPosition())
                                     .inTime(next.getTimePoint().asMillis() - fix.getTimePoint().asMillis());
                             final SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), bearing);
-                            GPSFixDTOWithSpeedWindTackAndLegType fixDTO = createDouglasPeuckerGPSFixDTO(trackedRace, competitor, fix, speedWithBearing);
-                            gpsFixDouglasList.add(fixDTO);
+                            gpsFixDouglasList.add(createDouglasPeuckerGPSFixDTO(trackedRace, competitor, fix, speedWithBearing));
                         }
                         fix = next;
                     }
                     if (fix != null) {
                         // add one last GPSFixDTO with no successor to calculate speed/bearing to:
                         final SpeedWithBearing speedWithBearing = gpsFixTrack.getEstimatedSpeed(fix.getTimePoint());
-                        GPSFixDTOWithSpeedWindTackAndLegType fixDTO = createDouglasPeuckerGPSFixDTO(trackedRace, competitor, fix, speedWithBearing);
-                        gpsFixDouglasList.add(fixDTO);
+                        gpsFixDouglasList.add(createDouglasPeuckerGPSFixDTO(trackedRace, competitor, fix, speedWithBearing));
                     }
                     result.put(competitorDTO, gpsFixDouglasList);
                 }
@@ -3383,25 +3380,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Map<CompetitorDTO, List<ManeuverDTO>> getManeuvers(RegattaAndRaceIdentifier raceIdentifier,
-            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to) throws NoWindException {
-        Map<CompetitorDTO, List<ManeuverDTO>> result = new HashMap<>();
+            Map<CompetitorDTO, TimeRange> competitorTimeRanges) throws NoWindException {
+        final Map<CompetitorDTO, List<ManeuverDTO>> result = new HashMap<>();
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
-            Map<CompetitorDTO, Future<List<ManeuverDTO>>> futures = new HashMap<CompetitorDTO, Future<List<ManeuverDTO>>>();
+            final Map<CompetitorDTO, Future<List<ManeuverDTO>>> futures = new HashMap<>();
             for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
-                if (from.containsKey(competitorDTO)) {
-                    final TimePoint timePointFrom = new MillisecondsTimePoint(from.get(competitorDTO));
-                    final TimePoint timePointTo = new MillisecondsTimePoint(to.get(competitorDTO));
-                    RunnableFuture<List<ManeuverDTO>> future = new FutureTask<List<ManeuverDTO>>(
-                            new Callable<List<ManeuverDTO>>() {
-                                @Override
-                                public List<ManeuverDTO> call() {
-                                    final Iterable<Maneuver> maneuversForCompetitor = trackedRace.getManeuvers(competitor, timePointFrom,
-                                            timePointTo, /* waitForLatest */ true);
-                                    return createManeuverDTOsForCompetitor(maneuversForCompetitor, trackedRace, competitor);
-                                }
-                            });
+                final CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+                if (competitorTimeRanges.containsKey(competitorDTO)) {
+                    final TimeRange timeRange = competitorTimeRanges.get(competitorDTO);
+                    final TimePoint from = timeRange.from(), to = timeRange.to();
+                    final RunnableFuture<List<ManeuverDTO>> future = new FutureTask<>(() -> {
+                        final Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, from, to,
+                                /* waitForLatest */ true);
+                        return createManeuverDTOsForCompetitor(maneuvers, trackedRace, competitor);
+                    });
                     executor.execute(future);
                     futures.put(competitorDTO, future);
                 }
@@ -3409,9 +3402,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             for (Map.Entry<CompetitorDTO, Future<List<ManeuverDTO>>> competitorAndFuture : futures.entrySet()) {
                 try {
                     result.put(competitorAndFuture.getKey(), competitorAndFuture.getValue().get());
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                } catch (ExecutionException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     throw new RuntimeException(e);
                 }
             }

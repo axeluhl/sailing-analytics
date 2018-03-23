@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,6 +32,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -318,9 +320,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         };
     }
 
-    /**
-     * Recreate the view, this is meant to save us a remote call if only competitor is changed
-     */
     private void rerender() {
         if (isVisible()) {
             if (Util.isEmpty(competitorSelectionModel.getSelectedCompetitors())) {
@@ -332,13 +331,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             } else {
                 this.contentPanel.setWidget(maneuverCellTable);
                 this.showCompetitorColumn(Util.size(competitorSelectionModel.getSelectedCompetitors()) != 1);
-                this.maneuverCellTable.setList(convertToTableFormat());
-                for (int i = 0; i < maneuverCellTable.getColumnCount(); i++) {
-                    final Column<ManeuverTableData, ?> column = maneuverCellTable.getColumn(i);
-                    if (column instanceof AbstractSortableColumnWithMinMax) {
-                        ((AbstractSortableColumnWithMinMax<ManeuverTableData, ?>) column).updateMinMax();
-                    }
-                }
+                this.updateManeuverTableData();
+                this.updateManeuverTableColumnsWithMinMax();
                 this.maneuverCellTable.restoreColumnSortInfos(timeColumn);
                 this.maneuverCellTable.redraw();
             }
@@ -353,36 +347,52 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         }
     }
 
-    private ArrayList<ManeuverTableData> convertToTableFormat() {
+    private void updateManeuverTableData() {
         final ArrayList<ManeuverTableData> data = new ArrayList<>();
-        for (Entry<CompetitorDTO, CompetitorManeuverData> res : competitorManeuverDataCache.entrySet()) {
-            for (ManeuverDTO maneuver : res.getValue().maneuvers) {
+        for (final Entry<CompetitorDTO, CompetitorManeuverData> entry : competitorManeuverDataCache.getCachedData()) {
+            for (ManeuverDTO maneuver : entry.getValue().getManeuvers()) {
                 if (settings.getSelectedManeuverTypes().contains(maneuver.type)) {
-                    data.add(new ManeuverTableData(res.getKey(), maneuver));
+                    data.add(new ManeuverTableData(entry.getKey(), maneuver));
                 }
             }
         }
-        return data;
+        this.maneuverCellTable.setList(data);
+    }
+
+    private void updateManeuverTableColumnsWithMinMax() {
+        for (int i = 0; i < maneuverCellTable.getColumnCount(); i++) {
+            final Column<ManeuverTableData, ?> column = maneuverCellTable.getColumn(i);
+            if (column instanceof AbstractSortableColumnWithMinMax) {
+                ((AbstractSortableColumnWithMinMax<ManeuverTableData, ?>) column).updateMinMax();
+            }
+        }
     }
 
     @Override
     public void setVisible(boolean visible) {
-        if (isVisible() && !visible) {
+        final boolean wasVisible = isVisible();
+        super.setVisible(visible);
+        if (wasVisible && !visible) {
             this.competitorManeuverDataCache.resetAll();
-        } else if (!isVisible() && visible) {
+        } else if (!wasVisible && visible) {
+            this.rerender();
             this.competitorManeuverDataCache.updateAll(competitorSelectionModel.getSelectedCompetitors());
         }
-        super.setVisible(visible);
     }
 
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
-        this.competitorManeuverDataCache.update(competitor);
+        if (isVisible()) {
+            this.competitorManeuverDataCache.update(competitor);
+        }
     }
 
     @Override
     public void removedFromSelection(CompetitorDTO competitor) {
-        this.competitorManeuverDataCache.reset(competitor);
+        if (isVisible()) {
+            this.competitorManeuverDataCache.reset(competitor);
+            this.rerender();
+        }
     }
 
     @Override
@@ -461,17 +471,17 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         private final Map<CompetitorDTO, CompetitorManeuverData> cache = new HashMap<>();
 
         private void updateAll(final Iterable<CompetitorDTO> competitors, final Date newTime) {
-            this.loadData(competitors, c -> getData(c).requiresUpdate(newTime));
+            this.loadData(competitors, c -> getData(c).requiresUpdate(newTime), true);
         }
 
         private void updateAll(final Iterable<CompetitorDTO> competitors) {
             final TimeRange timeRange = getFullTimeRange();
-            this.loadData(competitors, c -> Optional.of(timeRange));
+            this.loadData(competitors, c -> Optional.of(timeRange), false);
         }
 
         private void update(final CompetitorDTO competitor) {
             final TimeRange timeRange = getFullTimeRange();
-            this.loadData(Collections.singleton(competitor), c -> Optional.of(timeRange));
+            this.loadData(Collections.singleton(competitor), c -> Optional.of(timeRange), false);
         }
 
         private void resetAll() {
@@ -486,44 +496,54 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             return this.cache.isEmpty();
         }
 
-        private Set<Entry<CompetitorDTO, CompetitorManeuverData>> entrySet() {
-            return this.cache.entrySet();
-        }
-
         private CompetitorManeuverData getData(final CompetitorDTO competitor) {
             return this.cache.computeIfAbsent(competitor, c -> new CompetitorManeuverData());
         }
 
         private void loadData(final Iterable<CompetitorDTO> competitors,
-                final Function<CompetitorDTO, Optional<TimeRange>> timeRangeProvider) {
-            // final Map<CompetitorDTO, TimeRange> competitorToTimeRangeMap = new HashMap<>();
-            // competitors.forEach(c -> competitorToTimeRangeMap.put(c, timeRangeProvider.apply(c)));
-            final Map<CompetitorDTO, Date> compToFromDateMap = new HashMap<>(), compToToDateMap = new HashMap<>();
-            for (CompetitorDTO competitor : competitors) {
-                timeRangeProvider.apply(competitor).ifPresent(timeRange -> {
-                    compToFromDateMap.put(competitor, timeRange.from().asDate());
-                    compToToDateMap.put(competitor, timeRange.to().asDate());
-                });
-            }
-            sailingService.getManeuvers(raceIdentifier, compToFromDateMap, compToToDateMap,
-                    new AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>>() {
-                        @Override
-                        public void onSuccess(Map<CompetitorDTO, List<ManeuverDTO>> result) {
-                            for (final Entry<CompetitorDTO, List<ManeuverDTO>> entry : result.entrySet()) {
-                                final CompetitorManeuverData data = getData(entry.getKey());
-                                data.earliestRequestMillis = compToFromDateMap.get(entry.getKey()).getTime();
-                                data.latestRequestMillis = compToToDateMap.get(entry.getKey()).getTime();
-                                data.maneuvers.addAll(entry.getValue());
-                            }
-                            ManeuverTablePanel.this.rerender();
-                        }
+                final Function<CompetitorDTO, Optional<TimeRange>> timeRangeProvider, boolean incremental) {
+            if (!Util.isEmpty(competitors)) {
+                final Map<CompetitorDTO, TimeRange> competitorToTimeRange = new HashMap<>();
+                competitors.forEach(c -> timeRangeProvider.apply(c).ifPresent(tr -> competitorToTimeRange.put(c, tr)));
+                sailingService.getManeuvers(raceIdentifier, competitorToTimeRange,
+                        new AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>>() {
 
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            CompetitorManeuverDataCache.this.resetAll();
-                            ManeuverTablePanel.this.rerender();
-                        }
-                    });
+                            @Override
+                            public void onSuccess(Map<CompetitorDTO, List<ManeuverDTO>> result) {
+                                if (isVisible()) {
+                                    final Set<CompetitorDTO> competitorsToRefresh = new HashSet<>();
+                                    for (final Entry<CompetitorDTO, List<ManeuverDTO>> entry : result.entrySet()) {
+                                        final CompetitorDTO competitor = entry.getKey();
+                                        if (!incremental) {
+                                            reset(competitor);
+                                        }
+                                        final CompetitorManeuverData data = getData(competitor);
+                                        final TimeRange timeRange = competitorToTimeRange.get(competitor);
+                                        final List<ManeuverDTO> maneuvers = entry.getValue();
+                                        data.update(timeRange.from(), timeRange.to(), maneuvers);
+                                        if (incremental && maneuvers.stream().anyMatch(
+                                                maneuver -> (maneuver.type == ManeuverType.MARK_PASSING))) {
+                                            competitorsToRefresh.add(competitor);
+                                        }
+                                    }
+                                    ManeuverTablePanel.this.rerender();
+                                    if (incremental && !competitorsToRefresh.isEmpty()) {
+                                        updateAll(competitorsToRefresh);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                CompetitorManeuverDataCache.this.resetAll();
+                                ManeuverTablePanel.this.rerender();
+                            }
+                        });
+            }
+        }
+
+        private Set<Entry<CompetitorDTO, CompetitorManeuverData>> getCachedData() {
+            return this.cache.entrySet();
         }
 
     }
@@ -544,19 +564,34 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         private Long latestRequestMillis;
         
         /**
-         * The maneuvers retrieved for one specific competitor for the time range between {@link #earliestRequestMillis} and
-         * {@link #latestRequestMillis} so far. Note that the order of maneuvers in this list is not defined; in particular,
-         * they will not necessarily be represented in the order of ascending {@link ManeuverDTO#timePoint time points}.
+         * The maneuvers retrieved for one specific competitor for the time range between {@link #earliestRequestMillis}
+         * and {@link #latestRequestMillis} so far. Note that the order of maneuvers in this list is not defined; in
+         * particular, they will not necessarily be represented in the order of ascending {@link ManeuverDTO#timePoint
+         * time points}.
          */
-        private List<ManeuverDTO> maneuvers = new ArrayList<>();
+        private final List<ManeuverDTO> maneuvers = new ArrayList<>();
+
+        private void update(final TimePoint earliest, final TimePoint latest, final List<ManeuverDTO> maneuvers) {
+            this.earliestRequestMillis = earliest.asMillis();
+            this.latestRequestMillis = latest.asMillis();
+            this.maneuvers.addAll(maneuvers);
+        }
+
+        private Iterable<ManeuverDTO> getManeuvers() {
+            return this.maneuvers;
+        }
 
         private Optional<TimeRange> requiresUpdate(final Date newTime) {
             final Optional<TimeRange> result;
             if (isReplaying() && latestRequestMillis == null) {
                 result = Optional.of(getFullTimeRange());
-            } else if (earliestRequestMillis == null || newTime.getTime() < earliestRequestMillis) {
+            } else if (earliestRequestMillis == null) {
                 final TimePoint from = new MillisecondsTimePoint(timeRangeWithZoomProvider.getFromTime());
                 final TimePoint to = new MillisecondsTimePoint(newTime);
+                result = Optional.of(new TimeRangeImpl(from, to, true));
+            } else if (newTime.getTime() < earliestRequestMillis) {
+                final TimePoint from = new MillisecondsTimePoint(timeRangeWithZoomProvider.getFromTime());
+                final TimePoint to = new MillisecondsTimePoint(earliestRequestMillis);
                 result = Optional.of(new TimeRangeImpl(from, to, true));
             } else if (latestRequestMillis != null && newTime.getTime() > latestRequestMillis) {
                 final TimePoint from = new MillisecondsTimePoint(latestRequestMillis);
