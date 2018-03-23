@@ -15,7 +15,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.ApproximatedFixesCalculator;
 import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
 import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sailing.domain.tracking.ManeuverCurve;
+import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -105,7 +105,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
     }
     
     @Override
-    public List<ManeuverCurve> getAlreadyDetectedManeuverCurves() {
+    public List<CompleteManeuverCurve> getAlreadyDetectedManeuverCurves() {
         ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
         if (lastManeuverDetectionResult != null) {
             return lastManeuverDetectionResult.getManeuverSpots().stream().filter(maneuverSpot -> maneuverSpot.getManeuverCurve() != null)
@@ -200,7 +200,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                             } else {
                                 // New wind information has been received which considerably differs from previous
                                 // maneuver spot calculation => recalculate maneuvers of existing maneuver curve
-                                ManeuverCurve maneuverCurve = matchingManeuverSpotFromState.getManeuverCurve();
+                                CompleteManeuverCurve maneuverCurve = matchingManeuverSpotFromState.getManeuverCurve();
                                 ManeuverSpot maneuverSpot;
                                 if (maneuverCurve != null) {
                                     WindMeasurement windMeasurement = matchingManeuverSpotFromState

@@ -144,7 +144,7 @@ public interface Maneuver extends GPSFix {
     Speed getLowestSpeed();
 
     /**
-     * Gets the mark passing which is contained within maneuver. In case if no mark passing was passed, {@code null} is
+     * Gets the mark passing which is contained within maneuver curve. In case if no mark was passed, {@code null} is
      * returned.
      */
     MarkPassing getMarkPassing();
