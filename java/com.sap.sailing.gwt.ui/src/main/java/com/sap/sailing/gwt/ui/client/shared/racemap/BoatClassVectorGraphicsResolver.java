@@ -53,7 +53,7 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.TOM_28_MAX, BoatClassMasterdata.DELPHIA_24,
                 BoatClassMasterdata.RS200, BoatClassMasterdata.RS400, BoatClassMasterdata.RS500, BoatClassMasterdata.RS800,
                 BoatClassMasterdata.STREAMLINE, BoatClassMasterdata.SWAN_45, BoatClassMasterdata.TEENY, BoatClassMasterdata.X_99,
-                BoatClassMasterdata.TRIAS);
+                BoatClassMasterdata.TRIAS, BoatClassMasterdata.VENT_D_OUEST);
         BoatClassVectorGraphics circle = new CircleVectorGraphics(BoatClassMasterdata.RUNNING);
 
         defaultBoatVectorGraphics = dinghyWithSpinnaker; // TODO see bug 2571; this should be a slup-rigged icon working for 470, 505, J/70 etc.
