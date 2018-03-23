@@ -32,7 +32,6 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.InvertibleComparator;
-import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -52,6 +51,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel.LeaderBoardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.MinMaxRenderer;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
+import com.sap.sailing.gwt.ui.shared.MarkpassingManeuverDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
@@ -522,7 +522,9 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                                         final List<ManeuverDTO> maneuvers = entry.getValue();
                                         data.update(timeRange.from(), timeRange.to(), maneuvers);
                                         if (incremental && maneuvers.stream().anyMatch(
-                                                maneuver -> (maneuver.type == ManeuverType.MARK_PASSING))) {
+                                                // FIXME maybe extend ManeuverDTO for isMarkPassing() and remove
+                                                // MarkpassingManeuverDTO ?
+                                                maneuver -> (maneuver instanceof MarkpassingManeuverDTO))) {
                                             competitorsToRefresh.add(competitor);
                                         }
                                     }
