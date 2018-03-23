@@ -29,8 +29,6 @@ function master_instance_require(){
 	require_key_name
 	require_key_file
 	require_new_admin_password
-	require_user_username
-	require_user_password
 }
 
 # -----------------------------------------------------------
@@ -59,7 +57,7 @@ function master_instance_execute() {
 
 	local user_data_replica=$(build_configuration "MONGODB_HOST=$mongodb_host" "MONGODB_PORT=$mongodb_port" "MONGODB_NAME=$(alphanumeric $instance_name)-replica" \
 	"REPLICATION_CHANNEL=$(alphanumeric $instance_name)" "SERVER_NAME=$(alphanumeric $instance_name)" "USE_ENVIRONMENT=live-replica-server" \
-	"REPLICATE_MASTER_SERVLET_HOST=$public_dns_name" "REPLICATE_MASTER_EXCHANGE_HOST=$(alphanumeric $instance_name)" "EVENT_ID=$event_id" "INSTALL_FROM_RELEASE=$build_version" "SERVER_STARTUP_NOTIFY=$default_server_startup_notify")
+	"REPLICATE_MASTER_SERVLET_HOST=$public_dns_name" "REPLICATE_MASTER_EXCHANGE_NAME=$(alphanumeric $instance_name)" "EVENT_ID=$event_id" "INSTALL_FROM_RELEASE=$build_version" "SERVER_STARTUP_NOTIFY=$default_server_startup_notify")
 
 	local base64_user_data=$(echo "$user_data_replica" | base64 -w 0)
 	local launch_template_for_replica=$(printf '{"UserData":"%s","ImageId":"%s","InstanceType":"%s","TagSpecifications":[{"ResourceType":"instance","Tags":[{"Key":"Name","Value":"%s"}]}], "SecurityGroupIds": ["%s"], "KeyName": "%s"}'\

@@ -78,6 +78,10 @@ function ssh_wrapper(){
     success ${out:-"[ OK ]"}
     echo $out
   else
+    if ssh -o StrictHostKeyChecking=no "$@"; then
+      echo $out
+      return 0
+    fi
     error "[ ERROR ] $out"
     return 1
   fi
