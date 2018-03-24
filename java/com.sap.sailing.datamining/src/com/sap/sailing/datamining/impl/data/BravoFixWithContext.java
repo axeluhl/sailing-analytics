@@ -4,22 +4,20 @@ import com.sap.sailing.datamining.data.HasBravoFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindPositionMode;
+import com.sap.sse.common.TimePoint;
 
 public class BravoFixWithContext implements HasBravoFixContext {
-    private static final long serialVersionUID = -4537126043228674949L;
-
     private final HasTrackedLegOfCompetitorContext trackedLegOfCompetitorContext;
     
     private final BravoFix bravoFix;
-    private Wind wind;
 
     public BravoFixWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitorContext, BravoFix bravoFix) {
         this.trackedLegOfCompetitorContext = trackedLegOfCompetitorContext;
@@ -36,16 +34,14 @@ public class BravoFixWithContext implements HasBravoFixContext {
         return bravoFix;
     }
     
-    @Override
-    public Wind getWindInternal() {
-        return wind;
+    private TimePoint getTimePoint() {
+        return getBravoFix().getTimePoint();
     }
-
-    @Override
-    public void setWindInternal(Wind wind) {
-        this.wind = wind;
+    
+    private TrackedRace getTrackedRace() {
+        return getTrackedLegOfCompetitorContext().getTrackedRace();
     }
-
+    
     @Override
     public SpeedWithBearing getSpeed() {
         return getGpsFixTrack().getEstimatedSpeed(getTimePoint());
@@ -73,11 +69,6 @@ public class BravoFixWithContext implements HasBravoFixContext {
 
     private Competitor getCompetitor() {
         return getTrackedLegOfCompetitorContext().getCompetitor();
-    }
-
-    @Override
-    public Position getPosition() {
-        return getGpsFixTrack().getEstimatedPosition(getTimePoint(), /* extrapolate */ true);
     }
 
     private GPSFixTrack<Competitor, GPSFixMoving> getGpsFixTrack() {

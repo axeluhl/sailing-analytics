@@ -12,3 +12,4 @@ Export-Package: com.google.gwt.core.ext,
  com.google.gwt.core.ext.linker,
  com.google.gwt.core.ext.linker.impl,
  com.google.gwt.dev.cfg
+Automatic-Module-Name: com.google.gwt.dev

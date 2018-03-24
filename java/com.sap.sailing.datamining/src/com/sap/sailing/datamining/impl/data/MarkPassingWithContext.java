@@ -5,7 +5,6 @@ import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NauticalSide;
-import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -18,7 +17,6 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
     
     private Double absoluteRank;
     private boolean rankHasBeenInitialized;
-    private Wind wind;
 
     public MarkPassingWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitor, Maneuver markPassingManeuver) {
         this.trackedLegOfCompetitor = trackedLegOfCompetitor;
@@ -55,22 +53,12 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
     @Override
     public Double getAbsoluteRank() {
         if (!rankHasBeenInitialized) {
-            TrackedRace trackedRace = getTrackedRace();
+            TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedRace();
             Competitor competitor = getTrackedLegOfCompetitorContext().getCompetitor();
             int rank = trackedRace.getRank(competitor, getManeuver().getTimePoint());
             absoluteRank = rank == 0 ? null : Double.valueOf(rank);
             rankHasBeenInitialized = true;
         }
         return absoluteRank;
-    }
-
-    @Override
-    public Wind getWindInternal() {
-        return wind;
-    }
-
-    @Override
-    public void setWindInternal(Wind wind) {
-        this.wind = wind;
     }
 }

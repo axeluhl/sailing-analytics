@@ -22,4 +22,5 @@ Import-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.common.sensordata,
  org.osgi.framework;version="1.7.0"
 Bundle-Activator: com.sap.sailing.server.trackfiles.impl.Activator
+Automatic-Module-Name: com.sap.sailing.server.trackfiles
 
