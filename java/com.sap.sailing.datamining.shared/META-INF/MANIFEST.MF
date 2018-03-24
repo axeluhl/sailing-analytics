@@ -11,3 +11,4 @@ Require-Bundle: com.sap.sse.datamining.shared,
  com.sap.sailing.domain.common,
  com.sap.sse.common
 Export-Package: com.sap.sailing.datamining.shared
+Automatic-Module-Name: com.sap.sailing.datamining.shared

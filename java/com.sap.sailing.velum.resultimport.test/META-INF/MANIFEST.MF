@@ -13,3 +13,4 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  com.sap.sailing.domain,
  com.sap.sailing.resultimport,
  com.sap.sse.common
+Automatic-Module-Name: com.sap.sailing.velum.resultimport.test
