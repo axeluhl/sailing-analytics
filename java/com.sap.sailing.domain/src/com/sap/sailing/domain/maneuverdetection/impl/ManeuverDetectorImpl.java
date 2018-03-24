@@ -786,8 +786,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             } else {
                 tackAfterManeuver = null;
             }
-            maneuverLoss = getManeuverLoss(maneuverDetails.getTimePointBefore(), maneuverDetails.getTimePoint(),
-                    maneuverDetails.getTimePointAfter());
+            maneuverLoss = getManeuverLoss(maneuverDetails);
             maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, tackAfterManeuver,
                     maneuverPosition, maneuverLoss, maneuverDetails.getTimePoint(),
                     maneuverMainCurveDetails.extractCurveBoundariesOnly(), maneuverDetails.extractCurveBoundariesOnly(),
@@ -816,49 +815,38 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     /**
      * Computes the maneuver loss as the distance projected onto the average course between entering and exiting the
      * maneuver that the boat lost compared to not having maneuvered. With this distance measure, the competitors speed
-     * and bearing before the maneuver, as defined by <code>timePointBeforeManeuver</code> is extrapolated until
-     * <code>timePointAfterManeuver</code>, and the resulting extrapolated position's "windward distance" is compared to
+     * and bearing before the maneuver, as defined by <code>maneuverBoundaries.timePointBefore()</code> is extrapolated until
+     * <code>maneuverBoundaries.timePointAfter()</code>, and the resulting extrapolated position's "windward distance" is compared to
      * the competitor's actual position at that time. This distance is returned as the result of this method.
      */
-    private Distance getManeuverLoss(TimePoint timePointWhenSpeedStartedToDrop, TimePoint maneuverTimePoint,
-            TimePoint timePointWhenSpeedLevelledOffAfterManeuver) {
-        assert timePointWhenSpeedStartedToDrop != null;
-        assert timePointWhenSpeedLevelledOffAfterManeuver != null;
-        Distance result;
+    private Distance getManeuverLoss(ManeuverCurveBoundaries maneuverBoundaries) {
         final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-        SpeedWithBearing speedWhenSpeedStartedToDrop = track.getEstimatedSpeed(timePointWhenSpeedStartedToDrop);
-        if (speedWhenSpeedStartedToDrop != null) {
-            SpeedWithBearing speedAfterManeuver = track.getEstimatedSpeed(timePointWhenSpeedLevelledOffAfterManeuver);
-            if (speedAfterManeuver != null) {
-                // For upwind/downwind legs, find the mean course between inbound and outbound course and project actual
-                // and
-                // extrapolated positions onto it:
-                Bearing middleManeuverAngle = speedWhenSpeedStartedToDrop.getBearing()
-                        .middle(speedAfterManeuver.getBearing());
-                // extrapolate maximum speed before maneuver to time point of maximum speed after maneuver and project
-                // resulting position
-                // onto the average maneuver course; compare to the projected position actually reached at the time
-                // point of maximum speed after
-                // maneuver:
-                Position positionWhenSpeedStartedToDrop = track.getEstimatedPosition(timePointWhenSpeedStartedToDrop,
-                        /* extrapolate */ false);
-                Position extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver = speedWhenSpeedStartedToDrop.travelTo(
-                        positionWhenSpeedStartedToDrop, timePointWhenSpeedStartedToDrop,
-                        timePointWhenSpeedLevelledOffAfterManeuver);
-                Position actualPositionAtTimePointOfMaxSpeedAfterManeuver = track
-                        .getEstimatedPosition(timePointWhenSpeedLevelledOffAfterManeuver, /* extrapolate */ false);
-                Position projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver = extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver
-                        .projectToLineThrough(positionWhenSpeedStartedToDrop, middleManeuverAngle);
-                Position projectedActualPositionAtTimePointOfMaxSpeedAfterManeuver = actualPositionAtTimePointOfMaxSpeedAfterManeuver
-                        .projectToLineThrough(positionWhenSpeedStartedToDrop, middleManeuverAngle);
-                result = projectedActualPositionAtTimePointOfMaxSpeedAfterManeuver
-                        .getDistance(projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver);
-            } else {
-                result = null;
-            }
-        } else {
-            result = null;
-        }
+        SpeedWithBearing speedWhenSpeedStartedToDrop = maneuverBoundaries.getSpeedWithBearingBefore();
+        SpeedWithBearing speedAfterManeuver = maneuverBoundaries.getSpeedWithBearingAfter();
+        TimePoint timePointWhenSpeedStartedToDrop = maneuverBoundaries.getTimePointBefore();
+        TimePoint timePointWhenSpeedLevelledOffAfterManeuver = maneuverBoundaries.getTimePointAfter();
+        // For upwind/downwind legs, find the mean course between inbound and outbound course and project actual
+        // and
+        // extrapolated positions onto it:
+        Bearing middleManeuverAngle = speedWhenSpeedStartedToDrop.getBearing().middle(speedAfterManeuver.getBearing());
+        // extrapolate maximum speed before maneuver to time point of maximum speed after maneuver and project
+        // resulting position
+        // onto the average maneuver course; compare to the projected position actually reached at the time
+        // point of maximum speed after
+        // maneuver:
+        Position positionWhenSpeedStartedToDrop = track.getEstimatedPosition(timePointWhenSpeedStartedToDrop,
+                /* extrapolate */ false);
+        Position extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver = speedWhenSpeedStartedToDrop.travelTo(
+                positionWhenSpeedStartedToDrop, timePointWhenSpeedStartedToDrop,
+                timePointWhenSpeedLevelledOffAfterManeuver);
+        Position actualPositionAtTimePointOfMaxSpeedAfterManeuver = track
+                .getEstimatedPosition(timePointWhenSpeedLevelledOffAfterManeuver, /* extrapolate */ false);
+        Position projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver = extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver
+                .projectToLineThrough(positionWhenSpeedStartedToDrop, middleManeuverAngle);
+        Position projectedActualPositionAtTimePointOfMaxSpeedAfterManeuver = actualPositionAtTimePointOfMaxSpeedAfterManeuver
+                .projectToLineThrough(positionWhenSpeedStartedToDrop, middleManeuverAngle);
+        Distance result = projectedActualPositionAtTimePointOfMaxSpeedAfterManeuver
+                .getDistance(projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver);
         return result;
     }
 
