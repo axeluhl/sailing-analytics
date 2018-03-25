@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
@@ -142,6 +143,12 @@ public interface Maneuver extends GPSFix {
      * Gets lowest speed recorded within {@link #getManeuverBoundaries()}.
      */
     Speed getLowestSpeed();
+    
+    /**
+     * Gets the duration of the maneuver which lasts from {@link #getManeuverBoundaries()}.getTimePointBefore() until
+     * {@link #getManeuverBoundaries()}.getTimePointAfter().
+     */
+    Duration getDuration();
 
     /**
      * Gets the mark passing which is contained within maneuver curve. In case if no mark was passed, {@code null} is
@@ -160,5 +167,8 @@ public interface Maneuver extends GPSFix {
      */
     @Dimension(messageKey = "ToSide", ordinal = 16)
     NauticalSide getToSide();
+    
+    @Statistic(messageKey = "AvgTurningRate")
+    double getAvgTurningRate();
 
 }

@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.tracking.impl.AbstractGPSFixImpl;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -112,6 +113,11 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     public double getMaxAngularVelocityInDegreesPerSecond() {
         return maxAngularVelocityInDegreesPerSecond;
     }
+    
+    @Override
+    public Duration getDuration() {
+        return getManeuverBoundaries().getDuration();
+    }
 
     @Override
     public MarkPassing getMarkPassing() {
@@ -126,6 +132,11 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     @Override
     public NauticalSide getToSide() {
         return getMainCurveBoundaries().getDirectionChangeInDegrees() < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
+    }
+    
+    @Override
+    public double getAvgTurningRate() {
+        return Math.abs(getMainCurveBoundaries().getDirectionChangeInDegrees()) / getMainCurveBoundaries().getDuration().asSeconds();
     }
 
 }
