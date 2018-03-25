@@ -76,6 +76,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
@@ -2183,8 +2184,32 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         + NumberFormat.getDecimalFormat().format(before.speedInKnots) + " " + stringMessages.knotsUnit()
                         + " -> " + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "
                         + stringMessages.knotsUnit() + ")"));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.maxTurningRate(),
+                NumberFormat.getDecimalFormat().format(maneuver.maxTurningRateInDegreesPerSecond) + " "
+                        + stringMessages.degreesPerSecondUnit()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.avgTurningRate(),
+                NumberFormat.getDecimalFormat().format(maneuver.avgTurningRateInDegreesPerSecond) + " "
+                        + stringMessages.degreesPerSecondUnit()));
+        if (maneuver.type != ManeuverType.BEAR_AWAY && maneuver.type != ManeuverType.HEAD_UP) {
+            vPanel.add(createInfoWindowLabelAndValue(stringMessages.lowestSpeed(),
+                    NumberFormat.getDecimalFormat().format(maneuver.lowestSpeedInKnots) + " "
+                            + stringMessages.knotsUnit()));
+            vPanel.add(createInfoWindowLabelAndValue(stringMessages.durationPlain(),
+                    NumberFormat.getDecimalFormat().format(maneuver.maneuverDurationInSeconds) + " "
+                            + stringMessages.secondsUnit()));
+        }
         if (maneuver.maneuverLossInMeters != null) {
-            vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverLoss(), numberFormatOneDecimal.format(maneuver.maneuverLossInMeters)+"m"));
+            vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverLoss(),
+                    numberFormatOneDecimal.format(maneuver.maneuverLossInMeters) + " " + stringMessages.metersUnit()));
+        }
+        if (maneuver.markPassingTimePoint != null) {
+            vPanel.add(
+                    createInfoWindowLabelAndValue(stringMessages.markPassing(),
+                            DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(maneuver.markPassingTimePoint)
+                                    + (maneuver.markPassingSide == null ? ""
+                                            : " (" + (maneuver.markPassingSide == NauticalSide.PORT
+                                                    ? stringMessages.portSide() : stringMessages.starboardSide())
+                                                    + ")")));
         }
         return vPanel;
     }
