@@ -1,8 +1,5 @@
 package com.sap.sailing.datamining.shared;
 
-import java.util.List;
-
-import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sse.common.Duration;
 
 /**
@@ -26,8 +23,6 @@ public class ManeuverSettingsImpl extends ManeuverSettings {
     private Double maxManeuverExitingAbsTWA;
     private Double minAbsCourseChangeInDegrees;
     private Double maxAbsCourseChangeInDegrees;
-    private List<ManeuverType> typeOfPrecedingManeuver;
-    private List<ManeuverType> typeOfFollowingManeuver;
     private Duration minDurationFromPrecedingManeuver;
     private Duration maxDurationFromPrecedingManeuver;
     private Duration minDurationToFollowingManeuver;
@@ -36,7 +31,7 @@ public class ManeuverSettingsImpl extends ManeuverSettings {
 
     public static ManeuverSettingsImpl createDefault() {
         return new ManeuverSettingsImpl(Duration.ONE_SECOND, null, 2.0, null, 1.0, null, null, null, null, null, false,
-                null, null, null, null, null, null, null, null);
+                null, null, null, null, null, null);
     }
 
     public ManeuverSettingsImpl() {
@@ -47,8 +42,7 @@ public class ManeuverSettingsImpl extends ManeuverSettings {
             Double minManeuverExitingSpeedInKnots, Double maxManeuverExitingSpeedInKnots,
             Double minManeuverEnteringAbsTWA, Double maxManeuverEnteringAbsTWA, Double minManeuverExitingAbsTWA,
             Double maxManeuverExitingAbsTWA, boolean mainCurveAnalysis, Double minAbsCourseChangeInDegrees,
-            Double maxAbsCourseChangeInDegrees, List<ManeuverType> typeOfPrecedingManeuver,
-            List<ManeuverType> typeOfFollowingManeuver, Duration minDurationFromPrecedingManeuver,
+            Double maxAbsCourseChangeInDegrees, Duration minDurationFromPrecedingManeuver,
             Duration maxDurationFromPrecedingManeuver, Duration minDurationToFollowingManeuver,
             Duration maxDurationToFollowingManeuver) {
         super();
@@ -65,8 +59,6 @@ public class ManeuverSettingsImpl extends ManeuverSettings {
         this.mainCurveAnalysis = mainCurveAnalysis;
         this.minAbsCourseChangeInDegrees = minAbsCourseChangeInDegrees;
         this.maxAbsCourseChangeInDegrees = maxAbsCourseChangeInDegrees;
-        this.typeOfPrecedingManeuver = typeOfPrecedingManeuver;
-        this.typeOfFollowingManeuver = typeOfFollowingManeuver;
         this.minDurationFromPrecedingManeuver = minDurationFromPrecedingManeuver;
         this.maxDurationFromPrecedingManeuver = maxDurationFromPrecedingManeuver;
         this.minDurationToFollowingManeuver = minDurationToFollowingManeuver;
@@ -79,14 +71,6 @@ public class ManeuverSettingsImpl extends ManeuverSettings {
 
     public Double getMaxAbsCourseChangeInDegrees() {
         return maxAbsCourseChangeInDegrees;
-    }
-
-    public List<ManeuverType> getTypeOfPrecedingManeuver() {
-        return typeOfPrecedingManeuver;
-    }
-
-    public List<ManeuverType> getTypeOfFollowingManeuver() {
-        return typeOfFollowingManeuver;
     }
 
     public Duration getMinDurationFromPrecedingManeuver() {
@@ -179,8 +163,6 @@ public class ManeuverSettingsImpl extends ManeuverSettings {
         result = prime * result + ((minManeuverExitingAbsTWA == null) ? 0 : minManeuverExitingAbsTWA.hashCode());
         result = prime * result
                 + ((minManeuverExitingSpeedInKnots == null) ? 0 : minManeuverExitingSpeedInKnots.hashCode());
-        result = prime * result + ((typeOfFollowingManeuver == null) ? 0 : typeOfFollowingManeuver.hashCode());
-        result = prime * result + ((typeOfPrecedingManeuver == null) ? 0 : typeOfPrecedingManeuver.hashCode());
         return result;
     }
 
@@ -274,10 +256,6 @@ public class ManeuverSettingsImpl extends ManeuverSettings {
             if (other.minManeuverExitingSpeedInKnots != null)
                 return false;
         } else if (!minManeuverExitingSpeedInKnots.equals(other.minManeuverExitingSpeedInKnots))
-            return false;
-        if (typeOfFollowingManeuver != other.typeOfFollowingManeuver)
-            return false;
-        if (typeOfPrecedingManeuver != other.typeOfPrecedingManeuver)
             return false;
         return true;
     }

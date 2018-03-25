@@ -10,6 +10,7 @@ import com.sap.sailing.datamining.impl.data.ManeuverWithContext;
 import com.sap.sailing.datamining.shared.ManeuverSettings;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.components.Processor;
@@ -33,98 +34,105 @@ public class ManeuverRetrievalProcessor
         Collection<HasManeuverContext> maneuversWithContext = new ArrayList<>();
         TimePoint finishTime = element.getTrackedLegOfCompetitor().getFinishTime();
         if (finishTime != null) {
+            Iterable<Maneuver> maneuvers = null;
             try {
-                Iterable<Maneuver> maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
-                ManeuverWithContext previousManeuverWithContext = null;
-                ManeuverWithContext maneuverWithContextToAdd = null;
-                for (Maneuver maneuver : maneuvers) {
-                    ManeuverWithContext maneuverWithContext = new ManeuverWithContext(element, maneuver,
-                            settings.isMainCurveAnalysis());
-
-                    if (maneuverWithContextToAdd != null && !(settings.getTypeOfFollowingManeuver() != null
-                            && !settings.getTypeOfFollowingManeuver()
-                                    .contains(maneuverWithContext.getManeuver().getType())
-                            || settings.getMinDurationToFollowingManeuver() != null
-                                    && maneuverWithContextToAdd.getTimePointAfterForAnalysis()
-                                            .until(maneuverWithContext.getTimePointBeforeForAnalysis())
-                                            .compareTo(settings.getMinDurationToFollowingManeuver()) < 0
-                            || settings.getMaxDurationToFollowingManeuver() != null
-                                    && maneuverWithContextToAdd.getTimePointAfterForAnalysis()
-                                            .until(maneuverWithContext.getTimePointBeforeForAnalysis())
-                                            .compareTo(settings.getMaxDurationToFollowingManeuver()) > 0)) {
-                        maneuversWithContext.add(maneuverWithContextToAdd);
-                    }
-                    // Compute only numbers which are really required for filtering
-                    Duration maneuverDuration = settings.getMinManeuverDuration() != null
-                            || settings.getMaxManeuverDuration() != null
-                                    ? maneuverWithContext.getTimePointBeforeForAnalysis()
-                                            .until(maneuverWithContext.getTimePointAfterForAnalysis())
-                                    : null;
-                    double maneuverEnteringSpeed = settings.getMinManeuverEnteringSpeedInKnots() != null
-                            || settings.getMaxManeuverEnteringSpeedInKnots() != null
-                                    ? maneuverWithContext.getManeuverEnteringSpeed() : 0;
-                    double maneuverExitingSpeed = settings.getMinManeuverExitingSpeedInKnots() != null
-                            || settings.getMaxManeuverExitingSpeedInKnots() != null
-                                    ? maneuverWithContext.getManeuverExitingSpeed() : 0;
-                    double maneuverEnteringAbsTWA = settings.getMinManeuverEnteringAbsTWA() != null
-                            ? maneuverWithContext.getEnteringAbsTWA() : 0;
-                    double maneuverExitingAbsTWA = settings.getMinManeuverExitingAbsTWA() != null
-                            ? maneuverWithContext.getExitingAbsTWA() : 0;
-
-                    if (!(settings.getMinManeuverDuration() != null
-                            && maneuverDuration.compareTo(settings.getMinManeuverDuration()) < 0
-                            || settings.getMaxManeuverDuration() != null
-                                    && maneuverDuration.compareTo(settings.getMaxManeuverDuration()) > 0
-                            || settings.getMinManeuverEnteringSpeedInKnots() != null
-                                    && maneuverEnteringSpeed < settings.getMinManeuverEnteringSpeedInKnots()
-                            || settings.getMaxManeuverEnteringSpeedInKnots() != null
-                                    && maneuverEnteringSpeed > settings.getMaxManeuverEnteringSpeedInKnots()
-                            || settings.getMinManeuverExitingSpeedInKnots() != null
-                                    && maneuverExitingSpeed < settings.getMinManeuverExitingSpeedInKnots()
-                            || settings.getMaxManeuverExitingSpeedInKnots() != null
-                                    && maneuverExitingSpeed > settings.getMaxManeuverExitingSpeedInKnots()
-                            || settings.getMinManeuverEnteringAbsTWA() != null
-                                    && maneuverEnteringAbsTWA < settings.getMinManeuverEnteringAbsTWA()
-                            || settings.getMaxManeuverEnteringAbsTWA() != null
-                                    && maneuverEnteringAbsTWA > settings.getMaxManeuverEnteringAbsTWA()
-                            || settings.getMinManeuverExitingAbsTWA() != null
-                                    && maneuverExitingAbsTWA < settings.getMinManeuverExitingAbsTWA()
-                            || settings.getMaxManeuverExitingAbsTWA() != null
-                                    && maneuverExitingAbsTWA > settings.getMaxManeuverExitingAbsTWA()
-                            || settings.getMinAbsCourseChangeInDegrees() != null && maneuverWithContext
-                                    .getAbsoluteDirectionChangeInDegrees() < settings.getMinAbsCourseChangeInDegrees()
-                            || settings.getMaxAbsCourseChangeInDegrees() != null && maneuverWithContext
-                                    .getAbsoluteDirectionChangeInDegrees() > settings.getMaxAbsCourseChangeInDegrees()
-                            || settings.getTypeOfPrecedingManeuver() != null
-                                    && (previousManeuverWithContext == null || !settings.getTypeOfPrecedingManeuver()
-                                            .contains(previousManeuverWithContext.getManeuver().getType()))
-                            || settings.getMinDurationFromPrecedingManeuver() != null
-                                    && (previousManeuverWithContext == null
-                                            || previousManeuverWithContext.getTimePointAfterForAnalysis()
-                                                    .until(maneuverWithContext.getTimePointBeforeForAnalysis())
-                                                    .compareTo(settings.getMinDurationFromPrecedingManeuver()) < 0)
-                            || settings.getMaxDurationFromPrecedingManeuver() != null
-                                    && (previousManeuverWithContext == null
-                                            || previousManeuverWithContext.getTimePointAfterForAnalysis()
-                                                    .until(maneuverWithContext.getTimePointBeforeForAnalysis())
-                                                    .compareTo(settings.getMaxDurationFromPrecedingManeuver()) > 0))) {
-
-                        maneuverWithContextToAdd = maneuverWithContext;
-                    } else {
-                        maneuverWithContextToAdd = null;
-                    }
-                    previousManeuverWithContext = maneuverWithContext;
-                }
-                if (maneuverWithContextToAdd != null && settings.getTypeOfFollowingManeuver() == null
-                        && settings.getMinDurationToFollowingManeuver() == null
-                        && settings.getMaxDurationToFollowingManeuver() == null) {
-                    maneuversWithContext.add(maneuverWithContextToAdd);
-                }
+                maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
             } catch (NoWindException e) {
                 throw new IllegalStateException("No wind retrieving the maneuvers", e);
             }
+            Maneuver previousManeuver = null;
+            Maneuver currentManeuver = null;
+            for (Maneuver nextManeuver : maneuvers) {
+                if (currentManeuver != null) {
+                    ManeuverWithContext maneuverWithContext = new ManeuverWithContext(element, currentManeuver,
+                            settings.isMainCurveAnalysis(), previousManeuver, nextManeuver);
+                    if (isManeuverCompliantWithSettings(previousManeuver, maneuverWithContext, nextManeuver)) {
+                        maneuversWithContext.add(maneuverWithContext);
+                    }
+                }
+                previousManeuver = currentManeuver;
+                currentManeuver = nextManeuver;
+            }
+            if (currentManeuver != null) {
+                ManeuverWithContext maneuverWithContext = new ManeuverWithContext(element, currentManeuver,
+                        settings.isMainCurveAnalysis(), previousManeuver, null);
+                if (isManeuverCompliantWithSettings(previousManeuver, maneuverWithContext, null)) {
+                    maneuversWithContext.add(maneuverWithContext);
+                }
+            }
         }
         return maneuversWithContext;
+    }
+
+    private boolean isManeuverCompliantWithSettings(Maneuver previousManeuver,
+            ManeuverWithContext currentManeuverWithContext, Maneuver nextManeuver) {
+        boolean mainCurveAnalysis = settings.isMainCurveAnalysis();
+        // Compute only numbers which are really required for filtering
+        Duration maneuverDuration = settings.getMinManeuverDuration() != null
+                || settings.getMaxManeuverDuration() != null
+                        ? currentManeuverWithContext.getTimePointBeforeForAnalysis()
+                                .until(currentManeuverWithContext.getTimePointAfterForAnalysis())
+                        : null;
+        double maneuverEnteringSpeed = settings.getMinManeuverEnteringSpeedInKnots() != null
+                || settings.getMaxManeuverEnteringSpeedInKnots() != null
+                        ? currentManeuverWithContext.getManeuverEnteringSpeed() : 0;
+        double maneuverExitingSpeed = settings.getMinManeuverExitingSpeedInKnots() != null
+                || settings.getMaxManeuverExitingSpeedInKnots() != null
+                        ? currentManeuverWithContext.getManeuverExitingSpeed() : 0;
+        double maneuverEnteringAbsTWA = settings.getMinManeuverEnteringAbsTWA() != null
+                ? currentManeuverWithContext.getEnteringAbsTWA() : 0;
+        double maneuverExitingAbsTWA = settings.getMinManeuverExitingAbsTWA() != null
+                ? currentManeuverWithContext.getExitingAbsTWA() : 0;
+
+        Duration durationToPreviousManeuver = previousManeuver != null
+                ? getManeuverBoundariesForAnalysis(previousManeuver, mainCurveAnalysis).getTimePointAfter()
+                        .until(currentManeuverWithContext.getTimePointBeforeForAnalysis())
+                : null;
+        Duration durationToNextManeuver = nextManeuver != null
+                ? currentManeuverWithContext.getTimePointAfterForAnalysis().until(
+                        getManeuverBoundariesForAnalysis(nextManeuver, mainCurveAnalysis).getTimePointBefore())
+                : null;
+        if (!(settings.getMinManeuverDuration() != null
+                && maneuverDuration.compareTo(settings.getMinManeuverDuration()) < 0
+                || settings.getMaxManeuverDuration() != null
+                        && maneuverDuration.compareTo(settings.getMaxManeuverDuration()) > 0
+                || settings.getMinManeuverEnteringSpeedInKnots() != null
+                        && maneuverEnteringSpeed < settings.getMinManeuverEnteringSpeedInKnots()
+                || settings.getMaxManeuverEnteringSpeedInKnots() != null
+                        && maneuverEnteringSpeed > settings.getMaxManeuverEnteringSpeedInKnots()
+                || settings.getMinManeuverExitingSpeedInKnots() != null
+                        && maneuverExitingSpeed < settings.getMinManeuverExitingSpeedInKnots()
+                || settings.getMaxManeuverExitingSpeedInKnots() != null
+                        && maneuverExitingSpeed > settings.getMaxManeuverExitingSpeedInKnots()
+                || settings.getMinManeuverEnteringAbsTWA() != null
+                        && maneuverEnteringAbsTWA < settings.getMinManeuverEnteringAbsTWA()
+                || settings.getMaxManeuverEnteringAbsTWA() != null
+                        && maneuverEnteringAbsTWA > settings.getMaxManeuverEnteringAbsTWA()
+                || settings.getMinManeuverExitingAbsTWA() != null
+                        && maneuverExitingAbsTWA < settings.getMinManeuverExitingAbsTWA()
+                || settings.getMaxManeuverExitingAbsTWA() != null
+                        && maneuverExitingAbsTWA > settings.getMaxManeuverExitingAbsTWA()
+                || settings.getMinAbsCourseChangeInDegrees() != null && currentManeuverWithContext
+                        .getAbsoluteDirectionChangeInDegrees() < settings.getMinAbsCourseChangeInDegrees()
+                || settings.getMaxAbsCourseChangeInDegrees() != null && currentManeuverWithContext
+                        .getAbsoluteDirectionChangeInDegrees() > settings.getMaxAbsCourseChangeInDegrees()
+                || settings.getMinDurationFromPrecedingManeuver() != null && (previousManeuver == null
+                        || durationToPreviousManeuver.compareTo(settings.getMinDurationFromPrecedingManeuver()) < 0)
+                || settings.getMaxDurationFromPrecedingManeuver() != null && (previousManeuver == null
+                        || durationToPreviousManeuver.compareTo(settings.getMaxDurationFromPrecedingManeuver()) > 0)
+                || settings.getMinDurationToFollowingManeuver() != null && (nextManeuver == null
+                        || durationToNextManeuver.compareTo(settings.getMinDurationToFollowingManeuver()) < 0)
+                || settings.getMaxDurationToFollowingManeuver() != null && (nextManeuver == null
+                        || durationToNextManeuver.compareTo(settings.getMaxDurationToFollowingManeuver()) > 0))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private ManeuverCurveBoundaries getManeuverBoundariesForAnalysis(Maneuver maneuver, boolean mainCurveAnalysis) {
+        return mainCurveAnalysis ? maneuver.getMainCurveBoundaries()
+                : maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries();
     }
 
 }

@@ -1,8 +1,5 @@
 package com.sap.sailing.datamining.shared;
 
-import java.util.List;
-
-import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.settings.SerializableSettings;
 
@@ -38,10 +35,6 @@ public abstract class ManeuverSettings extends SerializableSettings {
     public abstract Double getMinAbsCourseChangeInDegrees();
 
     public abstract Double getMaxAbsCourseChangeInDegrees();
-
-    public abstract List<ManeuverType> getTypeOfPrecedingManeuver();
-
-    public abstract List<ManeuverType> getTypeOfFollowingManeuver();
 
     public abstract Duration getMinDurationFromPrecedingManeuver();
 

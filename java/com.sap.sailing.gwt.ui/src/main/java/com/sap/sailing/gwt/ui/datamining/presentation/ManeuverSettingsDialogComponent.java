@@ -1,8 +1,5 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -12,12 +9,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.ManeuverSettings;
 import com.sap.sailing.datamining.shared.ManeuverSettingsImpl;
-import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
-import com.sap.sse.gwt.client.controls.GenericListBox;
-import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -45,8 +39,6 @@ public class ManeuverSettingsDialogComponent implements SettingsDialogComponent<
     private DoubleBox maxManeuverExitingAbsTWA;
     private DoubleBox minAbsCourseChangeInDegrees;
     private DoubleBox maxAbsCourseChangeInDegrees;
-    private GenericListBox<ManeuverType> typeOfPrecedingManeuver;
-    private GenericListBox<ManeuverType> typeOfFollowingManeuver;
     private DoubleBox minDurationInSecondsFromPrecedingManeuver;
     private DoubleBox maxDurationInSecondsFromPrecedingManeuver;
     private DoubleBox minDurationInSecondsToFollowingManeuver;
@@ -60,7 +52,7 @@ public class ManeuverSettingsDialogComponent implements SettingsDialogComponent<
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
-        Grid grid = new Grid(19, 2);
+        Grid grid = new Grid(17, 2);
         grid.setCellPadding(5);
         vp.add(grid);
         setupGrid(grid, dialog);
@@ -136,65 +128,37 @@ public class ManeuverSettingsDialogComponent implements SettingsDialogComponent<
         maxAbsCourseChangeInDegrees = dialog.createDoubleBox(settings.getMaxAbsCourseChangeInDegrees(), 10);
         grid.setWidget(12, 1, maxAbsCourseChangeInDegrees);
 
-        Label typeOfPrecedingManeuverLabel = dialog.createLabel(stringMessages.typeOfPrecedingManeuver());
-        grid.setWidget(13, 0, typeOfPrecedingManeuverLabel);
-        typeOfPrecedingManeuver = dialog.createGenericListBox(new ValueBuilder<ManeuverType>() {
-            @Override
-            public String getValue(ManeuverType item) {
-                return item.toString();
-            }
-        }, true);
-        typeOfPrecedingManeuver.addItems(Arrays.asList(ManeuverType.values()));
-        if (settings.getTypeOfPrecedingManeuver() != null) {
-            typeOfPrecedingManeuver.setValues(settings.getTypeOfPrecedingManeuver());
-        }
-        grid.setWidget(13, 1, typeOfPrecedingManeuver);
-
         Label minDurationInSecondsFromPrecedingManeuverLabel = dialog
                 .createLabel(stringMessages.minDurationInSecondsFromPrecedingManeuver());
-        grid.setWidget(14, 0, minDurationInSecondsFromPrecedingManeuverLabel);
+        grid.setWidget(13, 0, minDurationInSecondsFromPrecedingManeuverLabel);
         minDurationInSecondsFromPrecedingManeuver = dialog
                 .createDoubleBox(settings.getMinDurationFromPrecedingManeuver() == null ? null
                         : settings.getMinDurationFromPrecedingManeuver().asSeconds(), 10);
-        grid.setWidget(14, 1, minDurationInSecondsFromPrecedingManeuver);
+        grid.setWidget(13, 1, minDurationInSecondsFromPrecedingManeuver);
 
         Label maxDurationInSecondsFromPrecedingManeuverLabel = dialog
                 .createLabel(stringMessages.maxDurationInSecondsFromPrecedingManeuver());
-        grid.setWidget(15, 0, maxDurationInSecondsFromPrecedingManeuverLabel);
+        grid.setWidget(14, 0, maxDurationInSecondsFromPrecedingManeuverLabel);
         maxDurationInSecondsFromPrecedingManeuver = dialog
                 .createDoubleBox(settings.getMaxDurationFromPrecedingManeuver() == null ? null
                         : settings.getMaxDurationFromPrecedingManeuver().asSeconds(), 10);
-        grid.setWidget(15, 1, maxDurationInSecondsFromPrecedingManeuver);
-
-        Label typeOfFollowingManeuverLabel = dialog.createLabel(stringMessages.typeOfFollowingManeuver());
-        grid.setWidget(16, 0, typeOfFollowingManeuverLabel);
-        typeOfFollowingManeuver = dialog.createGenericListBox(new ValueBuilder<ManeuverType>() {
-            @Override
-            public String getValue(ManeuverType item) {
-                return item.toString();
-            }
-        }, true);
-        typeOfFollowingManeuver.addItems(Arrays.asList(ManeuverType.values()));
-        if (settings.getTypeOfFollowingManeuver() != null) {
-            typeOfFollowingManeuver.setValues(settings.getTypeOfFollowingManeuver());
-        }
-        grid.setWidget(16, 1, typeOfFollowingManeuver);
+        grid.setWidget(14, 1, maxDurationInSecondsFromPrecedingManeuver);
 
         Label minDurationInSecondsToFollowingManeuverLabel = dialog
                 .createLabel(stringMessages.minDurationInSecondsToFollowingManeuver());
-        grid.setWidget(17, 0, minDurationInSecondsToFollowingManeuverLabel);
+        grid.setWidget(15, 0, minDurationInSecondsToFollowingManeuverLabel);
         minDurationInSecondsToFollowingManeuver = dialog
                 .createDoubleBox(settings.getMinDurationToFollowingManeuver() == null ? null
                         : settings.getMinDurationToFollowingManeuver().asSeconds(), 10);
-        grid.setWidget(17, 1, minDurationInSecondsToFollowingManeuver);
+        grid.setWidget(15, 1, minDurationInSecondsToFollowingManeuver);
 
         Label maxDurationInSecondsToFollowingManeuverLabel = dialog
                 .createLabel(stringMessages.maxDurationInSecondsToFollowingManeuver());
-        grid.setWidget(18, 0, maxDurationInSecondsToFollowingManeuverLabel);
+        grid.setWidget(16, 0, maxDurationInSecondsToFollowingManeuverLabel);
         maxDurationInSecondsToFollowingManeuver = dialog
                 .createDoubleBox(settings.getMaxDurationToFollowingManeuver() == null ? null
                         : settings.getMaxDurationToFollowingManeuver().asSeconds(), 10);
-        grid.setWidget(18, 1, maxDurationInSecondsToFollowingManeuver);
+        grid.setWidget(16, 1, maxDurationInSecondsToFollowingManeuver);
     }
 
     @Override
@@ -206,8 +170,7 @@ public class ManeuverSettingsDialogComponent implements SettingsDialogComponent<
                 minManeuverEnteringAbsTWA.getValue(), maxManeuverEnteringAbsTWA.getValue(),
                 minManeuverExitingAbsTWA.getValue(), maxManeuverExitingAbsTWA.getValue(),
                 mainCurveAnalysisBox.getValue(), minAbsCourseChangeInDegrees.getValue(),
-                maxAbsCourseChangeInDegrees.getValue(), getEncodedManeuverTypeList(typeOfPrecedingManeuver.getValues()),
-                getEncodedManeuverTypeList(typeOfFollowingManeuver.getValues()),
+                maxAbsCourseChangeInDegrees.getValue(),
                 getDurationFromSeconds(minDurationInSecondsFromPrecedingManeuver.getValue()),
                 getDurationFromSeconds(maxDurationInSecondsFromPrecedingManeuver.getValue()),
                 getDurationFromSeconds(minDurationInSecondsToFollowingManeuver.getValue()),
@@ -216,16 +179,6 @@ public class ManeuverSettingsDialogComponent implements SettingsDialogComponent<
 
     private Duration getDurationFromSeconds(Double seconds) {
         return seconds == null ? null : new MillisecondsDurationImpl((long) (seconds * 1000));
-    }
-
-    private ArrayList<ManeuverType> getEncodedManeuverTypeList(ArrayList<ManeuverType> maneuverTypeList) {
-        if (maneuverTypeList == null) {
-            return null;
-        }
-        if (maneuverTypeList.isEmpty() || maneuverTypeList.size() == ManeuverType.values().length) {
-            return null;
-        }
-        return maneuverTypeList;
     }
 
     @Override
