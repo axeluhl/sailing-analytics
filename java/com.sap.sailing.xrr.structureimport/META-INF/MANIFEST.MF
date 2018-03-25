@@ -22,3 +22,4 @@ Import-Package: com.sap.sailing.server.operationaltransformation,
  org.json.simple,
  org.json.simple.parser,
  org.osgi.framework;version="1.7.0"
+Automatic-Module-Name: com.sap.sailing.xrr.structureimport

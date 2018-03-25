@@ -39,3 +39,4 @@ Web-ContextPath: /dashboards
 Bundle-ClassPath: WEB-INF/classes/,
  WEB-INF/lib/gwt-maps-api-3.9.0-build-17.jar,
  WEB-INF/lib/gwt-ajaxloader.jar
+Automatic-Module-Name: com.sap.sailing.dashboards.gwt

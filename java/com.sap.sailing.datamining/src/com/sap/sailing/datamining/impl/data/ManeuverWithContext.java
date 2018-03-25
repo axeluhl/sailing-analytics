@@ -24,7 +24,6 @@ public class ManeuverWithContext implements HasManeuverContext {
     private static final long serialVersionUID = 7717196485074392156L;
     private final HasTrackedLegOfCompetitorContext trackedLegOfCompetitor;
     private final Maneuver maneuver;
-    private Wind wind;
     private final TimePoint timePointBeforeForAnalysis;
     private final TimePoint timePointAfterForAnalysis;
     private final double directionChangeInDegreesForAnalysis;
@@ -84,8 +83,7 @@ public class ManeuverWithContext implements HasManeuverContext {
     @Override
     public Double getAbsTWAAtManeuverClimax() {
         Competitor competitor = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getCompetitor();
-        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext()
-                .getTrackedRace();
+        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedRace();
         Wind wind = trackedRace.getWind(maneuver.getPosition(), maneuver.getTimePoint());
         SpeedWithBearing speedWithBearing = trackedRace.getTrack(competitor).getEstimatedSpeed(maneuver.getTimePoint());
         return Math.abs(wind.getFrom().getDifferenceTo(speedWithBearing.getBearing()).getDegrees());
@@ -112,16 +110,6 @@ public class ManeuverWithContext implements HasManeuverContext {
     }
 
     @Override
-    public Wind getWindInternal() {
-        return wind;
-    }
-
-    @Override
-    public void setWindInternal(Wind wind) {
-        this.wind = wind;
-    }
-
-    @Override
     public Double getEnteringAbsTWA() {
         return getAbsTWAAtTimepoint(getTimePointBeforeForAnalysis());
     }
@@ -140,11 +128,8 @@ public class ManeuverWithContext implements HasManeuverContext {
     }
 
     private Double getTWAAtTimepoint(TimePoint timepoint) {
-        Wind wind = trackedLegOfCompetitor.getTrackedLegContext().getTrackedRaceContext().getTrackedRace()
-                .getWind(maneuver.getPosition(), timepoint);
-        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrackedLegOfCompetitorContext()
-                .getTrackedLegContext().getTrackedRaceContext().getTrackedRace()
-                .getTrack(getTrackedLegOfCompetitorContext().getCompetitor());
+        Wind wind = getTrackedLegOfCompetitorContext().getTrackedRace().getWind(maneuver.getPosition(), timepoint);
+        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrackedLegOfCompetitorContext().getTrackedRace().getTrack(getTrackedLegOfCompetitorContext().getCompetitor());
         if (wind != null) {
             competitorTrack.lockForRead();
             try {
@@ -186,8 +171,7 @@ public class ManeuverWithContext implements HasManeuverContext {
 
     private GPSFixTrack<Competitor, GPSFixMoving> getGPSFixTrack() {
         Competitor competitor = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getCompetitor();
-        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext()
-                .getTrackedRace();
+        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedRace();
         return trackedRace.getTrack(competitor);
     }
 

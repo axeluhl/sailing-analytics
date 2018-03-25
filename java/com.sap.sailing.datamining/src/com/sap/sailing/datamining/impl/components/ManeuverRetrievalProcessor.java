@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import com.sap.sailing.datamining.data.HasManeuverContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.impl.data.ManeuverWithContext;
+import com.sap.sailing.datamining.impl.data.TrackedLegOfCompetitorWithSpecificTimePointWithContext;
 import com.sap.sailing.datamining.shared.ManeuverSettings;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -44,7 +45,8 @@ public class ManeuverRetrievalProcessor
             Maneuver currentManeuver = null;
             for (Maneuver nextManeuver : maneuvers) {
                 if (currentManeuver != null) {
-                    ManeuverWithContext maneuverWithContext = new ManeuverWithContext(element, currentManeuver,
+                    ManeuverWithContext maneuverWithContext = new ManeuverWithContext(new TrackedLegOfCompetitorWithSpecificTimePointWithContext(
+                            element.getTrackedLegContext(), element.getTrackedLegOfCompetitor(), currentManeuver.getTimePoint()), currentManeuver,
                             settings.isMainCurveAnalysis(), previousManeuver, nextManeuver);
                     if (isManeuverCompliantWithSettings(previousManeuver, maneuverWithContext, nextManeuver)) {
                         maneuversWithContext.add(maneuverWithContext);
