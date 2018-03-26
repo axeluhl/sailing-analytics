@@ -192,7 +192,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 				e.printStackTrace();
 			}
 		}
-        System.out.println(this.calcStandardDev(this.getAssignmentAssociations(bestPLT, new int[18][6])));
 		bestPLT = this.improveCompetitorAllocations(bestPLT, flightCount, groupCount, competitorCount);
 		bestPLT = this.improveAssignmentChanges(bestPLT, flightCount, groupCount, competitorCount);
 		if (flightMultiplier > 1) {
@@ -520,7 +519,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 	 * deviation of team associations will not be influenced by this method.
 	 * After executing the method the assignment should be well distributed.
 	 * 
-	 * @param pairinglist
+	 * @param pairingList
 	 *            current pairing list
 	 * @param flights
 	 *            count of flights
@@ -530,18 +529,50 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 	 *            count of competitors
 	 * @return improved pairing list template
 	 */
-	protected int[][] improveCompetitorAllocations(int[][] pairinglist, int flights, int groups, int competitors) {
-		int[][] resultPLT=new int[flights*groups][competitors/groups];
-		for(int flightIndex=0;flightIndex<flights;flightIndex++){
-			int offset=flightIndex % (competitors/groups);
-			for(int fleetIndex=0;fleetIndex<groups;fleetIndex++){
-				Arrays.sort(pairinglist[flightIndex*groups+fleetIndex]);
-				for(int competitorIndex=0;competitorIndex<(competitors/groups);competitorIndex++){
-					resultPLT[flightIndex*groups+fleetIndex][(competitorIndex+offset)%(competitors/groups)]=pairinglist[flightIndex*groups+fleetIndex][competitorIndex];
-				}
-			}
-		}
-		return resultPLT;
+	protected int[][] improveCompetitorAllocations(int[][] pairingList, int flights, int groups, int competitors) {
+	    int tolerance = (int) (competitors / groups);
+	    int[][] assignments = this.getAssignmentAssociations(pairingList, new int[competitors][competitors / groups]);
+            double averageAssignments = flights / (competitors / groups);
+            for (int iteration = 0; iteration < 10; iteration++) {
+                    for (int zGroup = 0; zGroup < pairingList.length; zGroup++) {
+                            int[][] groupAssignments = new int[competitors / groups][competitors / groups];
+                            for (int zPlace = 0; zPlace < (competitors / groups); zPlace++) {
+                                    System.arraycopy(assignments[pairingList[zGroup][zPlace]], 0, groupAssignments[zPlace], 0,
+                                                    (competitors / groups));
+                            }
+                            for (int zPlace = 0; zPlace < competitors * 50; zPlace++) {
+                                    int[] position = this.findWorstValuePosition(groupAssignments, (int) averageAssignments);
+                                    int prevFlight = (int) (zGroup / groups) - 1;
+                                    int prevPosition = -1; 
+                                    if (prevFlight >= 0) {
+                                        for (int i = prevFlight * 3; i <prevFlight * 3 + 3; i++) {
+                                            for (int j = 0; j < (competitors / groups); j++) {
+                                                if (pairingList[i][j] == pairingList[zGroup][position[0]]) {
+                                                    prevPosition = j;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (groupAssignments[position[0]][position[1]] > averageAssignments - 1
+                                                    && groupAssignments[position[0]][position[1]] < averageAssignments + 1) {
+                                            break;
+                                    } else {
+                                            int temp = 0;
+                                            int bestPosition = this.getBestPositionToChangeTo(groupAssignments[position[0]], prevPosition, tolerance);
+                                            temp = pairingList[zGroup][bestPosition];
+                                            pairingList[zGroup][bestPosition] = pairingList[zGroup][position[0]];
+                                            pairingList[zGroup][position[0]] = temp;
+                                            assignments = this.getAssignmentAssociations(pairingList,
+                                                            new int[competitors][competitors / groups]);
+                                            for (int x = 0; x < (competitors / groups); x++) {
+                                                    System.arraycopy(assignments[pairingList[zGroup][x]], 0, groupAssignments[x], 0,
+                                                                    (competitors / groups));
+                                            }
+                                    }
+                            }
+                    }
+            }
+            return pairingList;
 	}
 
 	/**
@@ -562,7 +593,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 	 */
 	private int[][] improveAssignmentChanges(int[][] pairingList, int flights, int groups, int competitors) {
 		int[][] resultPLT =new int[flights*groups][competitors/groups];
-		int[][] temp2= new int[groups][competitors/groups];
 		int counter = 0;
 		for(int i=0;i<flights/groups;i++ ){
 			for(int j=0;j<flights;j=j+competitors/groups){
@@ -657,45 +687,36 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 		for (int i = 0; i < groupAssignments.length; i++) {
 			for (int z = 0; z < groupAssignments[0].length; z++) {
 				if (groupAssignments[i][z] >= 0) {
-					if (Math.abs(groupAssignments[i][z] - neededAssigments) > worstValue) {
+					if (groupAssignments[i][z] > worstValue) {
 						worstValuePos[0] = i;
 						worstValuePos[1] = z;
-						worstValue = Math.abs(groupAssignments[i][z] - neededAssigments);
+						worstValue = groupAssignments[i][z];
 					}
 				}
 			}
 		}
 		return worstValuePos;
 	}
+	
+        private int getBestPositionToChangeTo(int[] arr, int previousPosition, int tolerance) {
+            int[] temp = new int[arr.length];
+            System.arraycopy(arr, 0, temp, 0, arr.length);
+            Arrays.sort(temp);
+            for (int i = 0; i < tolerance; i++) {
+                for (int j = 0; j < arr.length; j++) {
+                    if (temp[i] == arr[j] && j == previousPosition) {
+                        return j;
+                    }
+                }
+            }
+            for (int j = 0; j < arr.length; j++) {
+                if (temp[0] == arr[j]) {
+                    return j;
+                }
+            }
+            return -1;
+        }
 
-	/**
-	 * Checks if an array contains a specific value
-	 * 
-	 * @param arr
-	 *            {@link Array} in which the value might exist
-	 * @param value
-	 *            value to search for
-	 * @return true, if the value is found, else false
-	 */
-	private boolean contains(int[] arr, int value) {
-		for (int i = 0; i < arr.length; i++) {
-			if (arr[i] == value)
-				return true;
-		}
-		return false;
-	}
-
-	private int findMinValuePosition(int[] arr) {
-		int temp = Integer.MAX_VALUE;
-		int position = -1;
-		for (int z = 0; z < arr.length; z++) {
-			if (arr[z] < temp) {
-				position = z;
-				temp = arr[z];
-			}
-		}
-		return position;
-	}
 
 	/**
 	 * Returns a random number between min and max.
