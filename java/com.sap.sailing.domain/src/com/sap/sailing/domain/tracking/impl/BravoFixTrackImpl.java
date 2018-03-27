@@ -67,6 +67,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     private transient TimeRangeCache<Pair<Double, Long>> expeditionHeadingCache;
     private transient TimeRangeCache<Pair<Double, Long>> expeditionTimeToGunCache;
     private transient TimeRangeCache<Pair<Double, Long>> expeditionRudderCache;
+    private transient TimeRangeCache<Pair<Double, Long>> expeditionRateOfTurnCache;
     
     /**
      * If a GPS track was provided at construction time, remember it non-transiently. It is needed when restoring
@@ -143,6 +144,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         this.expeditionHeadingCache = createTimeRangeCache(trackedItem, "expeditionHeadingCache");
         this.expeditionTimeToGunCache = createTimeRangeCache(trackedItem, "expeditionTimeToGunCache");
         this.expeditionRudderCache = createTimeRangeCache(trackedItem, "expeditionRudderCache");
+        this.expeditionRateOfTurnCache = createTimeRangeCache(trackedItem, "expeditionRateOfTurnCache");
     }
 
     public GPSFixTrack<ItemType, GPSFixMoving> getGpsTrack() {
@@ -213,7 +215,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
                     expeditionCOGCache, expeditionForestayLoadCache, expeditionRakeCache, expeditionCourseDetailCache,
                     expeditionBaroCache, expeditionJibCarPortCache, expeditionJibCarStbdCache, expeditionLoadPCache,
                     expeditionLoadSCache, expeditionMastButtCache, expeditionHeadingCache, expeditionTimeToGunCache,
-                    expeditionRudderCache);
+                    expeditionRudderCache, expeditionRateOfTurnCache);
         }
         return added;
     }
@@ -565,8 +567,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
 
     @Override
     public Double getAverageExpeditionRateOfTurnIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
-        return null;
+        return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionRateOfTurn, expeditionRateOfTurnCache);
     }
 
     @Override
@@ -802,8 +803,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     
     @Override
     public Double getExpeditionRateOfTurnIfAvailable(TimePoint at){
-        //column currently unkown
-        return null;
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionRateOfTurn);
     }
     
     @Override

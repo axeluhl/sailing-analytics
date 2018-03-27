@@ -612,6 +612,13 @@ public class LeaderboardEntryDTO implements Serializable {
         }           
     }
     
+    public void setExpeditionRateOfTurn(Double expeditionRateOfTurn) {
+        if (expeditionRateOfTurn != null) {
+            ensureExpeditionHolder();
+            expeditionDataHolder.expeditionRateOfTurn = expeditionRateOfTurn;
+        }           
+    }
+    
     public Double getExpeditionAWA() {
         return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionAWA;
     }

@@ -46,8 +46,8 @@ public enum ExpeditionExtendedSensorDataMetadata {
     EXPEDITION_HDG("Hdg", BravoExtendedSensorDataMetadata.EXPEDITION_HDG), //
     EXPEDITION_TMTOGUN("TmToGun", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOGUN), //
     EXPEDITION_TMTOBURN("TmToBurn", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN), //
-    EXPEDITION_BELOWLN("BelowLn", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN), //
-    EXPEDITION_RATE_OF_TURN("ROT", BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN), //
+    EXPEDITION_BELOWLN("BelowLn", BravoExtendedSensorDataMetadata.EXPEDITION_BELOWLN), //
+    EXPEDITION_RATE_OF_TURN("ROT", BravoExtendedSensorDataMetadata.EXPEDITION_RATE_OF_TURN), //
     EXPEDITION_BARO("Baro", BravoExtendedSensorDataMetadata.EXPEDITION_BARO), //
     EXPEDITION_LOAD_P("Load P", BravoExtendedSensorDataMetadata.EXPEDITION_LOAD_P), //
     EXPEDITION_LOAD_S("Load S", BravoExtendedSensorDataMetadata.EXPEDITION_LOAD_S), //
