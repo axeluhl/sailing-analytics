@@ -256,4 +256,8 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         return trackedRace;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + ", race "+tractracRace.getName()+" with ID "+tractracRace.getId();
+    }
 }
