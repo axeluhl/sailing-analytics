@@ -1337,7 +1337,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.EXPEDITION_RACE_TIME_TO_GUN,
                     new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_GUN,
-                            new DurationAsSecondsDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToGun),
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToGun),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT,
                     new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT,
@@ -1350,7 +1350,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_LINE,
                     new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_LINE,
-                            new DurationAsSecondsDetailTypeExtractor(
+                            new DoubleTextRaceDetailTypeExtractor(
                                     LeaderboardEntryDTO::getExpeditionTimeToBurnToLine),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT,
@@ -1414,15 +1414,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                             new BearingAsDegreeDetailTypeExtractor(e -> e.pitch), LEG_COLUMN_HEADER_STYLE,
                             LEG_COLUMN_STYLE, LeaderboardPanel.this));
             return result;
-        }
-        
-        private class DurationAsSecondsDetailTypeExtractor extends DoubleTextRaceDetailTypeExtractor {
-            public DurationAsSecondsDetailTypeExtractor(Function<LeaderboardEntryDTO, Duration> valueExtractor) {
-                super(entry -> {
-                    Duration duration = valueExtractor.apply(entry);
-                    return duration == null ? null : duration.asSeconds();
-                });
-            }
         }
         
         private class BearingAsDegreeDetailTypeExtractor extends DoubleTextRaceDetailTypeExtractor {

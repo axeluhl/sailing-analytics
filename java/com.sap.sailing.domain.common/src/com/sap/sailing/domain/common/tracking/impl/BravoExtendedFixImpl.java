@@ -9,8 +9,6 @@ import com.sap.sailing.domain.common.sensordata.ColumnMetadata;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
-import com.sap.sse.common.Duration;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
  * Implementation of {@link BravoExtendedFix}. {@link BravoExtendedFix} adds more measures compared to {@link BravoFix}.
@@ -225,15 +223,13 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
     }
 
     @Override
-    public Duration getExpeditionTmToGun() {
-        Double duration = fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOGUN.getColumnIndex());
-        return duration == null ? null : new MillisecondsDurationImpl(Math.round(duration * 1000));
+    public Double getExpeditionTmToGun() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOGUN.getColumnIndex());
     }
 
     @Override
-    public Duration getExpeditionTmToBurn() {
-        Double duration = fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN.getColumnIndex());
-        return duration == null ? null : new MillisecondsDurationImpl(Math.round(duration * 1000));
+    public Double getExpeditionTmToBurn() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN.getColumnIndex());
     }
     
     @Override

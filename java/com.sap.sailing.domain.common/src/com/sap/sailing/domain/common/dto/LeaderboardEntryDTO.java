@@ -541,14 +541,14 @@ public class LeaderboardEntryDTO implements Serializable {
         }
     }
 
-    public void setExpeditionTimeToGun(Duration expeditionTmToGun) {
+    public void setExpeditionTimeToGun(Double expeditionTmToGun) {
         if (expeditionTmToGun != null) {
             ensureExpeditionHolder();
             expeditionDataHolder.expeditionTimeToGun = expeditionTmToGun;
         }
     }
 
-    public void setExpeditionTimeToBurnToLine(Duration expeditionTmToBurn) {
+    public void setExpeditionTimeToBurnToLine(Double expeditionTmToBurn) {
         if (expeditionTmToBurn != null) {
             ensureExpeditionHolder();
             expeditionDataHolder.expeditionTimeToBurnToLine = expeditionTmToBurn;
@@ -672,7 +672,7 @@ public class LeaderboardEntryDTO implements Serializable {
         return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToPin;
     }
 
-    public Duration getExpeditionTimeToGun() {
+    public Double getExpeditionTimeToGun() {
         return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToGun;
     }
 
@@ -692,7 +692,7 @@ public class LeaderboardEntryDTO implements Serializable {
         return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToBurnToCommitteeBoat;
     }
 
-    public Duration getExpeditionTimeToBurnToLine() {
+    public Double getExpeditionTimeToBurnToLine() {
         return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToBurnToLine;
     }
 
@@ -799,12 +799,12 @@ public class LeaderboardEntryDTO implements Serializable {
         private Double expeditionTimeToStbLayline;
         private Double expeditionTimeToPortLayline;
         private Double expeditionTimeToPin;
-        private Duration expeditionTimeToGun;
+        private Double expeditionTimeToGun;
         private Double expeditionTimeToCommitteeBoat;
         private Double expeditionTimeToBurnToPin;
         private Double expeditionTargTWA;
         private Double expeditionTimeToBurnToCommitteeBoat;
-        private Duration expeditionTimeToBurnToLine;
+        private Double expeditionTimeToBurnToLine;
         private Double expeditionTargetHeel;
         private Double expeditionTargBoatSpeed;
         private Double expeditionSOG;

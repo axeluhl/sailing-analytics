@@ -64,12 +64,16 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     private transient TimeRangeCache<Pair<Double, Long>> expeditionJibCarPortCache;
     private transient TimeRangeCache<Pair<Double, Long>> expeditionJibCarStbdCache;
     private transient TimeRangeCache<Pair<Double, Long>> expeditionMastButtCache;
+    private transient TimeRangeCache<Pair<Double, Long>> expeditionHeadingCache;
+    private transient TimeRangeCache<Pair<Double, Long>> expeditionTimeToGunCache;
+    private transient TimeRangeCache<Pair<Double, Long>> expeditionRudderCache;
     
     /**
      * If a GPS track was provided at construction time, remember it non-transiently. It is needed when restoring
      * the object after de-serialization, so the cache invalidation listener can be re-established.
      */
     private transient GPSFixTrack<ItemType, GPSFixMoving> gpsTrack;
+
     
     private class CacheInvalidationGpsTrackListener implements GPSTrackListener<ItemType, GPSFixMoving> {
         private static final long serialVersionUID = 6395529765232404414L;
@@ -136,6 +140,9 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         this.expeditionJibCarPortCache= createTimeRangeCache(trackedItem, "expeditionJibCarPortCache");
         this.expeditionJibCarStbdCache= createTimeRangeCache(trackedItem, "expeditionJibCarStbdCache");
         this.expeditionMastButtCache= createTimeRangeCache(trackedItem, "expeditionMastButtCache");
+        this.expeditionHeadingCache = createTimeRangeCache(trackedItem, "expeditionHeadingCache");
+        this.expeditionTimeToGunCache = createTimeRangeCache(trackedItem, "expeditionTimeToGunCache");
+        this.expeditionRudderCache = createTimeRangeCache(trackedItem, "expeditionRudderCache");
     }
 
     public GPSFixTrack<ItemType, GPSFixMoving> getGpsTrack() {
@@ -205,7 +212,8 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
                     expeditionTWDCache, expeditionBoatSpeedCache, expeditionTargBoatSpeedCache, expeditionSOGCache,
                     expeditionCOGCache, expeditionForestayLoadCache, expeditionRakeCache, expeditionCourseDetailCache,
                     expeditionBaroCache, expeditionJibCarPortCache, expeditionJibCarStbdCache, expeditionLoadPCache,
-                    expeditionLoadSCache, expeditionMastButtCache);
+                    expeditionLoadSCache, expeditionMastButtCache, expeditionHeadingCache, expeditionTimeToGunCache,
+                    expeditionRudderCache);
         }
         return added;
     }
@@ -540,49 +548,59 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
 
     @Override
     public Double getAverageExpeditionHeadingIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
-        return null;
+        return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionHDG, expeditionHeadingCache);
     }
 
     @Override
     public Double getAverageExpeditionVMGIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
 
     @Override
     public Double getAverageExpeditionVMGTargVMGDeltaIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
 
     @Override
     public Double getAverageExpeditionRateOfTurnIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
 
     @Override
-    public Double getAverageExpeditionRudderAngleIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
-        return null;
+    public Double getAverageExpeditionRudderAngleIfAvailable(TimePoint start, TimePoint endTimePoint) {
+        return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint,
+                new Function<BravoExtendedFix, Double>() {
+
+                    @Override
+                    public Double apply(BravoExtendedFix t) {
+                        final Bearing rudder = t.getRudder();
+                        Double result = null;
+                        if (rudder != null) {
+                            result = rudder.getDegrees();
+                        }
+                        return result;
+                    }
+                }, expeditionRudderCache);
     }
 
     @Override
     public Double getAverageExpeditionHeelIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
 
     @Override
     public Double getAverageExpeditionTargetHeelIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
 
     @Override
     public Double getAverageExpeditionTimeToPortLaylineIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
 
@@ -600,67 +618,66 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
 
     @Override
     public Double getAverageExpeditionDistToStbLaylineIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
 
     @Override
-    public Duration getAverageExpeditionTimeToGUNIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
-        return null;
+    public Double getAverageExpeditionTimeToGUNIfAvailable(TimePoint start, TimePoint endTimePoint){
+        return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionTmToGun, expeditionTimeToGunCache);
     }
 
     @Override
     public Double getAverageExpeditionTimeToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
 
     @Override
     public Double getAverageExpeditionTimeToPinIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
 
     @Override
-    public Duration getAverageExpeditionTimeToBurnToLineIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+    public Double getAverageExpeditionTimeToBurnToLineIfAvailable(TimePoint start, TimePoint endTimePoint){
+        //column currently unkown
         return null;
     }
 
     @Override
     public Double getAverageExpeditionTimeToBurnToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
 
     @Override
     public Double getAverageExpeditionTimeToBurnToPinIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
 
     @Override
     public Double getAverageExpeditionDistanceToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
 
     @Override
     public Double getAverageExpeditionDistanceToPinDetailIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
 
     @Override
     public Double getAverageExpeditionDistanceBelowLineIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
 
     @Override
     public Double getAverageExpeditionLineSquareForWindIfAvailable(TimePoint start, TimePoint endTimePoint){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
@@ -768,127 +785,119 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     
     @Override
     public Double getExpeditionHeadingIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
-        return null;
+     	return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionHDG);
     }
     
     @Override
     public Double getExpeditionVMGIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
     public Double getExpeditionVMGTargVMGDeltaIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
     public Double getExpeditionRateOfTurnIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
-    @Override
-    public Double getExpeditionRudderAngleIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
     public Double getExpeditionHeelIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
     public Double getExpeditionTargetHeelIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
     public Double getExpeditionTimeToPortLaylineIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
     public Double getExpeditionTimeToStbLaylineIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
     public Double getExpeditionDistToPortLaylineIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
     public Double getExpeditionDistToStbLaylineIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
-    public Duration getExpeditionTimeToGUNIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
-        return null;
+    public Double getExpeditionTimeToGUNIfAvailable(TimePoint at){
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTmToGun);
     }
     
     @Override
     public Double getExpeditionTimeToCommitteeBoatIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
     public Double getExpeditionTimeToPinIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
-    public Duration getExpeditionTimeToBurnToLineIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+    public Double getExpeditionTimeToBurnToLineIfAvailable(TimePoint at){
+        //column currently unkown
         return null;
     }
     
     @Override
     public Double getExpeditionTimeToBurnToCommitteeBoatIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
     public Double getExpeditionTimeToBurnToPinIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
     public Double getExpeditionDistanceToCommitteeBoatIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
     public Double getExpeditionDistanceToPinDetailIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
     public Double getExpeditionDistanceBelowLineIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     
     @Override
     public Double getExpeditionLineSquareForWindIfAvailable(TimePoint at){
-        // TODO Auto-generated method stub
+        //column currently unkown
         return null;
     }
     

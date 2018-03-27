@@ -1016,9 +1016,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             BiFunction<BiFunction<TrackedLegOfCompetitor, TimePoint, Double>, BiFunction<TrackedLegOfCompetitor, TimePoint, Double>, Double> extractDoubleValue = (
                     currentValueExtractor, averageValueExtractor) -> (hasFinishedLeg
                             ? averageValueExtractor.apply(trackedLeg, timePoint) : currentValueExtractor.apply(trackedLeg, timePoint));
-            BiFunction<BiFunction<TrackedLegOfCompetitor, TimePoint, Duration>, BiFunction<TrackedLegOfCompetitor, TimePoint, Duration>, Duration> extractDurationValue = (
-                    currentValueExtractor, averageValueExtractor) -> (hasFinishedLeg
-                            ? averageValueExtractor.apply(trackedLeg, timePoint) : currentValueExtractor.apply(trackedLeg, timePoint));
             result.setExpeditionAWA(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionAWA, TrackedLegOfCompetitor::getAverageExpeditionAWA));
             result.setExpeditionAWS(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionAWS, TrackedLegOfCompetitor::getAverageExpeditionAWS));
             result.setExpeditionTWA(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTWA, TrackedLegOfCompetitor::getAverageExpeditionTWA));
@@ -1043,10 +1040,10 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             result.setExpeditionTimeToStbLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToStbLayline, TrackedLegOfCompetitor::getAverageExpeditionTimeToStbLayline));
             result.setExpeditionDistToPortLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistToPortLayline, TrackedLegOfCompetitor::getAverageExpeditionDistToPortLayline));
             result.setExpeditionDistToStbLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistToStbLayline, TrackedLegOfCompetitor::getAverageExpeditionDistToStbLayline));
-            result.setExpeditionTimeToGUN(extractDurationValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToGUN, TrackedLegOfCompetitor::getAverageExpeditionTimeToGUN));
+            result.setExpeditionTimeToGUN(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToGUN, TrackedLegOfCompetitor::getAverageExpeditionTimeToGUN));
             result.setExpeditionTimeToCommitteeBoat(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToCommitteeBoat, TrackedLegOfCompetitor::getAverageExpeditionTimeToCommitteeBoat));
             result.setExpeditionTimeToPin(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToPin, TrackedLegOfCompetitor::getAverageExpeditionTimeToPin));
-            result.setExpeditionTimeToBurnToLine(extractDurationValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToLine, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToLine));
+            result.setExpeditionTimeToBurnToLine(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToLine, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToLine));
             result.setExpeditionTimeToBurnToCommitteeBoat(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToCommitteeBoat, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToCommitteeBoat));
             result.setExpeditionTimeToBurnToPin(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToPin, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToPin));
             result.setExpeditionDistanceToCommitteeBoat(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceToCommitteeBoat, TrackedLegOfCompetitor::getAverageExpeditionDistanceToCommitteeBoat));

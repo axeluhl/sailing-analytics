@@ -3194,7 +3194,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             }
             case EXPEDITION_RACE_RUDDER_ANGLE: {
-                result = getBravoDoubleValue(BravoFixTrack::getExpeditionRudderAngleIfAvailable, trackedRace, competitor, timePoint);
+                result = getBravoBearingInDegrees(BravoFixTrack::getRudderIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
             case EXPEDITION_RACE_SOG: {
@@ -3218,7 +3218,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             }
             case EXPEDITION_RACE_TIME_TO_BURN_TO_LINE: {
-                result = getBravoDurationValue(BravoFixTrack::getExpeditionTimeToBurnToLineIfAvailable, trackedRace, competitor, timePoint);
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToBurnToLineIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
             case EXPEDITION_RACE_TIME_TO_BURN_TO_PIN: {
@@ -3230,7 +3230,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             }
             case EXPEDITION_RACE_TIME_TO_GUN: {
-                result = getBravoDurationValue(BravoFixTrack::getExpeditionTimeToGUNIfAvailable, trackedRace, competitor, timePoint);
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToGUNIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
             case EXPEDITION_RACE_TIME_TO_PIN: {
@@ -3275,11 +3275,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
 
-    private Double getBravoDurationValue(BiFunction<BravoFixTrack<Competitor>, TimePoint, Duration> valueGetter,
-            TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
-        return getBravoValue(valueGetter, Duration::asSeconds, trackedRace, competitor, timePoint);
-    }
-    
     private Double getBravoDoubleValue(BiFunction<BravoFixTrack<Competitor>, TimePoint, Double> valueGetter,
             TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
         return getBravoValue(valueGetter, Function.identity(), trackedRace, competitor, timePoint);

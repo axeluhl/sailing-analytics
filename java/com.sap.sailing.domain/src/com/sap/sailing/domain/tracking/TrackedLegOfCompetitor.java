@@ -326,10 +326,10 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Double getExpeditionTimeToStbLayline(TimePoint at);
     Double getExpeditionDistToPortLayline(TimePoint at);
     Double getExpeditionDistToStbLayline(TimePoint at);
-    Duration getExpeditionTimeToGUN(TimePoint at);
+    Double getExpeditionTimeToGUN(TimePoint at);
     Double getExpeditionTimeToCommitteeBoat(TimePoint at);
     Double getExpeditionTimeToPin(TimePoint at);
-    Duration getExpeditionTimeToBurnToLine(TimePoint at);
+    Double getExpeditionTimeToBurnToLine(TimePoint at);
     Double getExpeditionTimeToBurnToCommitteeBoat(TimePoint at);
     Double getExpeditionTimeToBurnToPin(TimePoint at);
     Double getExpeditionDistanceToCommitteeBoat(TimePoint at);
@@ -366,10 +366,10 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Double getAverageExpeditionTimeToStbLayline(TimePoint at);
     Double getAverageExpeditionDistToPortLayline(TimePoint at);
     Double getAverageExpeditionDistToStbLayline(TimePoint at);
-    Duration getAverageExpeditionTimeToGUN(TimePoint at);
+    Double getAverageExpeditionTimeToGUN(TimePoint at);
     Double getAverageExpeditionTimeToCommitteeBoat(TimePoint at);
     Double getAverageExpeditionTimeToPin(TimePoint at);
-    Duration getAverageExpeditionTimeToBurnToLine(TimePoint at);
+    Double getAverageExpeditionTimeToBurnToLine(TimePoint at);
     Double getAverageExpeditionTimeToBurnToCommitteeBoat(TimePoint at);
     Double getAverageExpeditionTimeToBurnToPin(TimePoint at);
     Double getAverageExpeditionDistanceToCommitteeBoat(TimePoint at);

@@ -372,7 +372,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                         detailColumnStyle, leaderboardPanel));
         result.put(DetailType.EXPEDITION_LEG_TIME_TO_GUN,
                 new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TIME_TO_GUN,
-                        new DurationAsSecondsDetailTypeExtractor(LegEntryDTO::getExpeditionTimeToGUN),
+                        new DoubleDetailTypeExtractor(LegEntryDTO::getExpeditionTimeToGUN),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.EXPEDITION_LEG_TIME_TO_COMMITTEE_BOAT,
                 new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TIME_TO_COMMITTEE_BOAT,
@@ -384,7 +384,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                         detailColumnStyle, leaderboardPanel));
         result.put(DetailType.EXPEDITION_LEG_TIME_TO_BURN_TO_LINE,
                 new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TIME_TO_BURN_TO_LINE,
-                        new DurationAsSecondsDetailTypeExtractor(LegEntryDTO::getExpeditionTimeToBurnToLine),
+                        new DoubleDetailTypeExtractor(LegEntryDTO::getExpeditionTimeToBurnToLine),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.EXPEDITION_LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT,
                 new FormattedDoubleDetailTypeColumn(DetailType.EXPEDITION_LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT,

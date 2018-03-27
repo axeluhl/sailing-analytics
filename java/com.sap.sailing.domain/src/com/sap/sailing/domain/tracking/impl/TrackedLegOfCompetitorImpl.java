@@ -825,7 +825,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Double getExpeditionRudderAngle(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionRudderAngleIfAvailable);
+        Double result = null;
+        final Bearing valueOrNull = getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getRudderIfAvailable);
+        if(valueOrNull != null) {
+            result = valueOrNull.getDegrees();
+        }
+        return result;
     }
 
     @Override
@@ -859,7 +864,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Duration getExpeditionTimeToGUN(TimePoint at) {
+    public Double getExpeditionTimeToGUN(TimePoint at) {
         return getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTimeToGUNIfAvailable);
     }
 
@@ -874,7 +879,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Duration getExpeditionTimeToBurnToLine(TimePoint at) {
+    public Double getExpeditionTimeToBurnToLine(TimePoint at) {
         return getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTimeToBurnToLineIfAvailable);
     }
 
@@ -1059,7 +1064,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public Duration getAverageExpeditionTimeToGUN(TimePoint at) {
+    public Double getAverageExpeditionTimeToGUN(TimePoint at) {
         return getAverageExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getAverageExpeditionTimeToGUNIfAvailable);
     }
     
@@ -1074,7 +1079,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public Duration getAverageExpeditionTimeToBurnToLine(TimePoint at) {
+    public Double getAverageExpeditionTimeToBurnToLine(TimePoint at) {
         return getAverageExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getAverageExpeditionTimeToBurnToLineIfAvailable);
     }
     
