@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,79 +15,131 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Settings> {
     
+    private static final String htmlWhitespace = "&nbsp;";
+
+//    private final CheckBox appendResultCheckBox;
+    
     private final ScrollPanel scrollPanel;
     private final HTML resultsLabel;
-
+    
+    private final LinkedHashSet<String> signifiers;
+    private final Map<GroupKey, Map<String, Number>> results;
+    
     public PlainResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context, stringMessages);
+        signifiers = new LinkedHashSet<>();
+        results = new HashMap<>();
+        
+//        appendResultCheckBox = new CheckBox(stringMessages.appendResult());
+//        addControl(appendResultCheckBox);
         
         resultsLabel = new HTML();
         scrollPanel = new ScrollPanel(resultsLabel);
     }
 
     @Override
-    protected void internalShowNumericResult(Map<GroupKey, Number> resultValues, Map<GroupKey, Triple<Number, Number, Long>> errorMargins) {
-        QueryResultDTO<?> result = getCurrentResult();
-        SafeHtmlBuilder resultsBuilder = new SafeHtmlBuilder();
-        resultsBuilder.appendHtmlConstant("<b>").appendEscaped(result.getResultSignifier()).appendHtmlConstant("</b>");
-        resultsBuilder.appendHtmlConstant("<br />");
-        resultsBuilder.appendHtmlConstant("<table>");
-        if (isCurrentResultTwoDimensional()) {
-            buildTable(resultValues, resultsBuilder);
-        } else {
-            buildList(resultValues, resultsBuilder);
+    protected void internalShowNumericResults(Map<GroupKey, Number> resultValues, Map<GroupKey, Triple<Number, Number, Long>> errorMargins) {
+//        boolean appendResult = appendResultCheckBox.getValue();
+//        if (!appendResult) {
+//            signifiers.clear();
+//            results.clear();
+//        }
+        signifiers.clear();
+        results.clear();
+        
+        String currentSignifier = getCurrentResult().getResultSignifier();
+        signifiers.add(currentSignifier);
+        for (Entry<GroupKey, Number> entry : resultValues.entrySet()) {
+            Map<String, Number> values = results.get(entry.getKey());
+            if (values == null) {
+                values = new HashMap<>();
+                results.put(entry.getKey(), values);
+            }
+            values.put(currentSignifier, entry.getValue());
         }
-        resultsBuilder.appendHtmlConstant("</table>");
-        resultsLabel.setHTML(resultsBuilder.toSafeHtml().asString());
+        
+        SafeHtmlBuilder displayBuilder = new SafeHtmlBuilder();
+        if (signifiers.size() == 1) {
+            displayBuilder.appendHtmlConstant("<b>").appendEscaped(getCurrentResult().getResultSignifier())
+                          .appendHtmlConstant("</b>").appendHtmlConstant("<br />");
+        }
+        
+        displayBuilder.appendHtmlConstant("<table>");
+        if (signifiers.size() > 1) {
+            buildTableForMultipleSignifiers(displayBuilder);
+        } else if (areCollectedResultsTwoDimensional()) {
+            buildTableForTwoDimensionalResult(displayBuilder);
+        } else {
+            buildList(displayBuilder);
+        }
+        displayBuilder.appendHtmlConstant("</table>");
+        resultsLabel.setHTML(displayBuilder.toSafeHtml().asString());
     }
 
-    private void buildTable(Map<GroupKey, Number> twoDimensionalResultValues, SafeHtmlBuilder resultsBuilder) {
-        Map<GroupKey, Map<GroupKey, Number>> unfoldedResultValues = unfoldResultValues(twoDimensionalResultValues);
-        List<GroupKey> sortedMainKeys = new ArrayList<>(unfoldedResultValues.keySet());
-        Collections.sort(sortedMainKeys);
+    private boolean areCollectedResultsTwoDimensional() {
+        for (GroupKey key : results.keySet()) {
+            if (key.size() != 2) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void buildTableForMultipleSignifiers(SafeHtmlBuilder displayBuilder) {
+        buildTableHeader(signifiers, displayBuilder);
+        for (GroupKey key : getSortedKeys(results.keySet())) {
+            buildTableRow(key, signifiers, results.get(key), displayBuilder);
+        }
+    }
+
+    private void buildTableForTwoDimensionalResult(SafeHtmlBuilder displayBuilder) {
+        Map<GroupKey, Map<GroupKey, Number>> unfoldedResultValues = unfoldResultValues();
         Set<GroupKey> allSubKeys = new HashSet<>();
         unfoldedResultValues.forEach((key, values) -> allSubKeys.addAll(values.keySet()));
-        List<GroupKey> sortedSubKeys = new ArrayList<>(allSubKeys);
-        Collections.sort(sortedSubKeys);
+        Iterable<GroupKey> sortedSubKeys = getSortedKeys(allSubKeys);
 
-        resultsBuilder.appendHtmlConstant("<tr><th>&nbsp;</th>"); // First column empty for main keys, but selectable to copy the content
-        for (GroupKey subKey : sortedSubKeys) {
-            resultsBuilder.appendHtmlConstant("<th>").appendEscaped(subKey.toString()).appendHtmlConstant("</th>");
-        }
-        resultsBuilder.appendHtmlConstant("</tr>");
-        
-        for (GroupKey mainKey : sortedMainKeys) {
-            resultsBuilder.appendHtmlConstant("<tr>");
-            resultsBuilder.appendHtmlConstant("<td><b>").appendEscaped(mainKey + ":").appendHtmlConstant("</b></td>");
-            for (GroupKey subKey : sortedSubKeys) {
-                Number value = null;
-                if (unfoldedResultValues.containsKey(mainKey) &&
-                    unfoldedResultValues.get(mainKey).containsKey(subKey)) {
-                    value = unfoldedResultValues.get(mainKey).get(subKey);
-                }
-                resultsBuilder.appendHtmlConstant("<td>");
-                if (value != null) {
-                    resultsBuilder.append(value.doubleValue());
-                }
-                resultsBuilder.appendHtmlConstant("</td>");
-            }
-            resultsBuilder.appendHtmlConstant("</tr>");
+        buildTableHeader(sortedSubKeys, displayBuilder);
+        for (GroupKey mainKey : getSortedKeys(unfoldedResultValues.keySet())) {
+            buildTableRow(mainKey, sortedSubKeys, unfoldedResultValues.get(mainKey), displayBuilder);
         }
     }
 
-    private Map<GroupKey, Map<GroupKey, Number>> unfoldResultValues(Map<GroupKey, Number> twoDimensionalResultValues) {
+    private void buildTableHeader(Iterable<?> columnHeaders, SafeHtmlBuilder displayBuilder) {
+        displayBuilder.appendHtmlConstant("<tr><th>" + htmlWhitespace + "</th>"); // First column empty, but selectable to copy the content without shifting the headers
+        for (Object columnHeader : columnHeaders) {
+            displayBuilder.appendHtmlConstant("<th>").appendEscaped(columnHeader.toString()).appendHtmlConstant("</th>");
+        }
+        displayBuilder.appendHtmlConstant("</tr>");
+    }
+    
+    private void buildTableRow(GroupKey rowKey, Iterable<?> orderedColumnKeys, Map<?, Number> columnValues, SafeHtmlBuilder displayBuilder) {
+        displayBuilder.appendHtmlConstant("<tr>");
+        displayBuilder.appendHtmlConstant("<td><b>").appendEscaped(rowKey + ":").appendHtmlConstant("</b></td>");
+        for (Object columnKey : orderedColumnKeys) {
+            Number value = columnValues.get(columnKey);
+            displayBuilder.appendHtmlConstant("<td>");
+            if (value != null) {
+                displayBuilder.append(value.doubleValue());
+            }
+            displayBuilder.appendHtmlConstant("</td>");
+        }
+        displayBuilder.appendHtmlConstant("</tr>");
+    }
+
+    private Map<GroupKey, Map<GroupKey, Number>> unfoldResultValues() {
+        String signifier = Util.first(signifiers);
         Map<GroupKey, Map<GroupKey, Number>> unfoldedResultValues = new HashMap<>();
-        for (Entry<GroupKey, Number> entry : twoDimensionalResultValues.entrySet()) {
+        for (Entry<GroupKey, Map<String, Number>> entry : results.entrySet()) {
             List<? extends GroupKey> keys = entry.getKey().getKeys();
             GroupKey mainKey = keys.get(0);
             GroupKey subKey = keys.get(1);
@@ -96,26 +149,27 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
                 values = new HashMap<>();
                 unfoldedResultValues.put(mainKey, values);
             }
-            values.put(subKey, entry.getValue());
+            values.put(subKey, entry.getValue().get(signifier));
         }
         return unfoldedResultValues;
     }
 
-    private void buildList(Map<GroupKey, Number> resultValues, SafeHtmlBuilder resultsBuilder) {
-        for (GroupKey key : getSortedKeys()) {
-            resultsBuilder.appendHtmlConstant("<tr>");
-            resultsBuilder.appendHtmlConstant("<td><b>").appendEscaped(key + ":").appendHtmlConstant("</b></td>");
-            resultsBuilder.appendHtmlConstant("<td>").append(resultValues.get(key).doubleValue()).appendHtmlConstant("</td>");
-            resultsBuilder.appendHtmlConstant("</tr>");
+    private void buildList(SafeHtmlBuilder displayBuilder) {
+        String signifier = Util.first(signifiers);
+        for (GroupKey key : getSortedKeys(results.keySet())) {
+            displayBuilder.appendHtmlConstant("<tr>");
+            displayBuilder.appendHtmlConstant("<td><b>").appendEscaped(key + ":").appendHtmlConstant("</b></td>");
+            displayBuilder.appendHtmlConstant("<td>").append(results.get(key).get(signifier).doubleValue()).appendHtmlConstant("</td>");
+            displayBuilder.appendHtmlConstant("</tr>");
         }
     }
     
-    private Iterable<GroupKey> getSortedKeys() {
-        List<GroupKey> sortedKeys = new ArrayList<>(getCurrentResult().getResults().keySet());
+    private Iterable<GroupKey> getSortedKeys(Set<GroupKey> keys) {
+        List<GroupKey> sortedKeys = new ArrayList<>(keys);
         Collections.sort(sortedKeys);
         return sortedKeys;
     }
-
+    
     @Override
     protected Widget getPresentationWidget() {
         return scrollPanel;

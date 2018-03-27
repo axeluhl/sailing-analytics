@@ -7,8 +7,6 @@ public interface QueryDefinitionProvider<SettingsType extends Settings> extends 
 
     public Iterable<String> validateQueryDefinition(StatisticQueryDefinitionDTO queryDefinition);
     public StatisticQueryDefinitionDTO getQueryDefinition();
-    
-    public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition);
 
     public void addQueryDefinitionChangedListener(QueryDefinitionChangedListener listener);
     public void removeQueryDefinitionChangedListener(QueryDefinitionChangedListener listener);

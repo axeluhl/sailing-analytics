@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
+import java.util.Optional;
 import java.util.concurrent.Future;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
@@ -11,6 +12,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.impl.TrackedRaces;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.util.ThreadLocalTransporter;
 
 /**
  * Manages a set of {@link TrackedRace} objects that belong to the same {@link Regatta} (regatta, sailing regatta for a
@@ -65,7 +67,8 @@ public interface TrackedRegatta extends Serializable {
      */
     DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver);
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver,
+            Optional<ThreadLocalTransporter> beforeAndAfterNotificationHandler);
 
     /**
      * Obtains the tracked race for <code>race</code>. Blocks until the tracked race has been created
@@ -79,16 +82,16 @@ public interface TrackedRegatta extends Serializable {
      */
     TrackedRace getExistingTrackedRace(RaceDefinition race);
     
-    void addTrackedRace(TrackedRace trackedRace);
+    void addTrackedRace(TrackedRace trackedRace, Optional<ThreadLocalTransporter> beforeAndAfterNotificationHandler);
 
-    void removeTrackedRace(TrackedRace trackedRace);
+    void removeTrackedRace(TrackedRace trackedRace, Optional<ThreadLocalTransporter> beforeAndAfterNotificationHandler);
 
     /**
      * Listener will be notified when {@link #addTrackedRace(TrackedRace)} is called and
      * upon registration for each tracked race already known. Therefore, the listener
      * won't miss any tracked race.
      */
-    void addRaceListener(RaceListener listener);
+    void addRaceListener(RaceListener listener, Optional<ThreadLocalTransporter> beforeAndAfterNotificationHandler);
     
     /**
      * Removes the given listener and returns a {@link Future} that will be completed

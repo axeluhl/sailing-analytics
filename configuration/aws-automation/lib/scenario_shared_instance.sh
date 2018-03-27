@@ -26,8 +26,6 @@ function shared_instance_require(){
 	require_key_file
 	require_event_name
 	require_new_admin_password
-	require_user_username
-	require_user_password
 	require_ssh_user
 	require_contact_person
 	require_contact_email

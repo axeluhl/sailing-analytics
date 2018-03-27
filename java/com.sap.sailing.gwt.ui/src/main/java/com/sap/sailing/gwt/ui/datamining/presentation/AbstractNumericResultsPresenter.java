@@ -57,7 +57,7 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
             public void onValueChange(ValueChangeEvent<String> event) {
                 Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
                 Map<GroupKey, Triple<Number, Number, Long>> errorMargins = currentDataProvider.getErrorData(getCurrentResult(), dataSelectionListBox.getValue());
-                internalShowNumericResult(resultValues, errorMargins);
+                internalShowNumericResults(resultValues, errorMargins);
             }
         });
         addControl(dataSelectionListBox);
@@ -66,7 +66,7 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
     /**
      * Adjusts, if necessary, the {@link #currentDataProvider} to the type of result, then requests from the
      * {@link #currentDataProvider} the mapping of the {@code result} to {@link Number}s for each group key.
-     * The {@link Number}s returned by the provider will then be passed to {@link #internalShowNumericResult(Map, Map)}
+     * The {@link Number}s returned by the provider will then be passed to {@link #internalShowNumericResults(Map, Map)}
      * for display.
      */
     protected void internalShowResults(QueryResultDTO<?> result) {
@@ -75,7 +75,7 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
         if (currentDataProvider != null) {
             Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
             Map<GroupKey, Triple<Number, Number, Long>> errorMargins = currentDataProvider.getErrorData(getCurrentResult(), dataSelectionListBox.getValue());
-            internalShowNumericResult(resultValues, errorMargins);
+            internalShowNumericResults(resultValues, errorMargins);
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                 @Override
                 public void execute() {
@@ -98,7 +98,7 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
         }
     }
 
-    protected abstract void internalShowNumericResult(Map<GroupKey, Number> resultValues, Map<GroupKey, Triple<Number, Number, Long>> errorMargins);
+    protected abstract void internalShowNumericResults(Map<GroupKey, Number> resultValues, Map<GroupKey, Triple<Number, Number, Long>> errorMargins);
 
     String getSelectedDataKey() {
         return dataSelectionListBox.getValue();

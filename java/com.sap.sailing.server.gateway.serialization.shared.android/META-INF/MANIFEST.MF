@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Android
 Bundle-SymbolicName: com.sap.sailing.server.gateway.serialization.shared.android
+Automatic-Module-Name: com.sap.sailing.server.gateway.serialization.shared.android
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

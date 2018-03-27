@@ -249,7 +249,7 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
     }
 
     @Override
-    public void applySelection(StatisticQueryDefinitionDTO queryDefinition) {
+    public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
         for (RetrieverLevelFilterSelectionProvider selectionProvider : selectionProvidersMappedByRetrievedDataType.values()) {
             Map<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = queryDefinition.getFilterSelection();
             DataRetrieverLevelDTO retrieverLevel = selectionProvider.getRetrieverLevel();

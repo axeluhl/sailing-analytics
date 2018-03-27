@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.After;
@@ -228,7 +229,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
             public void raceAdded(TrackedRace trackedRace) {
             }
         };
-        raceHandle.getTrackedRegatta().addRaceListener(raceListener);
+        raceHandle.getTrackedRegatta().addRaceListener(raceListener, Optional.empty());
         raceHandle.getTrackedRegatta().removeRaceListener(raceListener).get();
     }
     
