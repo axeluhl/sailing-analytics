@@ -12,3 +12,4 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  com.sap.sse.common
 Export-Package: com.sap.sailing.ess40.resultimport
+Automatic-Module-Name: com.sap.sailing.ess40.resultimport

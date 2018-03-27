@@ -17,3 +17,4 @@ Require-Bundle: com.sap.sailing.domain.persistence,
  com.sap.sailing.server.gateway.serialization.shared.android,
  com.sap.sse
 Export-Package: com.sap.sailing.expeditionconnector.persistence
+Automatic-Module-Name: com.sap.sailing.expeditionconnector.persistence

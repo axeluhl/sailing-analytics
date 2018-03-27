@@ -12,3 +12,4 @@ Bundle-ActivationPolicy: lazy
 Import-Package: com.sap.sailing.util,
  org.osgi.framework;version="1.6.0"
 Bundle-Activator: com.sap.sse.mongodb.Activator
+Automatic-Module-Name: com.sap.sse.mongodb

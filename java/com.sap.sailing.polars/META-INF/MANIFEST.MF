@@ -45,3 +45,4 @@ Import-Package:
 Web-ContextPath: /polars
 Bundle-Activator: com.sap.sailing.polars.impl.Activator
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: com.sap.sailing.polars

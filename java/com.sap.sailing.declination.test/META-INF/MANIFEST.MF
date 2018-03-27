@@ -10,3 +10,4 @@ Require-Bundle: org.junit;bundle-version="4.8.2"
 Import-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.impl,
  com.sap.sailing.domain.common.quadtree
+Automatic-Module-Name: com.sap.sailing.declination.test

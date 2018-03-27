@@ -19,3 +19,4 @@ Require-Bundle: com.sap.sailing.domain.shared.android,
  com.sap.sse.common,
  com.sap.sailing.server.gateway.serialization.shared.android
 Export-Package: com.sap.sailing.domain.racelog.tracking.test.mock
+Automatic-Module-Name: com.sap.sailing.domain.racelogtrackingadapter.testsupport
