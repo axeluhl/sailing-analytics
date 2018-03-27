@@ -150,10 +150,10 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private Chart createChart() {
 
         Chart chart = new Chart().setZoomType(BaseChart.ZoomType.X)
-                .setPersistent(true)
+                .setPersistent(false)
                 .setReflow(false)
+                .setAlignTicks(false)
                 .setWidth100()
-                .setAlignTicks(true)
                 .setHeight100()
                 .setMarginLeft(65)
                 .setMarginRight(65)
@@ -681,7 +681,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 chart.getYAxis(0).setAxisTitleText(labelY0);
                 chart.getYAxis(1).setAxisTitle(null);
             }
-            chart.setAlignTicks(hasSecondYAxis());
             final NumberFormat numberFormatY0 = DetailTypeFormatter.getNumberFormat(selectedFirstDetailType);
             final NumberFormat numberFormatY1 = hasSecondYAxis() ? DetailTypeFormatter
                     .getNumberFormat(selectedSecondDetailType) : null;
