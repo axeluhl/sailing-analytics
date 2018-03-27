@@ -123,6 +123,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                 .setBackgroundColor(new Color("#FFFFFF"))
                 .setPlotBackgroundColor("#f8f8f8")
                 .setPlotBorderWidth(0)
+                .setAlignTicks(false)
                 .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()).setOption("floating",true))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
