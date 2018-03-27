@@ -49,4 +49,5 @@ public interface BravoExtendedFix extends BravoFix {
     Double getExpeditionLoadP();
     Double getExpeditionBARO();
     Double getExpeditionMastButt();
+    Double getExpeditionRateOfTurn();
 }

@@ -630,6 +630,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         entryDTO.setExpeditionJibCarPort(fix.getExpeditionJibCarPort());
                         entryDTO.setExpeditionJibCarStbd(fix.getExpeditionJibCarStbd());
                         entryDTO.setExpeditionMastButt(fix.getExpeditionMastButt());
+                        entryDTO.setExpeditionRateOfTurn(fix.getExpeditionRateOfTurn());
                         
                         entryDTO.heel = fix.getHeel();
                         entryDTO.pitch = fix.getPitch();

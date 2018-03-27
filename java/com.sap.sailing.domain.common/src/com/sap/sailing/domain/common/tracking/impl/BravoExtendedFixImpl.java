@@ -236,6 +236,11 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
     public Double getExpeditionBelowLn() {
         return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_BELOWLN.getColumnIndex());
     }
+    
+    @Override
+    public Double getExpeditionRateOfTurn() {
+        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_RATE_OF_TURN.getColumnIndex());
+    }
 
     @Override
     public Double getExpeditionCourse() {
