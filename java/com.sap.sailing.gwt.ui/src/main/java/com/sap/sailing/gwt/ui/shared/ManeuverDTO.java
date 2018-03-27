@@ -39,8 +39,6 @@ public class ManeuverDTO implements IsSerializable {
 
     public NauticalSide markPassingSide;
 
-    public double maneuverDurationInSeconds;
-
     public ManeuverDTO() {
     }
 
@@ -48,7 +46,7 @@ public class ManeuverDTO implements IsSerializable {
             SpeedWithBearingDTO speedWithBearingBefore, SpeedWithBearingDTO speedWithBearingAfter,
             double directionChangeInDegrees, Double maneuverLossInMeters, double maxTurningRateInDegreesPerSecond,
             double avgTurningRateInDegreesPerSecond, double lowestSpeedInKnots, Date markPassingTimePoint,
-            NauticalSide markPassingSide, double maneuverDurationInSeconds) {
+            NauticalSide markPassingSide) {
         super();
         this.type = type;
         this.newTack = newTack;
@@ -63,7 +61,6 @@ public class ManeuverDTO implements IsSerializable {
         this.lowestSpeedInKnots = lowestSpeedInKnots;
         this.markPassingTimePoint = markPassingTimePoint;
         this.markPassingSide = markPassingSide;
-        this.maneuverDurationInSeconds = maneuverDurationInSeconds;
     }
 
     public String toString(StringMessages stringMessages) {
@@ -89,9 +86,6 @@ public class ManeuverDTO implements IsSerializable {
                 + stringMessages.degreesPerSecondUnit();
         String lowestSpeed = stringMessages.lowestSpeed() + ": "
                 + NumberFormat.getDecimalFormat().format(this.lowestSpeedInKnots) + " " + stringMessages.knotsUnit();
-        String maneuverDuration = stringMessages.durationPlain() + ": "
-                + NumberFormat.getDecimalFormat().format(this.maneuverDurationInSeconds) + " "
-                + stringMessages.secondsUnit();
         String maneuverLoss = this.maneuverLossInMeters == null ? ""
                 : ("; " + stringMessages.maneuverLoss() + ": "
                         + NumberFormat.getDecimalFormat().format(this.maneuverLossInMeters) + " "
@@ -103,8 +97,7 @@ public class ManeuverDTO implements IsSerializable {
                                         : stringMessages.starboardSide(),
                         DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(this.markPassingTimePoint));
         String maneuverTitle = timeAndManeuver + "; " + directionChange + "; " + speedChange + "; " + maxTurningRate
-                + "; " + avgTurningRate + "; " + lowestSpeed + "; " + maneuverDuration + "; " + maneuverLoss + "; "
-                + markPassing;
+                + "; " + avgTurningRate + "; " + lowestSpeed + maneuverLoss + markPassing;
         return maneuverTitle;
     }
 }

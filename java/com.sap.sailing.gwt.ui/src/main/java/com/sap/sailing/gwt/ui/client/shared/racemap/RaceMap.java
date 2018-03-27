@@ -2194,9 +2194,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.lowestSpeed(),
                     NumberFormat.getDecimalFormat().format(maneuver.lowestSpeedInKnots) + " "
                             + stringMessages.knotsUnit()));
-            vPanel.add(createInfoWindowLabelAndValue(stringMessages.durationPlain(),
-                    NumberFormat.getDecimalFormat().format(maneuver.maneuverDurationInSeconds) + " "
-                            + stringMessages.secondsUnit()));
         }
         if (maneuver.maneuverLossInMeters != null) {
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverLoss(),

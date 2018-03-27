@@ -3424,7 +3424,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     maneuver.getMaxTurningRateInDegreesPerSecond(), maneuver.getAvgTurningRateInDegreesPerSecond(),
                     maneuver.getLowestSpeed().getKnots(),
                     maneuver.isMarkPassing() ? maneuver.getMarkPassing().getTimePoint().asDate() : null,
-                    maneuver.isMarkPassing() ? maneuver.getToSide() : null, maneuver.getDuration().asSeconds());
+                    maneuver.isMarkPassing() ? maneuver.getToSide() : null);
             result.add(maneuverDTO);
         }
         return result;
