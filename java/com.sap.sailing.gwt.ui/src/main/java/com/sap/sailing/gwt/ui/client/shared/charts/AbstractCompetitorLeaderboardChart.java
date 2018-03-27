@@ -114,7 +114,6 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
     
     private Chart createChart() {
         Chart chart = new Chart()
-            .setAnimation(false)
             .setPersistent(true)
             .setMarginLeft(40)
             .setMarginRight(40)

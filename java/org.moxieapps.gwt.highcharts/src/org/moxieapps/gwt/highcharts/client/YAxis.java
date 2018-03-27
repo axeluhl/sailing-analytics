@@ -105,8 +105,7 @@ public class YAxis extends Axis<YAxis> {
      */
     public YAxis setHeight(Number height) {
         this.setOption("height", height);
-        update(this);
-        return this;
+        return update(this);
     }
 
     /**
@@ -123,8 +122,7 @@ public class YAxis extends Axis<YAxis> {
      */
     public YAxis setTop(Number top) {
         this.setOption("top", top);
-        update(this);
-        return this;
+        return update(this);
     }
 
     private YAxisLabels yAxisLabels;
@@ -190,9 +188,8 @@ public class YAxis extends Axis<YAxis> {
     public YAxis setStackLabels(StackLabels stackLabels) {
         this.stackLabels = stackLabels;
         this.setOption("stackLabels", stackLabels != null ? stackLabels.getOptions() : null);
-        update(this);
-        return this;
-    }
+        return update(this);
+     }
 
     // Purposefully restricted to package scope
     StackLabels getStackLabels() {

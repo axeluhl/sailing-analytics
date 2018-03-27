@@ -61,7 +61,7 @@ public class ChartSelectionEvent extends MouseEvent {
     public Long getXAxisMinAsLongOrNull() {
         Long rv = null;
         Double minOrNull = getXAxisMinOrNull();
-        if(minOrNull != null){
+        if (minOrNull != null) {
             rv = minOrNull.longValue();
         }
         return rv;
@@ -95,7 +95,7 @@ public class ChartSelectionEvent extends MouseEvent {
     public Long getXAxisMinAsLongOrNull(int axisIndex) {
         Long rv = null;
         Double minOrNull = getXAxisMinOrNull(axisIndex);
-        if(minOrNull != null){
+        if (minOrNull != null) {
             rv = minOrNull.longValue();
         }
         return rv;
@@ -122,7 +122,7 @@ public class ChartSelectionEvent extends MouseEvent {
     public Long getXAxisMaxAsLongOrNull() {
         Long rv = null;
         Double maxOrNull = getXAxisMaxOrNull();
-        if(maxOrNull != null){
+        if (maxOrNull != null) {
             rv = maxOrNull.longValue();
         }
         return rv;

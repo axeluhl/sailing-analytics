@@ -216,9 +216,8 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setAllowDecimals(boolean allowDecimals) {
-        T rv = this.setOption("allowDecimals", allowDecimals);
-        update(this);
-        return rv;
+        this.setOption("allowDecimals", allowDecimals);
+        return update(this);
     }
 
     /**
@@ -233,9 +232,8 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setAlternateGridColor(String alternateGridColor) {
-        T rv = this.setOption("alternateGridColor", alternateGridColor);
-        update(this);
-        return rv;
+        this.setOption("alternateGridColor", alternateGridColor);
+        return update(this);
     }
 
     /**
@@ -269,9 +267,8 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setDateTimeLabelFormats(DateTimeLabelFormats dateTimeLabelFormats) {
-        T rv = this.setOption("dateTimeLabelFormats", dateTimeLabelFormats != null ? dateTimeLabelFormats.getOptions() : null);
-        update(this);
-        return rv;
+        this.setOption("dateTimeLabelFormats", dateTimeLabelFormats != null ? dateTimeLabelFormats.getOptions() : null);
+        return update(this);
     }
 
     /**
@@ -286,9 +283,8 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setEndOnTick(boolean endOnTick) {
-        T rv = this.setOption("endOnTick", endOnTick);
-        update(this);
-        return rv;
+        this.setOption("endOnTick", endOnTick);
+        return update(this);
     }
 
     // TODO: Add support for events
@@ -444,8 +440,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setGridLineColor(String gridLineColor) {
         this.setOption("gridLineColor", gridLineColor);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -462,8 +457,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setGridLineDashStyle(PlotLine.DashStyle gridLineDashStyle) {
         this.setOption("gridLineDashStyle", gridLineDashStyle != null ? gridLineDashStyle.toString() : null);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -478,8 +472,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setGridLineWidth(Number gridLineWidth) {
         this.setOption("gridLineWidth", gridLineWidth);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -494,8 +487,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setLineColor(String lineColor) {
         this.setOption("lineColor", lineColor);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -510,8 +502,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setLineWidth(Number lineWidth) {
         this.setOption("lineWidth", lineWidth);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -530,8 +521,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setLinkedTo(Number linkedTo) {
         this.setOption("linkedTo", linkedTo);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     private Number max;
@@ -556,8 +546,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
     public T setMax(Number max) {
         this.max = max;
         this.setOption("max", max);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -575,8 +564,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setMaxPadding(Number maxPadding) {
         this.setOption("maxPadding", maxPadding);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -593,8 +581,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setMaxZoom(Number maxZoom) {
         this.setOption("maxZoom", maxZoom);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     private Number min;
@@ -618,8 +605,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
     public T setMin(Number min) {
         this.min = min;
         this.setOption("min", min);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -634,8 +620,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setMinorGridLineColor(String minorGridLineColor) {
         this.setOption("minorGridLineColor", minorGridLineColor);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -652,8 +637,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setMinorGridLineDashStyle(PlotLine.DashStyle minorGridLineDashStyle) {
         this.setOption("minorGridLineDashStyle", minorGridLineDashStyle != null ? minorGridLineDashStyle.toString() : null);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -668,8 +652,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setMinorGridLineWidth(Number minorGridLineWidth) {
         this.setOption("minorGridLineWidth", minorGridLineWidth);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -684,8 +667,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setMinorTickColor(String minorTickColor) {
         this.setOption("minorTickColor", minorTickColor);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -702,8 +684,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setMinorTickInterval(Number minorTickInterval) {
         this.setOption("minorTickInterval", minorTickInterval);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -718,8 +699,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setMinorTickIntervalAuto() {
         this.setOption("minorTickInterval", "auto");
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -734,8 +714,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setMinorTickLength(Number minorTickLength) {
         this.setOption("minorTickLength", minorTickLength);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -751,8 +730,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setMinorTickPosition(TickPosition minorTickPosition) {
         this.setOption("minorTickPosition", minorTickPosition != null ? minorTickPosition.toString() : null);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -767,8 +745,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setMinorTickWidth(Number minorTickWidth) {
         this.setOption("minorTickWidth", minorTickWidth);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -786,8 +763,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setMinPadding(Number minPadding) {
         this.setOption("minPadding", minPadding);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -804,8 +780,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setOffset(Number offset) {
         this.setOption("offset", offset);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -823,8 +798,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setOpposite(boolean opposite) {
         this.setOption("opposite", opposite);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -849,8 +823,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setPlotLines(PlotLine... plotLines) {
         this.setOption("plotLines", plotLines);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -875,9 +848,8 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setPlotBands(PlotBand... plotBands) {
-        T rv = this.setOption("plotBands", plotBands);
-        update(this);
-        return rv;
+        this.setOption("plotBands", plotBands);
+        return update(this);
     }
 
     /**
@@ -894,8 +866,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setReversed(boolean reversed) {
         this.setOption("reversed", reversed);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -910,8 +881,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setShowEmpty(boolean showEmpty) {
         this.setOption("showEmpty", showEmpty);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -926,8 +896,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setShowFirstLabel(boolean showFirstLabel) {
         this.setOption("showFirstLabel", showFirstLabel);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -942,8 +911,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setShowLastLabel(boolean showLastLabel) {
         this.setOption("showLastLabel", showLastLabel);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -958,8 +926,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setStartOfWeek(WeekDay startOfWeek) {
         this.setOption("startOfWeek", startOfWeek != null ? startOfWeek.toNumber() : null);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -975,8 +942,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setStartOnTick(boolean startOnTick) {
         this.setOption("startOnTick", startOnTick);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -991,8 +957,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setTickColor(String tickColor) {
         this.setOption("tickColor", tickColor);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -1010,8 +975,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setTickInterval(Number tickInterval) {
         this.setOption("tickInterval", tickInterval);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -1026,8 +990,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setTickLength(Number tickLength) {
         this.setOption("tickLength", tickLength);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -1043,8 +1006,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setTickPixelInterval(Number tickPixelInterval) {
         this.setOption("tickPixelInterval", tickPixelInterval);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -1059,8 +1021,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setTickPosition(TickPosition tickPosition) {
         this.setOption("tickPosition", tickPosition != null ? tickPosition.toString() : null);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -1075,8 +1036,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setTickWidth(Number tickWidth) {
         this.setOption("tickWidth", tickWidth);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -1104,8 +1064,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      */
     public T setAxisTitleText(String title) {
         this.setAxisTitleText(title, true);
-        update(this);
-        return getThis();
+        return update(this);
     }
 
     /**
@@ -1199,9 +1158,8 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @since 1.2.0
      */
     public T setAxisTitle(AxisTitle title, boolean redraw) {
-         T rv = this.setOption("/title", title != null ? title.getOptions() : null);
-         update(this);
-         return rv;
+         this.setOption("/title", title != null ? title.getOptions() : null);
+         return update(this);
     }
 
     /**
@@ -1217,9 +1175,8 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setType(Type type) {
-        T rv = this.setOption("type", type != null ? type.toString() : null);
-        update(this);
-        return rv;
+        this.setOption("type", type != null ? type.toString() : null);
+        return update(this);
     }
 
     /**

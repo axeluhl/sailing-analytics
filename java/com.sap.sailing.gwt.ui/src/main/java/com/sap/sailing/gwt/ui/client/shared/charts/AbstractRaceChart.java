@@ -12,7 +12,6 @@ import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -190,13 +189,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
                 if(timer.getPlayMode() == PlayModes.Live) {
                     timer.pause();
                 }
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                    
-                    @Override
-                    public void execute() {
-                        timeRangeWithZoomProvider.setTimeZoom(rangeStart, rangeEnd);
-                    }
-                });
+                Scheduler.get().scheduleDeferred(() -> timeRangeWithZoomProvider.setTimeZoom(rangeStart, rangeEnd));
                 return true;
             }
             return false;
@@ -235,12 +228,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
             // if we are zoomed, and in livemode, reset the zoom, as this cannot be handled by the timesliders expected
             // behaviour
             if (timeRangeWithZoomProvider.isZoomed() && timer.getPlayMode() == PlayModes.Live) {
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                        timeRangeWithZoomProvider.resetTimeZoom();
-                    }
-                });
+                Scheduler.get().scheduleDeferred(timeRangeWithZoomProvider::resetTimeZoom);
                 return;
             }
             if (minTimepoint != null && maxTimepoint != null) {

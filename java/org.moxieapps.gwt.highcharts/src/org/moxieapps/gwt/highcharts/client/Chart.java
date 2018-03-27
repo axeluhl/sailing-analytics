@@ -101,7 +101,7 @@ public class Chart extends BaseChart<Chart> {
          */
         ALT("alt"),
 
-    /**
+        /**
          * Pan the chart while holding "ctrl"
          */
         CTRL("ctrl"),
