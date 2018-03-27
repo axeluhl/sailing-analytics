@@ -303,7 +303,17 @@
                         /** 
                          * @ignore
                          */
-                        width: 0.01
+                        width: 0.01,
+
+
+                        /**
+                         * The color of the marker.
+                         * 
+                         * @type {Color}
+                         * @default #999999
+                         * @product highcharts highmaps
+                         */
+                        color: '#999999'
 
                     },
 
@@ -494,7 +504,15 @@
                         dataClasses.push(dataClass);
 
 
+                        if (dataClass.color) {
+                            return;
+                        }
+
                         if (options.dataClassColor === 'category') {
+
+                            colors = chart.options.colors;
+                            colorCount = colors.length;
+                            dataClass.color = colors[colorCounter];
 
                             dataClass.colorIndex = colorCounter;
 
@@ -602,6 +620,8 @@
                                 (from === undefined || value >= from) &&
                                 (to === undefined || value <= to)
                             ) {
+
+                                color = dataClass.color;
 
                                 if (point) {
                                     point.dataClass = i;
@@ -774,6 +794,10 @@
 
                             this.cross.addedToColorAxis = true;
 
+
+                            this.cross.attr({
+                                fill: this.crosshair.color
+                            });
 
 
                         }
@@ -1054,6 +1078,8 @@
             colorKey: 'value',
 
 
+            pointAttribs: seriesTypes.column.prototype.pointAttribs,
+
 
             /**
              * In choropleth maps, the color is a result of the value, so this needs
@@ -1191,6 +1217,15 @@
 
 
 
+            /**
+             * The color applied to null points. In styled mode, a general CSS class is
+             * applied instead.
+             *
+             * @type {Color}
+             */
+            nullColor: '#f7f7f7',
+
+
             dataLabels: {
 
                 formatter: function() { // #2945
@@ -1310,9 +1345,7 @@
 
                 each(this.points, function(point) {
 
-                    // In styled mode, use CSS, otherwise the fill used in the style
-                    // sheet will take precedence over the fill attribute.
-                    point.graphic.css(this.colorAttribs(point));
+                    point.graphic.attr(this.colorAttribs(point));
 
                 }, this);
             },

@@ -45,6 +45,9 @@
 
         var defaultXAxisOptions = {
 
+            lineWidth: 0,
+            tickLength: 0,
+
             opposite: true,
             type: 'category'
         };
@@ -100,6 +103,8 @@
              * @since 6.0.0
              */
             parallelAxes: {
+
+                lineWidth: 1,
 
                 /**
                  * Titles for yAxes are taken from 

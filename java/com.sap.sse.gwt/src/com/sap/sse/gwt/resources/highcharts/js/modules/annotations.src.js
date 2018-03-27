@@ -97,6 +97,8 @@
                     tagName: 'path',
                     d: 'M 0 0 L 10 5 L 0 10 Z', // triangle (used as an arrow)
 
+                    strokeWidth: 0
+
                 }]
             }
         };
@@ -115,12 +117,65 @@
         });
 
 
+        // In a styled mode definition is implemented
+        H.SVGRenderer.prototype.definition = function(def) {
+            var ren = this;
+
+            function recurse(config, parent) {
+                var ret;
+                each(splat(config), function(item) {
+                    var node = ren.createElement(item.tagName),
+                        attr = {};
+
+                    // Set attributes
+                    objectEach(item, function(val, key) {
+                        if (
+                            key !== 'tagName' &&
+                            key !== 'children' &&
+                            key !== 'textContent'
+                        ) {
+                            attr[key] = val;
+                        }
+                    });
+                    node.attr(attr);
+
+                    // Add to the tree
+                    node.add(parent || ren.defs);
+
+                    // Add text content
+                    if (item.textContent) {
+                        node.element.appendChild(
+                            doc.createTextNode(item.textContent)
+                        );
+                    }
+
+                    // Recurse
+                    recurse(item.children || [], node);
+
+                    ret = node;
+                });
+
+                // Return last node added (on top level it's the only one)
+                return ret;
+            }
+            return recurse(def);
+        };
+
 
         H.SVGRenderer.prototype.addMarker = function(id, markerOptions) {
             var options = {
                 id: id
             };
 
+
+            var attrs = {
+                stroke: markerOptions.color || 'none',
+                fill: markerOptions.color || 'rgba(0, 0, 0, 0.75)'
+            };
+
+            options.children = H.map(markerOptions.children, function(child) {
+                return merge(attrs, child);
+            });
 
 
             var marker = this.definition(merge({
@@ -381,6 +436,15 @@
              * @type {Object}
              */
             attrsMap: {
+
+                backgroundColor: 'fill',
+                borderColor: 'stroke',
+                borderWidth: 'stroke-width',
+                dashStyle: 'dashstyle',
+                strokeWidth: 'stroke-width',
+                stroke: 'stroke',
+                fill: 'fill',
+
 
                 zIndex: 'zIndex',
                 width: 'width',
@@ -1046,6 +1110,16 @@
                 label.attr(attr);
 
 
+                var style = options.style;
+                if (style.color === 'contrast') {
+                    style.color = this.chart.renderer.getContrast(
+                        inArray(options.shape, this.shapesWithoutBackground) > -1 ?
+                        '#FFFFFF' :
+                        options.backgroundColor
+                    );
+                }
+                label.css(style).shadow(options.shadow);
+
 
                 if (options.className) {
                     label.addClass(options.className);
@@ -1681,6 +1755,12 @@
 
             p.call(this);
 
+
+            objectEach(this.options.defs, function(def) {
+                if (def.tagName === 'marker' && def.render !== false) {
+                    this.renderer.addMarker(def.id, def);
+                }
+            }, this);
 
         });
 

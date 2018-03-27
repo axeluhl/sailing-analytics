@@ -101,6 +101,47 @@
 
 
             /**
+             * Additional styles to apply to the X axis label for a point that
+             * has drilldown data. By default it is underlined and blue to invite
+             * to interaction.
+             * 
+             * @type {CSSObject}
+             * @see     In styled mode, active label styles can be set with the
+             *          `.highcharts-drilldown-axis-label` class.
+             * @sample  {highcharts} highcharts/drilldown/labels/ Label styles
+             * @default { "cursor": "pointer", "color": "#003399", "fontWeight": "bold", "textDecoration": "underline" }
+             * @since 3.0.8
+             * @product highcharts highmaps
+             */
+            activeAxisLabelStyle: {
+                cursor: 'pointer',
+                color: '#003399',
+                fontWeight: 'bold',
+                textDecoration: 'underline'
+            },
+
+            /**
+             * Additional styles to apply to the data label of a point that has
+             * drilldown data. By default it is underlined and blue to invite to
+             * interaction.
+             * 
+             * @type {CSSObject}
+             * @see In styled mode, active data label styles can be applied with
+             * the `.highcharts-drilldown-data-label` class.
+             * @sample {highcharts} highcharts/drilldown/labels/ Label styles
+             * @default { "cursor": "pointer", "color": "#003399", "fontWeight": "bold", "textDecoration": "underline" }
+             * @since 3.0.8
+             * @product highcharts highmaps
+             */
+            activeDataLabelStyle: {
+                cursor: 'pointer',
+                color: '#003399',
+                fontWeight: 'bold',
+                textDecoration: 'underline'
+            },
+
+
+            /**
              * Set the animation for all drilldown animations. Animation of a drilldown
              * occurs when drilling between a column point and a column series,
              * or a pie slice and a full pie series. Drilldown can still be used
@@ -354,7 +395,7 @@
 
 
             colorProp = {
-                colorIndex: pick(point.colorIndex, oldSeries.colorIndex)
+                color: point.color || oldSeries.color
             };
 
 
@@ -750,6 +791,9 @@
                     ) {
                         animateFrom = level.shapeArgs;
 
+                        // Add the point colors to animate from
+                        animateFrom.fill = level.color;
+
                     }
                 });
 
@@ -758,6 +802,9 @@
                 each(this.points, function(point) {
                     var animateTo = point.shapeArgs;
 
+
+                    // Add the point colors to animate to
+                    animateTo.fill = point.color;
 
 
                     if (point.graphic) {
@@ -819,6 +866,8 @@
                     delete point.graphic;
 
 
+                    animateTo.fill = level.color;
+
 
                     if (animationOptions.duration) {
                         graphic.animate(
@@ -854,6 +903,9 @@
                         each(this.points, function(point, i) {
                             var animateTo = point.shapeArgs;
 
+
+                            animateFrom.fill = level.color;
+                            animateTo.fill = point.color;
 
 
                             if (point.graphic) {
@@ -982,9 +1034,15 @@
                     label.drillable = true;
 
 
+                    if (!label.basicStyles) {
+                        label.basicStyles = H.merge(label.styles);
+                    }
+
 
                     label
                         .addClass('highcharts-drilldown-axis-label')
+
+                        .css(axis.chart.options.drilldown.activeAxisLabelStyle)
 
                         .on('click', function(e) {
                             axis.drilldownCategory(pos, e);
@@ -992,6 +1050,9 @@
 
                 } else if (label && label.drillable) {
 
+
+                    label.styles = {}; // reset for full overwrite of styles
+                    label.css(label.basicStyles);
 
 
                     label.on('click', null); // #3806			
@@ -1053,12 +1114,22 @@
 
                 if (point.drilldown && point.dataLabel) {
 
+                    if (css.color === 'contrast') {
+                        pointCSS.color = renderer.getContrast(
+                            point.color || this.color
+                        );
+                    }
+
                     if (dataLabelsOptions && dataLabelsOptions.color) {
                         pointCSS.color = dataLabelsOptions.color;
                     }
                     point.dataLabel
                         .addClass('highcharts-drilldown-data-label');
 
+
+                    point.dataLabel
+                        .css(css)
+                        .css(pointCSS);
 
                 }
             }, this);
@@ -1070,6 +1141,10 @@
                 'highcharts-drilldown-point'
             );
 
+
+            element.css({
+                cursor: cursor
+            });
 
         };
 
