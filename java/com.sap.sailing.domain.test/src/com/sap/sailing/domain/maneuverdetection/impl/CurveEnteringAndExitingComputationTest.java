@@ -43,7 +43,7 @@ public class CurveEnteringAndExitingComputationTest {
         // Test that bearing steps with continuous course change into the target direction wraps the whole time range of
         // analyzed steps.
         SpeedWithBearingStepsIterable steps = constructStepsWithBearings(0, 1, 3, 9, 10, 12);
-        ManeuverCurveDetails mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
+        ManeuverMainCurveDetailsWithBearingSteps mainCurve = maneuverDetector.computeManeuverMainCurve(steps, NauticalSide.STARBOARD);
         assertEquals(constructTimePoint(0), mainCurve.getTimePointBefore());
         assertEquals(constructTimePoint(5), mainCurve.getTimePointAfter());
         assertEquals(constructTimePoint(2.5), mainCurve.getTimePoint());

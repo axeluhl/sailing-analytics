@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
-import com.sap.sailing.domain.maneuverdetection.impl.ManeuverCurveDetails;
-import com.sap.sailing.domain.maneuverdetection.impl.ManeuverCurveDetailsWithBearingSteps;
+import com.sap.sailing.domain.maneuverdetection.impl.ManeuverMainCurveDetailsWithBearingSteps;
 
 /**
  * Represents a segment within a GPS-track where a maneuver is performed. In contrast to {@link Maneuver}, the
@@ -19,7 +18,7 @@ public interface CompleteManeuverCurve {
      * @return Entering and exiting details of maneuver main curve
      * @see CompleteManeuverCurve
      */
-    ManeuverCurveDetailsWithBearingSteps getMainCurveBoundaries();
+    ManeuverMainCurveDetailsWithBearingSteps getMainCurveBoundaries();
 
     /**
      * Gets time points and speeds with bearings before and after the maneuver, such that the speed and course before
@@ -29,7 +28,7 @@ public interface CompleteManeuverCurve {
      *         section
      * @see CompleteManeuverCurve
      */
-    ManeuverCurveDetails getManeuverCurveWithStableSpeedAndCourseBoundaries();
+    ManeuverCurveBoundaries getManeuverCurveWithStableSpeedAndCourseBoundaries();
 
     /**
      * Gets the mark passing which is contained within maneuver curve. In case if no mark was passed, {@code null} is

@@ -5,13 +5,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sailing.datamining.data.HasManeuverBoundariesContext;
+import com.sap.sailing.datamining.data.HasCompleteManeuverCurveWithEstimationDataContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
-import com.sap.sailing.datamining.impl.data.ManeuverBoundariesWithContext;
+import com.sap.sailing.datamining.impl.data.CompleteManeuverCurveWithEstimationDataWithContext;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.maneuverdetection.ManeuverWithEstimationData;
-import com.sap.sailing.domain.maneuverdetection.ManeuverWithEstimationDataCalculator;
-import com.sap.sailing.domain.maneuverdetection.impl.ManeuverWithEstimationDataCalculatorImpl;
+import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
+import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
+import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
+import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.datamining.components.Processor;
@@ -23,25 +24,26 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
  *
  */
 public class ManeuverBoundariesRetrievalProcessor
-        extends AbstractRetrievalProcessor<HasRaceOfCompetitorContext, HasManeuverBoundariesContext> {
+        extends AbstractRetrievalProcessor<HasRaceOfCompetitorContext, HasCompleteManeuverCurveWithEstimationDataContext> {
 
     public ManeuverBoundariesRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasManeuverBoundariesContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasRaceOfCompetitorContext.class, HasManeuverBoundariesContext.class, executor, resultReceivers,
+            Collection<Processor<HasCompleteManeuverCurveWithEstimationDataContext, ?>> resultReceivers, int retrievalLevel) {
+        super(HasRaceOfCompetitorContext.class, HasCompleteManeuverCurveWithEstimationDataContext.class, executor, resultReceivers,
                 retrievalLevel);
     }
 
     @Override
-    protected Iterable<HasManeuverBoundariesContext> retrieveData(HasRaceOfCompetitorContext element) {
-        List<HasManeuverBoundariesContext> result = new ArrayList<>();
+    protected Iterable<HasCompleteManeuverCurveWithEstimationDataContext> retrieveData(HasRaceOfCompetitorContext element) {
+        List<HasCompleteManeuverCurveWithEstimationDataContext> result = new ArrayList<>();
         TrackedRace trackedRace = element.getTrackedRaceContext().getTrackedRace();
         Competitor competitor = element.getCompetitor();
-        ManeuverWithEstimationDataCalculator calculator = new ManeuverWithEstimationDataCalculatorImpl();
+        ManeuverDetector maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
         Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, false);
-        Iterable<ManeuverWithEstimationData> maneuversWithEstimationData = calculator
-                .computeEstimationDataForManeuvers(trackedRace, competitor, maneuvers, true);
-        for (ManeuverWithEstimationData maneuverWithEstimationData : maneuversWithEstimationData) {
-            result.add(new ManeuverBoundariesWithContext(element, maneuverWithEstimationData));
+        Iterable<CompleteManeuverCurve> maneuverCurves = maneuverDetector.getCompleteManeuverCurves(maneuvers);
+        Iterable<CompleteManeuverCurveWithEstimationData> maneuversWithEstimationData = maneuverDetector
+                .getCompleteManeuverCurvesWithEstimationData(maneuverCurves);
+        for (CompleteManeuverCurveWithEstimationData maneuverWithEstimationData : maneuversWithEstimationData) {
+            result.add(new CompleteManeuverCurveWithEstimationDataWithContext(element, maneuverWithEstimationData));
         }
         return result;
     }

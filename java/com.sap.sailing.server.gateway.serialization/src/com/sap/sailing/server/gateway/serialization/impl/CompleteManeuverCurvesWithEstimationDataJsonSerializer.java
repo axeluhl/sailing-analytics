@@ -4,9 +4,10 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.maneuverdetection.ManeuverWithEstimationData;
-import com.sap.sailing.domain.maneuverdetection.ManeuverWithEstimationDataCalculator;
-import com.sap.sailing.domain.maneuverdetection.impl.ManeuverWithEstimationDataCalculatorImpl;
+import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
+import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
+import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
+import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -15,20 +16,18 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuversWithEstimationDataJsonSerializer extends AbstractTrackedRaceDataJsonSerializer {
-    public final static String MANEUVERS = "maneuvers";
+public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends AbstractTrackedRaceDataJsonSerializer {
+    public final static String MANEUVER_CURVES = "maneuverCurves";
     public final static String BOAT_CLASS = "boatClass";
     public final static String COMPETITOR_NAME = "competitorName";
 
     private final BoatClassJsonSerializer boatClassJsonSerializer;
-    private final ManeuverWithEstimationDataJsonSerializer maneuverWithEstimationDataJsonSerializer;
-    private final boolean avgSpeedAndCogCalculationBeforeAndAfterManeuver;
+    private final CompleteManeuverCurveWithEstimationDataJsonSerializer maneuverWithEstimationDataJsonSerializer;
 
-    public ManeuversWithEstimationDataJsonSerializer(BoatClassJsonSerializer boatClassJsonSerializer,
-            ManeuverWithEstimationDataJsonSerializer maneuverWithEstimationDataJsonSerializer, boolean avgSpeedAndCogCalculationBeforeAndAfterManeuver) {
+    public CompleteManeuverCurvesWithEstimationDataJsonSerializer(BoatClassJsonSerializer boatClassJsonSerializer,
+            CompleteManeuverCurveWithEstimationDataJsonSerializer maneuverWithEstimationDataJsonSerializer) {
         this.boatClassJsonSerializer = boatClassJsonSerializer;
         this.maneuverWithEstimationDataJsonSerializer = maneuverWithEstimationDataJsonSerializer;
-        this.avgSpeedAndCogCalculationBeforeAndAfterManeuver = avgSpeedAndCogCalculationBeforeAndAfterManeuver;
     }
 
     @Override
@@ -42,23 +41,24 @@ public class ManeuversWithEstimationDataJsonSerializer extends AbstractTrackedRa
             forCompetitorJson.put(COMPETITOR_NAME, competitor.getName());
             forCompetitorJson.put(BOAT_CLASS, boatClassJsonSerializer.serialize(competitor.getBoat().getBoatClass()));
             final JSONArray maneuvers = new JSONArray();
-            forCompetitorJson.put(MANEUVERS, maneuvers);
-            for (final ManeuverWithEstimationData maneuver : getManeuversWithEstimationData(trackedRace, competitor)) {
+            forCompetitorJson.put(MANEUVER_CURVES, maneuvers);
+            for (final CompleteManeuverCurveWithEstimationData maneuver : getCompleteManeuverCurvesWithEstimationData(trackedRace,
+                    competitor)) {
                 maneuvers.add(maneuverWithEstimationDataJsonSerializer.serialize(maneuver));
             }
         }
         return result;
     }
 
-    private Iterable<ManeuverWithEstimationData> getManeuversWithEstimationData(TrackedRace trackedRace,
+    private Iterable<CompleteManeuverCurveWithEstimationData> getCompleteManeuverCurvesWithEstimationData(TrackedRace trackedRace,
             Competitor competitor) {
         Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, false);
-        ManeuverWithEstimationDataCalculator maneuverWithEstimationDataCalculator = new ManeuverWithEstimationDataCalculatorImpl();
-        Iterable<ManeuverWithEstimationData> maneuversWithEstimationData = null;
+        ManeuverDetector maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
+        Iterable<CompleteManeuverCurveWithEstimationData> maneuversWithEstimationData = null;
         try {
-            maneuversWithEstimationData = maneuverWithEstimationDataCalculator.computeEstimationDataForManeuvers(trackedRace, competitor,
-                    maneuvers, avgSpeedAndCogCalculationBeforeAndAfterManeuver);
-        } catch(Exception e) {
+            Iterable<CompleteManeuverCurve> maneuverCurves = maneuverDetector.getCompleteManeuverCurves(maneuvers);
+            maneuversWithEstimationData = maneuverDetector.getCompleteManeuverCurvesWithEstimationData(maneuverCurves);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return maneuversWithEstimationData;

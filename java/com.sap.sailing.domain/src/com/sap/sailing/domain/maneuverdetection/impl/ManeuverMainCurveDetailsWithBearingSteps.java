@@ -3,26 +3,41 @@ package com.sap.sailing.domain.maneuverdetection.impl;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
+import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
 import com.sap.sailing.domain.tracking.impl.ManeuverCurveBoundariesImpl;
 import com.sap.sse.common.TimePoint;
 
 /**
- * Besides the parent class, this class contains the time point with the maximal angular velocity.
+ * Contains detailed information about the maneuver main curve, including its boundaries, speed and bearing steps within
+ * the curve, max. recorded turning rate with corresponding time point.
  * 
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverCurveDetails extends ManeuverCurveBoundariesImpl {
+public class ManeuverMainCurveDetailsWithBearingSteps extends ManeuverCurveBoundariesImpl {
+
     private final TimePoint timePoint;
     private final double maxAngularVelocityInDegreesPerSecond;
+    private final SpeedWithBearingStepsIterable speedWithBearingSteps;
 
-    public ManeuverCurveDetails(TimePoint timePointBefore, TimePoint timePointAfter, TimePoint timePoint,
-            SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            double directionChangeInDegrees, double maxAngularVelocityInDegreesPerSecond, Speed lowestSpeed) {
+    public ManeuverMainCurveDetailsWithBearingSteps(TimePoint timePointBefore, TimePoint timePointAfter,
+            TimePoint timePoint, SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
+            double directionChangeInDegrees, double maxAngularVelocityInDegreesPerSecond, Speed lowestSpeed,
+            SpeedWithBearingStepsIterable speedWithBearingSteps) {
         super(timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees,
                 lowestSpeed);
         this.timePoint = timePoint;
         this.maxAngularVelocityInDegreesPerSecond = maxAngularVelocityInDegreesPerSecond;
+        this.speedWithBearingSteps = speedWithBearingSteps;
+    }
+
+    /**
+     * Gets the list of bearing steps which was used for computation of curve details.
+     * 
+     * @return The bearing steps of the curve
+     */
+    public SpeedWithBearingStepsIterable getSpeedWithBearingSteps() {
+        return speedWithBearingSteps;
     }
 
     /**
@@ -48,4 +63,5 @@ public class ManeuverCurveDetails extends ManeuverCurveBoundariesImpl {
         return new ManeuverCurveBoundariesImpl(getTimePointBefore(), getTimePointAfter(), getSpeedWithBearingBefore(),
                 getSpeedWithBearingAfter(), getDirectionChangeInDegrees(), getLowestSpeed());
     }
+
 }

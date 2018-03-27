@@ -60,4 +60,26 @@ public interface ManeuverDetector {
      */
     List<CompleteManeuverCurve> detectCompleteManeuverCurves();
 
+    /**
+     * Parses {@link CompleteManeuverCurve}-instances from provided {@link Maneuver}-instances. This method performs
+     * significantly faster than {@link #detectCompleteManeuverCurves()}.
+     * 
+     * @param maneuvers
+     *            The maneuvers to parse into complete maneuver curves
+     * @return an empty list if provided maneuvers list is empty, otherwise the list with complete maneuver curves
+     *         derived from provided maneuvers.
+     * @see CompleteManeuverCurve
+     * @see Maneuver
+     */
+    List<CompleteManeuverCurve> getCompleteManeuverCurves(Iterable<Maneuver> maneuvers);
+
+    /**
+     * Converts provided {@link CompleteManeuverCurve}-instances into
+     * {@link CompleteManeuverCurveWithEstimationData}-instances. For this, additional information to
+     * {@code maneuverCurves} is computed. This computation is regarded as complex as the computation within
+     * {@link #detectManeuvers()}.
+     */
+    List<CompleteManeuverCurveWithEstimationData> getCompleteManeuverCurvesWithEstimationData(
+            Iterable<CompleteManeuverCurve> maneuverCurves);
+
 }

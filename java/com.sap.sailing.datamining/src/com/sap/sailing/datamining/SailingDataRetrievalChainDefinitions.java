@@ -10,7 +10,7 @@ import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasManeuverContext;
 import com.sap.sailing.datamining.data.HasManeuverSpeedDetailsContext;
-import com.sap.sailing.datamining.data.HasManeuverBoundariesContext;
+import com.sap.sailing.datamining.data.HasCompleteManeuverCurveWithEstimationDataContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
@@ -128,12 +128,12 @@ public class SailingDataRetrievalChainDefinitions {
                 "ManeuverSpeedDetails");
         dataRetrieverChainDefinitions.add(speedDetailsDataRetrieverChainDefinition);
         
-        DataRetrieverChainDefinition<RacingEventService, HasManeuverBoundariesContext> maneuverBoundariesRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
-                raceOfCompetitorRetrieverChainDefinition, HasManeuverBoundariesContext.class,
-                "ManeuverBoundariesRetrieverChain");
+        DataRetrieverChainDefinition<RacingEventService, HasCompleteManeuverCurveWithEstimationDataContext> maneuverBoundariesRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
+                raceOfCompetitorRetrieverChainDefinition, HasCompleteManeuverCurveWithEstimationDataContext.class,
+                "CompleteManeuverCurveWithEstimationDataRetrieverChain");
         maneuverBoundariesRetrieverChainDefinition.endWith(RaceOfCompetitorRetrievalProcessor.class,
-                ManeuverBoundariesRetrievalProcessor.class, HasManeuverBoundariesContext.class,
-                "ManeuverBoundaries");
+                ManeuverBoundariesRetrievalProcessor.class, HasCompleteManeuverCurveWithEstimationDataContext.class,
+                "CompleteManeuverCurveWithEstimationData");
         dataRetrieverChainDefinitions.add(maneuverBoundariesRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasMarkPassingContext> markPassingRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(

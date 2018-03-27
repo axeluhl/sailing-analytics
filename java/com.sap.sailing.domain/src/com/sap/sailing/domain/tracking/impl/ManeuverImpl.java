@@ -110,7 +110,7 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     }
 
     @Override
-    public double getMaxAngularVelocityInDegreesPerSecond() {
+    public double getMaxTurningRateInDegreesPerSecond() {
         return maxAngularVelocityInDegreesPerSecond;
     }
     
@@ -135,7 +135,7 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     }
     
     @Override
-    public double getAvgTurningRate() {
+    public double getAvgTurningRateInDegreesPerSecond() {
         return Math.abs(getMainCurveBoundaries().getDirectionChangeInDegrees()) / getMainCurveBoundaries().getDuration().asSeconds();
     }
 

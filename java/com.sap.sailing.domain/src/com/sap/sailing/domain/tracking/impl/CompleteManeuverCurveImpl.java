@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import com.sap.sailing.domain.maneuverdetection.impl.ManeuverCurveDetails;
-import com.sap.sailing.domain.maneuverdetection.impl.ManeuverCurveDetailsWithBearingSteps;
+import com.sap.sailing.domain.maneuverdetection.impl.ManeuverMainCurveDetailsWithBearingSteps;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
+import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.domain.tracking.MarkPassing;
 
 /**
@@ -11,24 +11,24 @@ import com.sap.sailing.domain.tracking.MarkPassing;
  */
 public class CompleteManeuverCurveImpl implements CompleteManeuverCurve {
 
-    private final ManeuverCurveDetailsWithBearingSteps mainCurveBoundaries;
-    private final ManeuverCurveDetails maneuverCurveWithStableSpeedAndCourseBoundaries;
+    private final ManeuverMainCurveDetailsWithBearingSteps mainCurveBoundaries;
+    private final ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries;
     private final MarkPassing markPassing;
 
-    public CompleteManeuverCurveImpl(ManeuverCurveDetailsWithBearingSteps mainCurveBoundaries,
-            ManeuverCurveDetails maneuverCurveWithStableSpeedAndCourseBoundaries, MarkPassing markPassing) {
+    public CompleteManeuverCurveImpl(ManeuverMainCurveDetailsWithBearingSteps mainCurveBoundaries,
+            ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries, MarkPassing markPassing) {
         this.mainCurveBoundaries = mainCurveBoundaries;
         this.maneuverCurveWithStableSpeedAndCourseBoundaries = maneuverCurveWithStableSpeedAndCourseBoundaries;
         this.markPassing = markPassing;
     }
 
     @Override
-    public ManeuverCurveDetailsWithBearingSteps getMainCurveBoundaries() {
+    public ManeuverMainCurveDetailsWithBearingSteps getMainCurveBoundaries() {
         return mainCurveBoundaries;
     }
 
     @Override
-    public ManeuverCurveDetails getManeuverCurveWithStableSpeedAndCourseBoundaries() {
+    public ManeuverCurveBoundaries getManeuverCurveWithStableSpeedAndCourseBoundaries() {
         return maneuverCurveWithStableSpeedAndCourseBoundaries;
     }
 
