@@ -71,12 +71,15 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
         this.events = new ArrayList<EventDTO>();
         eventSelectionBox = new ListBox();
         eventSelectionBox.setMultipleSelect(false);
+        eventSelectionBox.ensureDebugId("eventSelectionBox");
         leaderboardSelectionBox = new ListBox();
         leaderboardSelectionBox.setMultipleSelect(false);
+        leaderboardSelectionBox.ensureDebugId("leaderboardSelectionBox");
         localeSelectionBox = new ListBox();
         localeSelectionBox.setMultipleSelect(false);
         configurationSelectionBox = new ListBox();
         configurationSelectionBox.addItem("--", "");
+        configurationSelectionBox.ensureDebugId("configurationSelectionBox");
 
         for (AutoPlayType apt : AutoPlayType.values()) {
             configurationSelectionBox.addItem(apt.getName(), apt.name());
@@ -95,6 +98,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
         this.ensureDebugId("AutoPlayStartView");
 
         configStarter.getElement().getStyle().setDisplay(Display.BLOCK);
+        configStarter.ensureDebugId("startURL");
 
         validate();
     }
