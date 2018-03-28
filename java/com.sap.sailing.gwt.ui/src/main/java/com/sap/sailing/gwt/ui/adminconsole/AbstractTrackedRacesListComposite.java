@@ -188,7 +188,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
         raceTable.setVisible(false);
         panel.add(raceTableWrapper);
-        raceTable.getSelectionModel().addSelectionChangeHandler(new Handler() {
+        refreshableSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 Set<RaceDTO> selectedRaces = refreshableSelectionModel.getSelectedSet();
