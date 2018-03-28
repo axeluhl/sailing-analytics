@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinition;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.security.ui.client.UserService;
 
 public interface AutoPlayStartView {
     public interface Presenter {
@@ -20,4 +21,5 @@ public interface AutoPlayStartView {
     
     void setEvents(List<EventDTO> events);
     void showLoading();
+    void setUserService(UserService userService);
 }

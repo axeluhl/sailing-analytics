@@ -37,6 +37,7 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
             AutoPlayStartView view) {
         this.clientFactory = clientFactory;
         this.view = view;
+        view.setUserService(this.clientFactory.getUserService());
     }
 
     @Override
@@ -54,7 +55,7 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
                     StrippedLeaderboardDTO leaderBoard = AutoplayHelper.getSelectedLeaderboard(event,
                             apcd.getLeaderboardName());
 
-                    apcd.getType().getConfig().loadSettingsDefault(event, leaderBoard, new OnSettingsCallback() {
+                    apcd.getType().getConfig().loadSettingsDefault(event, leaderBoard, clientFactory.getUserService(), new OnSettingsCallback() {
 
                         @Override
                         public void newSettings(PerspectiveCompositeSettings<?> newSettings) {

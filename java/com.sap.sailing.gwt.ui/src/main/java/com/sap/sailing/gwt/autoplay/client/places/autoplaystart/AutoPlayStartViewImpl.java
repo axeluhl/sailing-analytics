@@ -32,6 +32,7 @@ import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.gwt.settings.UrlBuilderUtil;
+import com.sap.sse.security.ui.client.UserService;
 
 public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -65,6 +66,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
     private AutoPlayContextDefinitionImpl apcd;
     private PerspectiveCompositeSettings<?> settings;
     private String configuratedUrl;
+    private UserService userService;
 
     public AutoPlayStartViewImpl() {
         super();
@@ -151,7 +153,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
                         settings = newSettings;
                         updateURL();
                     }
-                }, settings, apcd);
+                }, settings, apcd, userService);
     }
 
     private boolean validate() {
@@ -190,9 +192,8 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
             settingsButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             apcd = new AutoPlayContextDefinitionImpl(selectedAutoPlayType, selectedEvent.id, selectedLeaderboardName);
-            apcd.getType().getConfig().loadSettingsDefault(selectedEvent, selectedLeaderboard,
+            apcd.getType().getConfig().loadSettingsDefault(selectedEvent, selectedLeaderboard, userService,
                     new OnSettingsCallback() {
-
                         @Override
                         public void newSettings(PerspectiveCompositeSettings<?> newSettings) {
                             settings = newSettings;
@@ -284,6 +285,11 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
     @Override
     public void showLoading() {
         startAutoPlayButton.setEnabled(false);
+    }
+
+    @Override
+    public void setUserService(UserService userService) {
+        this.userService = userService;
     }
 
 }
