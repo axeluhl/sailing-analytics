@@ -38,7 +38,7 @@ public class TestAutoPlay extends AbstractSeleniumTest {
     private static final Date BMW_STOP_EVENT_TIME = DatatypeConverter.parseDateTime("2017-04-08T10:50:00-05:00")
             .getTime();
     private static final String BMW_CUP_RACE_NAME = "R1";
-    private static final String NON_CONFIGURED_EXPECTED_URL = "blabla";
+    private static final String NON_CONFIGURED_EXPECTED_URL = "http://localhost:8888/gwt/AutoPlay.html?locale=en&lbwh.saph.title=Leaderboard%3A+BMW+Cup+(J80)&eventId=ad3112bd-b771-43c5-923e-6e332ca40290&name=BMW+Cup+(J80)";
 
     @Override
     @Before
