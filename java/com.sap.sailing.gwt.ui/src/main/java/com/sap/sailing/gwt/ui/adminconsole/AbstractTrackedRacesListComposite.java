@@ -153,6 +153,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                 return strings;
             }
         };
+        raceTableWrapper.registerSelectionModelOnNewDataProvider(filterablePanelRaces.getAllListDataProvider());
         Label lblFilterByRegatta = new Label(stringMessages.filterByRegatta());
         lblFilterByRegatta.setWordWrap(false);
         listBoxRegattas = new ListBox();
