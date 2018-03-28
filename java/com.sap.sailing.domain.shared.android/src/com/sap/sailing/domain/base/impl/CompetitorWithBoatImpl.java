@@ -70,4 +70,9 @@ public class CompetitorWithBoatImpl extends CompetitorImpl implements DynamicCom
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        return super.toString()+" with boat "+getBoat();
+    }
 }
