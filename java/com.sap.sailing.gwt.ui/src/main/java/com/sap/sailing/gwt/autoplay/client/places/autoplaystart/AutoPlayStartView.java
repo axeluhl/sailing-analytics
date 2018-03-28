@@ -12,14 +12,12 @@ public interface AutoPlayStartView {
     public interface Presenter {
         void startRootNode(AutoPlayContextDefinition ctxDef,
                 PerspectiveCompositeSettings<?> settings);
-
         void handleLocaleChange(String selectedLocale);
+        UserService getUserService();
     }
 
     void setCurrentPresenter(Presenter currentPresenter);
     Widget asWidget();
-    
     void setEvents(List<EventDTO> events);
     void showLoading();
-    void setUserService(UserService userService);
 }

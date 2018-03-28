@@ -25,6 +25,7 @@ import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.gwt.client.event.LocaleChangeEventHandler;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.ui.client.UserService;
 
 public class AutoPlayStartPresenterImpl extends AbstractActivity implements AutoPlayStartView.Presenter {
     public static final String LOAD_EVENTS_DATA_CATEGORY = "loadEventsData";
@@ -37,7 +38,6 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
             AutoPlayStartView view) {
         this.clientFactory = clientFactory;
         this.view = view;
-        view.setUserService(this.clientFactory.getUserService());
     }
 
     @Override
@@ -118,5 +118,10 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
     public void startRootNode(AutoPlayContextDefinition ctxDef, PerspectiveCompositeSettings<?> settings) {
         AutoPlayConfiguration autoPlayConfiguration = ctxDef.getType().getConfig();
         autoPlayConfiguration.startRootNode(clientFactory, ctxDef, settings);
+    }
+
+    @Override
+    public UserService getUserService() {
+        return clientFactory.getUserService();
     }
 }
