@@ -88,12 +88,6 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         String url = autoPlayConfiguration.getConfiguredUrl();
         assertSame(NON_CONFIGURED_EXPECTED_URL, url);
         
-        try {
-            Thread.sleep(200000000);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
     }
 
 }
