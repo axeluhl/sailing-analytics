@@ -40,12 +40,12 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends Abst
             byCompetitorJson.add(forCompetitorJson);
             forCompetitorJson.put(COMPETITOR_NAME, competitor.getName());
             forCompetitorJson.put(BOAT_CLASS, boatClassJsonSerializer.serialize(competitor.getBoat().getBoatClass()));
-            final JSONArray maneuvers = new JSONArray();
-            forCompetitorJson.put(MANEUVER_CURVES, maneuvers);
-            for (final CompleteManeuverCurveWithEstimationData maneuver : getCompleteManeuverCurvesWithEstimationData(trackedRace,
+            final JSONArray completeManeuverCurvesWithEstimationData = new JSONArray();
+            for (CompleteManeuverCurveWithEstimationData maneuver : getCompleteManeuverCurvesWithEstimationData(trackedRace,
                     competitor)) {
-                maneuvers.add(maneuverWithEstimationDataJsonSerializer.serialize(maneuver));
+                completeManeuverCurvesWithEstimationData.add(maneuverWithEstimationDataJsonSerializer.serialize(maneuver));
             }
+            forCompetitorJson.put(MANEUVER_CURVES, completeManeuverCurvesWithEstimationData);
         }
         return result;
     }

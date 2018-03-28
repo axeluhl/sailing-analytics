@@ -253,13 +253,11 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     private CompleteManeuverCurveWithEstimationData calculateCompleteManeuverCurveWithEstimationData(
             CompleteManeuverCurve maneuverCurve, CompleteManeuverCurve previousManeuverCurve,
             CompleteManeuverCurve nextManeuverCurve) {
-        Bearing courseAtMaxTurningRate = null;
+        Bearing courseAtMaxTurningRate = track.getEstimatedSpeed(maneuverCurve.getMainCurveBoundaries().getTimePoint())
+                .getBearing();
         SpeedWithBearingStep stepWithLowestSpeed = null;
         SpeedWithBearingStep stepWithHighestSpeed = null;
         for (SpeedWithBearingStep step : maneuverCurve.getMainCurveBoundaries().getSpeedWithBearingSteps()) {
-            if (step.getTimePoint().equals(maneuverCurve.getMainCurveBoundaries().getTimePoint())) {
-                courseAtMaxTurningRate = step.getSpeedWithBearing().getBearing();
-            }
             if (stepWithLowestSpeed == null
                     || stepWithLowestSpeed.getSpeedWithBearing().compareTo(step.getSpeedWithBearing()) > 0) {
                 stepWithLowestSpeed = step;
