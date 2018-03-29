@@ -782,49 +782,49 @@ public class LeaderboardEntryDTO implements Serializable {
     /**
      * Used to ensure that only one null value needs to be transmitted, if no expedition data exists 
      */
-    private static class ExpeditionDataHolder implements Serializable {
+    public static class ExpeditionDataHolder implements Serializable {
         private static final long serialVersionUID = 1L;
         
-        private Double expeditionMastButt;
-        private Double expeditionJibCarStbd;
-        private Double expeditionJibCarPort;
-        private Double expeditionLoadS;
-        private Double expeditionLoadP;
-        private Double expeditionBARO;
-        private Double expeditionAWA;
-        private Double expeditionAWS;
-        private Double expeditionBoatSpeed;
-        private Double expeditionCOG;
-        private Double expeditionDistanceBelowLine;
-        private Double expeditionDistanceToCommitteeBoat;
-        private Double expeditionDistToPortLayline;
-        private Double expeditionDistToStbLayline;
-        private Double expeditionVMG;
-        private Double expeditionTWS;
-        private Double expeditionTWD;
-        private Double expeditionTWA;
-        private Double expeditionTimeToStbLayline;
-        private Double expeditionTimeToPortLayline;
-        private Double expeditionTimeToPin;
-        private Double expeditionTimeToGun;
-        private Double expeditionTimeToCommitteeBoat;
-        private Double expeditionTimeToBurnToPin;
-        private Double expeditionTargTWA;
-        private Double expeditionTimeToBurnToCommitteeBoat;
-        private Double expeditionTimeToBurnToLine;
-        private Double expeditionTargetHeel;
-        private Double expeditionTargBoatSpeed;
-        private Double expeditionSOG;
-        private Double expeditionRudderAngle;
-        private Double expeditionRateOfTurn;
-        private Double expeditionRake;
-        private Double expeditionLineSquareForWindDirection;
-        private Double expeditionHeading;
-        private Double expeditionForestayLoad;
-        private Double expeditionHeel;
-        private Double expeditionCourseDetail;
-        private Double expeditionDistanceToPinDetail;
-        private Double expeditionVMGTargVMGDelta;
+        public Double expeditionMastButt;
+        public Double expeditionJibCarStbd;
+        public Double expeditionJibCarPort;
+        public Double expeditionLoadS;
+        public Double expeditionLoadP;
+        public Double expeditionBARO;
+        public Double expeditionAWA;
+        public Double expeditionAWS;
+        public Double expeditionBoatSpeed;
+        public Double expeditionCOG;
+        public Double expeditionDistanceBelowLine;
+        public Double expeditionDistanceToCommitteeBoat;
+        public Double expeditionDistToPortLayline;
+        public Double expeditionDistToStbLayline;
+        public Double expeditionVMG;
+        public Double expeditionTWS;
+        public Double expeditionTWD;
+        public Double expeditionTWA;
+        public Double expeditionTimeToStbLayline;
+        public Double expeditionTimeToPortLayline;
+        public Double expeditionTimeToPin;
+        public Double expeditionTimeToGun;
+        public Double expeditionTimeToCommitteeBoat;
+        public Double expeditionTimeToBurnToPin;
+        public Double expeditionTargTWA;
+        public Double expeditionTimeToBurnToCommitteeBoat;
+        public Double expeditionTimeToBurnToLine;
+        public Double expeditionTargetHeel;
+        public Double expeditionTargBoatSpeed;
+        public Double expeditionSOG;
+        public Double expeditionRudderAngle;
+        public Double expeditionRateOfTurn;
+        public Double expeditionRake;
+        public Double expeditionLineSquareForWindDirection;
+        public Double expeditionHeading;
+        public Double expeditionForestayLoad;
+        public Double expeditionHeel;
+        public Double expeditionCourseDetail;
+        public Double expeditionDistanceToPinDetail;
+        public Double expeditionVMGTargVMGDelta;
         
         @Override
         public int hashCode() {
