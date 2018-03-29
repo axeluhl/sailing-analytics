@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test
 Bundle-SymbolicName: com.sap.sailing.domain.deckmanadapter.test
+Automatic-Module-Name: com.sap.sailing.domain.deckmanadapter.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Fragment-Host: com.sap.sailing.domain.deckmanadapter

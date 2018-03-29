@@ -369,12 +369,10 @@ public class SettingsTest extends AbstractSeleniumTest {
     }
 
     private void initTrackingForBmwCupRace(AdminConsolePage adminConsole) {
-
         TrackableRaceDescriptor trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(BMW_RACE, 1),
                 BMW_CUP_BOAT_CLASS);
         TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
                 String.format(BMW_RACE, 1));
-
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         RegattaDescriptor bmwCupDescriptor = new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS);
@@ -384,7 +382,6 @@ public class SettingsTest extends AbstractSeleniumTest {
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
         trackedRacesList.waitForTrackedRace(trackedRace, Status.FINISHED, 600); // with the TracAPI, REPLAY races
         // status FINISHED when done loading
-
         LeaderboardConfigurationPanelPO leaderboard = adminConsole.goToLeaderboardConfiguration();
         LeaderboardDetailsPanelPO details = leaderboard.getLeaderboardDetails(BMW_CUP_REGATTA);
         Assert.assertTrue(details != null);
@@ -499,7 +496,7 @@ public class SettingsTest extends AbstractSeleniumTest {
     }
 
     /**
-     * Verifies that the leaderboard displays the configurated details in the leaderboard table as columns. Furthermore,
+     * Verifies that the leaderboard displays the configured details in the leaderboard table as columns. Furthermore,
      * the chart presence is verified when the corresponding settings in admin console has been checked. In order to get
      * the race details displayed, a tracked race is used.
      */
