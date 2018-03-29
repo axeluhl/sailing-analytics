@@ -27,6 +27,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
@@ -90,6 +91,11 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         Double distance = trackedRace.getDistanceFromStarboardSideOfStartLine(getCompetitor(), competitorStartTime).getMeters();
         Double length = trackedRace.getStartLine(competitorStartTime).getLength().getMeters();
         return distance / length;
+    }
+    
+    @Override
+    public Pair<Double, Double> getNormalizedDistanceToStarboardSideAtStartVsRankAtFirstMark(){
+        return new Pair<Double, Double> (getNormalizedDistanceToStarboardSideAtStart(), getRankAtFirstMark());
     }
     
     @Override

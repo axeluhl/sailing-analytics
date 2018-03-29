@@ -5,6 +5,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
@@ -33,6 +34,9 @@ public interface HasRaceOfCompetitorContext {
 
     @Statistic(messageKey="DistanceToStarboardSideAtStart", resultDecimals=2, ordinal=1)
     public Double getNormalizedDistanceToStarboardSideAtStart();
+    
+    @Statistic(messageKey="DistanceToStarboardSideAtStartVsRankAtFirstMark", resultDecimals=2, ordinal=1)
+    public Pair<Double, Double> getNormalizedDistanceToStarboardSideAtStartVsRankAtFirstMark();
     
     @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLine", resultDecimals=2, ordinal=2)
     public Distance getWindwardDistanceToAdvantageousLineEndAtStart();
