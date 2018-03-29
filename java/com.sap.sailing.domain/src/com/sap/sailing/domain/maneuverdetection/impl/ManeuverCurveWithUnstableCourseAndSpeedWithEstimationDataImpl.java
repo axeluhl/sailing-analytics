@@ -19,6 +19,7 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl exten
     private final Distance distanceSailedWithinManeuverTowardMiddleAngleProjection;
     private final Distance distanceSailedIfNotManeuvering;
     private final Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuvering;
+    private final int gpsFixesCount;
 
     public ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl(TimePoint timePointBefore,
             TimePoint timePointAfter, SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
@@ -27,7 +28,7 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl exten
             SpeedWithBearing averageSpeedWithBearingAfter, Duration durationFromManeuverEndToNextManeuverStart,
             Distance distanceSailedWithinManeuver, Distance distanceSailedWithinManeuverTowardMiddleAngleProjection,
             Distance distanceSailedIfNotManeuvering,
-            Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuvering) {
+            Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuvering, int gpsFixesCount) {
         super(timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees,
                 lowestSpeed);
         this.averageSpeedWithBearingBefore = averageSpeedWithBearingBefore;
@@ -38,6 +39,7 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl exten
         this.distanceSailedWithinManeuverTowardMiddleAngleProjection = distanceSailedWithinManeuverTowardMiddleAngleProjection;
         this.distanceSailedIfNotManeuvering = distanceSailedIfNotManeuvering;
         this.distanceSailedTowardMiddleAngleProjectionIfNotManeuvering = distanceSailedTowardMiddleAngleProjectionIfNotManeuvering;
+        this.gpsFixesCount = gpsFixesCount;
     }
 
     @Override
@@ -78,6 +80,11 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl exten
     @Override
     public Distance getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering() {
         return distanceSailedTowardMiddleAngleProjectionIfNotManeuvering;
+    }
+    
+    @Override
+    public int getGpsFixesCount() {
+        return gpsFixesCount;
     }
 
 }

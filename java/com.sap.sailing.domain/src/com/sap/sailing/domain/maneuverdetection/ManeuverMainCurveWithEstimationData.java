@@ -73,5 +73,10 @@ public interface ManeuverMainCurveWithEstimationData extends ManeuverCurveBounda
      * Gets the course at which the maximal turning rate was measured within the main curve.
      */
     Bearing getCourseAtMaxTurningRate();
+    
+    /**
+     * Gets the number of GPS-fixes contained within the maneuver main curve.
+     */
+    int getGpsFixesCount();
 
 }

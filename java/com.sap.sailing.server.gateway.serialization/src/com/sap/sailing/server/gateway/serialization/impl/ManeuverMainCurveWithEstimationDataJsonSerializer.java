@@ -19,6 +19,7 @@ public class ManeuverMainCurveWithEstimationDataJsonSerializer extends ManeuverC
     public static final String HIGHEST_SPEED_TIMEPOINT = "highestSpeedTimePoint";
     public static final String COURSE_AT_MAX_TURNING_RATE = "courseAtMaxTurningRate";
     public static final String MAX_TURNING_RATE_TIMEPOINT = "maxTurningRateTimePoint";
+    public static final String GPS_FIXES_COUNT = "gpsFixesCount";
 
     @Override
     public JSONObject serialize(ManeuverCurveBoundaries maneuverBoundaries) {
@@ -32,6 +33,7 @@ public class ManeuverMainCurveWithEstimationDataJsonSerializer extends ManeuverC
             result.put(HIGHEST_SPEED_TIMEPOINT, mainCurve.getHighestSpeedTimePoint().asMillis());
             result.put(COURSE_AT_MAX_TURNING_RATE, mainCurve.getCourseAtMaxTurningRate().getDegrees());
             result.put(MAX_TURNING_RATE_TIMEPOINT, mainCurve.getTimePointOfMaxTurningRate().asMillis());
+            result.put(GPS_FIXES_COUNT, mainCurve.getGpsFixesCount());
         }
         return result;
     }

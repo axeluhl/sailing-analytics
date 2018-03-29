@@ -46,5 +46,10 @@ public interface ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData exten
      * distance of at least one second, the result will be {@null}.
      */
     Duration getDurationFromManeuverEndToNextManeuverStart();
+    
+    /**
+     * Gets the number of GPS-fixes contained within the maneuver curve.
+     */
+    int getGpsFixesCount();
 
 }

@@ -10,6 +10,7 @@ import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Duration;
 
 /**
  * 
@@ -17,9 +18,10 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  *
  */
 public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends AbstractTrackedRaceDataJsonSerializer {
-    public final static String MANEUVER_CURVES = "maneuverCurves";
-    public final static String BOAT_CLASS = "boatClass";
-    public final static String COMPETITOR_NAME = "competitorName";
+    public static final String MANEUVER_CURVES = "maneuverCurves";
+    public static final String BOAT_CLASS = "boatClass";
+    public static final String COMPETITOR_NAME = "competitorName";
+    public static final String AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS = "avgIntervalBetweenFixesInSeconds";
 
     private final BoatClassJsonSerializer boatClassJsonSerializer;
     private final CompleteManeuverCurveWithEstimationDataJsonSerializer maneuverWithEstimationDataJsonSerializer;
@@ -46,6 +48,8 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends Abst
                 completeManeuverCurvesWithEstimationData.add(maneuverWithEstimationDataJsonSerializer.serialize(maneuver));
             }
             forCompetitorJson.put(MANEUVER_CURVES, completeManeuverCurvesWithEstimationData);
+            Duration averageIntervalBetweenFixes = trackedRace.getTrack(competitor).getAverageIntervalBetweenFixes();
+            forCompetitorJson.put(AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS, averageIntervalBetweenFixes.asSeconds());
         }
         return result;
     }

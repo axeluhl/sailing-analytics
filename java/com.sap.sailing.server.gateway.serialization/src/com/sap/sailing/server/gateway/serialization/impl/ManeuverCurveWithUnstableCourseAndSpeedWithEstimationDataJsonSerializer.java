@@ -19,6 +19,7 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerial
     public final static String AVERAGE_COURSE_AFTER_IN_DEGREES = "averageCourseAfterInDegrees";
     public final static String DURATION_FROM_PREVIOUS_MANEUVER_IN_SECONDS = "durationFromPreviousManeuverInSeconds";
     public final static String DURATION_TO_NEXT_MANEUVER_IN_SECONDS = "durationToNextManeuverInSeconds";
+    public static final String GPS_FIXES_COUNT = "gpsFixesCount";
 
     @Override
     public JSONObject serialize(ManeuverCurveBoundaries curveBoundaries) {
@@ -39,6 +40,7 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerial
             result.put(DURATION_TO_NEXT_MANEUVER_IN_SECONDS,
                     curve.getDurationFromManeuverEndToNextManeuverStart() == null ? null
                             : curve.getDurationFromManeuverEndToNextManeuverStart().asSeconds());
+            result.put(GPS_FIXES_COUNT, curve.getGpsFixesCount());
         }
         return result;
     }

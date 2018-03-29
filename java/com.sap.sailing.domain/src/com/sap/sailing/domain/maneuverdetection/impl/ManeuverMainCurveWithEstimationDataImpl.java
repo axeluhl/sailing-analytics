@@ -27,6 +27,7 @@ public class ManeuverMainCurveWithEstimationDataImpl extends ManeuverCurveBounda
     private final Distance distanceSailedIfNotManeuvering;
     private final Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuvering;
     private final double avgTurningRateInDegreesPerSecond;
+    private final int gpsFixesCount;
 
     public ManeuverMainCurveWithEstimationDataImpl(TimePoint timePointBefore, TimePoint timePointAfter,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
@@ -35,7 +36,7 @@ public class ManeuverMainCurveWithEstimationDataImpl extends ManeuverCurveBounda
             double maxTurningRateInDegreesPerSecond, Bearing courseAtMaxTurningRate,
             Distance distanceSailedWithinManeuver, Distance distanceSailedWithinManeuverTowardMiddleAngleProjection,
             Distance distanceSailedIfNotManeuvering,
-            Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuvering, double avgTurningRateInDegreesPerSecond) {
+            Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuvering, double avgTurningRateInDegreesPerSecond, int gpsFixesCount) {
         super(timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees,
                 lowestSpeed);
         this.lowestSpeedTimePoint = lowestSpeedTimePoint;
@@ -49,6 +50,7 @@ public class ManeuverMainCurveWithEstimationDataImpl extends ManeuverCurveBounda
         this.distanceSailedIfNotManeuvering = distanceSailedIfNotManeuvering;
         this.distanceSailedTowardMiddleAngleProjectionIfNotManeuvering = distanceSailedTowardMiddleAngleProjectionIfNotManeuvering;
         this.avgTurningRateInDegreesPerSecond = avgTurningRateInDegreesPerSecond;
+        this.gpsFixesCount = gpsFixesCount;
     }
 
     @Override
@@ -109,6 +111,11 @@ public class ManeuverMainCurveWithEstimationDataImpl extends ManeuverCurveBounda
     @Override
     public double getAvgTurningRateInDegreesPerSecond() {
         return avgTurningRateInDegreesPerSecond;
+    }
+
+    @Override
+    public int getGpsFixesCount() {
+        return gpsFixesCount;
     }
 
 }

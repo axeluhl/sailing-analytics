@@ -267,6 +267,23 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 stepWithHighestSpeed = step;
             }
         }
+        int gpsFixCountWithinMainCurve = 0;
+        int gpsFixCountWithinWholeCurve = 0;
+        try {
+            track.lockForRead();
+            for (GPSFixMoving fix : track.getFixes(
+                    maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore(), true,
+                    maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter(), true)) {
+                if (!fix.getTimePoint().before(maneuverCurve.getMainCurveBoundaries().getTimePointBefore())
+                        && !fix.getTimePoint().after(maneuverCurve.getMainCurveBoundaries().getTimePointAfter())) {
+                    ++gpsFixCountWithinMainCurve;
+                }
+                ++gpsFixCountWithinWholeCurve;
+            }
+        } finally {
+            track.unlockAfterRead();
+        }
+
         ManeuverLoss projectedManeuverLoss = getManeuverLoss(maneuverCurve.getMainCurveBoundaries());
         Distance distanceSailedIfNotManeuvering = maneuverCurve.getMainCurveBoundaries().getSpeedWithBearingBefore()
                 .travel(maneuverCurve.getMainCurveBoundaries().getDuration());
@@ -286,7 +303,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 courseAtMaxTurningRate, distanceSailedWithinManeuver, projectedManeuverLoss.getDistanceSailed(),
                 distanceSailedIfNotManeuvering, projectedManeuverLoss.getDistanceSailedIfNotManeuvering(),
                 Math.abs(maneuverCurve.getMainCurveBoundaries().getDirectionChangeInDegrees())
-                        / maneuverCurve.getMainCurveBoundaries().getDuration().asSeconds());
+                        / maneuverCurve.getMainCurveBoundaries().getDuration().asSeconds(),
+                gpsFixCountWithinMainCurve);
         projectedManeuverLoss = getManeuverLoss(maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries());
         distanceSailedIfNotManeuvering = maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries()
                 .getSpeedWithBearingBefore()
@@ -314,7 +332,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 durationAndAvgSpeedWithBearingBefore.getB(), durationAndAvgSpeedWithBearingBefore.getA(),
                 durationAndAvgSpeedWithBearingAfter.getB(), durationAndAvgSpeedWithBearingAfter.getA(),
                 distanceSailedWithinManeuver, projectedManeuverLoss.getDistanceSailed(), distanceSailedIfNotManeuvering,
-                projectedManeuverLoss.getDistanceSailedIfNotManeuvering());
+                projectedManeuverLoss.getDistanceSailedIfNotManeuvering(), gpsFixCountWithinWholeCurve);
         TimePoint maneuverTimePoint = maneuverCurve.getMainCurveBoundaries().getTimePoint();
         Position maneuverPosition = track.getEstimatedPosition(maneuverTimePoint, /* extrapolate */false);
         Wind wind = trackedRace.getWind(maneuverPosition, maneuverTimePoint);
