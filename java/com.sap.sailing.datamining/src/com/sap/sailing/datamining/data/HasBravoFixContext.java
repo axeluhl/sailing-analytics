@@ -6,11 +6,10 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.BravoFix;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Statistic;
 
-public interface HasBravoFixContext extends HasWindOnTrackedLeg {
+public interface HasBravoFixContext {
     @Connector(scanForStatistics=false)
     HasTrackedLegOfCompetitorContext getTrackedLegOfCompetitorContext();
     
@@ -21,16 +20,16 @@ public interface HasBravoFixContext extends HasWindOnTrackedLeg {
     SpeedWithBearing getSpeed();
     
     @Connector(messageKey="Wind")
-    Wind getWind();
+    default Wind getWind() {
+        return getTrackedLegOfCompetitorContext().getWind();
+    }
     
+    @Statistic(messageKey="TrueWindAngle")
+    Bearing getTrueWindAngle() throws NoWindException;
+
     @Statistic(messageKey="AbsoluteTrueWindAngle")
     Bearing getAbsoluteTrueWindAngle() throws NoWindException;
 
-    @Override
-    default TimePoint getTimePoint() {
-        return getBravoFix().getTimePoint();
-    }
-    
     @Connector(messageKey="VMG")
     Speed getVelocityMadeGood();
 }

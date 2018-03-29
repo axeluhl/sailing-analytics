@@ -14,3 +14,4 @@ Require-Bundle: com.google.gwt.user;bundle-version="2.8.2";resolution:=optional,
  com.sap.sse.security.common
 Export-Package: com.sap.sse.gwt.adminconsole
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: com.sap.sse.gwt.adminconsole

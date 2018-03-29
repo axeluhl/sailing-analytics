@@ -23,3 +23,4 @@ Require-Bundle: com.sap.sailing.domain,
 Bundle-ClassPath: resources/,
  .
 Import-Package: com.sap.sailing.server
+Automatic-Module-Name: com.sap.sailing.domain.swisstimingadapter.test

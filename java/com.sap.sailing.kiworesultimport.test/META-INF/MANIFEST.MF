@@ -8,3 +8,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: com.sap.sailing.kiworesultimport
 Require-Bundle: org.junit;bundle-version="4.8.2",
  com.sap.sse.common
+Automatic-Module-Name: com.sap.sailing.kiworesultimport.test

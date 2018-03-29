@@ -86,12 +86,13 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
     }
 
     /**
-     * Refreshes the {@link RefreshableSingleSelectionModel} with the <code>newObjects</code>. If the current selected
-     * object {@link EntityIdentityComparator#representSameEntity(Object, Object) represent the same entity} as an
-     * object from <code>newObjects</code> it will be reselected. All others are de-selected. That means a selected
-     * object is not contained in <code>newObjects</code> the object wouldn't be selected anymore. If this selection
-     * model has no {@link EntityIdentityComparator} set, this method will use the {@link #equals(Object)} method to
-     * compare. If an object is reselected it will be replaced with the new version of it.
+     * Refreshes the {@link RefreshableSingleSelectionModel} with the <code>newObjects</code>. If the currently selected
+     * object {@link EntityIdentityComparator#representSameEntity(Object, Object) represents the same entity} as an
+     * object from <code>newObjects</code> it will be reselected. All others are de-selected. That means if a selected
+     * object is not contained (based on {@link EntityIdentityComparator#representSameEntity(Object, Object)}) in
+     * <code>newObjects</code> the object wouldn't be selected anymore. If this selection model has no
+     * {@link EntityIdentityComparator} set, this method will use the {@link #equals(Object)} method to compare. If an
+     * object is reselected it will be replaced with the new version of it.
      * <p>
      *
      * When the selection is refreshed this method triggers a

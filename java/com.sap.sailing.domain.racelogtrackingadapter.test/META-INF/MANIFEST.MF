@@ -20,3 +20,4 @@ Import-Package: com.sap.sailing.domain.abstractlog.regatta.events,
  com.sap.sailing.server.impl,
  com.sap.sse.concurrent,
  javax.servlet.http;version="2.5.0"
+Automatic-Module-Name: com.sap.sailing.domain.racelogtrackingadapter.test
