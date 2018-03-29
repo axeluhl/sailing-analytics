@@ -126,7 +126,7 @@ public class EventConfigurationPanelPO extends PageArea {
             createDialog.setEventAndCourseArea(eventToLink, courseAreaToLink);
         }
         createDialog.pressOk();
-        return waitForPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_REGATTA_LEADERBOARD_CONFIRM_DIALOG, 5);
+        return waitForPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_REGATTA_LEADERBOARD_CONFIRM_DIALOG, 10);
     }
     
     private ConfirmDialogPO createRegatta(String name, String boatClass, Date start, Date end) {

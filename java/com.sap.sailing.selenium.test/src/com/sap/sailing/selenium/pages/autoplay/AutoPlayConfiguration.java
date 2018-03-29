@@ -1,4 +1,4 @@
-package com.sap.sailing.selenium.test.autoplay;
+package com.sap.sailing.selenium.pages.autoplay;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;

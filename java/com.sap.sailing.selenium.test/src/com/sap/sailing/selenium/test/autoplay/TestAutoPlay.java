@@ -1,9 +1,11 @@
 package com.sap.sailing.selenium.test.autoplay;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -22,7 +24,11 @@ import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.S
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
+import com.sap.sailing.selenium.pages.autoplay.AutoPlayConfiguration;
+import com.sap.sailing.selenium.pages.autoplay.AutoPlayLeaderboardView;
 import com.sap.sailing.selenium.pages.autoplay.AutoPlayPage;
+import com.sap.sailing.selenium.pages.autoplay.AutoPlayUpcomingView;
+import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestAutoPlay extends AbstractSeleniumTest {
@@ -71,7 +77,36 @@ public class TestAutoPlay extends AbstractSeleniumTest {
     }
 
     @Test
-    public void testAutoPlayStartup() {
+    public void testSixtyInchAutoPlayStartup() {
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        EventConfigurationPanelPO events = adminConsole.goToEvents();
+        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
+                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
+                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
+
+        initTrackingForBmwCupRace(adminConsole);
+
+        AutoPlayPage page = AutoPlayPage.goToPage(getWebDriver(), getContextRoot());
+        AutoPlayConfiguration autoPlayConfiguration = page.getAutoPlayConfiguration();
+        assertNotNull(autoPlayConfiguration);
+        autoPlayConfiguration.select("Sixty Inch Autoplay", BMW_CUP_EVENT, BMW_CUP_REGATTA);
+        String url = autoPlayConfiguration.getConfiguredUrl();
+        // eventid and server might change slightly, better only check arguments
+        assertTrue(url.contains("autoplayType=SIXTYINCH"));
+        assertTrue(url.contains("name=BMW+Cup+(J80)"));
+        AutoPlayUpcomingView autoplayPage = page.goToAutoPlaySixtyInchUrl(getWebDriver(), url);
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
+        String nextUpText = autoplayPage.getText();
+        assertEquals("There are currently no further planned races", nextUpText);
+        // give some extra time to load the leaderboard and finish the animation
+    }
+
+    @Test
+    public void testClassicAutoPlayStartup() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         EventConfigurationPanelPO events = adminConsole.goToEvents();
         events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
@@ -84,10 +119,22 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         AutoPlayConfiguration autoPlayConfiguration = page.getAutoPlayConfiguration();
         assertNotNull(autoPlayConfiguration);
         autoPlayConfiguration.select("Classic Autoplay", BMW_CUP_EVENT, BMW_CUP_REGATTA);
-
         String url = autoPlayConfiguration.getConfiguredUrl();
-        assertSame(NON_CONFIGURED_EXPECTED_URL, url);
-        
+        // eventid and server might change slightly, better only check arguments
+        assertTrue(url.contains("lbwh.saph.title=Leaderboard%3A+BMW+Cup+(J80)"));
+        assertTrue(url.contains("name=BMW+Cup+(J80)"));
+        AutoPlayLeaderboardView autoplayPage = page.goToAutoPlayClassicUrl(getWebDriver(), url);
+        // give some extra time to load the leaderboard and finish the animation
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
+        LeaderboardTablePO leaderBoard = autoplayPage.getLeaderBoard();
+        List<String> races = leaderBoard.getRaceNames();
+        Assert.assertTrue(races.contains("R1"));
+        Assert.assertTrue(races.contains("R2"));
+        Assert.assertTrue(races.contains("R3"));
     }
 
 }
