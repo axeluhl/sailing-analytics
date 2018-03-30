@@ -25,6 +25,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -238,7 +239,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
     }
     
     void openEditBoatDialog(final BoatDTO originalBoat, String boatClassName) {
-        final BoatEditDialog dialog = new BoatEditDialog(stringMessages, originalBoat, boatClassName, new DialogCallback<BoatDTO>() {
+        final BoatEditDialog dialog = new BoatEditDialog(getStringMessages(), originalBoat, boatClassName, new DialogCallback<BoatDTO>() {
             @Override
             public void ok(BoatDTO boat) {
                 sailingService.addOrUpdateBoat(boat, new AsyncCallback<BoatDTO>() {
@@ -282,7 +283,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
 
             @Override
             public void onSuccess(Void result) {
-                Window.alert(stringMessages.successfullyAllowedBoatReset(boats.toString()));
+                Window.alert(getStringMessages().successfullyAllowedBoatReset(boats.toString()));
             }
         });
     }

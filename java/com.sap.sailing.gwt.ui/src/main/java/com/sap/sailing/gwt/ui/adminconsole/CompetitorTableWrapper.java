@@ -434,7 +434,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
     }
 
     void openEditCompetitorWithoutBoatDialog(final CompetitorDTO originalCompetitor) {
-        final CompetitorEditDialog dialog = CompetitorEditDialog.create(stringMessages, originalCompetitor, new DialogCallback<CompetitorDTO>() {
+        final CompetitorEditDialog dialog = CompetitorEditDialog.create(getStringMessages(), originalCompetitor, new DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(final CompetitorDTO competitor) {
                 sailingService.addOrUpdateCompetitorWithoutBoat(competitor, new AsyncCallback<CompetitorDTO>() {

@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
+import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 
 public class CompactCompetitorConfigImagesBarCell extends ImagesBarCell {
     public final static String ACTION_UNLINK = "ACTION_UNLINK";
