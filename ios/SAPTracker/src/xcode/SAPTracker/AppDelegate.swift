@@ -18,12 +18,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         logInfo(name: "\(#function)", info: "Background fetch started...")
         var noData = true
         var allSuccess = true
-        if let checkIns = CoreDataManager.sharedManager.fetchCheckIns() {
+        if let checkIns = CoreDataManager.shared.fetchCheckIns() {
             checkIns.forEach({ (checkIn) in
                 if let gpsFixes = checkIn.gpsFixes {
                     if gpsFixes.count > 0 {
                         noData = false
-                        let gpsFixController = GPSFixController(checkIn: checkIn)
+                        let gpsFixController = GPSFixController(checkIn: checkIn, coreDataManager: CoreDataManager.shared)
                         gpsFixController.sendAll(completion: { (withSuccess) in
                             allSuccess = allSuccess && withSuccess
                         })
@@ -54,7 +54,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidEnterBackground(_ application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-        CoreDataManager.sharedManager.saveContext()
+        CoreDataManager.shared.saveContext()
     }
     
     func applicationWillEnterForeground(_ application: UIApplication) {
@@ -67,7 +67,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-        CoreDataManager.sharedManager.saveContext()
+        CoreDataManager.shared.saveContext()
     }
     
     // MARK: - Setup
@@ -91,12 +91,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     fileprivate func setupCoreData() {
-        _ = CoreDataManager.sharedManager // Initialize core data, migrate database if needed, or delete if migration needed but not possible
+        _ = CoreDataManager.shared // Initialize core data, migrate database if needed, or delete if migration needed but not possible
     }
     
     fileprivate func setupNavigationBarApperance() {
         UINavigationBar.appearance().tintColor = Colors.NavigationBarTintColor
-        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: Colors.NavigationBarTitleColor, NSFontAttributeName: Fonts.OpenSansBold17]
     }
     
     fileprivate func setupPageControlApperance() {
@@ -105,7 +104,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     fileprivate func setupSVProgressHUD() {
-        SVProgressHUD.setDefaultMaskType(.gradient)
+        SVProgressHUD.setDefaultMaskType(.clear)
     }
     
     // MARK: - Helper

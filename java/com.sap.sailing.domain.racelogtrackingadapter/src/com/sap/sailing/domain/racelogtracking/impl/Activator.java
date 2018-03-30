@@ -24,7 +24,6 @@ import com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrack
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
-import com.sap.sailing.server.MasterDataImportClassLoaderService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixJsonDeserializer;
@@ -36,6 +35,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdent
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.GPSFixJsonHandlerImpl;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneUUIDJsonHandler;
+import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.util.ServiceTrackerFactory;

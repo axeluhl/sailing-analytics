@@ -59,7 +59,7 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<IRaceCompetit
             DynamicTrackedRace trackedRace = getTrackedRace(race);
             if (trackedRace != null) {
                 final GPSFixMoving fix = getDomainFactory().createGPSFixMoving(event.getB());
-                Competitor competitor = getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor());
+                Competitor competitor = getDomainFactory().resolveCompetitor(event.getA().getCompetitor());
                 if (getSimulator() != null) {
                     getSimulator().scheduleCompetitorPosition(competitor, fix);
                 } else {

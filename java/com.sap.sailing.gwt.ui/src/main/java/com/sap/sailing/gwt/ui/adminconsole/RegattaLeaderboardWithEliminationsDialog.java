@@ -124,7 +124,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
         final CompetitorRegistrationsPanel[] competitorEliminationPanel = new CompetitorRegistrationsPanel[1];
         competitorEliminationPanel[0] = new CompetitorRegistrationsPanel(sailingService, stringMessages,
                 errorReporter, /* editable */ true, regattaLeaderboardsListBox.getValue(regattaLeaderboardsListBox.getSelectedIndex()),
-                selectedRegattaLeaderboard.boatClassName,
+                selectedRegattaLeaderboard.canBoatsOfCompetitorsChangePerRace, selectedRegattaLeaderboard.boatClassName,
                 /* "validator" updates eliminatedCompetitors */ ()->eliminatedCompetitors = competitorEliminationPanel[0].getResult(),
                 getEliminatedCompetitorsRetriever(),
                 /* restrictPoolToLeaderboard */ true, /* additionalWidgetsBeforeTables */ new Label(stringMessages.selectCompetitorsToEliminate()));

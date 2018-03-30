@@ -226,7 +226,8 @@ input.magnifier {
 }
 
 .statisticProviderElement {
-	margin: 2px;
+	margin: 10px 2px 2px 2px;
+	display: inline-block;
 }
 
 .definitionProviderControls {
@@ -240,4 +241,9 @@ input.magnifier {
 .queryDefinitionViewerContent {
 	background-color: white;
 	padding: 5px;
+}
+
+.statisticSuggestBoxPopup .suggestPopupContent {
+	max-height: 700px;
+	overflow-y: scroll;
 }

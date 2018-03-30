@@ -1,11 +1,11 @@
 package com.sap.sailing.domain.swisstimingreplayadapter.test;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.mockito.Mockito.mock;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -13,11 +13,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -202,9 +204,9 @@ public class SwissTimingReplayAdapterServiceTest {
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005905.20120805.replay"), replayListener);
         Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
         TrackedRace trackedRace = trackedRaces.iterator().next();
-        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            assertSame(DomainFactory.INSTANCE.getBaseDomainFactory().getOrCreateBoatClass("470"), competitor.getBoat().getBoatClass());
-            Distance distanceToLineAtStart = trackedRace.getDistanceToStartLine(competitor, trackedRace.getStartOfRace());
+        for (Entry<Competitor, Boat> competitorAndBoatEntry : trackedRace.getRace().getCompetitorsAndTheirBoats().entrySet()) {
+            assertSame(DomainFactory.INSTANCE.getBaseDomainFactory().getOrCreateBoatClass("470"), competitorAndBoatEntry.getValue().getBoatClass());
+            Distance distanceToLineAtStart = trackedRace.getDistanceToStartLine(competitorAndBoatEntry.getKey(), trackedRace.getStartOfRace());
             assertTrue(distanceToLineAtStart.getMeters() > 0);
             assertTrue(distanceToLineAtStart.getMeters() < 20);
         }

@@ -424,8 +424,7 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
                 if (checkinData instanceof CompetitorCheckinData) {
                     CompetitorCheckinData competitorCheckinData = (CompetitorCheckinData) checkinData;
                     DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
-                    DatabaseHelper.getInstance().storeCompetitorCheckinRow(this, competitorCheckinData.getEvent(), competitorCheckinData.getCompetitor(),
-                        competitorCheckinData.getLeaderboard(), competitorCheckinData.getCheckinUrl());
+                    DatabaseHelper.getInstance().storeCompetitorCheckinRow(this, competitorCheckinData);
                     competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
                     event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
                     leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);

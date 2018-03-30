@@ -2,13 +2,14 @@ package com.sap.sailing.server.masterdata;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
@@ -69,29 +70,26 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     private static final long serialVersionUID = -11522605089325440L;
     private Regatta regatta;
 
-    public DummyTrackedRace(final Serializable raceId, final Iterable<? extends Competitor> competitors,
-            final Regatta regatta, final TrackedRegatta trackedRegatta, final WindStore windStore) {
-        this(competitors, regatta, trackedRegatta,
-                new RaceDefinitionImpl("DummyRace", new CourseImpl("Dummy Course", Collections.<Waypoint> emptyList()),
-                        regatta.getBoatClass(), competitors, raceId),
-                windStore);
+    public DummyTrackedRace(final Serializable raceId, final Map<Competitor, Boat> competitorsAndBoats, final Regatta regatta, final TrackedRegatta trackedRegatta, final WindStore windStore) {
+        this(competitorsAndBoats, regatta, trackedRegatta, new RaceDefinitionImpl("DummyRace", new CourseImpl("Dummy Course", Collections.<Waypoint>emptyList()),
+                regatta.getBoatClass(), competitorsAndBoats, raceId), windStore);
     }
-
-    public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta,
-            final TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore) {
+    
+    public DummyTrackedRace(final Map<Competitor, Boat> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta,
+            RaceDefinition race, WindStore windStore) {
         super(race, trackedRegatta, windStore, -1);
         this.regatta = regatta;
     }
 
-    public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta,
-            final TrackedRegatta trackedRegatta, RaceDefinition race) {
-        this(competitors, regatta, trackedRegatta, race, EmptyWindStore.INSTANCE);
-
+    public DummyTrackedRace(final Map<Competitor, Boat> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta,
+            RaceDefinition race) {
+       this(competitors, regatta, trackedRegatta, race, EmptyWindStore.INSTANCE);
+        
     }
 
     public DummyTrackedRace(final String raceName, final Serializable raceId) {
         super(new RaceDefinitionImpl(raceName, new CourseImpl("Dummy Course", Collections.<Waypoint> emptyList()),
-                /* boatClass */ null, new HashSet<Competitor>(), raceId), null, EmptyWindStore.INSTANCE, -1);
+                /* boatClass */ null, Collections.<Competitor, Boat>emptyMap(), raceId), null, EmptyWindStore.INSTANCE, -1);
     }
 
     @Override
@@ -639,6 +637,16 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return null;
+    }
+
+    @Override
+    public Boat getBoatOfCompetitor(Competitor competitor) {
+        return null;
+    }
+    
+    @Override
+    public Competitor getCompetitorOfBoat(Boat boat) {
         return null;
     }
 

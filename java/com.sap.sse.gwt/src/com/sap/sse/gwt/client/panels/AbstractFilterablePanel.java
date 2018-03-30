@@ -19,10 +19,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractKeywordFilter;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.Filter;
-import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
-import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
 /**
  * This Panel contains a text box. Text entered into the text box filters the {@link CellTable} passed to the
@@ -37,7 +34,11 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
  * 
  * Note that this panel does <em>not</em> contain the table that it filters. With this, this class's clients are free to
  * position the table wherever they want, not necessarily related to the text box provided by this panel in any specific
- * way.
+ * way.<p>
+ * 
+ * It is recommended to use the {@link #getAllListDataProvider()} as the data provider for the table's selection model.
+ * This way, when the filter reduces the elements displayed in the table the selection will still refer to all elements
+ * and will not be modified solely by the act of filtering.
  * 
  * @param <T>
  * @author Nicolas Klose, Axel Uhl
@@ -223,28 +224,6 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
 
     public Iterable<T> getAll() {
         return all.getList();
-    }
-
-    /**
-     * Registers a {@link RefreshableSelectionModel} on the all data structure. So the selection can be maintained when
-     * the {@link CellTable} is filtered. You can use the {@link RefreshableSelectionModel} returned by this method e.g.
-     * for a {@link CellTable} using {@link CellTable#setSelectionModel(com.google.gwt.view.client.SelectionModel)}
-     * 
-     * @param comp
-     *            {@link EntityIdentityComparator Comperator} to create the {@link RefreshableSelectionModel selection
-     *            model}
-     * @param multiselection
-     *            set <code>true</code> when the {@link RefreshableSelectionModel selection model} should be a
-     *            {@link RefreshableMultiSelectionModel}. When it's set <code>false</code> the
-     *            {@link RefreshableSelectionModel selection model} will be a {@link RefreshableSingleSelectionModel}.
-     */
-    public RefreshableSelectionModel<T> registerSelectionModelOnAllElements(EntityIdentityComparator<T> comp,
-            boolean multiselection) {
-        if (multiselection) {
-            return new RefreshableMultiSelectionModel<>(comp, all);
-        } else {
-            return new RefreshableSingleSelectionModel<>(comp, all);
-        }
     }
 
     /**

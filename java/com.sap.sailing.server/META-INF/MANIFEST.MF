@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Sailing Server
 Bundle-SymbolicName: com.sap.sailing.server
+Automatic-Module-Name: com.sap.sailing.server
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.server.impl.Activator
 Bundle-Vendor: SAP

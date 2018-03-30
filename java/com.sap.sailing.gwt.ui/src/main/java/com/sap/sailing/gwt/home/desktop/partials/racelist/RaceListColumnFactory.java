@@ -453,7 +453,7 @@ public class RaceListColumnFactory {
                     String sailIdStyle = CSS.race_item_sailid();
                     String nameStyle = CSS.race_item_winner();
                     sb.append(TEMPLATE.winner( sailIdStyle, nameStyle, flagImageUri.asString(),
-                            value.getSailID(), value.getName()));
+                            value.getShortInfo(), value.getName()));
                 }
             }
         };

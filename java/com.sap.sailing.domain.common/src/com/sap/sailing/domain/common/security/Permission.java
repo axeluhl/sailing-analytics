@@ -15,6 +15,7 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     MANAGE_TRACKED_RACES,
     MANAGE_RACELOG_TRACKING,
     MANAGE_ALL_COMPETITORS,
+    MANAGE_ALL_BOATS,
     MANAGE_COURSE_LAYOUT,
     MANAGE_WIND,
     MANAGE_IGTIMI_ACCOUNTS,

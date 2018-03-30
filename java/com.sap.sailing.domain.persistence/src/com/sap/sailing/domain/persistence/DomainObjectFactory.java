@@ -12,8 +12,10 @@ import java.util.function.Consumer;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -129,12 +131,24 @@ public interface DomainObjectFactory {
     RaceLog loadRaceLog(RaceLogIdentifier identifier);
 
     RegattaLog loadRegattaLog(RegattaLikeIdentifier identifier);
-    
+
     /**
-     * Loads all competitors, and resolves them via the domain factory.
-     * @return
+     * Migrates the old COMPETITORS collection and the new BOATS collection.
+     * The old COLLECTION is will be renamed to COMPETITORS_BAK for deveopment and test purposes
+     * @return a collection of the old type where all competitors contain their boats or null if migration was not required.
+     */
+    Iterable<CompetitorWithBoat> migrateLegacyCompetitorsIfRequired();
+
+    /**
+     * Loads all competitors (with and without embedded boats) and resolves them via the domain factory.
+     * Returns a collection of {@link Competitor} or {@link CompetitorWithBoat} objects. 
      */
     Collection<Competitor> loadAllCompetitors();
+
+    /**
+     * Loads all boats and resolves them via the domain factory.
+     */
+    Collection<Boat> loadAllBoats();
 
     DomainFactory getBaseDomainFactory();
 

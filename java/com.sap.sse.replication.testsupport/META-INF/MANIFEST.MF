@@ -11,3 +11,4 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  com.rabbitmq.client;bundle-version="2.8.4",
  lz4-java;bundle-version="1.3.0"
 Export-Package: com.sap.sse.replication.testsupport
+Automatic-Module-Name: com.sap.sse.replication.testsupport

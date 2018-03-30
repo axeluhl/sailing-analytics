@@ -33,9 +33,7 @@ import java.util.Comparator;
  * <p>
  * You can control the order of items and change notifications via the {@link Callback} parameter.
  */
-@SuppressWarnings("unchecked")
 public class SortedList<T> {
-
     /**
      * Used by {@link #indexOf(Object)} when he item cannot be found in the list.
      */

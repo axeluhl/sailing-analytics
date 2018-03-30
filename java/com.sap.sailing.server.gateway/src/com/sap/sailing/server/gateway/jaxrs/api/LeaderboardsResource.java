@@ -49,9 +49,11 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceBoatMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.impl.OpenEndedDeviceMappingFinder;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -62,7 +64,9 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DeviceIdentifier;
@@ -110,7 +114,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseJsonSe
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 import com.sap.sse.InvalidDateException;
@@ -263,6 +267,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         }
         final TimePoint now = MillisecondsTimePoint.now();
         String competitorId = (String) requestObject.get(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING);
+        String boatId = (String) requestObject.get(DeviceMappingConstants.JSON_BOAT_ID_AS_STRING);
         String markId = (String) requestObject.get(DeviceMappingConstants.JSON_MARK_ID_AS_STRING);
         String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
         Long fromMillis = (Long) requestObject.get(DeviceMappingConstants.JSON_FROM_MILLIS);
@@ -271,7 +276,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         // String deviceType = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_TYPE);
         // String pushDeviceId = (String) requestObject.get(DeviceMappingConstants.JSON_PUSH_DEVICE_ID);
 
-        if ((competitorId == null && markId == null) || deviceUuid == null || fromMillis == null) {
+        if ((competitorId == null && boatId == null && markId == null) || deviceUuid == null || fromMillis == null) {
             // || deviceType == null
             logger.warning("Invalid JSON body in request");
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
@@ -298,6 +303,24 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                         .type(MediaType.TEXT_PLAIN).build();
             }
             event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, author, UUID.randomUUID(), mappedToCompetitor, device,
+                    from, /* to */ null);
+        } else if (boatId != null) {
+            // map to a boat
+            final Boat mappedToBoat = domainFactory.getCompetitorStore().getExistingBoatByIdAsString(boatId);
+            mappedTo = mappedToBoat;
+            if (mappedToBoat == null) {
+                logger.warning("No boat found for id " + boatId);
+                return Response.status(Status.BAD_REQUEST).entity("No boat found for id " + StringEscapeUtils.escapeHtml(boatId))
+                        .type(MediaType.TEXT_PLAIN).build();
+            }
+            Iterable<Boat> registered = hasRegattaLike.getAllBoats();
+            if (!Util.contains(registered, mappedToBoat)) {
+                logger.warning("Boat found but not registered for leaderboard " + leaderboardName);
+                return Response.status(Status.BAD_REQUEST)
+                        .entity("Boat found but not registered for leaderboard " + StringEscapeUtils.escapeHtml(leaderboardName))
+                        .type(MediaType.TEXT_PLAIN).build();
+            }
+            event = new RegattaLogDeviceBoatMappingEventImpl(now, now, author, UUID.randomUUID(), mappedToBoat, device,
                     from, /* to */ null);
         } else {
             // map to a mark
@@ -345,11 +368,12 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         logger.fine("JSON requestObject is: " + requestObject.toString());
         Long toMillis = (Long) requestObject.get(DeviceMappingConstants.JSON_TO_MILLIS);
         String competitorId = (String) requestObject.get(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING);
+        String boatId = (String) requestObject.get(DeviceMappingConstants.JSON_BOAT_ID_AS_STRING);
         String markId = (String) requestObject.get(DeviceMappingConstants.JSON_MARK_ID_AS_STRING);
         String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
         TimePoint closingTimePointInclusive = new MillisecondsTimePoint(toMillis);
         if (toMillis == null || deviceUuid == null || closingTimePointInclusive == null ||
-                (competitorId == null && markId == null)) {
+                (competitorId == null && boatId == null && markId == null)) {
             logger.warning("Invalid JSON body in request");
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
@@ -361,6 +385,14 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             if (mappedToCompetitor == null) {
                 logger.warning("No competitor found for id " + competitorId);
                 return Response.status(Status.BAD_REQUEST).entity("No competitor found for id " + competitorId)
+                        .type(MediaType.TEXT_PLAIN).build();
+            }
+        } else if (boatId != null) {
+            final Boat mappedToBoat = getService().getCompetitorStore().getExistingBoatByIdAsString(boatId);
+            mappedTo = mappedToBoat;
+            if (mappedToBoat == null) {
+                logger.warning("No boat found for id " + boatId);
+                return Response.status(Status.BAD_REQUEST).entity("No boat found for id " + boatId)
                         .type(MediaType.TEXT_PLAIN).build();
             }
         } else {
@@ -375,18 +407,24 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             }
             
         }
+        final String mappedToTypeString;
+        if (competitorId != null) {
+            mappedToTypeString = "competitor";
+        } else {
+            mappedToTypeString = (markId != null) ? "mark" : "boat";
+        }
         OpenEndedDeviceMappingFinder finder = new OpenEndedDeviceMappingFinder(isRegattaLike.getRegattaLog(), mappedTo, deviceUuid);
         Serializable deviceMappingEventId = finder.analyze();
         if (deviceMappingEventId == null) {
-            logger.warning("No corresponding open "+((markId!=null)?"mark":"competitor")+" to device mapping has been found");
+            logger.warning("No corresponding open " + mappedToTypeString + " to device mapping has been found");
             return Response.status(Status.BAD_REQUEST)
-                    .entity("No corresponding open "+((markId!=null)?"mark":"competitor")+" to device mapping has been found")
+                    .entity("No corresponding open " + mappedToTypeString + " to device mapping has been found")
                     .type(MediaType.TEXT_PLAIN).build();
         }
         RegattaLogCloseOpenEndedDeviceMappingEventImpl event = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(now,
                 author, deviceMappingEventId, closingTimePointInclusive);
         isRegattaLike.getRegattaLog().add(event);
-        logger.fine("Successfully checked out "+((markId!=null)?"mark ":"competitor ") + mappedTo.getName());
+        logger.fine("Successfully checked out " + mappedToTypeString + mappedTo.getName());
         return Response.status(Status.OK).build();
     }
 
@@ -992,10 +1030,11 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 return result;
             });
         }
-        CompetitorJsonSerializer serializer = new CompetitorJsonSerializer();
+        CompetitorWithBoatJsonSerializer serializer = CompetitorWithBoatJsonSerializer.create();
         JSONArray result = new JSONArray();
         for (final Competitor c : competitors) {
-            JSONObject jsonCompetitor = serializer.serialize(c);
+            Boat boat = trackedRace.getBoatOfCompetitor(c);
+            JSONObject jsonCompetitor = serializer.serialize(new CompetitorWithBoatImpl(c, (DynamicBoat) boat));
             result.add(jsonCompetitor);
         }
         String json = result.toJSONString();

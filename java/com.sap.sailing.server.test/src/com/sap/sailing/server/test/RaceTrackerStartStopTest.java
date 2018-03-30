@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -70,30 +72,34 @@ public class RaceTrackerStartStopTest {
         racingEventService = new RacingEventServiceImplMock(){};
         boatClass = new BoatClassImpl(BOATCLASSNAME, /* typicallyStartsUpwind */ true);
         regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
-                RegattaImpl.getDefaultName(EVENTNAME, boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */
+                RegattaImpl.getDefaultName(EVENTNAME, boatClass.getName()), boatClass, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */
                 null, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), UUID.randomUUID(), null);
         racingEventService.getRegattasByName().put(EVENTNAME, regatta);
         TrackedRegatta trackedRegatta1 = racingEventService.getOrCreateTrackedRegatta(regatta);
         racingEventService.getRegattasByName().put(EVENTNAME, regatta);
         raceTrackerSet = Collections.newSetFromMap(new ConcurrentHashMap<RaceTracker, Boolean>());
-        raceDef1 = new RaceDefinitionImpl(RACENAME1, new CourseImpl("Course1", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
-        raceDef2 = new RaceDefinitionImpl(RACENAME2, new CourseImpl("Course2", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
-        raceDef3 = new RaceDefinitionImpl(RACENAME3, new CourseImpl("Course3", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
+        raceDef1 = new RaceDefinitionImpl(RACENAME1, new CourseImpl("Course1", new ArrayList<Waypoint>()), boatClass, Collections.<Competitor, Boat>emptyMap());
+        raceDef2 = new RaceDefinitionImpl(RACENAME2, new CourseImpl("Course2", new ArrayList<Waypoint>()), boatClass, Collections.<Competitor, Boat>emptyMap());
+        raceDef3 = new RaceDefinitionImpl(RACENAME3, new CourseImpl("Course3", new ArrayList<Waypoint>()), boatClass, Collections.<Competitor, Boat>emptyMap());
         regatta.addRace(raceDef1);
         trackedRegatta1.createTrackedRace(raceDef1, Collections.<Sideline> emptyList(),
                 /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
                 /* millisecondsOverWhichToAverageWind */ 0l,
-                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class));
+                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class),
+                Optional.empty());
         regatta.addRace(raceDef2);
         trackedRegatta1.createTrackedRace(raceDef2, Collections.<Sideline> emptyList(),
                 /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
                 /* millisecondsOverWhichToAverageWind */ 0l,
-                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class));
+                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class),
+                Optional.empty());
         regatta.addRace(raceDef3);
         trackedRegatta1.createTrackedRace(raceDef3, Collections.<Sideline> emptyList(),
                 /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
                 /* millisecondsOverWhichToAverageWind */ 0l,
-                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class));
+                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class),
+                Optional.empty());
         Long trackerID1 = new Long(1);
         Long trackerID2 = new Long(2);
         Long trackerID3 = new Long(3);

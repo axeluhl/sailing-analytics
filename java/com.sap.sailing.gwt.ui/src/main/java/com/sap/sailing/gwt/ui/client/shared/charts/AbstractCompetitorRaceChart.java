@@ -46,8 +46,8 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.actions.GetCompetitorsRaceDataAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
@@ -87,7 +87,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     
     private final Label noCompetitorsSelectedLabel;
     private final Label noDataFoundLabel;
-    private final CompetitorSelectionProvider competitorSelectionProvider;
+    private final RaceCompetitorSelectionProvider competitorSelectionProvider;
     private DetailType selectedFirstDetailType;
     private DetailType selectedSecondDetailType;
 
@@ -102,9 +102,20 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private final TimingHolder primary = new TimingHolder();
     private final TimingHolder secondary = new TimingHolder();
 
+    /**
+     * Whenever data is received from the server, the effective step size of that data is captured
+     * in this field. Ideally, it would equal the {@link #getStepSizeInMillis() desired step size}, but
+     * long time ranges covered by the chart and the lack of zoom may require increasing the effective step size
+     * so as to reduce the number of fixes requested from the server.<p>
+     * 
+     * However, when zooming this will be re-evaluated, and a more fine-grained request to the server, limited to
+     * the zoom range, may then be issued.
+     */
+    private long effectiveStepSize = -1;
+    
     AbstractCompetitorRaceChart(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
+            RaceCompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             ErrorReporter errorReporter, DetailType firstDetailType, DetailType secondDetailType, boolean compactChart,
             boolean allowTimeAdjust,
@@ -237,25 +248,38 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             // If the time interval is too long and the step size too small, the number of fixes the query would have to
             // produce may exceed any reasonable limit. Therefore, we limit the number of fixes that such a query may ask
             // for:
-            doLoadDataForCompetitorsAndDataType(from, to, append, competitorsToLoad, getSelectedFirstDetailType(),primary);
+            doLoadDataForCompetitorsAndDataType(from, to, append, competitorsToLoad, getSelectedFirstDetailType(), primary);
             if (getSelectedSecondDetailType() != null) {
-                doLoadDataForCompetitorsAndDataType(from, to, append, competitorsToLoad, getSelectedSecondDetailType(),secondary);
+                doLoadDataForCompetitorsAndDataType(from, to, append, competitorsToLoad, getSelectedSecondDetailType(), secondary);
             }
         }
     }
 
-    private void doLoadDataForCompetitorsAndDataType(final Date from, final Date to, final boolean append,
-            ArrayList<CompetitorDTO> competitorsToLoad, final DetailType selectedDataTypeToRetrieve,final TimingHolder tholder) {
-        long stepSize = Math.max(getStepSizeInMillis(),
-                from==null||to==null ? 0 : Math.abs(to.getTime()-from.getTime())/SailingServiceConstants.MAX_NUMBER_OF_FIXES_TO_QUERY);
-        GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
-                selectedRaceIdentifier, competitorsToLoad, from, to, stepSize, selectedDataTypeToRetrieve,
-                leaderboardGroupName, leaderboardName);
+    @Override
+    protected void changeMinMaxAndExtremesInterval(Date minTimepoint, Date maxTimepoint, boolean redraw) {
+        super.changeMinMaxAndExtremesInterval(minTimepoint, maxTimepoint, redraw);
+        updateChartIfEffectiveStepSizeChanged(minTimepoint, maxTimepoint);
+    }
 
+    protected void updateChartIfEffectiveStepSizeChanged(Date minTimepoint, Date maxTimepoint) {
+        long effectiveStepSize = getEffectiveStepSize(minTimepoint, maxTimepoint);
+        if (this.effectiveStepSize != -1 && this.effectiveStepSize != effectiveStepSize) {
+            // the change has had an impact on the effective step size; trigger a re-load
+            updateChart(minTimepoint, maxTimepoint, /* append==false means replace points in chart by the new ones */ false);
+        }
+    }
+
+    private void doLoadDataForCompetitorsAndDataType(final Date from, final Date to, final boolean append,
+            ArrayList<CompetitorDTO> competitorsToLoad, final DetailType selectedDataTypeToRetrieve, final TimingHolder tholder) {
+        long effectiveStepSize = getEffectiveStepSize(from, to);
+        GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
+                selectedRaceIdentifier, competitorsToLoad, from, to, effectiveStepSize, selectedDataTypeToRetrieve,
+                leaderboardGroupName, leaderboardName);
         AsyncCallback<CompetitorsRaceDataDTO> dataLoadedCallback = new AsyncCallback<CompetitorsRaceDataDTO>() {
             @Override
             public void onSuccess(final CompetitorsRaceDataDTO result) {
                 hideLoading();
+                AbstractCompetitorRaceChart.this.effectiveStepSize = effectiveStepSize;
                 if (result != null) {
                     if (result.isEmpty() && chartContainsNoData()) {
                         setWidget(noDataFoundLabel);
@@ -276,7 +300,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                         timer.getPlayMode() == PlayModes.Live);
             }
         };
-
         if (append) {
             // this call is repeated, allow it to be throttled and dropped
             asyncActionsExecutor.execute(getCompetitorsRaceDataAction, LOAD_COMPETITOR_CHART_DATA_CATEGORY,
@@ -286,7 +309,21 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             // asyncActionExecutor
             getCompetitorsRaceDataAction.execute(dataLoadedCallback);
         }
+    }
 
+    /**
+     * Based on a time range and a {@link #getStepSizeInMillis() desired step size} computes an effective
+     * step size that observes a maximum number of fixes that may be queried in one request from the server
+     * ({@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY}). If the time range and the desired step
+     * size do not exceed this limit, the step size desired will be returned. Otherwise, the step size will be
+     * extended such that {@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY} fixes will be requested
+     * for the time range between {@code from} and {@code to}.
+     * 
+     * @return the effective step size in milliseconds
+     */
+    private long getEffectiveStepSize(final Date from, final Date to) {
+        return Math.max(getStepSizeInMillis(),
+                from==null||to==null ? 0 : Math.abs(to.getTime()-from.getTime())/SailingServiceConstants.MAX_NUMBER_OF_FIXES_TO_QUERY);
     }
     
     private boolean chartContainsNoData() {
@@ -347,14 +384,12 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      * Fills the series for the selected competitors with the data in {@link AbstractCompetitorRaceChart#chartData}.<br />
      */
     private synchronized void updateChartSeries(CompetitorsRaceDataDTO chartData, DetailType retrievedDataType,
-            boolean append,TimingHolder tholder) {
+            boolean append, TimingHolder tholder) {
         // Make sure the busy indicator is removed at this point, or plotting the data results in an exception
         setWidget(chart);
         for (CompetitorDTO competitor : chartData.getCompetitors()) {
             Series competitorDataSeries = getOrCreateCompetitorDataSeries(retrievedDataType, competitor);
-            Series markPassingSeries = getOrCreateCompetitorMarkPassingSeries(competitorDataSeries, retrievedDataType,
-                    competitor);
-            
+            Series markPassingSeries = getOrCreateCompetitorMarkPassingSeries(competitorDataSeries, retrievedDataType, competitor);
             CompetitorRaceDataDTO competitorData = chartData.getCompetitorData(competitor);
             if (competitorData != null) {
                 Date toDate = timer.getLiveTimePointAsDate();
@@ -371,23 +406,20 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                     }
                 }
                 markPassingSeries.setPoints(markPassingPoints.toArray(new Point[0]), false);
-
                 Point[] oldRaceDataPoints = competitorDataSeries.getPoints();
                 List<com.sap.sse.common.Util.Pair<Date, Double>> raceData = competitorData.getRaceData();
-
                 Point[] raceDataPointsToAdd = new Point[raceData.size()];
                 int currentPointIndex = 0;
                 for (com.sap.sse.common.Util.Pair<Date, Double> raceDataPoint : raceData) {
                     Double dataPointValue = raceDataPoint.getB();
-                    if(dataPointValue != null) {
+                    if (dataPointValue != null) {
                         long dataPointTimeAsMillis = raceDataPoint.getA().getTime();
-                        if(append == false || (tholder.timeOfEarliestRequestInMillis == null || dataPointTimeAsMillis < tholder.timeOfEarliestRequestInMillis) || 
+                        if (append == false || (tholder.timeOfEarliestRequestInMillis == null || dataPointTimeAsMillis < tholder.timeOfEarliestRequestInMillis) || 
                                 tholder.timeOfLatestRequestInMillis == null || dataPointTimeAsMillis > tholder.timeOfLatestRequestInMillis) {
                             raceDataPointsToAdd[currentPointIndex++] = new Point(dataPointTimeAsMillis, dataPointValue);
                         }
                     }
                 }
-
                 Point[] newRaceDataPoints;
                 if (append) {
                     newRaceDataPoints = new Point[oldRaceDataPoints.length + currentPointIndex];
@@ -397,16 +429,14 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                     newRaceDataPoints = new Point[currentPointIndex];
                     System.arraycopy(raceDataPointsToAdd, 0, newRaceDataPoints, 0, currentPointIndex);
                 }
-                
-                setSeriesPoints(competitorDataSeries, newRaceDataPoints);
+                setSeriesPoints(competitorDataSeries, newRaceDataPoints, /* manageZoom */ append);
                 // Adding the series if chart doesn't contain it
                 List<Series> chartSeries = Arrays.asList(chart.getSeries());
                 if (!chartSeries.contains(competitorDataSeries)) {
                     chart.addSeries(competitorDataSeries);
                     chart.addSeries(markPassingSeries);
-                    //this is to prevent a bug, that will prohibit the initial rendering
+                    // this is to prevent a bug, that will prohibit the initial rendering
                     chart.setSizeToMatchContainer();
-                    
                 }
             }
         }
@@ -775,11 +805,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         if (!isVisible()) {
             return;
         }
-
         if (allowTimeAdjust) {
             updateTimePlotLine(newTime);
         }
-        
         switch (timer.getPlayMode()) {
         case Live: {
             // is date before first cache entry or is cache empty?

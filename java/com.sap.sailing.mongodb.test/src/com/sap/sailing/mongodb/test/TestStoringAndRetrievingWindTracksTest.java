@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +31,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -90,7 +92,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
-                }, /* trackedRegattaRegistry */ null, mock(RaceLogResolver.class),
+                }, /* trackedRegattaRegistry */ null, mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class),
                 /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
         for (final Receiver receiver : typeControllers) {
@@ -103,7 +105,8 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
-                }, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class));
+                }, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class),
+                Optional.empty());
         WindSource windSource = new WindSourceImpl(WindSourceType.WEB);
         Mongo myFirstMongo = newMongo();
         DB firstDatabase = myFirstMongo.getDB(dbConfiguration.getDatabaseName());

@@ -26,7 +26,7 @@ import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -74,7 +74,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
 
     private SailingServiceAsync sailingServiceAsync;
     private StringMessages stringMessages;
-    private final CompetitorSelectionModel competitorSelectionModel;
+    private final RaceCompetitorSelectionModel competitorSelectionModel;
     private final CompetitorColorProvider colorProvider; 
     
     private final double WIND_LINE_ADVANTAGE_DIV_WIDTH_IN_PT = 185;
@@ -88,7 +88,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
         this.sailingServiceAsync = sailingServiceAsync;
         this.raceMapResources = raceMapResources;
         colorProvider = new CompetitorColorProviderImpl();
-        competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */true, colorProvider);
+        competitorSelectionModel = new RaceCompetitorSelectionModel(/* hasMultiSelection */true, colorProvider);
         competitorSelectionModel.setCompetitors(startAnalysisDTO.getCompetitorDTOsFromStartAnaylsisCompetitorDTOs(),
                 raceMap);
         initWidget(uiBinder.createAndBindUi(this));

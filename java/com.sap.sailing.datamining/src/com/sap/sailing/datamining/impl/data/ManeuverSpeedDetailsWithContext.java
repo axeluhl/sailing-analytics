@@ -36,7 +36,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
 
     @Override
     public NauticalSide getToSide() {
-        return maneuverContext.getToSide();
+        return maneuverContext.getManeuver().getToSide();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
         double lastSpeedValue = 0;
 
         Function<Integer, Integer> twaIterationFunction = ManeuverSpeedDetailsUtils
-                .getTWAIterationFunctionForManeuverDirection(maneuverContext.getToSide());
+                .getTWAIterationFunctionForManeuverDirection(getToSide());
 
         for (int twa = maneuverEnteringTWA, i = 0; i < 360; ++i, twa = twaIterationFunction.apply(twa)) {
             if (maneuverSpeedPerTWA[twa] == 0 || lastSpeedValue == 0) {
@@ -64,7 +64,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
         double firstSpeedValue = maneuverContext.getManeuverEnteringSpeed();
 
         Function<Integer, Integer> twaIterationFunction = ManeuverSpeedDetailsUtils
-                .getTWAIterationFunctionForManeuverDirection(maneuverContext.getToSide());
+                .getTWAIterationFunctionForManeuverDirection(getToSide());
 
         for (int twa = maneuverEnteringTWA, i = 0; i < 360; ++i, twa = twaIterationFunction.apply(twa)) {
             if (firstSpeedValue == 0) {
@@ -85,7 +85,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
         double lastSpeedValue = 0;
 
         Function<Integer, Integer> twaIterationFunction = ManeuverSpeedDetailsUtils
-                .getTWAIterationFunctionForManeuverDirection(maneuverContext.getToSide());
+                .getTWAIterationFunctionForManeuverDirection(getToSide());
 
         for (int twa = maneuverEnteringTWA, i = 0; i < 360; ++i, twa = twaIterationFunction.apply(twa)) {
             if (maneuverSpeedPerTWA[twa] == 0 || lastSpeedValue == 0) {

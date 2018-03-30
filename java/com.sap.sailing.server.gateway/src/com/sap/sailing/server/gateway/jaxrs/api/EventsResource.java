@@ -354,7 +354,8 @@ public class EventsResource extends AbstractSailingServerResource {
         RegattaCreationParametersDTO regattaCreationParametersDTO = new RegattaCreationParametersDTO(
                 createDefaultSeriesCreationParameters(regattaName, numberOfRaces));
         UUID regattaId = UUID.randomUUID();
-        addRegatta(regattaName, controlTrackingFromStartAndFinishTimes, useStartTimeInterference,
+        boolean canBoatsOfCompetitorsChangePerRace = false;
+        addRegatta(regattaName, canBoatsOfCompetitorsChangePerRace, controlTrackingFromStartAndFinishTimes, useStartTimeInterference,
                 buoyZoneRadiusInHullLengths, courseAreaId, boatClassName, /* startDate */ null, /* endDate */ null, scoringScheme,
                 rankingMetric, regattaId, regattaCreationParametersDTO, leaderboardDiscardThresholds, numberOfRaces);
         final RegattaLeaderboard leaderboard = addLeaderboard(regattaName, leaderboardDiscardThresholds);
@@ -536,7 +537,7 @@ public class EventsResource extends AbstractSailingServerResource {
         return getService().apply(new AddCourseAreas(eventId, courseAreaNames, courseAreaIds))[0];
     }
 
-    private Regatta addRegatta(String regattaName, boolean controlTrackingFromStartAndFinishTimes, boolean useStartTimeInterference,
+    private Regatta addRegatta(String regattaName, boolean canBoatsOfCompetitorsChangePerRace, boolean controlTrackingFromStartAndFinishTimes, boolean useStartTimeInterference,
             double buoyZoneRadiusInHullLengths, UUID courseAreaId, String boatClassName,
             MillisecondsTimePoint startDate, MillisecondsTimePoint endDate, ScoringScheme scoringScheme,
             RankingMetrics rankingMetric, UUID regattaId, RegattaCreationParametersDTO regattaCreationParametersDTO,
@@ -544,7 +545,7 @@ public class EventsResource extends AbstractSailingServerResource {
         if (enforceSecurityChecks) {
             SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultModes.CREATE, regattaName));
         }
-        Regatta regatta = getService().apply(new AddSpecificRegatta(regattaName, boatClassName, startDate, endDate, regattaId,
+        Regatta regatta = getService().apply(new AddSpecificRegatta(regattaName, boatClassName, canBoatsOfCompetitorsChangePerRace, startDate, endDate, regattaId,
                 regattaCreationParametersDTO, /* isPersistent */ true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths,
                 useStartTimeInterference, controlTrackingFromStartAndFinishTimes, rankingMetric));
         return regatta;

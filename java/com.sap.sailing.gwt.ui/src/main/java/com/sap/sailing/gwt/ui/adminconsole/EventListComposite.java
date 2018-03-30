@@ -579,7 +579,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                                 new AsyncCallback<LeaderboardGroupDTO>() {
                                     @Override
                                     public void onFailure(Throwable t) {
-                                        errorReporter.reportError("Error trying to create new leaderboard group" + newGroup.getName()
+                                        errorReporter.reportError(stringMessages.errorCreatingLeaderboardGroup(newGroup.getName())
                                                 + ": " + t.getMessage());
                                     }
                                     @Override

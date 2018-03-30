@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-declare -g DISPLAY_SUCCESS_FOR_THIS_COMMAND="true"
+# -----------------------------------------------------------
+# Functions that encapsulate error checking or looping logic whilst calling other functions.
+# -----------------------------------------------------------
+
+DISPLAY_SUCCESS_FOR_THIS_COMMAND="true"
 HTTP_RETRY_INTERVAL=5
 TIMEOUT=300
 
@@ -74,6 +78,10 @@ function ssh_wrapper(){
     success ${out:-"[ OK ]"}
     echo $out
   else
+    if ssh -o StrictHostKeyChecking=no "$@"; then
+      echo $out
+      return 0
+    fi
     error "[ ERROR ] $out"
     return 1
   fi

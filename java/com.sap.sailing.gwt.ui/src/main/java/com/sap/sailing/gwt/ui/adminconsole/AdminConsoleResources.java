@@ -28,6 +28,9 @@ interface AdminConsoleResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/users.png")
     ImageResource competitorsIcon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/sailboat.png")
+    ImageResource sailboatIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/blackdot.png")
     ImageResource blackdotIcon();
     
@@ -82,6 +85,9 @@ interface AdminConsoleResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/competitor_registrations.png")
     ImageResource competitorRegistrations();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boat_registrations.png")
+    ImageResource boatRegistrations();
 
     @Source("com/sap/sailing/gwt/ui/client/images/define_course.png")
     ImageResource defineCourse();

@@ -17,3 +17,4 @@ Import-Package: com.sap.sse.common.settings,
  com.sap.sse.common.settings.generic.base,
  com.sap.sse.common.settings.generic.converter,
  com.sap.sse.common.settings.serializer
+Automatic-Module-Name: com.sap.sse.shared.android

@@ -25,7 +25,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
     public final static String ACTION_SET_TRACKING_TIMES = "ACTION_SET_TRACKING_TIMES";
     public final static String ACTION_STOP_TRACKING = "ACTION_STOP_TRACKING";
     public final static String ACTION_START_TRACKING = "ACTION_START_TRACKING";
-
+    public final static String ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS = "ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS";
     
     private final StringMessages stringMessages;
     private SmartphoneTrackingEventManagementPanel smartphoneTrackingEventManagementPanel;
@@ -63,6 +63,10 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
             if (startEndTrackingTime.getB() == null || startEndTrackingTime.getB().getTimePoint() == null) {
                 result.add(new ImageSpec(ACTION_STOP_TRACKING, stringMessages.stopTracking(), makeImagePrototype(resources.stopRaceLogTracking())));
             }
+        }
+        
+        if (smartphoneTrackingEventManagementPanel.getSelectedLeaderboard().canBoatsOfCompetitorsChangePerRace) {
+            result.add(new ImageSpec(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, stringMessages.actionShowCompetitorToBoatAssignments(), makeImagePrototype(resources.sailboatIcon())));
         }
         
         return result;

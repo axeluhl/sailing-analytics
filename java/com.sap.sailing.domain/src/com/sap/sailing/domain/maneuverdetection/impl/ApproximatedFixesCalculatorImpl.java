@@ -19,8 +19,9 @@ public class ApproximatedFixesCalculatorImpl implements ApproximatedFixesCalcula
     @Override
     public Iterable<GPSFixMoving> approximate(TimePoint earliestStart, TimePoint latestEnd) {
         return trackedRace.approximate(competitor,
-                competitor.getBoat().getBoatClass().getMaximumDistanceForCourseApproximation(), earliestStart,
-                latestEnd);
+                trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass()
+                        .getMaximumDistanceForCourseApproximation(),
+                earliestStart, latestEnd);
     }
 
 }

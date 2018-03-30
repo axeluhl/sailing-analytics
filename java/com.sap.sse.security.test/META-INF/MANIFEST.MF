@@ -13,3 +13,4 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  com.sap.sse.mail
 Import-Package: com.sap.sse.security.shared,
  org.apache.shiro.session.mgt
+Automatic-Module-Name: com.sap.sse.security.test

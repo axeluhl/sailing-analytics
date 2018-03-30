@@ -5,17 +5,17 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
-import java.util.Set;
+import java.util.Optional;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -100,11 +100,11 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
     private TimePoint referenceTimePoint;
 
     /**
-     * feference location for location / lat/lng specifications
+     * reference location for location / lat/lng specifications
      */
     private Position referenceLocation;
 
-    private final Map<String, Set<Competitor>> competitorsPerRaceID;
+    private final Map<String, Map<Competitor, Boat>> competitorsAndBoatsPerRaceID;
 
     private final Map<String, Map<String, Mark>> marksPerRaceIDPerMarkID;
 
@@ -202,7 +202,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
         trackedRacePerRaceID = new HashMap<>();
         bestStartTimePerRaceID = new HashMap<>();
         raceTimePerRaceID = new HashMap<>();
-        competitorsPerRaceID = new HashMap<>();
+        competitorsAndBoatsPerRaceID = new HashMap<>();
         marksPerRaceIDPerMarkID = new HashMap<>();
         markByHashValue = new HashMap<>();
         competitorByHashValue = new HashMap<>();
@@ -297,15 +297,15 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
             CompetitorStatus competitorStatus, BoatType boatType, short cRank_Bracket, short cnPoints_x10_Bracket,
             short ctPoints_x10_Winner) {
         if (boatType == BoatType.Competitor) {
-            Competitor competitor = domainFactory.createCompetitorWithoutID(sailNumberOrTrackerID, threeLetterIOCCode.trim(), name.trim(),
+            Pair<Competitor,Boat> competitorAndBoat = domainFactory.createCompetitorWithoutID(sailNumberOrTrackerID, threeLetterIOCCode.trim(), name.trim(),
                     currentRaceID, domainFactory.getRaceTypeFromRaceID(currentRaceID).getBoatClass());
-            Set<Competitor> competitorsOfCurrentRace = competitorsPerRaceID.get(currentRaceID);
-            if (competitorsOfCurrentRace == null) {
-                competitorsOfCurrentRace = new HashSet<>();
-                competitorsPerRaceID.put(currentRaceID, competitorsOfCurrentRace);
+            Map<Competitor, Boat> competitorAndBoatsOfCurrentRace = competitorsAndBoatsPerRaceID.get(currentRaceID);
+            if (competitorAndBoatsOfCurrentRace == null) {
+                competitorAndBoatsOfCurrentRace = new HashMap<>();
+                competitorsAndBoatsPerRaceID.put(currentRaceID, competitorAndBoatsOfCurrentRace);
             }
-            competitorsOfCurrentRace.add(competitor);
-            competitorByHashValue.put(hashValue, competitor);
+            competitorAndBoatsOfCurrentRace.put(competitorAndBoat.getA(), competitorAndBoat.getB());
+            competitorByHashValue.put(hashValue, competitorAndBoat.getA());
         } else {
             // consider it a mark
             Mark mark = domainFactory.getOrCreateMark(sailNumberOrTrackerID.trim());
@@ -390,7 +390,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
 
     private void createRace() {
         RaceDefinition race = domainFactory.createRaceDefinition(regatta,
-                currentRaceID, competitorsPerRaceID.get(currentRaceID), currentCourseDefinition, raceName, raceIdForRaceDefinition);
+                currentRaceID, competitorsAndBoatsPerRaceID.get(currentRaceID), currentCourseDefinition, raceName, raceIdForRaceDefinition);
         synchronized (racePerRaceIdForRaceDefinition) {
             racePerRaceIdForRaceDefinition.put(raceIdForRaceDefinition, race);
             racePerRaceIdForRaceDefinition.notifyAll();
@@ -400,7 +400,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
                         TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS,
                         WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
                         /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                        /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm, raceLogResolver);
+                        /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm, raceLogResolver,
+                        /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
         trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
         TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
         if (bestStartTimeKnownSoFar != null) {

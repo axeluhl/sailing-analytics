@@ -184,13 +184,13 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
             if (!isZoomed) {
                 isZoomed = true;
             }
-            //Set a minute as max time zoom just as for chart
+            // Set a minute as max time zoom just as for chart
             if (xAxisMax - xAxisMin > MINUTE_IN_MILLIS) {
                 Date rangeStart = new Date(xAxisMin);
                 Date rangeEnd = new Date(xAxisMax);
                 timeRangeWithZoomProvider.setTimeZoom(rangeStart, rangeEnd, this);
+                updateChartIfEffectiveStepSizeChanged(rangeStart, rangeEnd);
                 fireEvent(new ChartZoomChangedEvent(rangeStart, rangeEnd));
-                
             } else {
                 fireEvent(new ChartZoomResetEvent());
                 return false;
@@ -199,7 +199,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                 @Override
                 public void execute() {
-                    // in case the user clicks the "reset zoom" button chartSelectionEvent.getXAxisMinAsLong() throws in exception
+                    // in case the user clicks the "reset zoom" button chartSelectionEvent.getXAxisMinAsLong() throws an exception
                     isZoomed = false;
                     timeRangeWithZoomProvider.resetTimeZoom();
                     // redraw is triggered by the call to onTimeZoomReset() and therefore not necessary again here
@@ -222,6 +222,13 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
             }
         }
         return true;
+    }
+    
+    /**
+     * Does nothing here; subclasses have the possibility to override if they need to re-load data
+     * based on changes in the visible area that may lead to step size / resolution adjustments
+     */
+    protected void updateChartIfEffectiveStepSizeChanged(Date minTimepoint, Date maxTimepoint) {
     }
 
     protected void changeMinMaxAndExtremesInterval(Date minTimepoint, Date maxTimepoint, boolean redraw) {
@@ -246,14 +253,14 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         }
     }
 
-    protected void setSeriesPoints(Series series, Point[] points) {
-        if (timeRangeWithZoomProvider.isZoomed()) {
+    protected void setSeriesPoints(Series series, Point[] points, boolean manageZoom) {
+        if (manageZoom && timeRangeWithZoomProvider.isZoomed()) {
             com.sap.sse.common.Util.Pair<Date, Date> timeZoom = timeRangeWithZoomProvider.getTimeZoom();
             resetMinMaxAndExtremesInterval(/* redraw */ false);
-            series.setPoints(points, false);
+            series.setPoints(points, /* redraw */ false);
             changeMinMaxAndExtremesInterval(timeZoom.getA(), timeZoom.getB(), /* redraw */ false);
         } else {
-            series.setPoints(points, false);
+            series.setPoints(points, /* redraw */ false);
         }
     }
     

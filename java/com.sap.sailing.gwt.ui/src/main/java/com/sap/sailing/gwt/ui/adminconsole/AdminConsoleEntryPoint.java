@@ -177,6 +177,15 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             }
         }, getStringMessages().competitors(), Permission.MANAGE_ALL_COMPETITORS);
 
+        final BoatPanel boatPanel = new BoatPanel(sailingService, getStringMessages(), this);
+        boatPanel.ensureDebugId("BoatPanel");
+        panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<BoatPanel>(boatPanel) {
+            @Override
+            public void refreshAfterBecomingVisible() {
+                getWidget().refreshBoatList();
+            }
+        }, getStringMessages().boats(), Permission.MANAGE_ALL_BOATS);
+
         RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(sailingService, this, this, getStringMessages());
         panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<RaceCourseManagementPanel>(raceCourseManagementPanel), getStringMessages().courseLayout(), Permission.MANAGE_COURSE_LAYOUT);
         regattasDisplayers.add(raceCourseManagementPanel);

@@ -300,7 +300,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                                                                 } else {
                                                                     getFilterField().remove(userWithUpdatedRoles);
                                                                     getFilterField().add(result.getUserDTO());
-                                                                    if (userService.getCurrentUser().getName().equals(result.getUserDTO())) {
+                                                                    if (userService.getCurrentUser().getName().equals(result.getUserDTO().getName())) {
                                                                         // if the current user's permissions changed, update the user object in the user service and notify others
                                                                         userService.updateUser(/* notify other instances */ true);
                                                                     }
