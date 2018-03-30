@@ -24,6 +24,19 @@
 
                     <h2 class="articleSubheadline">March 2018</h2>
                     <ul class="bulletList">
+                        <li>Boats are now separate entities. See the "Tracked Races / Boats" tab in the admin console.
+                            When creating a regatta, you now need to specify whether in that regatta the competitors
+                            may sail on changing boats ("Can boats of competitors change per race").
+                            If boats can change, boat assignments need to be specified per
+                            race. For the TracTrac connector this may happen as in the past, using the corresponding
+                            metadata attributes (boatName, either one of boatId or boatUuid, and boatColor) on the
+                            competitors in the race. For smartphone tracking, boats can be specified in the
+                            "Connectors / Smartphone Tracking" tab by using the boat icon in the actions column of
+                            the leaderboards table ("Boat Registrations"). This defines the boats from which you can
+                            then select in the scope of each race of the regatta. When adding competitors to such
+                            a race then you now have to assign boats from the boats list to each competitor before
+                            you can confirm the competitor-to-race assignments.
+                        </li>
                         <li>In addition to track competitors and marks using smartphone-tracking it is now possible to track boats.
                             This is e.g. useful for several national leagues where competitors are assigned dynamically to boats for each race.
                             In this case the competitors were used to bring a smartphone with them to the assigned boat.
