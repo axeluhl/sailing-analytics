@@ -1,6 +1,7 @@
 package com.sap.sailing.datamining.data;
 
-import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
@@ -19,6 +20,9 @@ public interface HasCompleteManeuverCurveWithEstimationDataContext {
 
     @Connector
     CompleteManeuverCurveWithEstimationData getCompleteManeuverCurveWithEstimationData();
+
+    @Dimension(messageKey = "ToSide")
+    NauticalSide getToSide();
 
     @Statistic(messageKey = "ManeuverStartSpeedDeviationRatioFromAvg", ordinal = 1, resultDecimals = 4)
     Double getManeuverStartSpeedDeviationRatioFromAvgStatistic();
@@ -51,12 +55,57 @@ public interface HasCompleteManeuverCurveWithEstimationDataContext {
     ClusterDTO getTackingCount();
 
     @Statistic(messageKey = "AbsTwaAtMaxTurningRate")
-    Bearing getAbsTwaAtMaxTurningRate();
+    double getAbsTwaAtMaxTurningRate();
 
     @Statistic(messageKey = "AbsTwaAtLowestSpeed")
-    Bearing getAbsTwaAtLowestSpeed();
+    double getAbsTwaAtLowestSpeed();
 
     @Statistic(messageKey = "AbsTwaAtHighestSpeed")
-    Bearing getAbsTwaAtHighestSpeed();
+    double getAbsTwaAtHighestSpeed();
+
+    @Statistic(messageKey = "AbsTwaAtManeuverMiddle")
+    double getAbsTwaAtManeuverMiddle();
+
+    @Statistic(messageKey = "GpsSamplingRate")
+    double getGpsSamplingRate();
+
+    @Statistic(messageKey = "ManeuverEnteringAbsTWA")
+    Double getEnteringAbsTWA();
+
+    @Statistic(messageKey = "ManeuverExitingAbsTWA")
+    Double getExitingAbsTWA();
+
+    @Dimension(messageKey = "TypeOfPreviousManeuver")
+    ManeuverType getTypeOfPreviousManeuver();
+
+    @Dimension(messageKey = "TypeOfNextManeuver")
+    ManeuverType getTypeOfNextManeuver();
+
+    @Statistic(messageKey = "AbsoluteDirectionChange", resultDecimals = 2)
+    Double getAbsoluteDirectionChangeInDegrees();
+
+    @Statistic(messageKey = "RatioBetweenDistanceSailedWithAndWithoutManeuver", resultDecimals = 4)
+    double getRatioBetweenDistanceSailedWithAndWithoutManeuver();
+
+    @Statistic(messageKey = "DurationLostByManeuver", resultDecimals = 4)
+    double getDurationLostByManeuver();
+
+    @Statistic(messageKey = "DurationLostByManeuverTowardMiddleAngleProjection", resultDecimals = 4)
+    double getDurationLostByManeuverTowardMiddleAngleProjection();
+
+    @Statistic(messageKey = "RatioBetweenDistanceSailedTowardMiddleAngleProjectionWithAndWithoutManeuver", resultDecimals = 4)
+    double getRatioBetweenDistanceSailedTowardMiddleAngleProjectionWithAndWithoutManeuver();
+
+    @Statistic(messageKey = "RelativeBearingToNextMarkBeforeManeuver", resultDecimals = 1)
+    Double getRelativeBearingToNextMarkBeforeManeuver();
+
+    @Statistic(messageKey = "RelativeBearingToNextMarkAfterManeuver", resultDecimals = 1)
+    Double getRelativeBearingToNextMarkAfterManeuver();
+
+    @Statistic(messageKey = "ManeuverEnteringSpeedInKnots", resultDecimals = 2)
+    Double getManeuverEnteringSpeed();
+
+    @Statistic(messageKey = "ManeuverExitingSpeedInKnots", resultDecimals = 2)
+    Double getManeuverExitingSpeed();
 
 }

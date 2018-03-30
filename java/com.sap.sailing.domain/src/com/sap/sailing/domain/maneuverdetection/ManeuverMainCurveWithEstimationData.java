@@ -25,7 +25,7 @@ public interface ManeuverMainCurveWithEstimationData extends ManeuverCurveBounda
      * Gets the time point at which the lowest speed was recorded within the main curve.
      */
     TimePoint getLowestSpeedTimePoint();
-    
+
     @Statistic(messageKey = "PercentageOfMainCurveProgressUntilLowestSpeed", resultDecimals = 4)
     default double getPercentageOfMainCurveProgressUntilLowestSpeed() {
         return getTimePointBefore().until(getLowestSpeedTimePoint()).asSeconds() / getDuration().asSeconds();
@@ -40,7 +40,7 @@ public interface ManeuverMainCurveWithEstimationData extends ManeuverCurveBounda
      * Gets the time point at which the highest speed was recorded within the main curve.
      */
     TimePoint getHighestSpeedTimePoint();
-    
+
     @Statistic(messageKey = "PercentageOfMainCurveProgressUntilHighestSpeed", resultDecimals = 4)
     default double getPercentageOfMainCurveProgressUntilHighestSpeed() {
         return getTimePointBefore().until(getHighestSpeedTimePoint()).asSeconds() / getDuration().asSeconds();
@@ -50,7 +50,7 @@ public interface ManeuverMainCurveWithEstimationData extends ManeuverCurveBounda
      * Gets the time point at which the maximal turning rate was recorded within the main curve.
      */
     TimePoint getTimePointOfMaxTurningRate();
-    
+
     @Statistic(messageKey = "PercentageOfMainCurveProgressUntilMaxTurningRate", resultDecimals = 4)
     default double getPercentageOfMainCurveProgressUntilMaxTurningRate() {
         return getTimePointBefore().until(getTimePointOfMaxTurningRate()).asSeconds() / getDuration().asSeconds();
@@ -61,7 +61,7 @@ public interface ManeuverMainCurveWithEstimationData extends ManeuverCurveBounda
      */
     @Statistic(messageKey = "MaxTurningRateInDegreesPerSecond", resultDecimals = 4)
     double getMaxTurningRateInDegreesPerSecond();
-    
+
     /**
      * Gets the average turning rate recorded within the maneuver main curve. It is calculated by absolute course change
      * within main curve divided by maneuver main curve duration.
@@ -73,7 +73,7 @@ public interface ManeuverMainCurveWithEstimationData extends ManeuverCurveBounda
      * Gets the course at which the maximal turning rate was measured within the main curve.
      */
     Bearing getCourseAtMaxTurningRate();
-    
+
     /**
      * Gets the number of GPS-fixes contained within the maneuver main curve.
      */

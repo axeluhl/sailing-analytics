@@ -6,7 +6,6 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
-import com.sap.sse.datamining.annotations.Statistic;
 
 /**
  * Contains information of a complete maneuver curve which is regarded as relevant for maneuver classification
@@ -17,19 +16,19 @@ import com.sap.sse.datamining.annotations.Statistic;
  *
  */
 public interface CompleteManeuverCurveWithEstimationData {
-    
-    @Dimension(messageKey = "ManeuverTypeForCompleteManeuverCurve")
+
+    @Dimension(messageKey = "ManeuverType")
     default ManeuverType getManeuverTypeForCompleteManeuverCurve() {
-        if(getJibingCount() > 0 && getTackingCount() > 0) {
+        if (getJibingCount() > 0 && getTackingCount() > 0) {
             return ManeuverType.PENALTY_CIRCLE;
         }
-        if(getTackingCount() > 0) {
+        if (getTackingCount() > 0) {
             return ManeuverType.TACK;
         }
-        if(getJibingCount() > 0) {
+        if (getJibingCount() > 0) {
             return ManeuverType.JIBE;
         }
-        if(getWind() == null) {
+        if (getWind() == null) {
             return ManeuverType.UNKNOWN;
         }
         return isManeuverStartsByRunningAwayFromTheWind() ? ManeuverType.BEAR_AWAY : ManeuverType.HEAD_UP;
@@ -39,14 +38,13 @@ public interface CompleteManeuverCurveWithEstimationData {
      * Gets the information of the main curve of maneuver including its boundaries, course change, and other data
      * relevant for maneuver classification.
      */
-    @Connector(messageKey="MainCurve")
+    @Connector
     ManeuverMainCurveWithEstimationData getMainCurve();
 
     /**
      * Gets the information of the curve with unstable course and speed of maneuver including its boundaries, course
      * change, and other data relevant for maneuver classification.
      */
-    @Connector(messageKey="CurveWithUnstableCourseAndSpeed")
     ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData getCurveWithUnstableCourseAndSpeed();
 
     /**
@@ -82,7 +80,6 @@ public interface CompleteManeuverCurveWithEstimationData {
      * calculated by absolute bearing of next mark from the boat's position minus the boat's course. As the maneuver
      * boundaries, the boundaries of the curve with unstable course and speed are used.
      */
-    @Statistic(messageKey="RelativeBearingToNextMarkBeforeManeuver", resultDecimals=1)
     Bearing getRelativeBearingToNextMarkBeforeManeuver();
 
     /**
@@ -90,9 +87,8 @@ public interface CompleteManeuverCurveWithEstimationData {
      * calculated by absolute bearing of next mark from the boat's position minus the boat's course. As the maneuver
      * boundaries, the boundaries of the curve with unstable course and speed are used.
      */
-    @Statistic(messageKey="RelativeBearingToNextMarkAfterManeuver", resultDecimals=1)
     Bearing getRelativeBearingToNextMarkAfterManeuver();
-    
+
     /**
      * Gets whether a mark was crossed within the maneuver curve.
      */

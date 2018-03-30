@@ -5,7 +5,6 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
-import com.sap.sse.datamining.annotations.Statistic;
 
 public interface HasDetailedManeuverLoss {
 
@@ -44,7 +43,6 @@ public interface HasDetailedManeuverLoss {
      * Gets the ratio between {@link #getDistanceSailedWithinManeuver()} and
      * {@link #getDistanceSailedIfNotManeuvering()}.
      */
-    @Statistic(messageKey = "RatioBetweenDistanceSailedWithAndWithoutManeuver", resultDecimals=4)
     default double getRatioBetweenDistanceSailedWithAndWithoutManeuver() {
         return getDistanceSailedWithinManeuver().getMeters() / getDistanceSailedIfNotManeuvering().getMeters();
     }
@@ -70,7 +68,6 @@ public interface HasDetailedManeuverLoss {
     /**
      * Gets the duration lost by maneuver.
      */
-    @Statistic(messageKey = "DurationLostByManeuver", resultDecimals=4)
     default Duration getDurationLostByManeuver() {
         return new MillisecondsDurationImpl(
                 (long) (getDistanceLost().getMeters() / getSpeedWithBearingBefore().getMetersPerSecond() * 1000));
@@ -79,7 +76,6 @@ public interface HasDetailedManeuverLoss {
     /**
      * Gets the duration lost by maneuver toward middle angle projection.
      */
-    @Statistic(messageKey = "DurationLostByManeuverTowardMiddleAngleProjection", resultDecimals=4)
     default Duration getDurationLostByManeuverTowardMiddleAngleProjection() {
         return new MillisecondsDurationImpl((long) (getDistanceLostTowardMiddleAngleProjection().getMeters()
                 / getSpeedWithBearingBefore().getMetersPerSecond() * 1000));
@@ -89,7 +85,6 @@ public interface HasDetailedManeuverLoss {
      * Gets the ratio between {@link #getDistanceSailedWithinManeuverTowardMiddleAngleProjection()} and
      * {@link #getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering()}
      */
-    @Statistic(messageKey = "RatioBetweenDistanceSailedTowardMiddleAngleProjectionWithAndWithoutManeuver", resultDecimals=4)
     default double getRatioBetweenDistanceSailedTowardMiddleAngleProjectionWithAndWithoutManeuver() {
         return getDistanceSailedWithinManeuverTowardMiddleAngleProjection().getMeters()
                 / getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering().getMeters();

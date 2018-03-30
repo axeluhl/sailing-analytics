@@ -11,7 +11,8 @@ import com.sap.sse.common.Duration;
  * @author Vladislav Chumak (D069712)
  *
  */
-public interface ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData extends ManeuverCurveBoundaries, HasDetailedManeuverLoss {
+public interface ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData
+        extends ManeuverCurveBoundaries, HasDetailedManeuverLoss {
 
     /**
      * Gets the average speed and course measured from the end of the previous maneuver until the start of this
@@ -46,7 +47,7 @@ public interface ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData exten
      * distance of at least one second, the result will be {@null}.
      */
     Duration getDurationFromManeuverEndToNextManeuverStart();
-    
+
     /**
      * Gets the number of GPS-fixes contained within the maneuver curve.
      */

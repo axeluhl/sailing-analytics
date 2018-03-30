@@ -2,11 +2,17 @@ package com.sap.sailing.datamining.impl.data;
 
 import com.sap.sailing.datamining.data.HasCompleteManeuverCurveWithEstimationDataContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
+import com.sap.sailing.datamining.shared.ManeuverSettings;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
+import com.sap.sailing.domain.maneuverdetection.HasDetailedManeuverLoss;
+import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
 /**
@@ -18,12 +24,20 @@ public class CompleteManeuverCurveWithEstimationDataWithContext
         implements HasCompleteManeuverCurveWithEstimationDataContext {
 
     private final CompleteManeuverCurveWithEstimationData maneuverWithEstimationData;
-    private HasRaceOfCompetitorContext raceOfCompetitorContext;
+    private final HasRaceOfCompetitorContext raceOfCompetitorContext;
+    private final ManeuverSettings maneuverSettings;
+    private final CompleteManeuverCurveWithEstimationData previousManeuverCurve;
+    private final CompleteManeuverCurveWithEstimationData nextManeuverCurve;
 
     public CompleteManeuverCurveWithEstimationDataWithContext(HasRaceOfCompetitorContext raceOfCompetitorContext,
-            CompleteManeuverCurveWithEstimationData maneuverWithEstimationData) {
+            CompleteManeuverCurveWithEstimationData maneuverWithEstimationData, ManeuverSettings maneuverSettings,
+            CompleteManeuverCurveWithEstimationData previousManeuverCurve,
+            CompleteManeuverCurveWithEstimationData nextManeuverCurve) {
         this.raceOfCompetitorContext = raceOfCompetitorContext;
         this.maneuverWithEstimationData = maneuverWithEstimationData;
+        this.maneuverSettings = maneuverSettings;
+        this.previousManeuverCurve = previousManeuverCurve;
+        this.nextManeuverCurve = nextManeuverCurve;
     }
 
     @Override
@@ -33,8 +47,8 @@ public class CompleteManeuverCurveWithEstimationDataWithContext
 
     @Override
     public Double getManeuverStartSpeedDeviationRatioFromAvgStatistic() {
-        SpeedWithBearing speedWithBearingBeforeManeuver = maneuverWithEstimationData
-                .getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore();
+        SpeedWithBearing speedWithBearingBeforeManeuver = getManeuverCurveBoundariesForAnalysis()
+                .getSpeedWithBearingBefore();
         SpeedWithBearing averageSpeedWithBearingBeforeManeuver = maneuverWithEstimationData
                 .getCurveWithUnstableCourseAndSpeed().getAverageSpeedWithBearingBefore();
         if (speedWithBearingBeforeManeuver != null && averageSpeedWithBearingBeforeManeuver != null) {
@@ -49,8 +63,8 @@ public class CompleteManeuverCurveWithEstimationDataWithContext
 
     @Override
     public Double getManeuverStartCogDeviationFromAvgInDegreesStatistic() {
-        SpeedWithBearing speedWithBearingBeforeManeuver = maneuverWithEstimationData
-                .getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore();
+        SpeedWithBearing speedWithBearingBeforeManeuver = getManeuverCurveBoundariesForAnalysis()
+                .getSpeedWithBearingBefore();
         SpeedWithBearing averageSpeedWithBearingBeforeManeuver = maneuverWithEstimationData
                 .getCurveWithUnstableCourseAndSpeed().getAverageSpeedWithBearingBefore();
         if (speedWithBearingBeforeManeuver != null && averageSpeedWithBearingBeforeManeuver != null) {
@@ -62,7 +76,7 @@ public class CompleteManeuverCurveWithEstimationDataWithContext
 
     @Override
     public Double getManeuverEndSpeedDeviationRatioFromAvgStatistic() {
-        SpeedWithBearing speedWithBearingAfterManeuver = maneuverWithEstimationData.getCurveWithUnstableCourseAndSpeed()
+        SpeedWithBearing speedWithBearingAfterManeuver = getManeuverCurveBoundariesForAnalysis()
                 .getSpeedWithBearingAfter();
         SpeedWithBearing averageSpeedWithBearingAfterManeuver = maneuverWithEstimationData
                 .getCurveWithUnstableCourseAndSpeed().getAverageSpeedWithBearingAfter();
@@ -140,23 +154,132 @@ public class CompleteManeuverCurveWithEstimationDataWithContext
     }
 
     @Override
-    public Bearing getAbsTwaAtMaxTurningRate() {
+    public double getAbsTwaAtMaxTurningRate() {
         return getAbsTwaFromCourse(maneuverWithEstimationData.getMainCurve().getCourseAtMaxTurningRate());
     }
 
     @Override
-    public Bearing getAbsTwaAtLowestSpeed() {
+    public double getAbsTwaAtLowestSpeed() {
         return getAbsTwaFromCourse(maneuverWithEstimationData.getMainCurve().getLowestSpeed().getBearing());
     }
 
     @Override
-    public Bearing getAbsTwaAtHighestSpeed() {
+    public double getAbsTwaAtHighestSpeed() {
         return getAbsTwaFromCourse(maneuverWithEstimationData.getMainCurve().getHighestSpeed().getBearing());
     }
 
-    private Bearing getAbsTwaFromCourse(Bearing course) {
+    private double getAbsTwaFromCourse(Bearing course) {
         double twa = maneuverWithEstimationData.getWind().getFrom().getDifferenceTo(course).getDegrees();
-        return new DegreeBearingImpl(twa);
+        return Math.abs(twa);
+    }
+
+    @Override
+    public NauticalSide getToSide() {
+        return maneuverWithEstimationData.getMainCurve().getDirectionChangeInDegrees() < 0 ? NauticalSide.PORT
+                : NauticalSide.STARBOARD;
+    }
+
+    private ManeuverCurveBoundaries getManeuverCurveBoundariesForAnalysis() {
+        return maneuverSettings.isMainCurveAnalysis() ? maneuverWithEstimationData.getMainCurve()
+                : maneuverWithEstimationData.getCurveWithUnstableCourseAndSpeed();
+    }
+
+    @Override
+    public Double getEnteringAbsTWA() {
+        return getAbsTwaFromCourse(getManeuverCurveBoundariesForAnalysis().getSpeedWithBearingBefore().getBearing());
+    }
+
+    @Override
+    public Double getExitingAbsTWA() {
+        return getAbsTwaFromCourse(getManeuverCurveBoundariesForAnalysis().getSpeedWithBearingAfter().getBearing());
+    }
+
+    @Override
+    public ManeuverType getTypeOfPreviousManeuver() {
+        return previousManeuverCurve == null ? ManeuverType.UNKNOWN
+                : previousManeuverCurve.getManeuverTypeForCompleteManeuverCurve();
+    }
+
+    @Override
+    public ManeuverType getTypeOfNextManeuver() {
+        return nextManeuverCurve == null ? ManeuverType.UNKNOWN
+                : nextManeuverCurve.getManeuverTypeForCompleteManeuverCurve();
+    }
+
+    @Override
+    public Double getAbsoluteDirectionChangeInDegrees() {
+        return Math.abs(getManeuverCurveBoundariesForAnalysis().getDirectionChangeInDegrees());
+    }
+
+    @Override
+    public double getRatioBetweenDistanceSailedWithAndWithoutManeuver() {
+        return ((HasDetailedManeuverLoss) getManeuverCurveBoundariesForAnalysis())
+                .getRatioBetweenDistanceSailedWithAndWithoutManeuver();
+    }
+
+    @Override
+    public double getDurationLostByManeuver() {
+        return ((HasDetailedManeuverLoss) getManeuverCurveBoundariesForAnalysis()).getDurationLostByManeuver()
+                .asSeconds();
+    }
+
+    @Override
+    public double getDurationLostByManeuverTowardMiddleAngleProjection() {
+        return ((HasDetailedManeuverLoss) getManeuverCurveBoundariesForAnalysis())
+                .getDurationLostByManeuverTowardMiddleAngleProjection().asSeconds();
+    }
+
+    @Override
+    public double getRatioBetweenDistanceSailedTowardMiddleAngleProjectionWithAndWithoutManeuver() {
+        return ((HasDetailedManeuverLoss) getManeuverCurveBoundariesForAnalysis())
+                .getRatioBetweenDistanceSailedTowardMiddleAngleProjectionWithAndWithoutManeuver();
+    }
+
+    @Override
+    public Double getRelativeBearingToNextMarkBeforeManeuver() {
+        return maneuverWithEstimationData.getRelativeBearingToNextMarkBeforeManeuver() == null ? null
+                : maneuverWithEstimationData.getRelativeBearingToNextMarkBeforeManeuver().getDegrees();
+    }
+
+    @Override
+    public Double getRelativeBearingToNextMarkAfterManeuver() {
+        return maneuverWithEstimationData.getRelativeBearingToNextMarkAfterManeuver() == null ? null
+                : maneuverWithEstimationData.getRelativeBearingToNextMarkAfterManeuver().getDegrees();
+    }
+
+    public TimePoint getTimePointBeforeForAnalysis() {
+        return getManeuverCurveBoundariesForAnalysis().getTimePointBefore();
+    }
+
+    public TimePoint getTimePointAfterForAnalysis() {
+        return getManeuverCurveBoundariesForAnalysis().getTimePointAfter();
+    }
+
+    @Override
+    public Double getManeuverEnteringSpeed() {
+        return getManeuverCurveBoundariesForAnalysis().getSpeedWithBearingBefore().getKnots();
+    }
+
+    @Override
+    public Double getManeuverExitingSpeed() {
+        return getManeuverCurveBoundariesForAnalysis().getSpeedWithBearingAfter().getKnots();
+    }
+
+    @Override
+    public double getAbsTwaAtManeuverMiddle() {
+        ManeuverCurveBoundaries boundariesForAnalysis = getManeuverCurveBoundariesForAnalysis();
+        Bearing middleCourse = boundariesForAnalysis.getSpeedWithBearingBefore().getBearing()
+                .add(new DegreeBearingImpl(boundariesForAnalysis.getDirectionChangeInDegrees() / 2));
+        return getAbsTwaFromCourse(middleCourse);
+    }
+
+    @Override
+    public double getGpsSamplingRate() {
+        return maneuverSettings.isMainCurveAnalysis()
+                ? maneuverWithEstimationData.getMainCurve().getGpsFixesCount()
+                        / maneuverWithEstimationData.getMainCurve().getDuration().asSeconds()
+                : maneuverWithEstimationData.getCurveWithUnstableCourseAndSpeed().getGpsFixesCount()
+                        / maneuverWithEstimationData.getCurveWithUnstableCourseAndSpeed().getDuration().asSeconds();
     }
 
 }

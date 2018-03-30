@@ -253,10 +253,11 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     private CompleteManeuverCurveWithEstimationData calculateCompleteManeuverCurveWithEstimationData(
             CompleteManeuverCurve maneuverCurve, CompleteManeuverCurve previousManeuverCurve,
             CompleteManeuverCurve nextManeuverCurve) {
-        Bearing courseAtMaxTurningRate = track.getEstimatedSpeed(maneuverCurve.getMainCurveBoundaries().getTimePoint())
-                .getBearing();
+        Bearing courseAtMaxTurningRate = null;
         SpeedWithBearingStep stepWithLowestSpeed = null;
         SpeedWithBearingStep stepWithHighestSpeed = null;
+        SpeedWithBearingStep stepWithMaxTurningRate = null;
+        SpeedWithBearingStep previousStep = null;
         for (SpeedWithBearingStep step : maneuverCurve.getMainCurveBoundaries().getSpeedWithBearingSteps()) {
             if (stepWithLowestSpeed == null
                     || stepWithLowestSpeed.getSpeedWithBearing().compareTo(step.getSpeedWithBearing()) > 0) {
@@ -266,6 +267,11 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                     || stepWithHighestSpeed.getSpeedWithBearing().compareTo(step.getSpeedWithBearing()) < 0) {
                 stepWithHighestSpeed = step;
             }
+            if(previousStep != null && (stepWithMaxTurningRate == null || stepWithMaxTurningRate.getAngularVelocityInDegreesPerSecond() < step.getAngularVelocityInDegreesPerSecond())) {
+                stepWithMaxTurningRate = step;
+                courseAtMaxTurningRate = previousStep.getSpeedWithBearing().getBearing().add(new DegreeBearingImpl(step.getCourseChangeInDegrees() / 2));
+            }
+            previousStep = step;
         }
         int gpsFixCountWithinMainCurve = 0;
         int gpsFixCountWithinWholeCurve = 0;
