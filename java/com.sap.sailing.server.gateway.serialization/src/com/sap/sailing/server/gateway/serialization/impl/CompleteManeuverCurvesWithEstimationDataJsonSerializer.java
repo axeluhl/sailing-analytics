@@ -49,7 +49,7 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends Abst
             }
             forCompetitorJson.put(MANEUVER_CURVES, completeManeuverCurvesWithEstimationData);
             Duration averageIntervalBetweenFixes = trackedRace.getTrack(competitor).getAverageIntervalBetweenFixes();
-            forCompetitorJson.put(AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS, averageIntervalBetweenFixes.asSeconds());
+            forCompetitorJson.put(AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS, averageIntervalBetweenFixes == null ? 0 : averageIntervalBetweenFixes.asSeconds());
         }
         return result;
     }
