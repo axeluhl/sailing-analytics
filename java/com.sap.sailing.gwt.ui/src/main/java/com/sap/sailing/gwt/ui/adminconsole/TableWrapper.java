@@ -34,7 +34,8 @@ extends com.sap.sse.gwt.client.celltable.TableWrapper<T, S, StringMessages, Admi
     public TableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection, boolean enablePager, int pagingSize,
             EntityIdentityComparator<T> entityIdentityComparator) {
+        super(stringMessages, errorReporter, multiSelection, enablePager, entityIdentityComparator, GWT.create(AdminConsoleTableResources.class));
         this.sailingService = sailingService;
-            table.setPageSize(pagingSize);
+        table.setPageSize(pagingSize);
     }
 }
