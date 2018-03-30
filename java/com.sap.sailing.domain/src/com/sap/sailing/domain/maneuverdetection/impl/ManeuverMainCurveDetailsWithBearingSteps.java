@@ -17,17 +17,17 @@ import com.sap.sse.common.TimePoint;
 public class ManeuverMainCurveDetailsWithBearingSteps extends ManeuverCurveBoundariesImpl {
 
     private final TimePoint timePoint;
-    private final double maxAngularVelocityInDegreesPerSecond;
+    private final double maxTurningRateInDegreesPerSecond;
     private final SpeedWithBearingStepsIterable speedWithBearingSteps;
 
     public ManeuverMainCurveDetailsWithBearingSteps(TimePoint timePointBefore, TimePoint timePointAfter,
             TimePoint timePoint, SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            double directionChangeInDegrees, double maxAngularVelocityInDegreesPerSecond, Speed lowestSpeed,
+            double directionChangeInDegrees, double maxTurningRateInDegreesPerSecond, Speed lowestSpeed,
             SpeedWithBearingStepsIterable speedWithBearingSteps) {
         super(timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees,
                 lowestSpeed);
         this.timePoint = timePoint;
-        this.maxAngularVelocityInDegreesPerSecond = maxAngularVelocityInDegreesPerSecond;
+        this.maxTurningRateInDegreesPerSecond = maxTurningRateInDegreesPerSecond;
         this.speedWithBearingSteps = speedWithBearingSteps;
     }
 
@@ -51,12 +51,12 @@ public class ManeuverMainCurveDetailsWithBearingSteps extends ManeuverCurveBound
     }
 
     /**
-     * Gets the maximal angular velocity recorded within the curve which was recorded at {@link #getTimePoint()}.
+     * Gets the maximal turning rate recorded within the curve which was recorded at {@link #getTimePoint()}.
      * 
-     * @return The maximal angular velocity in degrees per second
+     * @return The maximal turning rate in degrees per second
      */
-    public double getMaxAngularVelocityInDegreesPerSecond() {
-        return maxAngularVelocityInDegreesPerSecond;
+    public double getMaxTurningRateInDegreesPerSecond() {
+        return maxTurningRateInDegreesPerSecond;
     }
 
     public ManeuverCurveBoundaries extractCurveBoundariesOnly() {

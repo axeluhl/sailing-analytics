@@ -28,10 +28,10 @@ public interface SpeedWithBearingStep extends Timed {
     double getCourseChangeInDegrees();
 
     /**
-     * Gets the angular velocity (turning rate) of this step, which is calculated by {@link #getCourseChangeInDegrees()}
-     * divided by duration from the preceding step to this step.
+     * Gets the turning rate of this step, which is calculated by {@link #getCourseChangeInDegrees()} divided by
+     * duration from the preceding step to this step.
      * 
-     * @return The angular velocity of this step
+     * @return The turning rate of this step
      */
-    double getAngularVelocityInDegreesPerSecond();
+    double getTurningRateInDegreesPerSecond();
 }
