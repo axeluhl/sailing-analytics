@@ -1,10 +1,12 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.util.Collections;
+import java.util.Map;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogRegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogRegisteredCompetitorsAndBoatsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogUsesOwnCompetitorsAnalyzer;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -121,12 +123,12 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     }
     
     @Override
-    public Iterable<Competitor> getCompetitorsRegisteredInRacelog(final Fleet fleet) {
+    public Map<Competitor, Boat> getCompetitorsRegisteredInRacelog(final Fleet fleet) {
         RaceLog raceLog = getRaceLog(fleet);
         if (raceLog == null) {
-            return Collections.emptySet();
+            return Collections.emptyMap();
         } else {
-            RaceLogRegisteredCompetitorsAnalyzer analyzer = new RaceLogRegisteredCompetitorsAnalyzer(raceLog);
+            RaceLogRegisteredCompetitorsAndBoatsAnalyzer analyzer = new RaceLogRegisteredCompetitorsAndBoatsAnalyzer(raceLog);
             return analyzer.analyze();
         }
     }
@@ -141,4 +143,5 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
             return analyzer.analyze();
         }
     }
+
 }

@@ -12,6 +12,7 @@ import java.util.concurrent.Future;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -334,6 +335,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
+                    public Iterable<Boat> getAllBoats() {
+                        return null;
+                    }
+
+                    @Override
+                    public boolean canBoatsOfCompetitorsChangePerRace() {
+                        return false;
+                    }
+
+                    @Override
                     public void addRace(RaceDefinition race) {
                     }
 
@@ -529,7 +540,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public void registerCompetitors(Iterable<Competitor> competitor) {
+                    public void registerCompetitors(Iterable<Competitor> competitors) {
                     }
 
                     @Override
@@ -543,6 +554,27 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
                         return null;
+                    }
+
+                    @Override
+                    public Iterable<Boat> getBoatsRegisteredInRegattaLog() {
+                        return null;
+                    }
+
+                    @Override
+                    public void registerBoat(Boat boat) {
+                    }
+
+                    @Override
+                    public void registerBoats(Iterable<Boat> boat) {
+                    }
+
+                    @Override
+                    public void deregisterBoat(Boat boat) {
+                    }
+
+                    @Override
+                    public void deregisterBoats(Iterable<Boat> boat) {
                     }
 
                     @Override
@@ -1161,6 +1193,15 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public Boat getBoatOfCompetitor(Competitor competitor) {
+        return null;
+    }
+    
+    @Override
+    public Competitor getCompetitorOfBoat(Boat boat) {
+        return null;
+    }
+
     public Distance getEstimatedDistanceToComplete(TimePoint now) {
         return null;
     }

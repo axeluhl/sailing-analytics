@@ -32,7 +32,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.datamining.SailingPredefinedQueries;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -41,6 +43,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Distance;
@@ -73,10 +76,9 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.AbstractTrackedRaceDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithChangingBoatJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurveWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurvesWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DefaultWindTrackJsonSerializer;
@@ -214,8 +216,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         } else {
             NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
             CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
-                    new PersonJsonSerializer(nationalityJsonSerializer)), new BoatJsonSerializer(
-                    new BoatClassJsonSerializer()));
+                    new PersonJsonSerializer(nationalityJsonSerializer)));
             JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(null, competitorJsonSerializer);
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
 
@@ -245,10 +246,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
-                NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
-                CompetitorJsonSerializer competitorJsonSerializer = new CompetitorWithChangingBoatJsonSerializer(race, new TeamJsonSerializer(
-                        new PersonJsonSerializer(nationalityJsonSerializer)), new BoatJsonSerializer(
-                        new BoatClassJsonSerializer()));
+                CompetitorWithBoatJsonSerializer competitorJsonSerializer = CompetitorWithBoatJsonSerializer.create();
                 JsonSerializer<RaceDefinition> raceEntriesSerializer = new RaceEntriesJsonSerializer(competitorJsonSerializer);
                 JSONObject serializedRaceEntries = raceEntriesSerializer.serialize(race);
     
@@ -328,19 +326,20 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = getBadBoatClassResponse(boatClassName);
         } else {
             final User user = getService(SecurityService.class).getCurrentUser();
-            final Competitor competitor = getService().getCompetitorStore().getOrCreateCompetitor(UUID.randomUUID(),
-                    user.getFullName() == null ? user.getName() : user.getFullName(),
+            final Boat boat = new BoatImpl(UUID.randomUUID(), user.getName(),
+                    getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true),
+                    sailId);
+            final CompetitorWithBoat competitor = getService().getCompetitorStore().getOrCreateCompetitorWithBoat(UUID.randomUUID(),
+                    user.getFullName() == null ? user.getName() : user.getFullName(), /* shortName */ null,
                     /* displayColor */ null, user.getEmail(), /* flagImageURI */ null,
                     new TeamImpl(user.getName(), Collections.singleton(new PersonImpl(user.getFullName() == null ? user.getName() : user.getFullName(),
                             getService().getBaseDomainFactory().getOrCreateNationality(nationalityThreeLetterIOCCode),
                             /* dateOfBirth */ null, /* description */ null)),
-                            /* coach */ null), new BoatImpl(user.getName(),
-                                    getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true),
-                                    sailId), timeOnTimeFactor,
+                            /* coach */ null), timeOnTimeFactor,
                     timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
-                            searchTag);
+                    searchTag, (DynamicBoat) boat);
             regatta.registerCompetitor(competitor);
-            response = Response.ok(CompetitorJsonSerializer.create().serialize(competitor).toJSONString()).
+            response = Response.ok(CompetitorWithBoatJsonSerializer.create().serialize(competitor).toJSONString()).
                     header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
@@ -435,7 +434,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         JSONObject jsonCompetitor = new JSONObject();
                         jsonCompetitor.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
                         jsonCompetitor.put("name", competitor.getName());
-                        jsonCompetitor.put("sailNumber", competitor.getBoat().getSailID());
+                        jsonCompetitor.put("sailNumber", trackedRace.getBoatOfCompetitor(competitor).getSailID());
                         jsonCompetitor.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
                         if(competitor.getFlagImage() != null) {
                             jsonCompetitor.put("flagImage", competitor.getFlagImage().toString());
@@ -1015,7 +1014,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .build();
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-                ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(new CompetitorJsonSerializer(),
+                ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(CompetitorWithBoatJsonSerializer.create(),
                         new ManeuverJsonSerializer(new GPSFixJsonSerializer(), new DistanceJsonSerializer()));
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
@@ -1138,7 +1137,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 jsonCompetitorInLeg.put("id", competitor.getId() != null ? competitor.getId()
                                         .toString() : null);
                                 jsonCompetitorInLeg.put("name", competitor.getName());
-                                jsonCompetitorInLeg.put("sailNumber", competitor.getBoat().getSailID());
+                                jsonCompetitorInLeg.put("sailNumber", trackedRace.getBoatOfCompetitor(competitor).getSailID());
                                 jsonCompetitorInLeg.put("color", competitor.getColor() != null ? competitor.getColor()
                                         .getAsHtml() : null);
 
@@ -1296,7 +1295,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     }
                     jsonCompetitorInLeg.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
                     jsonCompetitorInLeg.put("name", competitor.getName());
-                    jsonCompetitorInLeg.put("sailNumber", competitor.getBoat().getSailID());
+                    jsonCompetitorInLeg.put("sailNumber", trackedRace.getBoatOfCompetitor(competitor).getSailID());
                     jsonCompetitorInLeg.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml()
                             : null);
                     jsonCompetitorInLeg.put("rank", rank++);

@@ -1,6 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
 import java.util.List;
+import java.util.Map;
+
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.racecommittee.app.R;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -9,21 +16,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.racecommittee.app.R;
+public class CompetitorAndBoatAdapter extends RecyclerView.Adapter<CompetitorAndBoatAdapter.ViewHolder> {
 
-public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.ViewHolder> {
+    private static final String TAG = CompetitorAndBoatAdapter.class.getName();
 
-    private static final String TAG = CompetitorAdapter.class.getName();
-
-    private Context mContext;
-    private List<Competitor> mData;
+    private final Context mContext;
+    private final List<Map.Entry<Competitor, Boat>> mData;
+    private boolean mCanBoatsOfCompetitorsChangePerRace;
     private CompetitorClick mListener;
 
-    public CompetitorAdapter(Context context, List<Competitor> data) {
+    public CompetitorAndBoatAdapter(Context context, List<Map.Entry<Competitor, Boat>> data, boolean canBoatsOfCompetitorsChangePerRace) {
         mContext = context;
         mData = data;
+        mCanBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
     }
 
     @Override
@@ -34,11 +39,16 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Competitor competitor = mData.get(position);
+        Competitor competitor = mData.get(position).getKey();
+        Boat boat = mData.get(position).getValue();
         if (competitor != null) {
+            if (mCanBoatsOfCompetitorsChangePerRace && boat != null) {
+                holder.vesselId.setText(boat.getSailID());
+                ViewHelper.setColors(holder.vesselId, boat.getColor().getAsHtml());
+            }
             String name = "";
-            if (competitor.getBoat() != null) {
-                name = competitor.getBoat().getSailID() + " - ";
+            if (competitor.getShortInfo() != null) {
+                name += competitor.getShortInfo() + " - ";
             }
             name += competitor.getName();
             if (holder.competitor != null) {
@@ -61,11 +71,15 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
         mListener = listener;
     }
 
+    public interface CompetitorClick {
+        void onCompetitorClick(Competitor competitor);
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        public View container;
-        public TextView vesselId;
-        public TextView competitor;
+        View container;
+        TextView vesselId;
+        TextView competitor;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -79,15 +93,11 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
         @Override
         public void onClick(View v) {
             if (mListener != null) {
-                Competitor competitor = mData.get(getAdapterPosition());
+                Competitor competitor = mData.get(getAdapterPosition()).getKey();
                 if (competitor != null) {
                     mListener.onCompetitorClick(competitor);
                 }
             }
         }
-    }
-
-    public interface CompetitorClick {
-        void onCompetitorClick(Competitor competitor);
     }
 }

@@ -14,6 +14,7 @@ import java.util.concurrent.Future;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
@@ -888,6 +889,15 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public Boat getBoatOfCompetitor(Competitor competitor) {
+        return null;
+    }
+    
+    @Override
+    public Competitor getCompetitorOfBoat(Boat boat) {
+        return null;
+    }
+
     public Distance getEstimatedDistanceToComplete(TimePoint now) {
         return null;
     }

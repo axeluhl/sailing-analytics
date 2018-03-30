@@ -7,7 +7,7 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
 
-public class TrackedRacesCompetitorCreateDialogPO extends DataEntryDialogPO {
+public class TrackedRacesBoatEditDialogPO extends DataEntryDialogPO {
     @FindBy(how = BySeleniumId.class, using = "NameTextBox")
     private WebElement nameTextBox;
     
@@ -20,7 +20,7 @@ public class TrackedRacesCompetitorCreateDialogPO extends DataEntryDialogPO {
     @FindBy(how = BySeleniumId.class, using = "OkButton")
     private WebElement okButton;
 
-    public TrackedRacesCompetitorCreateDialogPO(WebDriver driver, WebElement element) {
+    public TrackedRacesBoatEditDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
 

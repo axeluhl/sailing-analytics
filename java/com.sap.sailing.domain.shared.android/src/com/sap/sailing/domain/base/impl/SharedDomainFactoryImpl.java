@@ -16,9 +16,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseArea;
@@ -64,7 +66,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
     private final Map<String, BoatClass> boatClassCache;
     
-    protected final CompetitorStore competitorStore;
+    protected final CompetitorStore competitorAndBoatStore;
     
     private final Map<Serializable, CourseArea> courseAreaCache;
     
@@ -126,7 +128,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         controlPointWithTwoMarksCache = new HashMap<Serializable, ControlPointWithTwoMarks>();
         controlPointWithTwoMarksIdCache = new HashMap<String, Serializable>();
         boatClassCache = new HashMap<String, BoatClass>();
-        this.competitorStore = competitorStore;
+        this.competitorAndBoatStore = competitorStore;
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
         // FIXME ass also bug 3347: mapping to lower case should rather work through a common unification / canonicalization of boat class names
         mayStartWithNoUpwindLeg = Collections.singleton(BoatClassMasterdata.unifyBoatClassName(BoatClassMasterdata.EXTREME_40.getDisplayName()));
@@ -332,7 +334,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
 
     @Override
     public CompetitorStore getCompetitorStore() {
-        return competitorStore;
+        return competitorAndBoatStore;
     }
 
     @Override
@@ -341,19 +343,50 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result) {
-        return getCompetitorStore().isCompetitorToUpdateDuringGetOrCreate(result);
+    public CompetitorWithBoat getExistingCompetitorWithBoatById(Serializable competitorId) {
+        return getCompetitorStore().getExistingCompetitorWithBoatById(competitorId);
     }
 
     @Override
-    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email,
-            URI flagImage, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor,
+    public boolean isCompetitorToUpdateDuringGetOrCreate(Competitor competitor) {
+        return getCompetitorStore().isCompetitorToUpdateDuringGetOrCreate(competitor);
+    }
+
+    @Override
+    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, String shortname, Color displayColor, String email,
+            URI flagImage, DynamicTeam team, Double timeOnTimeFactor,
             Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
         }
-        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, displayColor, email, flagImage, team,
-                boat, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
+        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, shortname, displayColor, email, flagImage, team,
+                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
+    }
+
+    @Override
+    public CompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName,
+            Color displayColor, String email, URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor,
+            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
+        }
+        return getCompetitorStore().getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email, flagImageURI, team,
+                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+    }
+
+    @Override
+    public Boat getExistingBoatById(Serializable boatId) {
+        return getCompetitorStore().getExistingBoatById(boatId);
+    }
+
+    @Override
+    public boolean isBoatToUpdateDuringGetOrCreate(Boat boat) {
+        return getCompetitorStore().isBoatToUpdateDuringGetOrCreate(boat);
+    }
+
+    @Override
+    public Boat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color) {
+        return getCompetitorStore().getOrCreateBoat(id, name, boatClass, sailId, color);
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.net.URI;
 
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorChangeListener;
 import com.sap.sailing.domain.base.Nationality;
@@ -45,8 +44,18 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             }
 
             @Override
+            public String getShortName() {
+                return "Dummy";
+            }
+            
+            @Override
             public String getId() {
                 return "Dummy";
+            }
+
+            @Override
+            public boolean hasBoat() {
+                return false;
             }
 
             @Override
@@ -54,13 +63,7 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
                 return null;
             }
 
-            @Override
             public Nationality getNationality() {
-                return null;
-            }
-
-            @Override
-            public Boat getBoat() {
                 return null;
             }
 
@@ -110,6 +113,11 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             @Override
             public String getSearchTag() {
                 return null;
+            }
+
+            @Override
+            public String getShortInfo() {
+                return getShortName();
             }
         };
     }

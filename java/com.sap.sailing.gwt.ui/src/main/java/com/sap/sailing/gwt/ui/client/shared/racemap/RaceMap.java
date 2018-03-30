@@ -81,6 +81,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -98,6 +99,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -316,10 +318,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> lastDouglasPeuckerResult;
     
-    private final CompetitorSelectionProvider competitorSelection;
+    private final RaceCompetitorSelectionProvider competitorSelection;
     
     private final RaceCompetitorSet raceCompetitorSet;
-    
+
     /**
      * Used to check if the first initial zoom to the mark markers was already done.
      */
@@ -448,8 +450,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
             RaceMapSettings raceMapSettings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
-            StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
+            ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection,
+            RaceCompetitorSet raceCompetitorSet, StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
             RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
@@ -459,7 +461,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
             RaceMapSettings raceMapSettings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
+            ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
             RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider, Consumer<WindSource> showWindChartForProvider) {
         super(parent, context);
@@ -818,7 +820,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return Collections.unmodifiableMap(boatOverlays);
     }
     
-    protected CompetitorSelectionProvider getCompetitorSelection() {
+    protected RaceCompetitorSelectionProvider getCompetitorSelection() {
         return competitorSelection;
     }
 
@@ -1490,7 +1492,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
                 }
                 if (isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null && lastBoatFix.speedWithBearing != null) {
-                    Distance distanceFromBoatPositionInKm = visibleLeaderInfo.getB().getBoatClass().getHullLength(); // one hull length
+                    BoatDTO boat = competitorSelection.getBoat(visibleLeaderInfo.getB());
+                    Distance distanceFromBoatPositionInKm = boat.getBoatClass().getHullLength(); // one hull length
                     // implement and use Position.translateRhumb()
                     double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
                     LatLng boatPosition = coordinateSystem.toLatLng(lastBoatFix.position);
@@ -2080,7 +2083,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, DisplayMode displayMode) {
-        final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO, competitorSelection.getColor(competitorDTO, raceIdentifier), coordinateSystem);
+        final BoatDTO boatOfCompetitor = competitorSelection.getBoat(competitorDTO);
+        final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, boatOfCompetitor, competitorSelection.getColor(competitorDTO, raceIdentifier), coordinateSystem);
         boatCanvas.setDisplayMode(displayMode);
         boatCanvas.addClickHandler(event -> {
             GPSFixDTOWithSpeedWindTackAndLegType latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
@@ -2092,7 +2096,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         boatCanvas.addMouseOverHandler(new MouseOverMapHandler() {
             @Override
             public void onEvent(MouseOverMapEvent event) {
-                map.setTitle(competitorDTO.getSailID());
+                map.setTitle(boatOfCompetitor.getSailId());
             }
         });
         boatCanvas.addMouseOutMoveHandler(new MouseOutMapHandler() {
@@ -2260,7 +2264,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private Widget getInfoWindowContent(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegType lastFix) {
         final VerticalPanel vPanel = new VerticalPanel();
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.competitor(), competitorDTO.getName()));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.sailNumber(), competitorDTO.getSailID()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.sailNumber(), competitorSelection.getBoat(competitorDTO).getSailId()));
         final Integer rank = getRank(competitorDTO);
         if (rank != null) {
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.rank(), String.valueOf(rank)));
@@ -2880,6 +2884,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     @Override
     public Polyline createTail(final CompetitorDTO competitor, List<LatLng> points) {
+        final BoatDTO boat = competitorSelection.getBoat(competitor);
         PolylineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
         Polyline result = Polyline.newInstance(options);
         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));
@@ -2897,7 +2902,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         result.addMouseOverHandler(new MouseOverMapHandler() {
             @Override
             public void onEvent(MouseOverMapEvent event) {
-                map.setTitle(competitor.getSailID() + ", " + competitor.getName());
+                map.setTitle(boat.getSailId() + ", " + competitor.getName());
             }
         });
         resultHoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {

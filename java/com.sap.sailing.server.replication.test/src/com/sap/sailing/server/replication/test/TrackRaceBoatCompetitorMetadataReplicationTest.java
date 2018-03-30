@@ -6,8 +6,11 @@ import static org.junit.Assert.assertNotSame;
 
 import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,16 +18,24 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
+import com.sap.sailing.server.operationaltransformation.UpdateSeries;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.replication.OperationExecutionListener;
@@ -68,7 +79,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
                 }
             }
         });
-        trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE
+        trackingParams = new DomainFactoryImpl(master.getBaseDomainFactory())
                 .createTrackingConnectivityParameters(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                         startOfTracking, endOfTracking, /* delayToLiveInMillis */
                         0l, /* offsetToStartTimeOfSimulatedRace */null, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
@@ -84,7 +95,19 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
     }
 
     private void startTrackingOnMaster() throws Exception {
-        racesHandle = master.addRace(/* regattaToAddTo */ null, trackingParams, /* timeoutInMilliseconds */ 60000);
+        final Regatta regatta = master.createRegatta("Test regatta", "J/70",
+                /* canBoatsOfCompetitorsChangePerRace==true because it's a league race we're using for this test */ true,
+                /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
+                /* start with no series */ Collections.emptySet(),
+                /* persistent */ true, new LowPoint(), /* defaultCourseAreaId */ UUID.randomUUID(),
+                /* buoyZoneRadiusInHullLengths */ 2., /* useStartTimeInference */ false, /* controlTrackingFromStartAndFinishTimes */ false,
+                /* rankingMetricConstructor */ OneDesignRankingMetric::new);
+        final RegattaName regattaIdentifier = new RegattaName(regatta.getName());
+        master.apply(new UpdateSeries(regattaIdentifier, "Default", "Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
+                /* resultDiscardingThresholds */ null, /* startsWithZeroScore */ false, /* firstColumnIsNonDiscardableCarryForward */ false,
+                /* hasSplitFleetContiguousScoring */ false, /* maximumNumberOfDiscards */ null,
+                Arrays.asList(new FleetDTO("Red", 0, Color.RED), new FleetDTO("Green", 0, Color.GREEN), new FleetDTO("Blue", 0, Color.BLUE))));
+        racesHandle = master.addRace(/* regattaToAddTo */ regattaIdentifier, trackingParams, /* timeoutInMilliseconds */ 60000);
     }
 
     private void waitForTrackRaceReplicationTrigger() throws InterruptedException, IllegalAccessException {
@@ -125,7 +148,8 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
         
         for (Competitor competitor : masterCompetitors) {
             Competitor replicaCompetitor = findCompetitor(replicaCompetitors, competitor);
-            switch (competitor.getBoat().getSailID()) {
+            Boat competitorBoat = masterTrackedRace.getBoatOfCompetitor(competitor);
+            switch (competitorBoat.getSailID()) {
                 case boat1CompetitorName:
                     compareBoatOfCompetitors(masterTrackedRace.getRace().getBoatOfCompetitor(competitor),
                             replicaTrackedRace.getRace().getBoatOfCompetitor(replicaCompetitor), boat1Name, boat1Color);

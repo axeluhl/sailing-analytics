@@ -41,15 +41,18 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends Abst
             final JSONObject forCompetitorJson = new JSONObject();
             byCompetitorJson.add(forCompetitorJson);
             forCompetitorJson.put(COMPETITOR_NAME, competitor.getName());
-            forCompetitorJson.put(BOAT_CLASS, boatClassJsonSerializer.serialize(competitor.getBoat().getBoatClass()));
+            forCompetitorJson.put(BOAT_CLASS, boatClassJsonSerializer
+                    .serialize(trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass()));
             final JSONArray completeManeuverCurvesWithEstimationData = new JSONArray();
-            for (CompleteManeuverCurveWithEstimationData maneuver : getCompleteManeuverCurvesWithEstimationData(trackedRace,
-                    competitor)) {
-                completeManeuverCurvesWithEstimationData.add(maneuverWithEstimationDataJsonSerializer.serialize(maneuver));
+            for (CompleteManeuverCurveWithEstimationData maneuver : getCompleteManeuverCurvesWithEstimationData(
+                    trackedRace, competitor)) {
+                completeManeuverCurvesWithEstimationData
+                        .add(maneuverWithEstimationDataJsonSerializer.serialize(maneuver));
             }
             forCompetitorJson.put(MANEUVER_CURVES, completeManeuverCurvesWithEstimationData);
             Duration averageIntervalBetweenFixes = trackedRace.getTrack(competitor).getAverageIntervalBetweenFixes();
-            forCompetitorJson.put(AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS, averageIntervalBetweenFixes == null ? 0 : averageIntervalBetweenFixes.asSeconds());
+            forCompetitorJson.put(AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS,
+                    averageIntervalBetweenFixes == null ? 0 : averageIntervalBetweenFixes.asSeconds());
         }
         return result;
     }

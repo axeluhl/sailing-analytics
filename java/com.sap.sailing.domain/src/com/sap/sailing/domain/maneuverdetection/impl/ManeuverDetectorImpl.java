@@ -512,8 +512,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      */
     protected List<ManeuverSpot> detectManeuvers(TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
         return detectManeuvers(trackedRace.approximate(competitor,
-                competitor.getBoat().getBoatClass().getMaximumDistanceForCourseApproximation(), earliestManeuverStart,
-                latestManeuverEnd), earliestManeuverStart, latestManeuverEnd);
+                trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass().getMaximumDistanceForCourseApproximation(),
+                earliestManeuverStart, latestManeuverEnd), earliestManeuverStart, latestManeuverEnd);
     }
 
     /**
@@ -592,7 +592,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         if (lastCourseChangeDirection != newCourseChangeDirection) {
             return false;
         }
-        Distance threeHullLengths = competitor.getBoat().getBoatClass().getHullLength().scale(3);
+        Distance threeHullLengths = trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass().getHullLength().scale(3);
         if (currentFix.getTimePoint().asMillis()
                 - previousFix.getTimePoint().asMillis() > getApproximateManeuverDuration().asMillis()
                 && currentFix.getPosition().getDistance(previousFix.getPosition()).compareTo(threeHullLengths) > 0) {
@@ -1675,7 +1675,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      * Gets the approximated duration of the maneuver main curve considering the boat class of the competitor.
      */
     protected Duration getApproximateManeuverDuration() {
-        return competitor.getBoat().getBoatClass().getApproximateManeuverDuration();
+        return trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass().getApproximateManeuverDuration();
     }
 
 }
