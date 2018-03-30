@@ -10,7 +10,7 @@ import com.sap.sse.common.Util.Pair;
  */
 public interface PairingList<Flight, Group, Competitor, CompetitorAllocation> {
     /**
-     * Returns pairs of {@link Competitor}s and its {@link CompetitorAllocation} its within a group of a specific flight.
+     * Returns pairs of {@link Competitor}s and its {@link CompetitorAllocation} within a group of a specific flight.
      * 
      * @return {@link Pair}s of {@link Competitor}s and {@link CompetitorAllocation}
      */

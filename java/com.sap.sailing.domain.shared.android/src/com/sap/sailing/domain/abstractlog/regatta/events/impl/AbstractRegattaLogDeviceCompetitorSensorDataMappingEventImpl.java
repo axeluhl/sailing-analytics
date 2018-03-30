@@ -18,12 +18,6 @@ public abstract class AbstractRegattaLogDeviceCompetitorSensorDataMappingEventIm
         implements RegattaLogDeviceCompetitorSensorDataMappingEvent {
     private static final long serialVersionUID = -1494030544804758753L;
 
-    public interface Factory<T extends RegattaLogDeviceCompetitorSensorDataMappingEvent> {
-        T create(TimePoint createdAt, TimePoint logicalTimePoint,
-                AbstractLogEventAuthor author, Serializable pId, Competitor mappedTo, DeviceIdentifier device,
-                TimePoint from, TimePoint to);
-    }
-
     public AbstractRegattaLogDeviceCompetitorSensorDataMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable pId, Competitor mappedTo, DeviceIdentifier device,
             TimePoint from, TimePoint to) {

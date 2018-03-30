@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
@@ -160,8 +161,9 @@ public class FetchTracksAndStoreLocallyTest extends OnlineTracTracBasedTest {
     private void storeTracks() throws FileNotFoundException, IOException {
         for (Map.Entry<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> competitorAndTrack : tracks.entrySet()) {
             Competitor competitor = competitorAndTrack.getKey();
+            Boat boatOfCompetitor = trackedRace.getRace().getBoatOfCompetitor(competitor);
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = competitorAndTrack.getValue();
-            storeTrack(competitor, track, getTracTracEvent().getName()+"-"+trackedRace.getRace().getName());
+            storeTrack(competitor, boatOfCompetitor, track, getTracTracEvent().getName()+"-"+trackedRace.getRace().getName());
         }
     }
 

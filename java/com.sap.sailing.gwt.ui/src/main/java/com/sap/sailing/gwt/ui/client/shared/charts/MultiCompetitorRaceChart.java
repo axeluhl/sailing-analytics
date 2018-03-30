@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -38,7 +38,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     public MultiCompetitorRaceChart(Component<?> parent, ComponentContext<?> context,
             MultiCompetitorRaceChartLifecycle lifecycle,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
+            RaceCompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             final ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
             final String leaderboardGroupName, String leaderboardName) {

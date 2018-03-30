@@ -40,7 +40,7 @@ public class ManeuversWithEstimationDataJsonSerializer extends AbstractTrackedRa
             final JSONObject forCompetitorJson = new JSONObject();
             byCompetitorJson.add(forCompetitorJson);
             forCompetitorJson.put(COMPETITOR_NAME, competitor.getName());
-            forCompetitorJson.put(BOAT_CLASS, boatClassJsonSerializer.serialize(competitor.getBoat().getBoatClass()));
+            forCompetitorJson.put(BOAT_CLASS, boatClassJsonSerializer.serialize(trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass()));
             final JSONArray maneuvers = new JSONArray();
             forCompetitorJson.put(MANEUVERS, maneuvers);
             for (final ManeuverWithEstimationData maneuver : getManeuversWithEstimationData(trackedRace, competitor)) {

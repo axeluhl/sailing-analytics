@@ -1,47 +1,56 @@
 package com.sap.sailing.racecommittee.app.data.deserializer;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.racecommittee.app.domain.impl.CompetitorWithRaceRankImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceRankImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sse.common.Util;
 
 public class LeaderboardDeserializer implements JsonDeserializer<LeaderboardResult> {
 
     @Override
     public LeaderboardResult deserialize(JSONObject object) throws JsonDeserializationException {
-        List<CompetitorWithRaceRankImpl> competitorWithRaceRanks = new ArrayList<>();
+        Map<String, List<Util.Pair<Long, String>>> result = new HashMap<>();
+
+        List<Util.Pair<Long, String>> rankList;
         JSONArray competitors = (JSONArray) object.get("competitors");
         for (int i = 0; i < competitors.size(); i++) {
             JSONObject jsonCompetitor = (JSONObject) competitors.get(i);
-            /* competitor data */
-            String name = (String) jsonCompetitor.get("name");
-            Serializable id = (Serializable) jsonCompetitor.get("id");
-            CompetitorWithRaceRankImpl competitor =
-                new CompetitorWithRaceRankImpl(id, name, /* color */ null, /* email */ null, /* flagImage */ null,
-                    /* dynamicTeam */ null, /* dynamicBoat */ null, /* onTimeFactor */ null, /* onDistance */ null,
-                    /* searchTag */ null);
+            String id = (String) jsonCompetitor.get("id");
 
-            /* races with rank */
             JSONObject jsonRaceScores = (JSONObject) jsonCompetitor.get("raceScores");
             for (Map.Entry<Object, Object> raceScore : jsonRaceScores.entrySet()) {
-                String key = (String) raceScore.getKey();
-                JSONObject value = (JSONObject) raceScore.getValue();
-                Long rank = (Long) value.get("rank");
-                RaceRankImpl raceRank = new RaceRankImpl(key, rank);
-                competitor.addRaceRank(raceRank);
+                String race = (String) raceScore.getKey();
+                JSONObject jsonRace = (JSONObject) raceScore.getValue();
+                Long rank = (Long) jsonRace.get("rank");
+                rankList = result.get(race);
+                if (rankList == null) {
+                    rankList = new ArrayList<>();
+                }
+                rankList.add(new Util.Pair<>(rank, id));
+                result.put(race, rankList);
             }
-
-            competitorWithRaceRanks.add(competitor);
         }
-        return new LeaderboardResult(competitorWithRaceRanks);
+
+        // sort by rank
+        for (Map.Entry<String, List<Util.Pair<Long, String>>> item : result.entrySet()) {
+            Collections.sort(item.getValue(), new Comparator<Util.Pair<Long, String>>() {
+                @Override
+                public int compare(Util.Pair<Long, String> left, Util.Pair<Long, String> right) {
+                    return left.getA().intValue() - right.getA().intValue();
+                }
+            });
+        }
+
+        return new LeaderboardResult(result);
     }
 }

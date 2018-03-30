@@ -37,7 +37,7 @@ public interface RaceLogEventVisitor {
     public void visit(RaceLogDenoteForTrackingEvent event);
     
     public void visit(RaceLogStartTrackingEvent event);
-    
+
     public void visit(RaceLogRegisterCompetitorEvent event);
 
     public void visit(RaceLogAdditionalScoringInformationEvent additionalScoringInformation);

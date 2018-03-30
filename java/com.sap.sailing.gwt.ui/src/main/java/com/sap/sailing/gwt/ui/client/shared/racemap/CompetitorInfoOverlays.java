@@ -135,7 +135,7 @@ public class CompetitorInfoOverlays implements QuickRanksListener {
      */
     private String createInfoText(CompetitorDTO competitorDTO) {
         StringBuilder infoText = new StringBuilder();
-        infoText.append(competitorDTO.getSailID()).append("\n");
+        infoText.append(competitorDTO.getShortInfo()).append("\n");
         infoText.append(NumberFormatterFactory.getDecimalFormat(1).format(getLastPosition(competitorDTO).speedWithBearing.speedInKnots))
                 .append(" ").append(stringMessages.knotsUnit()).append("\n");
         final Integer rank = ranks.get(competitorDTO.getIdAsString());

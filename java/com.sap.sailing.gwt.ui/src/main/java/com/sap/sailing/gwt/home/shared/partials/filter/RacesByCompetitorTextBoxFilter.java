@@ -20,12 +20,12 @@ public class RacesByCompetitorTextBoxFilter extends AbstractListSuggestBoxFilter
         super(new AbstractListSuggestOracle<SimpleCompetitorDTO>() {
             @Override
             protected Iterable<String> getMatchingStrings(SimpleCompetitorDTO value) {
-                return Arrays.asList(value.getName(), value.getSailID());
+                return Arrays.asList(value.getName(), value.getShortInfo());
             }
 
             @Override
             protected String createSuggestionKeyString(SimpleCompetitorDTO value) {
-                return value.getSailID();
+                return value.getShortInfo();
             }
 
             @Override

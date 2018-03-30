@@ -12,10 +12,13 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.CompetitorAndBoatImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -169,6 +172,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      */
     public class ManeuverClassification {
         private final Competitor competitor;
+        private final Boat boat;
         private final TimePoint timePoint;
         private final Position position;
         /**
@@ -181,9 +185,10 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         private Pair<Double, SpeedWithBearingWithConfidence<Void>>[] likelihoodAndTWSBasedOnSpeedAndAngleCache;
         private ScalableBearingAndScalableDouble scalableMiddleManeuverCourseAndManeuverAngleDegCache;
 
-        protected ManeuverClassification(Competitor competitor, Maneuver maneuver) {
+        protected ManeuverClassification(CompetitorAndBoat competitorWithBoat, Maneuver maneuver) {
             super();
-            this.competitor = competitor;
+            this.competitor = competitorWithBoat.getCompetitor();
+            this.boat = competitorWithBoat.getBoat();
             this.timePoint = maneuver.getTimePoint();
             this.position = maneuver.getPosition();
             this.maneuverAngleDeg = maneuver.getDirectionChangeInDegrees();
@@ -199,6 +204,10 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
 
         public Competitor getCompetitor() {
             return competitor;
+        }
+
+        public Boat getBoat() {
+            return boat;
         }
 
         public TimePoint getTimePoint() {
@@ -231,7 +240,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
 
         public SpeedWithBearingWithConfidence<Void> getEstimatedWindSpeedAndBearing(ManeuverType maneuverType) {
             Pair<Double, SpeedWithBearingWithConfidence<Void>> likelihoodAndTWSBasedOnSpeedAndAngle = polarService
-                    .getManeuverLikelihoodAndTwsTwa(getCompetitor().getBoat().getBoatClass(),
+                    .getManeuverLikelihoodAndTwsTwa(getBoat().getBoatClass(),
                             getSpeedAtManeuverStart(), getManeuverAngleDeg(), maneuverType);
             final SpeedWithBearingWithConfidenceImpl<Void> result;
             // if no reasonable wind speed was found for the maneuver speed, return null
@@ -277,7 +286,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
                 final ManeuverType maneuverType) {
             if (likelihoodAndTWSBasedOnSpeedAndAngleCache[maneuverType.ordinal()] == null) {
                 likelihoodAndTWSBasedOnSpeedAndAngleCache[maneuverType.ordinal()] = polarService
-                        .getManeuverLikelihoodAndTwsTwa(getCompetitor().getBoat().getBoatClass(),
+                        .getManeuverLikelihoodAndTwsTwa(getBoat().getBoatClass(),
                                 getSpeedAtManeuverStart(), getManeuverAngleDeg(), maneuverType);
             }
             return likelihoodAndTWSBasedOnSpeedAndAngleCache[maneuverType.ordinal()];
@@ -378,7 +387,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      */
     private Triple<Set<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>>, List<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>>, List<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>>> analyzeRace(
             boolean waitForLatest) throws NotEnoughDataHasBeenAddedException {
-        final Map<Maneuver, Competitor> maneuvers = getAllManeuvers(waitForLatest);
+        final Map<Maneuver, CompetitorAndBoat> maneuvers = getAllManeuvers(waitForLatest);
         // cluster into eight clusters by middle COG first, then aggregate tack likelihoods for each, and jibe
         // likelihoods for opposite cluster
         final int numberOfClusters = 16;
@@ -773,7 +782,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
     /**
      * For each maneuver from <code>maneuvers</code>, a {@link ManeuverClassification object} is created.
      */
-    Stream<ManeuverClassification> getManeuverClassifications(final Map<Maneuver, Competitor> maneuvers) {
+    Stream<ManeuverClassification> getManeuverClassifications(final Map<Maneuver, CompetitorAndBoat> maneuvers) {
         return maneuvers
                 .entrySet()
                 .stream()
@@ -784,11 +793,13 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
     /**
      * Package scope to let test fragment access it
      */
-    Map<Maneuver, Competitor> getAllManeuvers(boolean waitForLatest) {
-        Map<Maneuver, Competitor> maneuvers = new HashMap<>();
+    Map<Maneuver, CompetitorAndBoat> getAllManeuvers(boolean waitForLatest) {
+        Map<Maneuver, CompetitorAndBoat> maneuvers = new HashMap<>();
         final Waypoint firstWaypoint = trackedRace.getRace().getCourse().getFirstWaypoint();
         final Waypoint lastWaypoint = trackedRace.getRace().getCourse().getLastWaypoint();
-        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+        for (Map.Entry<Competitor, Boat> competitorAndBoat : trackedRace.getRace().getCompetitorsAndTheirBoats().entrySet()) {
+            Competitor competitor = competitorAndBoat.getKey();
+            Boat boat = competitorAndBoat.getValue();
             final TimePoint from = Util.getFirstNonNull(
                     firstWaypoint == null ? null : trackedRace.getMarkPassing(competitor, firstWaypoint) == null ? null
                             : trackedRace.getMarkPassing(competitor, firstWaypoint).getTimePoint(), trackedRace
@@ -798,7 +809,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
                             : trackedRace.getMarkPassing(competitor, lastWaypoint).getTimePoint(), trackedRace
                             .getEndOfRace(), trackedRace.getEndOfTracking(), MillisecondsTimePoint.now());
             for (Maneuver maneuver : trackedRace.getManeuvers(competitor, from, to, waitForLatest)) {
-                maneuvers.put(maneuver, competitor);
+                maneuvers.put(maneuver, new CompetitorAndBoatImpl(competitor, boat));
             }
         }
         return Collections.unmodifiableMap(maneuvers);
