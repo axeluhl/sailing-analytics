@@ -120,7 +120,7 @@ public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSett
         });
         extractionFunctionSuggestBox.setLimit(Integer.MAX_VALUE);
         extractionFunctionSuggestBox.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
-        extractionFunctionSuggestBox.setWidth("70%");
+        extractionFunctionSuggestBox.setWidth("540px");
         mainPanel.add(extractionFunctionSuggestBox);
         
         aggregatorListBox = createAggregatorListBox();
