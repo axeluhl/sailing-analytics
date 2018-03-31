@@ -2,72 +2,83 @@ package com.sap.sailing.datamining.impl.components;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sailing.datamining.data.HasManeuverContext;
-import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
-import com.sap.sailing.datamining.impl.data.ManeuverWithContext;
-import com.sap.sailing.datamining.impl.data.TrackedLegOfCompetitorWithSpecificTimePointWithContext;
+import com.sap.sailing.datamining.data.HasCompleteManeuverCurveWithEstimationDataContext;
+import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
+import com.sap.sailing.datamining.impl.data.CompleteManeuverCurveWithEstimationDataWithContext;
 import com.sap.sailing.datamining.shared.ManeuverSettings;
-import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
+import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
+import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
+import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
-public class ManeuverRetrievalProcessor
-        extends AbstractRetrievalProcessor<HasTrackedLegOfCompetitorContext, HasManeuverContext> {
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
+public class CompleteManeuverCurveWithEstimationDataRetrievalProcessor extends
+        AbstractRetrievalProcessor<HasRaceOfCompetitorContext, HasCompleteManeuverCurveWithEstimationDataContext> {
 
     private final ManeuverSettings settings;
 
-    public ManeuverRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasManeuverContext, ?>> resultReceivers, ManeuverSettings settings,
-            int retrievalLevel) {
-        super(HasTrackedLegOfCompetitorContext.class, HasManeuverContext.class, executor, resultReceivers,
-                retrievalLevel);
+    public CompleteManeuverCurveWithEstimationDataRetrievalProcessor(ExecutorService executor,
+            Collection<Processor<HasCompleteManeuverCurveWithEstimationDataContext, ?>> resultReceivers,
+            ManeuverSettings settings, int retrievalLevel) {
+        super(HasRaceOfCompetitorContext.class, HasCompleteManeuverCurveWithEstimationDataContext.class, executor,
+                resultReceivers, retrievalLevel);
         this.settings = settings;
     }
 
     @Override
-    protected Iterable<HasManeuverContext> retrieveData(HasTrackedLegOfCompetitorContext element) {
-        Collection<HasManeuverContext> maneuversWithContext = new ArrayList<>();
-        TimePoint finishTime = element.getTrackedLegOfCompetitor().getFinishTime();
-        if (finishTime != null) {
-            Iterable<Maneuver> maneuvers = null;
-            try {
-                maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
-            } catch (NoWindException e) {
-                throw new IllegalStateException("No wind retrieving the maneuvers", e);
-            }
-            Maneuver previousManeuver = null;
-            Maneuver currentManeuver = null;
-            for (Maneuver nextManeuver : maneuvers) {
-                if (currentManeuver != null) {
-                    ManeuverWithContext maneuverWithContext = new ManeuverWithContext(new TrackedLegOfCompetitorWithSpecificTimePointWithContext(
-                            element.getTrackedLegContext(), element.getTrackedLegOfCompetitor(), currentManeuver.getTimePoint()), currentManeuver,
-                            settings.isMainCurveAnalysis(), previousManeuver, nextManeuver);
-                    if (isManeuverCompliantWithSettings(previousManeuver, maneuverWithContext, nextManeuver)) {
-                        maneuversWithContext.add(maneuverWithContext);
-                    }
-                }
-                previousManeuver = currentManeuver;
-                currentManeuver = nextManeuver;
-            }
+    protected Iterable<HasCompleteManeuverCurveWithEstimationDataContext> retrieveData(
+            HasRaceOfCompetitorContext element) {
+        List<HasCompleteManeuverCurveWithEstimationDataContext> result = new ArrayList<>();
+        TrackedRace trackedRace = element.getTrackedRaceContext().getTrackedRace();
+        Competitor competitor = element.getCompetitor();
+        ManeuverDetector maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
+        Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, false);
+        Iterable<CompleteManeuverCurve> maneuverCurves = maneuverDetector.getCompleteManeuverCurves(maneuvers);
+        Iterable<CompleteManeuverCurveWithEstimationData> maneuversWithEstimationData = maneuverDetector
+                .getCompleteManeuverCurvesWithEstimationData(maneuverCurves);
+
+        CompleteManeuverCurveWithEstimationData previousManeuver = null;
+        CompleteManeuverCurveWithEstimationData currentManeuver = null;
+        for (CompleteManeuverCurveWithEstimationData nextManeuver : maneuversWithEstimationData) {
             if (currentManeuver != null) {
-                ManeuverWithContext maneuverWithContext = new ManeuverWithContext(element, currentManeuver,
-                        settings.isMainCurveAnalysis(), previousManeuver, null);
-                if (isManeuverCompliantWithSettings(previousManeuver, maneuverWithContext, null)) {
-                    maneuversWithContext.add(maneuverWithContext);
+                CompleteManeuverCurveWithEstimationDataWithContext maneuverWithContext = new CompleteManeuverCurveWithEstimationDataWithContext(
+                        element, currentManeuver, settings, previousManeuver, nextManeuver);
+                if (currentManeuver.getWind() != null
+                        && isManeuverCompliantWithSettings(previousManeuver, maneuverWithContext, nextManeuver)) {
+                    result.add(maneuverWithContext);
                 }
+            }
+            previousManeuver = currentManeuver;
+            currentManeuver = nextManeuver;
+        }
+        if (currentManeuver != null) {
+            CompleteManeuverCurveWithEstimationDataWithContext maneuverWithContext = new CompleteManeuverCurveWithEstimationDataWithContext(
+                    element, currentManeuver, settings, previousManeuver, null);
+            if (currentManeuver.getWind() != null
+                    && isManeuverCompliantWithSettings(previousManeuver, maneuverWithContext, null)) {
+                result.add(maneuverWithContext);
             }
         }
-        return maneuversWithContext;
+        return result;
     }
 
-    private boolean isManeuverCompliantWithSettings(Maneuver previousManeuver,
-            ManeuverWithContext currentManeuverWithContext, Maneuver nextManeuver) {
+    private boolean isManeuverCompliantWithSettings(CompleteManeuverCurveWithEstimationData previousManeuver,
+            CompleteManeuverCurveWithEstimationDataWithContext currentManeuverWithContext,
+            CompleteManeuverCurveWithEstimationData nextManeuver) {
         boolean mainCurveAnalysis = settings.isMainCurveAnalysis();
         // Compute only numbers which are really required for filtering
         Duration maneuverDuration = settings.getMinManeuverDuration() != null
@@ -132,9 +143,9 @@ public class ManeuverRetrievalProcessor
         }
     }
 
-    private ManeuverCurveBoundaries getManeuverBoundariesForAnalysis(Maneuver maneuver, boolean mainCurveAnalysis) {
-        return mainCurveAnalysis ? maneuver.getMainCurveBoundaries()
-                : maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries();
+    private ManeuverCurveBoundaries getManeuverBoundariesForAnalysis(CompleteManeuverCurveWithEstimationData maneuver,
+            boolean mainCurveAnalysis) {
+        return mainCurveAnalysis ? maneuver.getMainCurve() : maneuver.getCurveWithUnstableCourseAndSpeed();
     }
 
 }

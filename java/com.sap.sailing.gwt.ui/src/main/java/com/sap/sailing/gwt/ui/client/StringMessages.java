@@ -568,7 +568,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String upcoming();
     String next();
     String inProgress();
-    String passedTo(String name);
+    String markPassedToAt(String name, String at);
     String gapChangeSinceLegStartInSeconds();
     String sideToWhichMarkAtLegStartWasRounded();
     String raceIsLive(String raceName);
@@ -2098,4 +2098,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windFinderWeatherData();
     String positionEditOnNonTrackingRace();
     String errorCreatingLeaderboardGroup(String name);
+    String minAbsCourseChangeInDegrees();
+    String maxAbsCourseChangeInDegrees();
+    String minDurationInSecondsFromPrecedingManeuver();
+    String maxDurationInSecondsFromPrecedingManeuver();
+    String minDurationInSecondsToFollowingManeuver();
+    String maxDurationInSecondsToFollowingManeuver();
+    String maxTurningRate();
+    String avgTurningRate();
+    String lowestSpeed();
+    String degreesPerSecondUnit();
 }

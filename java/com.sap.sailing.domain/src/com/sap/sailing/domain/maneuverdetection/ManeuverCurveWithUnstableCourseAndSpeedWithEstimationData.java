@@ -1,39 +1,18 @@
 package com.sap.sailing.domain.maneuverdetection;
 
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sse.common.Duration;
 
 /**
- * Contains maneuver, as well as additional maneuver information which is regarded as relevant for maneuver
- * classification algorithms, such as the wind estimation.
+ * Contains the information about the maneuver curve with unstable course and speed, which is regarded as relevant for
+ * maneuver classification algorithms, such as the wind estimation.
  * 
  * @author Vladislav Chumak (D069712)
  *
  */
-public interface ManeuverWithEstimationData {
-
-    /**
-     * Gets the represented maneuver.
-     */
-    Maneuver getManeuver();
-
-    /**
-     * Gets the wind measured at the {@link Maneuver#getTimePoint(). Can be {@code null} in cases, when no wind
-     * information is available.
-     */
-    Wind getWind();
-
-    /**
-     * Gets the highest speed measured within the main curve with corresponding course.
-     */
-    SpeedWithBearing getHighestSpeedWithinMainCurve();
-
-    /**
-     * Gets the lowest speed measured within the main curve with corresponding course.
-     */
-    SpeedWithBearing getLowestSpeedWithinMainCurve();
+public interface ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData
+        extends ManeuverCurveBoundaries, HasDetailedManeuverLoss {
 
     /**
      * Gets the average speed and course measured from the end of the previous maneuver until the start of this
@@ -68,4 +47,10 @@ public interface ManeuverWithEstimationData {
      * distance of at least one second, the result will be {@null}.
      */
     Duration getDurationFromManeuverEndToNextManeuverStart();
+
+    /**
+     * Gets the number of GPS-fixes contained within the maneuver curve.
+     */
+    int getGpsFixesCount();
+
 }
