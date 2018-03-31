@@ -101,6 +101,12 @@ public interface HasCompleteManeuverCurveWithEstimationDataContext {
 
     @Statistic(messageKey = "RelativeBearingToNextMarkAfterManeuver", resultDecimals = 1)
     Double getRelativeBearingToNextMarkAfterManeuver();
+    
+    @Statistic(messageKey = "AbsRelativeBearingToNextMarkBeforeManeuver", resultDecimals = 1)
+    Double getAbsRelativeBearingToNextMarkBeforeManeuver();
+
+    @Statistic(messageKey = "AbsRelativeBearingToNextMarkAfterManeuver", resultDecimals = 1)
+    Double getAbsRelativeBearingToNextMarkAfterManeuver();
 
     @Statistic(messageKey = "ManeuverEnteringSpeedInKnots", resultDecimals = 2)
     Double getManeuverEnteringSpeed();

@@ -282,4 +282,16 @@ public class CompleteManeuverCurveWithEstimationDataWithContext
                         / maneuverWithEstimationData.getCurveWithUnstableCourseAndSpeed().getDuration().asSeconds();
     }
 
+    @Override
+    public Double getAbsRelativeBearingToNextMarkBeforeManeuver() {
+        Double bearing = getRelativeBearingToNextMarkBeforeManeuver();
+        return bearing == null ? null : Math.abs(bearing);
+    }
+
+    @Override
+    public Double getAbsRelativeBearingToNextMarkAfterManeuver() {
+        Double bearing = getRelativeBearingToNextMarkAfterManeuver();
+        return bearing == null ? null : Math.abs(bearing);
+    }
+
 }
