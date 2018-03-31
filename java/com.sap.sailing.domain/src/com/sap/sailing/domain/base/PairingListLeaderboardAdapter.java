@@ -2,9 +2,8 @@ package com.sap.sailing.domain.base;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.pairinglist.PairingList; 
 
@@ -12,13 +11,9 @@ public class PairingListLeaderboardAdapter implements PairingList<RaceColumn, Fl
     
     @Override
     public Iterable<Pair<Competitor, Boat>> getCompetitors(RaceColumn raceColumn, Fleet fleet) {
-        // TODO add boat to return value (bug4403)
         List<Pair<Competitor, Boat>> result = new ArrayList<>();
-        int boatIndex = 0;
-        for (Competitor competitor : raceColumn.getCompetitorsRegisteredInRacelog(fleet)) {
-            result.add(new Pair<Competitor, Boat>(competitor, 
-                    new BoatImpl("Boat " + (boatIndex + 1), new BoatClassImpl("49er", true), "DE" + boatIndex)));
-            boatIndex++;
+        for (Entry<Competitor, Boat> competitorAndBoat : raceColumn.getAllCompetitorsAndTheirBoats(fleet).entrySet()) {
+            result.add(new Pair<Competitor, Boat>(competitorAndBoat.getKey(), competitorAndBoat.getValue()));
         }
         return result;
     }

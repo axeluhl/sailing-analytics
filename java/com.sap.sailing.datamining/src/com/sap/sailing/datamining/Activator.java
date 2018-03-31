@@ -14,7 +14,7 @@ import com.sap.sailing.datamining.data.HasFoilingSegmentContext;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
-import com.sap.sailing.datamining.data.HasManeuverBoundariesContext;
+import com.sap.sailing.datamining.data.HasCompleteManeuverCurveWithEstimationDataContext;
 import com.sap.sailing.datamining.data.HasManeuverContext;
 import com.sap.sailing.datamining.data.HasManeuverSpeedDetailsContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
@@ -107,7 +107,7 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         internalClasses.add(HasFoilingSegmentContext.class);
         internalClasses.add(HasManeuverContext.class);
         internalClasses.add(HasManeuverSpeedDetailsContext.class);
-        internalClasses.add(HasManeuverBoundariesContext.class);
+        internalClasses.add(HasCompleteManeuverCurveWithEstimationDataContext.class);
         internalClasses.add(HasMarkPassingContext.class);
         internalClasses.add(HasRaceOfCompetitorContext.class);
         internalClasses.add(HasLeaderboardGroupContext.class);

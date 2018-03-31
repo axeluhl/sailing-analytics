@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
@@ -45,10 +46,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     private static final long serialVersionUID = -7060076837717432808L;
     private final TrackedLegImpl trackedLeg;
     private final Competitor competitor;
+    private final Boat boat;
     
-    public TrackedLegOfCompetitorImpl(TrackedLegImpl trackedLeg, Competitor competitor) {
+    public TrackedLegOfCompetitorImpl(TrackedLegImpl trackedLeg, Competitor competitor, Boat boat) {
         this.trackedLeg = trackedLeg;
         this.competitor = competitor;
+        this.boat = boat;
     }
 
     @Override
@@ -59,6 +62,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Competitor getCompetitor() {
         return competitor;
+    }
+
+    @Override
+    public Boat getBoat() {
+        return boat;
     }
 
     @Override

@@ -2,11 +2,25 @@ package com.sap.sailing.domain.maneuverdetection;
 
 import java.util.List;
 
-import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.Maneuver;
 
 /**
- * Determines maneuvers performed within a tracked race.
+ * Determines maneuvers performed within a tracked race by competitor associated with this
+ * {@link ManeuverDetector}-instance. The steps of maneuver detection look as follows:
+ * <ol>
+ * <li>Douglas-Peucker-fixes set is determined for the GPS-track of competitor. The analyzed GPS-fixes set gets limited
+ * by the set contained between the time points of crossing start line and finish-line. The limit does not apply if no
+ * start-line has been crossed by the competitor at all. In case of absent crossing of finish-line, the GPS-fix set gets
+ * analyzed until the last available GPS-fix.</li>
+ * <li>The bearings between DP-fixes are calculated</li>
+ * <li>Consecutive DP-fixes get grouped together if their sign of associated bearing is equal and the duration and
+ * distance limits between DP-fixes is satisfied.</li>
+ * <li>For each DP-fixes group a {@link CompleteManeuverCurve} gets determined</li>
+ * <li>For each {@link CompleteManeuverCurve}-instance appropriate {@link Maneuver}-instance(s) are determined. In
+ * contrast to maneuvers, the complete maneuver curves are not subject to any splitting logic for maneuvers with
+ * multiple "tacking" and "jibing".</li>
+ * <ol>
  * 
  * @author Vladislav Chumak (D069712)
  *
@@ -14,23 +28,58 @@ import com.sap.sailing.domain.tracking.Maneuver;
 public interface ManeuverDetector {
 
     /**
-     * Tries to detect maneuvers on the <code>competitor</code>'s track based on a number of approximating fixes. The
-     * fixes contain bearing information, but this is not the bearing leading to the next approximation fix but the
-     * bearing the boat had at the time of the approximating fix which is taken from the original track.
-     * <p>
+     * Detects maneuvers performed within a GPS-track of the competitor associated with this
+     * {@link ManeuverDetector}-instance. See {@link ManeuverDetector} description for more info regarding the detection
+     * strategy.
      * 
-     * The time period assumed for a maneuver duration is taken from the
-     * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() boat class}. If no maneuver is detected, an empty
-     * list is returned. Maneuvers can only be expected to be detected if at least three fixes are provided in
-     * <code>approximatedFixesToAnalyze</code>. For the inner approximating fixes (all except the first and the last
-     * approximating fix), their course changes according to the approximated path (and not the underlying actual
-     * tracked fixes) are computed. Subsequent course changes to the same direction are then grouped. Those in closer
-     * timely distance than {@link #getApproximateManeuverDurationInMilliseconds()} (including single course changes
-     * that have no surrounding other course changes to group) are grouped into one {@link Maneuver}.
-     * 
-     * @return an empty list if no maneuver is detected for <code>competitor</code> between <code>from</code> and
-     *         <code>to</code>, or else the list of maneuvers detected.
+     * @return an empty list if no maneuvers were detected, otherwise the list with detected maneuvers.
      */
     List<Maneuver> detectManeuvers();
+
+    /**
+     * Derives maneuvers from the provided {@code maneuverCurves}. Since the provided complete maneuver curves already
+     * include the calculated boundaries of each complete maneuvering spot, this method operates in a very
+     * performance-efficient manner.
+     * 
+     * @param maneuverCurves
+     *            The maneuver curves from which the maneuvers shall be derived
+     * @return The maneuvers derived from the provided maneuver curves. The list gets empty, if the provided maneuver
+     *         curves list is also empty.
+     */
+    List<Maneuver> detectManeuvers(Iterable<CompleteManeuverCurve> maneuverCurves);
+
+    /**
+     * Detects the complete maneuver curves performed within a GPS-track of the competitor associated with this
+     * {@link ManeuverDetector}-instance. In contrast to maneuvers determined by {@link #detectManeuvers()}, the
+     * complete maneuver curves are not subject to any splitting logic for maneuvers with multiple "tacking" and
+     * "jibing". See {@link ManeuverDetector} description for more info regarding the detection strategy.
+     * 
+     * @return an empty list if no maneuver spots were detected, otherwise the list with detected maneuver curves.
+     * @see CompleteManeuverCurve
+     * @see ManeuverDetector
+     */
+    List<CompleteManeuverCurve> detectCompleteManeuverCurves();
+
+    /**
+     * Parses {@link CompleteManeuverCurve}-instances from provided {@link Maneuver}-instances. This method performs
+     * significantly faster than {@link #detectCompleteManeuverCurves()}.
+     * 
+     * @param maneuvers
+     *            The maneuvers to parse into complete maneuver curves
+     * @return an empty list if provided maneuvers list is empty, otherwise the list with complete maneuver curves
+     *         derived from provided maneuvers.
+     * @see CompleteManeuverCurve
+     * @see Maneuver
+     */
+    List<CompleteManeuverCurve> getCompleteManeuverCurves(Iterable<Maneuver> maneuvers);
+
+    /**
+     * Converts provided {@link CompleteManeuverCurve}-instances into
+     * {@link CompleteManeuverCurveWithEstimationData}-instances. For this, additional information to
+     * {@code maneuverCurves} is computed. This computation is regarded as complex as the computation within
+     * {@link #detectManeuvers()}.
+     */
+    List<CompleteManeuverCurveWithEstimationData> getCompleteManeuverCurvesWithEstimationData(
+            Iterable<CompleteManeuverCurve> maneuverCurves);
 
 }

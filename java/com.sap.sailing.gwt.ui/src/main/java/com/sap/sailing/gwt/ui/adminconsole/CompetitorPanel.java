@@ -45,7 +45,8 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
         super();
         this.leaderboardName = leaderboardName;
-        this.competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true);
+        this.competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true, 
+                /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         this.refreshableCompetitorSelectionModel = (RefreshableMultiSelectionModel<CompetitorDTO>) competitorTable.getSelectionModel();
 
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
@@ -175,9 +176,11 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
     }
 
     private void openAddCompetitorDialog() {
-        competitorTable.openEditCompetitorDialog(new CompetitorDTOImpl(), /* boat class to be used from CompetitorDTO */ null);
+        CompetitorDTOImpl competitorDTO = new CompetitorDTOImpl();
+        competitorDTO.setBoat(null);
+        competitorTable.openEditCompetitorWithoutBoatDialog(competitorDTO);
     }
-    
+
     public void refreshCompetitorList() {
         competitorTable.refreshCompetitorList(leaderboardName);
     }

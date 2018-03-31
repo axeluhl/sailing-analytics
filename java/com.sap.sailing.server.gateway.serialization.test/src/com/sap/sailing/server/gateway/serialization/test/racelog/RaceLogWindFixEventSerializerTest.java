@@ -49,9 +49,9 @@ public class RaceLogWindFixEventSerializerTest {
     public void setUp() {
         SharedDomainFactory factory = DomainFactory.INSTANCE;
         serializer = new RaceLogWindFixEventSerializer(new CompetitorJsonSerializer(new TeamJsonSerializer(
-                new PersonJsonSerializer(new NationalityJsonSerializer())), null), new WindJsonSerializer(
+                new PersonJsonSerializer(new NationalityJsonSerializer()))), new WindJsonSerializer(
                 new PositionJsonSerializer()));
-        deserializer = new RaceLogWindFixEventDeserializer(new CompetitorJsonDeserializer(factory.getCompetitorStore(), null, /* boatDeserializer */ null),
+        deserializer = new RaceLogWindFixEventDeserializer(new CompetitorJsonDeserializer(factory.getCompetitorStore(), null),
                 new WindJsonDeserializer(new PositionJsonDeserializer()));
 
         now = MillisecondsTimePoint.now();
@@ -67,8 +67,8 @@ public class RaceLogWindFixEventSerializerTest {
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
         assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
-        assertEquals(0, Util.size(event.getInvolvedBoats()));
-        assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
+        assertEquals(0, Util.size(event.getInvolvedCompetitors()));
+        assertEquals(0, Util.size(deserializedEvent.getInvolvedCompetitors()));
 
         compareWind(event.getWindFix(), deserializedEvent.getWindFix());
     }

@@ -76,7 +76,7 @@ public class TrackTest {
 
     @Before
     public void setUp() throws InterruptedException {
-        track = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("MyFirstBoat", new BoatClassImpl("505", /* typicallyStartsUpwind */
+        track = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("123", "MyFirstBoat", new BoatClassImpl("505", /* typicallyStartsUpwind */
         true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
         TimePoint now1 = MillisecondsTimePoint.now();
         TimePoint now2 = addMillisToTimepoint(now1, MILLIS_BETWEEN_FIXES);
@@ -131,7 +131,7 @@ public class TrackTest {
     @Test
     public void positionEstimationTest() {
         track = new DynamicGPSFixMovingTrackImpl<Boat>(
-                new BoatImpl("MyFirstBoat", new BoatClassImpl("505", true), null), 5000, null);
+                new BoatImpl("123", "MyFirstBoat", new BoatClassImpl("505", true), null), 5000, null);
         DegreePosition p1 = new DegreePosition(0, 0);
         DegreePosition p2 = new DegreePosition(90, 0);
         TimePoint t1 = MillisecondsTimePoint.now();
@@ -1077,8 +1077,8 @@ public class TrackTest {
     
     @Test
     public void testValidCheckForFixThatSaysItsAsFastAsItWas() {
-        DynamicGPSFixMovingTrackImpl<Boat> myTrack = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("MyFirstBoat", new BoatClassImpl("505", /* typicallyStartsUpwind */
-                true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
+        DynamicGPSFixMovingTrackImpl<Boat> myTrack = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("123", "MyFirstBoat", new BoatClassImpl("505", /* typicallyStartsUpwind */
+                        true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
         TimePoint now1 = MillisecondsTimePoint.now();
         TimePoint now2 = addMillisToTimepoint(now1, 1000); // 1s
         AbstractBearing bearing = new DegreeBearingImpl(90);
@@ -1098,8 +1098,8 @@ public class TrackTest {
     
     @Test
     public void testValidCheckForFixThatSaysItsFasterThanItActuallyWas() {
-        DynamicGPSFixMovingTrackImpl<Boat> myTrack = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("MyFirstBoat", new BoatClassImpl("505", /* typicallyStartsUpwind */
-                true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
+        DynamicGPSFixMovingTrackImpl<Boat> myTrack = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("123", "MyFirstBoat", new BoatClassImpl("505", /* typicallyStartsUpwind */
+                        true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
         TimePoint now1 = MillisecondsTimePoint.now();
         TimePoint now2 = addMillisToTimepoint(now1, 1000); // 1s
         AbstractBearing bearing = new DegreeBearingImpl(90);
@@ -1119,8 +1119,8 @@ public class TrackTest {
     
     @Test
     public void testValidCheckForFixThatSaysItsSlowerThanItActuallyWas() {
-        DynamicGPSFixMovingTrackImpl<Boat> myTrack = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("MyFirstBoat", new BoatClassImpl("505", /* typicallyStartsUpwind */
-                true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
+        DynamicGPSFixMovingTrackImpl<Boat> myTrack = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("123", "MyFirstBoat", new BoatClassImpl("505", /* typicallyStartsUpwind */
+                        true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
         TimePoint now1 = MillisecondsTimePoint.now();
         TimePoint now2 = addMillisToTimepoint(now1, 1000); // 1s
         AbstractBearing bearing = new DegreeBearingImpl(90);

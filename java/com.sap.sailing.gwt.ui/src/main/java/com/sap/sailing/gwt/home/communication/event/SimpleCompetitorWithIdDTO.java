@@ -25,9 +25,9 @@ public class SimpleCompetitorWithIdDTO extends SimpleCompetitorDTO {
         this.idAsString = competitor.getIdAsString();
     }
 
-    public SimpleCompetitorWithIdDTO(String idAsString, String name, String sailID, 
+    public SimpleCompetitorWithIdDTO(String idAsString, String name, String shortInfo, 
             String twoLetterIsoCountryCode, String flagImageURL) {
-        super(name, sailID, twoLetterIsoCountryCode, flagImageURL);
+        super(name, shortInfo, twoLetterIsoCountryCode, flagImageURL);
         this.idAsString = idAsString;
     }
 

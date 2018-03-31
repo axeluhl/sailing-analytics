@@ -49,8 +49,8 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
     public void setUp() {
         SharedDomainFactory factory = DomainFactory.INSTANCE;
         serializer = new RaceLogFinishPositioningConfirmedEventSerializer(new CompetitorJsonSerializer(
-                new TeamJsonSerializer(new PersonJsonSerializer(new NationalityJsonSerializer())), null));
-        deserializer = new RaceLogFinishPositioningConfirmedEventDeserializer(new CompetitorJsonDeserializer(factory.getCompetitorStore(), null, /* boatDeserializer */ null));
+                new TeamJsonSerializer(new PersonJsonSerializer(new NationalityJsonSerializer()))));
+        deserializer = new RaceLogFinishPositioningConfirmedEventDeserializer(new CompetitorJsonDeserializer(factory.getCompetitorStore(), null));
 
         now = MillisecondsTimePoint.now();
         positioningList = new CompetitorResultsImpl();
@@ -77,8 +77,8 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
         assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
-        assertEquals(0, Util.size(event.getInvolvedBoats()));
-        assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
+        assertEquals(0, Util.size(event.getInvolvedCompetitors()));
+        assertEquals(0, Util.size(deserializedEvent.getInvolvedCompetitors()));
         assertNotNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons());
         assertNotNull(deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
         assertEquals(1, Util.size(event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
@@ -96,8 +96,8 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
         assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
-        assertEquals(0, Util.size(event.getInvolvedBoats()));
-        assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
+        assertEquals(0, Util.size(event.getInvolvedCompetitors()));
+        assertEquals(0, Util.size(deserializedEvent.getInvolvedCompetitors()));
         assertNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons());
         assertNotNull(deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
         assertTrue(Util.isEmpty(deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
@@ -114,8 +114,8 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
         assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
-        assertEquals(0, Util.size(event.getInvolvedBoats()));
-        assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
+        assertEquals(0, Util.size(event.getInvolvedCompetitors()));
+        assertEquals(0, Util.size(deserializedEvent.getInvolvedCompetitors()));
         assertNotNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons());
         assertNotNull(deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
         assertTrue(Util.isEmpty(event.getPositionedCompetitorsIDsNamesMaxPointsReasons()));

@@ -27,7 +27,10 @@ public class LeaderboardEntryDTO implements Serializable {
      * fleet the competitor started in this column.
      */
     public RaceIdentifier race;
-    
+
+    /** the boat of the competitor in case of regattas where boat can change during racing, null otherwise */
+    public BoatDTO boat;
+
     /**
      * Either <code>null</code> in case no max points, or one of "DNS", "DNF", "OCS", "DND", "RAF", "BFD", "DNC", or "DSQ"
      */
@@ -264,6 +267,7 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result + ((totalPointsUncorrected == null) ? 0 : totalPointsUncorrected.hashCode());
         result = prime * result + (totalPointsCorrected ? 1231 : 1237);
         result = prime * result + ((race == null) ? 0 : race.hashCode());
+        result = prime * result + ((boat == null) ? 0 : boat.hashCode());
         result = prime * result + ((reasonForMaxPoints == null) ? 0 : reasonForMaxPoints.hashCode());
         result = prime
                 * result
@@ -365,6 +369,11 @@ public class LeaderboardEntryDTO implements Serializable {
             if (other.race != null)
                 return false;
         } else if (!race.equals(other.race))
+            return false;
+        if (boat == null) {
+            if (other.boat != null)
+                return false;
+        } else if (!boat.equals(other.boat))
             return false;
         if (reasonForMaxPoints != other.reasonForMaxPoints)
             return false;

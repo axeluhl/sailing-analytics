@@ -109,7 +109,7 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     public void visit(RaceLogRegisterCompetitorEvent event) {
 
     }
-    
+
     @Override
     public void visit(RaceLogAdditionalScoringInformationEvent event) {
         
@@ -144,4 +144,5 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     public void visit(RaceLogUseCompetitorsFromRaceLogEvent event) {
         
     }
+    
 }

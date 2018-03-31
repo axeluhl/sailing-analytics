@@ -1,12 +1,14 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
@@ -27,7 +29,7 @@ public class ManagedRaceImpl implements ManagedRace {
     private static final long serialVersionUID = -4936566684992524001L;
     private final ManagedRaceIdentifier identifier;
     private RaceState state;
-    private Collection<Competitor> competitors;
+    private Map<Competitor, Boat> competitorsAndBoats;
     private CourseBase courseOnServer;
     private ManagedRaceCalculator calculator;
     private double factor;
@@ -51,7 +53,7 @@ public class ManagedRaceImpl implements ManagedRace {
      */
     private ManagedRaceImpl(ManagedRaceIdentifier identifier, double factor, Double explicitFactor, int zeroBasedIndexInFleet) {
         this.identifier = identifier;
-        this.competitors = new ArrayList<>();
+        this.competitorsAndBoats = new HashMap<>();
         this.courseOnServer = null;
         this.factor = factor;
         this.explicitFactor = explicitFactor;
@@ -125,12 +127,18 @@ public class ManagedRaceImpl implements ManagedRace {
 
     @Override
     public Collection<Competitor> getCompetitors() {
-        return competitors;
+        return competitorsAndBoats.keySet();
     }
 
     @Override
-    public void setCompetitors(Collection<Competitor> competitors) {
-        this.competitors = competitors;
+    public Map<Competitor, Boat> getCompetitorsAndBoats() {
+        return competitorsAndBoats;
+    }
+
+    @Override
+    public void setCompetitors(Map<Competitor, Boat> competitorsAndBoats) {
+        this.competitorsAndBoats.clear();
+        this.competitorsAndBoats.putAll(competitorsAndBoats);
     }
 
     @Override

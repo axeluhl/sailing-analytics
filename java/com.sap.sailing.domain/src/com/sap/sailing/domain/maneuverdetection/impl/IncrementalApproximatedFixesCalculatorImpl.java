@@ -43,8 +43,8 @@ public class IncrementalApproximatedFixesCalculatorImpl extends ApproximatedFixe
     public IncrementalApproximatedFixesCalculatorImpl(TrackedRace trackedRace, Competitor competitor) {
         super(trackedRace, competitor);
         this.track = trackedRace.getTrack(competitor);
-        this.minDurationFromLastFixToPreviousMarkPassingToReusePreviousLegFixes = competitor.getBoat().getBoatClass()
-                .getApproximateManeuverDuration().times(10.0);
+        this.minDurationFromLastFixToPreviousMarkPassingToReusePreviousLegFixes = trackedRace.getRace()
+                .getBoatOfCompetitor(competitor).getBoatClass().getApproximateManeuverDuration().times(10.0);
     }
 
     @Override
