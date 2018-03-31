@@ -262,7 +262,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
             private boolean hasLink(RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName) {
                 return selectedRaceColumnAndFleetName.getA()
-                    .getRaceIdentifier(selectedRaceColumnAndFleetName.getB()) != null;
+                        .getRaceIdentifier(selectedRaceColumnAndFleetName.getB()) != null;
             }
             
             private boolean isLinkedToRace(RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName, RaceDTO selectedRace){
