@@ -113,7 +113,17 @@ public class RoleDefinitionsPanel extends VerticalPanel {
 
                     @Override
                     public void onSuccess(RoleDefinition result) {
-                        updateRoleDefinitions();
+                        userManagementService.updateRoleDefinition(editedObject, new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(stringMessages.errorEditingRoles(editedObject.getName(), caught.getMessage()));
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                updateRoleDefinitions();
+                            }
+                        });
                     }
                 });
             }
