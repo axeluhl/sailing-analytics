@@ -32,4 +32,11 @@ public class ObjectAnnotationImpl<T extends Serializable> implements ObjectAnnot
     public T getAnnotation() {
         return annotation;
     }
+    
+    @Override
+    public String toString() {
+        return "Annotation " + annotation + " on object "
+                + (getDisplayNameOfAnnotatedObject() == null ? "" : (getDisplayNameOfAnnotatedObject() + " "))
+                + "with ID " + getIdOfAnnotatedObjectAsString();
+    }
 }
