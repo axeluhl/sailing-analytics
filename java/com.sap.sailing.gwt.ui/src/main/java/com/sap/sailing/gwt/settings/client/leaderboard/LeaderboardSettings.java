@@ -36,9 +36,10 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
      */
     protected BooleanSetting showAddedScores;
     
-    protected BooleanSetting showCompetitorSailIdColumn;
+    protected BooleanSetting showCompetitorShortNameColumn;
     protected BooleanSetting showCompetitorFullNameColumn;
-    
+    protected BooleanSetting showCompetitorBoatInfoColumn;
+        
     @Override
     protected void addChildSettings() {
         isShowCompetitorNationality = new BooleanSetting("showCompetitorNationality", this, false);
@@ -60,8 +61,9 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         overallDetailsToShow = new EnumSetSetting<>("overallDetailsToShow", this, overallDetails, DetailType::valueOf);
         delayBetweenAutoAdvancesInMilliseconds = new LongSetting("delayBetweenAutoAdvancesInMilliseconds", this, LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         showAddedScores = new BooleanSetting("showAddedScores", this, false);
-        showCompetitorSailIdColumn = new BooleanSetting("showCompetitorSailIdColumn", this, true);
+        showCompetitorShortNameColumn = new BooleanSetting("showCompetitorShortNameColumn", this, true);
         showCompetitorFullNameColumn = new BooleanSetting("showCompetitorFullNameColumn", this, true);
+        showCompetitorBoatInfoColumn = new BooleanSetting("showCompetitorBoatInfoColumn", this, false);
     }
     
     public LeaderboardSettings() {
@@ -72,20 +74,22 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
      */
     public LeaderboardSettings(Collection<DetailType> maneuverDetailsToShow, Collection<DetailType> legDetailsToShow,
             Collection<DetailType> raceDetailsToShow, Collection<DetailType> overallDetailsToShow,
-            Long delayBetweenAutoAdvancesInMilliseconds, boolean showAddedScores, boolean showCompetitorSailIdColumn,
-            boolean showCompetitorFullNameColumn, boolean isCompetitorNationalityColumnVisible) {
+            Long delayBetweenAutoAdvancesInMilliseconds, 
+            boolean showAddedScores, boolean showCompetitorShortNameColumn, 
+            boolean showCompetitorFullNameColumn, boolean showCompetitorBoatInfoColumn,
+            boolean isCompetitorNationalityColumnVisible) {
         this.legDetailsToShow.setValues(legDetailsToShow);
         this.raceDetailsToShow.setValues(raceDetailsToShow);
         this.overallDetailsToShow.setValues(overallDetailsToShow);
         this.delayBetweenAutoAdvancesInMilliseconds.setValue(delayBetweenAutoAdvancesInMilliseconds);
         this.maneuverDetailsToShow.setValues(maneuverDetailsToShow);
         this.showAddedScores.setValue(showAddedScores);
-        this.showCompetitorSailIdColumn.setValue(showCompetitorSailIdColumn);
+        this.showCompetitorShortNameColumn.setValue(showCompetitorShortNameColumn);
         this.showCompetitorFullNameColumn.setValue(showCompetitorFullNameColumn);
+        this.showCompetitorBoatInfoColumn.setValue(showCompetitorBoatInfoColumn);
         this.isShowCompetitorNationality.setValue(isCompetitorNationalityColumnVisible);
     }
   
-
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
@@ -126,12 +130,16 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         return showAddedScores.getValue();
     }
     
-    public boolean isShowCompetitorSailIdColumn() {
-        return showCompetitorSailIdColumn.getValue();
+    public boolean isShowCompetitorShortNameColumn() {
+        return showCompetitorShortNameColumn.getValue();
     }
     
     public boolean isShowCompetitorFullNameColumn() {
         return showCompetitorFullNameColumn.getValue();
+    }
+
+    public boolean isShowCompetitorBoatInfoColumn() {
+        return showCompetitorBoatInfoColumn.getValue();
     }
 
     public boolean isShowCompetitorNationality() {

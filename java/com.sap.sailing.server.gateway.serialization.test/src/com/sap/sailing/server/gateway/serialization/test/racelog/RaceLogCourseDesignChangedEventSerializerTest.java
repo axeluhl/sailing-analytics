@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.UUID;
 
-import junit.framework.Assert;
-
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,6 +44,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import junit.framework.Assert;
+
 public class RaceLogCourseDesignChangedEventSerializerTest {
 
     private RaceLogCourseDesignChangedEventSerializer serializer;
@@ -78,8 +78,8 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
         assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
         assertEquals(event.getCourseDesignerMode(), deserializedEvent.getCourseDesignerMode());
-        assertEquals(0, Util.size(event.getInvolvedBoats()));
-        assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
+        assertEquals(0, Util.size(event.getInvolvedCompetitors()));
+        assertEquals(0, Util.size(deserializedEvent.getInvolvedCompetitors()));
 
         compareCourseData(event.getCourseDesign(), deserializedEvent.getCourseDesign());
     }

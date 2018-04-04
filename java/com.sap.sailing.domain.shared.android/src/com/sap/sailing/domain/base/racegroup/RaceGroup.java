@@ -42,6 +42,12 @@ public interface RaceGroup extends Named {
     public BoatClass getBoatClass();
 
     /**
+     * Indicates whether the competitors use the same boat for the whole regatta or change the boat used during the competition
+     * @return true when the competitors change their boats, false otherwise
+     */
+    public boolean canBoatsOfCompetitorsChangePerRace(); 
+
+    /**
      * Gets the collection of series, for a {@link RaceGroup} representing a regatta in the same order as
      * the {@code Regatta.getSeries()} call returns them.
      */

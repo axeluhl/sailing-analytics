@@ -151,7 +151,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
                         settings = newSettings;
                         updateURL();
                     }
-                }, settings, apcd);
+                }, settings, apcd, currentPresenter.getUserService());
     }
 
     private boolean validate() {
@@ -190,9 +190,8 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
             settingsButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             apcd = new AutoPlayContextDefinitionImpl(selectedAutoPlayType, selectedEvent.id, selectedLeaderboardName);
-            apcd.getType().getConfig().loadSettingsDefault(selectedEvent, selectedLeaderboard,
+            apcd.getType().getConfig().loadSettingsDefault(selectedEvent, selectedLeaderboard, currentPresenter.getUserService(),
                     new OnSettingsCallback() {
-
                         @Override
                         public void newSettings(PerspectiveCompositeSettings<?> newSettings) {
                             settings = newSettings;
@@ -285,5 +284,4 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
     public void showLoading() {
         startAutoPlayButton.setEnabled(false);
     }
-
 }

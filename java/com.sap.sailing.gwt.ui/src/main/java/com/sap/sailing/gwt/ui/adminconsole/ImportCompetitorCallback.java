@@ -55,7 +55,7 @@ public class ImportCompetitorCallback implements DialogCallback<Pair<Map<Competi
                 existingCompetitorsSelected.add(existingCompetitor);
             }
         }
-        sailingService.addOrUpdateCompetitor(new ArrayList<>(existingCompetitorsSelected), new MarkedAsyncCallback<>(
+        sailingService.addOrUpdateCompetitors(new ArrayList<>(existingCompetitorsSelected), new MarkedAsyncCallback<>(
                 new AsyncCallback<List<CompetitorDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {

@@ -46,8 +46,8 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.actions.GetCompetitorsRaceDataAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
@@ -87,7 +87,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     
     private final Label noCompetitorsSelectedLabel;
     private final Label noDataFoundLabel;
-    private final CompetitorSelectionProvider competitorSelectionProvider;
+    private final RaceCompetitorSelectionProvider competitorSelectionProvider;
     private DetailType selectedFirstDetailType;
     private DetailType selectedSecondDetailType;
 
@@ -115,7 +115,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     
     AbstractCompetitorRaceChart(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
+            RaceCompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             ErrorReporter errorReporter, DetailType firstDetailType, DetailType secondDetailType, boolean compactChart,
             boolean allowTimeAdjust,

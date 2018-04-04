@@ -117,6 +117,45 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
         return higherScoresIsBetter;
     }
 
+    public BoatDTO getBoatOfCompetitor(String raceColumnName, CompetitorDTO competitor) {
+        BoatDTO result = null;
+        if (rows != null) { 
+            LeaderboardRowDTO leaderboardRow = rows.get(competitor);
+            if (leaderboardRow != null) {
+                if (this.canBoatsOfCompetitorsChangePerRace == false) {
+                    result = leaderboardRow.boat;
+                } else {
+                    LeaderboardEntryDTO leaderboardEntry = leaderboardRow.fieldsByRaceColumnName.get(raceColumnName);
+                    if (leaderboardEntry != null) {
+                        result = leaderboardEntry.boat;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    public void setBoatOfCompetitor(CompetitorDTO competitor, BoatDTO boat) {
+        if (rows != null && this.canBoatsOfCompetitorsChangePerRace == false) {
+            LeaderboardRowDTO leaderboardRowDTO = rows.get(competitor);
+            if (leaderboardRowDTO != null) {
+                leaderboardRowDTO.boat = boat;
+            }
+        }
+    }
+
+    public void setBoatOfCompetitorForRace(String raceColumnName, CompetitorDTO competitor, BoatDTO boat) {
+        if (rows != null && this.canBoatsOfCompetitorsChangePerRace == true) {
+            LeaderboardRowDTO leaderboardRow = rows.get(competitor);
+            if (leaderboardRow != null) {
+                LeaderboardEntryDTO leaderboardEntry = leaderboardRow.fieldsByRaceColumnName.get(raceColumnName);
+                if (leaderboardEntry != null) {
+                    leaderboardEntry.boat = boat;
+                }
+            }
+        }
+    }
+
     public void setCompetitorsFromBestToWorst(String raceColumnName, List<CompetitorDTO> orderedCompetitors) {
         competitorOrderingPerRaceColumnName.put(raceColumnName, orderedCompetitors);
     }
