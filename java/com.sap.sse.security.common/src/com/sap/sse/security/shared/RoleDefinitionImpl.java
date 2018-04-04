@@ -34,6 +34,18 @@ public class RoleDefinitionImpl implements RoleDefinition {
         Util.addAll(permissions, this.permissions);
     }
     
+    public static RoleDefinition create(UUID id, String name, Iterable<WildcardPermission> permissions) {
+        final RoleDefinition result;
+        if (Util.equalsWithNull(id, AdminRole.getInstance().getId())) {
+            result = AdminRole.getInstance();
+        } else if (Util.equalsWithNull(id, UserRole.getInstance().getId())) {
+            result = UserRole.getInstance();
+        } else {
+            result = new RoleDefinitionImpl(id, name, permissions);
+        }
+        return result;
+    }
+    
     @Override
     public UUID getId() {
         return id;

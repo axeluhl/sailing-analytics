@@ -379,15 +379,10 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public RoleDefinition createRoleDefinition(UUID roleDefinitionId, String displayName, Iterable<WildcardPermission> permissions) {
-        final RoleDefinition role;
-        if (Util.equalsWithNull(roleDefinitionId, AdminRole.getInstance().getId())) {
-            role = AdminRole.getInstance();
-        } else {
-            role = new RoleDefinitionImpl(roleDefinitionId, displayName, permissions);
-        }
-        roleDefinitions.put(roleDefinitionId, role);
-        mongoObjectFactory.storeRoleDefinition(role);
-        return role;
+        final RoleDefinition roleDefinition = RoleDefinitionImpl.create(roleDefinitionId, displayName, permissions);
+        roleDefinitions.put(roleDefinitionId, roleDefinition);
+        mongoObjectFactory.storeRoleDefinition(roleDefinition);
+        return roleDefinition;
     }
 
     @Override

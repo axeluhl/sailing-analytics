@@ -37,6 +37,7 @@ import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserRole;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.AccessControlListImpl;
@@ -132,14 +133,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RoleDefinition loadRoleDefinition(DBObject roleDefinitionDBObject) {
         final RoleDefinition result;
         final String id = (String) roleDefinitionDBObject.get(FieldNames.Role.ID.name());
-        if (Util.equalsWithNull(id, AdminRole.getInstance().getId())) {
+        final String displayName = (String) roleDefinitionDBObject.get(FieldNames.Role.NAME.name());
+        final Set<WildcardPermission> permissions = new HashSet<>();
+        for (Object o : (BasicDBList) roleDefinitionDBObject.get(FieldNames.Role.PERMISSIONS.name())) {
+            permissions.add(new WildcardPermission(o.toString(), true));
+        }
+        if (Util.equalsWithNull(id, AdminRole.getInstance().getId().toString())) {
             result = AdminRole.getInstance();
+        } else if (Util.equalsWithNull(id, UserRole.getInstance().getId().toString())) {
+            result = UserRole.getInstance();
         } else {
-            final String displayName = (String) roleDefinitionDBObject.get(FieldNames.Role.NAME.name());
-            final Set<WildcardPermission> permissions = new HashSet<>();
-            for (Object o : (BasicDBList) roleDefinitionDBObject.get(FieldNames.Role.PERMISSIONS.name())) {
-                permissions.add(new WildcardPermission(o.toString(), true));
-            }
             result = new RoleDefinitionImpl(UUID.fromString(id), displayName, permissions);
         }
         return result;

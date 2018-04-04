@@ -15,8 +15,9 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.SecuredObject;
 
-public class EventBaseDTO extends NamedDTO implements IsSerializable {
+public class EventBaseDTO extends NamedDTO implements IsSerializable, SecuredObject {
     private static final long serialVersionUID = 818666323178097939L;
 
     public VenueDTO venue;
@@ -32,7 +33,7 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     private List<ImageDTO> images = new ArrayList<>();
     private List<VideoDTO> videos = new ArrayList<>();
     
-    private AccessControlList acl;
+    private AccessControlList accessControlList;
     private Ownership ownership;
 
     /**
@@ -187,12 +188,12 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         return imageSizes.get(imageURL);
     }
     
-    public void setAcl(AccessControlList acl) {
-        this.acl = acl;
+    public void setAccessControlList(AccessControlList acl) {
+        this.accessControlList = acl;
     }
     
-    public AccessControlList getAcl() {
-        return this.acl;
+    public AccessControlList getAccessControlList() {
+        return this.accessControlList;
     }
     
     public void setOwnership(Ownership ownership) {
