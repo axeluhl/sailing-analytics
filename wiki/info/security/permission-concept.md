@@ -33,45 +33,51 @@ In the course of this concept document there will be no difference in meaning be
 
 ## Initial Idea
 
-The inital idea for this document is based on the existing Shiro RBAC system that should handle global static roles and also supports directly granting permissions to a user. Furthermore, ACLs should be introduced. Those should solve the problem of “losing” implied permissions, because the access control lists are directly associated with the data object. The existing Shiro authorizing realm that checks for the roles and permissions directly assigned to a user would have to be extended by the ACL concept. This will form what we call a compound realm that if a permission is checked looks for the permission in the roles and permissions of the user and in the ACL of the data object. If either the roles and permissions or the ACL grants the permission the user is allowed access.
+The inital idea for this document is based on the existing Shiro RBAC system that handles roles that can imply permissions and that also supports directly granting permissions to a user. Furthermore, ACLs should be introduced. Those should solve the problem of “losing” implied permissions, e.g., upon ownership changes, because the access control lists are directly associated with the data object and do not depend on ownerships, whereas role-implied permissions may well be implied only if ownerships support this. Furthermore, an ACL can be used to explicitly revoke a permission that may otherwise have been implied for a user based on ownerships or the roles the user has assigned.
+
+The existing Shiro authorizing realm that checks for the roles and permissions directly assigned to a user would have to be extended by the ACL concept. This will form what we call a compound realm that if a permission is checked looks for the permission in the roles and permissions of the user *and* in the ACL of the data object. If either the roles and permissions or the ACL grants the permission the user is allowed access.
 
 ## Ownership
 
-It is common place in cloud applications where multiple groups of users that each belong to some kind of organization work in one system to summarize these groups of users as tenants. The tenants represent the organizations and---if a hierarchy is allowed---the sub-organizations working in the system. In the Sailing Analytics the organizations could be SAP in general (e.g. archive server), sailing clubs, events like the Travemünder Woche or in the future private users.
+The approach chosen here mimics that of a Unix/Linux file system where each file system object has a "group owner" and a "user owner." Certain permissions may then implicitly be granted if the requesting user belongs to the group owning the object or is identical to the user owning the object. Groups in this context are called "tenants."
 
-One idea behind tenants is to encapsulate organizations so users of one organization cannot work with data objects from another organization if they are not granted the permissions explicitly. Furthermore, tenants are used to group data objects so users can have access to all data objects of a tenant and do not have to be granted every permission explicitly. Additional to data objects, tenants are also associated with roles. Thus, assigning to a user a role associated with a tenant is equivalent to granting the permissions implied by that role for each data object which is associated with (owned by) the tenant. 
+The tenants represent the organizations and---if a hierarchy is allowed---the sub-organizations working in the system. In the Sailing Analytics the organizations could be SAP in general (e.g. archive server), sailing clubs, events like the Travemünder Woche or in the future private users.
 
-In the Sailing Analytics the set of roles for each tenant may, apart from certain exceptions, represent the subjects a user can adopt. A constraint could be introduced that only allows the roles for one tenant as a subject.
+One idea behind tenants is to encapsulate organizations' data so users of one organization cannot work with data objects from another organization if they are not granted the permissions explicitly. Furthermore, tenants are used to group data objects so users can have access to all data objects of a tenant and do not have to be granted every permission explicitly. Additional to data objects, tenants are also associated with roles. Thus, assigning to a user a role associated with a tenant is equivalent to granting the permissions implied by that role for each data object which is associated with (owned by) the tenant.
 
-Tenants pose a UI problem because it has to be clear to the user in which tenant he/she is currently working. The user has to be member of the tenant he/she is working for. Currently the best idea is to let the user select a tenant when he/she logs in and have default tenants for event and club servers that correspond to the event or club. Every following action is performed as that tenant. In particular, when creating new objects then that tenant will be set as the new object's tenant owner.
+As will be described later in more detail, ownership information can be used to constrain the granting of roles' permissions. For example, a user may be assigned the "admin" role qualified with a specific tenant so that the permissions implied by the admin role will be granted to that user only for those objects owned by that tenant. The same concept of role qualification can be applied to user ownerships.
+
+Ownerships should usually be assigned to an object upon its creation. For this, the session user may be taken as the default owning user. The owning tenant, however, may not be unique in case the user belongs to more than one tenant. In this case, a disambiguation is required which may happen upon user log-on where the user would have to select one of its several tenants that shall be used as the tenant owner for new objects created during this session.
 
 In some cases, it might be necessary to transfer the ownership to another tenant/user. Thus, ownership should not be final but changeable.
 
-### Users and/or Tenants as Owners
+## Roles
 
-A problem with the tenant approach is that users could have no permissions to e.g. remove data objects that they have just created by accident, because the remove permission is reserved to admins of the tenant which a user who has create permissions may not be.
+Roles have a *definition* and an *instantiation*. The role's definition is an entity that has a UUID, defines a (changeable) name and specifies the (changeable) set of permissions a user will obtain by being assigned a role instantiated from this definition. A role instantiation references a role definition and "inherits" the definition's name. The instantiation can furthermore optionally constrain the role by a tenant and/or user qualifier. In this case the permissions the role definition specifies will be granted to a user in that role only if requested for an object whose tenant/user owner matches that of the tenant/user qualifier provided by the role instantiation, respectively.
 
-Four solutions come to mind. (1) The creator of a data object could always be granted the permission to remove the data object explicitly. (2) Moreover, the log where the creation was logged could be crawled to find the user that created the data object and override the permission system when in a certain timespan.
+Roles with a tenant qualifier are displayed in the form "\<rolename\>:\<tenantname\>". Roles with tenant and user qualifier are displayed as "\<rolename\>:\<tenantname\>:\<username\>", and role instantiations with only a user qualifier are shown as "\<rolename\>::\<username\>". Examples:
 
-(3) There is an alternative approach to ownership. In this approach, a single user would own a data object so he can do everything with it. The tenant would then be a kind of secondary owner or group in Linux terms. This solves the problem that users could have no permissions to e.g. remove data objects that they have just created by accident. However, it also introduces a second layer of ownership. (4) Only grant the create permission when the user also has the corresponding delete permission.
+1. Tenant Owner "owner:tw2018" (Can delete the tenant, in addition to everything the tenant admin can do)
+2. Tenant Admin "admin:kw2018" (Has (almost) every permission in his tenant)
+3. Eventmanager "eventmanager:VSaW"
+4. Racemanager "racemanager:KYC"
+5. Editor "editor:BYC"
+6. Resultservice "resultservice:swc2018-miami"
+7. User "user::johndoe" (A role that every user should have for himself/herself; grants permissions to modify the respective user object properties such as company affiliation, password and full name
 
-Approaches (2) and (4) are impractical. (2) is too complicated. The user would need delete permission for everything in the tenant for (4) to work.
+With this it is possible, for example, to have an ``admin`` role definition with permission "\*". An instantiation of this role can then optionally restrict the tenant that must be an object's tenant owner for the role's permissions to be applied to permission checks for that object. If a user has role ``admin:server-A`` and requests permission for an object, the "\*" permission from the ``admin`` role definition is granted if and only if the object's tenant owner is ``server-A``.
 
-Approach (1) solves the problem on hand, however these explicitly granted remove permissions are not just removed when the ownership of the data object changes, but remain. This could lead to users being able to delete data objects in other tenants, just because they created the object. Approach (3) more explicitly creates an ownership relation that can be edited and is thus chosen.
+Similarly, if a role instantiation provides a user qualifier, the object for which a permission is checked must be owned by the user specified by the qualifier in order for the role's permissions to be granted to a user with this role.
 
-As the tenant is a data object itself, it also has an owner. The owning tenant of a tenant is the tenant itself. (TODO: Should it be possible to change the tenant owner of a tenant? What is the best default tenant owner for a tenant? The tenant itself or the tenant to which the user creating the tenant is currently logged on?)
+If both, a user and tenant parameter are declared for a role instantiation then both have to match in order for the role's permissions to be implied.
 
-### Subtenants
+## Permissions
 
-Subtenants could be a convenient way to restrict the permissions of certain users to only a part of a tenant’s domain. However, this introduces a hierarchy of tenants that brings with it its own challenges. Imagine there is a tenant “tw2017” and the 49er boat class races should not be manageable by the same race managers that can manage races of the other regattas. So “tw2017” would require a subtenant “other” and “49er” that encapsulate the 49er boat class and everything else from each other. Now if a permission is checked on an ACL, the ACL has to traverse the tenant hierarchy to find out if the user is part of a role for a parent tenant that grants the permission. However, the convenience of tenant hierarchies might be stronger than the traversal problem, because the hierarchy will probably never be deeper than one or two levels.
+When the permission to perform an action is checked, the action and the object must be identified unless the action is an object *creation*. The possible actions are described by a pair of strings where the first element of the pair tells the "type" of the object to which the action applied, and the second element identifies the action to be performed on the object of that type. For example, ``leaderboard:update`` could be such an action for which permission needs to be requested when changing an object of type ``Leaderboard``.
 
-Another challenge with subtenants is how to communicate the concept to users. Which also makes it harder to imply with which tenant or subtenant a user is currently working.
+To request the permission, the object identifier needs to be given... TODO when / backend / frontend / how...
 
-An alternative strategy is just creating a completely new top level tenant for the 49er boat class races of “tw2017”. This would not introduce a hierarchy, but would require users that have roles for all boat classes to have their roles for both tenants instead of only the role for the parent tenant.
-
-For now, we will not consider the concept of subtenants further.
-
-### Administration of Authorization
+## Administration of Authorization
 
 This section will discuss how it is determined if a user can grant or revoke a permission. Therefore, we define two rules:
 
@@ -116,32 +122,6 @@ This section will discuss how to handle default permissions. Default permissions
 3. Have default permissions in roles so they do not have to be entered into each ACL, but have negative permissions to revoke defaults.
 
 The default permissions will be handled by approach 3. to keep the ACLs short and less redundant.
-
-## Implementation of Roles
-
-There currently are only a few hardcoded global roles. These shall be usable in the future too and should be independent of the server or the tenant the person that has this role is working on. These include:
-
-1. Global Admin (Has permissions for everything)
-2. Create Tenant (Users that manage events and servers)
-3. Media Admin
-
-Roles have a definition and an instantiation. The role's definition has a UUID, defines a name and specifies the set of permissions a user will obtain by being assigned a role instantiated from this definition. A role instantiation references a role definition and "inherits" the definition's name. The instantiation can furthermore optionally constrain the role by a tenant and/or user qualifier. In this case the permissions the role definition specifies will be granted to a user in that role only if requested for an object whose tenant/user owner matches that of the tenant/user qualifier provided by the role instantiation, respectively.
-
-With this it is possible, for example, to have an ``admin`` role definition with permission "\*". An instantiation of this role can then optionally restrict the tenant that must be an object's tenant owner for the role's permissions to be applied to permission checks for that object. If a user has role ``admin:server-A`` and requests permission for an object, the "\*" permission from the ``admin`` role definition is granted if and only if the object's tenant owner is ``server-A``.
-
-Similarly, if a role instantiation provides a user qualifier, the object for which a permission is checked must be owned by the user specified by the qualifier in order for the role's permissions to be granted to a user with this role.
-
-If both, a user and tenant parameter are declared for a role instantiation then both have to match in order for the role's permissions to be implied.
-
-Roles with a tenant qualifier are displayed in the form "\<rolename\>:\<tenantname\>". Roles with tenant and user qualifier are displayed as "\<rolename\>:\<tenantname\>:\<username\>", and role instantiations with only a user qualifier are shown as "\<rolename\>::\<username\>". Examples:
-
-1. Tenant Owner "owner:tw2018" (Can delete the tenant, in addition to everything the tenant admin can do)
-2. Tenant Admin "admin:kw2018" (Has (almost) every permission in his tenant)
-3. Eventmanager "eventmanager:VSaW"
-4. Racemanager "racemanager:KYC"
-5. Editor "editor:BYC"
-6. Resultservice "resultservice:swc2018-miami"
-7. User "user::johndoe" (A role that every user should have for himself/herself; grants permissions to modify the respective user object properties such as company affiliation, password and full name
 
 ## Constraints
 
@@ -244,6 +224,34 @@ During role migration again the server's default tenant derived from the server 
 ## Implementation Details
 
 Access control relevant objects are stored in the AccessControlStore, while user related objects are stored in the user, i.e. the UserStore. Tenants are currently stored as UserGroups in the user store. The algorithm outlined above is implemented in the PermissionChecker, which is one of the most central classes in the permission system. Therefrom it should be possible to find all other relevant classes. Other relevant classes include the AbstractCompositeAuthorizingRealm that implements permission checking in Shiro. Therefor it uses the PermissionChecker and is connected to the UserStore and the AccessControlStore. Furthermore the RolePermissionModel implements how roles imply permissions. The RolePermissionModel as well as the parameterization of roles need more work and are just a rough sketch. The UserManagementService exposes most of the access control relevant parts to the frontend. It works through the SecurityService with the AccessControlStore and the UserStore. Permission checking in the frontend is also done with the PermissionChecker. To ease the creation of WildcardPermissions, a PermissionBuilder was introduced that also needs some more work. All access control relevant UI parts can be found in the "Advanced" tab under "User management" and "Tenant management". A further tab "Access Control Management" should be introduced. Unit tests can be found in the package com.sap.sse.security.test.
+
+
+
+### Discussion
+
+#### Users and/or Tenants as Owners
+
+A problem with the tenant approach is that users could have no permissions to e.g. remove data objects that they have just created by accident, because the remove permission is reserved to admins of the tenant which a user who has create permissions may not be.
+
+Four solutions come to mind. (1) The creator of a data object could always be granted the permission to remove the data object explicitly. (2) Moreover, the log where the creation was logged could be crawled to find the user that created the data object and override the permission system when in a certain timespan.
+
+(3) There is an alternative approach to ownership. In this approach, a single user would own a data object so he can do everything with it. The tenant would then be a kind of secondary owner or group in Linux terms. This solves the problem that users could have no permissions to e.g. remove data objects that they have just created by accident. However, it also introduces a second layer of ownership. (4) Only grant the create permission when the user also has the corresponding delete permission.
+
+Approaches (2) and (4) are impractical. (2) is too complicated. The user would need delete permission for everything in the tenant for (4) to work.
+
+Approach (1) solves the problem on hand, however these explicitly granted remove permissions are not just removed when the ownership of the data object changes, but remain. This could lead to users being able to delete data objects in other tenants, just because they created the object. Approach (3) more explicitly creates an ownership relation that can be edited and is thus chosen.
+
+As the tenant is a data object itself, it also has an owner. The owning tenant of a tenant is the tenant itself. (TODO: Should it be possible to change the tenant owner of a tenant? What is the best default tenant owner for a tenant? The tenant itself or the tenant to which the user creating the tenant is currently logged on?)
+
+#### Subtenants
+
+Subtenants could be a convenient way to restrict the permissions of certain users to only a part of a tenant’s domain. However, this introduces a hierarchy of tenants that brings with it its own challenges. Imagine there is a tenant “tw2017” and the 49er boat class races should not be manageable by the same race managers that can manage races of the other regattas. So “tw2017” would require a subtenant “other” and “49er” that encapsulate the 49er boat class and everything else from each other. Now if a permission is checked on an ACL, the ACL has to traverse the tenant hierarchy to find out if the user is part of a role for a parent tenant that grants the permission. However, the convenience of tenant hierarchies might be stronger than the traversal problem, because the hierarchy will probably never be deeper than one or two levels.
+
+Another challenge with subtenants is how to communicate the concept to users. Which also makes it harder to imply with which tenant or subtenant a user is currently working.
+
+An alternative strategy is just creating a completely new top level tenant for the 49er boat class races of “tw2017”. This would not introduce a hierarchy, but would require users that have roles for all boat classes to have their roles for both tenants instead of only the role for the parent tenant.
+
+For now, we will not consider the concept of subtenants further.
 
 ## TODOs
 
