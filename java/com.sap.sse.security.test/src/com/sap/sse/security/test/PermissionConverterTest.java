@@ -1,20 +1,24 @@
 package com.sap.sse.security.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import org.apache.shiro.authz.permission.WildcardPermission;
+import java.util.List;
+import java.util.Set;
+
 import org.junit.Test;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.impl.PermissionConverter;
+import com.sap.sse.security.shared.WildcardPermission;
 
 public class PermissionConverterTest {
     @Test
     public void testPermissionParts() {
-        String[] parts = new PermissionConverter().getPermissionParts(new WildcardPermission("LEADERBOARD:EDIT:KW2017 Laser Int."));
-        assertEquals("leaderboard", parts[0]);
-        assertEquals("edit", parts[1]);
-        assertEquals("kw2017 laser int.", parts[2]);
+        List<Set<String>> parts = new PermissionConverter().getPermissionParts(new WildcardPermission("LEADERBOARD:EDIT:KW2017 Laser Int."));
+        assertTrue(parts.get(0).contains("leaderboard"));
+        assertTrue(parts.get(1).contains("edit"));
+        assertTrue(parts.get(2).contains("kw2017 laser int."));
     }
 
     @Test
@@ -42,7 +46,7 @@ public class PermissionConverterTest {
     
     @Test
     public void testGetWildcardPermission() {
-        com.sap.sse.security.shared.WildcardPermission wp = new PermissionConverter().getWildcardPermission(new WildcardPermission("LEADERBOARD:EDIT:KW2017 Laser Int."));
+        com.sap.sse.security.shared.WildcardPermission wp = new PermissionConverter().getWildcardPermission(new org.apache.shiro.authz.permission.WildcardPermission("LEADERBOARD:EDIT:KW2017 Laser Int."));
         assertEquals("LEADERBOARD:EDIT:KW2017 Laser Int.".toLowerCase(), wp.toString());
     }
 }

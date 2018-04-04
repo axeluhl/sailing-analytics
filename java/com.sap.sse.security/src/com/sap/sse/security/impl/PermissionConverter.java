@@ -1,5 +1,8 @@
 package com.sap.sse.security.impl;
 
+import java.util.List;
+import java.util.Set;
+
 import org.apache.shiro.authz.Permission;
 
 import com.sap.sse.security.AccessControlStore;
@@ -34,8 +37,8 @@ public class PermissionConverter {
     /**
      * Splits the permission along ":" occurrences
      */
-    public String[] getPermissionParts(Permission permission) {
-        return getAsString(permission).split(":");
+    public List<Set<String>> getPermissionParts(WildcardPermission permission) {
+        return permission.getParts();
     }
     
     /**
@@ -43,7 +46,7 @@ public class PermissionConverter {
      * assembles IDs as strings that can be used, e.g., to look up ACLs or ownerships for the object for which the
      * {@code permission} is requested.
      */
-    public Iterable<String> getObjectIdsAsString(Permission permission) {
-        return poc.getObjectIdsAsString(getWildcardPermission(permission));
+    public Iterable<String> getObjectIdsAsString(WildcardPermission permission) {
+        return poc.getObjectIdsAsString(permission);
     }
 }
