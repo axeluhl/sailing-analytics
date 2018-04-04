@@ -315,15 +315,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
 
     /**
+     * Creates a regatta and replicates this to all replicas currently attached.
+     * 
      * @param series
      *            the series must not have any {@link RaceColumn}s yet
      * @param controlTrackingFromStartAndFinishTimes
      *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
      */
-    Regatta createRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
+    Regatta createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
-
+    
     /**
      * @param controlTrackingFromStartAndFinishTimes
      *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
@@ -471,6 +473,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
+    Map<Competitor, Boat> getCompetitorToBoatMappingsForRace(String leaderboardName, String raceColumnName, String fleetName);
+    
     /**
      * @param controlTrackingFromStartAndFinishTimes TODO
      * @param rankingMetricConstructor TODO
@@ -478,9 +482,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *         the call
      */
     Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName, String boatClassName, 
-            TimePoint startDate, TimePoint endDate, Serializable id, 
+            boolean canBoatsOfCompetitorsChangePerRace, TimePoint startDate, TimePoint endDate, Serializable id, 
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
 
     /**

@@ -65,6 +65,18 @@ public class PreviousCompetitorDTOImpl implements CompetitorDTO {
     }
 
     @Override
+    public String getShortName() {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
+    }
+
+    @Override
+    public String getShortInfo() {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
+    }
+
+    @Override
     public String getSailID() {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
@@ -72,6 +84,12 @@ public class PreviousCompetitorDTOImpl implements CompetitorDTO {
 
     @Override
     public BoatDTO getBoat() {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
+    }
+
+    @Override
+    public void setBoat(BoatDTO boat) {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
     }

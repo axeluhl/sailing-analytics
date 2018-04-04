@@ -68,7 +68,7 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     public static final String charsetName = "UTF-8";
 
-    protected final static String TAG = MessageSendingService.class.getName();
+    protected final static String TAG = MessageSendingService.class.getSimpleName();
 
     private ConnectivityManager connectivityManager;
     private Handler handler;

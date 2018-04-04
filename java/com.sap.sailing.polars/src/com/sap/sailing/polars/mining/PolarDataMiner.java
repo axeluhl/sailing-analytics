@@ -198,7 +198,7 @@ public class PolarDataMiner {
                                 element.getCompetitor(),
                                 backendPolarSheetGenerationSettings.getPctOfLeadingCompetitorsToInclude())) {
                             result = true;
-                            final BoatClass boatClass = element.getCompetitor().getBoat().getBoatClass();
+                            final BoatClass boatClass = element.getBoat().getBoatClass();
                             AtomicInteger count = stats.get(boatClass);
                             if (count == null) {
                                 count = new AtomicInteger(1);

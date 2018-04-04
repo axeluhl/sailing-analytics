@@ -19,3 +19,4 @@ Require-Bundle: com.tractrac.clientmodule;bundle-version="2.0.0",
  com.sap.sse.common
 Import-Package: org.json.simple,
  org.json.simple.parser
+Automatic-Module-Name: com.sap.sailing.server.trackfiles.test

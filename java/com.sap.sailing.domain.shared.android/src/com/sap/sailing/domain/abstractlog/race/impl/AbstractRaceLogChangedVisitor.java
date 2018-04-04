@@ -103,7 +103,7 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
     public void visit(RaceLogRegisterCompetitorEvent event) {
         notifyListenerAboutEventAdded(event);
     }
-    
+
     @Override
     public void visit(RaceLogAdditionalScoringInformationEvent additionalScoringInformation) {
         notifyListenerAboutEventAdded(additionalScoringInformation);

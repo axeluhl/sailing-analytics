@@ -14,9 +14,11 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sse.common
 Import-Package: com.sap.sailing.domain.abstractlog.regatta.events,
+ com.sap.sailing.domain.base,
  com.sap.sailing.domain.persistence.impl,
  com.sap.sailing.domain.persistence.racelog.tracking.impl,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.server.impl,
  com.sap.sse.concurrent,
  javax.servlet.http;version="2.5.0"
+Automatic-Module-Name: com.sap.sailing.domain.racelogtrackingadapter.test

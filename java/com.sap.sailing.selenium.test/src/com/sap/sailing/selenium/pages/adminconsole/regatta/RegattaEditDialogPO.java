@@ -21,6 +21,9 @@ public class RegattaEditDialogPO extends DataEntryDialogPO {
     @FindBy(how = BySeleniumId.class, using = "UseStartTimeInferenceCheckBox")
     private WebElement useStartTimeInferenceCheckbox;
 
+    @FindBy(how = BySeleniumId.class, using = "CanBoatsOfCompetitorsChangePerRaceCheckBox")
+    private WebElement canBoatsOfCompetitorsChangePerRaceCheckbox;
+    
     @FindBy(how = BySeleniumId.class, using = "CourseAreaListBox")
     private WebElement courseAreaListBox;
     
@@ -35,7 +38,12 @@ public class RegattaEditDialogPO extends DataEntryDialogPO {
         CheckBoxPO checkbox = new CheckBoxPO(driver, useStartTimeInferenceCheckbox);
         checkbox.setSelected(b);
     }
-    
+
+    public void setCanBoatsOfCompetitorsChangePerRaceCheckBox(boolean b) {
+        CheckBoxPO checkbox = new CheckBoxPO(driver, canBoatsOfCompetitorsChangePerRaceCheckbox);
+        checkbox.setSelected(b);
+    }
+
     public SeriesCreateDialogPO addSeries() {
         this.addSeriesButton.click();
         

@@ -8,17 +8,23 @@
 
 import UIKit
 
+enum SessionControllerError: Error {
+    case checkInDataIsIncomplete
+}
+
 class SessionController: NSObject {
-        
-    let checkIn: CheckIn
+    
+    weak var checkIn: CheckIn!
+    weak var coreDataManager: CoreDataManager!
     
     var sendingBackgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
     var sendingDate: Date = Date()
     
     fileprivate (set) var isTracking: Bool = false
     
-    init(checkIn: CheckIn) {
+    init(checkIn: CheckIn, coreDataManager: CoreDataManager) {
         self.checkIn = checkIn
+        self.coreDataManager = coreDataManager
         super.init()
         subscribeForNotifications()
     }
@@ -53,9 +59,9 @@ class SessionController: NSObject {
             guard self.isTracking else { return }
             guard let locationData = notification.userInfo?[LocationManager.UserInfo.LocationData] as? LocationData else { return }
             guard locationData.isValid else { return }
-            let gpsFix = CoreDataManager.sharedManager.newGPSFix(checkIn: self.checkIn)
+            let gpsFix = self.coreDataManager.newGPSFix(checkIn: self.checkIn)
             gpsFix.updateWithLocationData(locationData: locationData)
-            CoreDataManager.sharedManager.saveContext()
+            self.coreDataManager.saveContext()
             if self.sendingDate.compare(Date()) == .orderedAscending {
                 self.sendingDate = Date().addingTimeInterval(BatteryManager.sharedManager.sendingPeriod)
                 self.beginGPSFixSendingInBackgroundTask()
@@ -92,25 +98,27 @@ class SessionController: NSObject {
     
     // MARK: - Update
     
-    func update(completion: @escaping () -> Void) {
-        guard let checkInData = CheckInData(checkIn: checkIn) else { updateFailure(completion: completion); return }
-        requestManager.getCheckInData(
-            checkInData: checkInData,
-            success: { (checkInData) in self.updateSuccess(checkInData: checkInData, completion: completion) },
-            failure: { (error) in self.updateFailure(completion: completion) }
-        )
+    func update(
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void) throws
+    {
+        guard let checkInData = CheckInData(checkIn: checkIn) else {
+            throw SessionControllerError.checkInDataIsIncomplete
+        }
+        let checkInDataCollector = CheckInDataCollector(checkInData: checkInData)
+        checkInDataCollector.collect(checkInData: checkInData, success: { [weak self] (checkInData) in
+            self?.updateSuccess(checkInData: checkInData, success: success)
+        }) { (error) in
+            failure(error)
+        }
     }
     
-    func updateSuccess(checkInData: CheckInData, completion: () -> Void) {
+    fileprivate func updateSuccess(checkInData: CheckInData, success: () -> Void) {
         checkIn.event.updateWithEventData(eventData: checkInData.eventData)
         checkIn.leaderboard.updateWithLeaderboardData(leaderboardData: checkInData.leaderboardData)
         checkIn.updateWithCheckInData(checkInData: checkInData)
-        CoreDataManager.sharedManager.saveContext()
-        completion()
-    }
-    
-    func updateFailure(completion: () -> Void) {
-        completion()
+        coreDataManager.saveContext()
+        success()
     }
     
     // MARK: - Tracking
@@ -129,7 +137,7 @@ class SessionController: NSObject {
     // MARK: - CheckOut
     
     func checkOut(completion: @escaping (_ withSuccess: Bool) -> Void) {
-        requestManager.postCheckOut(
+        checkInRequestManager.postCheckOut(
             checkIn,
             success: { () in completion(true) },
             failure: { (error) in completion(false) }
@@ -139,13 +147,11 @@ class SessionController: NSObject {
     // MARK: - Properties
     
     lazy var gpsFixController: GPSFixController = {
-        let gpsFixController = GPSFixController(checkIn: self.checkIn)
-        return gpsFixController
+        return GPSFixController(checkIn: self.checkIn, coreDataManager: self.coreDataManager)
     }()
     
-    lazy var requestManager: RequestManager = {
-        let requestManager = RequestManager(baseURLString: self.checkIn.serverURL)
-        return requestManager
+    lazy var checkInRequestManager: CheckInRequestManager = {
+        return CheckInRequestManager(baseURLString: self.checkIn.serverURL)
     }()
     
 }

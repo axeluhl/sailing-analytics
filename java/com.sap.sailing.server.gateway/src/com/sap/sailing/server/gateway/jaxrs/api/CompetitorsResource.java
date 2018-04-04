@@ -52,11 +52,10 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         JSONObject json = new JSONObject();
         json.put(CompetitorJsonConstants.FIELD_ID, competitor.getId().toString());
         json.put(CompetitorJsonConstants.FIELD_NAME, competitor.getName());
-        json.put(CompetitorJsonConstants.FIELD_SAIL_ID, competitor.getBoat().getSailID());
+        json.put(CompetitorJsonConstants.FIELD_SHORT_NAME, competitor.getShortName());
         final Nationality nationality = competitor.getTeam().getNationality();
         json.put(CompetitorJsonConstants.FIELD_NATIONALITY, nationality==null?null:nationality.getThreeLetterIOCAcronym());
         json.put(CompetitorJsonConstants.FIELD_COUNTRY_CODE, nationality==null?null:nationality.getCountryCode().getTwoLetterISOCode());
-        json.put(CompetitorJsonConstants.FIELD_BOAT_CLASS_NAME, competitor.getBoat().getBoatClass().getName());
         json.put(CompetitorJsonConstants.FIELD_COLOR, competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
         if (competitor.getFlagImage() != null) {
             json.put(CompetitorJsonConstants.FIELD_FLAG_IMAGE, competitor.getFlagImage().toString());
@@ -164,8 +163,9 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                     .entity("Could not store competitor image").type(MediaType.TEXT_PLAIN).build());
         }
 
-        getService().getCompetitorStore().updateCompetitor(competitorId, competitor.getName(), competitor.getColor(), competitor.getEmail(), 
-                competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), imageUri, competitor.getFlagImage(),
+        getService().getCompetitorStore().updateCompetitor(competitorId, competitor.getName(), competitor.getShortName(), 
+                competitor.getColor(), competitor.getEmail(), 
+                competitor.getTeam().getNationality(), imageUri, competitor.getFlagImage(),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, competitor.getSearchTag());
         logger.log(Level.INFO, "Set team image for competitor " + competitor.getName());
 

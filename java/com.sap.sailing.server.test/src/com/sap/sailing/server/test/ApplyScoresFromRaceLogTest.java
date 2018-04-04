@@ -28,8 +28,6 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
@@ -63,13 +61,12 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         for (int i=0; i<numberOfCompetitors; i++) {
             final String competitorName = "C"+i;
             competitors.add(service.getBaseDomainFactory().getCompetitorStore().getOrCreateCompetitor(UUID.randomUUID(),
-                    competitorName, /* displayColor */ Color.RED, /* email */ null, /* flagImageURI */ null,
+                    competitorName, "c", /* displayColor */ Color.RED, /* email */ null, /* flagImageURI */ null,
                     new TeamImpl("STG", Collections.singleton(
                             new PersonImpl(competitorName, new NationalityImpl("GER"),
                             /* dateOfBirth */ null, "This is famous "+competitorName)),
                             new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                            /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                    new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null),
+                            /* dateOfBirth */null, "This is Rigo, the coach")),
                     /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
         }
         regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1,

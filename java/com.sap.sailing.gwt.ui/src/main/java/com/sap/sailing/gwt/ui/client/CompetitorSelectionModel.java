@@ -11,7 +11,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
@@ -19,7 +18,7 @@ import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
 public class CompetitorSelectionModel implements CompetitorSelectionProvider {
-    private final Set<CompetitorDTO> allCompetitors;
+    protected final Set<CompetitorDTO> allCompetitors;
     
     /**
      * Keys are {@link CompetitorDTO#getIdAsString()} of their values
@@ -32,7 +31,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     private FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet; 
 
-    private final CompetitorColorProvider competitorColorProvider; 
+    protected final CompetitorColorProvider competitorColorProvider; 
 
     public CompetitorSelectionModel(boolean hasMultiSelection) {
         this(hasMultiSelection, new CompetitorColorProviderImpl(), null);
@@ -258,11 +257,6 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     @Override
     public Color getColor(CompetitorDTO competitor) {
         return allCompetitors.contains(competitor) ? competitorColorProvider.getColor(competitor) : null;
-    }
-
-    @Override
-    public Color getColor(CompetitorDTO competitor, RegattaAndRaceIdentifier raceIdentfier) {
-        return allCompetitors.contains(competitor) ? competitorColorProvider.getColor(competitor, raceIdentfier) : Color.WHITE /* safe default */;
     }
 
     @Override

@@ -15,6 +15,7 @@ import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
+import com.sap.sse.util.ThreadLocalTransporter;
 
 /**
  * Represents a replicable part of an application. Such a replicable part is usually holder of application state and a
@@ -199,6 +200,29 @@ public interface Replicable<S, O extends OperationWithResult<S, ?>> extends Repl
      */
     void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean b);
 
+    default ThreadLocalTransporter getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster() {
+        return new ThreadLocalTransporter() {
+            private boolean currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster;
+            private boolean currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMasterAtBeginningOfTask;
+            
+            @Override
+            public void rememberThreadLocalStates() {
+                currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster();
+            }
+
+            @Override
+            public void pushThreadLocalStates() {
+                currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMasterAtBeginningOfTask = isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster();
+                setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster);
+            }
+
+            @Override
+            public void popThreadLocalStates() {
+                setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMasterAtBeginningOfTask);
+            }
+        };
+    }
+    
     /**
      * If an operation equal to <code>operationWithResultWithIdWrapper</code> has previously been passed to a call to
      * {@link #addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper)}, the call returns <code>true</code>

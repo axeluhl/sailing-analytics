@@ -16,7 +16,7 @@ public class SpeedWithBearingStepImpl implements SpeedWithBearingStep {
     private final TimePoint timePoint;
     private final SpeedWithBearing speedWithBearing;
     private final double courseChangeInDegrees;
-    private final double angularVelocityInDegreesPerSecond;
+    private final double turningRateInDegreesPerSecond;
 
     /**
      * Constructs a speed with bearing step with details about speed, bearing and course change related to the previous
@@ -30,11 +30,11 @@ public class SpeedWithBearingStepImpl implements SpeedWithBearingStep {
      *            Course change in degrees compared to the previous step. Zero, if this is a first step.
      */
     public SpeedWithBearingStepImpl(TimePoint timePoint, SpeedWithBearing speedWithBearing,
-            double courseChangeInDegrees, double angularVelocityInDegreesPerSecond) {
+            double courseChangeInDegrees, double turningRateInDegreesPerSecond) {
         this.timePoint = timePoint;
         this.speedWithBearing = speedWithBearing;
         this.courseChangeInDegrees = courseChangeInDegrees;
-        this.angularVelocityInDegreesPerSecond = angularVelocityInDegreesPerSecond;
+        this.turningRateInDegreesPerSecond = turningRateInDegreesPerSecond;
     }
 
     @Override
@@ -54,13 +54,13 @@ public class SpeedWithBearingStepImpl implements SpeedWithBearingStep {
 
     @Override
     public String toString() {
-        return "Timepoint: " + timePoint + ", speed: " + speedWithBearing.getKnots() + " kts, course change: " + courseChangeInDegrees
-                + "°, angular velocity: " + angularVelocityInDegreesPerSecond + "°/s, bearing: "
-                + speedWithBearing.getBearing().getDegrees() + "°";
+        return "Timepoint: " + timePoint + ", speed: " + speedWithBearing.getKnots() + " kts, course change: "
+                + courseChangeInDegrees + "°, turning rate: " + turningRateInDegreesPerSecond + " deg/s, bearing: "
+                + speedWithBearing.getBearing().getDegrees() + " deg";
     }
 
     @Override
-    public double getAngularVelocityInDegreesPerSecond() {
-        return angularVelocityInDegreesPerSecond;
+    public double getTurningRateInDegreesPerSecond() {
+        return turningRateInDegreesPerSecond;
     }
 }

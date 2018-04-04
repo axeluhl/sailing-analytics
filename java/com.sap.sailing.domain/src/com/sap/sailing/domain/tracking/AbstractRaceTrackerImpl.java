@@ -15,7 +15,7 @@ public abstract class AbstractRaceTrackerImpl extends AbstractRaceTrackerBaseImp
         final RegattaAndRaceIdentifier result;
         final RaceDefinition race = getRace();
         if (race != null) {
-            TrackedRace trackedRace = getTrackedRegatta().getTrackedRace(race);
+            TrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
             if (trackedRace != null) {
                 result = trackedRace.getRaceIdentifier();
             } else {

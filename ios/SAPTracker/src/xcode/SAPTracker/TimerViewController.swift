@@ -15,36 +15,53 @@ class TimerViewController: UIViewController {
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var timeLabel: UILabel!
     
+    weak var timer: Timer?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        validateTimer()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        invalidateTimer()
+    }
+    
+    // MARK: - Timer
+    
+    fileprivate func validateTimer() {
+        timer = Timer.scheduledTimer(
+            timeInterval: 0.1,
+            target: self,
+            selector: #selector(tickTimer),
+            userInfo: nil,
+            repeats: true
+        )
+        tickTimer()
+    }
+
+    fileprivate func invalidateTimer() {
+        timer?.invalidate()
     }
     
     // MARK: - Setup
     
     fileprivate func setup() {
         setupLocalization()
-        setupTimer()
     }
     
     fileprivate func setupLocalization() {
         titleLabel.text = Translation.TimerView.TitleLabel.Text.String
     }
     
-    fileprivate func setupTimer() {
-        let timer = Timer(
-            timeInterval: 0.1,
-            target: self,
-            selector: #selector(tick),
-            userInfo: nil,
-            repeats: true
-        )
-        RunLoop.current.add(timer, forMode: RunLoopMode.commonModes)
-    }
-    
     // MARK: - Timer
     
-    @objc fileprivate func tick(_ timer: Timer) {
+    @objc fileprivate func tickTimer() {
         let currentDate = Date()
         let timeInterval = currentDate.timeIntervalSince(startDate)
         let timerDate = Date(timeIntervalSince1970: timeInterval)

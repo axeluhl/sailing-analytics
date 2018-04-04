@@ -12,3 +12,4 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.common
 Import-Package: org.osgi.framework
 Bundle-Activator: com.sap.sailing.domain.deckmanadapter.impl.Activator
+Automatic-Module-Name: com.sap.sailing.domain.deckmanadapter
