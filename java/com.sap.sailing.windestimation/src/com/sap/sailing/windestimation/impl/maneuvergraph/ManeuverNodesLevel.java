@@ -1,6 +1,5 @@
 package com.sap.sailing.windestimation.impl.maneuvergraph;
 
-import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.tracking.Maneuver;
 
@@ -146,11 +145,11 @@ public class ManeuverNodesLevel {
 
     private boolean isMarkPassingNeighbour() {
         boolean markPassingIsNeighbour = false;
-        if (previousLevel != null && previousLevel.getManeuver().getType() == ManeuverType.MARK_PASSING
+        if (previousLevel != null && previousLevel.getManeuver().isMarkPassing()
                 && previousLevel.getManeuver().getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter()
                         .until(maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore())
                         .asSeconds() <= 24
-                || nextLevel != null && nextLevel.getManeuver().getType() == ManeuverType.MARK_PASSING
+                || nextLevel != null && nextLevel.getManeuver().isMarkPassing()
                         && maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries()
                                 .getTimePointAfter().until(nextLevel.getManeuver()
                                         .getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore())
