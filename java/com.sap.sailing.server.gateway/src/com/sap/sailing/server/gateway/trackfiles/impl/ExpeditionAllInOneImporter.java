@@ -81,7 +81,7 @@ public class ExpeditionAllInOneImporter {
     private final RaceLogTrackingAdapter adapter;
     private final TypeBasedServiceFinderFactory serviceFinderFactory;
     private final BundleContext context;
-    
+
     public enum ImportMode {
         NEW_EVENT,
         NEW_COMPETITOR,
@@ -95,10 +95,19 @@ public class ExpeditionAllInOneImporter {
         final String sensorFixImporterType;
         final List<ErrorImportDTO> errorList = new ArrayList<>();
 
-        public ImporterResult(Throwable exception, List<ErrorImportDTO> additionalErrors) {
+        public ImporterResult(String error, List<ErrorImportDTO> additionalErrors) {
             this(null, "", "", new RegattaNameAndRaceName("", ""), "", "", Collections.emptyList(),
                     Collections.emptyList(), "", additionalErrors);
-            this.errorList.add(new ErrorImportDTO(exception.getClass().getName(), exception.getMessage()));
+            errorList.add(new ErrorImportDTO("Import Error", error));
+        }
+
+        public ImporterResult(Throwable exception, List<ErrorImportDTO> additionalErrors) {
+            this(null, "", "", new RegattaNameAndRaceName("", ""), "", "", Collections.emptyList(),
+                    Collections.emptyList(), "", Collections.emptyList());
+            errorList.add(new ErrorImportDTO(exception.getClass().getName(), exception.getMessage()));
+            if (additionalErrors != null) {
+                errorList.addAll(additionalErrors);
+            }
         }
 
         private ImporterResult(final UUID eventId, final String leaderboardName, String leaderboardGroupName,
@@ -261,11 +270,11 @@ public class ExpeditionAllInOneImporter {
             if (existingRegattaName != null && !existingRegattaName.isEmpty()) {
                 regatta = service.getRegattaByName(existingRegattaName);
                 if (regatta == null) {
-                    // TODO error
+                    return new ImporterResult("The regatta could not be resolved, please ensure the name is correct", null);
                 }
                 final Leaderboard leaderboard = service.getLeaderboardByName(existingRegattaName);
                 if (leaderboard == null || !(leaderboard instanceof RegattaLeaderboard)) {
-                    // TODO error
+                    return new ImporterResult("The Leaderboard could not be resolved, please ensure a leaderboard named like the regatta exists", null);
                 }
                 regattaLeaderboard = (RegattaLeaderboard) leaderboard;
                 
@@ -283,7 +292,7 @@ public class ExpeditionAllInOneImporter {
                     }
                 }
                 if (foundEvent == null) {
-                    // TODO error?
+                    return new ImporterResult("The Event for the leaderboard could not be obtained, please ensure the leaderboard is properly attached to an leaderboardgroup that is attached to an event", null);
                 }
                 eventId = foundEvent.getId();
                 leaderboardGroupName = foundLeaderboardGroup.getName();
@@ -291,7 +300,7 @@ public class ExpeditionAllInOneImporter {
                 if (importMode == ImportMode.NEW_COMPETITOR) {
                     final Iterable<RaceColumn> raceColumns = regattaLeaderboard.getRaceColumns();
                     if (Util.isEmpty(raceColumns)) {
-                        // TODO error: no race to import to
+                        return new ImporterResult("To add competitors, a race must be existing", null);
                     }
                     try {
                         Fleet firstFleet = null;
@@ -300,7 +309,7 @@ public class ExpeditionAllInOneImporter {
                         for (RaceColumn raceColumn : raceColumns) {
                             final Iterable<? extends Fleet> fleets = raceColumn.getFleets();
                             if (Util.size(fleets) != 1) {
-                                // TODO error: split fleet racing not supported here
+                                return new ImporterResult("The expedition importer, cannot handle split fleet racing", null);
                             }
                             final Fleet fleet = fleets.iterator().next();
                             DynamicTrackedRace trackedRaceForColumn = (DynamicTrackedRace) raceColumn.getTrackedRace(fleet);
@@ -325,12 +334,12 @@ public class ExpeditionAllInOneImporter {
                     // ImportMode.NEW_RACE
                     final Iterable<? extends Series> seriesInRegatta = regatta.getSeries();
                     if (Util.isEmpty(seriesInRegatta)) {
-                        // TODO error
+                        return new ImporterResult("There is no series in this regatta, cannot add race", null);
                     }
                     final Series series = Util.get(seriesInRegatta, Util.size(seriesInRegatta) - 1);
                     final Iterable<? extends Fleet> fleets = series.getFleets();
                     if (Util.size(fleets) != 1) {
-                        // TODO error
+                        return new ImporterResult("There is more than one series in this regatta, cannot add race", null);
                     }
                     final Fleet fleet = fleets.iterator().next();
                     fleetName = fleet.getName();
@@ -343,14 +352,7 @@ public class ExpeditionAllInOneImporter {
                     trackedRaces.add(trackedRace);
                 }
             } else {
-                // TODO error
-                
-                // TODO remove when all errors are handled -> it should be assigned in all code paths that do not result in an error
-                eventId = null;
-                leaderboardGroupName = null;
-                trackedRace = null;
-                fleetName = null;
-                raceColumnName = null;
+                return new ImporterResult("Please enter a valid regatta name to proceed", null);
             }
         }
 
@@ -372,14 +374,14 @@ public class ExpeditionAllInOneImporter {
         }
     }
 
-    private DynamicTrackedRace createTrackedAndSetupRaceTimes(final List<ErrorImportDTO> errors, final String trackedRaceName,
-            TimePoint firstFixAt, TimePoint lastFixAt, final Regatta regatta,
+    private DynamicTrackedRace createTrackedAndSetupRaceTimes(final List<ErrorImportDTO> errors,
+            final String trackedRaceName, TimePoint firstFixAt, TimePoint lastFixAt, final Regatta regatta,
             final RegattaLeaderboard regattaLeaderboard, final RaceColumn raceColumn, final Fleet fleet)
             throws AllinOneImportException {
         final RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        
+
         final AbstractLogEventAuthor author = service.getServerAuthor();
-        
+
         final TimePoint startOfTracking = firstFixAt;
         final TimePoint endOfTracking = lastFixAt;
         raceLog.add(new RaceLogStartOfTrackingEventImpl(startOfTracking, author, raceLog.getCurrentPassId()));
@@ -388,14 +390,15 @@ public class ExpeditionAllInOneImporter {
 
         try {
             TimePoint startTrackingTimePoint = MillisecondsTimePoint.now();
-            // this ensures that the events consistently have different timepoints to ensure a consistent result of the state analysis
+            // this ensures that the events consistently have different timepoints to ensure a consistent result of the
+            // state analysis
             // that's why we can't just call adapter.denoteRaceForRaceLogTracking
             final TimePoint denotationTimePoint = startTrackingTimePoint.minus(1);
-            raceLog.add(new RaceLogDenoteForTrackingEventImpl(denotationTimePoint,
-                    service.getServerAuthor(), raceLog.getCurrentPassId(), trackedRaceName, regatta.getBoatClass(), UUID.randomUUID()));
-            
+            raceLog.add(new RaceLogDenoteForTrackingEventImpl(denotationTimePoint, service.getServerAuthor(),
+                    raceLog.getCurrentPassId(), trackedRaceName, regatta.getBoatClass(), UUID.randomUUID()));
+
             raceLog.add(new RaceLogStartTrackingEventImpl(startTrackingTimePoint, author, raceLog.getCurrentPassId()));
-            
+
             return trackRace(regattaLeaderboard, raceColumn, fleet);
         } catch (Exception e) {
             throw new AllinOneImportException(e, errors);
@@ -407,10 +410,10 @@ public class ExpeditionAllInOneImporter {
         DynamicTrackedRace trackedRace;
         final RaceHandle raceHandle = adapter.startTracking(service, regattaLeaderboard, raceColumn, fleet,
                 /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true);
-        
+
         // wait for the RaceDefinition to be created
         raceHandle.getRace();
-        
+
         trackedRace = WaitForTrackedRaceUtil.waitForTrackedRace(raceColumn, fleet, 10);
         if (trackedRace == null) {
             throw new IllegalStateException("Could not obtain imported race");
