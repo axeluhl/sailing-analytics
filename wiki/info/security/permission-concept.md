@@ -77,6 +77,26 @@ When the permission to perform an action is checked, the action and the object m
 
 To request the permission, the object identifier needs to be given... TODO when / backend / frontend / how...
 
+## Defaults upon First Server Startup
+
+When a system starts up for the first time, a set of default roles with default permissions and at least one default user need to be created.
+
+### Role "admin"
+
+This role implies the "*" permission. It should ideally be used with a tenant qualification.
+
+### Role "user"
+
+
+
+### User "admin"
+
+### Role for Anonymous Users
+
+When a user has not yet been authenticated, certain actions still need to be allowed for such users, in particular viewing public events or creating a new user during a sign-up activity. One approach may be to simply not request permissions for such actions. This way, all sessions would be able to perform such actions. The downside: in no server configuration would it be possible to limit access to those actions. For example, if one wanted to set up a private server instance where user sign-up is to be allowed only for administrators of that server then this could not be solved by role and permission configuration.
+
+It would be more flexible if there was a role that all anonymous users implicitly have. This role could then by default imply the permissions that we want anonymous users to have. If a special server set-up demands changes then this could easily be solved by modifying the permissions of this role.
+
 ## Administration of Authorization
 
 This section will discuss how it is determined if a user can grant or revoke a permission. Therefore, we define two rules:
