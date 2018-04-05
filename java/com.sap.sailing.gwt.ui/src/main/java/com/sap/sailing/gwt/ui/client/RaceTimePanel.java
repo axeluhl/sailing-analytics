@@ -210,7 +210,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         timeSlider.setMaxValue(new Double(timeRangeProvider.getToTime().getTime()), false);
         timeSlider.setCurrentValue(new Double(timer.getTime().getTime()), true);
         timeSlider.clearMarkersAndLabelsAndTicks();
-        redrawAllMarkers(lastRaceTimesInfo);
+        if (lastRaceTimesInfo != null) {
+            redrawAllMarkers(lastRaceTimesInfo);
+        }
     }
 
     /**
