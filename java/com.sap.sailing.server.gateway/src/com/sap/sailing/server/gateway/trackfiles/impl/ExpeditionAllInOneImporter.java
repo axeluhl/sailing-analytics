@@ -97,8 +97,11 @@ public class ExpeditionAllInOneImporter {
 
         public ImporterResult(String error, List<ErrorImportDTO> additionalErrors) {
             this(null, "", "", new RegattaNameAndRaceName("", ""), "", "", Collections.emptyList(),
-                    Collections.emptyList(), "", additionalErrors);
+                    Collections.emptyList(), "", Collections.emptyList());
             errorList.add(new ErrorImportDTO("Import Error", error));
+            if (additionalErrors != null) {
+                errorList.addAll(additionalErrors);
+            }
         }
 
         public ImporterResult(Throwable exception, List<ErrorImportDTO> additionalErrors) {
