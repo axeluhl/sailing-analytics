@@ -4552,7 +4552,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     false);
             eventLeaderboardGroupUUIDs.add(leaderboardGroupDTO.getId());
         } else {
-            leaderboardNames.addAll(getLeaderboardNames());
             updateLeaderboardGroup(eventName, eventName, newEvent.getDescription(), eventName, leaderboardNames, null, null);
             leaderboardGroupDTO = getLeaderboardGroupByName(eventName, false);
         }
