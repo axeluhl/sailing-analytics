@@ -1,5 +1,6 @@
 package com.sapsailing.xrr.structureimport.eventimport;
 
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import java.io.IOException;
 
 import java.io.InputStream;
@@ -66,7 +67,7 @@ public class EventParser {
         
         URLConnection connection = null;
         try {
-            connection = new URL(url).openConnection();
+            connection = HttpUrlConnectionHelper.redirectConnection(new URL(url));
             is = connection.getInputStream();
         } catch (MalformedURLException e) {
             e.printStackTrace();
