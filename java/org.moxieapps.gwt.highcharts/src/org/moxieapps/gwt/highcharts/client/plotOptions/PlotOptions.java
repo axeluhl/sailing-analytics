@@ -220,6 +220,23 @@ public abstract class PlotOptions<T extends PlotOptions> extends Configurable<T>
     }
 
     /**
+     * Convenience method for setting the 'cropThreshold' option.  Equivalent to:
+     * <pre><code>
+     *     plotOptions.setOption("crpThreshold", 25);
+     * </code></pre>
+     * When the series contains less points than the crop threshold, all points are drawn, even if the points fall
+     * outside the visible plot area at the current zoom. The advantage of drawing all points (including markers and
+     * columns), is that animation is performed on updates. On the other hand, when the series contains more points
+     * than the crop threshold, the series data is cropped to only contain points that fall within the plot area. The
+     * advantage of cropping away invisible points is to increase performance on large series. Defaults to 50.
+     * @param cropThreshold The limit of points to be displayed at any one time
+     * @return A reference to this {@link PlotOptions} instance for convenient method chaining.
+     */
+    public T setCropThreshold(Number cropThreshold) {
+        return this.setOption("cropThreshold", cropThreshold);
+    }
+
+    /**
      * Convenience method for setting the 'cursor' plot option.  Equivalent to:
      * <pre><code>
      *     plotOptions.setOption("cursor", PlotOptions.Cursor.POINTER);
@@ -720,6 +737,33 @@ public abstract class PlotOptions<T extends PlotOptions> extends Configurable<T>
      */
     public T setZIndex(Number zIndex) {
         return this.setOption("zIndex", zIndex);
+    }
+
+    /**
+     * Convenience method for setting the 'zoneAxis' plot option.  Equivalent to:
+     * <pre><code>
+     *     plotOption.setOption("zoneAxis", "y");
+     * </code></pre>
+     * Defines the Axis on which the zones are applied. Defaults to y.
+     * @param zoneAxis
+     * @return A reference to this {@link PlotOptions} instance for convenient method chaining.
+     * @see Zone.Axis
+     */
+    public T setZoneAxis(Zone.Axis zoneAxis) {
+        return this.setOption("zoneAxis", zoneAxis != null ? zoneAxis.toString() : null);
+    }
+
+    /**
+     * Convenience method for setting the 'zone' plot option.  Equivalent to:
+     * <pre><code>
+     *     plotOption.setOption("zone", );
+     * </code></pre>
+     * @param zones An array defining zones within a series.
+     * @return A reference to this {@link PlotOptions} instance for convenient method chaining.
+     * @see Zone
+     */
+    public T setZones(Zone... zones) {
+        return this.setOption("zones", zones);
     }
 
 }
