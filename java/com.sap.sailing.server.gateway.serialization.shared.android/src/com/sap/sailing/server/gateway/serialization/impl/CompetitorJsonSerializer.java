@@ -7,7 +7,9 @@ import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
@@ -19,17 +21,19 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     public static final String FIELD_ID = "id";
     
     private final JsonSerializer<Team> teamJsonSerializer;
+    private final JsonSerializer<Boat> boatJsonSerializer;
 
     public static CompetitorJsonSerializer create() {
-        return new CompetitorJsonSerializer(TeamJsonSerializer.create());
+        return new CompetitorJsonSerializer(TeamJsonSerializer.create(), BoatJsonSerializer.create());
     }
 
     public CompetitorJsonSerializer() {
-        this(null);
+        this(null, null);
     }
 
-    public CompetitorJsonSerializer(JsonSerializer<Team> teamJsonSerializer) {
+    public CompetitorJsonSerializer(JsonSerializer<Team> teamJsonSerializer, JsonSerializer<Boat> boatJsonSerializer) {
         this.teamJsonSerializer = teamJsonSerializer;
+        this.boatJsonSerializer = boatJsonSerializer;
     }
     
     public static JSONObject getCompetitorIdQuery(Competitor competitor) {
@@ -68,6 +72,9 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         if (teamJsonSerializer != null) {
             result.put(CompetitorJsonConstants.FIELD_TEAM, teamJsonSerializer.serialize(competitor.getTeam()));
         }
+        if (boatJsonSerializer != null && competitor.hasBoat()) {
+            result.put(CompetitorJsonConstants.FIELD_BOAT, boatJsonSerializer.serialize(((CompetitorWithBoat) competitor).getBoat()));
+        }
         result.put(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR, competitor.getTimeOnTimeFactor());
         result.put(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                 competitor.getTimeOnDistanceAllowancePerNauticalMile() == null ? null :
@@ -75,7 +82,7 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         return result;
     }
 
-    protected Color getColor(Competitor competitor ) {
+    protected Color getColor(Competitor competitor) {
         return competitor.getColor();
     }
 }
