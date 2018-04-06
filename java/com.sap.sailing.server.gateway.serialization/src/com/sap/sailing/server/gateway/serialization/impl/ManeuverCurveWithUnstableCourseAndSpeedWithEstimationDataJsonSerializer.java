@@ -19,6 +19,8 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerial
     public final static String AVERAGE_COURSE_AFTER_IN_DEGREES = "averageCourseAfterInDegrees";
     public final static String DURATION_FROM_PREVIOUS_MANEUVER_IN_SECONDS = "durationFromPreviousManeuverInSeconds";
     public final static String DURATION_TO_NEXT_MANEUVER_IN_SECONDS = "durationToNextManeuverInSeconds";
+    public final static String GPS_FIXES_COUNT_FROM_PREVIOUS_MANEUVER_IN_SECONDS = "gpsFixesCountFromPreviousManeuver";
+    public final static String GPS_FIXES_COUNT_TO_NEXT_MANEUVER_IN_SECONDS = "gpsFixesCountToNextManeuver";
     public static final String GPS_FIXES_COUNT = "gpsFixesCount";
 
     @Override
@@ -41,6 +43,10 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerial
                     curve.getDurationFromManeuverEndToNextManeuverStart() == null ? null
                             : curve.getDurationFromManeuverEndToNextManeuverStart().asSeconds());
             result.put(GPS_FIXES_COUNT, curve.getGpsFixesCount());
+            result.put(GPS_FIXES_COUNT_FROM_PREVIOUS_MANEUVER_IN_SECONDS,
+                    curve.getGpsFixesCountFromPreviousManeuverEndToManeuverStart());
+            result.put(GPS_FIXES_COUNT_TO_NEXT_MANEUVER_IN_SECONDS,
+                    curve.getGpsFixesCountFromManeuverEndToNextManeuverStart());
         }
         return result;
     }
