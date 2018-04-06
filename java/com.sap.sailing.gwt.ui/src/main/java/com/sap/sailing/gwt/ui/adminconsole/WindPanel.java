@@ -17,6 +17,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -44,9 +46,12 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestOracle;
+import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -55,6 +60,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.dto.ExpeditionAllInOneConstants;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
@@ -89,7 +95,6 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  *
  */
 public class WindPanel extends FormPanel implements RegattasDisplayer, WindShower {
-
     private static final String WIND_IMPORT_PARAMETER_RACES = "races";
 
     private static final String EXPEDITON_IMPORT_PARAMETER_BOAT_ID = "boatId";
@@ -120,6 +125,13 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     private final CellTable<WindDTO> rawWindFixesTable;
     private final VerticalPanel windFixPanel;
 
+    private RadioButton newEventImport;
+    private RadioButton newCompetitorImport;
+    private RadioButton newRaceImport;
+    private SuggestBox regatttaSuggestBox;
+    private SuggestBox boatClassInput;
+    private MultiWordSuggestOracle regattaOracle;
+
     public WindPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
         ensureDebugId("WindPanel");
@@ -132,7 +144,6 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSize("100%", "100%");
         this.setWidget(mainPanel);
-
         trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, errorReporter,
                 regattaRefresher,
                 stringMessages, /*multiselection*/true, /* actionButtonsEnabled */ false);
@@ -146,6 +157,8 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             }
         });
 
+        regattaOracle = new MultiWordSuggestOracle(". _");
+        
         windCaptionPanel = new CaptionPanel(stringMessages.wind());
         windCaptionPanel.setVisible(false);
         mainPanel.add(windCaptionPanel);
@@ -475,6 +488,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
                         response.getRaceColumnName(), response.getFleetName(), response.getGpsDeviceIds(),
                         response.getSensorDeviceIds(), response.getSensorFixImporterType(), sailingService,
                         errorReporter, stringMessages);
+                refreshRegattaOracle();
             } else {
                 ExpeditionDataImportResultsDialog.showResults(response);
             }
@@ -491,38 +505,56 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         final FlowPanel regattaNamePanel = new FlowPanel();
         regattaNamePanel.setVisible(false);
         contentPanel.add(regattaNamePanel);
-        final RadioButton newEventImport = new RadioButton("importMode", "TODO new event");
+        newEventImport = new RadioButton(ExpeditionAllInOneConstants.REQUEST_PARAMETER_IMPORT_MODE, stringMessages.createNewEvent());
         newEventImport.setFormValue("NEW_EVENT");
         newEventImport.setValue(true);
         importModePanel.add(newEventImport);
         newEventImport.addClickHandler(event -> {
             regattaNamePanel.setVisible(false);
+            boatClassInput.setEnabled(true);
+            boatClassInput.setValue(null);
         });
-        final RadioButton newCompetitorImport = new RadioButton("importMode", "TODO new competitor");
-        newCompetitorImport.setFormValue("NEW_COMPETITOR");
+        newCompetitorImport = new RadioButton(ExpeditionAllInOneConstants.REQUEST_PARAMETER_IMPORT_MODE, stringMessages.newExpeditionCompetitor());
+        newCompetitorImport.setFormValue(ExpeditionAllInOneConstants.ImportMode.NEW_COMPETITOR.name());
         importModePanel.add(newCompetitorImport);
         newCompetitorImport.addClickHandler(event -> {
             regattaNamePanel.setVisible(true);
+            regatttaSuggestBox.setEnabled(true);
+            regatttaSuggestBox.setValue(null);
+            boatClassInput.setEnabled(false);
         });
-        final RadioButton newRaceImport = new RadioButton("importMode", "TODO new race");
-        newRaceImport.setFormValue("NEW_RACE");
+        newRaceImport = new RadioButton(ExpeditionAllInOneConstants.REQUEST_PARAMETER_IMPORT_MODE, stringMessages.newExpeditionRace());
+        newRaceImport.setFormValue(ExpeditionAllInOneConstants.ImportMode.NEW_RACE.name());
         importModePanel.add(newRaceImport);
         newRaceImport.addClickHandler(event -> {
             regattaNamePanel.setVisible(true);
+            regatttaSuggestBox.setEnabled(true);
+            regatttaSuggestBox.setValue(null);
+            boatClassInput.setEnabled(false);
         });
-        final Label regattaNameLabel = new Label("TODO: regatta name" + ":");
+        
+        fileUpload.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                enableExpeditionRadios(fileUpload.getFilename() != null);
+            }
+        });
+        
+        final Label regattaNameLabel = new Label(stringMessages.regattaName());
         regattaNamePanel.add(regattaNameLabel);
         final TextBox regattaName = new TextBox();
         regattaName.setName("regattaName");
-        regattaNamePanel.add(regattaName);
-        
+
+        refreshRegattaOracle();
+        regatttaSuggestBox = new SuggestBox(regattaOracle , regattaName);
+        regattaNamePanel.add(regatttaSuggestBox);
         final HorizontalPanel boatClassPanel = new HorizontalPanel();
         boatClassPanel.setSpacing(5);
         contentPanel.add(boatClassPanel);
         final Label boatClassLabel = new Label(stringMessages.boatClass() + ":");
         boatClassPanel.add(boatClassLabel);
         boatClassPanel.setCellVerticalAlignment(boatClassLabel, HasVerticalAlignment.ALIGN_MIDDLE);
-        final SuggestBox boatClassInput = new SuggestBox(new BoatClassMasterdataSuggestOracle());
+        boatClassInput = new SuggestBox(new BoatClassMasterdataSuggestOracle());
         boatClassInput.getValueBox().setName(EXPEDITON_IMPORT_PARAMETER_BOAT_CLASS);
         boatClassPanel.add(boatClassInput);
         boatClassPanel.setCellVerticalAlignment(boatClassInput, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -531,6 +563,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         controlPanel.add(uploadButton);
         controlPanel.add(busyIndicator);
         contentPanel.add(controlPanel);
+        
         final Runnable validation = () -> {
             final String filename = fileUpload.getFilename(), boatClass = boatClassInput.getValue();
             final boolean fileValid = filename != null && !filename.trim().isEmpty();
@@ -538,11 +571,72 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             uploadButton.setEnabled(fileValid && boatClassValid);
         };
         
+        regatttaSuggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
+
+            @Override
+            public void onSelection(SelectionEvent<Suggestion> event) {
+                final String selected = event.getSelectedItem().getReplacementString();
+                if (selected != null) {
+                    sailingService.getRegattaByName(selected, new AsyncCallback<RegattaDTO>() {
+                        @Override
+                        public void onSuccess(RegattaDTO result) {
+                            boatClassInput.setEnabled(true);
+                            if (result.boatClass != null) {
+                                boatClassInput.setValue(result.boatClass.getName(), true);
+                                validation.run();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            boatClassInput.setEnabled(true);
+                            errorReporter.reportError("Could not determine Regatta " + selected);
+                        }
+                    });
+                }
+            }
+        });
+        
+        
         fileUpload.addChangeHandler(event -> validation.run());
         boatClassInput.addSelectionHandler(event -> validation.run());
         boatClassInput.addKeyUpHandler(event -> validation.run());
         validation.run();
+        
+        enableExpeditionRadios(false);
         return rootPanel;
+    }
+
+    protected void enableExpeditionRadios(boolean b) {
+        newCompetitorImport.setEnabled(b);
+        newEventImport.setEnabled(b);
+        newRaceImport.setEnabled(b);
+        if(!b) {
+            //also prevent later stages
+            regatttaSuggestBox.setEnabled(false);
+            boatClassInput.setEnabled(false);
+        } else {
+            //set consistent start scenario after choosing different file
+            newEventImport.setValue(true);
+            boatClassInput.setEnabled(true);
+            boatClassInput.setValue(null);
+        }
+    }
+
+    private void refreshRegattaOracle() {
+        sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
+            @Override
+            public void onSuccess(List<RegattaDTO> result) {
+                regattaOracle.clear();
+                for (RegattaDTO regatta : result) {
+                    regattaOracle.add(regatta.getName());
+                }
+            }
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Could not load regattanames " + caught.getMessage());
+            }
+        });
     }
 
     private CaptionPanel createExpeditionWindImportPanel() {

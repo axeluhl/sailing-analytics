@@ -2068,4 +2068,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windFinderWeatherData();
     String positionEditOnNonTrackingRace();
     String errorCreatingLeaderboardGroup(String name);
+    String newExpeditionRace();
+    String newExpeditionCompetitor();
 }
