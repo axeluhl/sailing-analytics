@@ -5,8 +5,7 @@ Bundle-SymbolicName: com.sap.sailing.server.gateway
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.sap.sailing.server,
- com.sap.sailing.server.operationaltransformation,
+Import-Package: com.sap.sailing.server.operationaltransformation,
  javax.ws.rs;version="1.1.1",
  javax.ws.rs.core;version="1.1.1",
  javax.ws.rs.ext;version="1.1.1",
@@ -15,7 +14,8 @@ Import-Package: com.sap.sailing.server,
  org.json.simple.parser,
  org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker;version="1.3.1"
-Require-Bundle: com.sap.sailing.domain,
+Require-Bundle: com.sap.sailing.server,
+ com.sap.sailing.domain,
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.declination,
  com.sap.sailing.domain.tractracadapter,
