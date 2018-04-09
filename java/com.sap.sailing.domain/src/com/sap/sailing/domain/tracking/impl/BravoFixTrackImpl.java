@@ -75,7 +75,6 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
      */
     private transient GPSFixTrack<ItemType, GPSFixMoving> gpsTrack;
 
-    
     private class CacheInvalidationGpsTrackListener implements GPSTrackListener<ItemType, GPSFixMoving> {
         private static final long serialVersionUID = 6395529765232404414L;
         @Override

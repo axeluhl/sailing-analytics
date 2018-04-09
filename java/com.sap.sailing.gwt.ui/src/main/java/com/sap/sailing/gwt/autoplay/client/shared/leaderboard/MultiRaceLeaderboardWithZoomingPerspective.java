@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.autoplay.client.shared.leaderboard;
 
-import java.util.Collection;
-
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.dom.client.Style.FontWeight;
@@ -56,7 +54,7 @@ public class MultiRaceLeaderboardWithZoomingPerspective extends AbstractPerspect
             SailingServiceAsync sailingService, UserService userService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
-            boolean startInFullScreenMode, Collection<DetailType> availableDetailTypes) {
+            boolean startInFullScreenMode, Iterable<DetailType> availableDetailTypes) {
         super(parent, componentContext, lifecycle, settings);
         this.stringMessages = stringMessages;
         Window.addResizeHandler(new ResizeHandler() {
@@ -186,7 +184,7 @@ public class MultiRaceLeaderboardWithZoomingPerspective extends AbstractPerspect
             PerspectiveCompositeSettings<LeaderboardWithZoomingPerspectiveSettings> settings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, 
-            String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages, Collection<DetailType> availableDetailTypes) {
+            String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
         MultiRaceLeaderboardPanelLifecycle leaderboardPanelLifecycle = getPerspectiveLifecycle().getLeaderboardPanelLifecycle();
         MultiRaceLeaderboardSettings leaderboardSettings = settings
                 .findSettingsByComponentId(leaderboardPanelLifecycle.getComponentId());
