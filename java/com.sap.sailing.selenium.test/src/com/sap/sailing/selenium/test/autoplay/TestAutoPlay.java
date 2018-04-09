@@ -96,8 +96,8 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         }
         String url = autoPlayConfiguration.getConfiguredUrl();
         // eventid and server might change slightly, better only check arguments
-        assertTrue(url.contains("autoplayType=SIXTYINCH"));
-        assertTrue(url.contains("name=BMW+Cup+(J80)"));
+        assertTrue("Url does not contain proper type " + url, url.contains("autoplayType=SIXTYINCH"));
+        assertTrue("Url does not contain proper name " + url, url.contains("name=BMW+Cup+(J80)"));
         // give some extra time to load settings and create url
         AutoPlayUpcomingView autoplayPage = page.goToAutoPlaySixtyInchUrl(getWebDriver(), url);
         try {
@@ -132,8 +132,8 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         }
         String url = autoPlayConfiguration.getConfiguredUrl();
         // eventid and server might change slightly, better only check arguments
-        assertTrue(url.contains("lbwh.saph.title=Leaderboard%3A+BMW+Cup+(J80)"));
-        assertTrue(url.contains("name=BMW+Cup+(J80)"));
+        assertTrue("Url does not contain proper title " + url, url.contains("lbwh.saph.title=Leaderboard%3A+BMW+Cup+(J80)"));
+        assertTrue("Url does not contain proper name " + url, url.contains("name=BMW+Cup+(J80)"));
         AutoPlayLeaderboardView autoplayPage = page.goToAutoPlayClassicUrl(getWebDriver(), url);
         // give some extra time to load the leaderboard and finish the animation
         try {
