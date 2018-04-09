@@ -7,13 +7,16 @@ import static org.mockito.Mockito.mock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -52,9 +55,10 @@ public class StatisticsTest {
     private static final long START_OF_RACE = 200;
     private static final long END_OF_TRACKING = 400;
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
-    private final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null,
-            new BoatImpl("boat", boatClass, "DE 12345"), /* timeOnTimeFactor */ null,
+    private final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", "c", null, null, null, null,
+            /* timeOnTimeFactor */ null,
             /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+    private final Boat boat = new BoatImpl("boat", "b", boatClass, "DE 12345");
     private final Mark mark1 = DomainFactory.INSTANCE.getOrCreateMark("mark1");
     private final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
     private final Mark mark3 = DomainFactory.INSTANCE.getOrCreateMark("mark3");
@@ -68,12 +72,14 @@ public class StatisticsTest {
     @Before
     public void setUp() {
         regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
-                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
+                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, false,
                 /* startDate */ null, /* endDate */null, null, null, "a", null));
 
         final Course course = new CourseImpl("course",
                 Arrays.asList(new Waypoint[] { waypoint1, waypoint2, waypoint3 }));
-        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(comp));
+        Map<Competitor, Boat> competitors = new HashMap<>();
+        competitors.put(comp, boat);
+        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitors);
 
         trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline>emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,

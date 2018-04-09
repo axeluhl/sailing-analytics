@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
 
 import com.mongodb.BasicDBList;
@@ -14,8 +12,6 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.impl.BoatImpl;
-import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
@@ -26,6 +22,8 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sse.mongodb.MongoDBService;
+
+import junit.framework.TestCase;
 
 public class LeaderboardStorageTest extends TestCase {
 
@@ -58,10 +56,9 @@ public class LeaderboardStorageTest extends TestCase {
         List<DynamicPerson> sailorList = new ArrayList<DynamicPerson>();
         sailorList.add(new PersonImpl("sailor", new NationalityImpl("GER"), null, ""));
         DynamicTeam team = new TeamImpl("team", sailorList, null);
-        DynamicBoat boat = new BoatImpl("woot", service.getBaseDomainFactory().getOrCreateBoatClass("H16"), "70155");
         String competitorId = "testC";
-        Competitor competitor = service.getBaseDomainFactory().getOrCreateCompetitor(competitorId, "Test C", null,
-                null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+        Competitor competitor = service.getBaseDomainFactory().getOrCreateCompetitor(competitorId, "Test C", null, null,
+                null, null, team, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
 
         double carriedPoints = 2.0;
         leaderboard.setCarriedPoints(competitor, carriedPoints);

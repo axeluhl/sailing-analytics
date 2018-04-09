@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
@@ -18,6 +17,7 @@ import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -40,8 +40,6 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
-import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
@@ -49,9 +47,7 @@ import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
-import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
-import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.panels.CustomizableFilterablePanel;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
@@ -67,9 +63,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
     protected RefreshableSelectionModel<RaceDTO> refreshableSelectionModel;
     
-    private SelectionCheckboxColumn<RaceDTO> selectionCheckboxColumn;
-
-    protected FlushableCellTable<RaceDTO> raceTable;
+    protected CellTable<RaceDTO> raceTable;
 
     private ListDataProvider<RaceDTO> raceList;
 
@@ -127,8 +121,6 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     }
     
     protected void createUI() {
-        AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
-        raceList = new ListDataProvider<>();
         settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
         VerticalPanel panel = new VerticalPanel();
@@ -139,8 +131,9 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         noTrackedRacesLabel = new Label(stringMessages.noRacesYet());
         noTrackedRacesLabel.setWordWrap(false);
         panel.add(noTrackedRacesLabel);
-        AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceTable = new FlushableCellTable<RaceDTO>(/* pageSize */10000, tableRes);
+        TableWrapper<RaceDTO, RefreshableSelectionModel<RaceDTO>> raceTableWrapper = new TrackedRacesTableWrapper(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ true);
+        raceTable = raceTableWrapper.getTable();
+        raceTable.setPageSize(1000);
         raceTable.ensureDebugId("TrackedRacesCellTable");
         
         Label lblFilterRaces = new Label(stringMessages.filterRaces()+":");
@@ -149,7 +142,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         lblFilterRaces.getElement().getStyle().setMarginRight(10, Unit.PX);
         filterPanel.add(lblFilterRaces);
         filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
-
+        raceList = raceTableWrapper.getDataProvider();
         filterablePanelRaces = new CustomizableFilterablePanel<RaceDTO>(allRaces, raceTable, raceList) {            
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {
@@ -160,6 +153,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                 return strings;
             }
         };
+        raceTableWrapper.registerSelectionModelOnNewDataProvider(filterablePanelRaces.getAllListDataProvider());
         Label lblFilterByRegatta = new Label(stringMessages.filterByRegatta());
         lblFilterByRegatta.setWordWrap(false);
         listBoxRegattas = new ListBox();
@@ -189,38 +183,13 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         filterPanel.add(filterablePanelRaces);
         filterPanel.setCellVerticalAlignment(filterablePanelRaces, HasVerticalAlignment.ALIGN_MIDDLE);
 
-        final EntityIdentityComparator<RaceDTO> entityIdentityComparator = new EntityIdentityComparator<RaceDTO>() {
-            @Override
-            public boolean representSameEntity(RaceDTO dto1, RaceDTO dto2) {
-                return dto1.getRaceIdentifier().equals(dto2.getRaceIdentifier());
-            }
-            @Override
-            public int hashCode(RaceDTO t) {
-                return t.getRaceIdentifier().hashCode();
-            }
-        };
-        if (multiSelection) {
-            this.selectionCheckboxColumn = new SelectionCheckboxColumn<RaceDTO>(
-                    tableResources.cellTableStyle().cellTableCheckboxSelected(),
-                    tableResources.cellTableStyle().cellTableCheckboxDeselected(),
-                    tableResources.cellTableStyle().cellTableCheckboxColumnCell(), entityIdentityComparator,
-                    filterablePanelRaces.getAllListDataProvider(), raceTable);
-            refreshableSelectionModel = selectionCheckboxColumn.getSelectionModel();
-            raceTable.setSelectionModel(refreshableSelectionModel, this.selectionCheckboxColumn.getSelectionManager());
-        } else {
-            refreshableSelectionModel = new RefreshableSingleSelectionModel<RaceDTO>(entityIdentityComparator,
-                    filterablePanelRaces.getAllListDataProvider());
-            raceTable.setSelectionModel(refreshableSelectionModel);
-        }
-        
-        ListHandler<RaceDTO> columnSortHandler = setupTableColumns(stringMessages);
+        refreshableSelectionModel = raceTableWrapper.getSelectionModel();
+        setupTableColumns(stringMessages, raceTableWrapper.getColumnSortHandler());
         raceTable.setWidth("300px");
 
         raceTable.setVisible(false);
-        panel.add(raceTable);
-        raceList.addDataDisplay(raceTable);
-        raceTable.addColumnSortHandler(columnSortHandler);
-        raceTable.getSelectionModel().addSelectionChangeHandler(new Handler() {
+        panel.add(raceTableWrapper);
+        refreshableSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 Set<RaceDTO> selectedRaces = refreshableSelectionModel.getSelectedSet();
@@ -250,8 +219,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
     abstract protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel);
 
-    private ListHandler<RaceDTO> setupTableColumns(final StringMessages stringMessages) {
-        ListHandler<RaceDTO> columnSortHandler = new ListHandler<RaceDTO>(raceList.getList());
+    private void setupTableColumns(final StringMessages stringMessages, ListHandler<RaceDTO> columnSortHandler) {
         TextColumn<RaceDTO> regattaNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
@@ -413,10 +381,6 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                 return race.isTracked && race.trackedRace != null ? race.trackedRace.delayToLiveInMs : null;
             }
         });
-        if (multiSelection) {
-            columnSortHandler.setComparator(selectionCheckboxColumn, selectionCheckboxColumn.getComparator());
-            raceTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
-        }
         raceTable.addColumn(regattaNameColumn, stringMessages.regatta());
         raceTable.addColumn(boatClassNameColumn, stringMessages.boatClass());
         raceTable.addColumn(raceNameColumn, stringMessages.race());
@@ -425,8 +389,6 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         raceTable.addColumn(hasGPSDataColumn, stringMessages.gpsData());
         raceTable.addColumn(raceStatusColumn, stringMessages.status());
         raceTable.addColumn(raceLiveDelayColumn, stringMessages.delayInSeconds());
-
-        return columnSortHandler;
     }
 
     @Override

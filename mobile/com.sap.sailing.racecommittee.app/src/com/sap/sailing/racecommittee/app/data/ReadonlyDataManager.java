@@ -2,7 +2,9 @@ package com.sap.sailing.racecommittee.app.data;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
@@ -130,8 +132,8 @@ public interface ReadonlyDataManager {
      *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
      *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
      */
-    LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createCompetitorsLoader(ManagedRace managedRace,
-        LoadClient<Collection<Competitor>> callback);
+    LoaderCallbacks<DataLoaderResult<Map<Competitor, Boat>>> createCompetitorsLoader(ManagedRace managedRace,
+        LoadClient<Map<Competitor, Boat>> callback);
 
     /**
      * Create a new {@link LoaderCallbacks} object for loading {@link Competitor}
@@ -142,8 +144,8 @@ public interface ReadonlyDataManager {
      *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
      *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
      */
-    LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createStartOrderLoader(ManagedRace managedRace,
-        LoadClient<Collection<Competitor>> callback);
+    LoaderCallbacks<DataLoaderResult<Map<Competitor, Boat>>> createStartOrderLoader(ManagedRace managedRace,
+        LoadClient<Map<Competitor, Boat>> callback);
 
     /**
      * Create a new {@link LoaderCallbacks} object for loading {@link LeaderboardResult}

@@ -17,6 +17,7 @@ import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -53,7 +54,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
                         EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE,
                         EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry(),
-                        mock(RaceLogResolver.class), new RaceTrackingConnectivityParametersImpl(new URL(
+                        mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), new RaceTrackingConnectivityParametersImpl(new URL(
                                 "http://"
                                         + TracTracConnectionConstants.HOST_NAME
                                         + "/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=5b08a9ee-9933-11e0-85be-406186cbf87c"),

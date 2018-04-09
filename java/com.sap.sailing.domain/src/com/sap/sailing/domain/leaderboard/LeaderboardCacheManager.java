@@ -100,11 +100,6 @@ public class LeaderboardCacheManager {
         }
 
         @Override
-        public void sailIdChanged(String oldSailId, String newSailId) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
         public void nationalityChanged(WithNationality what, Nationality oldNationality, Nationality newNationality) {
             removeFromCache(leaderboard);
         }
@@ -119,6 +114,11 @@ public class LeaderboardCacheManager {
             removeFromCache(leaderboard);
         }
 
+        @Override
+        public void shortNameChanged(String oldShortName, String newShortName) {
+            removeFromCache(leaderboard);
+        }
+        
         public synchronized void updateCompetitorListeners() {
             Set<Competitor> competitorsToStopObserving = new HashSet<>(observedCompetitors);
             for (Competitor competitor : leaderboard.getCompetitors()) {

@@ -19,6 +19,11 @@ public class PairingListImpl<Flight, Group, Competitor,CompetitorAllocation> imp
      * @param standardDev: describes quality of our pList (the lower the standardDev, the better the pairing list)
      */
     public PairingListImpl(PairingListTemplate template, CompetitionFormat<Flight, Group, Competitor, CompetitorAllocation> competitionFormat) {
+        final int numberOfCompetitorAllocations = Util.size(competitionFormat.getCompetitorAllocation());
+        if (numberOfCompetitorAllocations < competitionFormat.getMaxNumberOfCompetitorAllocationsNeeded()) {
+            throw new IllegalArgumentException("Too few competitor allocations ("+numberOfCompetitorAllocations+
+                    "). "+competitionFormat.getMaxNumberOfCompetitorAllocationsNeeded()+" are needed.");
+        }
         this.pairingListTemplate = template;
         this.competitionFormat = competitionFormat;
         this.competitors = Util.asList(competitionFormat.getCompetitors());
@@ -38,8 +43,9 @@ public class PairingListImpl<Flight, Group, Competitor,CompetitorAllocation> imp
         
         final List<Pair<Competitor, CompetitorAllocation>> result = new ArrayList<>();
         for (int slot = 0; slot < competitorIndicesInRace.size(); slot++) {
-            if (competitorIndicesInRace.get(slot) >= 0) {
-                result.add(new Pair<Competitor, CompetitorAllocation>(competitors.get(competitorIndicesInRace.get(slot)),
+            final Integer index = competitorIndicesInRace.get(slot);
+            if (index >= 0) {
+                result.add(new Pair<Competitor, CompetitorAllocation>(competitors.get(index),
                         Util.get(competitionFormat.getCompetitorAllocation(), slot)));
             } else {
                 result.add(new Pair<Competitor, CompetitorAllocation>(null, 

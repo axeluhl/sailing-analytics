@@ -107,7 +107,7 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
     public static List<Competitor> createCompetitors(int numberOfCompetitorsToCreate) {
         List<Competitor> result = new ArrayList<Competitor>();
         for (int i=1; i<=numberOfCompetitorsToCreate; i++) {
-            result.add(createCompetitor("C"+i));
+            result.add(createCompetitorWithBoat("C"+i));
         }
         return result;
     }
@@ -126,8 +126,8 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
         series.add(defaultSeries);
 
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass,
-        /* startDate */null, /* endDate */null, series, /* persistent */false, scoringScheme, "123", null,
-                OneDesignRankingMetric::new);
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */null, /* endDate */null, series, 
+                /* persistent */false, scoringScheme, "123", null, OneDesignRankingMetric::new);
         return regatta;
     }
 
@@ -182,7 +182,8 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
         }
 
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
-                /*startDate*/ null, /*endDate*/ null, series, /* persistent */ false, scoringScheme, "123", null, OneDesignRankingMetric::new);
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, series, 
+                /* persistent */ false, scoringScheme, "123", null, OneDesignRankingMetric::new);
         return regatta;
     }
     
@@ -227,8 +228,8 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
             }
         }
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
-                /*startDate*/ null, /*endDate*/ null, series, /* persistent */ false, scoringScheme,
-                /* ID */ "123", /* course area */ null, OneDesignRankingMetric::new);
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, series,
+                /* persistent */ false, scoringScheme, /* ID */ "123", /* course area */ null, OneDesignRankingMetric::new);
         return regatta;
     }
 }
