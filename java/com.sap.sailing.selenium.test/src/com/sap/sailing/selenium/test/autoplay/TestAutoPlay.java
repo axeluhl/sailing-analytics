@@ -44,7 +44,6 @@ public class TestAutoPlay extends AbstractSeleniumTest {
     private static final Date BMW_STOP_EVENT_TIME = DatatypeConverter.parseDateTime("2017-04-08T10:50:00-05:00")
             .getTime();
     private static final String BMW_CUP_RACE_NAME = "R1";
-    private static final String NON_CONFIGURED_EXPECTED_URL = "http://localhost:8888/gwt/AutoPlay.html?locale=en&lbwh.saph.title=Leaderboard%3A+BMW+Cup+(J80)&eventId=ad3112bd-b771-43c5-923e-6e332ca40290&name=BMW+Cup+(J80)";
 
     @Override
     @Before
@@ -90,10 +89,16 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         AutoPlayConfiguration autoPlayConfiguration = page.getAutoPlayConfiguration();
         assertNotNull(autoPlayConfiguration);
         autoPlayConfiguration.select("Sixty Inch Autoplay", BMW_CUP_EVENT, BMW_CUP_REGATTA);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
         String url = autoPlayConfiguration.getConfiguredUrl();
         // eventid and server might change slightly, better only check arguments
         assertTrue(url.contains("autoplayType=SIXTYINCH"));
         assertTrue(url.contains("name=BMW+Cup+(J80)"));
+        // give some extra time to load settings and create url
         AutoPlayUpcomingView autoplayPage = page.goToAutoPlaySixtyInchUrl(getWebDriver(), url);
         try {
             Thread.sleep(10000);
@@ -119,6 +124,12 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         AutoPlayConfiguration autoPlayConfiguration = page.getAutoPlayConfiguration();
         assertNotNull(autoPlayConfiguration);
         autoPlayConfiguration.select("Classic Autoplay", BMW_CUP_EVENT, BMW_CUP_REGATTA);
+        // give some extra time to load settings and create url
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
         String url = autoPlayConfiguration.getConfiguredUrl();
         // eventid and server might change slightly, better only check arguments
         assertTrue(url.contains("lbwh.saph.title=Leaderboard%3A+BMW+Cup+(J80)"));
