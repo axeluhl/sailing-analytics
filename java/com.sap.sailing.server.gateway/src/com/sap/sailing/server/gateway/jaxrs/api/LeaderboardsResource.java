@@ -64,9 +64,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DeviceIdentifier;
@@ -115,7 +113,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseJsonSe
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 import com.sap.sse.InvalidDateException;
@@ -1030,11 +1028,11 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 return result;
             });
         }
-        CompetitorJsonSerializer serializer = CompetitorJsonSerializer.create();
+        CompetitorAndBoatJsonSerializer serializer = CompetitorAndBoatJsonSerializer.create();
         JSONArray result = new JSONArray();
         for (final Competitor c : competitors) {
             Boat boat = trackedRace.getBoatOfCompetitor(c);
-            JSONObject jsonCompetitor = serializer.serialize(new CompetitorWithBoatImpl(c, (DynamicBoat) boat));
+            JSONObject jsonCompetitor = serializer.serialize(new Pair<>(c, boat));
             result.add(jsonCompetitor);
         }
         String json = result.toJSONString();
