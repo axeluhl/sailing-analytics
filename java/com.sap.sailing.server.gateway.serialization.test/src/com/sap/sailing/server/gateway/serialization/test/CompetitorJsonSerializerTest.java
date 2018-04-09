@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.serialization.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -23,8 +24,11 @@ import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.TransientCompetitorStoreImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorAndBoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sse.common.Util.Pair;
 
 public class CompetitorJsonSerializerTest {
 
@@ -94,6 +98,69 @@ public class CompetitorJsonSerializerTest {
         final CompetitorWithBoat deserializedCompetitorWithBoat = (CompetitorWithBoat) deserializedCompetitor;
         assertEquals(boat.getId(), deserializedCompetitorWithBoat.getBoat().getId());
         assertEquals(boat.getSailID(), deserializedCompetitorWithBoat.getBoat().getSailID());
+    }
+
+    @Test
+    public void testCompetitorAndBoatWithBoat() throws JsonDeserializationException, ParseException {
+        final CompetitorWithBoat competitorWithBoat = mock(CompetitorWithBoat.class);
+        mockTeam(competitorWithBoat);
+        String expectedId = "123";
+        when(competitorWithBoat.getId()).thenReturn(expectedId);
+        final Boat boat = mock(Boat.class);
+        when(competitorWithBoat.hasBoat()).thenReturn(true);
+        when(competitorWithBoat.getBoat()).thenReturn(boat);
+        when(boat.getId()).thenReturn(UUID.randomUUID());
+        when(boat.getSailID()).thenReturn("1233");
+        when(boat.getBoatClass()).thenReturn(DomainFactory.INSTANCE.getOrCreateBoatClass("Tornado"));
+        JSONObject result = CompetitorAndBoatJsonSerializer.create().serialize(new Pair<>(competitorWithBoat, boat));
+        final Pair<Competitor, Boat> deserializedCompetitorAndBoat = CompetitorAndBoatJsonDeserializer
+                .create(new DomainFactoryImpl(new TransientCompetitorStoreImpl(), /* raceLogResolver */ null))
+                .deserialize((JSONObject) new JSONParser().parse(result.toString()));
+        assertTrue(deserializedCompetitorAndBoat.getA().hasBoat());
+        assertTrue(deserializedCompetitorAndBoat.getA() instanceof CompetitorWithBoat);
+        final CompetitorWithBoat deserializedCompetitorWithBoat = (CompetitorWithBoat) deserializedCompetitorAndBoat.getA();
+        assertSame(deserializedCompetitorWithBoat.getBoat(), deserializedCompetitorAndBoat.getB());
+        assertEquals(boat.getId(), deserializedCompetitorWithBoat.getBoat().getId());
+        assertEquals(boat.getSailID(), deserializedCompetitorWithBoat.getBoat().getSailID());
+    }
+
+    @Test
+    public void testCompetitorAndBoatWithoutBoat() throws JsonDeserializationException, ParseException {
+        String expectedId = "1234";
+        when(competitor.getId()).thenReturn(expectedId);
+        when(competitor.hasBoat()).thenReturn(false);
+        final Boat boat = mock(Boat.class);
+        when(boat.getId()).thenReturn(UUID.randomUUID());
+        when(boat.getSailID()).thenReturn("12334");
+        when(boat.getBoatClass()).thenReturn(DomainFactory.INSTANCE.getOrCreateBoatClass("Tornado"));
+        JSONObject result = CompetitorAndBoatJsonSerializer.create().serialize(new Pair<>(competitor, boat));
+        final Pair<Competitor, Boat> deserializedCompetitorAndBoat = CompetitorAndBoatJsonDeserializer
+                .create(new DomainFactoryImpl(new TransientCompetitorStoreImpl(), /* raceLogResolver */ null))
+                .deserialize((JSONObject) new JSONParser().parse(result.toString()));
+        assertFalse(deserializedCompetitorAndBoat.getA().hasBoat());
+        assertFalse(deserializedCompetitorAndBoat.getA() instanceof CompetitorWithBoat);
+        assertEquals("12334", deserializedCompetitorAndBoat.getB().getSailID());
+    }
+
+    @Test
+    public void testCompetitorAndBoatWithNullBoat() throws JsonDeserializationException, ParseException {
+        final CompetitorWithBoat competitorWithBoat = mock(CompetitorWithBoat.class);
+        mockTeam(competitorWithBoat);
+        String expectedId = "1234";
+        when(competitorWithBoat.getId()).thenReturn(expectedId);
+        when(competitorWithBoat.hasBoat()).thenReturn(false);
+        when(competitorWithBoat.getBoat()).thenReturn(null);
+        final Boat boat = mock(Boat.class);
+        when(boat.getId()).thenReturn(UUID.randomUUID());
+        when(boat.getSailID()).thenReturn("1233");
+        when(boat.getBoatClass()).thenReturn(DomainFactory.INSTANCE.getOrCreateBoatClass("Tornado"));
+        JSONObject result = CompetitorAndBoatJsonSerializer.create().serialize(new Pair<>(competitorWithBoat, boat));
+        final Pair<Competitor, Boat> deserializedCompetitorAndBoat = CompetitorAndBoatJsonDeserializer
+                .create(new DomainFactoryImpl(new TransientCompetitorStoreImpl(), /* raceLogResolver */ null))
+                .deserialize((JSONObject) new JSONParser().parse(result.toString()));
+        assertFalse(deserializedCompetitorAndBoat.getA().hasBoat());
+        assertFalse(deserializedCompetitorAndBoat.getA() instanceof CompetitorWithBoat);
+        assertEquals("1233", deserializedCompetitorAndBoat.getB().getSailID());
     }
 
     @Test
