@@ -55,9 +55,10 @@ public class SlicingTest {
     private final String fleetName = "default";
     private final String columnNameOriginalRace = "original";
     private final String columnNameSlicedRace = "sliced";
-    private final CompetitorDescriptor competitor = new CompetitorDescriptor(null, regattaName, boatClassName,
-            columnNameOriginalRace, fleetName, "test1", "test", "test", "test",
-            CountryCodeFactoryImpl.INSTANCE.getFromTwoLetterISOName("de"), null, 1.0, null);
+    
+    private final CompetitorDescriptor competitor = new CompetitorDescriptor(null, regattaName, columnNameOriginalRace, fleetName, null, 
+            "test1", "test", "test", null, CountryCodeFactoryImpl.INSTANCE.getFromTwoLetterISOName("de"), 
+            1.0, null, null, "B1", boatClassName, "GER 123");
 
     private SailingServiceImplMock sailingService;
     
@@ -94,7 +95,7 @@ public class SlicingTest {
                 new SeriesCreationParametersDTO(fleets, false, false, true, false, new int[0], false, 0));
         final RegattaCreationParametersDTO regattaCreationParameters = new RegattaCreationParametersDTO(
                 seriesCreationParameters);
-        final RegattaDTO regatta = sailingService.createRegatta(regattaName, boatClassName, null, null,
+        final RegattaDTO regatta = sailingService.createRegatta(regattaName, boatClassName, false, null, null,
                 regattaCreationParameters, false, ScoringSchemeType.HIGH_POINT, null, 3.0, false, false,
                 RankingMetrics.ONE_DESIGN);
         final List<Pair<String, Integer>> columnNames = new ArrayList<>();

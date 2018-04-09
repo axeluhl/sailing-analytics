@@ -77,7 +77,7 @@ public class TestParseAndMigratePassingSideAndControlPointTwoMarks {
         raceLogEvent.put(FieldNames.RACE_LOG_EVENT_PASS_ID.name(), 1);
         raceLogEvent.put(FieldNames.RACE_LOG_EVENT_AUTHOR_NAME.name(), "Test Author");
         raceLogEvent.put(FieldNames.RACE_LOG_EVENT_AUTHOR_PRIORITY.name(), 1);
-        RaceLogCourseDesignChangedEvent event = (RaceLogCourseDesignChangedEvent) dof.loadRaceLogEvent(raceLogEvent);
+        RaceLogCourseDesignChangedEvent event = (RaceLogCourseDesignChangedEvent) dof.loadRaceLogEvent(raceLogEvent).getA();
         assertEquals(event.getCourseDesign().getFirstWaypoint().getPassingInstructions(), PassingInstruction.Line);
         assertTrue(waypoint1.containsField(FieldNames.WAYPOINT_PASSINGINSTRUCTIONS.name())
                 && !waypoint1.containsField(FieldNames.WAYPOINT_PASSINGSIDE.name()));

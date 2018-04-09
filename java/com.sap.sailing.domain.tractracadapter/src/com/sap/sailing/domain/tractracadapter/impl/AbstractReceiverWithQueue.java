@@ -194,6 +194,10 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                 }
             } catch (InterruptedException e) {
                 logger.log(Level.INFO, "Interrupted while taking element from queue", e);
+            } catch (Exception e) {
+                // before this thread terminates abnormally, at least log it:
+                logger.log(Level.SEVERE, ""+this+" is terminating abnormally; the race will probably be left at LOADING (100%).", e);
+                throw e;
             }
         }
         unsubscribe();
@@ -261,5 +265,11 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                 getDomainFactory().getOrCreateControlPoint(ttcp);
             }
         }
+    }
+    
+    @Override
+    public String toString() {
+        return "Receiver "+getClass().getName()+" for regatta "+getTrackedRegatta().getRegatta().getName()+
+                " in event "+getTracTracEvent().getName()+" with ID "+getTracTracEvent().getId();
     }
 }

@@ -32,14 +32,17 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
         raceDetails.add(DetailType.RACE_DISPLAY_LEGS);
         List<DetailType> overallDetails = new ArrayList<>();
         SingleRaceLeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings();
+
         SingleRaceLeaderboardSettings settings = new SingleRaceLeaderboardSettings(
                 defaultSettings.getManeuverDetailsToShow(), defaultSettings.getLegDetailsToShow(),
                 defaultSettings.getRaceDetailsToShow(), overallDetails, DEFAULT_REFRESH_INTERVAL,
-                defaultSettings.isShowAddedScores(), /* showCompetitorSailIdColumn */ true,
+                defaultSettings.isShowAddedScores(),
+                /* showCompetitorShortNameColumn */ true,
                 /*
                  * don't showCompetitorFullNameColumn in case screen is so small that we don't even display the
                  * leaderboard initially
-                 */ isScreenLargeEnoughToInitiallyDisplayLeaderboard, false, false);
+                 */ isScreenLargeEnoughToInitiallyDisplayLeaderboard, 
+                 /* showCompetitorBoatInfoColumn */ true, false, false);
         SettingsUtil.copyDefaultsFromValues(settings, settings);
         
         return settings;
@@ -57,8 +60,9 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
                 currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 currentLeaderboardSettings.isShowAddedScores(),
-                currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
+                currentLeaderboardSettings.isShowCompetitorShortNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
+                currentLeaderboardSettings.isShowCompetitorBoatInfoColumn(),
                 currentLeaderboardSettings.isShowRaceRankColumn(),
                 currentLeaderboardSettings.isShowCompetitorNationality());
         return SettingsUtil.copyValues(contextSpecificLeaderboardSettings, defaultLeaderboardSettings);
@@ -72,8 +76,9 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
                 currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 currentLeaderboardSettings.isShowAddedScores(),
-                currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
+                currentLeaderboardSettings.isShowCompetitorShortNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
+                currentLeaderboardSettings.isShowCompetitorBoatInfoColumn(),
                 currentLeaderboardSettings.isShowCompetitorNationality(),currentLeaderboardSettings.isShowRaceRankColumn());
         return SettingsUtil.copyValues(globalLeaderboardSettings, defaultLeaderboardSettings);
     }

@@ -68,6 +68,7 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
+import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -363,8 +364,16 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         result.name = this.getName();
         result.displayName = this.getDisplayName();
         result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+        boolean isLeaderboardThatHasRegattaLike = this instanceof LeaderboardThatHasRegattaLike;
+        if (isLeaderboardThatHasRegattaLike) {
+            LeaderboardThatHasRegattaLike regattaLikeLeaderboard = (LeaderboardThatHasRegattaLike) this;
+            result.canBoatsOfCompetitorsChangePerRace = regattaLikeLeaderboard.getRegattaLike().canBoatsOfCompetitorsChangePerRace();
+        } else {
+            result.canBoatsOfCompetitorsChangePerRace = false;
+        }
+
         for (Competitor suppressedCompetitor : this.getSuppressedCompetitors()) {
-            result.setSuppressed(baseDomainFactory.convertToCompetitorDTO(suppressedCompetitor), true);
+            result.setSuppressed(baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(suppressedCompetitor), true);
         }
         // Now create the race columns and, as a future task, set their competitorsFromBestToWorst, then wait for all these
         // futures to finish:
@@ -376,8 +385,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                     raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                     isMetaLeaderboardColumn);
             if (isMetaLeaderboardColumn && raceColumnDTO instanceof MetaLeaderboardRaceColumnDTO) {
-                calculateRacesMetadata((MetaLeaderboardColumn) raceColumn, (MetaLeaderboardRaceColumnDTO) raceColumnDTO,
-                        trackedRegattaRegistry, baseDomainFactory);
+                calculateRacesMetadata((MetaLeaderboardColumn) raceColumn, (MetaLeaderboardRaceColumnDTO) raceColumnDTO, baseDomainFactory);
             }
             for (Fleet fleet : raceColumn.getFleets()) {
                 RegattaAndRaceIdentifier raceIdentifier = null;
@@ -452,7 +460,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
         }
         for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint)) {
-            CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+            CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(competitor);
             LeaderboardRowDTO row = new LeaderboardRowDTO();
             row.competitor = competitorDTO;
             row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
@@ -503,6 +511,16 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             String displayName = this.getDisplayName(competitor);
             if (displayName != null) {
                 result.competitorDisplayNames.put(competitorDTO, displayName);
+            }
+            // in case boats can't change set the also the boat on the row to simplify access
+            if (result.canBoatsOfCompetitorsChangePerRace == false && !row.fieldsByRaceColumnName.isEmpty()) {
+                // find a raceColumn where a boat is available
+                for (LeaderboardEntryDTO leaderboardEntry: row.fieldsByRaceColumnName.values()) {
+                    if (leaderboardEntry.boat != null) {
+                        row.boat = leaderboardEntry.boat;
+                        break;
+                    }
+                }
             }
         }
         logger.info("computeLeaderboardByName(" + this.getName() + ", " + timePoint + ", "
@@ -562,6 +580,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
         TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
+        // TODO bug2822: Should this rather come from raceColumn.getBoatOfCompetitor() ?
+        entryDTO.boat = trackedRace == null ? null : baseDomainFactory.convertToBoatDTO(trackedRace.getBoatOfCompetitor(competitor));
         entryDTO.totalPoints = entry.getTotalPoints();
         if (fillTotalPointsUncorrected) {
             entryDTO.totalPointsUncorrected = entry.getTotalPointsUncorrected();
@@ -693,7 +713,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     }
 
     private void calculateRacesMetadata(MetaLeaderboardColumn metaLeaderboardColumn, MetaLeaderboardRaceColumnDTO columnDTO,
-            TrackedRegattaRegistry trackedRegattaRegistry, final DomainFactory baseDomainFactory) {
+            final DomainFactory baseDomainFactory) {
         for (final RaceColumn raceColumn : metaLeaderboardColumn.getLeaderboard().getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
@@ -928,7 +948,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             // calls. To avoid having to use expensive locking, we'll just double-check here if legFinishTime is null and
             // treat this as if trackedLeg.hasFinishedLeg(timePoint) had returned false.
             result.correctedTotalTime = trackedLeg.hasStartedLeg(timePoint) ? trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getCorrectedTime(trackedLeg.getCompetitor(),
-                    hasFinishedLeg && legFinishTime != null ? legFinishTime : timePoint, cache) : null;
+                    trackedLeg.hasFinishedLeg(timePoint) && legFinishTime != null ? legFinishTime : timePoint, cache) : null;
             // fetch the leg gap in own corrected time from the ranking metric
             final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().
                     getLegGapToLegLeaderInOwnTime(trackedLeg, timePoint, rankingInfo, cache);
@@ -1258,7 +1278,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         }
         return result;
     }
-    
+
     @Override
     public Iterable<Competitor> getAllCompetitors() {
         return getAllCompetitorsWithRaceDefinitionsConsidered().getB();

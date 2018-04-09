@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.Bearing;
@@ -20,6 +21,8 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Leg getLeg();
 
     Competitor getCompetitor();
+
+    Boat getBoat();
 
     /**
      * How much time did the {@link #getCompetitor competitor} spend in this {@link #getLeg() leg} at

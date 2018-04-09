@@ -23,11 +23,11 @@ public class MarkPassingDataFinder extends RaceLogAnalyzer<Set<Triple<Competitor
         for (RaceLogEvent event : getLog().getUnrevokedEvents()) {
             if (event instanceof RaceLogFixedMarkPassingEvent) {
                 RaceLogFixedMarkPassingEvent castedEvent = (RaceLogFixedMarkPassingEvent) event;
-                result.add(new Triple<Competitor, Integer, TimePoint>(castedEvent.getInvolvedBoats().get(0), castedEvent
+                result.add(new Triple<Competitor, Integer, TimePoint>(castedEvent.getInvolvedCompetitors().get(0), castedEvent
                         .getZeroBasedIndexOfPassedWaypoint(), castedEvent.getTimePointOfFixedPassing()));
             } else if (event instanceof RaceLogSuppressedMarkPassingsEvent){
                 RaceLogSuppressedMarkPassingsEvent castedEvent = (RaceLogSuppressedMarkPassingsEvent) event;
-                result.add(new Triple<Competitor, Integer, TimePoint>(castedEvent.getInvolvedBoats().get(0), castedEvent.getZeroBasedIndexOfFirstSuppressedWaypoint(), null));
+                result.add(new Triple<Competitor, Integer, TimePoint>(castedEvent.getInvolvedCompetitors().get(0), castedEvent.getZeroBasedIndexOfFirstSuppressedWaypoint(), null));
             }
         }
         return result;

@@ -113,7 +113,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         this.regattaLikeHelper.addListener(new RegattaLogEventAdditionForwarder(getRaceColumnListeners()));
         this.raceExecutionOrderProvider = new RaceExecutionOrderCache();
     }
-
+    
     /**
      * Deserialization has to be maintained in lock-step with {@link #writeObject(ObjectOutputStream) serialization}.
      * When de-serializing, a possibly remote {@link #raceLogStore} is ignored because it is transient. Instead, an
@@ -372,6 +372,11 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         return LeaderboardType.FlexibleLeaderboard;
     }
 
+    @Override
+    public boolean canBoatsOfCompetitorsChangePerRace() {
+        return false;
+    }
+    
     /**
      * In addition to invoking the superclass implementation, a flexible leaderboard also
      * detaches all race logs from any tracked race currently linked to any of the race columns

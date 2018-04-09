@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.autoplay.client.app.AnimationPanel;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -36,7 +36,7 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
     private PreLeaderboardWithImageView view;
     private SingleRaceLeaderboardPanel leaderboardPanel;
     private Timer selectionTimer;
-    private CompetitorSelectionModel competitorSelectionProvider;
+    private RaceCompetitorSelectionModel competitorSelectionProvider;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
     private com.sap.sse.gwt.client.player.Timer timer;
 
@@ -99,12 +99,12 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
         final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
                 /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, /* raceDetailsToShow */ null,
                 /* overallDetailsToShow */ null, /* delayBetweenAutoAdvancesInMilliseconds */ null,
-                /* showAddedScores */ false, /* showCompetitorSailIdColumn */ false,
+                /* showAddedScores */ false, /* showCompetitorShortNameColumn */ false,
                 /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ false,
-                /* showRaceRankColumn */ false);
+                /* showCompetitorBoatInfoColumn */ false, /* showRaceRankColumn */ false);
 
         GWT.log("event " + getSlideCtx().getEvent());
-        competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ false);
+        competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ false);
 
         timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play

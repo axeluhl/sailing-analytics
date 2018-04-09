@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
+import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -39,7 +39,7 @@ import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
-    private RaceWithCompetitorsDTO selectedRace;
+    private RaceWithCompetitorsAndBoatsDTO selectedRace;
 
     /**
      * Controls the predefined mode into which to switch or configure the race viewer. 
@@ -101,7 +101,10 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                         .createStoredSettingsLocatorForRaceBoard(raceboardContextDefinition,
                                 finalMode != null ? finalMode.name() : null);
-                sailingService.determineDetailTypesForCompetitorChart(raceboardContextDefinition.getLeaderboardGroupName(),
+                // TODO bug2822: also determine regatta's boat change parameter and parameterize Leaderboard settings
+                // --> show boat info column yes/no?
+                sailingService.determineDetailTypesForCompetitorChart(
+                        raceboardContextDefinition.getLeaderboardGroupName(),
                         raceboardData.getRace().getRaceIdentifier(), new AsyncCallback<Iterable<DetailType>>() {
 
                             @Override
@@ -110,11 +113,10 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                             }
 
                             @Override
-                            public void onSuccess(Iterable<DetailType> result) {
+                            public void onSuccess(Iterable<DetailType> chartAllowedTypes) {
                                 sailingService.getAvailableDetailTypesForLeaderboard(
                                         raceboardContextDefinition.getLeaderboardName(),
                                         new AsyncCallback<Iterable<DetailType>>() {
-
                                             @Override
                                             public void onFailure(Throwable caught) {
                                                 reportError(
@@ -122,9 +124,10 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                                             }
 
                                             @Override
-                                            public void onSuccess(Iterable<DetailType> availableDetailTypes) {
+                                            public void onSuccess(Iterable<DetailType> leaderboardAllowedTypes) {
                                                 final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(
-                                                        StringMessages.INSTANCE, result, getUserService(), availableDetailTypes);
+                                                        StringMessages.INSTANCE, chartAllowedTypes, getUserService(),
+                                                        leaderboardAllowedTypes);
                                                 RaceBoardComponentContext componentContext = new RaceBoardComponentContext(
                                                         lifeCycle, getUserService(), storageDefinition);
 
@@ -138,7 +141,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                                                                         null, componentContext, initialSettings,
                                                                         raceboardData,
                                                                         showChartMarkEditMediaButtonsAndVideo,
-                                                                        lifeCycle, timer, availableDetailTypes);
+                                                                        lifeCycle, timer, leaderboardAllowedTypes);
                                                                 if (finalMode != null) {
                                                                     finalMode.getMode().applyTo(raceBoardPanel);
                                                                 }

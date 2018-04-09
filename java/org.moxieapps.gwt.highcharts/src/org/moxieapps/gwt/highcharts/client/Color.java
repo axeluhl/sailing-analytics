@@ -112,20 +112,15 @@ public class Color extends Configurable<Color> {
      * {@link #setLinearGradient(double, double, double, double)} if you're only operating
      * in percentages.
      *
-     * @param x0 The x-coordinate of the start point of the gradient.
-     * @param y0 The y-coordinate of the start point of the gradient.
-     * @param x1 The x-coordinate of the end point of the gradient.
-     * @param y1 The y-coordinate of the end point of the gradient.
+     * @param x1 The x-coordinate of the start point of the gradient.
+     * @param x2 The x-coordinate of the end point of the gradient.
+     * @param y1 The y-coordinate of the start point of the gradient.
+     * @param y2 The y-coordinate of the end point of the gradient.
      * @return A reference to this {@link Color} instance for convenient method chaining.
      */
-    public Color setLinearGradient(String x0, String y0, String x1, String y1) {
+    public Color setLinearGradient(String x1, String x2, String y1, String y2) {
         value = null;
-        JSONArray coordinates = new JSONArray();
-        coordinates.set(0, new JSONString(x0));
-        coordinates.set(1, new JSONString(y0));
-        coordinates.set(2, new JSONString(x1));
-        coordinates.set(3, new JSONString(y1));
-        return this.setOption("linearGradient", coordinates);
+        return this.setOption("linearGradient", new LinearGradient(x1, x2, y1, y2));
     }
 
     /**
@@ -137,20 +132,15 @@ public class Color extends Configurable<Color> {
      * {@link #setLinearGradient(String, String, String, String)} version if you need to
      * operate in both percentages and pixels concurrently.
      *
-     * @param x0 The x-coordinate of the start point of the gradient (in pixels).
-     * @param y0 The y-coordinate of the start point of the gradient (in pixels).
-     * @param x1 The x-coordinate of the end point of the gradient (in pixels).
-     * @param y1 The y-coordinate of the end point of the gradient (in pixels).
+     * @param x1 The x-coordinate of the start point of the gradient (in pixels).
+     * @param x2 The x-coordinate of the end point of the gradient (in pixels).
+     * @param y1 The y-coordinate of the start point of the gradient (in pixels).
+     * @param y2 The y-coordinate of the end point of the gradient (in pixels).
      * @return A reference to this {@link Color} instance for convenient method chaining.
      */
-    public Color setLinearGradient(int x0, int y0, int x1, int y1) {
+    public Color setLinearGradient(int x1, int x2, int y1, int y2) {
         value = null;
-        JSONArray coordinates = new JSONArray();
-        coordinates.set(0, new JSONNumber(x0));
-        coordinates.set(1, new JSONNumber(y0));
-        coordinates.set(2, new JSONNumber(x1));
-        coordinates.set(3, new JSONNumber(y1));
-        return this.setOption("linearGradient", coordinates);
+        return this.setOption("linearGradient", new LinearGradient(x1, x2, y1, y2));
     }
 
     /**
@@ -164,20 +154,15 @@ public class Color extends Configurable<Color> {
      * {@link #setLinearGradient(String, String, String, String)} version if you need to
      * operate in both percentages and pixels concurrently.
      *
-     * @param x0 The x-percentage of the start point of the gradient (0.0 to 1.0)
-     * @param y0 The y-percentage of the start point of the gradient (0.0 to 1.0)
-     * @param x1 The x-percentage of the end point of the gradient (0.0 to 1.0)
-     * @param y1 The y-percentage of the end point of the gradient (0.0 to 1.0)
+     * @param x1 The x-percentage of the start point of the gradient (0.0 to 1.0)
+     * @param x2 The x-percentage of the end point of the gradient (0.0 to 1.0)
+     * @param y1 The y-percentage of the start point of the gradient (0.0 to 1.0)
+     * @param y2 The y-percentage of the end point of the gradient (0.0 to 1.0)
      * @return A reference to this {@link Color} instance for convenient method chaining.
      */
-    public Color setLinearGradient(double x0, double y0, double x1, double y1) {
+    public Color setLinearGradient(double x1, double x2, double y1, double y2) {
         value = null;
-        JSONArray coordinates = new JSONArray();
-        coordinates.set(0, new JSONString(((Double) (x0 * 100)).intValue() + "%"));
-        coordinates.set(1, new JSONString(((Double) (y0 * 100)).intValue() + "%"));
-        coordinates.set(2, new JSONString(((Double) (x1 * 100)).intValue() + "%"));
-        coordinates.set(3, new JSONString(((Double) (y1 * 100)).intValue() + "%"));
-        return this.setOption("linearGradient", coordinates);
+        return this.setOption("linearGradient", new LinearGradient(x1, x2, y1, y2));
     }
 
     private JSONArray colorStops = new JSONArray();
@@ -310,5 +295,37 @@ public class Color extends Configurable<Color> {
             .append(")").toString();
     }
 
+    /**
+     * Internal helper class for setting linear gradients.  This class has three constructors for the three
+     * types of inputs for linear gradients. (i.e. String, int, double)
+     */
+    private class LinearGradient extends Configurable<LinearGradient> {
+
+        private LinearGradient() {
+            // Not called
+        }
+
+        private LinearGradient(String x1, String x2, String y1, String y2) {
+            this.setOption("x1", x1)
+                .setOption("x2", x2)
+                .setOption("y1", y1)
+                .setOption("y2", y2);
+        }
+
+        private LinearGradient(int x1, int x2, int y1, int y2) {
+            this.setOption("x1", new JSONNumber(x1))
+                .setOption("x2", new JSONNumber(x2))
+                .setOption("y1", new JSONNumber(y1))
+                .setOption("y2", new JSONNumber(y2));
+        }
+
+        private LinearGradient(double x1, double x2, double y1, double y2) {
+            this.setOption("x1", new JSONString(((Double) (x1 * 100)).intValue() + "%"))
+                .setOption("x2", new JSONString(((Double) (x2 * 100)).intValue() + "%"))
+                .setOption("y1", new JSONString(((Double) (y1 * 100)).intValue() + "%"))
+                .setOption("y2", new JSONString(((Double) (y2 * 100)).intValue() + "%"));
+        }
+
+    }
 
 }

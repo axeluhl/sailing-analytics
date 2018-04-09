@@ -49,6 +49,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String competitor();
     String competitors();
     String competitorsSelected(int selectedCompetitorsCount, int competitorsCount);
+    String boats();
+    String competitorWithBoat();
     String noSuchLeaderboard();
     String leaderboardConfiguration();
     String newDotDotDot();
@@ -102,6 +104,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windwardDistanceToGoInMeters();
     String windwardDistanceToCompetitorFarthestAheadInMeters();
     String name();
+    String shortName();
     String leaveEmptyForDefault();
     String trackNewEvent();
     String trackableRaces();
@@ -216,6 +219,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String actionEdit();
     String actionEditScores();
     String actionEditCompetitors();
+    String actionShowCompetitorToBoatAssignments();
+    String actionEditCompetitorToBoatAssignments();
+    String actionContinueToBoatAssignment();
     String actionOpenBrowser();
     String actionRemove();
     String actionEditSeries();
@@ -224,6 +230,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String actionRaceRemove();
     String actionExportXML();
     String actionOpenDashboard();
+    String actionBoatUnlink();
     String filterLeaderboardsByName();
     String actions();
     String islinked();
@@ -561,7 +568,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String upcoming();
     String next();
     String inProgress();
-    String passedTo(String name);
+    String markPassedToAt(String name, String at);
     String gapChangeSinceLegStartInSeconds();
     String sideToWhichMarkAtLegStartWasRounded();
     String raceIsLive(String raceName);
@@ -997,9 +1004,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String doYouReallyWantToRemoveCompetitors();
     String doYouReallyWantToRemoveCompetitor(String name);
     String filterCompetitors();
+    String filterBoats();
     String editCompetitor();
     String pleaseEnterASailNumber();
+    String pleaseEnterASailNumberOrABoatName();
     String successfullyAllowedCompetitorReset(String names);
+    String successfullyAllowedBoatReset(String names);
     String allowReload();
     String id();
     String compress();
@@ -1110,6 +1120,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String filterByLeaderboard();
     String removeLeaderboardFilter();
     String competitorRegistrations();
+    String boatRegistrations();
     String trackerStatus();
     String courseStatus();
     String canOnlyBeEditedBeforeStartingTracking();
@@ -1156,6 +1167,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String twoMarkControlPoint();
     String registeredCompetitors();
     String competitorPool();
+    String registeredBoats();
+    String boatPool();
     String selectAtLeastOne();
     String selectRaces();
     String importFixes();
@@ -1217,6 +1230,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String setTimeToNow();
     String useStartTimeInference();
     String controlTrackingFromStartAndFinishTimes();
+    String canBoatsOfCompetitorsChangePerRace();    
+    String canBoatsChange();
+    String canNotRegisterBoats();
     String numberOfQueueMessagesSent();
     String totalSize();
     String averageMessageSize();
@@ -1332,8 +1348,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String fileUploadResult(String status, String message);
     @Override
     String removeUploadedFile();
+    String showCompetitorBoatColumn();
     String showCompetitorSailIdColumn();
     String showCompetitorSailIdColumnTooltip(String alwaysShowCompetitorNationalityColumnTitle);
+    String showCompetitorShortNameColumn();
+    String showCompetitorShortNameColumnTooltip(String alwaysShowCompetitorNationalityColumnTitle);
     String showCompetitorFullNameColumn();
     String alwaysShowCompetitorNationalityColumn();
     String alwaysShowCompetitorNationalityColumnTooltip();
@@ -1519,6 +1538,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String inviteSelectedCompetitors();
     String denoteAllRacesForRaceLogTrackingShorctut();
     String registerCompetitors();
+    String registerBoats();
     String createDefaultRegattaLeaderboard();
     String doYouWantToCreateADefaultRegattaLeaderboard();
     String copyCourse();
@@ -1576,8 +1596,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String bufferLineStrokeWeight();
     String profile();
     String showOnlyCompetitorsOfLog();
+    String showOnlyBoatsOfLog();
     String maneuverType();
     String confirmLosingCompetitorEditsWhenTogglingLogBasedView();
+    String confirmLosingBoatEditsWhenTogglingLogBasedView();
     String removalOfMarkDisabledMayBeUsedInRaces(String raceNames);
     String pleaseCreateAtLeastOneMappingBy();
     String createDefaultLeaderboardGroup();
@@ -1875,6 +1897,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String selectCompetitorsToEliminate();
     String noUpcomingRaceDataAvailable();
     String trackedRaceAlreadyLinked();
+    String boatAlreadyLinked();
     String reallyRemoveSeries(String seriesName);
     String maneuverSpeedDetails();
     String maneuverDirectionNormalization();
@@ -2050,6 +2073,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String importFinishedGotoRaceboard();
     String importFinishedGotoEvent();
     String chooseAName();
+    String errorFillingRaceLogsFromPairingList(String message);
+    String successfullyFilledRaceLogsFromPairingList();
+    String errorFetchingRaceDisplayNamedFromLeaderboard(String message);
+    String errorCalculatingPairingListTemplate(String message);
+    String errorCreatingPairingList(String message);
     String unexpectedErrorDuringFileImport();
     String couldNotDownload(String url);
     String sliceRace();
@@ -2069,6 +2097,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windFinderWeatherData();
     String positionEditOnNonTrackingRace();
     String errorCreatingLeaderboardGroup(String name);
+    String minAbsCourseChangeInDegrees();
+    String maxAbsCourseChangeInDegrees();
+    String minDurationInSecondsFromPrecedingManeuver();
+    String maxDurationInSecondsFromPrecedingManeuver();
+    String minDurationInSecondsToFollowingManeuver();
+    String maxDurationInSecondsToFollowingManeuver();
+    String maxTurningRate();
+    String avgTurningRate();
+    String lowestSpeed();
+    String degreesPerSecondUnit();
     String expeditionAwa();
     String expeditionAws();
     String expeditionTwa();

@@ -28,8 +28,9 @@ public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycl
                 currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 currentLeaderboardSettings.getActiveRaceColumnSelectionStrategy(),
                 currentLeaderboardSettings.isShowAddedScores(),
-                currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
+                currentLeaderboardSettings.isShowCompetitorShortNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
+                currentLeaderboardSettings.isShowCompetitorBoatInfoColumn(),
                 currentLeaderboardSettings.isShowCompetitorNationality());
         return SettingsUtil.copyValues(globalLeaderboardSettings, defaultLeaderboardSettings);
     }
@@ -45,15 +46,16 @@ public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycl
                 currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 currentLeaderboardSettings.getActiveRaceColumnSelectionStrategy(),
                 currentLeaderboardSettings.isShowAddedScores(),
-                currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
+                currentLeaderboardSettings.isShowCompetitorShortNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
+                currentLeaderboardSettings.isShowCompetitorBoatInfoColumn(),
                 currentLeaderboardSettings.isShowCompetitorNationality());
         return SettingsUtil.copyValues(contextSpecificLeaderboardSettings, defaultLeaderboardSettings);
     }
     
     @Override
     public MultiRaceLeaderboardSettingsDialogComponent getSettingsDialogComponent(MultiRaceLeaderboardSettings settings) {
-        return new MultiRaceLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages, availableDetailTypes);
+        return new MultiRaceLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages, availableDetailTypes, false);
     }
 
     @Override

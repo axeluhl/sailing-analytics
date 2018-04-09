@@ -54,8 +54,7 @@ public class TrackingTimesEventSerializerTest {
 
     private CompetitorJsonSerializer createCompetitorSerializer() {
         return new CompetitorJsonSerializer(new TeamJsonSerializer(
-                new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(
-                new BoatClassJsonSerializer()));
+                new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(new BoatClassJsonSerializer()));
     }
 
     @Test

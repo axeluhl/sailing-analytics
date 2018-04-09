@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -86,7 +87,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                             public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                             }
                         },
-                        /* trackedRegattaRegistry */null, mock(RaceLogResolver.class), getTracTracRace(), /* courseDesignUpdateURI */
+                        /* trackedRegattaRegistry */null, mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), getTracTracRace(), /* courseDesignUpdateURI */
                         null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS)) {
             receiver.subscribe();
             getRaceSubscriber().start();
@@ -99,7 +100,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                             @Override
                             public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                             }
-                        }, /* trackedRegattaRegistry */null, mock(RaceLogResolver.class), getTracTracRace(), /* courseDesignUpdateURI */
+                        }, /* trackedRegattaRegistry */null, mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), getTracTracRace(), /* courseDesignUpdateURI */
                         null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS));
     }
 

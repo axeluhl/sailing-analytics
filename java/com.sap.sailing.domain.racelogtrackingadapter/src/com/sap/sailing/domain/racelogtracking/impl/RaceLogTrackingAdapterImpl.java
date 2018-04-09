@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -27,6 +28,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackin
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -138,13 +140,13 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             RegattaLeaderboard rLeaderboard = (RegattaLeaderboard) leaderboard;
             boatClass = rLeaderboard.getRegatta().getBoatClass();
         } else {
-            if (!Util.isEmpty(raceColumn.getAllCompetitors(fleet))) {
-                boatClass = findDominatingBoatClass(raceColumn.getAllCompetitors(fleet));
-            } else if (!Util.isEmpty(raceColumn.getAllCompetitors())) {
-                boatClass = findDominatingBoatClass(raceColumn.getAllCompetitors());
+            if (!Util.isEmpty(raceColumn.getAllCompetitorsAndTheirBoats(fleet).values())) {
+                boatClass = findDominatingBoatClass(raceColumn.getAllCompetitorsAndTheirBoats(fleet).values());
+            } else if (!Util.isEmpty(raceColumn.getAllCompetitorsAndTheirBoats().values())) {
+                boatClass = findDominatingBoatClass(raceColumn.getAllCompetitorsAndTheirBoats().values());
             } else if (!Util.isEmpty(leaderboard.getAllCompetitors())) {
-                boatClass = findDominatingBoatClass(leaderboard.getAllCompetitors());
-            } else {
+                boatClass = leaderboard.getBoatClass();
+            } else { 
                 throw new NotDenotableForRaceLogTrackingException("Couldn't infer boat class, no competitors on race and leaderboard");
             }
         }
@@ -167,8 +169,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         return result;
     }
     
-    private BoatClass findDominatingBoatClass(Iterable<Competitor> allCompetitors) {
-        return Util.getDominantObject(()->StreamSupport.stream(allCompetitors.spliterator(), /* parallel */ false).map(c->c.getBoat().getBoatClass()).iterator());
+    private BoatClass findDominatingBoatClass(Iterable<Boat> allBoats) {
+        return Util.getDominantObject(()->StreamSupport.stream(allBoats.spliterator(), /* parallel */ false).map(b->b.getBoatClass()).iterator());
     }
 
     @Override
@@ -228,16 +230,16 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
     @Override
     public void copyCompetitors(final RaceColumn fromRaceColumn, final Fleet fromFleet, final Iterable<Pair<RaceColumn, Fleet>> toRaces) {
-        Iterable<Competitor> competitorsToCopy = fromRaceColumn.getAllCompetitors(fromFleet);
+        Map<Competitor, Boat> competitorsAndBoatsToCopy = fromRaceColumn.getAllCompetitorsAndTheirBoats(fromFleet);
         for (Pair<RaceColumn, Fleet> toRace : toRaces) {
             final RaceColumn toRaceColumn = toRace.getA();
             final Fleet toFleet = toRace.getB();
             try {
                 if (toRaceColumn.isCompetitorRegistrationInRacelogEnabled(toFleet)) {
-                    toRaceColumn.registerCompetitors(competitorsToCopy, toFleet);
+                    toRaceColumn.registerCompetitors(competitorsAndBoatsToCopy, toFleet);
                 } else {
                     toRaceColumn.enableCompetitorRegistrationOnRaceLog(toFleet);
-                    toRaceColumn.registerCompetitors(competitorsToCopy, toFleet);
+                    toRaceColumn.registerCompetitors(competitorsAndBoatsToCopy, toFleet);
                 }
             } catch (CompetitorRegistrationOnRaceLogDisabledException e1) {
                 // cannot happen as we explicitly checked successfully before, or enabled it when the check failed; still produce a log documenting this strangeness:
