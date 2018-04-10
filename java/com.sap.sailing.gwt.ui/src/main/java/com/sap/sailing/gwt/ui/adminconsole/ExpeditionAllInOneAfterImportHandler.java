@@ -23,6 +23,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class ExpeditionAllInOneAfterImportHandler {
     
@@ -89,32 +90,73 @@ public class ExpeditionAllInOneAfterImportHandler {
             }
         });
     }
+    
+    private class RegattaLogCompetitorRegistrationAndSelectionDialog extends RegattaLogCompetitorRegistrationDialog {
+        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass, SailingServiceAsync sailingService,
+                StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
+                boolean canBoatsOfCompetitorsChangePerRace) {
+            this(boatClass, sailingService, stringMessages, errorReporter, editable, leaderboardName,
+                    canBoatsOfCompetitorsChangePerRace, new ValidatorForCompetitorRegistrationDialog(),
+                    new CallbackForCompetitorRegistrationDialog());
+        }
+        
+        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass, SailingServiceAsync sailingService,
+                StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
+                boolean canBoatsOfCompetitorsChangePerRace, ValidatorForCompetitorRegistrationDialog validator,
+                CallbackForCompetitorRegistrationDialog callback) {
+            super(boatClass, sailingService, stringMessages, errorReporter, editable, leaderboardName,
+                    canBoatsOfCompetitorsChangePerRace, validator, callback);
+            validator.setCompetitorRegistrationsPanel(competitorRegistrationsPanel);
+            callback.setCompetitorRegistrationsPanel(competitorRegistrationsPanel);
+        }
+    }
+    
+    private static class ValidatorForCompetitorRegistrationDialog implements Validator<Set<CompetitorDTO>> {
+        private CompetitorRegistrationsPanel competitorRegistrationsPanel;
+        @Override
+        public String getErrorMessage(Set<CompetitorDTO> valueToValidate) {
+            if (competitorRegistrationsPanel == null || competitorRegistrationsPanel.getSelectedRegisteredCompetitors().size() != 1) {
+                return "TODO: select one competitor in the left table";
+            }
+            return null;
+        }
+        public void setCompetitorRegistrationsPanel(CompetitorRegistrationsPanel competitorRegistrationsPanel) {
+            this.competitorRegistrationsPanel = competitorRegistrationsPanel;
+        }
+    }
+    
+    private class CallbackForCompetitorRegistrationDialog extends CancelImportDialogCallback<Set<CompetitorDTO>> {
+        private CompetitorRegistrationsPanel competitorRegistrationsPanel;
+        
+        @Override
+        public void ok(Set<CompetitorDTO> competitors) {
+            if (competitors.isEmpty()) {
+                Window.alert(stringMessages.importCanceledNoCompetitorAdded());
+            } else {
+                sailingService.setCompetitorRegistrationsInRegattaLog(leaderboard.getName(),
+                    competitors, new AsyncCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                                mapCompetitorsToGPSFixDeviceIds(competitorRegistrationsPanel == null ? competitors
+                                        : competitorRegistrationsPanel.getSelectedRegisteredCompetitors());
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Failed to register competitors!");
+                        }
+                    });
+            }
+        }
+        public void setCompetitorRegistrationsPanel(CompetitorRegistrationsPanel competitorRegistrationsPanel) {
+            this.competitorRegistrationsPanel = competitorRegistrationsPanel;
+        }
+    }
 
     private void showCompetitorRegistration() {
-        new RegattaLogCompetitorRegistrationDialog(regatta.boatClass == null ? null : regatta.boatClass.getName(),
+        new RegattaLogCompetitorRegistrationAndSelectionDialog(regatta.boatClass == null ? null : regatta.boatClass.getName(),
                 sailingService, stringMessages, errorReporter, true, leaderboard.getName(),
-                leaderboard.canBoatsOfCompetitorsChangePerRace,
-                new CancelImportDialogCallback<Set<CompetitorDTO>>() {
-            @Override
-            public void ok(final Set<CompetitorDTO> competitors) {
-                if (competitors.isEmpty()) {
-                    Window.alert(stringMessages.importCanceledNoCompetitorAdded());
-                } else {
-                    sailingService.setCompetitorRegistrationsInRegattaLog(leaderboard.getName(),
-                        competitors, new AsyncCallback<Void>() {
-                            @Override
-                            public void onSuccess(Void result) {
-                                mapCompetitorsToGPSFixDeviceIds(competitors);
-                            }
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Failed to register competitors!");
-                            }
-                        });
-                }
-            }
-        }).show();
+                leaderboard.canBoatsOfCompetitorsChangePerRace).show();
     }
     
     private void mapCompetitorsToGPSFixDeviceIds(final Set<CompetitorDTO> mappedCompetitors) {
