@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
@@ -64,7 +65,7 @@ public class MultiCompetitorRaceChartSettingsComponent extends
                 boolean o1Expedition = DetailType.isExpeditionType(o1);
                 boolean o2Expedition = DetailType.isExpeditionType(o2);
                 if ((o1Expedition && o2Expedition) || (!o1Expedition && !o2Expedition)) {
-                    return o1Name.compareToIgnoreCase(o2Name);
+                    return Collator.getInstance().compare(o1Name, o2Name);
                 }
                 if (o1Expedition && !o2Expedition) {
                     return 1;
