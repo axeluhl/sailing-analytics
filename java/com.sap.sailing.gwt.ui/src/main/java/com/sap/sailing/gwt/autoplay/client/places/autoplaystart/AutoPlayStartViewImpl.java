@@ -189,8 +189,11 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
             configuratedUrl = null;
             startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             settingsButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
-            configStarter.setText("");
+            configStarter.setText(StringMessages.INSTANCE.invalidSelection());
+            configStarter.setEnabled(false);
         } else {
+            configStarter.setEnabled(true);
+            configStarter.setText(StringMessages.INSTANCE.loading());
             settingsButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             apcd = new AutoPlayContextDefinitionImpl(selectedAutoPlayType, selectedEvent.id, selectedLeaderboardName);

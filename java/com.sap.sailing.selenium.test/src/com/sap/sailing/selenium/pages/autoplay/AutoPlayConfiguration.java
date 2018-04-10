@@ -32,7 +32,7 @@ public class AutoPlayConfiguration extends PageArea {
     }
 
     public String getConfiguredUrl() {
-        return startURL.getText();
+        return startURL.getAttribute("href");
     }
 
 }
