@@ -42,6 +42,8 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
@@ -52,6 +54,7 @@ import com.sap.sailing.gwt.ui.leaderboard.MinMaxRenderer;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkpassingManeuverDTO;
+import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
@@ -74,7 +77,7 @@ import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTableSettings>
-        implements CompetitorSelectionChangeListener, TimeListener {
+        implements CompetitorSelectionChangeListener, TimeListener, RaceTimesInfoProviderListener {
 
     private final ManeuverTablePanelResources resources = GWT.create(ManeuverTablePanelResources.class);
 
@@ -92,16 +95,19 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private final SortableColumn<ManeuverTableData, String> competitorColumn, timeColumn;
     private final Timer timer;
     private final TimeRangeWithZoomModel timeRangeWithZoomProvider;
+    private final RaceTimesInfoProvider raceTimesInfoProvider;
     private final CompetitorManeuverDataCache competitorManeuverDataCache = new CompetitorManeuverDataCache();
     
     private ManeuverTableSettings settings;
     private boolean hasCanReplayDuringLiveRacesPermission;
 
+
     public ManeuverTablePanel(Component<?> parent, ComponentContext<?> context,
             final SailingServiceAsync sailingService, final RegattaAndRaceIdentifier raceIdentifier,
             final StringMessages stringMessages, final CompetitorSelectionProvider competitorSelectionModel,
             final ErrorReporter errorReporter, final Timer timer, ManeuverTableSettings initialSettings,
-            TimeRangeWithZoomModel timeRangeWithZoomProvider, LeaderBoardStyle style, UserService userService) {
+            TimeRangeWithZoomModel timeRangeWithZoomProvider, RaceTimesInfoProvider raceTimesInfoProvider,
+            LeaderBoardStyle style, UserService userService) {
         super(parent, context);
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
@@ -119,8 +125,10 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         this.stringMessages = stringMessages;
         this.timer = timer;
         this.timeRangeWithZoomProvider = timeRangeWithZoomProvider;
+        this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.competitorSelectionModel.addCompetitorSelectionChangeListener(this);
         this.timer.addTimeListener(this);
+        this.raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
         final FlowPanel rootPanel = new FlowPanel();
         rootPanel.addStyleName(resources.css().maneuverPanel());
         this.contentPanel.addStyleName(resources.css().contentContainer());
@@ -457,6 +465,12 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         }
     }
     
+    @Override
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
+            long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
+
+    }
+
     private boolean isReplaying() {
         return this.timer.getPlayMode() == PlayModes.Replay;
     }
@@ -505,42 +519,44 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             if (!Util.isEmpty(competitors)) {
                 final Map<CompetitorDTO, TimeRange> competitorToTimeRange = new HashMap<>();
                 competitors.forEach(c -> timeRangeProvider.apply(c).ifPresent(tr -> competitorToTimeRange.put(c, tr)));
-                sailingService.getManeuvers(raceIdentifier, competitorToTimeRange,
-                        new AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>>() {
+                if (!competitorToTimeRange.isEmpty()) {
+                    sailingService.getManeuvers(raceIdentifier, competitorToTimeRange,
+                            new AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>>() {
 
-                            @Override
-                            public void onSuccess(Map<CompetitorDTO, List<ManeuverDTO>> result) {
-                                if (isVisible()) {
-                                    final Set<CompetitorDTO> competitorsToRefresh = new HashSet<>();
-                                    for (final Entry<CompetitorDTO, List<ManeuverDTO>> entry : result.entrySet()) {
-                                        final CompetitorDTO competitor = entry.getKey();
-                                        if (!incremental) {
-                                            reset(competitor);
+                                @Override
+                                public void onSuccess(Map<CompetitorDTO, List<ManeuverDTO>> result) {
+                                    if (isVisible()) {
+                                        final Set<CompetitorDTO> competitorsToRefresh = new HashSet<>();
+                                        for (final Entry<CompetitorDTO, List<ManeuverDTO>> entry : result.entrySet()) {
+                                            final CompetitorDTO competitor = entry.getKey();
+                                            if (!incremental) {
+                                                reset(competitor);
+                                            }
+                                            final CompetitorManeuverData data = getData(competitor);
+                                            final TimeRange timeRange = competitorToTimeRange.get(competitor);
+                                            final List<ManeuverDTO> maneuvers = entry.getValue();
+                                            data.update(timeRange.from(), timeRange.to(), maneuvers);
+                                            if (incremental && maneuvers.stream().anyMatch(
+                                                    // FIXME maybe extend ManeuverDTO for isMarkPassing() and remove
+                                                    // MarkpassingManeuverDTO ?
+                                                    maneuver -> (maneuver instanceof MarkpassingManeuverDTO))) {
+                                                competitorsToRefresh.add(competitor);
+                                            }
                                         }
-                                        final CompetitorManeuverData data = getData(competitor);
-                                        final TimeRange timeRange = competitorToTimeRange.get(competitor);
-                                        final List<ManeuverDTO> maneuvers = entry.getValue();
-                                        data.update(timeRange.from(), timeRange.to(), maneuvers);
-                                        if (incremental && maneuvers.stream().anyMatch(
-                                                // FIXME maybe extend ManeuverDTO for isMarkPassing() and remove
-                                                // MarkpassingManeuverDTO ?
-                                                maneuver -> (maneuver instanceof MarkpassingManeuverDTO))) {
-                                            competitorsToRefresh.add(competitor);
+                                        ManeuverTablePanel.this.rerender();
+                                        if (incremental && !competitorsToRefresh.isEmpty()) {
+                                            updateAll(competitorsToRefresh);
                                         }
-                                    }
-                                    ManeuverTablePanel.this.rerender();
-                                    if (incremental && !competitorsToRefresh.isEmpty()) {
-                                        updateAll(competitorsToRefresh);
                                     }
                                 }
-                            }
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                CompetitorManeuverDataCache.this.resetAll();
-                                ManeuverTablePanel.this.rerender();
-                            }
-                        });
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    CompetitorManeuverDataCache.this.resetAll();
+                                    ManeuverTablePanel.this.rerender();
+                                }
+                            });
+                }
             }
         }
 
@@ -558,12 +574,17 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
          */
         private Long earliestRequestMillis;
 
+        // /**
+        // * The time point, as millisecond time stamp, of the end of the time range for which maneuvers have been
+        // * requested; or {@code null} in case ... TODO When can this be null? Upon an uninitialized TimePanel? Upon an
+        // * open-ended time range? Or only if no request has been made yet?
+        // */
+        // private Long latestRequestMillis;
+
         /**
-         * The time point, as millisecond time stamp, of the end of the time range for which
-         * maneuvers have been requested; or {@code null} in case ...
-         * TODO When can this be null? Upon an uninitialized TimePanel? Upon an open-ended time range? Or only if no request has been made yet?
+         * TODO
          */
-        private Long latestRequestMillis;
+        private Long latestManeuverMillis;
         
         /**
          * The maneuvers retrieved for one specific competitor for the time range between {@link #earliestRequestMillis}
@@ -575,8 +596,16 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
         private void update(final TimePoint earliest, final TimePoint latest, final List<ManeuverDTO> maneuvers) {
             this.earliestRequestMillis = earliest.asMillis();
-            this.latestRequestMillis = latest.asMillis();
+            // this.latestRequestMillis = latest.asMillis();
+            maneuvers.forEach(this::updateLatestManeuverMillis);
+            this.latestManeuverMillis++;
             this.maneuvers.addAll(maneuvers);
+        }
+
+        private void updateLatestManeuverMillis(final ManeuverDTO maneuver) {
+            final long maneuverMillis = maneuver.timePoint.getTime();
+            final boolean first = this.latestManeuverMillis == null;
+            this.latestManeuverMillis = first ? maneuverMillis : Math.max(this.latestManeuverMillis, maneuverMillis);
         }
 
         private Iterable<ManeuverDTO> getManeuvers() {
@@ -585,9 +614,9 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
         private Optional<TimeRange> requiresUpdate(final Date newTime) {
             final Optional<TimeRange> result;
-            if (isReplaying() && latestRequestMillis == null) {
-                result = Optional.of(getFullTimeRange());
-            } else if (earliestRequestMillis == null) {
+            if (isReplaying()) {
+                result = latestManeuverMillis == null ? Optional.of(getFullTimeRange()) : Optional.empty();
+            } else if (latestManeuverMillis == null) {
                 final TimePoint from = new MillisecondsTimePoint(timeRangeWithZoomProvider.getFromTime());
                 final TimePoint to = new MillisecondsTimePoint(newTime);
                 result = Optional.of(new TimeRangeImpl(from, to, true));
@@ -595,8 +624,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 final TimePoint from = new MillisecondsTimePoint(timeRangeWithZoomProvider.getFromTime());
                 final TimePoint to = new MillisecondsTimePoint(earliestRequestMillis);
                 result = Optional.of(new TimeRangeImpl(from, to, true));
-            } else if (latestRequestMillis != null && newTime.getTime() > latestRequestMillis) {
-                final TimePoint from = new MillisecondsTimePoint(latestRequestMillis);
+            } else if (newTime.getTime() > latestManeuverMillis) {
+                final TimePoint from = new MillisecondsTimePoint(latestManeuverMillis);
                 final TimePoint to = new MillisecondsTimePoint(timeRangeWithZoomProvider.getToTime());
                 result = Optional.of(new TimeRangeImpl(from, to, true));
             } else {
