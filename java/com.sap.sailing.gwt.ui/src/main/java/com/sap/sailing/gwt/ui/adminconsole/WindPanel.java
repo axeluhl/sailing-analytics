@@ -468,6 +468,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         final FormPanel formPanel = new FormPanel();
         final BusyIndicator busyIndicator = new SimpleBusyIndicator();
         final Button uploadButton = new Button(stringMessages.upload());
+        formPanel.getElement().setAttribute("autocomplete", "off");
         uploadButton.addClickHandler(event -> {
             uploadButton.setEnabled(false);
             busyIndicator.setBusy(true);
