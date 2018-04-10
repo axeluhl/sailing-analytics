@@ -101,7 +101,7 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         // give some extra time to load settings and create url
         AutoPlayUpcomingView autoplayPage = page.goToAutoPlaySixtyInchUrl(getWebDriver(), url);
         try {
-            Thread.sleep(10000);
+            Thread.sleep(15000);
         } catch (InterruptedException e1) {
             e1.printStackTrace();
         }
@@ -137,7 +137,7 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         AutoPlayLeaderboardView autoplayPage = page.goToAutoPlayClassicUrl(getWebDriver(), url);
         // give some extra time to load the leaderboard and finish the animation
         try {
-            Thread.sleep(10000);
+            Thread.sleep(15000);
         } catch (InterruptedException e1) {
             e1.printStackTrace();
         }
