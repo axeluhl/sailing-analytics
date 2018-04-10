@@ -20,6 +20,8 @@ import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeseria
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEndOfTrackingEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogStartOfTrackingEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
@@ -52,7 +54,7 @@ public class TrackingTimesEventSerializerTest {
 
     private CompetitorJsonSerializer createCompetitorSerializer() {
         return new CompetitorJsonSerializer(new TeamJsonSerializer(
-                new PersonJsonSerializer(new NationalityJsonSerializer())));
+                new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(new BoatClassJsonSerializer()));
     }
 
     @Test
