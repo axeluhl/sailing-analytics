@@ -6,6 +6,8 @@ import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -88,13 +90,15 @@ public class SapSailingDataImporter {
         HttpGet getEstimationData = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH + "/" + encodedRegattaName
                 + REST_API_RACES_PATH + "/" + encodedRaceName + REST_API_ESTIMATION_DATA_PATH);
         JSONObject resultJson = (JSONObject) getJsonFromResponse(client.execute(getEstimationData));
-        for (Object competitorDataJson : (JSONArray) resultJson.get("bycompetitor")) {
-            JSONObject competitorData = (JSONObject) competitorDataJson;
-            JSONArray maneuverCurves = (JSONArray) competitorData.get("maneuverCurves");
+        List<JSONObject> competitorTracks = new ArrayList<>();
+        for (Object competitorTrackJson : (JSONArray) resultJson.get("bycompetitor")) {
+            JSONObject competitorTrack = (JSONObject) competitorTrackJson;
+            JSONArray maneuverCurves = (JSONArray) competitorTrack.get("maneuverCurves");
             if (!maneuverCurves.isEmpty()) {
-                persistanceManager.addDataSet(regattaName, trackedRaceName, competitorData);
+                competitorTracks.add(competitorTrack);
             }
         }
+        persistanceManager.addRace(regattaName, trackedRaceName, competitorTracks);
     }
 
     // FIXME duplicated code taken from ConnectivityUtils

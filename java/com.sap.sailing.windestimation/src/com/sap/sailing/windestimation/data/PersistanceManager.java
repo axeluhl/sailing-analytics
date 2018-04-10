@@ -1,9 +1,11 @@
 package com.sap.sailing.windestimation.data;
 
 import java.net.UnknownHostException;
+import java.util.List;
 
 import org.json.simple.JSONObject;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -28,14 +30,18 @@ public class PersistanceManager {
         db.dropDatabase();
     }
 
-    public void addDataSet(String regattaName, String raceName, JSONObject estimationDataForCompetitorTrack) {
-        DBCollection regattas = db.getCollection("regattas");
-        regattas.insert(new BasicDBObject("regattaName", regattaName));
-        DBCollection races = regattas.getCollection("races");
-        races.insert(new BasicDBObject("raceName", raceName));
-        DBCollection competitorTracks = races.getCollection("competitorTracks");
-        DBObject entry = (DBObject) JSON.parse(estimationDataForCompetitorTrack.toString());
-        competitorTracks.insert(entry);
+    public void addRace(String regattaName, String trackedRaceName, List<JSONObject> competitorTracks) {
+        BasicDBList dbCompetitorTracks = new BasicDBList();
+        for (JSONObject competitorTrack : competitorTracks) {
+            DBObject entry = (DBObject) JSON.parse(competitorTrack.toString());
+            dbCompetitorTracks.add(entry);
+        }
+        BasicDBObject dbObject = new BasicDBObject();
+        dbObject.put("regattaName", regattaName);
+        dbObject.put("trackedRaceName", trackedRaceName);
+        dbObject.put("competitorTracks", dbCompetitorTracks);
+        DBCollection races = db.getCollection("races");
+        races.insert(dbObject);
     }
 
 }
