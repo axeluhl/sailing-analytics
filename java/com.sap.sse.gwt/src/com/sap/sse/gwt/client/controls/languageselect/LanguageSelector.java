@@ -99,7 +99,18 @@ public class LanguageSelector extends Composite {
 
     private void switchLanguage(String newLocaleName) {
         final UrlBuilder builder = Location.createUrlBuilder().setParameter("locale", newLocaleName);
-        Window.Location.replace(builder.buildString());
+        // Now work around the asymmetry (see also bug 4497) of the UrlBuilder's dealing with the hash/fragment:
+        final String hash = Location.getHash();
+        builder.setHash(null);
+        final String newUrl;
+        if (hash == null) {
+            newUrl = builder.buildString();
+        } else if (hash.startsWith("#")) {
+            newUrl = builder.buildString()+hash;
+        } else {
+            newUrl = builder.buildString()+"#"+hash;
+        }
+        Window.Location.replace(newUrl);
     }
 
     private static class LanguageRenderer extends AbstractRenderer<String> {

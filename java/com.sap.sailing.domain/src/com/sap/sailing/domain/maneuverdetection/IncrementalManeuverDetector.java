@@ -3,6 +3,7 @@ package com.sap.sailing.domain.maneuverdetection;
 import java.util.List;
 
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 
 /**
  * An extension of {@link ManeuverDetector} which supports incremental maneuver detection within calls of
@@ -16,9 +17,16 @@ import com.sap.sailing.domain.tracking.Maneuver;
 public interface IncrementalManeuverDetector extends ManeuverDetector {
 
     /**
-     * Gets the detected maneuvers during previous calls of {@link #detectManeuvers()}
+     * Gets the already detected maneuvers by previous calls of {@link #detectManeuvers()} and
+     * {@link #detectCompleteManeuverCurves()}.
      */
     List<Maneuver> getAlreadyDetectedManeuvers();
+
+    /**
+     * Gets the already detected maneuver curves by previous calls of {@link #detectManeuvers()} and
+     * {@link #detectCompleteManeuverCurves()}.
+     */
+    List<CompleteManeuverCurve> getAlreadyDetectedManeuverCurves();
 
     /**
      * Clears the whole state of the detector, which is used for incremental maneuver detection. The following calls of

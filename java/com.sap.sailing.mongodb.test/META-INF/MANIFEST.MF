@@ -40,4 +40,5 @@ Import-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.tracking,
  com.sap.sailing.domain.common.tracking.impl,
  com.sap.sailing.domain.tractracadapter.persistence.impl
+Automatic-Module-Name: com.sap.sailing.mongodb.test
 

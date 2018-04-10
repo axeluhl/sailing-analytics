@@ -53,7 +53,6 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel.LeaderBoardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.MinMaxRenderer;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
-import com.sap.sailing.gwt.ui.shared.MarkpassingManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -537,9 +536,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                                             final List<ManeuverDTO> maneuvers = entry.getValue();
                                             data.update(timeRange.from(), timeRange.to(), maneuvers);
                                             if (incremental && maneuvers.stream().anyMatch(
-                                                    // FIXME maybe extend ManeuverDTO for isMarkPassing() and remove
-                                                    // MarkpassingManeuverDTO ?
-                                                    maneuver -> (maneuver instanceof MarkpassingManeuverDTO))) {
+                                                    // FIXME extend ManeuverDTO for isMarkPassing() check
+                                                    maneuver -> maneuver.markPassingTimePoint != null)) {
                                                 competitorsToRefresh.add(competitor);
                                             }
                                         }

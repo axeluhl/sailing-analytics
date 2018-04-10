@@ -19,14 +19,27 @@ public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFa
     @Connector(messageKey="Nationality", ordinal=9)
     Nationality getNationality();
 
-    @Connector(messageKey="Boat", ordinal=10)
-    Boat getBoat();
-    
     Color getColor();
     
     String getEmail();
-    
+
     boolean hasEmail();
+
+    String getShortName();
+
+    /**
+     * Returns a derived short information about a competitor depending on the information available
+     * If we have a short name set on the competitor this name will be returned.
+     * If no short name exist but a boat the either the sailId or the boat name will returned.
+     * If all these attributes have no value null is returned.   
+     */
+    String getShortInfo();
+
+    /**
+     * A helper to know if the competitor has a boat attached.
+     * See {@link CompetitorWithBoat}
+     */
+    boolean hasBoat();
 
     @Dimension(messageKey="SearchTag", ordinal=11)
     String getSearchTag();

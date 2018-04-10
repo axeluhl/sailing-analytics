@@ -16,3 +16,4 @@ Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
  com.sap.sse.common,
  com.sap.sse,
  com.sap.sse.shared.android
+Automatic-Module-Name: com.sap.sailing.domain.shared.android.test

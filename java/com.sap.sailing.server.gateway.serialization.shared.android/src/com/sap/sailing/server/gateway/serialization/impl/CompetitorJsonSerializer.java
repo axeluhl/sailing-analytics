@@ -9,6 +9,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
@@ -30,14 +31,15 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         this(null, null);
     }
 
-    public CompetitorJsonSerializer(JsonSerializer<Team> teamJsonSerializer, JsonSerializer<Boat> teamBoatSerializer) {
+    public CompetitorJsonSerializer(JsonSerializer<Team> teamJsonSerializer, JsonSerializer<Boat> boatJsonSerializer) {
         this.teamJsonSerializer = teamJsonSerializer;
-        this.boatJsonSerializer = teamBoatSerializer;
+        this.boatJsonSerializer = boatJsonSerializer;
     }
     
     public static JSONObject getCompetitorIdQuery(Competitor competitor) {
         JSONObject result = new JSONObject();
-        result.put(FIELD_ID, getPersistentCompetitorId(competitor));
+        Serializable competitorId = competitor.getId() instanceof UUID ? competitor.getId().toString() : competitor.getId();
+        result.put(FIELD_ID, competitorId);
         return result;
     }
 
@@ -54,11 +56,11 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
             result.put(idKeyAndValue.getKey(), idKeyAndValue.getValue());
         }
         result.put(CompetitorJsonConstants.FIELD_NAME, competitor.getName());
+        result.put(CompetitorJsonConstants.FIELD_SHORT_NAME, competitor.getShortName());
         Color color = getColor(competitor);
         result.put(CompetitorJsonConstants.FIELD_DISPLAY_COLOR, color == null ? null : color.getAsHtml());
         result.put(CompetitorJsonConstants.FIELD_EMAIL, competitor.getEmail());
         result.put(CompetitorJsonConstants.FIELD_SEARCHTAG, competitor.getSearchTag());
-        result.put(CompetitorJsonConstants.FIELD_SAIL_ID, competitor.getBoat() == null ? "" : competitor.getBoat().getSailID());
         final Nationality nationality = competitor.getTeam() == null ? null : competitor.getTeam().getNationality();
         result.put(CompetitorJsonConstants.FIELD_NATIONALITY, nationality == null ? "" : nationality.getThreeLetterIOCAcronym());
         CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
@@ -70,8 +72,8 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         if (teamJsonSerializer != null) {
             result.put(CompetitorJsonConstants.FIELD_TEAM, teamJsonSerializer.serialize(competitor.getTeam()));
         }
-        if (boatJsonSerializer != null) {
-            result.put(CompetitorJsonConstants.FIELD_BOAT, boatJsonSerializer.serialize(getBoat(competitor)));
+        if (boatJsonSerializer != null && competitor.hasBoat()) {
+            result.put(CompetitorJsonConstants.FIELD_BOAT, boatJsonSerializer.serialize(((CompetitorWithBoat) competitor).getBoat()));
         }
         result.put(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR, competitor.getTimeOnTimeFactor());
         result.put(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
@@ -80,17 +82,7 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         return result;
     }
 
-    private static Serializable getPersistentCompetitorId(Competitor competitor) {
-        Serializable competitorId = competitor.getId() instanceof UUID ? competitor.getId().toString() : competitor.getId();
-        return competitorId;
-    }
-
-    protected Color getColor(Competitor competitor ) {
+    protected Color getColor(Competitor competitor) {
         return competitor.getColor();
     }
-    
-    protected Boat getBoat(Competitor competitor ) {
-        return competitor.getBoat();
-    }
-
 }

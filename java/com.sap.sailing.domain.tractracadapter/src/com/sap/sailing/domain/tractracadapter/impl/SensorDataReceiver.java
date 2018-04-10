@@ -100,7 +100,7 @@ public class SensorDataReceiver extends AbstractReceiverWithQueue<IRaceCompetito
                 }
                 if (create) {
                     final BravoFix fix = new BravoFixImpl(new DoubleVectorFixImpl(new MillisecondsTimePoint(sensorData.getTimestamp()), fixData));
-                    final Competitor competitor = getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor());
+                    final Competitor competitor = getDomainFactory().resolveCompetitor(event.getA().getCompetitor());
                     DynamicBravoFixTrack<Competitor> bravoFixTrack =
                             trackedRace.getOrCreateSensorTrack(competitor, BravoFixTrack.TRACK_NAME,
                                     () -> new CompetitorBravoFixTrackImpl(competitor, BravoFixTrack.TRACK_NAME, /* hasExtendedFixes */ false,

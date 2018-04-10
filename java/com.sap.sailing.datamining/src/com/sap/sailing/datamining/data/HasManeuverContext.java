@@ -1,18 +1,25 @@
 package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
 
-public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, HasTrackedLegOfCompetitor {
+public interface HasManeuverContext extends HasManeuver, HasTrackedLegOfCompetitor {
     @Connector(scanForStatistics = false)
     HasTrackedLegOfCompetitorContext getTrackedLegOfCompetitorContext();
 
     @Dimension(messageKey = "TackBeforeManeuver")
     Tack getTackBeforeManeuver();
+    
+    @Dimension(messageKey = "TypeOfPreviousManeuver")
+    ManeuverType getTypeOfPreviousManeuver();
+    
+    @Dimension(messageKey = "TypeOfNextManeuver")
+    ManeuverType getTypeOfNextManeuver();
 
     @Statistic(messageKey = "AbsoluteDirectionChange", resultDecimals = 2, ordinal = 3)
     Double getAbsoluteDirectionChangeInDegrees();
@@ -61,7 +68,7 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
 
     @Statistic(messageKey = "AbsCourseDifferenceBetweenStableSpeedWithCourseAndMainCurveEndInDegrees", ordinal = 25, resultDecimals = 2)
     Double getAbsCourseDifferenceBetweenStableSpeedWithCourseAndMainCurveEndInDegrees();
-
+    
     TimePoint getTimePointBeforeForAnalysis();
 
     TimePoint getTimePointAfterForAnalysis();

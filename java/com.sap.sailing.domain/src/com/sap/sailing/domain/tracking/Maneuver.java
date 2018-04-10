@@ -102,13 +102,13 @@ public interface Maneuver extends GPSFix {
     ManeuverCurveBoundaries getManeuverBoundaries();
 
     /**
-     * The maximal angular velocity recorded within the main curve at maneuver climax.
+     * The maximal turning rate recorded within the main curve at maneuver climax.
      * 
-     * @return The maximal angular velocity in degrees per second
+     * @return The maximal turning rate in degrees per second
      * @see #getTimePoint()
      */
-    @Statistic(messageKey = "MaxAngularVelocityInDegreesPerSecond", resultDecimals = 4, ordinal = 4)
-    double getMaxAngularVelocityInDegreesPerSecond();
+    @Statistic(messageKey = "MaxTurningRateInDegreesPerSecond", resultDecimals = 4, ordinal = 4)
+    double getMaxTurningRateInDegreesPerSecond();
 
     /**
      * Gets the speed with bearing at maneuver start, which is at {@link #getManeuverBoundaries()}.getTimePointBefore().
@@ -153,7 +153,7 @@ public interface Maneuver extends GPSFix {
     Speed getLowestSpeed();
 
     /**
-     * Gets the mark passing which is contained within maneuver. In case if no mark passing was passed, {@code null} is
+     * Gets the mark passing which is contained within maneuver curve. In case if no mark was passed, {@code null} is
      * returned.
      */
     MarkPassing getMarkPassing();
@@ -169,5 +169,12 @@ public interface Maneuver extends GPSFix {
      */
     @Dimension(messageKey = "ToSide", ordinal = 16)
     NauticalSide getToSide();
+
+    /**
+     * Gets the average turning rate recorded within the maneuver main curve. It is calculated by absolute course change
+     * within main curve divided by maneuver main curve duration.
+     */
+    @Statistic(messageKey = "AvgTurningRateInDegreesPerSecond", resultDecimals = 4)
+    double getAvgTurningRateInDegreesPerSecond();
 
 }

@@ -18,22 +18,23 @@ public class PairingListTemplateDTO implements Serializable {
     public PairingListTemplateDTO() { }
     
     public PairingListTemplateDTO(int competitorCount, int flightMultiplier) {
-        this(0, 0, competitorCount, flightMultiplier, null, 0.0, null);
+        this(0, 0, competitorCount, flightMultiplier, null, 0.0, /* selected flight names */ null);
     }
     
     public PairingListTemplateDTO(int competitorCount, int flightMultiplier, int[][] pairingListTemplate, double quality) {
-        this(0, 0, competitorCount, flightMultiplier, pairingListTemplate, quality, null);
+        this(0, 0, competitorCount, flightMultiplier, pairingListTemplate, quality, /* selected flight names */ null);
     }
     
     public PairingListTemplateDTO(int competitorCount, int[][] pairingListTemplate, double quality) {
-        this(0, 0, competitorCount, 0, pairingListTemplate, quality, null);
+        this(0, 0, competitorCount, 0, pairingListTemplate, quality, /* selected flight names */ null);
     }
     
     public PairingListTemplateDTO(int flightCount, int groupCount, int competitorCount, int flightMultiplier, int[][] pairingListTemplate, double quality) {
-        this(flightCount, groupCount, competitorCount, flightMultiplier, pairingListTemplate, quality, null);
+        this(flightCount, groupCount, competitorCount, flightMultiplier, pairingListTemplate, quality, /* selected flight names */ null);
     }
     
-    public PairingListTemplateDTO(int flightCount, int groupCount, int competitorCount, int flightMultiplier, int[][] pairingListTemplate, double quality, Iterable<String> selectedFlightNames) {
+    public PairingListTemplateDTO(int flightCount, int groupCount, int competitorCount, int flightMultiplier,
+            int[][] pairingListTemplate, double quality, Iterable<String> selectedFlightNames) {
         this.flightCount = flightCount;
         this.groupCount = groupCount;
         this.competitorCount = competitorCount;
@@ -46,6 +47,7 @@ public class PairingListTemplateDTO implements Serializable {
     public void setFlightCount(int flightCount){
         this.flightCount=flightCount;
     }
+    
     public void setGroupCount(int groupCount) {
         this.groupCount = groupCount;
     }

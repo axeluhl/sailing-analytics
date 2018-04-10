@@ -305,8 +305,8 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     
     @Test
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogFinishPositioningConfirmedEvent() {   
-        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", 
-                Color.RED, "someone@nowhere.de", null, null, null,
+        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP",
+                Color.RED, "someone@nowhere.de", null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */
@@ -329,8 +329,8 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     
     @Test
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogFinishPositioningConfirmedEventWithContents() {   
-        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", 
-                Color.RED, "someone@nowhere.de", null, null, null,
+        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP",
+                Color.RED, "someone@nowhere.de", null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         final TimePoint finishingTimePoint = MillisecondsTimePoint.now();
@@ -368,7 +368,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
             RaceLogFinishPositioningConfirmedEvent loadedConfirmedEvent = (RaceLogFinishPositioningConfirmedEvent) loadedEvent;
             assertEquals(now, loadedConfirmedEvent.getLogicalTimePoint());
             assertEquals(0, loadedConfirmedEvent.getPassId());
-            assertEquals(0, loadedConfirmedEvent.getInvolvedBoats().size());
+            assertEquals(0, loadedConfirmedEvent.getInvolvedCompetitors().size());
             assertNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons()); 
             assertNull(loadedConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
@@ -400,8 +400,8 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     
     @Test
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogFinishPositioningListChangeEvent() {
-        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.RED,
-                "someone@nowhere.de", null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP", Color.RED,
+                "someone@nowhere.de", null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */
                 1, MaxPointsReason.NONE, /* score */ null, /* finishingTimePoint */null, /* comment */null, MergeState.OK));
@@ -418,7 +418,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
             assertEquals(event.getLogicalTimePoint(), loadedPositioningEvent.getLogicalTimePoint());
             assertEquals(event.getPassId(), loadedPositioningEvent.getPassId());
             assertEquals(event.getId(), loadedPositioningEvent.getId());
-            assertEquals(event.getInvolvedBoats().size(), loadedPositioningEvent.getInvolvedBoats().size());
+            assertEquals(event.getInvolvedCompetitors().size(), loadedPositioningEvent.getInvolvedCompetitors().size());
             final CompetitorResults expectedCompetiorResults = event.getPositionedCompetitorsIDsNamesMaxPointsReasons();
             final CompetitorResults loadedCompetitorResults = loadedPositioningEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons();
             assertCompetitorResultsEqual(expectedCompetiorResults, loadedCompetitorResults);

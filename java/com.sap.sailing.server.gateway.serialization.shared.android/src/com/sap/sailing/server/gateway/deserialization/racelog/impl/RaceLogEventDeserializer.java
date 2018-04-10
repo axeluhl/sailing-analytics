@@ -4,6 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.SmartphoneUUIDIdentifier;
@@ -14,7 +15,9 @@ import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBase
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorWithBoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
@@ -55,6 +58,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
     public static RaceLogEventDeserializer create(SharedDomainFactory domainFactory,
             JsonDeserializer<DeviceIdentifier> deviceDeserializer) {
     	JsonDeserializer<Competitor> competitorDeserializer = CompetitorJsonDeserializer.create(domainFactory);
+        JsonDeserializer<CompetitorWithBoat> competitorWithBoatDeserializer = CompetitorWithBoatJsonDeserializer.create(domainFactory);
         return new RaceLogEventDeserializer(
                 new RaceLogFlagEventDeserializer(competitorDeserializer),
                 new RaceLogStartTimeEventDeserializer(competitorDeserializer), 
@@ -78,7 +82,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogDenoteForTrackingEventDeserializer(competitorDeserializer, domainFactory),
                 new RaceLogStartTrackingEventDeserializer(competitorDeserializer),
                 new RaceLogRevokeEventDeserializer(competitorDeserializer),
-                new RaceLogRegisterCompetitorEventDeserializer(competitorDeserializer),
+                new RaceLogRegisterCompetitorEventDeserializer(competitorDeserializer, competitorWithBoatDeserializer, BoatJsonDeserializer.create(domainFactory)),
                 new RaceLogAdditionalScoringInformationEventDeserializer(competitorDeserializer),
                 new RaceLogFixedMarkPassingEventDeserializer(competitorDeserializer),
                 new RaceLogSuppressedMarkPassingsEventDeserializer(competitorDeserializer),

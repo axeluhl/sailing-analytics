@@ -2,12 +2,10 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Collections;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -28,14 +26,13 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class LineAnalysisTest extends TrackBasedTest {
     private TimePoint now;
     private DynamicTrackedRace trackedRace;
-    private Competitor competitor;
+    private CompetitorWithBoat competitor;
 
     @Before
     public void setUp() {
-        competitor = createCompetitor("Test");
-        final Iterable<Competitor> competitorListWithOneCompetitor = Collections.singletonList(competitor);
+        competitor = createCompetitorWithBoat("Test");
         now = MillisecondsTimePoint.now();
-        trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", competitorListWithOneCompetitor, now, /* useMarkPassingCalculator */ false);
+        trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", createCompetitorAndBoatsMap(competitor), now, /* useMarkPassingCalculator */ false);
     }
     
     @Test

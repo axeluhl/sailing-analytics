@@ -404,6 +404,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource Tartan10Icon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/VENTDOUEST.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource VentdOuestIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/VIPER_640.png")
     @ImageOptions(preventInlining = true)
     ImageResource Viper640Icon();

@@ -128,6 +128,8 @@ public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRe
      */
     Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered();
 
+    Iterable<Boat> getAllBoats();
+
     /**
      * Will remove the series from this regatta. Will also call {@link RaceColumn#removeRaceIdentifier(Fleet)} to make
      * sure that all raceLogs and race associations get removed for all race columns in this series.

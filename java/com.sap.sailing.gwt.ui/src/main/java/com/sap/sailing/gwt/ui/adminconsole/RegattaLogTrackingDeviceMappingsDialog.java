@@ -35,11 +35,11 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
+import com.sap.sailing.gwt.ui.client.MappableToDeviceFormatter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
-import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -159,10 +159,9 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
             public String format(ToolTipData toolTipData) {
                 int index = (int) toolTipData.getXAsLong();
                 DeviceMappingDTO mapping = mappings.get(index);
-                String itemType = mapping.mappedTo instanceof MarkDTO ? stringMessages.mark() : stringMessages.competitor();
-                
+                final String itemType = MappableToDeviceFormatter.formatType(mapping.mappedTo, stringMessages);
                 return "<b>" + stringMessages.device() + ":</b> " + mapping.deviceIdentifier.deviceType + " - " + mapping.deviceIdentifier.deviceId + "<br/>" +
-                    "<b>" + stringMessages.mappedTo() + ":</b> " + itemType + " - " + mapping.mappedTo + "<br/>" +
+                    "<b>" + stringMessages.mappedTo() + ":</b> " + itemType + " - " + MappableToDeviceFormatter.formatName(mapping.mappedTo) + "<br/>" +
                     "<b>" + stringMessages.from() + ":</b> " + DateAndTimeFormatterUtil.formatDateAndTime(mapping.from) + "<br/>" +
                     "<b>" + stringMessages.to() + ":</b> " + DateAndTimeFormatterUtil.formatDateAndTime(mapping.to);
             }
