@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/fiori_main_background">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fiori_main_background">
 
     <TextView
         android:id="@+id/buoy_Name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:padding="5dp"
+        tools:text="Text"
+        tools:background="#E90EA8"
         android:layout_centerInParent="true"
         android:textSize="@dimen/tracking_button_text_size"/>
 

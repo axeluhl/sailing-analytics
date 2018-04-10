@@ -12,3 +12,4 @@ Import-Package: org.osgi.framework;version="1.8.0",
  org.osgi.util.tracker
 Export-Package: com.sap.sailing.datamining.provider
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: com.sap.sailing.datamining.provider

@@ -93,6 +93,7 @@ public class ExpeditionAllInOneAfterImportHandler {
     private void showCompetitorRegistration() {
         new RegattaLogCompetitorRegistrationDialog(regatta.boatClass == null ? null : regatta.boatClass.getName(),
                 sailingService, stringMessages, errorReporter, true, leaderboard.getName(),
+                leaderboard.canBoatsOfCompetitorsChangePerRace,
                 new CancelImportDialogCallback<Set<CompetitorDTO>>() {
             @Override
             public void ok(final Set<CompetitorDTO> competitors) {

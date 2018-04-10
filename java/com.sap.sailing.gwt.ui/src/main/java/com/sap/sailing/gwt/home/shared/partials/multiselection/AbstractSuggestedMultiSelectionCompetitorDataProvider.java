@@ -23,7 +23,7 @@ public abstract class AbstractSuggestedMultiSelectionCompetitorDataProvider exte
     
     @Override
     public final String createSuggestionKeyString(SimpleCompetitorWithIdDTO value) {
-        return value.getSailID();
+        return value.getShortInfo();
     }
     
     @Override

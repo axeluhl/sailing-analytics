@@ -23,9 +23,9 @@ public class ManeuverWithStableSpeedAndCourseBoundariesImpl extends ManeuverImpl
     public ManeuverWithStableSpeedAndCourseBoundariesImpl(ManeuverType type, Tack newTack, Position position,
             Distance maneuverLoss, TimePoint timePoint, ManeuverCurveBoundaries mainCurveBoundaries,
             ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries,
-            double maxAngularVelocityInDegreesPerSecond, MarkPassing markPassing) {
+            double maxTurningRateInDegreesPerSecond, MarkPassing markPassing) {
         super(type, newTack, position, maneuverLoss, timePoint, mainCurveBoundaries,
-                maneuverCurveWithStableSpeedAndCourseBoundaries, maxAngularVelocityInDegreesPerSecond, markPassing);
+                maneuverCurveWithStableSpeedAndCourseBoundaries, maxTurningRateInDegreesPerSecond, markPassing);
     }
 
     @Override

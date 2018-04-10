@@ -40,6 +40,7 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
 
         nameEntryField.setEnabled(false);
         boatClassEntryField.setEnabled(false);
+        canBoatsOfCompetitorsChangePerRaceCheckBox.setEnabled(false);
         scoringSchemeListBox.setEnabled(false);
         sailingEventsListBox.setEnabled(true);
         courseAreaListBox.setEnabled(true);

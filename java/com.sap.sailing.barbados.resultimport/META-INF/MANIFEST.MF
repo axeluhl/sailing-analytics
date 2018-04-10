@@ -22,3 +22,4 @@ Require-Bundle: com.sap.sailing.server,
  org.apache.poi.ooxml.schemas;bundle-version="3.9.0"
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.barbados.resultimport.impl;x-friends:="com.sap.sailing.barbados.resultimport.test"
+Automatic-Module-Name: com.sap.sailing.barbados.resultimport

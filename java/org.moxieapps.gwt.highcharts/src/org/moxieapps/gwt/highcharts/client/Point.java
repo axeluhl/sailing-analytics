@@ -17,6 +17,7 @@
 package org.moxieapps.gwt.highcharts.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
@@ -61,49 +62,16 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
  * @since 1.0.0
  */
 public class Point extends Configurable<Point> {
-	
-	/**
-     * An enumeration describing the type of data contained within the Point. Retrievable via
-     * {@link Point#getType()}.  (The type is purposefully restricted to package scope to hide
-     * this as an implementation detail since an equivalent concept doesn't exist in the core
-     * Highcharts API, but exposing this enum could be reconsidered if a use case was identified.)
-     */
-	static enum Type {
 
-        /**
-         * Indicates that the point is a Flag
-         */
-        FLAG,
+    private String name;
 
-		/**
-		 * Indicates the point contains only a Y value
-		 */
-		Y,
-		
-		/**
-		 * Indicates the point contains an X and Y value
-		 */
-		X_Y,
-		
-		/**
-		 * Indicates the point contains an X, Low and High values
-		 */
-		X_LOW_HIGH,
-		
-		/**
-		 * Indicates the point contains an X, Open, High, Low, and Close values
-		 */
-		X_OPEN_HIGH_LOW_CLOSE
-	}
-	
-	private final Type type;
+    // Generic instance variable that represents the various properties of a point.
+    private Number[] values;
 
-    private Number y;
-    private Number x;
-    private Number open;
-    private Number high;
-    private Number low;
-    private Number close;
+
+    Number[] getValues() {
+        return this.values;
+    }
 
     /**
      * Create a new point, setting only the Y axis value that the point should be
@@ -112,8 +80,7 @@ public class Point extends Configurable<Point> {
      * @param y The Y value that the point should be rendered at within the series.
      */
     public Point(Number y) {
-        this.y = y;
-        this.type = Type.Y;
+        this(new Number[]{y});
     }
 
     /**
@@ -124,25 +91,24 @@ public class Point extends Configurable<Point> {
      * @param y The Y value that the point should be rendered at within the series.
      */
     public Point(Number x, Number y) {
-        this.x = x;
-        this.y = y;
-        this.type = Type.X_Y;
+        this(new Number[]{x, y});
     }
-    
+
     /**
      * Create a new point for an area range / area range spline chart, setting the x and low / high y values.
+     * Or, create a new point for a heatmap, where the first and second parameters are the x/y coordinates
+     * of the point on the heatmap, and the third parameter is the value that will be used to determine the
+     * intensity of the "heat" color for that point.
      *
-     * @param x     The X value that the point should be rendered at within the series.
-     * @param low   The "low" Y value that the point should be rendered at within the series.
-     * @param high  The "high" Y value that the point should be rendered at within the series.
-     *
+     * @param x The X value that the point should be rendered at within the series.
+     * @param a The "low" value that the point should be rendered at within the series for
+     *          a range chart, or the Y value when used in a heatmap.
+     * @param b The "high" Y value that the point should be rendered at within the series
+     *          for a range chart, or the intensity of the color in a heat map.
      * @since 1.5.0
      */
-    public Point(Number x, Number low, Number high) {
-        this.x = x;
-        this.low = low;
-        this.high = high;
-        this.type = Type.X_LOW_HIGH;
+    public Point(Number x, Number a, Number b) {
+        this(new Number[]{x, a, b});
     }
 
     /**
@@ -156,12 +122,27 @@ public class Point extends Configurable<Point> {
      * @since 1.2.0
      */
     public Point(Number x, Number open, Number high, Number low, Number close) {
-        this.x = x;
-        this.open = open;
-        this.high = high;
-        this.low = low;
-        this.close = close;
-        this.type = Type.X_OPEN_HIGH_LOW_CLOSE;
+        this(new Number[]{x, open, high, low, close});
+    }
+
+    /**
+     * Create a new point with an arbitrary number of values.  E.g. a call
+     * like "new Point(5)" would create a point with a single Y value.  A
+     * call like "new Point(5, 10)" would create a point with an X and Y value, etc.
+     * See the other Point constructors for details on the purpose of point with
+     * a different count of values.
+     *
+     * @param values An array of numeric values to initialize the point with.
+     * @see #Point(Number)
+     * @see #Point(Number, Number)
+     * @see #Point(Number, Number, Number)
+     * @see #Point(Number, Number, Number, Number, Number)
+     * @see #Point(String)
+     * @see #Point(String, Number)
+     * @see #Point(Number, String, String)
+     */
+    public Point(Number... values) {
+        this.values = values;
     }
 
     /**
@@ -173,35 +154,33 @@ public class Point extends Configurable<Point> {
      * @param y    The Y value that the point should be rendered at within the series.
      */
     public Point(String name, Number y) {
+        this.values = new Number[]{y};
         setName(name);
-        this.y = y;
-        this.type = Type.Y;
     }
 
     /**
      * Creates a new point with only a 'name' field.  Only used in waterfall charts when the value is computed by
      * {@link #setIsIntermediateSum(boolean)} or (@link #setIsSum(boolean)}
+     *
      * @param name The name of the point
      * @since 1.6.0
      */
     public Point(String name) {
         setName(name);
-        this.type = Type.Y;
     }
 
     /**
      * Creates a new point of type "flag" at a given value with a title and text.  Intended to be
      * added to series whose type has been set to {@link Series.Type#FLAGS};
-     * 
-     * @param x Point where the flag appears
+     *
+     * @param x     Point where the flag appears
      * @param title Title of flag displayed on the chart
-     * @param text Text displayed when the flag are highlighted.
+     * @param text  Text displayed when the flag are highlighted.
      */
     public Point(Number x, String title, String text) {
-        this.x = x;
+        this.values = new Number[]{x};
         setTitle(title);
         setText(text);
-        this.type = Type.FLAG;
     }
 
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
@@ -215,20 +194,43 @@ public class Point extends Configurable<Point> {
      */
     public Point(JavaScriptObject nativePoint) {
         this.nativePoint = nativePoint;
-        this.type = determineType(nativePoint);
     }
-        
+
     /**
-     * Retrieve the type of data stored within this Point instance (purposefully restricted to
-     * package scope to hide this as an implementation detail since the concept doesn't exist
-     * in the core Highcharts API, but exposing this properly could be reconsidered if a
-     * use case was identified.)
+     * Retrieves the intensity 'value' of the point as it pertains to heatmaps.
      *
-     * @return The point's type
-     * @since 1.5.0
+     * @return The 'value' value of the point (should always be non-null, unless called on a point
+     *         that is not part of a heatmap.)
      */
-    Type getType() {
-    	return type;
+    public Number getValue() {
+        if (this.nativePoint != null && nativeContainsKey(this.nativePoint, "value")) {
+            return nativeGetNumber(this.nativePoint, "value");
+        } else {
+            if (values.length == 3) {
+                return values[2];
+            } else {
+                return null;
+            }
+        }
+
+    }
+
+    /**
+     * Retrieves the Z value of where point should be rendered at within the series for 3D chart types.
+     *
+     * @return The Z value of the point (should always be non-null, unless called on a point
+     *         that is not part of a 3D series.)
+     */
+    public Number getZ() {
+        if (this.nativePoint != null && nativeContainsKey(this.nativePoint, "z")) {
+            return nativeGetNumber(this.nativePoint, "z");
+        } else {
+            if (values.length == 3) {
+                return values[2];
+            } else {
+                return null;
+            }
+        }
     }
 
     /**
@@ -240,7 +242,11 @@ public class Point extends Configurable<Point> {
         if (this.nativePoint != null && nativeContainsKey(this.nativePoint, "y")) {
             return nativeGetNumber(this.nativePoint, "y");
         } else {
-            return y;
+            if (values.length <= 3 && values.length > 1) {
+                return values[1];
+            } else {
+                return values[0];
+            }
         }
     }
 
@@ -253,7 +259,11 @@ public class Point extends Configurable<Point> {
         if (this.nativePoint != null && nativeContainsKey(this.nativePoint, "x")) {
             return nativeGetNumber(this.nativePoint, "x");
         } else {
-            return x;
+            if (values.length > 1) {
+                return values[0];
+            } else {
+                return null;
+            }
         }
     }
 
@@ -267,7 +277,15 @@ public class Point extends Configurable<Point> {
         if (this.nativePoint != null && nativeContainsKey(this.nativePoint, "open")) {
             return nativeGetNumber(this.nativePoint, "open");
         } else {
-            return open;
+            if (values.length >= 4) {
+                if (values.length == 4) {
+                    return values[0];
+                } else {
+                    return values[1];
+                }
+            } else {
+                return null;
+            }
         }
     }
 
@@ -281,7 +299,15 @@ public class Point extends Configurable<Point> {
         if (this.nativePoint != null && nativeContainsKey(this.nativePoint, "high")) {
             return nativeGetNumber(this.nativePoint, "high");
         } else {
-            return high;
+            if (values.length >= 4) {
+                if (values.length == 4) {
+                    return values[1];
+                } else {
+                    return values[2];
+                }
+            } else {
+                return null;
+            }
         }
     }
 
@@ -295,7 +321,15 @@ public class Point extends Configurable<Point> {
         if (this.nativePoint != null && nativeContainsKey(this.nativePoint, "low")) {
             return nativeGetNumber(this.nativePoint, "low");
         } else {
-            return low;
+            if (values.length >= 4) {
+                if (values.length == 4) {
+                    return values[2];
+                } else {
+                    return values[3];
+                }
+            } else {
+                return null;
+            }
         }
     }
 
@@ -309,7 +343,15 @@ public class Point extends Configurable<Point> {
         if (this.nativePoint != null && nativeContainsKey(this.nativePoint, "close")) {
             return nativeGetNumber(this.nativePoint, "close");
         } else {
-            return close;
+            if (values.length >= 4) {
+                if (values.length == 4) {
+                    return values[3];
+                } else {
+                    return values[4];
+                }
+            } else {
+                return null;
+            }
         }
     }
 
@@ -328,12 +370,52 @@ public class Point extends Configurable<Point> {
     }
 
     /**
+     * Convenience method for setting the 'drilldown' option of the point. Equivalent to:
+     * <pre><code>
+     *     point.setOption("drilldown", "apples");
+     * </code></pre>
+     * This method should be the primary method of adding a drilldown series to a point.
+     * <p/>
+     * The name of a series in the drilldown.series array to use for a drilldown for this point.
+     * The name option of a point can be set via {@link Point#setName(String)}
+     *
+     * @param drilldownSeries A series that will be displayed when this point is clicked
+     * @return A reference to this {@link Point} instance for convenient method chaining.
+     * @since 1.7.0
+     */
+    public Point setDrilldownSeries(Series drilldownSeries) {
+        return this.setOption("drilldown", drilldownSeries.getId());
+    }
+
+    // TODO: Add support for enabling drilldowns on points that will have their series resolved
+    // dynamically after a drilldown event is fired (and the series will then be added to the
+    // chart via the chart.addSeriesAsDrilldown() method.
+    /**
+     * Convenience method for setting the 'drilldown' option of the point.  Equivalent to:
+     * <pre><code>
+     *     point.setOption("drilldown", true);
+     * </code></pre>
+     * Used when asynchronously loading in a drilldown series.  In this case the series to be rendered will have a "name"
+     * value that matches the "name" of the point which is clicked.
+     *
+     * @param drilldown
+     * @return A reference to this {@link Point} instance for convenient method chaining.
+     * @since 1.7.0
+     */
+    /*
+    public Point setDrilldown(Boolean drilldown) {
+        return this.setOption("drilldown", drilldown);
+    }
+    */
+
+    /**
      * Convenience method for setting the 'isIntermediateSum' option for a point.  Equivalent to:
      * <pre><code>
      *     point.setOption("setIntermediateSum", true)
      * </code></pre>
      * Used in Waterfall Charts.  When this option is set to true, the point will be assigned a value that is calculated
      * by summing all points since the last 'intermediate sum' Defaults to false.
+     *
      * @param isIntermediateSum Whether the point is an intermediate sum.
      * @return A reference to this {@link Point} instance for convenient method chaining.
      * @since 1.6.0
@@ -343,12 +425,13 @@ public class Point extends Configurable<Point> {
     }
 
     /**
-     * Convenience mwthod for setting the 'isSum' option for the point.  Equivalent to:
+     * Convenience method for setting the 'isSum' option for the point.  Equivalent to:
      * <pre><code>
      *     point.setOption("isSum", true);
      * </code></pre>
      * Used in Waterfall charts.  When this option is set to true, the point will ba assigned a value that is
      * calculated by summing all of the points.  Defaults to false.
+     *
      * @param isSum Whether the point is the sum of all points
      * @return A reference to this {@link Point} instance for convenient method chaining.
      * @since 1.6.0
@@ -384,7 +467,6 @@ public class Point extends Configurable<Point> {
         return this.setOption("marker", marker != null ? marker.getOptions() : null);
     }
 
-    private String name;
 
     /**
      * Convenience method for setting the 'name' option of the point.  Equivalent to:
@@ -413,6 +495,35 @@ public class Point extends Configurable<Point> {
         } else {
             return this.name;
         }
+    }
+
+    /**
+     * Convenience method for setting the 'parent' option of the point. which is useful for
+     * tree map chart types.  Equivalent to:
+     * <pre><code>
+     *     point.setOption("parent", parentPoint.getId());
+     * </code></pre>
+     * Sets the parent of the point to the given point.
+     *
+     * @param parent The point that will act as this point's 'parent'
+     * @return A reference to this {@link Point} instance or convenient method chaining.
+     */
+    public Point setParent(Point parent) {
+        return this.setOption("parent", parent != null ? parent.getId(true) : null);
+    }
+
+    /**
+     * convenience method for setting the 'parent' option of the point, which is useful for
+     * tree map chart types. Equivalent to:
+     * <pre><code>
+     *     point.setOption("parent", "categoryXYZ");
+     * </code></pre>
+     *
+     * @param parent The ID of the point to be used as this point's parent
+     * @return A reference to this {@link Point} instance or convenient method chaining.
+     */
+    public Point setParent(String parent) {
+        return this.setOption("parent", parent);
     }
 
     private boolean selected = false;
@@ -793,13 +904,13 @@ public class Point extends Configurable<Point> {
     public Point update(Number x, Number y) {
         return this.update(new Point(x, y));
     }
-    
+
     /**
      * Update the point with the new values, automatically redrawing
      * the chart with the default animation options.
      *
-     * @param x The new x value for the point.
-     * @param low The new low value for the point.
+     * @param x    The new x value for the point.
+     * @param low  The new low value for the point.
      * @param high The new high value for the point.
      * @return A reference to this {@link Point} instance for convenient method chaining.
      * @since 1.5.0
@@ -838,14 +949,14 @@ public class Point extends Configurable<Point> {
     public Point update(Number x, Number y, boolean redraw) {
         return this.update(new Point(x, y), redraw, true);
     }
-    
+
     /**
      * Update the point with the new values, specifying whether or not the chart should be automatically
      * redrawn with the new values.
      *
      * @param x      The new x value for the point.
      * @param low    The new low value for the point.
-     * @param high    The new high value for the point.
+     * @param high   The new high value for the point.
      * @param redraw Whether to redraw the chart after the point is updated. When updating more than one
      *               point, it is highly recommended that the redraw option be set to false, and instead
      *               {@link Chart#redraw()} is explicitly called after the updating of points is finished.
@@ -922,17 +1033,14 @@ public class Point extends Configurable<Point> {
                 }
             }
         } else {
-            this.x = pointOptions.x;
-            this.y = pointOptions.y;
-            this.open = pointOptions.open;
-            this.high = pointOptions.high;
-            this.low = pointOptions.low;
-            this.close = pointOptions.close;
+            this.values = pointOptions.values;
             this.name = pointOptions.name;
             this.selected = pointOptions.selected;
             this.sliced = pointOptions.sliced;
-            for (String key : pointOptions.getOptions().keySet()) {
-                this.setOption(key, pointOptions.getOptions().get(key));
+            if (this.getOptions() != null) {
+                for (String key : pointOptions.getOptions().keySet()) {
+                    this.setOption(key, pointOptions.getOptions().get(key));
+                }
             }
         }
         return this;
@@ -940,7 +1048,7 @@ public class Point extends Configurable<Point> {
 
     // Purposefully package scope
     boolean isSingleValue() {
-        return this.getOptions() == null && this.getX() == null;
+        return this.getOptions() == null && (this.getValues() == null || this.getValues().length == 1);
     }
 
     // Purposefully package scope
@@ -959,69 +1067,37 @@ public class Point extends Configurable<Point> {
         return options;
     }
 
-    // Only needed and used when handling removing of points from charts that have been set in "persistent" mode
-    private String id;
+    // Only needed and used when handling removing of points from charts that have been set in "persistent" mode,
+    // or used to identify points in a parent-child relationship. (Treemap, drilldown)
+    public String id;
 
-    // Internal method purposefully package scope
-    void setId(String id) {
-        this.id = id;
-    }
-
-    // Internal method purposefully package scope
-    String getId() {
-        if (this.nativePoint != null) {
+    String getId(boolean generateIdIsMissing) {
+        if (this.nativePoint != null && nativeContainsKey(this.nativePoint, "id")) {
             return nativeGetString(this.nativePoint, "id");
         } else {
+            if (this.id == null && generateIdIsMissing) {
+                this.id = Document.get().createUniqueId();
+                this.setOption("id", this.id);
+            }
             return this.id;
         }
     }
 
     private static JavaScriptObject convertPointToJavaScriptObject(Point point) {
         final JSONObject options = point.getOptions() != null ? point.getOptions() : new JSONObject();
-        Chart.addPointScalarValues(point, options);
+
+        // TODO: Using a default series type of "LINE" here isn't really appropriate, because it's possible
+        // that the caller may be trying to update a point on a series of a type that we need to do special
+        // handling of within the "addPointScalarValues" method (e.g. for BOXPLOT series types).  However,
+        // currently there is no straightforward was to determine the series that the point being updated
+        // is a part of, so far now we're leaving that case unresolved.
+        Chart.addPointScalarValues(point, options, Series.Type.LINE);
         if (point.hasNativeProperties()) {
             Point.addPointNativeProperties(point, options);
         }
         return options.getJavaScriptObject();
     }
 
-    private static Type determineType(JavaScriptObject nativePoint) {
-        boolean hasX = nativeContainsKey(nativePoint, "x");
-        boolean hasY = nativeContainsKey(nativePoint, "y");
-        boolean hasLow = nativeContainsKey(nativePoint, "low");
-        boolean hasHigh = nativeContainsKey(nativePoint, "high");
-        boolean hasOpen = nativeContainsKey(nativePoint, "open");
-        boolean hasClose = nativeContainsKey(nativePoint, "close");
-
-        if (hasX && hasOpen && hasHigh && hasLow && hasClose) {
-            return Type.X_OPEN_HIGH_LOW_CLOSE;
-        }
-        if (hasX && hasLow && hasHigh) {
-            return Type.X_LOW_HIGH;
-        }
-        if (hasX && hasY) {
-            return Type.X_Y;
-        }
-        if (hasY) {
-            return Type.Y;
-        }
-
-        // Fall back on determining based on data array length
-        int dataLength = nativeGetDataLength(nativePoint);
-        switch (dataLength) {
-            case 1:
-                return Type.Y;
-            case 2:
-                return Type.X_Y;
-            case 3:
-                return Type.X_LOW_HIGH;
-            case 5:
-                return Type.X_OPEN_HIGH_LOW_CLOSE;
-            default:
-                // Assuming the most basic case if the value is null
-                return Type.Y;
-        }
-    }
 
     /**
      * Returns a pointer to the native Highchart's JS point instance
@@ -1043,7 +1119,7 @@ public class Point extends Configurable<Point> {
     }-*/;
 
     private static native int nativeGetDataLength(JavaScriptObject point) /*-{
-        if(point == null){
+        if (point == null) {
             return -1;
         }
 

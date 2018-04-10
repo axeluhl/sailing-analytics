@@ -22,12 +22,15 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAndBoatsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -298,27 +301,78 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     public Iterable<Competitor> getAllCompetitors(final Fleet fleet) {
         return getAllCompetitorsWithRaceDefinitionsConsidered(fleet).getB();
     }
+
     
     @Override
-    public void registerCompetitor(Competitor competitor, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
-        registerCompetitors(Collections.singleton(competitor), fleet);
+    public Map<Competitor, Boat> getAllCompetitorsAndTheirBoats() {
+        Map<Competitor, Boat> result = new HashMap<>();
+        for (Fleet fleet : getFleets()) {
+            result.putAll(getAllCompetitorsAndTheirBoats(fleet));
+        }
+        return result;
+    }        
+
+    @Override
+    public Map<Competitor, Boat> getAllCompetitorsAndTheirBoats(Fleet fleet) {
+        final Map<Competitor, Boat> competitors;
+        TrackedRace trackedRace = getTrackedRace(fleet);
+        if (trackedRace != null) {
+            competitors = trackedRace.getRace().getCompetitorsAndTheirBoats();
+        } else {
+            // if no tracked race is found, use competitors from race/regatta log depending on whether
+            // the mapping event is present or not; this assumes that if a tracked
+            // race exists, its competitors set takes precedence over what's in the race log. Usually,
+            // the tracked race will have the same competitors as those in the race log, or more because
+            // those from the regatta log are added to the tracked race as well.
+            competitors = new RegisteredCompetitorsAndBoatsAnalyzer(getRaceLog(fleet), getRegattaLog()).analyze();
+        }
+        return competitors;
     }
-    
+
     @Override
-    public void registerCompetitors(Iterable<Competitor> competitors, Fleet fleet)
+    public void registerCompetitor(CompetitorWithBoat competitorWithBoat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(competitorWithBoat, competitorWithBoat.getBoat());
+        registerCompetitorsInternal(competitorsAndBoats, fleet);
+    }
+
+    @Override
+    public void registerCompetitors(Iterable<CompetitorWithBoat> competitorWithBoats, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        for (CompetitorWithBoat competitorWithBoat: competitorWithBoats) {
+            competitorsAndBoats.put(competitorWithBoat, competitorWithBoat.getBoat());
+        }
+        registerCompetitorsInternal(competitorsAndBoats, fleet);
+    }
+
+    @Override
+    public void registerCompetitor(Competitor competitor, Boat boat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(competitor, boat);
+        registerCompetitorsInternal(competitorsAndBoats, fleet);
+    }
+
+    @Override
+    public void registerCompetitors(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
+        registerCompetitorsInternal(competitorsAndBoats, fleet);
+    }
+
+    private void registerCompetitorsInternal(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
         if (!isCompetitorRegistrationInRacelogEnabled(fleet)) {
-            throw new CompetitorRegistrationOnRaceLogDisabledException("Competitor registration not allowed  for fleet "+fleet+" in column "+this);
+            throw new CompetitorRegistrationOnRaceLogDisabledException("Competitor registration not allowed for fleet "+fleet+" in column "+this);
         }
         TimePoint now = MillisecondsTimePoint.now();
         RaceLog raceLog = getRaceLog(fleet);
         int passId = raceLog.getCurrentPassId();
-        for (Competitor competitor : competitors) {
+        for (Entry<Competitor, Boat> competitorAndBoat : competitorsAndBoats.entrySet()) {
             raceLog.add(new RaceLogRegisterCompetitorEventImpl(now, now, raceLogEventAuthorForRaceColumn, 
-                    UUID.randomUUID(), passId, competitor));
+                    UUID.randomUUID(), passId, competitorAndBoat.getKey(), competitorAndBoat.getValue()));
         }
     }
     
+
     @Override
     public void deregisterCompetitor(Competitor competitor, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
@@ -431,4 +485,5 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             }
         }
     }
+
 }

@@ -17,7 +17,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -161,9 +161,9 @@ public class AutoplayHelper {
         public final RaceTimesInfoProvider creationTimeProvider;
         public final Timer raceboardTimer;
         public final RaceMap raceboardPerspective;
-        public final CompetitorSelectionModel csel;
+        public final RaceCompetitorSelectionModel csel;
 
-        public RVWrapper(RaceMap raceboardPerspective, CompetitorSelectionModel competitorSelectionProvider,
+        public RVWrapper(RaceMap raceboardPerspective, RaceCompetitorSelectionModel competitorSelectionProvider,
                 Timer raceboardTimer, RaceTimesInfoProvider creationTimeProvider) {
             this.raceboardPerspective = raceboardPerspective;
             this.csel = competitorSelectionProvider;
@@ -288,7 +288,7 @@ public class AutoplayHelper {
         RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE);
 
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace, result);
-        CompetitorSelectionModel competitorSelectionProvider = new CompetitorSelectionModel(
+        RaceCompetitorSelectionModel competitorSelectionProvider = new RaceCompetitorSelectionModel(
                 /* hasMultiSelection */ true, colorProvider);
         competitorSelectionProvider.setCompetitors(competitors);
         RaceMap raceboardPerspective = new RaceMap(null, null, raceMapLifecycle, settings, sailingService,

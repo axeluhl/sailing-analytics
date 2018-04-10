@@ -21,4 +21,10 @@ public interface CompetitionFormat<Flight, Group, Competitor, CompetitorAllocati
     }
 
     Iterable<CompetitorAllocation> getCompetitorAllocation();
+
+    default int getMaxNumberOfCompetitorAllocationsNeeded() {
+        final int div = getCompetitorsCount() / getGroupsCount();
+        final int mod = getCompetitorsCount() % getGroupsCount();
+        return div + (mod > 0 ? 1 : 0); // round up
+    }
 }

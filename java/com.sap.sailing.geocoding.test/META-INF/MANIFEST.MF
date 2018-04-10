@@ -8,3 +8,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: com.sap.sailing.geocoding
 Require-Bundle: org.junit;bundle-version="4.8.2"
 Import-Package: org.json.simple.parser
+Automatic-Module-Name: com.sap.sailing.geocoding.test

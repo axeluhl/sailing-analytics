@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -123,7 +124,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
         for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracRace(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */0l, /* simulator */null, createRaceDefinitionSet(),
                 /* trackedRegattaRegistry */null,
-                mock(RaceLogResolver.class), /* courseDesignUpdateURI */null, /* tracTracUsername */null, /* tracTracPassword */
+                mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), /* courseDesignUpdateURI */null, /* tracTracUsername */null, /* tracTracPassword */
                 null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, receiverTypes)) {
             receivers.add(r);
         }

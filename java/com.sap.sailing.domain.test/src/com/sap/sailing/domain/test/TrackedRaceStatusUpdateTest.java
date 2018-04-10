@@ -2,12 +2,10 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertSame;
 
-import java.util.Collections;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
@@ -21,13 +19,13 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  *
  */
 public class TrackedRaceStatusUpdateTest extends TrackBasedTest {
-    private Competitor competitor;
+    private CompetitorWithBoat competitor;
     private DynamicTrackedRace trackedRace;
     
     @Before
     public void setUp() {
-        competitor = createCompetitor("Test Competitor");
-        trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", Collections.singleton(competitor), MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ false);
+        competitor = createCompetitorWithBoat("Test Competitor");
+        trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", createCompetitorAndBoatsMap(competitor), MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ false);
     }
     
     @Test

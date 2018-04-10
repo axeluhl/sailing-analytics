@@ -36,6 +36,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -296,9 +297,9 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             }
             throw new RaceNotCreatedException(String.format("Race for racelog (%s) has already been created", raceLog));
         }
-        Iterable<Competitor> competitors = raceColumn.getAllCompetitors(params.getFleet());
+        Map<Competitor, Boat> competitorsAndTheirBoats = raceColumn.getAllCompetitorsAndTheirBoats(params.getFleet());
         Serializable raceId = denoteEvent.getRaceId();
-        final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
+        final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndTheirBoats, raceId);
         Iterable<Sideline> sidelines = Collections.<Sideline> emptyList();
         // set race definition, so race is linked to leaderboard automatically
         trackedRegatta.getRegatta().addRace(raceDef);
