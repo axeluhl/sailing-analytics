@@ -33,6 +33,7 @@ import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberD
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataMedianAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataMinAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataSumAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberPairDataAverageAggregationProcessor;
 import com.sap.sse.datamining.impl.components.management.AggregationProcessorDefinitionManager;
 import com.sap.sse.datamining.impl.components.management.DataRetrieverChainDefinitionManager;
 import com.sap.sse.datamining.impl.components.management.DataSourceProviderManager;
@@ -86,6 +87,7 @@ public class DataMiningFrameworkActivator implements BundleActivator {
         defaultAggregationProcessors.add(ParallelGroupedDataCountDistinctAggregationProcessor.getDefinition());
         defaultAggregationProcessors.add(ParallelGroupedDataCountAggregationProcessor.getDefinition());
         defaultAggregationProcessors.add(ParallelGroupedNumberDataAverageAggregationProcessor.getDefinition());
+        defaultAggregationProcessors.add(ParallelGroupedNumberPairDataAverageAggregationProcessor.getDefinition());
         defaultAggregationProcessors.add(ParallelGroupedNumberDataMaxAggregationProcessor.getDefinition());
         defaultAggregationProcessors.add(ParallelGroupedNumberDataMedianAggregationProcessor.getDefinition());
         defaultAggregationProcessors.add(ParallelGroupedNumberDataMinAggregationProcessor.getDefinition());
