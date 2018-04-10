@@ -1,5 +1,10 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -8,6 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -47,7 +53,30 @@ public class MultiCompetitorRaceChartSettingsComponent extends
         //add empty values, required, if a non available value is saved as default in the settings. Eg. rideheight, which is only valid for foiling races
         chartSecondTypeSelectionListBox.addItem("--", "--");
         int i = 0;
-        for (DetailType detailType : availableDetailsTypes) {
+        
+        List<DetailType> sortedAvailableDetailTypes = new ArrayList<DetailType>();
+        Util.addAll(availableDetailsTypes, sortedAvailableDetailTypes);
+        Collections.sort(sortedAvailableDetailTypes, new Comparator<DetailType>() {
+            @Override
+            public int compare(DetailType o1, DetailType o2) {
+                String o1Name = DetailTypeFormatter.format(o1);
+                String o2Name = DetailTypeFormatter.format(o2);
+                boolean o1Expedition = DetailType.isExpeditionType(o1);
+                boolean o2Expedition = DetailType.isExpeditionType(o2);
+                if ((o1Expedition && o2Expedition) || (!o1Expedition && !o2Expedition)) {
+                    return o1Name.compareToIgnoreCase(o2Name);
+                }
+                if (o1Expedition && !o2Expedition) {
+                    return 1;
+                }
+                if (o2Expedition && !o1Expedition) {
+                    return -1;
+                }
+                return 0;
+            }
+        });
+        
+        for (DetailType detailType : sortedAvailableDetailTypes) {
             chartFirstTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
             chartSecondTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
             if (detailType == initialFirstDetailType) {

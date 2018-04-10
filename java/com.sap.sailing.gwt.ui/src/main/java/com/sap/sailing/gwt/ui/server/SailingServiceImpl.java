@@ -7185,6 +7185,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public Iterable<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier) {
         final List<DetailType> availableDetailsTypes = new ArrayList<>();
         availableDetailsTypes.addAll(DetailType.getAutoplayDetailTypesForChart());
+        availableDetailsTypes.removeAll(DetailType.getRaceBravoDetailTypes());
         final DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);
         if (trackedRace != null) {
             boolean hasBravoTrack = false;
