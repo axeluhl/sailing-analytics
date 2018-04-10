@@ -238,8 +238,8 @@ public enum DetailType implements Serializable {
         availableDetailsTypes.add(DetailType.CHART_BEAT_ANGLE);
         availableDetailsTypes.add(DetailType.CHART_COURSE_OVER_GROUND_TRUE_DEGREES);
         availableDetailsTypes.add(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
-        availableDetailsTypes.add(DetailType.BRAVO_LEG_CURRENT_HEEL_IN_DEGREES);
-        availableDetailsTypes.add(DetailType.BRAVO_LEG_CURRENT_PITCH_IN_DEGREES);
+        availableDetailsTypes.add(DetailType.BRAVO_RACE_HEEL_IN_DEGREES);
+        availableDetailsTypes.add(DetailType.BRAVO_RACE_PITCH_IN_DEGREES);
         return availableDetailsTypes;
     }
 
@@ -482,5 +482,15 @@ public enum DetailType implements Serializable {
             }
         }
         throw new IllegalArgumentException("Could not restore " + value + " to an DetailType enum");
+    }
+
+    public static boolean isExpeditionType(DetailType toTest) {
+        if(getLegExpeditionDetailColumnTypes().contains(toTest)) {
+            return true;
+        }
+        if(getRaceExpeditionDetailTypes().contains(toTest)) {
+            return true;
+        }
+        return false;
     }
 }
