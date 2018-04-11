@@ -38,7 +38,7 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
      * must call {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam...)} to cause an update of the
      * competitor's values.
      */
-    Competitor getExistingCompetitorByIdAsString(String idAsString);
+    DynamicCompetitor getExistingCompetitorByIdAsString(String idAsString);
 
     /**
      * If a valid competitor is returned and the caller has information available that could be used to update the competitor,

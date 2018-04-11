@@ -200,7 +200,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public Competitor getExistingCompetitorByIdAsString(String competitorIdAsString) {
+    public DynamicCompetitor getExistingCompetitorByIdAsString(String competitorIdAsString) {
         LockUtil.lockForRead(lock);
         try {
             return competitorsByIdAsString.get(competitorIdAsString);
@@ -329,7 +329,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     public Competitor updateCompetitor(String idAsString, String newName, String newShortName, Color newDisplayColor, String newEmail,
             Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
             Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String newSearchTag) {
-        DynamicCompetitor competitor = (DynamicCompetitor) getExistingCompetitorByIdAsString(idAsString);
+        DynamicCompetitor competitor = getExistingCompetitorByIdAsString(idAsString);
         if (competitor != null) {
             LockUtil.lockForWrite(lock);
             try {
