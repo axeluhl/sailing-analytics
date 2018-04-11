@@ -12,7 +12,7 @@ public class CompetitorWithBoatRefJsonSerializer implements JsonSerializer<Compe
     private final JsonSerializer<Competitor> competitorJsonSerializer;
 
     public static CompetitorWithBoatRefJsonSerializer create() {
-        return new CompetitorWithBoatRefJsonSerializer(CompetitorJsonSerializer.create());
+        return new CompetitorWithBoatRefJsonSerializer(CompetitorJsonSerializer.create(/* serialize boat */ false));
     }
 
     public CompetitorWithBoatRefJsonSerializer(JsonSerializer<Competitor> competitorJsonSerializer) {
@@ -22,7 +22,6 @@ public class CompetitorWithBoatRefJsonSerializer implements JsonSerializer<Compe
     @Override
     public JSONObject serialize(CompetitorWithBoat competitor) {
         JSONObject serializedCompetitor = competitorJsonSerializer.serialize(competitor);
-        
         Boat boat = competitor.getBoat();
         if (boat != null) {
             serializedCompetitor.put(CompetitorJsonConstants.FIELD_BOAT_ID_TYPE, boat.getId().getClass().getName());

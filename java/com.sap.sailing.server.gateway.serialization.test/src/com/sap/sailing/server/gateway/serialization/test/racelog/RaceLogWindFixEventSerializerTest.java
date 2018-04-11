@@ -53,11 +53,9 @@ public class RaceLogWindFixEventSerializerTest {
         serializer = new RaceLogWindFixEventSerializer(new CompetitorJsonSerializer(new TeamJsonSerializer(
                 new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(new BoatClassJsonSerializer())), new WindJsonSerializer(
                 new PositionJsonSerializer()));
-        deserializer = new RaceLogWindFixEventDeserializer(new CompetitorJsonDeserializer(factory.getCompetitorStore(), null),
+        deserializer = new RaceLogWindFixEventDeserializer(new CompetitorJsonDeserializer(factory.getCompetitorStore(), /* team deserializer */ null, /* boat deserializer */ null),
                 new WindJsonDeserializer(new PositionJsonDeserializer()));
-
         now = MillisecondsTimePoint.now();
-
         event = new RaceLogWindFixEventImpl(now, author, 0, createWindFix(), /* isMagnetic */ false);
     }
 
@@ -65,13 +63,11 @@ public class RaceLogWindFixEventSerializerTest {
     public void testSerializeAndDeserializeRaceLogWindFixEvent() throws JsonDeserializationException {
         JSONObject jsonWindFixEvent = serializer.serialize(event);
         RaceLogWindFixEvent deserializedEvent = (RaceLogWindFixEvent) deserializer.deserialize(jsonWindFixEvent);
-
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
         assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
         assertEquals(0, Util.size(event.getInvolvedCompetitors()));
         assertEquals(0, Util.size(deserializedEvent.getInvolvedCompetitors()));
-
         compareWind(event.getWindFix(), deserializedEvent.getWindFix());
     }
 
@@ -93,5 +89,4 @@ public class RaceLogWindFixEventSerializerTest {
         SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(10.4, bearing);
         return new WindImpl(position, now, speedBearing);
     }
-
 }
