@@ -7,22 +7,21 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
-import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ManeuversJsonSerializer extends AbstractTrackedRaceDataJsonSerializer {
     public final static String MANEUVERS = "maneuvers";
     
-    private final CompetitorWithBoatJsonSerializer competitorSerializer;
+    private final CompetitorAndBoatJsonSerializer competitorAndBoatSerializer;
     private final ManeuverJsonSerializer maneuverSerializer;
 
-    public ManeuversJsonSerializer(CompetitorWithBoatJsonSerializer competitorSerializer, ManeuverJsonSerializer maneuverSerializer) {
+    public ManeuversJsonSerializer(CompetitorAndBoatJsonSerializer competitorSerializer, ManeuverJsonSerializer maneuverSerializer) {
         super();
-        this.competitorSerializer = competitorSerializer;
+        this.competitorAndBoatSerializer = competitorSerializer;
         this.maneuverSerializer = maneuverSerializer;
     }
 
@@ -36,7 +35,7 @@ public class ManeuversJsonSerializer extends AbstractTrackedRaceDataJsonSerializ
             Boat boat = competitorAndBoatEntry.getValue();
             final JSONObject forCompetitorJson = new JSONObject();
             byCompetitorJson.add(forCompetitorJson);
-            forCompetitorJson.put(COMPETITOR, competitorSerializer.serialize(new CompetitorWithBoatImpl(competitor, (DynamicBoat) boat)));
+            forCompetitorJson.put(COMPETITOR, competitorAndBoatSerializer.serialize(new Pair<>(competitor, boat)));
             final JSONArray maneuvers = new JSONArray();
             forCompetitorJson.put(MANEUVERS, maneuvers);
             for (final Maneuver maneuver : getManeuversDuringRace(trackedRace, competitor)) {
