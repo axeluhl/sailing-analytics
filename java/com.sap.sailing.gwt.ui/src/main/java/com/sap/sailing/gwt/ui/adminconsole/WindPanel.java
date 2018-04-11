@@ -524,6 +524,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             }
         });
         
+        regattaNamePanel.setSpacing(5);
         final Label regattaNameLabel = new Label(stringMessages.regattaName() + ":");
         regattaNamePanel.add(regattaNameLabel);
         regattaNamePanel.setCellVerticalAlignment(regattaNameLabel, HasVerticalAlignment.ALIGN_MIDDLE);
