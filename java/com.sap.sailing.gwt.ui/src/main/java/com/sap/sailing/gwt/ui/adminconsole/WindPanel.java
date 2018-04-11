@@ -486,7 +486,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         
         final FlowPanel importModePanel = new FlowPanel();
         contentPanel.add(importModePanel);
-        final FlowPanel regattaNamePanel = new FlowPanel();
+        final HorizontalPanel regattaNamePanel = new HorizontalPanel();
         regattaNamePanel.setVisible(false);
         final HorizontalPanel boatClassPanel = new HorizontalPanel();
         contentPanel.add(regattaNamePanel);
@@ -524,14 +524,16 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             }
         });
         
-        final Label regattaNameLabel = new Label(stringMessages.regattaName());
+        final Label regattaNameLabel = new Label(stringMessages.regattaName() + ":");
         regattaNamePanel.add(regattaNameLabel);
+        regattaNamePanel.setCellVerticalAlignment(regattaNameLabel, HasVerticalAlignment.ALIGN_MIDDLE);
         final TextBox regattaName = new TextBox();
         regattaName.setName("regattaName");
 
         refreshRegattaOracle();
         regatttaSuggestBox = new SuggestBox(regattaOracle , regattaName);
         regattaNamePanel.add(regatttaSuggestBox);
+        regattaNamePanel.setCellVerticalAlignment(regatttaSuggestBox, HasVerticalAlignment.ALIGN_MIDDLE);
         boatClassPanel.setSpacing(5);
         contentPanel.add(boatClassPanel);
         final Label boatClassLabel = new Label(stringMessages.boatClass() + ":");
