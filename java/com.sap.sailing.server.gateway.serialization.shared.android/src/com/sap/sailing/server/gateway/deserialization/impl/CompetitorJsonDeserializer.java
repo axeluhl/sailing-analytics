@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -75,15 +76,11 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
                 displayColor = new RGBColor(displayColorAsString);
             }
             DynamicTeam team = null;
-            DynamicBoat boat = null;
             if (teamJsonDeserializer != null && object.get(CompetitorJsonConstants.FIELD_TEAM) != null) {
                 team = teamJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
                         CompetitorJsonConstants.FIELD_TEAM));
             }
-            if (boatJsonDeserializer != null && object.get(CompetitorJsonConstants.FIELD_BOAT) != null) {
-                boat = boatJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
-                        CompetitorJsonConstants.FIELD_BOAT));
-            }
+            final DynamicBoat boat = getBoat(object);
             final Double timeOnTimeFactor = (Double) object.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR);
             final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = (Double) object
                     .get(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
@@ -103,5 +100,22 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
         } catch (Exception e) {
             throw new JsonDeserializationException(e);
         }
+    }
+
+    /**
+     * Looks for the {@link CompetitorJsonConstants#FIELD_BOAT} field and if present and there is a
+     * {@link #boatJsonDeserializer} set, the boat is deserialized from that field and returned; otherwise, {@code null}
+     * is returned.
+     */
+    protected DynamicBoat getBoat(JSONObject object) throws ClassNotFoundException, NoSuchMethodException,
+            InstantiationException, IllegalAccessException, InvocationTargetException, JsonDeserializationException {
+        final DynamicBoat boat;
+        if (boatJsonDeserializer != null && object.get(CompetitorJsonConstants.FIELD_BOAT) != null) {
+            boat = boatJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
+                    CompetitorJsonConstants.FIELD_BOAT));
+        } else {
+            boat = null;
+        }
+        return boat;
     }
 }
