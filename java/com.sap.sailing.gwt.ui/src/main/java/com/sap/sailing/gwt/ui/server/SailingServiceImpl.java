@@ -5071,7 +5071,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* flag image */ null, team,
                 competitorDescriptor.getTimeOnTimeFactor(),
                 competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag, boat);
-        
         return competitorWithBoat;
     }
 

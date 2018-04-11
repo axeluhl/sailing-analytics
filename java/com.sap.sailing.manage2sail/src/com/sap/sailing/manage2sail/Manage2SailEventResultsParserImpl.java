@@ -64,14 +64,12 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
                 regattaResult.setHtmlUrl(parseURL(jsonRegatta, "HtmlUrl"));
                 regattaResult.setPublishedAt(parseDate(jsonRegatta, "Published"));
                 regattaResult.setIsFinal((Boolean) jsonRegatta.get("Final"));
-                
                 JSONArray jsonRaces = (JSONArray) jsonRegatta.get("Races");
                 if(jsonRaces != null) {
                     for (Object raceObject: jsonRaces) {
                         RaceResultDescriptor raceResult = new RaceResultDescriptor(); 
                         JSONObject jsonRace = (JSONObject) raceObject;
                         raceResult.setId((String) jsonRace.get("Id"));
-                        // TODO fetch XrrEntriesUrl for competitor information, instead of depending on STL message for competitor details
                         raceResult.setName((String) jsonRace.get("Name"));
                         raceResult.setRaceColumnNumber(parseInteger(jsonRace, "RaceIndex"));
                         raceResult.setStatus((String) jsonRace.get("Status"));

@@ -410,8 +410,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     @Override
     public void addNewCompetitorsWithBoat(Iterable<CompetitorWithBoat> competitors) {
         for (CompetitorWithBoat competitor: competitors) {
+            addNewBoat(competitor.getBoat()); // create the boat before the competitor because the competitor references the boat
             addNewCompetitor(competitor);
-            addNewBoat(competitor.getBoat());
         }
     }
 
