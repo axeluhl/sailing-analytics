@@ -140,7 +140,7 @@ public class CompetitorStoreTest {
 
         CompetitorStore persistentStore2 = new PersistentCompetitorStore(
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */false, null, /* raceLogResolver */ (srlid)->null);
-        Boat boat2 = persistentStore2.getExistingBoatById(template.getId());
+        DynamicBoat boat2 = persistentStore2.getExistingBoatById(template.getId());
         assertNotSame(boat2, template); // the new store loads new instances from the database
         assertEquals(template.getId(), boat2.getId());
 

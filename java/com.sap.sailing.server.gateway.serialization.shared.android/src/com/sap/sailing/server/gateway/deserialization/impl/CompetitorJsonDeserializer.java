@@ -9,10 +9,10 @@ import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -22,7 +22,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.RGBColor;
 
-public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> {
+public class CompetitorJsonDeserializer implements JsonDeserializer<DynamicCompetitor> {
     private final CompetitorFactory competitorWithBoatFactory;
     private final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
     private final JsonDeserializer<DynamicBoat> boatJsonDeserializer;
@@ -44,7 +44,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
     }
 
     @Override
-    public Competitor deserialize(JSONObject object) throws JsonDeserializationException {
+    public DynamicCompetitor deserialize(JSONObject object) throws JsonDeserializationException {
         Serializable competitorId = (Serializable) object.get(CompetitorJsonSerializer.FIELD_ID);
         try {
             Class<?> idClass = Class.forName((String) object.get(CompetitorJsonConstants.FIELD_ID_TYPE));
@@ -84,7 +84,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
             final Double timeOnTimeFactor = (Double) object.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR);
             final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = (Double) object
                     .get(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
-            final Competitor result;
+            final DynamicCompetitor result;
             if (boat == null) {
                 result = competitorWithBoatFactory.getOrCreateCompetitor(competitorId, name, shortName, displayColor, email,
                         flagImageURI, team, timeOnTimeFactor,

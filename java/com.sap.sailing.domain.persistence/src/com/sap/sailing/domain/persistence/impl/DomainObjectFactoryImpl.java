@@ -158,6 +158,8 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -2393,13 +2395,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Collection<Competitor> loadAllCompetitors() {
-        Map<Serializable, Competitor> competitorsById = new HashMap<>();
+    public Collection<DynamicCompetitor> loadAllCompetitors() {
+        Map<Serializable, DynamicCompetitor> competitorsById = new HashMap<>();
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         try {
             for (DBObject o : collection.find()) {
                 JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
-                Competitor c = competitorWithBoatRefDeserializer.deserialize(json);
+                DynamicCompetitor c = competitorWithBoatRefDeserializer.deserialize(json);
                 // ensure that in case there should be multiple competitors with equal IDs in the DB
                 // only one will survive
                 if (competitorsById.containsKey(c.getId())) {
@@ -2455,13 +2457,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Collection<Boat> loadAllBoats() {
-        ArrayList<Boat> result = new ArrayList<Boat>();
+    public Collection<DynamicBoat> loadAllBoats() {
+        ArrayList<DynamicBoat> result = new ArrayList<>();
         DBCollection collection = database.getCollection(CollectionNames.BOATS.name());
         try {
             for (DBObject o : collection.find()) {
                 JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
-                Boat b = boatDeserializer.deserialize(json);
+                DynamicBoat b = boatDeserializer.deserialize(json);
                 result.add(b);
             }
         } catch (Exception e) {

@@ -38,12 +38,12 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     private static final Logger logger = Logger.getLogger(TransientCompetitorStoreImpl.class.getName());
     private static final long serialVersionUID = -4198298775476586931L;
 
-    private final Map<Serializable, Competitor> competitorCache;
-    private final Map<String, Competitor> competitorsByIdAsString;
+    private final Map<Serializable, DynamicCompetitor> competitorCache;
+    private final Map<String, DynamicCompetitor> competitorsByIdAsString;
     private transient Set<CompetitorUpdateListener> competitorUpdateListeners;
     
-    private final Map<Serializable, Boat> boatCache;
-    private final Map<String, Boat> boatsByIdAsString;
+    private final Map<Serializable, DynamicBoat> boatCache;
+    private final Map<String, DynamicBoat> boatsByIdAsString;
     private transient Set<BoatUpdateListener> boatUpdateListeners;
     
     /**
@@ -54,7 +54,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     
     private transient WeakHashMap<Competitor, CompetitorWithoutBoatDTO> weakCompetitorDTOCache;
 
-    private final Set<Boat> boatsToUpdateDuringGetOrCreate;
+    private final Set<DynamicBoat> boatsToUpdateDuringGetOrCreate;
     
     private transient WeakHashMap<Boat, BoatDTO> weakBoatDTOCache;
     
@@ -62,15 +62,15 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
 
     public TransientCompetitorStoreImpl() {
         lock = new NamedReentrantReadWriteLock("CompetitorStore", /* fair */ false);
-        competitorCache = new HashMap<Serializable, Competitor>();
-        competitorsByIdAsString = new HashMap<String, Competitor>();
-        competitorsToUpdateDuringGetOrCreate = new HashSet<Competitor>();
-        weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorWithoutBoatDTO>();
+        competitorCache = new HashMap<>();
+        competitorsByIdAsString = new HashMap<>();
+        competitorsToUpdateDuringGetOrCreate = new HashSet<>();
+        weakCompetitorDTOCache = new WeakHashMap<>();
         competitorUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorUpdateListener>());
-        boatCache = new HashMap<Serializable, Boat>();
-        boatsByIdAsString = new HashMap<String, Boat>();
-        boatsToUpdateDuringGetOrCreate = new HashSet<Boat>();
-        weakBoatDTOCache = new WeakHashMap<Boat, BoatDTO>();
+        boatCache = new HashMap<>();
+        boatsByIdAsString = new HashMap<>();
+        boatsToUpdateDuringGetOrCreate = new HashSet<>();
+        weakBoatDTOCache = new WeakHashMap<>();
         boatUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.BoatUpdateListener>());
     }
     
@@ -78,7 +78,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         ois.defaultReadObject();
         weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorWithoutBoatDTO>();
         competitorUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorUpdateListener>());
-        weakBoatDTOCache = new WeakHashMap<Boat, BoatDTO>();
+        weakBoatDTOCache = new WeakHashMap<>();
         boatUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.BoatUpdateListener>());
     }
 
@@ -98,9 +98,9 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         competitorUpdateListeners.remove(listener);
     }
 
-    private Competitor createCompetitor(Serializable id, String name, String shortName, Color displayColor, String email, URI flagImage,
+    private DynamicCompetitor createCompetitor(Serializable id, String name, String shortName, Color displayColor, String email, URI flagImage,
             DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
-        Competitor result = new CompetitorImpl(id, name, shortName, displayColor, email, flagImage, team,
+        DynamicCompetitor result = new CompetitorImpl(id, name, shortName, displayColor, email, flagImage, team,
                 timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
         addNewCompetitor(result);
         if (logger.isLoggable(Level.FINEST)) {
@@ -131,7 +131,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
      * competitor entity can be represented in the scope of the VM by at most one Java {@link Competitor} object, and
      * replacing an object in this store would leave us with at least two.
      */
-    protected void addNewCompetitor(Competitor competitor) {
+    protected void addNewCompetitor(DynamicCompetitor competitor) {
         LockUtil.lockForWrite(lock);
         try {
             final Competitor existingCompetitorWithEqualId = competitorCache.put(competitor.getId(), competitor);
@@ -156,10 +156,10 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
     
     @Override
-    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, String shortName, Color displayColor, String email,
+    public DynamicCompetitor getOrCreateCompetitor(Serializable competitorId, String name, String shortName, Color displayColor, String email,
             URI flagImage, DynamicTeam team, Double timeOnTimeFactor,
             Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
-        Competitor result = getExistingCompetitorById(competitorId); // avoid synchronization for successful read access
+        DynamicCompetitor result = getExistingCompetitorById(competitorId); // avoid synchronization for successful read access
         if (result == null) {
             LockUtil.lockForWrite(lock);
             try {
@@ -189,10 +189,10 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public Competitor getExistingCompetitorById(Serializable competitorId) {
+    public DynamicCompetitor getExistingCompetitorById(Serializable competitorId) {
         LockUtil.lockForRead(lock);
         try {
-            Competitor competitor = competitorCache.get(competitorId);
+            DynamicCompetitor competitor = competitorCache.get(competitorId);
             return competitor;
         } finally {
             LockUtil.unlockAfterRead(lock);
@@ -215,13 +215,13 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public CompetitorWithBoat getExistingCompetitorWithBoatById(Serializable competitorId) {
-        final CompetitorWithBoat result;
+    public DynamicCompetitorWithBoat getExistingCompetitorWithBoatById(Serializable competitorId) {
+        final DynamicCompetitorWithBoat result;
         LockUtil.lockForRead(lock);
         try {
-            Competitor competitor = competitorCache.get(competitorId);
+            DynamicCompetitor competitor = competitorCache.get(competitorId);
             if (competitor != null && isValidCompetitorWithBoat(competitor)) {
-                result = (CompetitorWithBoat) competitor;
+                result = (DynamicCompetitorWithBoat) competitor;
             } else {
                 result = null;
             }
@@ -401,23 +401,23 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public void addNewCompetitors(Iterable<Competitor> competitors) {
-        for (Competitor competitor : competitors) {
+    public void addNewCompetitors(Iterable<DynamicCompetitor> competitors) {
+        for (DynamicCompetitor competitor : competitors) {
             addNewCompetitor(competitor);
         }
     }
 
     @Override
-    public void addNewCompetitorsWithBoat(Iterable<CompetitorWithBoat> competitors) {
-        for (CompetitorWithBoat competitor: competitors) {
+    public void addNewCompetitorsWithBoat(Iterable<DynamicCompetitorWithBoat> competitors) {
+        for (DynamicCompetitorWithBoat competitor : competitors) {
             addNewBoat(competitor.getBoat()); // create the boat before the competitor because the competitor references the boat
             addNewCompetitor(competitor);
         }
     }
 
-    private CompetitorWithBoat createCompetitorWithBoat(Serializable id, String name, String shortName, Color displayColor, String email, URI flagImage,
+    private DynamicCompetitorWithBoat createCompetitorWithBoat(Serializable id, String name, String shortName, Color displayColor, String email, URI flagImage,
             DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
-        CompetitorWithBoat competitor = new CompetitorWithBoatImpl(id, name, shortName, displayColor, email, flagImage, team,
+        DynamicCompetitorWithBoat competitor = new CompetitorWithBoatImpl(id, name, shortName, displayColor, email, flagImage, team,
                 timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
         addNewBoat(boat); // create the boat before the competitor because the competitor references the boat
         addNewCompetitor(competitor);
@@ -428,10 +428,10 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public CompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName, Color displayColor, String email,
+    public DynamicCompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName, Color displayColor, String email,
             URI flagImage, DynamicTeam team, Double timeOnTimeFactor,
             Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
-        CompetitorWithBoat result = null; 
+        DynamicCompetitorWithBoat result = null; 
         result = getExistingCompetitorWithBoatById(competitorId); // avoid synchronization for successful read access
         if (result == null) {
             LockUtil.lockForWrite(lock);
@@ -501,8 +501,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         boatUpdateListeners.remove(listener);
     }
 
-    private Boat createBoat(Serializable id, String name, BoatClass boatClass, String sailID, Color color) {
-        Boat boat = new BoatImpl(id, name, boatClass, sailID, color);
+    private DynamicBoat createBoat(Serializable id, String name, BoatClass boatClass, String sailID, Color color) {
+        DynamicBoat boat = new BoatImpl(id, name, boatClass, sailID, color);
         addNewBoat(boat);
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Created boat "+name+" with ID "+id, new Exception("Here is where it happened"));
@@ -515,7 +515,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
      * {@link #getExistingBoatById(Serializable)}. Subclasses may override in case they need to take additional
      * measures such as durably storing the boat. Overriding implementations must call this implementation.
      */
-    protected void addNewBoat(Boat boat) {
+    protected void addNewBoat(DynamicBoat boat) {
         LockUtil.lockForWrite(lock);
         try {
             boatCache.put(boat.getId(), boat);
@@ -531,8 +531,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public Boat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color) {
-        Boat result = getExistingBoatById(id); // avoid synchronization for successful read access
+    public DynamicBoat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color) {
+        DynamicBoat result = getExistingBoatById(id); // avoid synchronization for successful read access
         if (result == null) {
             LockUtil.lockForWrite(lock);
             try {
@@ -560,7 +560,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public Boat getExistingBoatById(Serializable boatId) {
+    public DynamicBoat getExistingBoatById(Serializable boatId) {
         LockUtil.lockForRead(lock);
         try {
             return boatCache.get(boatId);
@@ -570,7 +570,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public Boat getExistingBoatByIdAsString(String boatIdAsString) {
+    public DynamicBoat getExistingBoatByIdAsString(String boatIdAsString) {
         LockUtil.lockForRead(lock);
         try {
             return boatsByIdAsString.get(boatIdAsString);
@@ -615,14 +615,14 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public Iterable<Boat> getStandaloneBoats() {
+    public Iterable<DynamicBoat> getStandaloneBoats() {
         LockUtil.lockForRead(lock);
         try {
-            Set<Boat> boats = new HashSet<>(boatCache.values());
-            Set<Boat> boatsEmbeddedInCompetitors = new HashSet<>();
+            Set<DynamicBoat> boats = new HashSet<>(boatCache.values());
+            Set<DynamicBoat> boatsEmbeddedInCompetitors = new HashSet<>();
             for (Competitor competitor : competitorCache.values()) {
                 if (isValidCompetitorWithBoat(competitor)) {
-                    boatsEmbeddedInCompetitors.add(((CompetitorWithBoat) competitor).getBoat()); 
+                    boatsEmbeddedInCompetitors.add(((DynamicCompetitorWithBoat) competitor).getBoat()); 
                 }
             }
             boats.removeAll(boatsEmbeddedInCompetitors);
@@ -695,7 +695,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public void allowBoatResetToDefaults(Boat boat) {
+    public void allowBoatResetToDefaults(DynamicBoat boat) {
         LockUtil.lockForWrite(lock);
         try {
             boatsToUpdateDuringGetOrCreate.add(boat);
@@ -705,10 +705,10 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
     
     @Override
-    public void addNewBoats(Iterable<Boat> boats) {
+    public void addNewBoats(Iterable<DynamicBoat> boats) {
         LockUtil.lockForWrite(lock);
         try {
-            for (Boat boat: boats) {
+            for (DynamicBoat boat : boats) {
                 boatCache.put(boat.getId(), boat);
                 boatsByIdAsString.put(boat.getId().toString(), boat);
             }
@@ -739,9 +739,9 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats) {
+    public Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, ? extends Boat> competitorsAndBoats) {
         Map<CompetitorDTO, BoatDTO> result = new HashMap<>();
-        for (Entry<Competitor, Boat> entry: competitorsAndBoats.entrySet()) {
+        for (Entry<Competitor, ? extends Boat> entry : competitorsAndBoats.entrySet()) {
             CompetitorDTO competitorDTO = convertToCompetitorWithOptionalBoatDTO(entry.getKey());
             BoatDTO boatDTO = convertToBoatDTO(entry.getValue());
             result.put(competitorDTO, boatDTO);

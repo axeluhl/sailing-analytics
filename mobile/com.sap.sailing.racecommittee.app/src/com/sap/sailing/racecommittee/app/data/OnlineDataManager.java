@@ -76,7 +76,6 @@ import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJ
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
@@ -252,16 +251,13 @@ public class OnlineDataManager extends DataManager {
             @Override
             public Loader<DataLoaderResult<Map<Competitor, Boat>>> create(int id, Bundle args) throws Exception {
                 ExLog.i(context, TAG, "Creating Competitor-OnlineDataLoader " + id);
-                JsonDeserializer<Pair<Competitor, Boat>> competitorAndBoatDeserializer = CompetitorAndBoatJsonDeserializer.create(domainFactory);
+                CompetitorAndBoatJsonDeserializer competitorAndBoatDeserializer = CompetitorAndBoatJsonDeserializer.create(domainFactory);
                 DataParser<Map<Competitor, Boat>> parser = new CompetitorsDataParser(competitorAndBoatDeserializer);
                 DataHandler<Map<Competitor, Boat>> handler = new CompetitorsDataHandler(OnlineDataManager.this, managedRace);
-
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
-
                 String raceGroupName = identifier.getRaceGroup().getName();
                 String raceColumnName = identifier.getRaceColumnName();
                 String fleetName = identifier.getFleet().getName();
-
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumnName));
@@ -279,7 +275,7 @@ public class OnlineDataManager extends DataManager {
             @Override
             public Loader<DataLoaderResult<Map<Competitor, Boat>>> create(int id, Bundle args) throws Exception {
                 ExLog.i(context, TAG, "Creating StartOrder-Competitor-OnlineDataLoader " + id);
-                JsonDeserializer<Pair<Competitor, Boat>> competitorAndBoatDeserializer = CompetitorAndBoatJsonDeserializer.create(domainFactory);
+                CompetitorAndBoatJsonDeserializer competitorAndBoatDeserializer = CompetitorAndBoatJsonDeserializer.create(domainFactory);
                 DataParser<Map<Competitor, Boat>> parser = new CompetitorsDataParser(competitorAndBoatDeserializer);
                 DataHandler<Map<Competitor, Boat>> handler = new CompetitorsDataHandler(OnlineDataManager.this, managedRace);
                 Uri.Builder uri = Uri.parse(preferences.getServerBaseURL()).buildUpon();

@@ -182,11 +182,11 @@ import com.sap.sailing.domain.base.configuration.impl.RacingProcedureWithConfigu
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.SWCStartConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartModeFlagRacingProcedureConfiguration;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.PersonImpl;
@@ -5041,37 +5041,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<CompetitorDTO> addCompetitors(List<CompetitorDescriptor> competitorDescriptors, String searchTag) throws URISyntaxException {
-        List<CompetitorWithBoat> competitorsForSaving = new ArrayList<>();
+        List<DynamicCompetitorWithBoat> competitorsForSaving = new ArrayList<>();
         for (final CompetitorDescriptor competitorDescriptor : competitorDescriptors) {
-            competitorsForSaving.add(convertCompetitorDescriptorToCompetitorWithBoat(competitorDescriptor, searchTag));
+            competitorsForSaving.add(getService().convertCompetitorDescriptorToCompetitorWithBoat(competitorDescriptor, searchTag));
         }
         getBaseDomainFactory().getCompetitorStore().addNewCompetitorsWithBoat(competitorsForSaving);
         return convertToCompetitorDTOs(competitorsForSaving);
-    }
-
-    /**
-     * Creates a new {@link CompetitorWithBoat} objects from a {@link CompetitorDescriptor}.
-     * 
-     * @param searchTag
-     *            set as the {@link Competitor#getSearchTag() searchTag} property of all new competitors
-     */
-    private CompetitorWithBoat convertCompetitorDescriptorToCompetitorWithBoat(CompetitorDescriptor competitorDescriptor, String searchTag) throws URISyntaxException {
-        Nationality nationality = (competitorDescriptor.getCountryCode() == null
-                || competitorDescriptor.getCountryCode().getThreeLetterIOCCode() == null
-                || competitorDescriptor.getCountryCode().getThreeLetterIOCCode().isEmpty()) ? null
-                        : getBaseDomainFactory().getOrCreateNationality(competitorDescriptor.getCountryCode().getThreeLetterIOCCode());
-        UUID competitorUUID = competitorDescriptor.getCompetitorUUID() != null ? competitorDescriptor.getCompetitorUUID() : UUID.randomUUID();
-        UUID boatUUID = competitorDescriptor.getBoatUUID() != null ? competitorDescriptor.getBoatUUID() : UUID.randomUUID();
-        DynamicPerson sailor = new PersonImpl(competitorDescriptor.getName(), nationality, null, null);
-        DynamicTeam team = new TeamImpl(competitorDescriptor.getName(), Collections.singleton(sailor), null);
-        BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitorDescriptor.getBoatClassName());
-        DynamicBoat boat = new BoatImpl(competitorUUID, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber());
-        CompetitorWithBoat competitorWithBoat = new CompetitorWithBoatImpl(boatUUID, competitorDescriptor.getName(), competitorDescriptor.getSailNumber(),
-                /* color */ null, /* eMail */ null,
-                /* flag image */ null, team,
-                competitorDescriptor.getTimeOnTimeFactor(),
-                competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag, boat);
-        return competitorWithBoat;
     }
 
     @Override
