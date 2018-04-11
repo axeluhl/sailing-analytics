@@ -2109,4 +2109,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String degreesPerSecondUnit();
     String newExpeditionRace();
     String newExpeditionCompetitor();
+    String selectOneCompetitorToMapTheImportedData();
 }

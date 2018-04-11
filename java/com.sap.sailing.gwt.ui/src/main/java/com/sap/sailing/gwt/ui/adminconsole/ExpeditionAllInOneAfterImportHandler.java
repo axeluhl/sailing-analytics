@@ -96,7 +96,7 @@ public class ExpeditionAllInOneAfterImportHandler {
                 StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
                 boolean canBoatsOfCompetitorsChangePerRace) {
             this(boatClass, sailingService, stringMessages, errorReporter, editable, leaderboardName,
-                    canBoatsOfCompetitorsChangePerRace, new ValidatorForCompetitorRegistrationDialog(),
+                    canBoatsOfCompetitorsChangePerRace, new ValidatorForCompetitorRegistrationDialog(stringMessages),
                     new CallbackForCompetitorRegistrationDialog());
         }
         
@@ -113,10 +113,14 @@ public class ExpeditionAllInOneAfterImportHandler {
     
     private static class ValidatorForCompetitorRegistrationDialog implements Validator<Set<CompetitorDTO>> {
         private CompetitorRegistrationsPanel competitorRegistrationsPanel;
+        private StringMessages stringMessages;
+        public ValidatorForCompetitorRegistrationDialog(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
+        }
         @Override
         public String getErrorMessage(Set<CompetitorDTO> valueToValidate) {
             if (competitorRegistrationsPanel == null || competitorRegistrationsPanel.getSelectedRegisteredCompetitors().size() != 1) {
-                return "TODO: select one competitor in the left table";
+                return stringMessages.selectOneCompetitorToMapTheImportedData();
             }
             return null;
         }
