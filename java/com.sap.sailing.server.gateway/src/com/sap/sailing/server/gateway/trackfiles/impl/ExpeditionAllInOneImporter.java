@@ -426,7 +426,7 @@ public class ExpeditionAllInOneImporter {
             final Fleet fleet) throws NotDenotedForRaceLogTrackingException, Exception {
         DynamicTrackedRace trackedRace;
         final RaceHandle raceHandle = adapter.startTracking(service, regattaLeaderboard, raceColumn, fleet,
-                /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true);
+                /* trackWind */ true, /* TODO correctWindDirectionByMagneticDeclination */ true);
 
         // wait for the RaceDefinition to be created
         raceHandle.getRace();
