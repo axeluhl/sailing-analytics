@@ -2798,7 +2798,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         EventResultDescriptor eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
         if (eventResult != null) {
             for (RegattaResultDescriptor regattaResult : eventResult.getRegattaResults()) {
-                for(RaceResultDescriptor race: regattaResult.getRaceResults()) {
+                for (RaceResultDescriptor race : regattaResult.getRaceResults()) {
                     // add only the  tracked races
                     if (race.isTracked() != null && race.isTracked() == true) {
                         SwissTimingRaceRecordDTO swissTimingRaceRecordDTO = new SwissTimingRaceRecordDTO(race.getId(), race.getName(), 
@@ -5014,7 +5014,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()), team,
                                     competitor.getTimeOnTimeFactor(),
                                     competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag());
-            
         } else {
             result = getService().apply(
                             new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor.getShortName(),
