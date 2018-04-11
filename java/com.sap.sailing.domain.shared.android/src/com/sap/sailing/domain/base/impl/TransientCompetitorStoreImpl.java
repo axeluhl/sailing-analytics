@@ -419,8 +419,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
         CompetitorWithBoat competitor = new CompetitorWithBoatImpl(id, name, shortName, displayColor, email, flagImage, team,
                 timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+        addNewBoat(boat); // create the boat before the competitor because the competitor references the boat
         addNewCompetitor(competitor);
-        addNewBoat(boat);
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Created competitor "+name+" with ID "+id, new Exception("Here is where it happened"));
         }
