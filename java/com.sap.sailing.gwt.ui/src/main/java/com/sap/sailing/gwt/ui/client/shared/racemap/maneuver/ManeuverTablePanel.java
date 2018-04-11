@@ -14,11 +14,14 @@ import java.util.function.Function;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.cell.client.DateCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat;
+import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
@@ -87,12 +90,11 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private final CompetitorSelectionProvider competitorSelectionModel;
 
     private final NumberFormat towDigitAccuracy = NumberFormatterFactory.getDecimalFormat(2);
-    private final DateTimeFormat dateformat = DateTimeFormat.getFormat("HH:mm:ss");
 
     private final SimplePanel contentPanel = new SimplePanel();
     private final Label importantMessageLabel = new Label();
     private final SortedCellTableWithStylableHeaders<ManeuverTableData> maneuverCellTable;
-    private final SortableColumn<ManeuverTableData, String> competitorColumn, timeColumn;
+    private final SortableColumn<ManeuverTableData, ?> competitorColumn, timeColumn;
     private final Timer timer;
     private final TimeRangeWithZoomModel timeRangeWithZoomProvider;
     private final RaceTimesInfoProvider raceTimesInfoProvider;
@@ -273,7 +275,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         };
     }
 
-    private SortableColumn<ManeuverTableData, String> createTimeColumn() {
+    private SortableColumn<ManeuverTableData, Date> createTimeColumn() {
 
         final InvertibleComparator<ManeuverTableData> comparator = new InvertibleComparatorAdapter<ManeuverTableData>() {
             @Override
@@ -282,8 +284,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             }
         };
 
-        final SortableColumn<ManeuverTableData, String> col = new SortableColumn<ManeuverTableData, String>(
-                new TextCell(), SortingOrder.ASCENDING) {
+        final SortableColumn<ManeuverTableData, Date> col = new SortableColumn<ManeuverTableData, Date>(
+                new DateCell(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG)), SortingOrder.ASCENDING) {
             @Override
             public InvertibleComparator<ManeuverTableData> getComparator() {
                 return comparator;
@@ -295,8 +297,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             }
 
             @Override
-            public String getValue(ManeuverTableData object) {
-                return dateformat.format(object.getTimePoint());
+            public Date getValue(ManeuverTableData object) {
+                return object.getTimePoint();
             }
         };
         col.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -306,7 +308,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private SortableColumn<ManeuverTableData, Boolean> createMarkPassingColumn() {
         final InvertibleComparator<ManeuverTableData> comparator = new InvertibleComparatorAdapter<ManeuverTableData>() {
             public int compare(ManeuverTableData o1, ManeuverTableData o2) {
-                return Boolean.compare(o1.isMarkPassing(), o2.isMarkPassing());
+                return -Boolean.compare(o1.isMarkPassing(), o2.isMarkPassing());
             }
         };
 
@@ -314,7 +316,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 new AbstractCell<Boolean>() {
                     @Override
                     public void render(Context context, Boolean value, SafeHtmlBuilder sb) {
-                        sb.appendEscaped("TODO " + (value ? "Yes" : "No"));
+                        sb.append(value ? SafeHtmlUtils.fromTrustedString("&#10004;") : SafeHtmlUtils.EMPTY_SAFE_HTML);
                     }
                 }, SortingOrder.ASCENDING) {
 
@@ -325,7 +327,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
             @Override
             public Header<?> getHeader() {
-                return new TextHeader("TODO Mark passing");
+                return new TextHeader(stringMessages.markPassing());
             }
 
             @Override
