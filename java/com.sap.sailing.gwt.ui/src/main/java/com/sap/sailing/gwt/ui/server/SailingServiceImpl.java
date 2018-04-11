@@ -2798,7 +2798,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         EventResultDescriptor eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
         if (eventResult != null) {
             for (RegattaResultDescriptor regattaResult : eventResult.getRegattaResults()) {
-                for(RaceResultDescriptor race: regattaResult.getRaceResults()) {
+                for (RaceResultDescriptor race : regattaResult.getRaceResults()) {
                     // add only the  tracked races
                     if (race.isTracked() != null && race.isTracked() == true) {
                         SwissTimingRaceRecordDTO swissTimingRaceRecordDTO = new SwissTimingRaceRecordDTO(race.getId(), race.getName(), 
