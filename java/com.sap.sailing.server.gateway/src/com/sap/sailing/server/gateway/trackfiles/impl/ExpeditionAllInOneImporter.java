@@ -158,7 +158,6 @@ public class ExpeditionAllInOneImporter {
         final String filename = ExpeditionImportFilenameUtils.truncateFilenameExtentions(filenameWithSuffix);
         final String filenameWithDateTimeSuffix = filename + "_" + importTimeString;
         final String trackedRaceName = filenameWithDateTimeSuffix;
-        // TODO is this a proper id for the WindSource used here?
         final String windSourceId = filenameWithDateTimeSuffix;
 
         // TODO wild guess...
