@@ -11,7 +11,6 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.Duration;
 
 public class ManeuverDTO implements IsSerializable {
     public ManeuverType type;
@@ -28,14 +27,10 @@ public class ManeuverDTO implements IsSerializable {
 
     public SpeedWithBearingDTO speedWithBearingAfter;
 
-    public SpeedDTO minSpeed;
-    
     public double directionChangeInDegrees;
 
     public Double maneuverLossInMeters;
 
-    public Duration duration;
-    
     public double maxTurningRateInDegreesPerSecond;
 
     public double avgTurningRateInDegreesPerSecond;
@@ -47,13 +42,12 @@ public class ManeuverDTO implements IsSerializable {
     public NauticalSide markPassingSide;
 
     public ManeuverDTO() {}
-    
+
     public ManeuverDTO(ManeuverType type, Tack newTack, Position position, Date timePoint, Date timePointBefore,
             SpeedWithBearingDTO speedWithBearingBefore, SpeedWithBearingDTO speedWithBearingAfter,
-            double directionChangeInDegrees, Double maneuverLossInMeters, Duration duration, SpeedDTO lowestSpeed,
-            double maxTurningRateInDegreesPerSecond, double avgTurningRateInDegreesPerSecond, double lowestSpeedInKnots,
-            Date markPassingTimePoint, NauticalSide markPassingSide) {
-        super();
+            double directionChangeInDegrees, Double maneuverLossInMeters, double maxTurningRateInDegreesPerSecond,
+            double avgTurningRateInDegreesPerSecond, double lowestSpeedInKnots, Date markPassingTimePoint,
+            NauticalSide markPassingSide) {
         this.type = type;
         this.newTack = newTack;
         this.position = position;
@@ -63,8 +57,6 @@ public class ManeuverDTO implements IsSerializable {
         this.speedWithBearingAfter = speedWithBearingAfter;
         this.directionChangeInDegrees = directionChangeInDegrees;
         this.maneuverLossInMeters = maneuverLossInMeters;
-        this.duration = duration;
-        this.minSpeed = lowestSpeed;
         this.maxTurningRateInDegreesPerSecond = maxTurningRateInDegreesPerSecond;
         this.avgTurningRateInDegreesPerSecond = avgTurningRateInDegreesPerSecond;
         this.lowestSpeedInKnots = lowestSpeedInKnots;

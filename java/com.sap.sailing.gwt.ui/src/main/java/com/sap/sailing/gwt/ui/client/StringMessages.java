@@ -2108,11 +2108,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String lowestSpeed();
     String degreesPerSecondUnit();
     String maneuverTable();
-    String turnRate();
     String speedIn();
     String speedOut();
-    String minSpeed();
     String selectAtLeastOneCompetitorManeuver();
     String noDataManeuverTable();
-    String maneuverAngle();
 }

@@ -427,7 +427,6 @@ import com.sap.sailing.gwt.ui.shared.SidelineDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
-import com.sap.sailing.gwt.ui.shared.SpeedDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
@@ -2003,10 +2002,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return new MillisecondsTimePoint(timePoint.asMillis() / resolutionInMilliseconds * resolutionInMilliseconds);
     }
 
-    private SpeedDTO createSpeedDTO(Speed speedWithBearing) {
-        return new SpeedDTO(speedWithBearing.getKnots());
-    }
-    
     private SpeedWithBearingDTO createSpeedWithBearingDTO(SpeedWithBearing speedWithBearing) {
         return new SpeedWithBearingDTO(speedWithBearing.getKnots(), speedWithBearing
                 .getBearing().getDegrees());
@@ -3428,19 +3423,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final SpeedWithBearingDTO speedAfter = createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter());
             final double directionChangeInDegrees = maneuver.getDirectionChangeInDegrees();
             final Double maneuverLossInMeters = maneuver.getManeuverLoss() == null ? null : maneuver.getManeuverLoss().getMeters();
-            final Duration duration = maneuver.getDuration();
-            final SpeedDTO minSpeed = maneuver.getLowestSpeed() == null ? null : createSpeedDTO(maneuver.getLowestSpeed());
             final double maxTurningRateInDegreesPerSecond = maneuver.getMaxTurningRateInDegreesPerSecond();
             final double averageTurningRateInDegreesPerSecond = maneuver.getAvgTurningRateInDegreesPerSecond();
             final double lowestSpeedInKnots = maneuver.getLowestSpeed().getKnots();
             final Date markPassingTimePoint = maneuver.isMarkPassing()
                     ? maneuver.getMarkPassing().getTimePoint().asDate() : null;
             final NauticalSide markPassingSide = maneuver.isMarkPassing() ? maneuver.getToSide() : null;
-            final ManeuverDTO maneuverDTO = new ManeuverDTO(type, newTack, position, timepoint, timePointBefore,
-                    speedBefore, speedAfter, directionChangeInDegrees, maneuverLossInMeters, duration, minSpeed,
-                    maxTurningRateInDegreesPerSecond, averageTurningRateInDegreesPerSecond, lowestSpeedInKnots,
-                    markPassingTimePoint, markPassingSide);
-            result.add(maneuverDTO);
+            result.add(new ManeuverDTO(type, newTack, position, timepoint, timePointBefore, speedBefore, speedAfter,
+                    directionChangeInDegrees, maneuverLossInMeters, maxTurningRateInDegreesPerSecond,
+                    averageTurningRateInDegreesPerSecond, lowestSpeedInKnots, markPassingTimePoint, markPassingSide));
         }
         return result;
     }

@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.shared.GWT;
@@ -154,22 +155,24 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         });
         this.maneuverCellTable.addColumn(competitorColumn = createCompetitorColumn());
         this.maneuverCellTable.addColumn(createManeuverTypeColumn());
+        this.maneuverCellTable.addColumn(createMarkPassingColumn());
         this.maneuverCellTable.addColumn(timeColumn = createTimeColumn());
-        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getDurationAsSeconds,
-                this.stringMessages.durationPlain(), this.stringMessages.secondsUnit()));
-        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getSpeedInAsKnots,
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getSpeedBeforeInKnots,
                 this.stringMessages.speedIn(), this.stringMessages.knotsUnit()));
-        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getSpeedOutAsKnots,
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getSpeedAfterInKnots,
                 this.stringMessages.speedOut(), this.stringMessages.knotsUnit()));
-        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getMinSpeedAsKnots,
-                this.stringMessages.minSpeed(), this.stringMessages.knotsUnit()));
-        this.maneuverCellTable
-                .addColumn(createSortableMinMaxColumn(ManeuverTableData::getTurnRate, this.stringMessages.turnRate(),
-                        this.stringMessages.degreesUnit() + "/" + this.stringMessages.secondsUnit()));
-        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getLoss,
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getSpeedChangeInKnots,
+                this.stringMessages.speedChange(), this.stringMessages.knotsUnit()));
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getLowestSpeedInKnots,
+                this.stringMessages.lowestSpeed(), this.stringMessages.knotsUnit()));
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getMaximumTurningRate,
+                this.stringMessages.maxTurningRate(), this.stringMessages.degreesPerSecondUnit()));
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getAverageTurningRate,
+                this.stringMessages.avgTurningRate(), this.stringMessages.degreesPerSecondUnit()));
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getManeuverLoss,
                 this.stringMessages.maneuverLoss(), stringMessages.metersUnit()));
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getDirectionChange,
-                stringMessages.maneuverAngle(), this.stringMessages.degreesUnit()));
+                stringMessages.directionChange(), this.stringMessages.degreesShort()));
         initWidget(rootPanel);
         setVisible(false);
     }
@@ -300,11 +303,45 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         return col;
     }
 
+    private SortableColumn<ManeuverTableData, Boolean> createMarkPassingColumn() {
+        final InvertibleComparator<ManeuverTableData> comparator = new InvertibleComparatorAdapter<ManeuverTableData>() {
+            public int compare(ManeuverTableData o1, ManeuverTableData o2) {
+                return Boolean.compare(o1.isMarkPassing(), o2.isMarkPassing());
+            }
+        };
+
+        final SortableColumn<ManeuverTableData, Boolean> column = new SortableColumn<ManeuverTableData, Boolean>(
+                new AbstractCell<Boolean>() {
+                    @Override
+                    public void render(Context context, Boolean value, SafeHtmlBuilder sb) {
+                        sb.appendEscaped("TODO " + (value ? "Yes" : "No"));
+                    }
+                }, SortingOrder.ASCENDING) {
+
+            @Override
+            public InvertibleComparator<ManeuverTableData> getComparator() {
+                return comparator;
+            }
+
+            @Override
+            public Header<?> getHeader() {
+                return new TextHeader("TODO Mark passing");
+            }
+
+            @Override
+            public Boolean getValue(ManeuverTableData object) {
+                return object.isMarkPassing();
+            }
+        };
+        column.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        return column;
+    }
+
     private SortableColumn<ManeuverTableData, String> createCompetitorColumn() {
         InvertibleComparator<ManeuverTableData> comparator = new InvertibleComparatorAdapter<ManeuverTableData>() {
             @Override
             public int compare(ManeuverTableData o1, ManeuverTableData o2) {
-                return o1.getCompetitor().getName().compareTo(o2.getCompetitor().getName());
+                return o1.getCompetitorName().compareTo(o2.getCompetitorName());
             }
         };
 
@@ -322,7 +359,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
             @Override
             public String getValue(ManeuverTableData object) {
-                return object.getCompetitor().getName();
+                return object.getCompetitorName();
             }
         };
     }
