@@ -366,7 +366,7 @@ public class ExpeditionAllInOneImporter {
                             raceColumn, fleet);
                     trackedRaces.add(trackedRace);
                 } else {
-                    return new ImporterResult(ERROR_MESSAGE_INVALID_IMPORTMODE + importMode);    
+                    return new ImporterResult(ERROR_MESSAGE_INVALID_IMPORTMODE + importMode);
                 }
             } else {
                 return new ImporterResult(ERROR_MESSAGE_INVALID_REGATTA_NAME);
