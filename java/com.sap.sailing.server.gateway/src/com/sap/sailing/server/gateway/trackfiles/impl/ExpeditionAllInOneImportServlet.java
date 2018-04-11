@@ -32,6 +32,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
 
     private static final String ERROR_MESSAGE_IMPORT_FILE_MISSING = "No file to import found!";
     private static final String ERROR_MESSAGE_BOAT_CLASS_MISSING = "No boat class name found!";
+    private static final String ERROR_MESSAGE_REGATTA_MISSING = "No regatta name found!";
     private static final String ERROR_MESSAGE_UNKNOWN_IMPORT_MODE = "Unknown import mode!";
 
     private ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> raceLogTrackingAdapterTracker;
@@ -76,9 +77,6 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
             if (fileItem == null) {
                 throw new AllinOneImportException(ERROR_MESSAGE_IMPORT_FILE_MISSING);
             }
-            if (boatClassName == null || boatClassName.isEmpty()) {
-                throw new AllinOneImportException(ERROR_MESSAGE_BOAT_CLASS_MISSING);
-            }
             final ImportMode importMode;
             if (importModeName == null) {
                 importMode = ImportMode.NEW_EVENT;
@@ -87,6 +85,15 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
                     importMode = ImportMode.valueOf(importModeName);
                 } catch (Exception e) {
                     throw new AllinOneImportException(ERROR_MESSAGE_UNKNOWN_IMPORT_MODE);
+                }
+            }
+            if (importMode == ImportMode.NEW_EVENT) {
+                if (boatClassName == null || boatClassName.isEmpty()) {
+                    throw new AllinOneImportException(ERROR_MESSAGE_BOAT_CLASS_MISSING);
+                }
+            } else {
+                if (regattaName == null || regattaName.isEmpty()) {
+                    throw new AllinOneImportException(ERROR_MESSAGE_REGATTA_MISSING);
                 }
             }
             importerResult = new ExpeditionAllInOneImporter(getService(),
