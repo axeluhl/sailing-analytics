@@ -217,8 +217,8 @@ public class ExpeditionAllInOneImporter {
         final String regattaNameAndleaderboardName;
         final Regatta regatta;
         final RegattaLeaderboard regattaLeaderboard;
-        // TODO Should we return all TrackedRaces? Alternatively make final when all errors are handled
-        DynamicTrackedRace trackedRace;
+        // TODO Should we return all TrackedRaces and show several RaceBoard links to the user?
+        final DynamicTrackedRace trackedRace;
         final List<DynamicTrackedRace> trackedRaces = new ArrayList<>();
         final String fleetName;
         final String raceColumnName;
@@ -309,6 +309,7 @@ public class ExpeditionAllInOneImporter {
                 if (foundEvent == null) {
                     return new ImporterResult(ERROR_MESSAGE_INVALID_LEADERBOARD_EVENT_LINK);
                 }
+                // TODO should we extend the time range of the event to ensure that it includes the newly imported tracks' time ranges?
                 eventId = foundEvent.getId();
                 leaderboardGroupName = foundLeaderboardGroup.getName();
                 
