@@ -128,7 +128,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     private RadioButton newEventImport;
     private RadioButton newCompetitorImport;
     private RadioButton newRaceImport;
-    private SuggestBox regatttaSuggestBox;
+    private SuggestBox regattaSuggestBox;
     private SuggestBox boatClassInput;
     private MultiWordSuggestOracle regattaOracle;
 
@@ -503,8 +503,8 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         importModePanel.add(newCompetitorImport);
         newCompetitorImport.addClickHandler(event -> {
             regattaNamePanel.setVisible(true);
-            regatttaSuggestBox.setEnabled(true);
-            regatttaSuggestBox.setValue(null);
+            regattaSuggestBox.setEnabled(true);
+            regattaSuggestBox.setValue(null);
             boatClassPanel.setVisible(false);
         });
         newRaceImport = new RadioButton(ExpeditionAllInOneConstants.REQUEST_PARAMETER_IMPORT_MODE, stringMessages.newExpeditionRace());
@@ -512,8 +512,8 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         importModePanel.add(newRaceImport);
         newRaceImport.addClickHandler(event -> {
             regattaNamePanel.setVisible(true);
-            regatttaSuggestBox.setEnabled(true);
-            regatttaSuggestBox.setValue(null);
+            regattaSuggestBox.setEnabled(true);
+            regattaSuggestBox.setValue(null);
             boatClassPanel.setVisible(false);
         });
         
@@ -531,9 +531,9 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         regattaName.setName("regattaName");
 
         refreshRegattaOracle();
-        regatttaSuggestBox = new SuggestBox(regattaOracle , regattaName);
-        regattaNamePanel.add(regatttaSuggestBox);
-        regattaNamePanel.setCellVerticalAlignment(regatttaSuggestBox, HasVerticalAlignment.ALIGN_MIDDLE);
+        regattaSuggestBox = new SuggestBox(regattaOracle , regattaName);
+        regattaNamePanel.add(regattaSuggestBox);
+        regattaNamePanel.setCellVerticalAlignment(regattaSuggestBox, HasVerticalAlignment.ALIGN_MIDDLE);
         boatClassPanel.setSpacing(5);
         contentPanel.add(boatClassPanel);
         final Label boatClassLabel = new Label(stringMessages.boatClass() + ":");
@@ -551,7 +551,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         
         final Runnable validation = () -> {
             final String filename = fileUpload.getFilename(), boatClass = boatClassInput.getValue();
-            final String regattaNameValue = regatttaSuggestBox.getValue();
+            final String regattaNameValue = regattaSuggestBox.getValue();
             final boolean fileValid = filename != null && !filename.trim().isEmpty();
             final boolean isNewEventImport = Boolean.TRUE.equals(newEventImport.getValue());
             final boolean boatClassValid = boatClass != null && !boatClass.trim().isEmpty();
@@ -577,7 +577,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             }
         });
         
-        regatttaSuggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
+        regattaSuggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(SelectionEvent<Suggestion> event) {
                 final String selected = event.getSelectedItem().getReplacementString();
@@ -596,7 +596,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
                 }
             }
         });
-        regatttaSuggestBox.addKeyUpHandler(event -> validation.run());
+        regattaSuggestBox.addKeyUpHandler(event -> validation.run());
         
         fileUpload.addChangeHandler(event -> validation.run());
         boatClassInput.addSelectionHandler(event -> validation.run());
@@ -611,7 +611,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         newCompetitorImport.setEnabled(b);
         newEventImport.setEnabled(b);
         newRaceImport.setEnabled(b);
-        regatttaSuggestBox.setEnabled(b);
+        regattaSuggestBox.setEnabled(b);
         boatClassInput.setEnabled(b);
         if(b) {
             //set consistent start scenario after choosing different file
