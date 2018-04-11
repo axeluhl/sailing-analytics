@@ -5014,7 +5014,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()), team,
                                     competitor.getTimeOnTimeFactor(),
                                     competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag());
-            
         } else {
             result = getService().apply(
                             new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor.getShortName(),
