@@ -437,7 +437,6 @@ public class ExpeditionAllInOneImporter {
         final TimePoint endOfTracking = lastFixAt;
         raceLog.add(new RaceLogStartOfTrackingEventImpl(startOfTracking, author, raceLog.getCurrentPassId()));
         raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTracking, author, raceLog.getCurrentPassId()));
-        // TODO explicitly set startOfRace?
 
         try {
             TimePoint startTrackingTimePoint = MillisecondsTimePoint.now();
