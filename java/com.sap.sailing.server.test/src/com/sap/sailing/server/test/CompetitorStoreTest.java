@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -18,10 +18,10 @@ import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
-import com.sap.sailing.domain.base.impl.TransientCompetitorStoreImpl;
+import com.sap.sailing.domain.base.impl.TransientCompetitorAndBoatStoreImpl;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
-import com.sap.sailing.server.impl.PersistentCompetitorStore;
+import com.sap.sailing.server.impl.PersistentCompetitorAndBoatStore;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.RGBColor;
 
@@ -29,7 +29,7 @@ public class CompetitorStoreTest {
     
     @Test
     public void testAddingCompetitorsToTransientStore() {
-        CompetitorStore transientStore = new TransientCompetitorStoreImpl();
+        CompetitorAndBoatStore transientStore = new TransientCompetitorAndBoatStoreImpl();
         DynamicCompetitor template = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitor("Test Competitor");
         Competitor competitor = transientStore.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(), template.getColor(), template.getEmail(), template.getFlagImage(), template.getTeam(),
                 /* timeOnTimeFactor */ 1.234, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ Duration.ONE_SECOND.times(730), null);
@@ -59,14 +59,14 @@ public class CompetitorStoreTest {
     
     @Test
     public void testPersistentCompetitorStore() {
-        CompetitorStore persistentStore1 = new PersistentCompetitorStore(
+        CompetitorAndBoatStore persistentStore1 = new PersistentCompetitorAndBoatStore(
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */true, null, /* raceLogResolver */ (srlid)->null);
         DynamicCompetitor template = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitor("Test Competitor");
         Competitor competitor = persistentStore1.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(),
                 template.getColor(), template.getEmail(), template.getFlagImage(), template.getTeam(),
                 /* timeOnTimeFactor */ 1.234, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ Duration.ONE_SECOND.times(730), null);
 
-        CompetitorStore persistentStore2 = new PersistentCompetitorStore(
+        CompetitorAndBoatStore persistentStore2 = new PersistentCompetitorAndBoatStore(
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */false, null, /* raceLogResolver */ (srlid)->null);
         Competitor competitor2 = persistentStore2.getExistingCompetitorById(template.getId());
         assertNotSame(competitor2, template); // the new store loads new instances from the database
@@ -95,14 +95,14 @@ public class CompetitorStoreTest {
 
     @Test
     public void testPersistentCompetitorWithBoatStore() {
-        CompetitorStore persistentStore1 = new PersistentCompetitorStore(
+        CompetitorAndBoatStore persistentStore1 = new PersistentCompetitorAndBoatStore(
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */true, null, /* raceLogResolver */ (srlid)->null);
         DynamicCompetitorWithBoat template = (DynamicCompetitorWithBoat) AbstractLeaderboardTest.createCompetitorWithBoat("Test Competitor");
         CompetitorWithBoat competitor = persistentStore1.getOrCreateCompetitorWithBoat(template.getId(), template.getName(), template.getShortName(),
                 template.getColor(), template.getEmail(), template.getFlagImage(), template.getTeam(),
                 /* timeOnTimeFactor */ 1.234, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ Duration.ONE_SECOND.times(730), null, template.getBoat());
 
-        CompetitorStore persistentStore2 = new PersistentCompetitorStore(
+        CompetitorAndBoatStore persistentStore2 = new PersistentCompetitorAndBoatStore(
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */false, null, /* raceLogResolver */ (srlid)->null);
         CompetitorWithBoat competitor2 = persistentStore2.getExistingCompetitorWithBoatById(template.getId());
         assertNotSame(competitor2, template); // the new store loads new instances from the database
@@ -131,14 +131,14 @@ public class CompetitorStoreTest {
 
     @Test
     public void testPersistentBoatStore() {
-        CompetitorStore persistentStore1 = new PersistentCompetitorStore(
+        CompetitorAndBoatStore persistentStore1 = new PersistentCompetitorAndBoatStore(
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */true, null, /* raceLogResolver */ (srlid)->null);
         DynamicBoat template = new BoatImpl("id-12345", "Morning Glory", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), 
                 "GER 1234", new RGBColor(255, 0, 0));
         persistentStore1.getOrCreateBoat(template.getId(), template.getName(), template.getBoatClass(), 
                 template.getSailID(), template.getColor());
 
-        CompetitorStore persistentStore2 = new PersistentCompetitorStore(
+        CompetitorAndBoatStore persistentStore2 = new PersistentCompetitorAndBoatStore(
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */false, null, /* raceLogResolver */ (srlid)->null);
         DynamicBoat boat2 = persistentStore2.getExistingBoatById(template.getId());
         assertNotSame(boat2, template); // the new store loads new instances from the database

@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.communication.event;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 
 public class SimpleCompetitorWithIdDTO extends SimpleCompetitorDTO {
 
@@ -20,7 +20,7 @@ public class SimpleCompetitorWithIdDTO extends SimpleCompetitorDTO {
     }
 
     @GwtIncompatible
-    public SimpleCompetitorWithIdDTO(CompetitorDTO competitor) {
+    public SimpleCompetitorWithIdDTO(CompetitorWithBoatDTO competitor) {
         super(competitor);
         this.idAsString = competitor.getIdAsString();
     }

@@ -8,7 +8,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AnimationPanel;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
@@ -35,7 +35,7 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
     private SingleRaceLeaderboardPanel leaderboardPanel;
     private Timer selectionTimer;
     private RaceCompetitorSelectionModel competitorSelectionProvider;
-    ArrayList<CompetitorDTO> compList = new ArrayList<>();
+    ArrayList<CompetitorWithBoatDTO> compList = new ArrayList<>();
     private com.sap.sse.gwt.client.player.Timer timer;
 
     public PreLiveRaceLeaderBoardWithImagePresenterImpl(AbstractPreRaceLeaderBoardWithImagePlace place,
@@ -61,7 +61,7 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
             return;
         }
         if (selected >= 0) {
-            CompetitorDTO lastSelected = compList.get(selected);
+            CompetitorWithBoatDTO lastSelected = compList.get(selected);
             competitorSelectionProvider.setSelected(lastSelected, false);
         }
         selected++;
@@ -69,7 +69,7 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
         if (selected > compList.size() - 1) {
             selected = 0;
         }
-        CompetitorDTO newSelected = compList.get(selected);
+        CompetitorWithBoatDTO newSelected = compList.get(selected);
         competitorSelectionProvider.setSelected(newSelected, true);
         view.onCompetitorSelect(newSelected);
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {

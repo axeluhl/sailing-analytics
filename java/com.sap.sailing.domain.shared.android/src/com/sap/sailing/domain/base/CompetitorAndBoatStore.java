@@ -9,8 +9,8 @@ import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 
@@ -21,7 +21,7 @@ import com.sap.sse.common.Duration;
  * @author Axel Uhl (d043530)
  *
  */
-public interface CompetitorStore extends CompetitorFactory, BoatFactory {
+public interface CompetitorAndBoatStore extends CompetitorFactory, BoatFactory {
     public interface CompetitorUpdateListener {
         void competitorUpdated(Competitor competitor);
         void competitorCreated(Competitor competitor);
@@ -102,13 +102,13 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
 
     void addNewCompetitorsWithBoat(Iterable<DynamicCompetitorWithBoat> competitorsWithBoat);
 
-    CompetitorWithoutBoatDTO convertToCompetitorDTO(Competitor competitor);
+    CompetitorDTO convertToCompetitorDTO(Competitor competitor);
 
-    CompetitorDTO convertToCompetitorWithBoatDTO(Competitor c, Boat b);
+    CompetitorWithBoatDTO convertToCompetitorWithBoatDTO(Competitor c, Boat b);
 
-    CompetitorDTO convertToCompetitorWithOptionalBoatDTO(Competitor c);
+    CompetitorWithBoatDTO convertToCompetitorWithOptionalBoatDTO(Competitor c);
 
-    Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, ? extends Boat> competitorsAndBoats);
+    Map<CompetitorWithBoatDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, ? extends Boat> competitorsAndBoats);
     
     /**
      * Listeners added here are notified whenever {@link #updateCompetitor(String, String, Color, String, Nationality)} is called

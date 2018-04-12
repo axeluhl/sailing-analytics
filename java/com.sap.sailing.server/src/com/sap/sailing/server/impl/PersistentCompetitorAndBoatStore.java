@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Nationality;
@@ -22,7 +22,7 @@ import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
-import com.sap.sailing.domain.base.impl.TransientCompetitorStoreImpl;
+import com.sap.sailing.domain.base.impl.TransientCompetitorAndBoatStoreImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
@@ -36,25 +36,25 @@ import com.sap.sse.mongodb.MongoDBService;
  * and a {@link DomainObjectFactory} for initially filling this store's in-memory representation from the persistent
  * store.<p>
  * 
- * Note that the results of calling {@link CompetitorStore#allowCompetitorResetToDefaults(Competitor)} and
- * {@link CompetitorStore#allowBoatResetToDefaults(Boat)} are not stored
+ * Note that the results of calling {@link CompetitorAndBoatStore#allowCompetitorResetToDefaults(Competitor)} and
+ * {@link CompetitorAndBoatStore#allowBoatResetToDefaults(Boat)} are not stored
  * persistently and therefore will be reset when re-initializing a competitor/boat store from the database.
  * 
  * @author Axel Uhl (d043530)
  * 
  */
-public class PersistentCompetitorStore extends TransientCompetitorStoreImpl implements CompetitorStore {
+public class PersistentCompetitorAndBoatStore extends TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatStore {
     private static final long serialVersionUID = 9205956018421790908L;
     private transient MongoObjectFactory storeTo;
     private transient DomainObjectFactory loadFrom;
-    private static final Logger logger = Logger.getLogger(PersistentCompetitorStore.class.getName());
+    private static final Logger logger = Logger.getLogger(PersistentCompetitorAndBoatStore.class.getName());
     
     /**
      * @param clearCompetitorsAndBaots
      *            if <code>true</code>, the persistent competitor and boats store is initially cleared, with all persistent
      *            competitor and boat data removed; use with caution!
      */
-    public PersistentCompetitorStore(MongoObjectFactory storeTo, boolean clearCompetitorsAndBaots, 
+    public PersistentCompetitorAndBoatStore(MongoObjectFactory storeTo, boolean clearCompetitorsAndBaots, 
             TypeBasedServiceFinderFactory serviceFinderFactory, RaceLogResolver raceLogResolver) {
         DomainFactoryImpl baseDomainFactory = new DomainFactoryImpl(this, raceLogResolver);
         this.loadFrom = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, baseDomainFactory, serviceFinderFactory);

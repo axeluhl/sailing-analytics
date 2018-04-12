@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sse.common.Duration;
 
 public class RaceMapDataDTO implements IsSerializable {
-    public Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions;
+    public Map<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions;
     public CoursePositionsDTO coursePositions;
     public List<SidelineDTO> courseSidelines;
     public LinkedHashMap<String, QuickRankDTO> quickRanks;

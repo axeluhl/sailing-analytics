@@ -70,9 +70,9 @@ import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
-import com.sap.sailing.domain.base.CompetitorStore.BoatUpdateListener;
-import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore.BoatUpdateListener;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore.CompetitorUpdateListener;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
@@ -381,7 +381,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private final NamedReentrantReadWriteLock leaderboardGroupsByNameLock;
 
-    private final CompetitorStore competitorStore;
+    private final CompetitorAndBoatStore competitorStore;
 
     /**
      * A set based on a concurrent hash map, therefore being thread safe
@@ -518,7 +518,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         DomainObjectFactory getDomainObjectFactory();
         MongoObjectFactory getMongoObjectFactory();
         com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
-        CompetitorStore getCompetitorStore();
+        CompetitorAndBoatStore getCompetitorStore();
     }
 
     /**
@@ -551,7 +551,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * be cleared before the service starts.
      * 
      * @param clearPersistentCompetitorAndBoatStore
-     *            if <code>true</code>, the {@link PersistentCompetitorStore} is created empty, with the corresponding
+     *            if <code>true</code>, the {@link PersistentCompetitorAndBoatStore} is created empty, with the corresponding
      *            database collection cleared as well. Use with caution! When used with <code>false</code>, competitors and boats
      *            created and stored during previous service executions will initially be loaded.
      * @param sailingNotificationService
@@ -569,7 +569,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
                         .getDefaultMongoObjectFactory(serviceFinderFactory);
-                private final PersistentCompetitorStore competitorStore = new PersistentCompetitorStore(
+                private final PersistentCompetitorAndBoatStore competitorStore = new PersistentCompetitorAndBoatStore(
                         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory),
                         clearPersistentCompetitorAndBoatStore, serviceFinderFactory, raceLogResolver);
 
@@ -589,7 +589,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
 
                 @Override
-                public CompetitorStore getCompetitorStore() {
+                public CompetitorAndBoatStore getCompetitorStore() {
                     return competitorStore;
                 }
             };
@@ -604,7 +604,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
                         .getDefaultMongoObjectFactory(serviceFinderFactory);
-                private final PersistentCompetitorStore competitorStore = new PersistentCompetitorStore(
+                private final PersistentCompetitorAndBoatStore competitorStore = new PersistentCompetitorAndBoatStore(
                         mongoObjectFactory, clearPersistentCompetitorStore, serviceFinderFactory, raceLogResolver);
 
                 @Override
@@ -623,7 +623,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
 
                 @Override
-                public CompetitorStore getCompetitorStore() {
+                public CompetitorAndBoatStore getCompetitorStore() {
                     return competitorStore;
                 }
             };
@@ -651,7 +651,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
 
                 @Override
-                public CompetitorStore getCompetitorStore() {
+                public CompetitorAndBoatStore getCompetitorStore() {
                     return getBaseDomainFactory().getCompetitorStore();
                 }
             };
@@ -3046,7 +3046,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // only copy the competitors from the deserialized competitor store; don't use it because it will have set
         // a default Mongo object factory
         logger.info("Reading competitors...");
-        for (Competitor competitor : ((CompetitorStore) ois.readObject()).getAllCompetitors()) {
+        for (Competitor competitor : ((CompetitorAndBoatStore) ois.readObject()).getAllCompetitors()) {
             DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
             // the following should actually be redundant because during de-serialization the Competitor objects,
             // whose classes implement IsManagedByCache, should already have been got/created from/in the
@@ -3701,7 +3701,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public CompetitorStore getCompetitorStore() {
+    public CompetitorAndBoatStore getCompetitorStore() {
         return competitorStore;
     }
 

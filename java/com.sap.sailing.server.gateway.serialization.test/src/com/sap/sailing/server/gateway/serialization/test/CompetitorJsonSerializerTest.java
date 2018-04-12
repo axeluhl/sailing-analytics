@@ -22,9 +22,9 @@ import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.base.impl.TransientCompetitorAndBoatStoreImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
-import com.sap.sailing.domain.base.impl.TransientCompetitorStoreImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorAndBoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
@@ -44,7 +44,7 @@ public class CompetitorJsonSerializerTest {
         mockTeam(competitor);
         serializer = CompetitorJsonSerializer.create();
         // use a separate competitor store for the de-serializer
-        deserializer = CompetitorJsonDeserializer.create(new DomainFactoryImpl(new TransientCompetitorStoreImpl(), /* raceLogResolver */ null));
+        deserializer = CompetitorJsonDeserializer.create(new DomainFactoryImpl(new TransientCompetitorAndBoatStoreImpl(), /* raceLogResolver */ null));
     }
 
     private void mockTeam(final Competitor competitor) {
@@ -116,7 +116,7 @@ public class CompetitorJsonSerializerTest {
         when(boat.getBoatClass()).thenReturn(DomainFactory.INSTANCE.getOrCreateBoatClass("Tornado"));
         JSONObject result = CompetitorAndBoatJsonSerializer.create().serialize(new Pair<>(competitorWithBoat, boat));
         final Pair<DynamicCompetitor, Boat> deserializedCompetitorAndBoat = CompetitorAndBoatJsonDeserializer
-                .create(new DomainFactoryImpl(new TransientCompetitorStoreImpl(), /* raceLogResolver */ null))
+                .create(new DomainFactoryImpl(new TransientCompetitorAndBoatStoreImpl(), /* raceLogResolver */ null))
                 .deserialize((JSONObject) new JSONParser().parse(result.toString()));
         assertTrue(deserializedCompetitorAndBoat.getA().hasBoat());
         assertTrue(deserializedCompetitorAndBoat.getA() instanceof CompetitorWithBoat);
@@ -137,7 +137,7 @@ public class CompetitorJsonSerializerTest {
         when(boat.getBoatClass()).thenReturn(DomainFactory.INSTANCE.getOrCreateBoatClass("Tornado"));
         JSONObject result = CompetitorAndBoatJsonSerializer.create().serialize(new Pair<>(competitor, boat));
         final Pair<DynamicCompetitor, Boat> deserializedCompetitorAndBoat = CompetitorAndBoatJsonDeserializer
-                .create(new DomainFactoryImpl(new TransientCompetitorStoreImpl(), /* raceLogResolver */ null))
+                .create(new DomainFactoryImpl(new TransientCompetitorAndBoatStoreImpl(), /* raceLogResolver */ null))
                 .deserialize((JSONObject) new JSONParser().parse(result.toString()));
         assertFalse(deserializedCompetitorAndBoat.getA().hasBoat());
         assertFalse(deserializedCompetitorAndBoat.getA() instanceof CompetitorWithBoat);
@@ -158,7 +158,7 @@ public class CompetitorJsonSerializerTest {
         when(boat.getBoatClass()).thenReturn(DomainFactory.INSTANCE.getOrCreateBoatClass("Tornado"));
         JSONObject result = CompetitorAndBoatJsonSerializer.create().serialize(new Pair<>(competitorWithBoat, boat));
         final Pair<DynamicCompetitor, Boat> deserializedCompetitorAndBoat = CompetitorAndBoatJsonDeserializer
-                .create(new DomainFactoryImpl(new TransientCompetitorStoreImpl(), /* raceLogResolver */ null))
+                .create(new DomainFactoryImpl(new TransientCompetitorAndBoatStoreImpl(), /* raceLogResolver */ null))
                 .deserialize((JSONObject) new JSONParser().parse(result.toString()));
         assertFalse(deserializedCompetitorAndBoat.getA().hasBoat());
         assertFalse(deserializedCompetitorAndBoat.getA() instanceof CompetitorWithBoat);

@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -39,7 +39,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
      * this field. For an existing leaderboard with eliminations it is initially filled from the
      * server's copy of that leaderboard. For new leaderboards it starts out empty.
      */
-    protected Collection<CompetitorDTO> eliminatedCompetitors;
+    protected Collection<CompetitorWithBoatDTO> eliminatedCompetitors;
 
     protected static class LeaderboardParameterValidator implements Validator<LeaderboardDescriptorWithEliminations> {
         protected final StringMessages stringMessages;
@@ -139,7 +139,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
      * this hasn't happened before, and the result is cached locally. In the {@link #getResult()} implementation the
      * eliminations are then taken from the local state.
      */
-    protected abstract Consumer<AsyncCallback<Collection<CompetitorDTO>>> getEliminatedCompetitorsRetriever();
+    protected abstract Consumer<AsyncCallback<Collection<CompetitorWithBoatDTO>>> getEliminatedCompetitorsRetriever();
 
     /**
      * Based on the contents of {@link #regattaLeaderboardsListBox} obtains the leaderboard from
