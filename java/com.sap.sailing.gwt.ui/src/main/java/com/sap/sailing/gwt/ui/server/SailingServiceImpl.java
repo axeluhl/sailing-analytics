@@ -858,9 +858,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 // Un-comment the following lines if you need to update the file used by LeaderboardDTODiffingTest, set a breakpoint
                 // and toggle the storeLeaderboardForTesting flag if you found a good version. See also bug 1417.
+                // The leaderboard that the test wants to use is that of the 505 Worlds 2013, obtained for
+                // an expanded Race R9 at time 2013-05-03T19:17:09Z after the last competitor tracked has finished the last leg. The
+                // total distance traveled in meters has to be expanded for the test to work.
                 boolean storeLeaderboardForTesting = false;
                 if (storeLeaderboardForTesting) {
-                    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File("C:/Projekte/sailing/dev/git/java/com.sap.sailing.domain.test/resources/IncrementalLeaderboardDTO.ser")));
+                    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File("C:/data/SAP/sailing/workspace/java/com.sap.sailing.domain.test/resources/IncrementalLeaderboardDTO.ser")));
                     oos.writeObject(leaderboardDTO);
                     oos.close();
                 }
