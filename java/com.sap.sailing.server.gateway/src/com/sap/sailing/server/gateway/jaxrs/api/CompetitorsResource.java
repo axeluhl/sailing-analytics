@@ -25,7 +25,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
@@ -126,7 +126,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     public String setTeamImage(@PathParam("competitor-id") String competitorId, InputStream uploadedInputStream,
             @HeaderParam("Content-Type") String fileType, @HeaderParam("Content-Length") long sizeInBytes) throws IOException {
         RacingEventService service = getService();
-        CompetitorStore store = service.getCompetitorStore();
+        CompetitorAndBoatStore store = service.getCompetitorStore();
         Competitor competitor = store.getExistingCompetitorByIdAsString(competitorId);
         if (competitor == null) {
             logger.log(Level.INFO, "Could not find competitor to store image for: " + StringEscapeUtils.escapeHtml(competitorId));

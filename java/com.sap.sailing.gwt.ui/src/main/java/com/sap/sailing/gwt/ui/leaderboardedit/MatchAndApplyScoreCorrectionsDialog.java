@@ -26,7 +26,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
@@ -44,16 +44,16 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     private static final RegExp sailIdPattern = RegExp.compile("^([A-Z][A-Z][A-Z])\\s*[^0-9]*([0-9]*)$");
     
     private final LeaderboardDTO leaderboard;
-    private final Map<CompetitorDTO, String> defaultOfficialSailIDsForCompetitors;
+    private final Map<CompetitorWithBoatDTO, String> defaultOfficialSailIDsForCompetitors;
     private final Set<String> allOfficialSailIDs;
     private final Map<RaceColumnDTO, String> raceColumnToOfficialRaceNameOrNumber;
     private final RegattaScoreCorrectionDTO regattaScoreCorrection;
-    private final Map<CompetitorDTO, CheckBox> competitorCheckboxes;
+    private final Map<CompetitorWithBoatDTO, CheckBox> competitorCheckboxes;
     private final Map<RaceColumnDTO, CheckBox> raceColumnCheckboxes;
-    private final Map<Util.Pair<CompetitorDTO, RaceColumnDTO>, CheckBox> cellCheckboxes;
+    private final Map<Util.Pair<CompetitorWithBoatDTO, RaceColumnDTO>, CheckBox> cellCheckboxes;
     private final Grid grid;
     private final Map<RaceColumnDTO, ListBox> raceNameOrNumberChoosers;
-    private final Map<CompetitorDTO, ListBox> officialSailIDChoosers;
+    private final Map<CompetitorWithBoatDTO, ListBox> officialSailIDChoosers;
     private final CheckBox allAllCheckbox;
 
     public MatchAndApplyScoreCorrectionsDialog(EditableLeaderboardPanel leaderboardPanel, StringMessages stringMessages,
@@ -64,17 +64,17 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
         this.regattaScoreCorrection = result;
         this.leaderboard = leaderboardPanel.getLeaderboard();
         this.allOfficialSailIDs = new LinkedHashSet<String>();
-        this.defaultOfficialSailIDsForCompetitors = new HashMap<CompetitorDTO, String>();
+        this.defaultOfficialSailIDsForCompetitors = new HashMap<CompetitorWithBoatDTO, String>();
         mapCompetitorsAndInitializeAllOfficialRaceIDs(leaderboard, result);
         this.raceColumnToOfficialRaceNameOrNumber = createRaceColumnNameToOfficialRaceNameOrNumberSuggestion(leaderboard, result);
-        competitorCheckboxes = new HashMap<CompetitorDTO, CheckBox>();
-        for (final CompetitorDTO competitor : leaderboard.competitors) {
+        competitorCheckboxes = new HashMap<CompetitorWithBoatDTO, CheckBox>();
+        for (final CompetitorWithBoatDTO competitor : leaderboard.competitors) {
             CheckBox checkbox = createCheckbox(stringMessages.selectAll());
             checkbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
                     for (RaceColumnDTO raceColumn : MatchAndApplyScoreCorrectionsDialog.this.leaderboard.getRaceList()) {
-                        cellCheckboxes.get(new Util.Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)).setValue(event.getValue());
+                        cellCheckboxes.get(new Util.Pair<CompetitorWithBoatDTO, RaceColumnDTO>(competitor, raceColumn)).setValue(event.getValue());
                     }
                 }
             });
@@ -86,27 +86,27 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
             checkbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
-                    for (CompetitorDTO competitor : MatchAndApplyScoreCorrectionsDialog.this.leaderboard.competitors) {
-                        cellCheckboxes.get(new Util.Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)).setValue(event.getValue());
+                    for (CompetitorWithBoatDTO competitor : MatchAndApplyScoreCorrectionsDialog.this.leaderboard.competitors) {
+                        cellCheckboxes.get(new Util.Pair<CompetitorWithBoatDTO, RaceColumnDTO>(competitor, raceColumn)).setValue(event.getValue());
                     }
                 }
             });
             raceColumnCheckboxes.put(raceColumn, checkbox);
         }
-        cellCheckboxes = new HashMap<Util.Pair<CompetitorDTO, RaceColumnDTO>, CheckBox>();
-        for (final CompetitorDTO competitor : leaderboard.competitors) {
+        cellCheckboxes = new HashMap<Util.Pair<CompetitorWithBoatDTO, RaceColumnDTO>, CheckBox>();
+        for (final CompetitorWithBoatDTO competitor : leaderboard.competitors) {
             for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-                cellCheckboxes.put(new Util.Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn), createCheckbox(stringMessages.apply()));
+                cellCheckboxes.put(new Util.Pair<CompetitorWithBoatDTO, RaceColumnDTO>(competitor, raceColumn), createCheckbox(stringMessages.apply()));
             }
         }
         allAllCheckbox = createCheckbox(stringMessages.selectAll());
         allAllCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                for (CompetitorDTO competitor : leaderboard.competitors) {
+                for (CompetitorWithBoatDTO competitor : leaderboard.competitors) {
                     competitorCheckboxes.get(competitor).setValue(event.getValue());
                     for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-                        cellCheckboxes.get(new Util.Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)).setValue(event.getValue());
+                        cellCheckboxes.get(new Util.Pair<CompetitorWithBoatDTO, RaceColumnDTO>(competitor, raceColumn)).setValue(event.getValue());
                     }
                 }
                 for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
@@ -115,7 +115,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
             }
         });
         raceNameOrNumberChoosers = new HashMap<RaceColumnDTO, ListBox>();
-        officialSailIDChoosers = new HashMap<CompetitorDTO, ListBox>();
+        officialSailIDChoosers = new HashMap<CompetitorWithBoatDTO, ListBox>();
         grid = new Grid(leaderboard.competitors.size()+1, leaderboard.getRaceList().size()+1);
         fillRaceNameOrNumberChoosers();
         fillOfficialSailIDChoosers();
@@ -154,7 +154,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     }
 
     private void fillOfficialSailIDChoosers() {
-        for (CompetitorDTO competitor : leaderboard.competitors) {
+        for (CompetitorWithBoatDTO competitor : leaderboard.competitors) {
             ListBox listbox = createListBoxWithGridUpdateChangeHandler(allOfficialSailIDs, /* selection */
                     defaultOfficialSailIDsForCompetitors.get(competitor));
             officialSailIDChoosers.put(competitor, listbox);
@@ -177,24 +177,24 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     }
 
     /**
-     * Maps the sail IDs contained in <code>result</code> to the {@link CompetitorDTO}s contained in <code>leaderboard</code>.
-     * The match making ignores all whitespaces in the sail IDs on both sides. If the {@link CompetitorDTO#sailID} does not start
-     * with a letter it is assumed the country code is missing. In this case, the {@link CompetitorDTO#threeLetterIocCountryCode} is
+     * Maps the sail IDs contained in <code>result</code> to the {@link CompetitorWithBoatDTO}s contained in <code>leaderboard</code>.
+     * The match making ignores all whitespaces in the sail IDs on both sides. If the {@link CompetitorWithBoatDTO#sailID} does not start
+     * with a letter it is assumed the country code is missing. In this case, the {@link CompetitorWithBoatDTO#threeLetterIocCountryCode} is
      * prepended before comparing to <code>result</code>'s sail IDs. The sail ID number is extracted by trimming and using all
      * trailing digits.
      * 
-     * @return a map mapping the sailIDs as found in <code>result</code> to the {@link CompetitorDTO}s used in <code>leaderboard</code>;
+     * @return a map mapping the sailIDs as found in <code>result</code> to the {@link CompetitorWithBoatDTO}s used in <code>leaderboard</code>;
      * values may be <code>null</code> if no competitor was found for the sail ID in the leaderboard
      */
     private void mapCompetitorsAndInitializeAllOfficialRaceIDs(LeaderboardDTO leaderboard,
             RegattaScoreCorrectionDTO regattaScoreCorrection) {
-        Map<String, CompetitorDTO> canonicalizedLeaderboardSailIDToCompetitors = canonicalizeLeaderboardSailIDs(leaderboard);
+        Map<String, CompetitorWithBoatDTO> canonicalizedLeaderboardSailIDToCompetitors = canonicalizeLeaderboardSailIDs(leaderboard);
         List<String> allOfficialSailIDsAsSortableList = new ArrayList<String>();
         for (Map<String, ScoreCorrectionEntryDTO> scoreCorrectionsBySailID : regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber().values()) {
             for (String officialSailID : scoreCorrectionsBySailID.keySet()) {
                 allOfficialSailIDsAsSortableList.add(officialSailID);
                 String canonicalizedResultSailID = canonicalizeSailID(officialSailID, /* defaultNationality */ null);
-                CompetitorDTO competitor = canonicalizedLeaderboardSailIDToCompetitors.get(canonicalizedResultSailID);
+                CompetitorWithBoatDTO competitor = canonicalizedLeaderboardSailIDToCompetitors.get(canonicalizedResultSailID);
                 defaultOfficialSailIDsForCompetitors.put(competitor, officialSailID);
             }
         }
@@ -228,9 +228,9 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
         return result;
     }
 
-    private Map<String, CompetitorDTO> canonicalizeLeaderboardSailIDs(LeaderboardDTO leaderboard) {
-        Map<String, CompetitorDTO> result = new HashMap<String, CompetitorDTO>();
-        for (CompetitorDTO competitor : leaderboard.competitors) {
+    private Map<String, CompetitorWithBoatDTO> canonicalizeLeaderboardSailIDs(LeaderboardDTO leaderboard) {
+        Map<String, CompetitorWithBoatDTO> result = new HashMap<String, CompetitorWithBoatDTO>();
+        for (CompetitorWithBoatDTO competitor : leaderboard.competitors) {
             String canonicalizedSailID = canonicalizeSailID(competitor.getSailID().trim(), competitor.getThreeLetterIocCountryCode().trim());
             if (canonicalizedSailID != null) {
                 result.put(canonicalizedSailID, competitor);
@@ -242,9 +242,9 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     @Override
     protected BulkScoreCorrectionDTO getResult() {
         BulkScoreCorrectionDTO result = new BulkScoreCorrectionDTO(leaderboard.name);
-        for (CompetitorDTO competitor : leaderboard.competitors) {
+        for (CompetitorWithBoatDTO competitor : leaderboard.competitors) {
             for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-                Util.Pair<CompetitorDTO, RaceColumnDTO> key = new Util.Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn);
+                Util.Pair<CompetitorWithBoatDTO, RaceColumnDTO> key = new Util.Pair<CompetitorWithBoatDTO, RaceColumnDTO>(competitor, raceColumn);
                 CheckBox cellCheckbox = cellCheckboxes.get(key);
                 if (cellCheckbox.getValue()) {
                     // apply the score correction of the cell:
@@ -295,7 +295,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
             c++;
         }
         int row=1;
-        for (CompetitorDTO competitor : leaderboard.competitors) {
+        for (CompetitorWithBoatDTO competitor : leaderboard.competitors) {
             String officialSailID = getSelectedString(officialSailIDChoosers, competitor);
             int column = 0;
             VerticalPanel vp = new VerticalPanel();
@@ -357,7 +357,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                     }
                     cell.add(new HTML(sb.toSafeHtml()));
                 }
-                cell.add(cellCheckboxes.get(new Util.Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)));
+                cell.add(cellCheckboxes.get(new Util.Pair<CompetitorWithBoatDTO, RaceColumnDTO>(competitor, raceColumn)));
                 grid.setWidget(row, column++, cell);
             }
             row++;
