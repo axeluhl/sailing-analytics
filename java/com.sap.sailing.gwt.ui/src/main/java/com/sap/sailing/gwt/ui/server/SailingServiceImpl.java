@@ -2793,7 +2793,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         // TODO: delete getSwissTimingAdapter().getSwissTimingRaceRecords() method
         // TODO: delete SwissTimingDomainFactory.getRaceTypeFromRaceID(String raceID)
         URL url = new URL(eventJsonURL);
-        URLConnection eventResultConn = url.openConnection();
+        URLConnection eventResultConn = HttpUrlConnectionHelper.redirectConnection(url);
         Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
         EventResultDescriptor eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
         if (eventResult != null) {
