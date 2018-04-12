@@ -14,8 +14,8 @@ import com.sap.sailing.gwt.autoplay.client.app.AnimationPanel;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
-import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
@@ -97,7 +97,7 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
         final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
                 /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, /* raceDetailsToShow */ null,
                 /* overallDetailsToShow */ null, /* delayBetweenAutoAdvancesInMilliseconds */ null,
-                /* showAddedScores */ false, /* showCompetitorShortNameColumn */ false,
+                /* showAddedScores */ false, /* showCompetitorShortNameColumn */ true,
                 /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ false,
                 /* showCompetitorBoatInfoColumn */ false, /* showRaceRankColumn */ false);
 
