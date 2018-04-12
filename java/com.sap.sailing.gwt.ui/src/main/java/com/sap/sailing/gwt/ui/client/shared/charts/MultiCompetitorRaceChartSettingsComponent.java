@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -105,7 +104,6 @@ public class MultiCompetitorRaceChartSettingsComponent extends
         if (com.sap.sse.common.Util.equalsWithNull(newFirstDetailType, newSecondDetailType)) {
             newSecondDetailType = null;
         }
-        Window.alert("blabla " + newFirstDetailType + "---" + newSecondDetailType);
         return new MultiCompetitorRaceChartSettings(getAbstractResult(), newFirstDetailType, newSecondDetailType);
     }
 

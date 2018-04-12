@@ -236,8 +236,8 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
@@ -3022,10 +3022,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 Bearing twa = trackedRace.getTWA(competitor, timePoint, cache);
                 result = twa == null? null:twa.getDegrees();
                 break;
+            case BRAVO_RACE_HEEL_IN_DEGREES:
             case BRAVO_LEG_CURRENT_HEEL_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getHeel, trackedRace, competitor, timePoint);
                 break;
             }
+            case BRAVO_RACE_PITCH_IN_DEGREES:
             case BRAVO_LEG_CURRENT_PITCH_IN_DEGREES: {
                 result = getBravoBearingInDegrees(BravoFixTrack::getPitch, trackedRace, competitor, timePoint);
                 break;
