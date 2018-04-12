@@ -185,7 +185,9 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 color = new InvalidColor(iae);
             }
         }
-        CompetitorDTO result = new CompetitorDTOImpl(name.getText(), shortName.getText(), color, email.getText(),
+        CompetitorDTO result = new CompetitorDTOImpl(name.getText(),
+                shortName.getText().trim().isEmpty() ? null : shortName.getText(), color,
+                email.getText().trim().isEmpty() ? null : email.getText(),
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
                 /* countryName */ null, competitorToEdit.getIdAsString(),

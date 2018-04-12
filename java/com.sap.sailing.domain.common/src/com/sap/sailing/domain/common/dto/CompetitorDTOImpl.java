@@ -63,7 +63,7 @@ public class CompetitorDTOImpl extends CompetitorWithoutBoatDTOImpl implements C
     @Override
     public String getShortInfo() {
         String result = null;
-        if (getShortName() != null) {
+        if (getShortName() != null && !getShortName().trim().isEmpty()) {
             result = getShortName(); 
         } else if (getBoat() != null) {
             result = getBoat().getSailId() != null ? getBoat().getSailId() : getBoat().getName();
