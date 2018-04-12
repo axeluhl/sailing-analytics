@@ -8,7 +8,7 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel.LeaderBoardStyle;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
@@ -48,7 +48,7 @@ public class ClassicLeaderboardStyle implements LeaderBoardStyle {
     }
 
     @Override
-    public void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb, CompetitorDTO competitor) {
+    public void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb, CompetitorWithBoatDTO competitor) {
         sb.append(TEMPLATE.imageWithTitle(flagImageURL,RENDERED_FLAG_WIDTH,RENDERED_FLAG_HEIGHT,competitor.getName()));
     }
 

@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
@@ -107,7 +107,7 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
                 raceColumn = column;
             }
         }
-        List<CompetitorDTO> sortedCompetitors = leaderboardPanel.getLeaderboard()
+        List<CompetitorWithBoatDTO> sortedCompetitors = leaderboardPanel.getLeaderboard()
                 .getCompetitorsFromBestToWorst(raceColumn);
 
         if (sortedCompetitors.size() >= 3) {

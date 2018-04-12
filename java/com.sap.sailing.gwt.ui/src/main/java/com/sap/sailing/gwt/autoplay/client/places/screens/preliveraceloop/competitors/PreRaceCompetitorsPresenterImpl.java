@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 
@@ -30,7 +30,7 @@ public class PreRaceCompetitorsPresenterImpl extends AutoPlayPresenterConfigured
     @Override
     public void startConfigured(AcceptsOneWidget panel) {
         view.startingWith(this, panel);
-        List<CompetitorDTO> data = null;
+        List<CompetitorWithBoatDTO> data = null;
         view.setCompetitors(data);
         selectionScroll.scheduleRepeating(DELAY_NEXT);
     }

@@ -5,7 +5,7 @@ import java.util.Set;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -25,7 +25,7 @@ public class CompetitorInvitationHelper {
         this.errorReporter = errorReporter;
     }
 
-    public void inviteCompetitors(Set<CompetitorDTO> competitors, String leaderboardName) {
+    public void inviteCompetitors(Set<CompetitorWithBoatDTO> competitors, String leaderboardName) {
         if (competitors.size() == 0){
             Window.alert(stringMessages.selectAtLeastOneCompetitorForInvitation());
         } else {
@@ -39,8 +39,8 @@ public class CompetitorInvitationHelper {
         }
     }
     
-    private boolean isEmailProvidedForAll(Iterable<CompetitorDTO> allCompetitors) {
-        for (CompetitorDTO competitor : allCompetitors) {
+    private boolean isEmailProvidedForAll(Iterable<CompetitorWithBoatDTO> allCompetitors) {
+        for (CompetitorWithBoatDTO competitor : allCompetitors) {
             if (!competitor.hasEmail()) {
                 return false;
             }
@@ -49,7 +49,7 @@ public class CompetitorInvitationHelper {
         return true;
     }
     
-    private void openChooseEventDialogAndSendMails(final Set<CompetitorDTO> competitors, final String leaderboardName) {
+    private void openChooseEventDialogAndSendMails(final Set<CompetitorWithBoatDTO> competitors, final String leaderboardName) {
         new SelectEventAndHostnameDialog(sailingService, stringMessages, errorReporter, leaderboardName, new DialogCallback<Pair<EventDTO, String>>() {
 
             @Override
