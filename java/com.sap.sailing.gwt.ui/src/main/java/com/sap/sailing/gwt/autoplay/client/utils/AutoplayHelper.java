@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.autoplay.client.utils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
@@ -285,6 +286,9 @@ public class AutoplayHelper {
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace, result);
         RaceCompetitorSelectionModel competitorSelectionProvider = new RaceCompetitorSelectionModel(
                 /* hasMultiSelection */ true, colorProvider, result);
+        for (Entry<CompetitorDTO, BoatDTO> entry : result.entrySet()) {
+            competitorSelectionProvider.setBoat(entry.getKey(), entry.getValue());
+        }
         competitorSelectionProvider.setCompetitors(competitors);
         RaceMap raceboardPerspective = new RaceMap(null, null, raceMapLifecycle, settings, sailingService,
                 asyncActionsExecutor, errorReporter, raceboardTimer, competitorSelectionProvider,
