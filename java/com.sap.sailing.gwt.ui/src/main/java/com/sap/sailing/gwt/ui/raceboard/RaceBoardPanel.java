@@ -216,7 +216,7 @@ public class RaceBoardPanel
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
 
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
-        competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
+        competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider, competitorsAndTheirBoats);
                 
         raceMapResources.raceMapStyle().ensureInjected();
         RaceMapLifecycle raceMapLifecycle = lifecycle.getRaceMapLifecycle();

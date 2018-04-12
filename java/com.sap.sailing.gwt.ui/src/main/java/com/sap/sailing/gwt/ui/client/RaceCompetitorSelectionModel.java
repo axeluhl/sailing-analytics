@@ -9,14 +9,17 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sse.common.Color;
 
 public class RaceCompetitorSelectionModel extends CompetitorSelectionModel implements RaceCompetitorSelectionProvider {
-    private final Map<CompetitorDTO, BoatDTO> boatsOfCompetitors = new HashMap<>();
+    private final Map<CompetitorDTO, BoatDTO> boatsOfCompetitors;
     
     public RaceCompetitorSelectionModel(boolean hasMultiSelection) {
         super(hasMultiSelection);
+        boatsOfCompetitors = new HashMap<>();
     }
 
-    public RaceCompetitorSelectionModel(boolean hasMultiSelection, CompetitorColorProvider competitorColorProvider) {
+    public RaceCompetitorSelectionModel(boolean hasMultiSelection, CompetitorColorProvider competitorColorProvider, Map<CompetitorDTO, BoatDTO> boatsOfCompetitors) {
         super(hasMultiSelection, competitorColorProvider);
+        this.boatsOfCompetitors = boatsOfCompetitors;
+        addAll(boatsOfCompetitors.keySet());
     }
 
     @Override

@@ -142,11 +142,11 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
         }
         SailingServiceAsync sailingService = getClientFactory().getSailingService();
         ErrorReporter errorReporter = getClientFactory().getErrorReporter();
-        RegattaAndRaceIdentifier lifeRace = getSlideCtx().getLiveRace();
+        RegattaAndRaceIdentifier liveRace = getSlideCtx().getLiveRace();
         ArrayList<String> racesToShow = null;
-        if (lifeRace != null) {
+        if (liveRace != null) {
             racesToShow = new ArrayList<>();
-            racesToShow.add(lifeRace.getRaceName());
+            racesToShow.add(liveRace.getRaceName());
         } else {
             view.showErrorNoLive(this, panel, new IllegalStateException("No race is live"));
             return;
@@ -154,21 +154,20 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
         final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
                 /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, /* raceDetailsToShow */ null,
                 /* overallDetailsToShow */ null, /* delayBetweenAutoAdvancesInMilliseconds */ null,
-                /* showAddedScores */ false, /* showCompetitorShortNameColumn */ false,
+                /* showAddedScores */ false, /* showCompetitorShortNameColumn */ true,
                 /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ false,
                 /* showCompetitorBoatInfoColumn */ false, /* showRaceRankColumn */ true);
         timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
-        leaderboardPanel = new SingleRaceLeaderboardPanel(null,null,sailingService, new AsyncActionsExecutor(), leaderboardSettings,
-                true, lifeRace, getPlace().getRaceMapSelectionProvider(), timer, null,
+        leaderboardPanel = new SingleRaceLeaderboardPanel(null, null, sailingService, new AsyncActionsExecutor(),
+                leaderboardSettings, true, liveRace, getPlace().getRaceMapSelectionProvider(), timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(true),
                 FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
-        
-        getPlace().getRaceMap().setQuickRanksDTOProvider(new QuickRanksDTOFromLeaderboardDTOProvider(new RaceCompetitorSet(getPlace().getRaceMapSelectionProvider()), lifeRace));
-        
+        getPlace().getRaceMap().setQuickRanksDTOProvider(new QuickRanksDTOFromLeaderboardDTOProvider(
+                new RaceCompetitorSet(getPlace().getRaceMapSelectionProvider()), liveRace));
         view.startingWith(this, panel, getPlace().getRaceMap(), leaderboardPanel);
         selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
     }

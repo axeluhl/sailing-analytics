@@ -42,8 +42,6 @@ import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.RaceListener;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -94,20 +92,6 @@ public class StatisticsTest {
     private TrackedRaceStatisticsCacheImpl getStatisticsCacheWithRegattaAdded() throws Exception {
         TrackedRaceStatisticsCacheImpl trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
         trackedRaceStatisticsCache.regattaAdded(regatta);
-        
-        // The following lines ensure that we received all necessary events from the TrackedRegatta
-        // When removing a listener we get a Future whose get method will block until all previously triggered events are processed.
-        RaceListener raceListener = new RaceListener() {
-            @Override
-            public void raceRemoved(TrackedRace trackedRace) {
-            }
-            @Override
-            public void raceAdded(TrackedRace trackedRace) {
-            }
-        };
-        regatta.addRaceListener(raceListener, Optional.empty());
-        regatta.removeRaceListener(raceListener).get();
-        
         return trackedRaceStatisticsCache;
     }
 

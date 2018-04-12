@@ -1417,7 +1417,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, getBaseDomainFactory()
                     .getOrCreateBoatClass(boatClassName), /* canBoatsOfCompetitorsChangePerRace*/ false, 
                     /* startDate */null, /* endDate */null, this,
-                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), id, null);
+                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), id, /* course area */ null);
             logger.info("Created default regatta " + result.getName() + " (" + hashCode() + ") on " + this);
             onRegattaLikeAdded(result);
             cacheAndReplicateDefaultRegatta(result);

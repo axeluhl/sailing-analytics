@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.autoplay.client.utils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
@@ -197,16 +198,14 @@ public class AutoplayHelper {
                     public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
                             long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest,
                             long clientTimeWhenResponseWasReceived) {
-
                         // keep the creationTime updated upon liveChanges!
                         creationTimer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest,
                                 clientTimeWhenResponseWasReceived);
                         creationTimer
                                 .setLivePlayDelayInMillis(raceTimesInfo.get(regattaAndRaceIdentifier).delayToLiveInMs);
                         creationTimer.play();
-
                         if (regattaAndRaceIdentifier != null) {
-                            if(!mapAlreadyCreated){
+                            if (!mapAlreadyCreated) {
                                 mapAlreadyCreated = true;
                                 sailingService.getCompetitorBoats(regattaAndRaceIdentifier,
                                         new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
@@ -280,16 +279,16 @@ public class AutoplayHelper {
         typesToConsiderOnZoom.add(ZoomTypes.BUOYS);
         typesToConsiderOnZoom.add(ZoomTypes.BOATS);
         RaceMapZoomSettings autoFollowRace = new RaceMapZoomSettings(typesToConsiderOnZoom, true);
-
         RaceMapSettings settings = new RaceMapSettings(autoFollowRace, new RaceMapHelpLinesSettings(), false, 15,
                 100000l, false, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS, false, true, false, false, false, false,
                 RaceMapSettings.getDefaultManeuvers(), false, false);
-
         RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE);
-
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace, result);
         RaceCompetitorSelectionModel competitorSelectionProvider = new RaceCompetitorSelectionModel(
-                /* hasMultiSelection */ true, colorProvider);
+                /* hasMultiSelection */ true, colorProvider, result);
+        for (Entry<CompetitorDTO, BoatDTO> entry : result.entrySet()) {
+            competitorSelectionProvider.setBoat(entry.getKey(), entry.getValue());
+        }
         competitorSelectionProvider.setCompetitors(competitors);
         RaceMap raceboardPerspective = new RaceMap(null, null, raceMapLifecycle, settings, sailingService,
                 asyncActionsExecutor, errorReporter, raceboardTimer, competitorSelectionProvider,
