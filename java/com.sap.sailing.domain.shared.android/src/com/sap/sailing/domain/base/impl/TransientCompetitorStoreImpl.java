@@ -725,7 +725,6 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             boatDTO = convertToBoatDTO(boat); 
         }
         CompetitorDTO competitorDTO = new CompetitorDTOImpl(c, boatDTO);
-
         return competitorDTO;
     }
 
