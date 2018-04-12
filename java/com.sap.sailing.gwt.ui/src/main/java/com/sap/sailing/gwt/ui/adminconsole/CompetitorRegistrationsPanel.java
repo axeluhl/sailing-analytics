@@ -322,7 +322,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
     }
     
-    public Set<CompetitorDTO> getSelectedRegisteredCompetitors() {
+    public Set<CompetitorWithBoatDTO> getSelectedRegisteredCompetitors() {
         return registeredCompetitorsTable.getSelectionModel().getSelectedSet();
     }
 }

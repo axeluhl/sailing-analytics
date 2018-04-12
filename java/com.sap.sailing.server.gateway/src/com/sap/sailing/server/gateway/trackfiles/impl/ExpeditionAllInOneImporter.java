@@ -97,14 +97,13 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * <li>{@link ImportMode#NEW_RACE} requires a regatta name to be given. In this case the a new {@link RaceColumn} is
  * created in the last existing {@link Series}. A new {@link WindSource} is added to the {@link TrackedRace} associated
  * with the newly added {@link RaceColumn}. This mode does not support importing in cases where fleet racing is used by
- * a regatta.</li>
+ * a {@link Regatta}.</li>
  * </ul>
  * The imported {@link GPSFixMoving} and {@link BravoExtendedFix} tracks aren't mapped to a {@link Competitor} by the
  * importer. Instead the IDs of the imported tracks are contained in the result and are expected to be mapped by the
  * user afterwards.
  * 
  * This importer is intended to be used by {@link ExpeditionAllInOneImportServlet}.
- *
  */
 public class ExpeditionAllInOneImporter {
     private static final String ERROR_MESSAGE_INVALID_REGATTA_NAME = "Please enter a valid regatta name to proceed";
@@ -438,7 +437,6 @@ public class ExpeditionAllInOneImporter {
         final TimePoint endOfTracking = lastFixAt;
         raceLog.add(new RaceLogStartOfTrackingEventImpl(startOfTracking, author, raceLog.getCurrentPassId()));
         raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTracking, author, raceLog.getCurrentPassId()));
-        // TODO explicitly set startOfRace?
 
         try {
             TimePoint startTrackingTimePoint = MillisecondsTimePoint.now();

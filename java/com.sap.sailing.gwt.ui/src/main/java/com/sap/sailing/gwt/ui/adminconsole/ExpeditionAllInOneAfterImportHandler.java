@@ -121,7 +121,7 @@ public class ExpeditionAllInOneAfterImportHandler {
         }
     }
     
-    private static class ValidatorForCompetitorRegistrationDialog implements Validator<Set<CompetitorDTO>> {
+    private static class ValidatorForCompetitorRegistrationDialog implements Validator<Set<CompetitorWithBoatDTO>> {
         private CompetitorRegistrationsPanel competitorRegistrationsPanel;
         private StringMessages stringMessages;
         public ValidatorForCompetitorRegistrationDialog(StringMessages stringMessages) {
@@ -139,11 +139,11 @@ public class ExpeditionAllInOneAfterImportHandler {
         }
     }
     
-    private class CallbackForCompetitorRegistrationDialog extends CancelImportDialogCallback<Set<CompetitorDTO>> {
+    private class CallbackForCompetitorRegistrationDialog extends CancelImportDialogCallback<Set<CompetitorWithBoatDTO>> {
         private CompetitorRegistrationsPanel competitorRegistrationsPanel;
         
         @Override
-        public void ok(Set<CompetitorDTO> competitors) {
+        public void ok(Set<CompetitorWithBoatDTO> competitors) {
             if (competitors.isEmpty()) {
                 Window.alert(stringMessages.importCanceledNoCompetitorAdded());
             } else {
