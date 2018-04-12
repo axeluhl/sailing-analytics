@@ -1,7 +1,15 @@
 package com.sap.sse.datamining.ui;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 
+
+/**
+ * Defines the text strings for i18n that are used by the Datamining GWT bundle. 
+ * 
+ * @author Maximilian Groﬂ (D064866)
+ */
+@DefaultLocale("en")
 public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
 
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
@@ -18,7 +26,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String useStringLiterals();
     String useStringLiteralsTooltip();
     String copyToClipboard();
-    String details();
     String code();
     String queryDefinitionViewer();
     String runAsSubstantive();
@@ -28,13 +35,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String integer();
     String runAQuery();
     String runningQuery();
-    String noDataFound();
-    String numberOfDataPoints();
-    String boatSpeed();
-    String knotsUnit();
-    String windSpeed();
-    String TWA();
-    String degreesShort();
     String choosePresentation();
     String plainText();
     String groupName();
@@ -52,11 +52,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String resultsChart();
     String cantDisplayDataOfType(String resultType);
     String sortBy();
-    String results();
     String developerOptions();
     String runAutomatically();
     String runAutomaticallyTooltip();
-    String filterBy();
     String currentFilterSelection();
     String plainResultsPresenter();
     String multiResultsPresenter();
@@ -65,7 +63,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String errorFetchingComponentsChangedTimepoint(String message);
     String dataMiningComponentsHaveBeenUpdated();
     String dataMiningComponentsNeedReloadDialogMessage();
-    String reload();
     String noDimensionToGroupBySelectedError();
     String noDataRetrieverChainDefinitonSelectedError();
     String noStatisticSelectedError();
@@ -79,23 +76,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String chooseDifferentDimensionMessage();
     String pleaseSelectADimension();
     String queryDefinitionProvider();
-    String analyze();
     String dataMiningRetrieval();
-    String error();
     String tabbedResultsPresenter();
-    String empty();
     String angleInDegree();
     String angleInRadian();
     String centralAngleInRadian();
-    String centralAngleInDegree();
-    String kilometers();
-    String meters();
-    String nauticalMiles();
-    String seaMiles();
-    String geographicalMiles();
-    String days();
-    String hours();
-    String minutes();
-    String seconds();
-    String milliseconds();
+    String centralAngleInDegree();    
 }

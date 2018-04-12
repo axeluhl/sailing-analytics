@@ -33,4 +33,24 @@ public interface StringMessages extends Messages {
     String resetToDefaultInProgress();
     String settingsRemoved();
     String settingsRemovedError();
+    
+    String details();
+    String filterBy();
+    String noDataFound();
+    String results();
+    String analyze();
+    String reload();
+    String empty();
+    String error();
+
+    String kilometers();
+    String meters();
+    String nauticalMiles();
+    String seaMiles();
+    String geographicalMiles();
+    String days();
+    String hours();
+    String minutes();
+    String seconds();
+    String milliseconds();
 }
