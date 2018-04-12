@@ -38,7 +38,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
@@ -395,7 +395,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
     private void updateManeuverTableData() {
         final ArrayList<ManeuverTableData> data = new ArrayList<>();
-        for (final Entry<CompetitorDTO, CompetitorManeuverData> entry : competitorManeuverDataCache.getCachedData()) {
+        for (final Entry<CompetitorWithBoatDTO, CompetitorManeuverData> entry : competitorManeuverDataCache.getCachedData()) {
             for (ManeuverDTO maneuver : entry.getValue().getManeuvers()) {
                 if (settings.getSelectedManeuverTypes().contains(maneuver.type)) {
                     data.add(new ManeuverTableData(entry.getKey(), maneuver));
@@ -427,14 +427,14 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     }
 
     @Override
-    public void addedToSelection(CompetitorDTO competitor) {
+    public void addedToSelection(CompetitorWithBoatDTO competitor) {
         if (isVisible()) {
             this.competitorManeuverDataCache.update(competitor);
         }
     }
 
     @Override
-    public void removedFromSelection(CompetitorDTO competitor) {
+    public void removedFromSelection(CompetitorWithBoatDTO competitor) {
         if (isVisible()) {
             this.competitorManeuverDataCache.reset(competitor);
             this.rerender();
@@ -462,16 +462,16 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     }
 
     @Override
-    public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
-            FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
+    public void filterChanged(FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> oldFilterSet,
+            FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> newFilterSet) {
     }
 
     @Override
-    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+    public void competitorsListChanged(Iterable<CompetitorWithBoatDTO> competitors) {
     }
 
     @Override
-    public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
+    public void filteredCompetitorsListChanged(Iterable<CompetitorWithBoatDTO> filteredCompetitors) {
     }
 
     @Override
@@ -520,18 +520,18 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     }
 
     private final class CompetitorManeuverDataCache {
-        private final Map<CompetitorDTO, CompetitorManeuverData> cache = new HashMap<>();
+        private final Map<CompetitorWithBoatDTO, CompetitorManeuverData> cache = new HashMap<>();
 
-        private void updateAll(final Iterable<CompetitorDTO> competitors, final Date newTime) {
+        private void updateAll(final Iterable<CompetitorWithBoatDTO> competitors, final Date newTime) {
             this.loadData(competitors, c -> getData(c).requiresUpdate(newTime), true);
         }
 
-        private void updateAll(final Iterable<CompetitorDTO> competitors) {
+        private void updateAll(final Iterable<CompetitorWithBoatDTO> competitors) {
             final TimeRange timeRange = getFullTimeRange();
             this.loadData(competitors, c -> Optional.of(timeRange), false);
         }
 
-        private void update(final CompetitorDTO competitor) {
+        private void update(final CompetitorWithBoatDTO competitor) {
             final TimeRange timeRange = getFullTimeRange();
             this.loadData(Collections.singleton(competitor), c -> Optional.of(timeRange), false);
         }
@@ -540,7 +540,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             this.cache.clear();
         }
 
-        private void reset(final CompetitorDTO competitor) {
+        private void reset(final CompetitorWithBoatDTO competitor) {
             this.cache.remove(competitor);
         }
 
@@ -548,25 +548,24 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             return this.cache.isEmpty();
         }
 
-        private CompetitorManeuverData getData(final CompetitorDTO competitor) {
+        private CompetitorManeuverData getData(final CompetitorWithBoatDTO competitor) {
             return this.cache.computeIfAbsent(competitor, c -> new CompetitorManeuverData());
         }
 
-        private void loadData(final Iterable<CompetitorDTO> competitors,
-                final Function<CompetitorDTO, Optional<TimeRange>> timeRangeProvider, boolean incremental) {
+        private void loadData(final Iterable<CompetitorWithBoatDTO> competitors,
+                final Function<CompetitorWithBoatDTO, Optional<TimeRange>> timeRangeProvider, boolean incremental) {
             if (!Util.isEmpty(competitors)) {
-                final Map<CompetitorDTO, TimeRange> competitorToTimeRange = new HashMap<>();
+                final Map<CompetitorWithBoatDTO, TimeRange> competitorToTimeRange = new HashMap<>();
                 competitors.forEach(c -> timeRangeProvider.apply(c).ifPresent(tr -> competitorToTimeRange.put(c, tr)));
                 if (!competitorToTimeRange.isEmpty()) {
                     sailingService.getManeuvers(raceIdentifier, competitorToTimeRange,
-                            new AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>>() {
-
+                            new AsyncCallback<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>>() {
                                 @Override
-                                public void onSuccess(Map<CompetitorDTO, List<ManeuverDTO>> result) {
+                                public void onSuccess(Map<CompetitorWithBoatDTO, List<ManeuverDTO>> result) {
                                     if (isVisible()) {
-                                        final Set<CompetitorDTO> competitorsToRefresh = new HashSet<>();
-                                        for (final Entry<CompetitorDTO, List<ManeuverDTO>> entry : result.entrySet()) {
-                                            final CompetitorDTO competitor = entry.getKey();
+                                        final Set<CompetitorWithBoatDTO> competitorsToRefresh = new HashSet<>();
+                                        for (final Entry<CompetitorWithBoatDTO, List<ManeuverDTO>> entry : result.entrySet()) {
+                                            final CompetitorWithBoatDTO competitor = entry.getKey();
                                             if (!incremental) {
                                                 reset(competitor);
                                             }
@@ -597,7 +596,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             }
         }
 
-        private Set<Entry<CompetitorDTO, CompetitorManeuverData>> getCachedData() {
+        private Set<Entry<CompetitorWithBoatDTO, CompetitorManeuverData>> getCachedData() {
             return this.cache.entrySet();
         }
 

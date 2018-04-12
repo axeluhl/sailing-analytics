@@ -2293,6 +2293,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 final TimePoint to = new MillisecondsTimePoint(getBoatFix(competitorDTO, timer.getTime()).timepoint);
                 timeRange.put(competitorDTO, new TimeRangeImpl(from, to, true));
                 sailingService.getDouglasPoints(race, timeRange, 3,
+                        new AsyncCallback<Map<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError("Error obtaining douglas positions: " + caught.getMessage(), true /*silentMode */);
