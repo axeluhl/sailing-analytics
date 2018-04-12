@@ -89,17 +89,12 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         AutoPlayConfiguration autoPlayConfiguration = page.getAutoPlayConfiguration();
         assertNotNull(autoPlayConfiguration);
         autoPlayConfiguration.select("Sixty Inch Autoplay", BMW_CUP_EVENT, BMW_CUP_REGATTA);
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        }
         String url = autoPlayConfiguration.getConfiguredUrl();
-        // eventid and server might change slightly, better only check arguments
+        // eventid and server change, better only check arguments
         assertTrue("Url does not contain proper type " + url, url.contains("autoplayType=SIXTYINCH"));
         assertTrue("Url does not contain proper name " + url, url.contains("name=BMW+Cup+(J80)"));
-        // give some extra time to load settings and create url
         AutoPlayUpcomingView autoplayPage = page.goToAutoPlaySixtyInchUrl(getWebDriver(), url);
+        // give some extra time to load the leaderboard and finish the animation
         try {
             Thread.sleep(15000);
         } catch (InterruptedException e1) {
@@ -107,7 +102,6 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         }
         String nextUpText = autoplayPage.getText();
         assertEquals("There are currently no further planned races", nextUpText);
-        // give some extra time to load the leaderboard and finish the animation
     }
 
     @Test
@@ -124,14 +118,8 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         AutoPlayConfiguration autoPlayConfiguration = page.getAutoPlayConfiguration();
         assertNotNull(autoPlayConfiguration);
         autoPlayConfiguration.select("Classic Autoplay", BMW_CUP_EVENT, BMW_CUP_REGATTA);
-        // give some extra time to load settings and create url
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        }
         String url = autoPlayConfiguration.getConfiguredUrl();
-        // eventid and server might change slightly, better only check arguments
+        // eventid and server change, better only check arguments
         assertTrue("Url does not contain proper title " + url, url.contains("lbwh.saph.title=Leaderboard%3A+BMW+Cup+(J80)"));
         assertTrue("Url does not contain proper name " + url, url.contains("name=BMW+Cup+(J80)"));
         AutoPlayLeaderboardView autoplayPage = page.goToAutoPlayClassicUrl(getWebDriver(), url);
