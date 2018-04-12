@@ -4,9 +4,9 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -31,7 +31,7 @@ public abstract class AbstractCompetitorWithBoatDialog extends CompetitorEditDia
         }
         
         @Override
-        public String getErrorMessage(CompetitorDTO competitorToValidate) {
+        public String getErrorMessage(CompetitorWithBoatDTO competitorToValidate) {
             String result = super.getErrorMessage(competitorToValidate);
             if (result == null) {
                 BoatDTO boatToValidate = competitorToValidate.getBoat();
@@ -58,8 +58,8 @@ public abstract class AbstractCompetitorWithBoatDialog extends CompetitorEditDia
      *            The boat class is the default shown boat class for new boats. Set <code>null</code> if your boat is
      *            already initialized or you don't want a default boat class.
      */
-    public AbstractCompetitorWithBoatDialog(String dialogTitle, StringMessages stringMessages, CompetitorDTO competitorToEdit,
-            DialogCallback<CompetitorDTO> callback, String boatClass) {
+    public AbstractCompetitorWithBoatDialog(String dialogTitle, StringMessages stringMessages, CompetitorWithBoatDTO competitorToEdit,
+            DialogCallback<CompetitorWithBoatDTO> callback, String boatClass) {
         super(dialogTitle, stringMessages, competitorToEdit, new AbstractCompetitorWithBoatDialog.CompetitorWithBoatValidator(stringMessages), callback);
                 
         final BoatDTO boatToEdit = competitorToEdit.getBoat();
@@ -86,10 +86,10 @@ public abstract class AbstractCompetitorWithBoatDialog extends CompetitorEditDia
     protected abstract BoatDTO getBoat();
 
     @Override
-    protected CompetitorDTO getResult() {
-        CompetitorWithoutBoatDTO c = super.getResult();
+    protected CompetitorWithBoatDTO getResult() {
+        CompetitorDTO c = super.getResult();
         BoatDTO boat = getBoat();
-        CompetitorDTO result = new CompetitorDTOImpl(c.getName(), c.getShortName(), c.getColor(), c.getEmail(),
+        CompetitorWithBoatDTO result = new CompetitorWithBoatDTOImpl(c.getName(), c.getShortName(), c.getColor(), c.getEmail(),
                 c.getTwoLetterIsoCountryCode(), c.getThreeLetterIocCountryCode(), c.getCountryName(),
                 getCompetitorToEdit().getIdAsString(),
                 c.getImageURL(), c.getFlagImageURL(),

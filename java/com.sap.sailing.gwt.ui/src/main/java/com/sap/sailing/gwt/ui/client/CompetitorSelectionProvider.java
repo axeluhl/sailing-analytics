@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
@@ -12,30 +12,30 @@ public interface CompetitorSelectionProvider {
      *         which elements were selected; all competitors contained in the structure returned are also in the
      *         structure returned by {@link #getAllCompetitors()} at the time of the call.
      */
-    Iterable<CompetitorDTO> getSelectedCompetitors();
+    Iterable<CompetitorWithBoatDTO> getSelectedCompetitors();
     
     /**
      * The intersection of {@link #getSelectedCompetitors()} and {@link #getFilteredCompetitors()}
      */
-    Iterable<CompetitorDTO> getSelectedFilteredCompetitors();
+    Iterable<CompetitorWithBoatDTO> getSelectedFilteredCompetitors();
     
     /**
      * @return a non-<code>null</code> sequence of all competitors which may be empty.
      */
-    Iterable<CompetitorDTO> getAllCompetitors();
+    Iterable<CompetitorWithBoatDTO> getAllCompetitors();
 
     /**
      * @return a non-<code>null</code> sequence of all competitors filtered by the applied
      * {@link #getCompetitorsFilterSet() filter set} (which may be null).
      */
-    Iterable<CompetitorDTO> getFilteredCompetitors();
+    Iterable<CompetitorWithBoatDTO> getFilteredCompetitors();
 
     /**
      * Updates the selection state of <code>competitor</code> if contained in {@link #getAllCompetitors()}. If this
      * means a change in <code>competitor</code>'s selection state, all listeners except for those in
      * <code>listenersNotToNotify</code> will be informed.
      */
-    void setSelected(CompetitorDTO competitor, boolean selected, CompetitorSelectionChangeListener... listenersNotToNotify);
+    void setSelected(CompetitorWithBoatDTO competitor, boolean selected, CompetitorSelectionChangeListener... listenersNotToNotify);
 
     /**
      * Those competitors in <code>newSelection</code> that are also in {@link #getAllCompetitors()} will be selected,
@@ -46,7 +46,7 @@ public interface CompetitorSelectionProvider {
      * @param listenersNotToNotify
      *            if provided, these listeners will not be notified about the selection changes caused by this call
      */
-    void setSelection(Iterable<CompetitorDTO> newSelection, CompetitorSelectionChangeListener... listenersNotToNotify);
+    void setSelection(Iterable<CompetitorWithBoatDTO> newSelection, CompetitorSelectionChangeListener... listenersNotToNotify);
     
     /**
      * Deselects and removes all competitors from {@link #getAllCompetitors()} which are not in <code>newCompetitor</code> and
@@ -54,23 +54,23 @@ public interface CompetitorSelectionProvider {
      * of {@link #getAllCompetitors()} are equal to <code>newCompetitors</code> except for ordering which is not guaranteed
      * to be stable.
      */
-    void setCompetitors(Iterable<CompetitorDTO> newCompetitors, CompetitorSelectionChangeListener... listenersNotToNotify);
+    void setCompetitors(Iterable<CompetitorWithBoatDTO> newCompetitors, CompetitorSelectionChangeListener... listenersNotToNotify);
     
-    boolean isSelected(CompetitorDTO competitor);
+    boolean isSelected(CompetitorWithBoatDTO competitor);
     
     boolean hasMultiSelection();
 
-    Color getColor(CompetitorDTO competitor);
+    Color getColor(CompetitorWithBoatDTO competitor);
     
     void addCompetitorSelectionChangeListener(CompetitorSelectionChangeListener listener);
 
     void removeCompetitorSelectionChangeListener(CompetitorSelectionChangeListener listener);
     
-    public FilterSet<CompetitorDTO, Filter<CompetitorDTO>> getCompetitorsFilterSet();
+    public FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> getCompetitorsFilterSet();
 
-    public void setCompetitorsFilterSet(FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet);
+    public void setCompetitorsFilterSet(FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> competitorsFilterSet);
 
-    FilterSet<CompetitorDTO, Filter<CompetitorDTO>> getOrCreateCompetitorsFilterSet(String nameToAssignToNewFilterSet);
+    FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> getOrCreateCompetitorsFilterSet(String nameToAssignToNewFilterSet);
     
     /**
      * Returns <code>true</code> if the provider has any filters that will restrain the selection.

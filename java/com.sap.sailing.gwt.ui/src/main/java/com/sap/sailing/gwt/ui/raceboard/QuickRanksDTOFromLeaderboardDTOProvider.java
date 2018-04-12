@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
@@ -71,9 +71,9 @@ public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksD
             raceColumnName = getRaceColumnName(leaderboard, selectedRace);
         }
         if (raceColumnName != null) {
-            final List<CompetitorDTO> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(raceColumnName);
+            final List<CompetitorWithBoatDTO> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(raceColumnName);
             if (competitorsFromBestToWorst.isEmpty()) {
-                for (CompetitorDTO c : leaderboard.competitors) {
+                for (CompetitorWithBoatDTO c : leaderboard.competitors) {
                     final QuickRankDTO quickRank = new QuickRankDTO(c, /* oneBasedRank */ 0, /* leg number ignored */ 0);
                     QuickRankDTO oldQuickRank = quickRanks.put(c.getIdAsString(), quickRank);
                     if (Util.equalsWithNull(oldQuickRank, quickRank)) {
@@ -82,7 +82,7 @@ public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksD
                 }
             } else {
                 int oneBasedRank = 1;
-                for (final CompetitorDTO c : competitorsFromBestToWorst) {
+                for (final CompetitorWithBoatDTO c : competitorsFromBestToWorst) {
                     if (Util.contains(raceCompetitorSet.getIdsOfCompetitorsParticipatingInRaceAsStrings(), c.getIdAsString())) {
                         final LeaderboardRowDTO row = leaderboard.rows.get(c);
                         final int oneBasedLegNumber;

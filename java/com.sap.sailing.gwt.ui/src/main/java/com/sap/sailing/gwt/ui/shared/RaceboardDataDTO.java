@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 
 public class RaceboardDataDTO implements IsSerializable {
     private RaceWithCompetitorsAndBoatsDTO race;
@@ -22,11 +22,11 @@ public class RaceboardDataDTO implements IsSerializable {
         this.isValidEvent = isValidEvent;
     }
 
-    public Map<CompetitorDTO, BoatDTO> getCompetitorAndTheirBoats() {
+    public Map<CompetitorWithBoatDTO, BoatDTO> getCompetitorAndTheirBoats() {
         return race.getCompetitorsAndBoats();
     }
 
-    public Iterable<CompetitorDTO> getCompetitors() {
+    public Iterable<CompetitorWithBoatDTO> getCompetitors() {
         return race.getCompetitors();
     }
 

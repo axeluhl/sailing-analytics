@@ -43,7 +43,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.actions.GetCompetitorsRaceDataAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
@@ -96,8 +96,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private final String leaderboardGroupName;
     private final String leaderboardName;
     private long stepSizeInMillis = DEFAULT_STEPSIZE;
-    private final Map<Pair<CompetitorDTO, DetailType>, Series> dataSeriesForDetailTypeAndCompetitor = new HashMap<>();
-    private final Map<Pair<CompetitorDTO, DetailType>, Series> markPassingSeriesByCompetitor = new HashMap<>();
+    private final Map<Pair<CompetitorWithBoatDTO, DetailType>, Series> dataSeriesForDetailTypeAndCompetitor = new HashMap<>();
+    private final Map<Pair<CompetitorWithBoatDTO, DetailType>, Series> markPassingSeriesByCompetitor = new HashMap<>();
     
     private final TimingHolder primary = new TimingHolder();
     private final TimingHolder secondary = new TimingHolder();
@@ -221,8 +221,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             if (!getChildren().contains(chart)) {
                 add(chart);
             }
-            ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
-            for (CompetitorDTO competitorDTO : getSelectedCompetitors()) {
+            ArrayList<CompetitorWithBoatDTO> competitorsToLoad = new ArrayList<CompetitorWithBoatDTO>();
+            for (CompetitorWithBoatDTO competitorDTO : getSelectedCompetitors()) {
                 competitorsToLoad.add(competitorDTO);
             }
             loadData(from, to, competitorsToLoad, append);
@@ -234,15 +234,15 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         }
     }
 
-    private void loadData(final Date from, final Date to, final List<CompetitorDTO> competitors, final boolean append) {
+    private void loadData(final Date from, final Date to, final List<CompetitorWithBoatDTO> competitors, final boolean append) {
         if (isVisible()) {
             // if no data is loaded yet, or if it is not playing and not live (append loading every second) show loading
             // indicator
             if (shouldShowLoading(primary.timeOfLatestRequestInMillis)) {
                 showLoading(stringMessages.loadingCompetitorData());
             }
-            ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
-            for (CompetitorDTO competitorDTO : competitors) {
+            ArrayList<CompetitorWithBoatDTO> competitorsToLoad = new ArrayList<CompetitorWithBoatDTO>();
+            for (CompetitorWithBoatDTO competitorDTO : competitors) {
                 competitorsToLoad.add(competitorDTO);
             }
             // If the time interval is too long and the step size too small, the number of fixes the query would have to
@@ -270,7 +270,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     private void doLoadDataForCompetitorsAndDataType(final Date from, final Date to, final boolean append,
-            ArrayList<CompetitorDTO> competitorsToLoad, final DetailType selectedDataTypeToRetrieve, final TimingHolder tholder) {
+            ArrayList<CompetitorWithBoatDTO> competitorsToLoad, final DetailType selectedDataTypeToRetrieve, final TimingHolder tholder) {
         long effectiveStepSize = getEffectiveStepSize(from, to);
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
                 selectedRaceIdentifier, competitorsToLoad, from, to, effectiveStepSize, selectedDataTypeToRetrieve,
@@ -336,10 +336,10 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     @Override
-    public void addedToSelection(CompetitorDTO competitor) {
+    public void addedToSelection(CompetitorWithBoatDTO competitor) {
         if (isVisible()) {
             showLoading(stringMessages.loadingCompetitorData());
-            ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
+            ArrayList<CompetitorWithBoatDTO> competitorsToLoad = new ArrayList<CompetitorWithBoatDTO>();
             competitorsToLoad.add(competitor);
             
             {
@@ -356,8 +356,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     @Override
-    public void removedFromSelection(CompetitorDTO competitor) {
-        for (Pair<CompetitorDTO, DetailType> coDePair : dataSeriesForDetailTypeAndCompetitor.keySet()) {
+    public void removedFromSelection(CompetitorWithBoatDTO competitor) {
+        for (Pair<CompetitorWithBoatDTO, DetailType> coDePair : dataSeriesForDetailTypeAndCompetitor.keySet()) {
             if (!coDePair.getA().equals(competitor)) {
                 continue;
             }
@@ -387,7 +387,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             boolean append, TimingHolder tholder) {
         // Make sure the busy indicator is removed at this point, or plotting the data results in an exception
         setWidget(chart);
-        for (CompetitorDTO competitor : chartData.getCompetitors()) {
+        for (CompetitorWithBoatDTO competitor : chartData.getCompetitors()) {
             Series competitorDataSeries = getOrCreateCompetitorDataSeries(retrievedDataType, competitor);
             Series markPassingSeries = getOrCreateCompetitorMarkPassingSeries(competitorDataSeries, retrievedDataType, competitor);
             CompetitorRaceDataDTO competitorData = chartData.getCompetitorData(competitor);
@@ -449,7 +449,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         chart.redraw();
     }
 
-    private Iterable<CompetitorDTO> getSelectedCompetitors() {
+    private Iterable<CompetitorWithBoatDTO> getSelectedCompetitors() {
         return competitorSelectionProvider.getSelectedCompetitors();
     }
 
@@ -462,8 +462,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      * @param competitor
      * @return A series in the chart, that can be used to show the data of a specific competitor.
      */
-    protected Series getOrCreateCompetitorDataSeries(DetailType seriesDetailType, final CompetitorDTO competitor) {
-        final Pair<CompetitorDTO, DetailType> coDePair = new Pair<CompetitorDTO, DetailType>(competitor,
+    protected Series getOrCreateCompetitorDataSeries(DetailType seriesDetailType, final CompetitorWithBoatDTO competitor) {
+        final Pair<CompetitorWithBoatDTO, DetailType> coDePair = new Pair<CompetitorWithBoatDTO, DetailType>(competitor,
                 seriesDetailType);
         final int yAxisIndex = yAxisIndex(seriesDetailType);
         Series result = this.dataSeriesForDetailTypeAndCompetitor.get(coDePair);
@@ -496,8 +496,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      * @return A series in the chart, that can be used to show the mark passings.
      */
     private Series getOrCreateCompetitorMarkPassingSeries(Series linkedCompetitorSeries, DetailType seriesDetailType,
-            CompetitorDTO competitor) {
-        final Pair<CompetitorDTO, DetailType> coDePair = new Pair<CompetitorDTO, DetailType>(competitor,
+            CompetitorWithBoatDTO competitor) {
+        final Pair<CompetitorWithBoatDTO, DetailType> coDePair = new Pair<CompetitorWithBoatDTO, DetailType>(competitor,
                 seriesDetailType);
         Series result = markPassingSeriesByCompetitor.get(coDePair);
         final int yAxisIndex = yAxisIndex(seriesDetailType);
@@ -717,7 +717,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     
     private boolean isSecondYAxis(String seriesId) {
         Series series = chart.getSeries(seriesId);
-        for (Entry<Pair<CompetitorDTO, DetailType>, Series> entry : dataSeriesForDetailTypeAndCompetitor.entrySet()) {
+        for (Entry<Pair<CompetitorWithBoatDTO, DetailType>, Series> entry : dataSeriesForDetailTypeAndCompetitor.entrySet()) {
             if (entry.getValue().equals(series)) {
                 return entry.getKey().getB().equals(selectedSecondDetailType);
             }
@@ -830,18 +830,18 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     @Override
-    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+    public void competitorsListChanged(Iterable<CompetitorWithBoatDTO> competitors) {
         timeChanged(timer.getTime(), null);
     }
     
     @Override
-    public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
+    public void filteredCompetitorsListChanged(Iterable<CompetitorWithBoatDTO> filteredCompetitors) {
         timeChanged(timer.getTime(), null);
     }
 
     @Override
-    public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
-            FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
+    public void filterChanged(FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> oldFilterSet,
+            FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> newFilterSet) {
         // nothing to do; if it changes the filtered competitor list, a separate call to filteredCompetitorsListChanged will occur
     }
     
