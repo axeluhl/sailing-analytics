@@ -513,7 +513,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             // in case boats can't change set the also the boat on the row to simplify access
             if (result.canBoatsOfCompetitorsChangePerRace == false && !row.fieldsByRaceColumnName.isEmpty()) {
                 // find a raceColumn where a boat is available
-                for (LeaderboardEntryDTO leaderboardEntry: row.fieldsByRaceColumnName.values()) {
+                for (LeaderboardEntryDTO leaderboardEntry : row.fieldsByRaceColumnName.values()) {
                     if (leaderboardEntry.boat != null) {
                         row.boat = leaderboardEntry.boat;
                         break;
