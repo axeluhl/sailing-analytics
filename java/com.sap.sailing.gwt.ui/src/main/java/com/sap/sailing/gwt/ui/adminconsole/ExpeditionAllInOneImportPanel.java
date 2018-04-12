@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.List;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -17,7 +15,6 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
@@ -26,8 +23,11 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.ExpeditionAllInOneConstants;
 import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
+import com.sap.sailing.gwt.common.client.suggestion.RegattaSuggestOracle;
 import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResponse;
 import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResultsDialog;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -38,19 +38,13 @@ import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 /**
  * The UI form to upload data for expedition all in one import.
  */
-public class ExpeditionAllInOneImportPanel extends Composite {
+public class ExpeditionAllInOneImportPanel extends Composite implements RegattasDisplayer {
     private static final String URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT = "/../../sailingserver/expedition/import";
 
-    private final MultiWordSuggestOracle regattaOracle;
+    private final RegattaSuggestOracle regattaOracle;
 
-    private final SailingServiceAsync sailingService;
-
-    private final ErrorReporter errorReporter;
-
-    public ExpeditionAllInOneImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter) {
-        this.sailingService = sailingService;
-        this.errorReporter = errorReporter;
+    public ExpeditionAllInOneImportPanel(final StringMessages stringMessages, final SailingServiceAsync sailingService,
+            final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher) {
         final FormPanel formPanel = new FormPanel();
         final BusyIndicator busyIndicator = new SimpleBusyIndicator();
         final Button uploadButton = new Button(stringMessages.upload());
@@ -108,8 +102,7 @@ public class ExpeditionAllInOneImportPanel extends Composite {
         final TextBox regattaName = new TextBox();
         regattaName.setName(ExpeditionAllInOneConstants.REQUEST_PARAMETER_REGATTA_NAME);
 
-        regattaOracle = new MultiWordSuggestOracle(". _");
-        refreshRegattaOracle();
+        regattaOracle = new RegattaSuggestOracle();
         final SuggestBox regattaSuggestBox = new SuggestBox(regattaOracle, regattaName);
         regattaNamePanel.add(regattaSuggestBox);
         regattaNamePanel.setCellVerticalAlignment(regattaSuggestBox, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -127,7 +120,6 @@ public class ExpeditionAllInOneImportPanel extends Composite {
         controlPanel.add(uploadButton);
         controlPanel.add(busyIndicator);
         contentPanel.add(controlPanel);
-
         final Runnable validation = () -> {
             final String filename = fileUpload.getFilename(), boatClass = boatClassInput.getValue();
             final String regattaNameValue = regattaSuggestBox.getValue();
@@ -137,14 +129,12 @@ public class ExpeditionAllInOneImportPanel extends Composite {
             final boolean regattaNameValid = regattaNameValue != null && !regattaNameValue.trim().isEmpty();
             uploadButton.setEnabled(fileValid && (isNewEventImport ? boatClassValid : regattaNameValid));
         };
-
         fileUpload.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 validation.run();
             }
         });
-
         formPanel.addSubmitCompleteHandler(event -> {
             validation.run();
             busyIndicator.setBusy(false);
@@ -157,12 +147,11 @@ public class ExpeditionAllInOneImportPanel extends Composite {
                         response.getRaceColumnName(), response.getFleetName(), response.getGpsDeviceIds(),
                         response.getSensorDeviceIds(), response.getSensorFixImporterType(), sailingService,
                         errorReporter, stringMessages);
-                refreshRegattaOracle();
+                regattaRefresher.fillRegattas();
             } else {
                 ExpeditionDataImportResultsDialog.showResults(response);
             }
         });
-
         regattaSuggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(SelectionEvent<Suggestion> event) {
@@ -183,30 +172,15 @@ public class ExpeditionAllInOneImportPanel extends Composite {
             }
         });
         regattaSuggestBox.addKeyUpHandler(event -> validation.run());
-
         fileUpload.addChangeHandler(event -> validation.run());
         boatClassInput.addSelectionHandler(event -> validation.run());
         boatClassInput.addKeyUpHandler(event -> validation.run());
         validation.run();
-
         initWidget(formPanel);
     }
 
-    private void refreshRegattaOracle() {
-        sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
-            @Override
-            public void onSuccess(List<RegattaDTO> result) {
-                regattaOracle.clear();
-                for (RegattaDTO regatta : result) {
-                    regattaOracle.add(regatta.getName());
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Could not load regattanames " + caught.getMessage());
-            }
-        });
+    @Override
+    public void fillRegattas(Iterable<RegattaDTO> regattas) {
+        regattaOracle.fillRegattas(regattas);
     }
-
 }
