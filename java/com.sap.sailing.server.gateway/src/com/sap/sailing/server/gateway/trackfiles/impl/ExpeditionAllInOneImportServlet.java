@@ -25,6 +25,8 @@ import com.sap.sse.util.ServiceTrackerFactory;
 /**
  * Import servlet for sensor data files. Importers are located through the OSGi service registry and matched against the
  * name provided by the upload form.
+ * 
+ * @see ExpeditionAllInOneImporter
  */
 public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
     private static final long serialVersionUID = 1120226743039934620L;

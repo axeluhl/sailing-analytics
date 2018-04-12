@@ -25,6 +25,16 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
+/**
+ * This is the UI wizard to be executed after
+ * {@link com.sap.sailing.server.gateway.trackfiles.impl.ExpeditionAllInOneImporter ExpeditionAllInOneImporter}
+ * succeeded running. This provides the functionality to add new {@link com.sap.sailing.domain.base.Competitor
+ * Competitors} to the {@link com.sap.sailing.domain.base.Regatta Regatta} and automatically maps the imported GPS and
+ * Bravo tracks to a selected {@link com.sap.sailing.domain.base.Competitor Competitor}. In addition, the
+ * {@link com.sap.sailing.domain.tracking.TrackedRace TrackedRace} is retracked after the process to ensure that newly
+ * added competitors are correctly visible afterwards. After the import finished successfully, a dialog is provided to
+ * the user that shows links to the event page and race board.
+ */
 public class ExpeditionAllInOneAfterImportHandler {
     
     private final SailingServiceAsync sailingService;
