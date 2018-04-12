@@ -83,6 +83,7 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurveWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurvesWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DefaultWindTrackJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DetailedBoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DistanceJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixJsonSerializer;
@@ -1043,7 +1044,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 CompleteManeuverCurvesWithEstimationDataJsonSerializer serializer = new CompleteManeuverCurvesWithEstimationDataJsonSerializer(
-                        new BoatClassJsonSerializer(),
+                        new DetailedBoatClassJsonSerializer(),
                         new CompleteManeuverCurveWithEstimationDataJsonSerializer(
                                 new ManeuverMainCurveWithEstimationDataJsonSerializer(),
                                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer(),
