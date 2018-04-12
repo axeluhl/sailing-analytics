@@ -25,7 +25,8 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
@@ -52,6 +53,9 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         JSONObject json = new JSONObject();
         json.put(CompetitorJsonConstants.FIELD_ID, competitor.getId().toString());
         json.put(CompetitorJsonConstants.FIELD_NAME, competitor.getName());
+        if (competitor.hasBoat()) {
+            json.put(CompetitorJsonConstants.FIELD_SAIL_ID, ((CompetitorWithBoat) competitor).getBoat().getSailID());
+        }
         json.put(CompetitorJsonConstants.FIELD_SHORT_NAME, competitor.getShortName());
         final Nationality nationality = competitor.getTeam().getNationality();
         json.put(CompetitorJsonConstants.FIELD_NATIONALITY, nationality==null?null:nationality.getThreeLetterIOCAcronym());
@@ -89,26 +93,21 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     @Path("{competitor-id}/team")
     public Response getTeam(@PathParam("competitor-id") String competitorId) {
         Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
-
         if (competitor == null) {
             return Response.status(Status.NOT_FOUND)
                     .entity("Could not find a competitor with id '" + StringEscapeUtils.escapeHtml(competitorId) + "'.").type(MediaType.TEXT_PLAIN)
                     .build();
         }
-
         Team team = competitor.getTeam();
-
         if (team == null) {
             return Response.status(Status.NOT_FOUND)
                     .entity("Could not find a team associated with competitor '" + StringEscapeUtils.escapeHtml(competitorId) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-
         TeamJsonSerializer teamJsonSerializer = new TeamJsonSerializer(new PersonJsonSerializer(
                 new NationalityJsonSerializer()));
         JSONObject teamJson = teamJsonSerializer.serialize(team);
         String json = teamJson.toJSONString();
-
         return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
@@ -127,7 +126,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     public String setTeamImage(@PathParam("competitor-id") String competitorId, InputStream uploadedInputStream,
             @HeaderParam("Content-Type") String fileType, @HeaderParam("Content-Length") long sizeInBytes) throws IOException {
         RacingEventService service = getService();
-        CompetitorStore store = service.getCompetitorStore();
+        CompetitorAndBoatStore store = service.getCompetitorStore();
         Competitor competitor = store.getExistingCompetitorByIdAsString(competitorId);
         if (competitor == null) {
             logger.log(Level.INFO, "Could not find competitor to store image for: " + StringEscapeUtils.escapeHtml(competitorId));

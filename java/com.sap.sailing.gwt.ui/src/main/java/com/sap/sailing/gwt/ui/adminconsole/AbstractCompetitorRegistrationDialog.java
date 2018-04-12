@@ -6,13 +6,13 @@ import java.util.function.Consumer;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDialog<Set<CompetitorDTO>> {
+public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDialog<Set<CompetitorWithBoatDTO>> {
     protected final ErrorReporter errorReporter;
     protected final SailingServiceAsync sailingService;
     protected final StringMessages stringMessages;
@@ -22,9 +22,9 @@ public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDial
 
     public AbstractCompetitorRegistrationDialog(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean editable,
-            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback,
+            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorWithBoatDTO>> callback,
             String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, String okButtonMessage,
-            Validator<Set<CompetitorDTO>> validator) {
+            Validator<Set<CompetitorWithBoatDTO>> validator) {
         super(stringMessages.registerCompetitors(), /* messsage */null, okButtonMessage, stringMessages.cancel(),
                 validator, callback);
         this.errorReporter = errorReporter;
@@ -42,11 +42,11 @@ public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDial
     }
 
     @Override
-    protected Set<CompetitorDTO> getResult() {
+    protected Set<CompetitorWithBoatDTO> getResult() {
         return competitorRegistrationsPanel.getResult();
     }
 
-    protected abstract Consumer<AsyncCallback<Collection<CompetitorDTO>>> getRegisteredCompetitorsRetriever();
+    protected abstract Consumer<AsyncCallback<Collection<CompetitorWithBoatDTO>>> getRegisteredCompetitorsRetriever();
     
     protected abstract Widget[] getAdditionalWidgetsToInsertAboveCompetitorTables(StringMessages stringMessages);
 }

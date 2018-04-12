@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -32,12 +32,12 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
     private final StringMessages stringMessages;
     private final SimplePanel importWidgetHolder;
     protected final TrackFileImportDeviceIdentifierTableWrapper deviceIdTable;
-    private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
+    private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorWithBoatDTO>> competitorTable;
     private final MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>> markTable;
     private final BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>> boatTable;
 
     private TrackFileImportDeviceIdentifierDTO deviceToSelect;
-    private CompetitorDTO compToSelect;
+    private CompetitorWithBoatDTO compToSelect;
     private MarkDTO markToSelect;
     private BoatDTO boatToSelect;
     private boolean inInstableTransitionState = false;
@@ -108,9 +108,9 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
 
     private void getCompetitorRegistrations(SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
         sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName,
-                new AsyncCallback<Collection<CompetitorDTO>>() {
+                new AsyncCallback<Collection<CompetitorWithBoatDTO>>() {
                     @Override
-                    public void onSuccess(Collection<CompetitorDTO> result) {
+                    public void onSuccess(Collection<CompetitorWithBoatDTO> result) {
                         competitorTable.refreshCompetitorList(result);
                     }
 
@@ -157,8 +157,8 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
         if (!inInstableTransitionState) {
             deviceIdTable.setMappedObjectForSelectedDevice(mappedTo);
 
-            if (mappedTo instanceof CompetitorDTO) {
-                compToSelect = (CompetitorDTO) mappedTo;
+            if (mappedTo instanceof CompetitorWithBoatDTO) {
+                compToSelect = (CompetitorWithBoatDTO) mappedTo;
                 boatToSelect = null;
                 markToSelect = null;
             } else if (mappedTo instanceof BoatDTO) {
@@ -184,8 +184,8 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
 
             if (deviceId != null) {
                 final MappableToDevice mappedTo = deviceIdTable.getMappedObjectForDeviceId(deviceId);
-                if (mappedTo instanceof CompetitorDTO) {
-                    compToSelect = (CompetitorDTO) mappedTo;
+                if (mappedTo instanceof CompetitorWithBoatDTO) {
+                    compToSelect = (CompetitorWithBoatDTO) mappedTo;
                 } else if (mappedTo instanceof BoatDTO) {
                     boatToSelect = (BoatDTO) mappedTo;
                 } else if (mappedTo instanceof MarkDTO) {
