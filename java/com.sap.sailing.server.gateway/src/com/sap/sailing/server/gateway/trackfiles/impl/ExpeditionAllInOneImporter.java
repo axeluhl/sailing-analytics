@@ -25,6 +25,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImp
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -37,6 +38,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.ExpeditionAllInOneConstants.ImportMode;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -44,6 +46,8 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
+import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -53,6 +57,8 @@ import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.ErrorImportDTO;
 import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.TrackImportDTO;
@@ -71,6 +77,35 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+/**
+ * Importer for expedition data that imports all available data for a boat:
+ * <ul>
+ * <li>{@link GPSFixMoving} and {@link BravoExtendedFix} instances are imported as a distinct track that needs to be
+ * mapped to a specific competitor afterwards</li>
+ * <li>Wind fixes are being imported as a new {@link WindTrack}</li>
+ * </ul>
+ * There are several {@link ImportMode ImportModes} which have specific preconditions and activate different importing
+ * behavior:
+ * <ul>
+ * <li>{@link ImportMode#NEW_EVENT} requires a boatclass name to be given. In this case new {@link Event},
+ * {@link Regatta} and {@link RegattaLeaderboard} entities are created with one {@link RaceColumn} for a new
+ * {@link TrackedRace} to be the target of the imported data. The names of the created entities as well as the created
+ * {@link RaceColumn} and {@link WindSource} are generated from the name of the given {@link FileItem}.</li>
+ * <li>{@link ImportMode#NEW_COMPETITOR} requires a regatta name to be given. In this case the wind data is being
+ * imported as new {@link WindSource} to any existing race of the given regatta. The name of the {@link WindSource} is
+ * determined from the name of the given {@link FileItem}. No new entities are created.</li>
+ * <li>{@link ImportMode#NEW_RACE} requires a regatta name to be given. In this case the a new {@link RaceColumn} is
+ * created in the last existing {@link Series}. A new {@link WindSource} is added to the {@link TrackedRace} associated
+ * with the newly added {@link RaceColumn}. This mode does not support importing in cases where fleet racing is used by
+ * a regatta.</li>
+ * </ul>
+ * The imported {@link GPSFixMoving} and {@link BravoExtendedFix} tracks aren't mapped to a {@link Competitor} by the
+ * importer. Instead the IDs of the imported tracks are contained in the result and are expected to be mapped by the
+ * user afterwards.
+ * 
+ * This importer is intended to be used by {@link ExpeditionAllInOneImportServlet}.
+ *
+ */
 public class ExpeditionAllInOneImporter {
     private static final String ERROR_MESSAGE_INVALID_REGATTA_NAME = "Please enter a valid regatta name to proceed";
 
