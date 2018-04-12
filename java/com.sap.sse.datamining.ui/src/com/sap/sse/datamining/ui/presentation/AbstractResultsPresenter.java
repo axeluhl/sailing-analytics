@@ -13,20 +13,18 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.ui.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.ResultsPresenterWithControls;
-import com.sap.sse.datamining.ui.StringMessages;
-import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public abstract class AbstractResultsPresenter<SettingsType extends Settings> extends AbstractComponent<SettingsType>
-        implements ResultsPresenterWithControls<SettingsType> {
+public abstract class AbstractResultsPresenter<SettingsType extends Settings>
+        extends AbstractDataMiningComponent<SettingsType> implements ResultsPresenterWithControls<SettingsType> {
 
     private enum ResultsPresenterState {
         BUSY, ERROR, RESULT
     }
 
-    protected final StringMessages stringMessages;
     private ResultsPresenterState state;
 
     private final DockLayoutPanel mainPanel;
@@ -39,9 +37,8 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings> ex
     private QueryResultDTO<?> currentResult;
     private boolean isCurrentResultSimple;
 
-    public AbstractResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
+    public AbstractResultsPresenter(Component<?> parent, ComponentContext<?> context) {
         super(parent, context);
-        this.stringMessages = stringMessages;
         mainPanel = new DockLayoutPanel(Unit.PX);
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
@@ -61,9 +58,9 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings> ex
         mainPanel.add(presentationPanel);
         errorLabel = new HTML();
         errorLabel.setStyleName("chart-importantMessage");
-        labeledBusyIndicator = new HTML(stringMessages.runningQuery());
+        labeledBusyIndicator = new HTML(getDataMiningStringMessages().runningQuery());
         labeledBusyIndicator.setStyleName("chart-busyMessage");
-        showError(getStringMessages().runAQuery());
+        showError(getDataMiningStringMessages().runAQuery());
     }
 
     @Override
@@ -90,7 +87,7 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings> ex
         } else {
             this.currentResult = null;
             updateCurrentResultInfo();
-            showError(getStringMessages().noDataFound() + ".");
+            showError(getDataMiningStringMessages().noDataFound() + ".");
         }
     }
 
@@ -147,10 +144,6 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings> ex
 
     protected boolean isCurrentResultSimple() {
         return isCurrentResultSimple;
-    }
-
-    protected StringMessages getStringMessages() {
-        return stringMessages;
     }
 
     @Override

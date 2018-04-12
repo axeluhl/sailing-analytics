@@ -22,6 +22,7 @@ import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.ui.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.AggregatorDefinitionChangedListener;
 import com.sap.sse.datamining.ui.AggregatorDefinitionProvider;
 import com.sap.sse.datamining.ui.DataMiningServiceAsync;
@@ -29,21 +30,18 @@ import com.sap.sse.datamining.ui.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sse.datamining.ui.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.ExtractionFunctionChangedListener;
 import com.sap.sse.datamining.ui.ExtractionFunctionProvider;
-import com.sap.sse.datamining.ui.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class ExtractionFunctionAndAggregatorDefinitionProvider extends AbstractComponent<SerializableSettings>
+public class ExtractionFunctionAndAggregatorDefinitionProvider extends AbstractDataMiningComponent<SerializableSettings>
         implements ExtractionFunctionProvider<SerializableSettings>, AggregatorDefinitionProvider<SerializableSettings>,
         DataRetrieverChainDefinitionChangedListener {
 
     private static final String STATISTIC_PROVIDER_ELEMENT_STYLE = "statisticProviderElement";
 
-    private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final Collection<ExtractionFunctionChangedListener> extractionFunctionListeners;
@@ -57,10 +55,9 @@ public class ExtractionFunctionAndAggregatorDefinitionProvider extends AbstractC
     private final ValueListBox<AggregationProcessorDefinitionDTO> aggregatorDefinitionListBox;
 
     public ExtractionFunctionAndAggregatorDefinitionProvider(Component<?> parent, ComponentContext<?> context,
-            StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
             DataRetrieverChainDefinitionProvider retrieverChainProvider) {
         super(parent, context);
-        this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         extractionFunctionListeners = new HashSet<>();
@@ -78,7 +75,7 @@ public class ExtractionFunctionAndAggregatorDefinitionProvider extends AbstractC
         selectionPanel.add(aggregatorDefinitionListBox);
 
         mainPanel = new FlowPanel();
-        Label label = new Label(this.stringMessages.calculateThe());
+        Label label = new Label(this.getDataMiningStringMessages().calculateThe());
         label.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
         mainPanel.add(label);
         mainPanel.add(selectionPanel);
@@ -242,7 +239,7 @@ public class ExtractionFunctionAndAggregatorDefinitionProvider extends AbstractC
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.statisticProvider();
+        return getDataMiningStringMessages().statisticProvider();
     }
 
     @Override

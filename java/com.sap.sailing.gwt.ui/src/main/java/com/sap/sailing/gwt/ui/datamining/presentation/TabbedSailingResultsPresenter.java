@@ -12,10 +12,12 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class TabbedSailingResultsPresenter extends AbstractTabbedResultsPresenter {
 
+    private final StringMessages stringMessages;
+
     public TabbedSailingResultsPresenter(Component<?> parent, ComponentContext<?> context,
             DrillDownCallback drillDownCallback, StringMessages stringMessages) {
-        super(parent, context, drillDownCallback, stringMessages);
-
+        super(parent, context, drillDownCallback);
+        this.stringMessages = stringMessages;
     }
 
     @Override
@@ -40,8 +42,7 @@ public class TabbedSailingResultsPresenter extends AbstractTabbedResultsPresente
             } else {
                 if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
                     CloseableTabHeader oldHeader = getSelectedHeader();
-                    addTabAndFocus(
-                            new MultiResultsPresenter(this, getComponentContext(), drillDownCallback, stringMessages));
+                    addTabAndFocus(new MultiResultsPresenter(this, getComponentContext(), drillDownCallback));
                     removeTab(oldHeader);
                 }
             }

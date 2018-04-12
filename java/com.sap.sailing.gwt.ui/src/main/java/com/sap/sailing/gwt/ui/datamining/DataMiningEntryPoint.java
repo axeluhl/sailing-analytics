@@ -15,15 +15,16 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.datamining.presentation.TabbedSailingResultsPresenter;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.datamining.ui.AnchorDataMiningSettingsControl;
 import com.sap.sse.datamining.ui.DataMiningService;
 import com.sap.sse.datamining.ui.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.DataMiningSettingsControl;
+import com.sap.sse.datamining.ui.DataMiningSettingsInfoManager;
 import com.sap.sse.datamining.ui.ResultsPresenter;
 import com.sap.sse.datamining.ui.execution.SimpleQueryRunner;
-import com.sap.sse.datamining.ui.presentation.AbstractTabbedResultsPresenter;
 import com.sap.sse.datamining.ui.selection.QueryDefinitionProviderWithControls;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
@@ -37,60 +38,66 @@ import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAut
 public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
 
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
-    
+
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
-    
+
     private DataMiningSession session;
 
     private QueryDefinitionProviderWithControls queryDefinitionProviderWithControls;
-    
+
     @Override
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithMore();
         super.doOnModuleLoad();
         session = new UUIDDataMiningSession(UUID.randomUUID());
-        EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService, RemoteServiceMappingConstants.dataMiningServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService,
+                RemoteServiceMappingConstants.dataMiningServiceRemotePath);
         createDataminingPanel();
     }
-    
+
     private void createDataminingPanel() {
         SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
-        GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
-        AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
-        authorizedContentDecorator.setPermissionToCheck(Permission.DATA_MINING, SailingPermissionsForRoleProvider.INSTANCE);
+        GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(),
+                header.getAuthenticationMenuView());
+        AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(
+                genericSailingAuthentication);
+        authorizedContentDecorator.setPermissionToCheck(Permission.DATA_MINING,
+                SailingPermissionsForRoleProvider.INSTANCE);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
             private SimpleQueryRunner queryRunner;
+            private final DataMiningSettingsInfoManager settingsManager = new DataMiningSettingsInfoManagerImpl(
+                    getStringMessages());
 
             @Override
             public Widget get() {
-                DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null,
-                        getStringMessages());
-                ResultsPresenter<?> resultsPresenter = new AbstractTabbedResultsPresenter(/* parent */ null, /* context */ null,
-                        /* delegate drillDownCallback */ groupKey -> {
-                            queryDefinitionProviderWithControls.drillDown(groupKey, /* onSuccessCallback */ ()->queryRunner.runQuery());
+                DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null);
+                ResultsPresenter<?> resultsPresenter = new TabbedSailingResultsPresenter(/* parent */ null,
+                        /* context */ null, /* delegate drillDownCallback */ groupKey -> {
+                            queryDefinitionProviderWithControls.drillDown(groupKey,
+                                    /* onSuccessCallback */ () -> queryRunner.runQuery());
                         }, getStringMessages());
                 DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
-                queryDefinitionProviderWithControls =
-                        new QueryDefinitionProviderWithControls(null, null, session, getStringMessages(),
-                                dataMiningService, DataMiningEntryPoint.this, settingsControl, resultsPresenter);
+                queryDefinitionProviderWithControls = new QueryDefinitionProviderWithControls(null, null, session,
+                        dataMiningService, DataMiningEntryPoint.this, settingsControl, settingsManager,
+                        resultsPresenter);
                 queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
                 selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
-                queryRunner = new SimpleQueryRunner(null, null, session, getStringMessages(),
-                        dataMiningService,
-                        DataMiningEntryPoint.this, queryDefinitionProviderWithControls, resultsPresenter);
+                queryRunner = new SimpleQueryRunner(null, null, session, dataMiningService, DataMiningEntryPoint.this,
+                        queryDefinitionProviderWithControls, resultsPresenter);
                 queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
-                /* Running queries automatically when they've been changed is currently unnecessary, if not even counterproductive.
-                 * This removes the query runner settings to prevent that the user can enable the automatic execution of queries.
-                 * Re-enable this, when this functionality is desired again.
+                /*
+                 * Running queries automatically when they've been changed is currently unnecessary, if not even
+                 * counterproductive. This removes the query runner settings to prevent that the user can enable the
+                 * automatic execution of queries. Re-enable this, when this functionality is desired again.
                  */
-//                settingsControl.addSettingsComponent(queryRunner);
+                // settingsControl.addSettingsComponent(queryRunner);
                 SplitLayoutPanel splitPanel = new SplitLayoutPanel(15);
                 splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
                 splitPanel.add(selectionDockPanel);
                 return splitPanel;
             }
         });
-        
+
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         DockLayoutPanel panel = new DockLayoutPanel(Unit.PX);
         panel.addNorth(header, 75);

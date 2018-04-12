@@ -10,22 +10,21 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.ui.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.DataMiningService;
 import com.sap.sse.datamining.ui.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.ManagedDataMiningQueriesCounter;
 import com.sap.sse.datamining.ui.QueryDefinitionProvider;
 import com.sap.sse.datamining.ui.QueryRunner;
 import com.sap.sse.datamining.ui.ResultsPresenter;
-import com.sap.sse.datamining.ui.StringMessages;
 import com.sap.sse.datamining.ui.settings.QueryRunnerSettings;
 import com.sap.sse.datamining.ui.settings.QueryRunnerSettingsDialogComponent;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> implements QueryRunner {
+public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSettings> implements QueryRunner {
 
     /**
      * The delay before a query is sent to the {@link DataMiningService}.
@@ -35,7 +34,6 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
     private static final int queryBufferTimeInMillis = 200;
 
     private final DataMiningSession session;
-    private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final ManagedDataMiningQueriesCounter counter;
@@ -54,11 +52,10 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
     private final Button runButton;
 
     public SimpleQueryRunner(Component<?> parent, ComponentContext<?> context, DataMiningSession session,
-            StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+           DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
             QueryDefinitionProvider<?> queryDefinitionProvider, ResultsPresenter<?> resultsPresenter) {
         super(parent, context);
         this.session = session;
-        this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         counter = new SimpleManagedDataMiningQueriesCounter();
@@ -67,7 +64,7 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
         this.queryDefinitionProvider = queryDefinitionProvider;
         this.resultsPresenter = resultsPresenter;
 
-        runButton = new Button(this.stringMessages.runAsSubstantive());
+        runButton = new Button(getDataMiningStringMessages().runAsSubstantive());
         runButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -102,7 +99,8 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
                         @Override
                         protected void handleFailure(Throwable caught) {
                             errorReporter.reportError("Error running the query: " + caught.getMessage());
-                            resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
+                            resultsPresenter
+                                    .showError(getDataMiningStringMessages().errorRunningDataMiningQuery() + ".");
                         }
 
                         @Override
@@ -111,7 +109,7 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
                         }
                     });
         } else {
-            resultsPresenter.showError(stringMessages.queryNotValidBecause(), errorMessages);
+            resultsPresenter.showError(getDataMiningStringMessages().queryNotValidBecause(), errorMessages);
         }
     }
 
@@ -135,7 +133,7 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.queryRunner();
+        return getDataMiningStringMessages().queryRunner();
     }
 
     @Override
@@ -165,7 +163,7 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
 
     @Override
     public SettingsDialogComponent<QueryRunnerSettings> getSettingsDialogComponent(QueryRunnerSettings settings) {
-        return new QueryRunnerSettingsDialogComponent(settings, stringMessages);
+        return new QueryRunnerSettingsDialogComponent(settings, getDataMiningStringMessages());
     }
 
     @Override

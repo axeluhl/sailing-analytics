@@ -30,6 +30,7 @@ import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.ui.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.AggregatorDefinitionChangedListener;
 import com.sap.sse.datamining.ui.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.DataMiningSettingsControl;
@@ -39,9 +40,7 @@ import com.sap.sse.datamining.ui.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sse.datamining.ui.ExtractionFunctionChangedListener;
 import com.sap.sse.datamining.ui.StatisticChangedListener;
 import com.sap.sse.datamining.ui.StatisticProvider;
-import com.sap.sse.datamining.ui.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent;
@@ -58,11 +57,11 @@ import com.sap.sse.gwt.client.suggestion.CustomSuggestBox;
  * 
  * @author Lennart Hensler
  */
-public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSettings> implements StatisticProvider {
+public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<CompositeSettings>
+        implements StatisticProvider {
 
     private static final String STATISTIC_PROVIDER_ELEMENT_STYLE = "statisticProviderElement";
 
-    private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final Set<DataRetrieverChainDefinitionChangedListener> retrieverChainListeners;
@@ -82,10 +81,9 @@ public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSett
     private final ValueListBox<AggregationProcessorDefinitionDTO> aggregatorListBox;
 
     public SuggestBoxStatisticProvider(Component<?> parent, ComponentContext<?> componentContext,
-            StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
             DataMiningSettingsControl settingsControl, DataMiningSettingsInfoManager settingsManager) {
         super(parent, componentContext);
-        this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         retrieverChainListeners = new HashSet<>();
@@ -99,7 +97,7 @@ public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSett
         retrieverLevelSettingsComponents = new ArrayList<>();
 
         mainPanel = new FlowPanel();
-        Label label = new Label(this.stringMessages.calculateThe());
+        Label label = new Label(getDataMiningStringMessages().calculateThe());
         label.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
         mainPanel.add(label);
 
@@ -295,7 +293,7 @@ public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSett
             final Class<?> settingsType = retrieverLevelSettings.getValue().getClass();
             DataMiningSettingsInfo settingsInfo = settingsManager.getSettingsInfo(settingsType);
             settingsComponents.add(new RetrieverLevelSettingsComponent(this, getComponentContext(), retrieverLevel,
-                    settingsInfo.getId(), settingsInfo.getLocalizedName(stringMessages)) {
+                    settingsInfo.getId(), settingsInfo.getLocalizedName()) {
                 @Override
                 public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(
                         SerializableSettings settings) {
@@ -343,7 +341,8 @@ public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSett
             final Class<?> settingsType = retrieverLevelSettings.getValue().getClass();
             DataMiningSettingsInfo settingsInfo = settingsManager.getSettingsInfo(settingsType);
             RetrieverLevelSettingsComponent c = new RetrieverLevelSettingsComponent(this, getComponentContext(),
-                    retrieverLevel, settingsInfo.getId(), settingsInfo.getLocalizedName(stringMessages)) {
+                    retrieverLevel, settingsInfo.getId(),
+                    settingsInfo.getLocalizedName()) {
                 @Override
                 public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(
                         SerializableSettings settings) {
@@ -447,7 +446,7 @@ public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSett
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.statisticProvider();
+        return getDataMiningStringMessages().statisticProvider();
     }
 
     @Override
@@ -514,8 +513,8 @@ public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSett
         public String getDisplayString() {
             StringBuilder builder = new StringBuilder(extractionFunction.getDisplayName());
             if (isVerbose()) {
-                builder.append(" (").append(stringMessages.basedOn()).append(" ").append(retrieverChain.getName())
-                        .append(")");
+                builder.append(" (").append(getDataMiningStringMessages().basedOn()).append(" ")
+                        .append(retrieverChain.getName()).append(")");
             }
             return builder.toString();
         }

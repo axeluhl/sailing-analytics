@@ -18,45 +18,45 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.ui.StringMessages;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Settings> {
-    
+
     private static final String htmlWhitespace = "&nbsp;";
 
-//    private final CheckBox appendResultCheckBox;
-    
+    // private final CheckBox appendResultCheckBox;
+
     private final ScrollPanel scrollPanel;
     private final HTML resultsLabel;
-    
+
     private final LinkedHashSet<String> signifiers;
     private final Map<GroupKey, Map<String, Number>> results;
-    
-    public PlainResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
-        super(parent, context, stringMessages);
+
+    public PlainResultsPresenter(Component<?> parent, ComponentContext<?> context) {
+        super(parent, context);
         signifiers = new LinkedHashSet<>();
         results = new HashMap<>();
-        
-//        appendResultCheckBox = new CheckBox(stringMessages.appendResult());
-//        addControl(appendResultCheckBox);
-        
+
+        // appendResultCheckBox = new CheckBox(stringMessages.appendResult());
+        // addControl(appendResultCheckBox);
+
         resultsLabel = new HTML();
         scrollPanel = new ScrollPanel(resultsLabel);
     }
 
     @Override
-    protected void internalShowNumericResults(Map<GroupKey, Number> resultValues, Map<GroupKey, Triple<Number, Number, Long>> errorMargins) {
-//        boolean appendResult = appendResultCheckBox.getValue();
-//        if (!appendResult) {
-//            signifiers.clear();
-//            results.clear();
-//        }
+    protected void internalShowNumericResults(Map<GroupKey, Number> resultValues,
+            Map<GroupKey, Triple<Number, Number, Long>> errorMargins) {
+        // boolean appendResult = appendResultCheckBox.getValue();
+        // if (!appendResult) {
+        // signifiers.clear();
+        // results.clear();
+        // }
         signifiers.clear();
         results.clear();
-        
+
         String currentSignifier = getCurrentResult().getResultSignifier();
         signifiers.add(currentSignifier);
         for (Entry<GroupKey, Number> entry : resultValues.entrySet()) {
@@ -67,13 +67,13 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
             }
             values.put(currentSignifier, entry.getValue());
         }
-        
+
         SafeHtmlBuilder displayBuilder = new SafeHtmlBuilder();
         if (signifiers.size() == 1) {
             displayBuilder.appendHtmlConstant("<b>").appendEscaped(getCurrentResult().getResultSignifier())
-                          .appendHtmlConstant("</b>").appendHtmlConstant("<br />");
+                    .appendHtmlConstant("</b>").appendHtmlConstant("<br />");
         }
-        
+
         displayBuilder.appendHtmlConstant("<table>");
         if (signifiers.size() > 1) {
             buildTableForMultipleSignifiers(displayBuilder);
@@ -115,14 +115,18 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
     }
 
     private void buildTableHeader(Iterable<?> columnHeaders, SafeHtmlBuilder displayBuilder) {
-        displayBuilder.appendHtmlConstant("<tr><th>" + htmlWhitespace + "</th>"); // First column empty, but selectable to copy the content without shifting the headers
+        displayBuilder.appendHtmlConstant("<tr><th>" + htmlWhitespace + "</th>"); // First column empty, but selectable
+                                                                                  // to copy the content without
+                                                                                  // shifting the headers
         for (Object columnHeader : columnHeaders) {
-            displayBuilder.appendHtmlConstant("<th>").appendEscaped(columnHeader.toString()).appendHtmlConstant("</th>");
+            displayBuilder.appendHtmlConstant("<th>").appendEscaped(columnHeader.toString())
+                    .appendHtmlConstant("</th>");
         }
         displayBuilder.appendHtmlConstant("</tr>");
     }
-    
-    private void buildTableRow(GroupKey rowKey, Iterable<?> orderedColumnKeys, Map<?, Number> columnValues, SafeHtmlBuilder displayBuilder) {
+
+    private void buildTableRow(GroupKey rowKey, Iterable<?> orderedColumnKeys, Map<?, Number> columnValues,
+            SafeHtmlBuilder displayBuilder) {
         displayBuilder.appendHtmlConstant("<tr>");
         displayBuilder.appendHtmlConstant("<td><b>").appendEscaped(rowKey + ":").appendHtmlConstant("</b></td>");
         for (Object columnKey : orderedColumnKeys) {
@@ -143,7 +147,7 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
             List<? extends GroupKey> keys = entry.getKey().getKeys();
             GroupKey mainKey = keys.get(0);
             GroupKey subKey = keys.get(1);
-            
+
             Map<GroupKey, Number> values = unfoldedResultValues.get(mainKey);
             if (values == null) {
                 values = new HashMap<>();
@@ -159,17 +163,18 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
         for (GroupKey key : getSortedKeys(results.keySet())) {
             displayBuilder.appendHtmlConstant("<tr>");
             displayBuilder.appendHtmlConstant("<td><b>").appendEscaped(key + ":").appendHtmlConstant("</b></td>");
-            displayBuilder.appendHtmlConstant("<td>").append(results.get(key).get(signifier).doubleValue()).appendHtmlConstant("</td>");
+            displayBuilder.appendHtmlConstant("<td>").append(results.get(key).get(signifier).doubleValue())
+                    .appendHtmlConstant("</td>");
             displayBuilder.appendHtmlConstant("</tr>");
         }
     }
-    
+
     private Iterable<GroupKey> getSortedKeys(Set<GroupKey> keys) {
         List<GroupKey> sortedKeys = new ArrayList<>(keys);
         Collections.sort(sortedKeys);
         return sortedKeys;
     }
-    
+
     @Override
     protected Widget getPresentationWidget() {
         return scrollPanel;
@@ -177,7 +182,7 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
 
     @Override
     public String getLocalizedShortName() {
-        return getStringMessages().plainResultsPresenter();
+        return getDataMiningStringMessages().plainResultsPresenter();
     }
 
     @Override

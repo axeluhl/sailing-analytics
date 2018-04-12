@@ -23,8 +23,10 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 public class DataMiningSettingsInfoManagerImpl implements DataMiningSettingsInfoManager {
 
     private final Map<Class<?>, DataMiningSettingsInfo> infosMappedBySettingsType;
+    private final StringMessages stringMessages;
 
-    public DataMiningSettingsInfoManagerImpl() {
+    public DataMiningSettingsInfoManagerImpl(StringMessages stringMessages) {
+        this.stringMessages = stringMessages;
         infosMappedBySettingsType = new HashMap<>();
 
         // GWT doesn't support Class.isAssignableFrom and Class.getInterfaces.
@@ -65,7 +67,7 @@ public class DataMiningSettingsInfoManagerImpl implements DataMiningSettingsInfo
         }
 
         @Override
-        public String getLocalizedName(StringMessages stringMessages) {
+        public String getLocalizedName() {
             return stringMessages.polars();
         }
 
@@ -87,7 +89,7 @@ public class DataMiningSettingsInfoManagerImpl implements DataMiningSettingsInfo
         }
 
         @Override
-        public String getLocalizedName(StringMessages stringMessages) {
+        public String getLocalizedName() {
             return stringMessages.maneuver();
         }
 
@@ -109,7 +111,7 @@ public class DataMiningSettingsInfoManagerImpl implements DataMiningSettingsInfo
         }
 
         @Override
-        public String getLocalizedName(StringMessages stringMessages) {
+        public String getLocalizedName() {
             return stringMessages.maneuverSpeedDetails();
         }
 
@@ -130,7 +132,7 @@ public class DataMiningSettingsInfoManagerImpl implements DataMiningSettingsInfo
         }
 
         @Override
-        public String getLocalizedName(StringMessages stringMessages) {
+        public String getLocalizedName() {
             return stringMessages.foilingSegments();
         }
 

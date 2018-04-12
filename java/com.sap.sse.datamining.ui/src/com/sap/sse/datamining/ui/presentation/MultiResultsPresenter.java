@@ -14,39 +14,36 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.ui.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.ResultsPresenter;
-import com.sap.sse.datamining.ui.StringMessages;
 import com.sap.sse.datamining.ui.presentation.ResultsChart.DrillDownCallback;
-import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class MultiResultsPresenter extends AbstractComponent<Settings> implements ResultsPresenter<Settings> {
-    
-    private final StringMessages stringMessages;
-    
+public class MultiResultsPresenter extends AbstractDataMiningComponent<Settings> implements ResultsPresenter<Settings> {
+
     private final DeckLayoutPanel presenterPanel;
     private final HorizontalPanel controlsPanel;
     private final ValueListBox<PresenterDescriptor<Object>> presentersListBox;
     private AbstractResultsPresenter<?> currentPresenter;
 
     private List<PresenterDescriptor<Object>> availablePresenters;
-    
-    public MultiResultsPresenter(Component<?> parent, ComponentContext<?> context, DrillDownCallback drillDownCallback, StringMessages stringMessages) {
+
+    public MultiResultsPresenter(Component<?> parent, ComponentContext<?> context,
+            DrillDownCallback drillDownCallback) {
         super(parent, context);
-        this.stringMessages = stringMessages;
         availablePresenters = new ArrayList<>();
         availablePresenters.add(new ColumnChartDescriptor(drillDownCallback));
         availablePresenters.add(new ColumnChartDescriptorWithErrorBars(drillDownCallback));
         availablePresenters.add(new PlainDescriptor());
 
         presenterPanel = new DeckLayoutPanel();
-        
+
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
-        controlsPanel.add(new Label(stringMessages.choosePresentation() + ":"));
+        controlsPanel.add(new Label(getDataMiningStringMessages().choosePresentation() + ":"));
         presentersListBox = new ValueListBox<>(new AbstractObjectRenderer<PresenterDescriptor<? extends Object>>() {
             @Override
             protected String convertObjectToString(PresenterDescriptor<? extends Object> nonNullObject) {
@@ -62,20 +59,20 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
         controlsPanel.add(presentersListBox);
         presentersListBox.setValue(availablePresenters.get(0), false);
         presentersListBox.setAcceptableValues(availablePresenters);
-        
+
         setCurrentPresenter(availablePresenters.get(0).getPresenter());
     }
 
     private void setCurrentPresenter(AbstractResultsPresenter<?> presenter) {
         controlsPanel.removeFromParent();
         presenter.addControl(controlsPanel);
-        
-        if (presenter instanceof AbstractNumericResultsPresenter &&
-            currentPresenter instanceof AbstractNumericResultsPresenter) {
+
+        if (presenter instanceof AbstractNumericResultsPresenter
+                && currentPresenter instanceof AbstractNumericResultsPresenter) {
             String dataKey = ((AbstractNumericResultsPresenter<?>) currentPresenter).getSelectedDataKey();
             ((AbstractNumericResultsPresenter<?>) presenter).setSelectedDataKey(dataKey);
         }
-        
+
         currentPresenter = presenter;
         presenterPanel.setWidget(currentPresenter.getEntryWidget());
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
@@ -121,7 +118,7 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.multiResultsPresenter();
+        return getDataMiningStringMessages().multiResultsPresenter();
     }
 
     @Override
@@ -158,47 +155,48 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
     public Settings getSettings() {
         return null;
     }
-    
+
     @Override
     public String getDependentCssClassName() {
         return "multiResultsPresenter";
     }
 
     private interface PresenterDescriptor<ResultType> {
-        
+
         public String getName();
-        
+
         public AbstractResultsPresenter<?> getPresenter();
-        
+
     }
-    
+
     private class PlainDescriptor implements PresenterDescriptor<Object> {
-        
+
         private final AbstractResultsPresenter<?> presenter;
-        
+
         public PlainDescriptor() {
-            presenter = new PlainResultsPresenter(MultiResultsPresenter.this, getComponentContext(), stringMessages);
+            presenter = new PlainResultsPresenter(MultiResultsPresenter.this, getComponentContext());
         }
 
         @Override
         public String getName() {
-            return stringMessages.plainText();
+            return getDataMiningStringMessages().plainText();
         }
-        
+
         @Override
         public AbstractResultsPresenter<?> getPresenter() {
             return presenter;
         }
-        
+
     }
-    
+
     private abstract class AbstractColumnChartDescriptor implements PresenterDescriptor<Object> {
         private final ResultsChart presenter;
         private final String name;
 
         public AbstractColumnChartDescriptor(String name, boolean showErrorBars, DrillDownCallback drillDownCallback) {
             this.name = name;
-            presenter = new ResultsChart(MultiResultsPresenter.this, getComponentContext(), stringMessages, showErrorBars, drillDownCallback);
+            presenter = new ResultsChart(MultiResultsPresenter.this, getComponentContext(), showErrorBars,
+                    drillDownCallback);
         }
 
         @Override
@@ -211,16 +209,17 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
             return presenter;
         }
     }
-    
+
     private class ColumnChartDescriptor extends AbstractColumnChartDescriptor {
         public ColumnChartDescriptor(DrillDownCallback drillDownCallback) {
-            super(stringMessages.columnChart(), /* showErrorBars */ false, drillDownCallback);
+            super(getDataMiningStringMessages().columnChart(), /* showErrorBars */ false, drillDownCallback);
         }
     }
 
     private class ColumnChartDescriptorWithErrorBars extends AbstractColumnChartDescriptor {
         public ColumnChartDescriptorWithErrorBars(DrillDownCallback drillDownCallback) {
-            super(stringMessages.columnChartWithErrorBars(), /* showErrorBars */ true, drillDownCallback);
+            super(getDataMiningStringMessages().columnChartWithErrorBars(), /* showErrorBars */ true,
+                    drillDownCallback);
         }
     }
 

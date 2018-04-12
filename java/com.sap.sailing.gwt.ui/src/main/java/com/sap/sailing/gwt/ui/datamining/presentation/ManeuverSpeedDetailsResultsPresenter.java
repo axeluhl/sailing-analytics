@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsAggregation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartToCsvExporter;
+import com.sap.sailing.gwt.ui.datamining.AbstractSailingResultsPresenter;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.GroupKey;
@@ -36,7 +37,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * @author D069712 (Vladislav Chumak)
  *
  */
-public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresenter<Settings> {
+public class ManeuverSpeedDetailsResultsPresenter extends AbstractSailingResultsPresenter<Settings> {
 
     private final DockLayoutPanel dockLayoutPanel;
 
@@ -216,7 +217,7 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
 
     @Override
     public String getLocalizedShortName() {
-        return getStringMessages().maneuverSpeedDetailsResultsPresenter();
+        return stringMessages.maneuverSpeedDetailsResultsPresenter();
     }
 
     @Override

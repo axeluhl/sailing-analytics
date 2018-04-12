@@ -31,24 +31,22 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
+import com.sap.sse.datamining.ui.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.FilterSelectionChangedListener;
 import com.sap.sse.datamining.ui.FilterSelectionPresenter;
 import com.sap.sse.datamining.ui.FilterSelectionProvider;
-import com.sap.sse.datamining.ui.StringMessages;
 import com.sap.sse.datamining.ui.presentation.PlainFilterSelectionPresenter;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent<SerializableSettings>
+public class ListRetrieverChainFilterSelectionProvider extends AbstractDataMiningComponent<SerializableSettings>
         implements FilterSelectionProvider {
 
     private final DataMiningSession session;
-    private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final DataRetrieverChainDefinitionProvider retrieverChainProvider;
@@ -76,11 +74,10 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
     private ReducedDimensionsDTO reducedDimensions;
 
     public ListRetrieverChainFilterSelectionProvider(Component<?> parent, ComponentContext<?> context,
-            DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
-            ErrorReporter errorReporter, DataRetrieverChainDefinitionProvider retrieverChainProvider) {
+            DataMiningSession session, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+            DataRetrieverChainDefinitionProvider retrieverChainProvider) {
         super(parent, context);
         this.session = session;
-        this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         this.retrieverChainProvider = retrieverChainProvider;
@@ -100,11 +97,11 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
         ScrollPanel retrieverLevelListScrollPanel = new ScrollPanel(retrieverLevelList);
 
         DockLayoutPanel selectionDockLayoutPanel = new DockLayoutPanel(Unit.PX);
-        selectionDockLayoutPanel.addNorth(new Label(this.stringMessages.filterBy()), 18);
+        selectionDockLayoutPanel.addNorth(new Label(getDataMiningStringMessages().filterBy()), 18);
         selectionPanel = new ScrollPanel();
         selectionDockLayoutPanel.add(selectionPanel);
 
-        selectionPresenter = new PlainFilterSelectionPresenter(this, context, stringMessages, retrieverChainProvider,
+        selectionPresenter = new PlainFilterSelectionPresenter(this, context, getDataMiningStringMessages(), retrieverChainProvider,
                 this);
         selectionPresenterScrollPanel = new ScrollPanel(selectionPresenter.getEntryWidget());
 

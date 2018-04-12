@@ -21,14 +21,14 @@ import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.ui.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.DataMiningServiceAsync;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<AbstractSettings> {
+public class RetrieverLevelFilterSelectionProvider extends AbstractDataMiningComponent<AbstractSettings> {
 
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;

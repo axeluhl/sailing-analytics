@@ -23,25 +23,23 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
+import com.sap.sse.datamining.ui.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.DataMiningSettingsControl;
 import com.sap.sse.datamining.ui.DataMiningSettingsInfo;
 import com.sap.sse.datamining.ui.DataMiningSettingsInfoManager;
 import com.sap.sse.datamining.ui.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sse.datamining.ui.DataRetrieverChainDefinitionProvider;
-import com.sap.sse.datamining.ui.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponent<CompositeSettings>
+public class SimpleDataRetrieverChainDefinitionProvider extends AbstractDataMiningComponent<CompositeSettings>
         implements DataRetrieverChainDefinitionProvider {
 
-    private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final Set<DataRetrieverChainDefinitionChangedListener> listeners;
@@ -57,10 +55,9 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
     private final List<Component<?>> retrieverLevelSettingsComponents;
 
     public SimpleDataRetrieverChainDefinitionProvider(Component<?> parent, ComponentContext<?> context,
-            final StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
             DataMiningSettingsControl settingsControl, DataMiningSettingsInfoManager settingsManager) {
         super(parent, context);
-        this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         this.retrieverLevelSettingsComponents = new ArrayList<>();
@@ -73,7 +70,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
 
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
-        mainPanel.add(new Label(this.stringMessages.analyze()));
+        mainPanel.add(new Label(getDataMiningStringMessages().analyze()));
 
         retrieverChainsListBox = createRetrieverChainsListBox();
         mainPanel.add(retrieverChainsListBox);
@@ -184,7 +181,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.dataMiningRetrieval();
+        return getDataMiningStringMessages().dataMiningRetrieval();
     }
 
     @Override
@@ -237,7 +234,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
             DataMiningSettingsInfo settingsInfo = settingsManager.getSettingsInfo(settingsType);
             settingsComponents.add(new RetrieverLevelSettingsComponent(SimpleDataRetrieverChainDefinitionProvider.this,
                     getComponentContext(), retrieverLevel, settingsInfo.getId(),
-                    settingsInfo.getLocalizedName(stringMessages)) {
+                    settingsInfo.getLocalizedName()) {
                 @Override
                 public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(
                         SerializableSettings settings) {
@@ -286,7 +283,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
             DataMiningSettingsInfo settingsInfo = settingsManager.getSettingsInfo(settingsType);
             RetrieverLevelSettingsComponent c = new RetrieverLevelSettingsComponent(
                     SimpleDataRetrieverChainDefinitionProvider.this, getComponentContext(), retrieverLevel,
-                    settingsInfo.getId(), settingsInfo.getLocalizedName(stringMessages)) {
+                    settingsInfo.getId(), settingsInfo.getLocalizedName()) {
                 @Override
                 public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(
                         SerializableSettings settings) {

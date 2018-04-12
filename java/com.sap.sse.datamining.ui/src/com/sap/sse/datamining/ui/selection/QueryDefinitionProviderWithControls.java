@@ -44,7 +44,6 @@ import com.sap.sse.datamining.ui.FilterSelectionProvider;
 import com.sap.sse.datamining.ui.GroupingChangedListener;
 import com.sap.sse.datamining.ui.GroupingProvider;
 import com.sap.sse.datamining.ui.ResultsPresenter;
-import com.sap.sse.datamining.ui.StringMessages;
 import com.sap.sse.datamining.ui.WithControls;
 import com.sap.sse.datamining.ui.developer.PredefinedQueryRunner;
 import com.sap.sse.datamining.ui.developer.QueryDefinitionViewer;
@@ -83,10 +82,10 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     private final FilterSelectionProvider filterSelectionProvider;
 
     public QueryDefinitionProviderWithControls(Component<?> parent, ComponentContext<?> context,
-            DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
-            ErrorReporter errorReporter, DataMiningSettingsControl settingsControl,
-            DataMiningSettingsInfoManager settingsManager, ResultsPresenter<?> resultsPresenter) {
-        super(parent, context, stringMessages, dataMiningService, errorReporter);
+            DataMiningSession session, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+            DataMiningSettingsControl settingsControl, DataMiningSettingsInfoManager settingsManager,
+            ResultsPresenter<?> resultsPresenter) {
+        super(parent, context, dataMiningService, errorReporter);
         providerListener = new ProviderListener();
         // Creating the header panel, that contains the retriever chain provider and the controls
         controlsPanel = new FlowPanel();
@@ -97,7 +96,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         settings = new AdvancedDataMiningSettings();
         this.settingsControl.addSettingsComponent(this);
 
-        queryDefinitionViewerToggleButton = new ToggleButton(getStringMessages().viewQueryDefinition(),
+        queryDefinitionViewerToggleButton = new ToggleButton(getDataMiningStringMessages().viewQueryDefinition(),
                 new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
@@ -105,12 +104,12 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                                 !queryDefinitionViewerToggleButton.getValue());
                     }
                 });
-        queryDefinitionViewer = new QueryDefinitionViewer(parent, context, getStringMessages());
+        queryDefinitionViewer = new QueryDefinitionViewer(parent, context, getDataMiningStringMessages());
         addQueryDefinitionChangedListener(queryDefinitionViewer);
-        predefinedQueryRunner = new PredefinedQueryRunner(parent, context, session, getStringMessages(),
+        predefinedQueryRunner = new PredefinedQueryRunner(parent, context, session, getDataMiningStringMessages(),
                 dataMiningService, errorReporter, resultsPresenter);
 
-        Button clearSelectionButton = new Button(this.getStringMessages().clearSelection());
+        Button clearSelectionButton = new Button(getDataMiningStringMessages().clearSelection());
         clearSelectionButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -119,7 +118,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         });
         addControl(clearSelectionButton);
 
-        Button reloadButton = new Button(getStringMessages().reload());
+        Button reloadButton = new Button(getDataMiningStringMessages().reload());
         reloadButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -134,7 +133,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         }
 
         SuggestBoxStatisticProvider statisticProvider = new SuggestBoxStatisticProvider(parent, context,
-                getStringMessages(), getDataMiningService(), getErrorReporter(), settingsControl, settingsManager);
+                getDataMiningService(), getErrorReporter(), settingsControl, settingsManager);
 
         retrieverChainProvider = statisticProvider;
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(providerListener);
@@ -148,8 +147,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         aggregationDefinitionProvider = statisticProvider;
         aggregationDefinitionProvider.addAggregatorDefinitionChangedListener(providerListener);
 
-        groupingProvider = new MultiDimensionalGroupingProvider(parent, context, getStringMessages(),
-                getDataMiningService(), getErrorReporter(), retrieverChainProvider);
+        groupingProvider = new MultiDimensionalGroupingProvider(parent, context, getDataMiningService(),
+                getErrorReporter(), retrieverChainProvider);
         groupingProvider.addGroupingChangedListener(providerListener);
 
         filterSplitPanel = new SplitLayoutPanel(15);
@@ -157,7 +156,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         filterSplitPanel.addEast(queryDefinitionViewer.getEntryWidget(), 600);
         filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
         filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(parent, context, session,
-                stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
+                dataMiningService, errorReporter, retrieverChainProvider);
         filterSelectionProvider.addSelectionChangedListener(providerListener);
         filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
 
@@ -213,13 +212,13 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         private ValueListBox<FunctionDTO> dimensionChooser;
 
         public FirstDimensionSelectionDialog(DialogCallback<FunctionDTO> callback) {
-            super(getStringMessages().chooseDifferentDimensionTitle(),
-                    getStringMessages().chooseDifferentDimensionMessage(), getStringMessages().ok(),
-                    getStringMessages().cancel(), new DataEntryDialog.Validator<FunctionDTO>() {
+            super(getDataMiningStringMessages().chooseDifferentDimensionTitle(),
+                    getDataMiningStringMessages().chooseDifferentDimensionMessage(), getDataMiningStringMessages().ok(),
+                    getDataMiningStringMessages().cancel(), new DataEntryDialog.Validator<FunctionDTO>() {
                         @Override
                         public String getErrorMessage(FunctionDTO valueToValidate) {
                             if (valueToValidate == null) {
-                                return getStringMessages().pleaseSelectADimension();
+                                return getDataMiningStringMessages().pleaseSelectADimension();
                             } else {
                                 return null;
                             }
@@ -339,7 +338,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
     @Override
     public String getLocalizedShortName() {
-        return getStringMessages().queryDefinitionProvider();
+        return getDataMiningStringMessages().queryDefinitionProvider();
     }
 
     @Override
@@ -365,7 +364,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     @Override
     public SettingsDialogComponent<AdvancedDataMiningSettings> getSettingsDialogComponent(
             AdvancedDataMiningSettings settings) {
-        return new AdvancedDataMiningSettingsDialogComponent(settings, getStringMessages());
+        return new AdvancedDataMiningSettingsDialogComponent(settings, getDataMiningStringMessages());
     }
 
     @Override

@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
@@ -22,27 +21,24 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class AnchorDataMiningSettingsControl extends AbstractComponent<CompositeSettings>
+public class AnchorDataMiningSettingsControl extends AbstractDataMiningComponent<CompositeSettings>
         implements DataMiningSettingsControl {
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
 
-    private final StringMessages stringMessages;
     private final Collection<Component<?>> components;
     private final Anchor anchor;
 
-    public AnchorDataMiningSettingsControl(Component<?> parent, ComponentContext<?> context,
-            final StringMessages stringMessages) {
+    public AnchorDataMiningSettingsControl(Component<?> parent, ComponentContext<?> context) {
         super(parent, context);
-        this.stringMessages = stringMessages;
         components = new LinkedHashSet<>();
 
         anchor = new Anchor(AbstractImagePrototype.create(resources.darkSettingsIcon()).getSafeHtml());
         anchor.addStyleName("settingsAnchor");
-        anchor.setTitle(stringMessages.dataMiningSettings());
+        anchor.setTitle(getDataMiningStringMessages().dataMiningSettings());
         anchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new SettingsDialog<>(AnchorDataMiningSettingsControl.this, stringMessages).show();
+                new SettingsDialog<>(AnchorDataMiningSettingsControl.this, getDataMiningStringMessages()).show();
             }
         });
     }
@@ -59,7 +55,7 @@ public class AnchorDataMiningSettingsControl extends AbstractComponent<Composite
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.dataMiningSettings();
+        return getDataMiningStringMessages().dataMiningSettings();
     }
 
     @Override

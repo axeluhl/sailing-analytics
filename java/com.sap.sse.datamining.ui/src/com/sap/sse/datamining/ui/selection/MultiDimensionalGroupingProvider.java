@@ -22,28 +22,26 @@ import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.ui.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.GroupingChangedListener;
 import com.sap.sse.datamining.ui.GroupingProvider;
-import com.sap.sse.datamining.ui.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class MultiDimensionalGroupingProvider extends AbstractComponent<SerializableSettings>
+public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponent<SerializableSettings>
         implements GroupingProvider {
-    
+
     private static final String GROUPING_PROVIDER_ELEMENT_STYLE = "groupingProviderElement";
-    
-    private final StringMessages stringMessages;
+
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final Set<GroupingChangedListener> listeners;
-    
+
     private final FlowPanel mainPanel;
     private final List<ValueListBox<FunctionDTO>> dimensionToGroupByBoxes;
 
@@ -52,10 +50,9 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
     private final List<FunctionDTO> availableDimensions;
 
     public MultiDimensionalGroupingProvider(Component<?> parent, ComponentContext<?> context,
-            StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-                                            DataRetrieverChainDefinitionProvider retrieverChainProvider) {
+            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+            DataRetrieverChainDefinitionProvider retrieverChainProvider) {
         super(parent, context);
-        this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         listeners = new HashSet<GroupingChangedListener>();
@@ -63,9 +60,9 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
         availableDimensions = new ArrayList<>();
         isAwaitingReload = false;
         dimensionToGroupByBoxes = new ArrayList<ValueListBox<FunctionDTO>>();
-        
+
         mainPanel = new FlowPanel();
-        Label groupByLabel = new Label(this.stringMessages.groupBy());
+        Label groupByLabel = new Label(this.getDataMiningStringMessages().groupBy());
         groupByLabel.addStyleName(GROUPING_PROVIDER_ELEMENT_STYLE);
         mainPanel.add(groupByLabel);
 
@@ -73,23 +70,23 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
         addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
     }
-    
+
     @Override
     public void awaitReloadComponents() {
         isAwaitingReload = true;
     }
-    
+
     @Override
     public boolean isAwatingReload() {
         return isAwaitingReload;
     }
-    
+
     @Override
     public void reloadComponents() {
         isAwaitingReload = false;
         updateAvailableDimensions();
     }
-    
+
     @Override
     public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newRetrieverChainDefinition) {
         if (!Objects.equals(currentRetrieverChainDefinition, newRetrieverChainDefinition)) {
@@ -102,29 +99,30 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
 
     private void updateAvailableDimensions() {
         if (currentRetrieverChainDefinition != null) {
-            dataMiningService.getDimensionsFor(currentRetrieverChainDefinition, LocaleInfo.getCurrentLocale()
-                    .getLocaleName(), new AsyncCallback<HashSet<FunctionDTO>>() {
-                @Override
-                public void onSuccess(HashSet<FunctionDTO> dimensions) {
-                    clearAvailableDimensionsAndGroupByBoxes();
-                    for (FunctionDTO dimension : dimensions) {
-                        availableDimensions.add(dimension);
-                    }
-                    ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
-                    addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
-                    if (!availableDimensions.isEmpty()) {
-                        Collections.sort(availableDimensions);
-                        firstDimensionToGroupByBox.setValue(availableDimensions.iterator().next(), true);
-                    } else {
-                        notifyListeners();
-                    }
-                }
+            dataMiningService.getDimensionsFor(currentRetrieverChainDefinition,
+                    LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<HashSet<FunctionDTO>>() {
+                        @Override
+                        public void onSuccess(HashSet<FunctionDTO> dimensions) {
+                            clearAvailableDimensionsAndGroupByBoxes();
+                            for (FunctionDTO dimension : dimensions) {
+                                availableDimensions.add(dimension);
+                            }
+                            ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
+                            addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
+                            if (!availableDimensions.isEmpty()) {
+                                Collections.sort(availableDimensions);
+                                firstDimensionToGroupByBox.setValue(availableDimensions.iterator().next(), true);
+                            } else {
+                                notifyListeners();
+                            }
+                        }
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error fetching the dimensions from the server: " + caught.getMessage());
-                }
-            });
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(
+                                    "Error fetching the dimensions from the server: " + caught.getMessage());
+                        }
+                    });
         } else {
             clearAvailableDimensionsAndGroupByBoxes();
             ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
@@ -139,7 +137,7 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
         dimensionToGroupByBoxes.clear();
         availableDimensions.clear();
     }
-    
+
     @Override
     public Iterable<FunctionDTO> getAvailableDimensions() {
         return Collections.unmodifiableList(availableDimensions);
@@ -175,13 +173,14 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
 
     @Override
     public ValueListBox<FunctionDTO> createDimensionToGroupByBoxWithoutEventHandler() {
-        ValueListBox<FunctionDTO> dimensionToGroupByBox = new ValueListBox<FunctionDTO>(new AbstractObjectRenderer<FunctionDTO>() {
-            @Override
-            protected String convertObjectToString(FunctionDTO function) {
-                return function.getDisplayName();
-            }
-            
-        });
+        ValueListBox<FunctionDTO> dimensionToGroupByBox = new ValueListBox<FunctionDTO>(
+                new AbstractObjectRenderer<FunctionDTO>() {
+                    @Override
+                    protected String convertObjectToString(FunctionDTO function) {
+                        return function.getDisplayName();
+                    }
+
+                });
         dimensionToGroupByBox.addStyleName(GROUPING_PROVIDER_ELEMENT_STYLE);
         return dimensionToGroupByBox;
     }
@@ -219,10 +218,10 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
         }
         return dimensionsToGroupBy;
     }
-    
+
     @Override
     public void removeDimensionToGroupBy(FunctionDTO dimension) {
-        for (final Iterator<ValueListBox<FunctionDTO>> i=dimensionToGroupByBoxes.iterator(); i.hasNext(); ) {
+        for (final Iterator<ValueListBox<FunctionDTO>> i = dimensionToGroupByBoxes.iterator(); i.hasNext();) {
             final ValueListBox<FunctionDTO> dimensionListBox = i.next();
             if (Util.equalsWithNull(dimension, dimensionListBox.getValue())) {
                 i.remove();
@@ -251,7 +250,7 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
     public void addGroupingChangedListener(GroupingChangedListener listener) {
         listeners.add(listener);
     }
-    
+
     private void notifyListeners() {
         for (GroupingChangedListener listener : listeners) {
             listener.groupingChanged();
@@ -260,7 +259,7 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.groupingProvider();
+        return getDataMiningStringMessages().groupingProvider();
     }
 
     @Override
@@ -292,7 +291,7 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
     public void updateSettings(SerializableSettings newSettings) {
         // no-op
     }
-    
+
     @Override
     public String getDependentCssClassName() {
         return "multiDimensionalGroupingProvider";

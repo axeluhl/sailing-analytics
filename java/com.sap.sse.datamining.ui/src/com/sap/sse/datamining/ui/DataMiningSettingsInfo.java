@@ -10,6 +10,6 @@ public interface DataMiningSettingsInfo {
     <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(
             SettingsType settings);
 
-    String getLocalizedName(StringMessages stringMessages);
+    String getLocalizedName();
 
 }

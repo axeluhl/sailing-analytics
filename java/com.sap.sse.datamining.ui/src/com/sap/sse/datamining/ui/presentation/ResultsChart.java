@@ -41,7 +41,6 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
-import com.sap.sse.datamining.ui.StringMessages;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.controls.SimpleObjectRenderer;
@@ -61,7 +60,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
 
         @Override
         public String toString() {
-            return getStringMessages().groupName();
+            return getDataMiningStringMessages().groupName();
         };
     };
     private final Comparator<GroupKey> ascendingByValueKeyComparator = new Comparator<GroupKey>() {
@@ -74,7 +73,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
 
         @Override
         public String toString() {
-            return getStringMessages().valueAscending();
+            return getDataMiningStringMessages().valueAscending();
         };
     };
     private final Comparator<GroupKey> descendingByValueKeyComparator = new Comparator<GroupKey>() {
@@ -85,7 +84,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
 
         @Override
         public String toString() {
-            return getStringMessages().valueDescending();
+            return getDataMiningStringMessages().valueDescending();
         };
     };
     private final Comparator<GroupKey> ascendingByGroupAverageComparator = new Comparator<GroupKey>() {
@@ -97,7 +96,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         }
 
         public String toString() {
-            return getStringMessages().groupAverageAscending();
+            return getDataMiningStringMessages().groupAverageAscending();
         };
     };
     private final Comparator<GroupKey> descendingByGroupAverageComparator = new Comparator<GroupKey>() {
@@ -107,7 +106,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         }
 
         public String toString() {
-            return getStringMessages().groupAverageDescending();
+            return getDataMiningStringMessages().groupAverageDescending();
         };
     };
     private final Comparator<GroupKey> ascendingByGroupMedianComparator = new Comparator<GroupKey>() {
@@ -119,7 +118,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         }
 
         public String toString() {
-            return getStringMessages().groupMedianAscending();
+            return getDataMiningStringMessages().groupMedianAscending();
         };
     };
     private final Comparator<GroupKey> descendingByGroupMedianComparator = new Comparator<GroupKey>() {
@@ -129,7 +128,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         }
 
         public String toString() {
-            return getStringMessages().groupMedianDescending();
+            return getDataMiningStringMessages().groupMedianDescending();
         };
     };
 
@@ -161,14 +160,14 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private final Map<GroupKey, Double> medianPerMainKey;
     private final boolean showErrorBars;
 
-    public ResultsChart(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
-            boolean showErrorBars, DrillDownCallback drillDownCallback) {
-        super(parent, context, stringMessages);
+    public ResultsChart(Component<?> parent, ComponentContext<?> context, boolean showErrorBars,
+            DrillDownCallback drillDownCallback) {
+        super(parent, context);
         this.showErrorBars = showErrorBars;
         this.drillDownCallback = drillDownCallback;
         sortByPanel = new HorizontalPanel();
         sortByPanel.setSpacing(5);
-        sortByPanel.add(new Label(stringMessages.sortBy() + ":"));
+        sortByPanel.add(new Label(getDataMiningStringMessages().sortBy() + ":"));
         keyComparatorListBox = new ValueListBox<>(new AbstractRenderer<Comparator<?>>() {
             @Override
             public String render(Comparator<?> object) {
@@ -188,7 +187,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
 
         HorizontalPanel decimalsPanel = new HorizontalPanel();
         decimalsPanel.setSpacing(5);
-        decimalsPanel.add(new Label(getStringMessages().shownDecimals() + ":"));
+        decimalsPanel.add(new Label(getDataMiningStringMessages().shownDecimals() + ":"));
         decimalsListBox = new ValueListBox<Integer>(new SimpleObjectRenderer<Integer>());
         decimalsPanel.add(decimalsListBox);
         decimalsListBox.setValue(0);
@@ -215,7 +214,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
 
         seriesMappedByGroupKey = new HashMap<>();
         errorSeriesMappedByGroupKey = new HashMap<>();
-        simpleResultSeriesKey = new GenericGroupKey<>(stringMessages.results());
+        simpleResultSeriesKey = new GenericGroupKey<>(getDataMiningStringMessages().results());
         mainKeyToXValueMap = new HashMap<>();
         xValueToMainKeyMap = new HashMap<>();
         averagePerMainKey = new HashMap<>();
@@ -274,7 +273,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     }
 
     private void updateChartSubtitle() {
-        chart.setChartSubtitle(new ChartSubtitle().setText(getStringMessages().queryResultsChartSubtitle(
+        chart.setChartSubtitle(new ChartSubtitle().setText(getDataMiningStringMessages().queryResultsChartSubtitle(
                 getCurrentResult().getRetrievedDataAmount(), getCurrentResult().getCalculationTimeInSeconds())));
     }
 
@@ -300,7 +299,8 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
                 if (errorMargins != null) {
                     Point errorMarginsPoint = new Point(mainKeyToXValueMap.get(mainKey), errorMargins.getA(),
                             errorMargins.getB());
-                    errorMarginsPoint.setName(mainKey.asString() + ", " + stringMessages.elements(errorMargins.getC()));
+                    errorMarginsPoint.setName(
+                            mainKey.asString() + ", " + getDataMiningStringMessages().elements(errorMargins.getC()));
                     errorSeriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
                             .addPoint(errorMarginsPoint, false, false, false);
                 }
@@ -377,8 +377,8 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
             if (!seriesMappedByGroupKey.containsKey(seriesKey)) {
                 seriesMappedByGroupKey.put(seriesKey, chart.createSeries().setName(seriesKey.asString()));
                 if (showErrorBars) {
-                    errorSeriesMappedByGroupKey.put(seriesKey, chart.createSeries().setType(Type.ERRORBAR)
-                            .setName(seriesKey.asString() + " " + getStringMessages().dataMiningErrorMargins()));
+                    errorSeriesMappedByGroupKey.put(seriesKey, chart.createSeries().setType(Type.ERRORBAR).setName(
+                            seriesKey.asString() + " " + getDataMiningStringMessages().dataMiningErrorMargins()));
                 }
             }
         }
@@ -415,7 +415,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         Chart chart = new Chart().setType(Series.Type.COLUMN).setMarginLeft(100).setMarginRight(45).setWidth100()
                 .setHeight100().setBorderColor(new Color("#F0AB00")).setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
-                .setChartTitle(new ChartTitle().setText(getStringMessages().dataMiningResult()));
+                .setChartTitle(new ChartTitle().setText(getDataMiningStringMessages().dataMiningResult()));
         chart.setExporting(new Exporting().setEnabled(false));
         chart.getXAxis().setAllowDecimals(false);
         chart.getYAxis().setAxisTitleText("Result").setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
@@ -446,7 +446,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
 
     @Override
     public String getLocalizedShortName() {
-        return getStringMessages().resultsChart();
+        return getDataMiningStringMessages().resultsChart();
     }
 
     @Override

@@ -16,31 +16,26 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.ui.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.DataMiningResources;
 import com.sap.sse.datamining.ui.ResultsPresenter;
-import com.sap.sse.datamining.ui.StringMessages;
 import com.sap.sse.datamining.ui.presentation.ResultsChart.DrillDownCallback;
-import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.controls.ScrolledTabLayoutPanel;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public abstract class AbstractTabbedResultsPresenter extends AbstractComponent<Settings>
+public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningComponent<Settings>
         implements ResultsPresenter<Settings> {
 
     protected static final DataMiningResources resources = GWT.create(DataMiningResources.class);
-
-    protected final StringMessages stringMessages;
-
     protected final ScrolledTabLayoutPanel tabPanel;
     protected final Map<Widget, ResultsPresenter<?>> presentersMappedByHeader;
     protected final DrillDownCallback drillDownCallback;
 
     public AbstractTabbedResultsPresenter(Component<?> parent, ComponentContext<?> context,
-            DrillDownCallback drillDownCallback, StringMessages stringMessages) {
+            DrillDownCallback drillDownCallback) {
         super(parent, context);
-        this.stringMessages = stringMessages;
         this.drillDownCallback = drillDownCallback;
         tabPanel = new ScrolledTabLayoutPanel(30, Unit.PX, resources.arrowLeftIcon(), resources.arrowRightIcon());
         tabPanel.setAnimationDuration(0);
@@ -48,7 +43,7 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractComponent<S
         presentersMappedByHeader = new HashMap<>();
 
         addNewTabTab();
-        addTabAndFocus(new MultiResultsPresenter(this, context, drillDownCallback, stringMessages));
+        addTabAndFocus(new MultiResultsPresenter(this, context, drillDownCallback));
     }
 
     private void addNewTabTab() {
@@ -62,7 +57,7 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractComponent<S
                 if (event.getItem() == tabPanel.getWidgetCount() - 1) {
                     event.cancel();
                     addTabAndFocus(new MultiResultsPresenter(AbstractTabbedResultsPresenter.this, getComponentContext(),
-                            drillDownCallback, stringMessages));
+                            drillDownCallback));
                 }
             }
         });
@@ -70,19 +65,19 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractComponent<S
 
     @Override
     public void showError(String error) {
-        getSelectedHeader().setText(stringMessages.error());
+        getSelectedHeader().setText(getDataMiningStringMessages().error());
         getSelectedPresenter().showError(error);
     }
 
     @Override
     public void showError(String mainError, Iterable<String> detailedErrors) {
-        getSelectedHeader().setText(stringMessages.error());
+        getSelectedHeader().setText(getDataMiningStringMessages().error());
         getSelectedPresenter().showError(mainError, detailedErrors);
     }
 
     @Override
     public void showBusyIndicator() {
-        getSelectedHeader().setText(stringMessages.runningQuery());
+        getSelectedHeader().setText(getDataMiningStringMessages().runningQuery());
         getSelectedPresenter().showBusyIndicator();
     }
 
@@ -116,7 +111,7 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractComponent<S
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.tabbedResultsPresenter();
+        return getDataMiningStringMessages().tabbedResultsPresenter();
     }
 
     @Override
@@ -164,7 +159,7 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractComponent<S
         private final HTML label;
 
         public CloseableTabHeader() {
-            label = new HTML(stringMessages.empty());
+            label = new HTML(getDataMiningStringMessages().empty());
             label.getElement().getStyle().setMarginRight(5, Unit.PX);
             this.add(label);
             Image closeImage = new Image(resources.closeIcon());
