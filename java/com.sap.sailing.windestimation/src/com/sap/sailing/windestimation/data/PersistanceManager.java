@@ -12,6 +12,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.util.JSON;
+import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 
 /**
  * 
@@ -42,6 +43,15 @@ public class PersistanceManager {
         dbObject.put("competitorTracks", dbCompetitorTracks);
         DBCollection races = db.getCollection("races");
         races.insert(dbObject);
+    }
+
+    public List<CompleteManeuverCurveWithEstimationData> getManeuvers() {
+        for (DBObject dbObject : db.getCollection("races").find()) {
+            String regattaName = (String) dbObject.get("regattaName");
+            String raceName = (String) dbObject.get("trackedRaceName");
+            // TODO use deserializer
+        }
+        return null;
     }
 
 }
