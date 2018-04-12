@@ -44,7 +44,9 @@ public class CompetitorAndBoatAdapter extends RecyclerView.Adapter<CompetitorAnd
         if (competitor != null) {
             if (mCanBoatsOfCompetitorsChangePerRace && boat != null) {
                 holder.vesselId.setText(boat.getSailID());
-                ViewHelper.setColors(holder.vesselId, boat.getColor().getAsHtml());
+                if (boat.getColor() != null) {
+                    ViewHelper.setColors(holder.vesselId, boat.getColor().getAsHtml());
+                }
             }
             String name = "";
             if (competitor.getShortInfo() != null) {

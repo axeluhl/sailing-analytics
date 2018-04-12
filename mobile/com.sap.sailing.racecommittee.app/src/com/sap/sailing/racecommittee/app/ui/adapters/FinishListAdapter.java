@@ -58,7 +58,9 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         if (mCanBoatsOfCompetitorsChangePerRace && item.getBoat() != null) {
             holder.vesselId.setVisibility(View.VISIBLE);
             holder.vesselId.setText(item.getBoat().getSailID());
-            ViewHelper.setColors(holder.vesselId, item.getBoat().getColor().getAsHtml());
+            if (item.getBoat().getColor() != null) {
+                ViewHelper.setColors(holder.vesselId, item.getBoat().getColor().getAsHtml());
+            }
         }
         holder.competitor.setText(item.getCompetitorDisplayName());
         int dragState = holder.getDragStateFlags();

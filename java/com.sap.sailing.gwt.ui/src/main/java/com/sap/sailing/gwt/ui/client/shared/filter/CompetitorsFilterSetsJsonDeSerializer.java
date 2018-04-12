@@ -6,7 +6,7 @@ import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.filter.ValueFilter;
@@ -28,7 +28,7 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
         result.put(FIELD_FILTERSETS, filterSetArray);
         
         int i = 0;
-        for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: filterSets.getFilterSets()) {
+        for(FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> filterSet: filterSets.getFilterSets()) {
             // only editable filter sets are stored
             if(filterSet.isEditable()) {
                 JSONObject filterSetObject = new JSONObject();
@@ -40,7 +40,7 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
                 JSONArray filterArray = new JSONArray();
                 filterSetObject.put(FIELD_FILTERS, filterArray);
                 int j = 0;
-                for(FilterWithUI<CompetitorDTO> filter: filterSet.getFilters()) {
+                for(FilterWithUI<CompetitorWithBoatDTO> filter: filterSet.getFilters()) {
                     // Remark: other filter types than ValueFilter's are not stored right now
                     if(filter instanceof ValueFilter<?,?>) {
                         ValueFilter<?,?> valueFilter = (ValueFilter<?,?>) filter;
@@ -75,7 +75,7 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
                 JSONString filterSetNameValue = (JSONString) filterSetValue.get(FIELD_FILTERSET_NAME);
                 JSONBoolean filterSetIsEditableValue = (JSONBoolean) filterSetValue.get(FIELD_FILTERSET_ISEDITABLE);
                 
-                FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet = new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(filterSetNameValue.stringValue());
+                FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> filterSet = new FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>>(filterSetNameValue.stringValue());
                 filterSet.setEditable(filterSetIsEditableValue.booleanValue());
                 result.addFilterSet(filterSet);
 
@@ -84,7 +84,7 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
                     JSONObject filterObject = (JSONObject) filterArray.get(j);
                     JSONString filterType = (JSONString) filterObject.get(ValueFilterJsonDeSerializerUtil.FIELD_FILTER_TYPE);
                     if(filterType != null && ValueFilterJsonDeSerializerUtil.VALUE_FILTER_TYPE.equals(filterType.stringValue())) {
-                        FilterWithUI<CompetitorDTO> filterWithUI = ValueFilterJsonDeSerializerUtil.deserialize(filterObject);
+                        FilterWithUI<CompetitorWithBoatDTO> filterWithUI = ValueFilterJsonDeSerializerUtil.deserialize(filterObject);
                         if(filterWithUI != null) {
                             filterSet.addFilter(filterWithUI);
                         }
@@ -93,7 +93,7 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
             }
             // finally set the active filter set
             if(activeFilterSetName != null) {
-                for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: result.getFilterSets()) {
+                for(FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> filterSet: result.getFilterSets()) {
                     if(activeFilterSetName.equals(filterSet.getName())) {
                         result.setActiveFilterSet(filterSet);
                         break;

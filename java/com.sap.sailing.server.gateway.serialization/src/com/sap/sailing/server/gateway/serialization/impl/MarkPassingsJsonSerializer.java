@@ -11,10 +11,9 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
-import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Util.Pair;
 
 public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSerializer {
     public static final String ZERO_BASED_WAYPOINT_INDEX = "zeroBasedWaypointIndex";
@@ -27,7 +26,7 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
     public JSONObject serialize(TrackedRace trackedRace) {
         final Course course = trackedRace.getRace().getCourse();
         JSONObject result = new JSONObject();
-        CompetitorWithBoatJsonSerializer competitorWithBoatSerializer = CompetitorWithBoatJsonSerializer.create();
+        CompetitorAndBoatJsonSerializer competitorWithBoatSerializer = CompetitorAndBoatJsonSerializer.create();
         CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
         JSONArray byCompetitorJson = new JSONArray();
         result.put(BYCOMPETITOR, byCompetitorJson);
@@ -36,7 +35,7 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
             Boat boat = competitorAndBoatEntry.getValue();
             JSONObject forCompetitorJson = new JSONObject();
             byCompetitorJson.add(forCompetitorJson);
-            forCompetitorJson.put(COMPETITOR, competitorWithBoatSerializer.serialize(new CompetitorWithBoatImpl(competitor, (DynamicBoat) boat)));
+            forCompetitorJson.put(COMPETITOR, competitorWithBoatSerializer.serialize(new Pair<>(competitor, boat)));
             final NavigableSet<MarkPassing> markPassingsForCompetitor = trackedRace.getMarkPassings(competitor);
             JSONArray markPassingsForCompetitorJson = new JSONArray();
             forCompetitorJson.put(MARKPASSINGS, markPassingsForCompetitorJson);

@@ -20,21 +20,26 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl exten
     private final Distance distanceSailedIfNotManeuvering;
     private final Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuvering;
     private final int gpsFixesCount;
+    private final int gpsFixesCountFromPreviousManeuverEndToManeuverStart;
+    private final int gpsFixesCountFromManeuverEndToNextManeuverStart;
 
     public ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl(TimePoint timePointBefore,
             TimePoint timePointAfter, SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            double directionChangeInDegrees, Speed lowestSpeed,
-            SpeedWithBearing averageSpeedWithBearingBefore, Duration durationFromPreviousManeuverEndToManeuverStart,
-            SpeedWithBearing averageSpeedWithBearingAfter, Duration durationFromManeuverEndToNextManeuverStart,
+            double directionChangeInDegrees, Speed lowestSpeed, SpeedWithBearing averageSpeedWithBearingBefore,
+            Duration durationFromPreviousManeuverEndToManeuverStart,
+            int gpsFixesCountFromPreviousManeuverEndToManeuverStart, SpeedWithBearing averageSpeedWithBearingAfter,
+            Duration durationFromManeuverEndToNextManeuverStart, int gpsFixesCountFromManeuverEndToNextManeuverStart,
             Distance distanceSailedWithinManeuver, Distance distanceSailedWithinManeuverTowardMiddleAngleProjection,
-            Distance distanceSailedIfNotManeuvering,
-            Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuvering, int gpsFixesCount) {
+            Distance distanceSailedIfNotManeuvering, Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuvering,
+            int gpsFixesCount) {
         super(timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees,
                 lowestSpeed);
         this.averageSpeedWithBearingBefore = averageSpeedWithBearingBefore;
         this.durationFromPreviousManeuverEndToManeuverStart = durationFromPreviousManeuverEndToManeuverStart;
+        this.gpsFixesCountFromPreviousManeuverEndToManeuverStart = gpsFixesCountFromPreviousManeuverEndToManeuverStart;
         this.averageSpeedWithBearingAfter = averageSpeedWithBearingAfter;
         this.durationFromManeuverEndToNextManeuverStart = durationFromManeuverEndToNextManeuverStart;
+        this.gpsFixesCountFromManeuverEndToNextManeuverStart = gpsFixesCountFromManeuverEndToNextManeuverStart;
         this.distanceSailedWithinManeuver = distanceSailedWithinManeuver;
         this.distanceSailedWithinManeuverTowardMiddleAngleProjection = distanceSailedWithinManeuverTowardMiddleAngleProjection;
         this.distanceSailedIfNotManeuvering = distanceSailedIfNotManeuvering;
@@ -81,10 +86,20 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl exten
     public Distance getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering() {
         return distanceSailedTowardMiddleAngleProjectionIfNotManeuvering;
     }
-    
+
     @Override
     public int getGpsFixesCount() {
         return gpsFixesCount;
+    }
+
+    @Override
+    public int getGpsFixesCountFromPreviousManeuverEndToManeuverStart() {
+        return gpsFixesCountFromPreviousManeuverEndToManeuverStart;
+    }
+
+    @Override
+    public int getGpsFixesCountFromManeuverEndToNextManeuverStart() {
+        return gpsFixesCountFromManeuverEndToNextManeuverStart;
     }
 
 }

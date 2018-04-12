@@ -17,7 +17,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -87,7 +87,7 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
      */
     public static interface CompetitorsToImportToExistingLinking {
         void unlinkCompetitor(CompetitorDescriptor competitor);
-        CompetitorDTO getExistingCompetitorToUseInsteadOf(CompetitorDescriptor competitor);
+        CompetitorWithBoatDTO getExistingCompetitorToUseInsteadOf(CompetitorDescriptor competitor);
     }
 
     public CompetitorDescriptorTableWrapper(CompetitorImportMatcher competitorImportMatcherParam,
@@ -225,7 +225,7 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
             ImagesBarColumn<CompetitorDescriptor, CompetitorImportTableActionIcons> unlinkColumn, CompetitorsToImportToExistingLinking unlinkCallback) {
         ListHandler<CompetitorDescriptor> competitorColumnListHandler = getColumnSortHandler();
         final NaturalComparator caseInsensitiveNaturalComparator = new NaturalComparator(/* case sensitive */ false);
-        final Comparator<CompetitorDTO> nullFirstComparator = Comparator.nullsFirst(/* real comparator */ null);
+        final Comparator<CompetitorWithBoatDTO> nullFirstComparator = Comparator.nullsFirst(/* real comparator */ null);
         competitorColumnListHandler.setComparator(competitorNameColumn, (cd1, cd2)->caseInsensitiveNaturalComparator.compare(cd1.getName(), cd2.getName()));
         competitorColumnListHandler.setComparator(boatClassNameColumn, (cd1, cd2)->caseInsensitiveNaturalComparator.compare(cd1.getBoatClassName(), cd2.getBoatClassName()));
         competitorColumnListHandler.setComparator(sailIdColumn, (cd1, cd2)->caseInsensitiveNaturalComparator.compare(cd1.getSailNumber(), cd2.getSailNumber()));

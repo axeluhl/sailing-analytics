@@ -10,46 +10,46 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 
 public class CompetitorTable extends AbsolutePanel {
 
-    private CellTable<CompetitorDTO> table;
+    private CellTable<CompetitorWithBoatDTO> table;
     private CompetitorTableRowSelectionListener competitorTableRowSelectionListener;
 
     public CompetitorTable(CompetitorTableRowSelectionListener competitorTableRowSelectionListener) {
         this.competitorTableRowSelectionListener = competitorTableRowSelectionListener;
     }
 
-    public void setTableContent(List<CompetitorDTO> competitorNames) {
+    public void setTableContent(List<CompetitorWithBoatDTO> competitorNames) {
         if (table == null) {
             initTable(competitorNames);
         }
     }
 
-    private void initTable(List<CompetitorDTO> competitorNames) {
+    private void initTable(List<CompetitorWithBoatDTO> competitorNames) {
         CellTable.Resources tableRes = GWT.create(CompetitorTableStyleResource.class);
 
-        table = new BaseCelltable<CompetitorDTO>(15, tableRes);
+        table = new BaseCelltable<CompetitorWithBoatDTO>(15, tableRes);
         table.getElement().getStyle().setWidth(100, Unit.PCT);
         table.setSkipRowHoverStyleUpdate(true);
         table.setSkipRowHoverCheck(true);
         table.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
-        final SingleSelectionModel<CompetitorDTO> selectionModel = new SingleSelectionModel<CompetitorDTO>();
+        final SingleSelectionModel<CompetitorWithBoatDTO> selectionModel = new SingleSelectionModel<CompetitorWithBoatDTO>();
         table.setSelectionModel(selectionModel);
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
-                CompetitorDTO selected = selectionModel.getSelectedObject();
+                CompetitorWithBoatDTO selected = selectionModel.getSelectedObject();
                 if (selected != null) {
                     competitorTableRowSelectionListener.didSelectedRowWithCompetitorName(selected);
                 }
             }
         });
 
-        TextColumn<CompetitorDTO> competitorNameCollumn = new TextColumn<CompetitorDTO>() {
+        TextColumn<CompetitorWithBoatDTO> competitorNameCollumn = new TextColumn<CompetitorWithBoatDTO>() {
             @Override
-            public String getValue(CompetitorDTO competitor) {
+            public String getValue(CompetitorWithBoatDTO competitor) {
                 return competitor.getName();
             }
         };

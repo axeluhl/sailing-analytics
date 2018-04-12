@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.NumberFilter;
 import com.sap.sse.common.filter.TextFilter;
@@ -28,7 +28,7 @@ public class ValueFilterJsonDeSerializerUtil {
         return filterAsJsonObject;
     }
 
-    public static FilterWithUI<CompetitorDTO> deserialize(JSONObject filterAsJsonObject) {
+    public static FilterWithUI<CompetitorWithBoatDTO> deserialize(JSONObject filterAsJsonObject) {
         JSONString filterNameValue = (JSONString) filterAsJsonObject.get(FIELD_FILTER_NAME);
         JSONString filterOperatorValue = (JSONString) filterAsJsonObject.get(FIELD_FILTER_OPERATOR);
         JSONString filterValueValue = (JSONString) filterAsJsonObject.get(FIELD_FILTER_VALUE);
@@ -37,16 +37,16 @@ public class ValueFilterJsonDeSerializerUtil {
         String operator = filterOperatorValue.stringValue();
         String value = filterValueValue.stringValue();
         
-        FilterWithUI<CompetitorDTO> filter = CompetitorFilterWithUIFactory.createFilter(filterName);
+        FilterWithUI<CompetitorWithBoatDTO> filter = CompetitorFilterWithUIFactory.createFilter(filterName);
         if(filter != null && operator != null && value != null) {
             if(filter instanceof NumberFilter<?,?>) {
                 @SuppressWarnings("unchecked")
-                NumberFilter<CompetitorDTO, Integer> numberFilter = (NumberFilter<CompetitorDTO, Integer>) filter;
+                NumberFilter<CompetitorWithBoatDTO, Integer> numberFilter = (NumberFilter<CompetitorWithBoatDTO, Integer>) filter;
                 numberFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.valueOf(operator)));
                 numberFilter.setValue(Integer.valueOf(value));
             } else if(filter instanceof TextFilter<?>) {
                 @SuppressWarnings("unchecked")
-                TextFilter<CompetitorDTO> textFilter = (TextFilter<CompetitorDTO>) filter;
+                TextFilter<CompetitorWithBoatDTO> textFilter = (TextFilter<CompetitorWithBoatDTO>) filter;
                 textFilter.setOperator(new TextOperator(TextOperator.Operators.valueOf(operator)));
                 textFilter.setValue(value);
             }

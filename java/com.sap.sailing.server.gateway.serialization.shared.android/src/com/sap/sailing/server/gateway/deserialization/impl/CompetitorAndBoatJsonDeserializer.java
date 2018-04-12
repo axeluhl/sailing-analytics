@@ -4,6 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -26,8 +27,16 @@ public class CompetitorAndBoatJsonDeserializer implements JsonDeserializer<Pair<
 
     @Override
     public Pair<Competitor, Boat> deserialize(JSONObject competitorAndBoatJsonObject) throws JsonDeserializationException {
-        Competitor competitor = competitorDeserializer.deserialize(Helpers.getNestedObjectSafe(competitorAndBoatJsonObject, CompetitorAndBoatJsonSerializer.FIELD_COMPETITOR));
-        Boat boat = boatDeserializer.deserialize(Helpers.getNestedObjectSafe(competitorAndBoatJsonObject, CompetitorAndBoatJsonSerializer.FIELD_BOAT));
+        final Competitor competitor;
+        final Boat boat;
+        if (competitorAndBoatJsonObject.containsKey(CompetitorAndBoatJsonSerializer.FIELD_COMPETITOR)) {
+            competitor = competitorDeserializer.deserialize(Helpers.getNestedObjectSafe(competitorAndBoatJsonObject, CompetitorAndBoatJsonSerializer.FIELD_COMPETITOR));
+            boat = boatDeserializer.deserialize(Helpers.getNestedObjectSafe(competitorAndBoatJsonObject, CompetitorAndBoatJsonSerializer.FIELD_BOAT));
+        } else {
+            final CompetitorWithBoat competitorWithBoat = (CompetitorWithBoat) competitorDeserializer.deserialize(competitorAndBoatJsonObject);
+            competitor = competitorWithBoat;
+            boat = competitorWithBoat.getBoat();
+        }
         return new Pair<Competitor, Boat>(competitor, boat);
     }
 }

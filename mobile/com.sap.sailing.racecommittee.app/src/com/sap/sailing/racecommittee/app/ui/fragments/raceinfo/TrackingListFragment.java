@@ -30,7 +30,7 @@ import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -574,7 +574,7 @@ public class TrackingListFragment extends BaseFragment
         }
     }
 
-    private CompetitorStore getCompetitorStore() {
+    private CompetitorAndBoatStore getCompetitorStore() {
         return DataManager.create(getActivity()).getDataStore().getDomainFactory().getCompetitorStore();
     }
 
