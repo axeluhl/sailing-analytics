@@ -23,8 +23,8 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public String name;
 
     private List<RaceColumnDTO> races;
-    public Map<CompetitorDTO, String> competitorDisplayNames;
-    public Map<CompetitorDTO, LeaderboardRowDTO> rows;
+    public Map<CompetitorWithBoatDTO, String> competitorDisplayNames;
+    public Map<CompetitorWithBoatDTO, LeaderboardRowDTO> rows;
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
     
@@ -53,7 +53,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     
     private void collectBoatClasses(Collection<BoatClassDTO> boatClasses) {
         if (rows != null) {
-            for (CompetitorDTO competitor : rows.keySet()) {
+            for (CompetitorWithBoatDTO competitor : rows.keySet()) {
                 boatClasses.add(competitor.getBoatClass());
             }
         }
@@ -69,7 +69,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         return displayName;
     }
 
-    public String getDisplayName(CompetitorDTO competitor) {
+    public String getDisplayName(CompetitorWithBoatDTO competitor) {
         if (competitorDisplayNames == null || competitorDisplayNames.get(competitor) == null) {
             return competitor.getName();
         } else {
@@ -115,7 +115,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
      * Tells if the <code>competitor</code> scored (and therefore presumably participated) in a medal race represented
      * in this leaderboard.
      */
-    public boolean scoredInMedalRace(CompetitorDTO competitor) {
+    public boolean scoredInMedalRace(CompetitorWithBoatDTO competitor) {
         LeaderboardRowDTO row = rows.get(competitor);
         for (RaceColumnDTO race : races) {
             if (race.isMedalRace() && row.fieldsByRaceColumnName.get(race.getRaceColumnName()).netPoints > 0) {
@@ -125,7 +125,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         return false;
     }
 
-    public Double getTotalPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
+    public Double getTotalPoints(CompetitorWithBoatDTO competitor, String nameOfLastRaceSoFar) {
         Double totalPoints = null;
         final LeaderboardRowDTO row = rows.get(competitor);
         if (row != null) {
@@ -431,7 +431,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         return true;
     }
 
-    public boolean isDisplayNameSet(CompetitorDTO competitor) {
+    public boolean isDisplayNameSet(CompetitorWithBoatDTO competitor) {
         return competitorDisplayNames.get(competitor) != null;
     }
 

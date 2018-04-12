@@ -14,7 +14,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -42,8 +42,8 @@ public class CompetitorWithBoatCreateDialog extends AbstractCompetitorWithBoatDi
      *            The boat class is the default shown boat class for new boats. Set <code>null</code> if your boat is
      *            already initialized or you don't want a default boat class.
      */
-    public CompetitorWithBoatCreateDialog(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter, CompetitorDTO competitorToEdit,
-            DialogCallback<CompetitorDTO> callback, String boatClass) {
+    public CompetitorWithBoatCreateDialog(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter, CompetitorWithBoatDTO competitorToEdit,
+            DialogCallback<CompetitorWithBoatDTO> callback, String boatClass) {
         super("Add competitor with boat", stringMessages, competitorToEdit, callback, boatClass);
         this.ensureDebugId("CompetitorWithBoatCreateDialog");
                         

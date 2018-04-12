@@ -3,7 +3,7 @@ package com.sap.sailing.server.operationaltransformation;
 import java.util.ArrayList;
 
 import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sse.common.Util;
@@ -21,7 +21,7 @@ public class AllowBoatResetToDefaults extends AbstractRacingEventServiceOperatio
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        final CompetitorStore competitorAndBoatStore = toState.getBaseDomainFactory().getCompetitorStore();
+        final CompetitorAndBoatStore competitorAndBoatStore = toState.getBaseDomainFactory().getCompetitorStore();
         for (String boatIdAsString : boatIdsAsStrings) {
             Boat boat = competitorAndBoatStore.getExistingBoatByIdAsString(boatIdAsString);
             if (boat != null) {

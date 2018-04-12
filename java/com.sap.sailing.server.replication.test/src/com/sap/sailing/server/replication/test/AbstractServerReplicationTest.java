@@ -1,7 +1,7 @@
 package com.sap.sailing.server.replication.test;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -53,7 +53,7 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                     @Override public DomainObjectFactory getDomainObjectFactory() { return PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, baseDomainFactory); }
                     @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
                     @Override public DomainFactory getBaseDomainFactory() { return baseDomainFactory; }
-                    @Override public CompetitorStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
+                    @Override public CompetitorAndBoatStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
                 };
             }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, null, null, /* sailingNotificationService */ null,
                     /* trackedRaceStatisticsCache */ null, /* restoreTrackedRaces */ false);
@@ -72,7 +72,7 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                             @Override public DomainObjectFactory getDomainObjectFactory() { return domainObjectFactory; }
                             @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
                             @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
-                            @Override public CompetitorStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
+                            @Override public CompetitorAndBoatStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
                         };
                     }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE,
                     /* serviceFinderFactory */ null, null, /* sailingNotificationService */ null,
