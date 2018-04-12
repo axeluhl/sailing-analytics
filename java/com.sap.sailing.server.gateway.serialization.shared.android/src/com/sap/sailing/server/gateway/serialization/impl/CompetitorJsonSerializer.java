@@ -17,14 +17,37 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.CountryCode;
 
+/**
+ * Serializes a {@link Competitor} or {@link CompetitorWithBoat} object. If a {@link CompetitorWithBoat} object,
+ * the {@link CompetitorJsonConstants#FIELD_BOAT} field will be filled with a boat document as serialized by the
+ * {@link BoatJsonSerializer}. For {@link Competitor} objects with {@link Competitor#hasBoat()}{@code == false} the
+ * {@link CompetitorJsonConstants#FIELD_BOAT} field will not be set. This can also be used by the corresponding
+ * de-serializer to identify which class implementing the {@link Competitor} interface to instantiate. 
+ */
 public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     public static final String FIELD_ID = "id";
     
     private final JsonSerializer<Team> teamJsonSerializer;
     private final JsonSerializer<Boat> boatJsonSerializer;
 
+    /**
+     * Creates a serializer for {@link Competitor} objects which by default, if the competitor
+     * {@link Competitor#hasBoat() has a boat attached} will serialize the boat in the
+     * {@link CompetitorJsonConstants#FIELD_BOAT} field of the resulting document. See {@link #create(boolean)} for a
+     * variant where callers can choose whether the {@link CompetitorJsonConstants#FIELD_BOAT} field shall be filled or
+     * not.
+     */
     public static CompetitorJsonSerializer create() {
-        return new CompetitorJsonSerializer(TeamJsonSerializer.create(), BoatJsonSerializer.create());
+        return create(/* serialize boat */ true);
+    }
+
+    /**
+     * Creates a serializer for {@link Competitor} objects which if {@code serializeBoat==true} and if the competitor
+     * {@link Competitor#hasBoat() has a boat attached} will serialize the boat in the
+     * {@link CompetitorJsonConstants#FIELD_BOAT} field of the resulting document.
+     */
+    public static CompetitorJsonSerializer create(boolean serializeBoat) {
+        return new CompetitorJsonSerializer(TeamJsonSerializer.create(), serializeBoat?BoatJsonSerializer.create():null);
     }
 
     public CompetitorJsonSerializer() {

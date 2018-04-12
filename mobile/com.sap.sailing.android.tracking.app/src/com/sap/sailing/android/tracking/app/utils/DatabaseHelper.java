@@ -261,7 +261,6 @@ public class DatabaseHelper {
         LeaderboardInfo leaderboard = checkin.getLeaderboard();
         CheckinUrlInfo checkinUrlInfo = checkin.getCheckinUrl();
         Boat boat = checkin.getBoat();
-
         // boat
         ContentResolver contentResolver = context.getContentResolver();
         ArrayList<ContentProviderOperation> opList = new ArrayList<>();
@@ -273,11 +272,9 @@ public class DatabaseHelper {
             cv.put(AnalyticsContract.Boat.BOAT_NAME, boat.getName());
         }
         cv.put(AnalyticsContract.Boat.BOAT_CHECKIN_DIGEST, checkinUrlInfo.checkinDigest);
-        cv.put(AnalyticsContract.Boat.BOAT_COLOR, boat.getColor().getAsHtml());
+        cv.put(AnalyticsContract.Boat.BOAT_COLOR, boat.getColor()==null?null:boat.getColor().getAsHtml());
         opList.add(ContentProviderOperation.newInsert(AnalyticsContract.Boat.CONTENT_URI).withValues(cv).build());
-
         addBasicInformationToOperationList(opList, leaderboard, event, checkinUrlInfo);
-
         try {
             contentResolver.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
         } catch (RemoteException | OperationApplicationException e) {

@@ -37,7 +37,6 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
@@ -74,7 +73,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
                 new RaceLogDenoteForTrackingEventSerializer(competitorSerializer),
                 new RaceLogStartTrackingEventSerializer(competitorSerializer),
                 new RaceLogRevokeEventSerializer(competitorSerializer),
-                new RaceLogRegisterCompetitorEventSerializer(competitorSerializer, CompetitorWithBoatJsonSerializer.create(), BoatJsonSerializer.create()),
+                new RaceLogRegisterCompetitorEventSerializer(competitorSerializer, BoatJsonSerializer.create()),
                 new RaceLogAdditionalScoringInformationSerializer(competitorSerializer),
                 new RaceLogFixedMarkPassingEventSerializer(competitorSerializer),
                 new RaceLogSuppressedMarkPassingsEventSerializer(competitorSerializer),
