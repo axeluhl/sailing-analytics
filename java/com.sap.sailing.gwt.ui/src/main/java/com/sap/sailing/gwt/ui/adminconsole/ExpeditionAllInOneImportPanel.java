@@ -39,8 +39,6 @@ import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
  * The UI form to upload data for expedition all in one import.
  */
 public class ExpeditionAllInOneImportPanel extends Composite {
-    private static final String EXPEDITON_IMPORT_PARAMETER_BOAT_CLASS = "boatClass";
-
     private static final String URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT = "/../../sailingserver/expedition/import";
 
     private final MultiWordSuggestOracle regattaOracle;
@@ -79,7 +77,7 @@ public class ExpeditionAllInOneImportPanel extends Composite {
         contentPanel.add(regattaNamePanel);
         final RadioButton newEventImport = new RadioButton(ExpeditionAllInOneConstants.REQUEST_PARAMETER_IMPORT_MODE,
                 stringMessages.createNewEvent());
-        newEventImport.setFormValue("NEW_EVENT");
+        newEventImport.setFormValue(ExpeditionAllInOneConstants.ImportMode.NEW_EVENT.name());
         newEventImport.setValue(true);
         importModePanel.add(newEventImport);
         newEventImport.addClickHandler(event -> {
@@ -108,7 +106,7 @@ public class ExpeditionAllInOneImportPanel extends Composite {
         regattaNamePanel.add(regattaNameLabel);
         regattaNamePanel.setCellVerticalAlignment(regattaNameLabel, HasVerticalAlignment.ALIGN_MIDDLE);
         final TextBox regattaName = new TextBox();
-        regattaName.setName("regattaName");
+        regattaName.setName(ExpeditionAllInOneConstants.REQUEST_PARAMETER_REGATTA_NAME);
 
         regattaOracle = new MultiWordSuggestOracle(". _");
         refreshRegattaOracle();
@@ -121,7 +119,7 @@ public class ExpeditionAllInOneImportPanel extends Composite {
         boatClassPanel.add(boatClassLabel);
         boatClassPanel.setCellVerticalAlignment(boatClassLabel, HasVerticalAlignment.ALIGN_MIDDLE);
         final SuggestBox boatClassInput = new SuggestBox(new BoatClassMasterdataSuggestOracle());
-        boatClassInput.getValueBox().setName(EXPEDITON_IMPORT_PARAMETER_BOAT_CLASS);
+        boatClassInput.getValueBox().setName(ExpeditionAllInOneConstants.REQUEST_PARAMETER_BOAT_CLASS);
         boatClassPanel.add(boatClassInput);
         boatClassPanel.setCellVerticalAlignment(boatClassInput, HasVerticalAlignment.ALIGN_MIDDLE);
         final HorizontalPanel controlPanel = new HorizontalPanel();
