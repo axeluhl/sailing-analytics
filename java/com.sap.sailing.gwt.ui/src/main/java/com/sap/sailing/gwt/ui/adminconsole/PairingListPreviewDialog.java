@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
@@ -107,7 +107,7 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
         String color = BACKGROUND_SHADE;
         pairingListGrid.getCellFormatter().getElement(0, 0).getStyle().setBackgroundColor(BACKGROUND_SHADE);
         pairingListGrid.getCellFormatter().getElement(0, 1).getStyle().setBackgroundColor(BACKGROUND_SHADE);
-        for (List<List<Pair<CompetitorWithoutBoatDTO, BoatDTO>>> flight : pairingListDTO.getPairingList()) {
+        for (List<List<Pair<CompetitorDTO, BoatDTO>>> flight : pairingListDTO.getPairingList()) {
             color = (color.equals("none") ? BACKGROUND_SHADE : "none");
             // setting up race
             int currentRaceInGridCells = (((flightIndexInGrid - 1) * groupCount) + 1);
@@ -116,7 +116,7 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
             pairingListGrid.getCellFormatter().getElement(currentRaceInGridCells, 0).getStyle().setPadding(5, Unit.PX);
             pairingListGrid.getCellFormatter().getElement(currentRaceInGridCells, 0).getStyle()
                     .setBackgroundColor(color);
-            for (List<Pair<CompetitorWithoutBoatDTO, BoatDTO>> group : flight) {
+            for (List<Pair<CompetitorDTO, BoatDTO>> group : flight) {
                 // setting up fleet
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setPadding(3, Unit.PX);
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setBackgroundColor(color);
@@ -127,14 +127,14 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 1).getStyle().setBackgroundColor(color);
                 if (group.size() < boatCount) {
                     List<BoatDTO> unusedBoats = new ArrayList<>(boats);
-                    for (Pair<CompetitorWithoutBoatDTO, BoatDTO> competitorAndBoatPair : group) {
+                    for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : group) {
                         unusedBoats.remove(competitorAndBoatPair.getB());
                     }
                     for (BoatDTO unusedBoat : unusedBoats) {
                         group.add(new Pair<>(null, unusedBoat));
                     }
                 }
-                for (Pair<CompetitorWithoutBoatDTO, BoatDTO> competitorAndBoatPair : group) {
+                for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : group) {
                     int boatIndexInGrid = boats.indexOf(competitorAndBoatPair.getB()) + 2;
                     if (competitorAndBoatPair.getA() == null) {
                         pairingListGrid.setWidget(groupIndex, boatIndexInGrid, new Label(stringMessages.empty()));

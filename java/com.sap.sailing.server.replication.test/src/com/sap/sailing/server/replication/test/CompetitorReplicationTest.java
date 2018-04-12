@@ -18,7 +18,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -52,10 +52,10 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
- * Tests replication of competitors in conjunction with the {@link CompetitorStore} concepts, particularly the
+ * Tests replication of competitors in conjunction with the {@link CompetitorAndBoatStore} concepts, particularly the
  * possibility to allow for competitor data to be updated, either explicitly or implicitly from a tracking provider
  * after marking the competitor using
- * {@link CompetitorStore#allowCompetitorResetToDefaults(com.sap.sailing.domain.base.Competitor)}.
+ * {@link CompetitorAndBoatStore#allowCompetitorResetToDefaults(com.sap.sailing.domain.base.Competitor)}.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -63,7 +63,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class CompetitorReplicationTest extends AbstractServerReplicationTest {
     /**
      * Add a tracked race to the master that includes a competitor; check that the competitor was properly replicated to
-     * the replica's {@link CompetitorStore}. Afterwards, use the {@link UpdateCompetitor} operation on the master to
+     * the replica's {@link CompetitorAndBoatStore}. Afterwards, use the {@link UpdateCompetitor} operation on the master to
      * perform an explicit update; ensure that the update arrived on the replica. Then execute an
      * {@link AllowCompetitorResetToDefaults} operation on the master, afterwards update the competitor on the master,
      * then force some competitor-related event to be sent to the replica, such as a GPS fix update. This will serialize

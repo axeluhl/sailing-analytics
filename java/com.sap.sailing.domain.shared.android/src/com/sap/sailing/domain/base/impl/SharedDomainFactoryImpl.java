@@ -19,7 +19,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
@@ -66,7 +66,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
     private final Map<String, BoatClass> boatClassCache;
     
-    protected final CompetitorStore competitorAndBoatStore;
+    protected final CompetitorAndBoatStore competitorAndBoatStore;
     
     private final Map<Serializable, CourseArea> courseAreaCache;
     
@@ -116,10 +116,10 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
      * Uses a transient competitor store
      */
     public SharedDomainFactoryImpl(RaceLogResolver raceLogResolver) {
-        this(new TransientCompetitorStoreImpl(), raceLogResolver);
+        this(new TransientCompetitorAndBoatStoreImpl(), raceLogResolver);
     }
     
-    public SharedDomainFactoryImpl(CompetitorStore competitorStore, RaceLogResolver raceLogResolver) {
+    public SharedDomainFactoryImpl(CompetitorAndBoatStore competitorStore, RaceLogResolver raceLogResolver) {
         this.raceLogResolver = raceLogResolver;
         waypointCacheReferenceQueue = new ReferenceQueue<Waypoint>();
         nationalityCache = new HashMap<String, Nationality>();
@@ -333,7 +333,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public CompetitorStore getCompetitorStore() {
+    public CompetitorAndBoatStore getCompetitorStore() {
         return competitorAndBoatStore;
     }
 

@@ -40,7 +40,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -323,13 +323,13 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     Window.open(leaderboardEditingUrl, "_blank", null);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT_COMPETITORS.equals(value)) {
                     EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingService, leaderboardDTO.name, stringMessages, 
-                            errorReporter, new DialogCallback<List<CompetitorDTO>>() {
+                            errorReporter, new DialogCallback<List<CompetitorWithBoatDTO>>() {
                         @Override
                         public void cancel() {
                         }
 
                         @Override
-                        public void ok(final List<CompetitorDTO> result) {
+                        public void ok(final List<CompetitorWithBoatDTO> result) {
                         }
                     });
                     editCompetitorsDialog.show();

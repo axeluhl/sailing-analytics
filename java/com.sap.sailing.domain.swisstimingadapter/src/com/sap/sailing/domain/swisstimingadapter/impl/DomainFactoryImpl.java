@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Nationality;
@@ -120,7 +120,7 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public Pair<Competitor, Boat> createCompetitorWithID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass) {
-        CompetitorStore competitorAndBoatStore = baseDomainFactory.getCompetitorStore();
+        CompetitorAndBoatStore competitorAndBoatStore = baseDomainFactory.getCompetitorStore();
         CompetitorWithBoat domainCompetitor = competitorAndBoatStore.getExistingCompetitorWithBoatByIdAsString(competitor.getID());
         if (domainCompetitor == null || competitorAndBoatStore.isCompetitorToUpdateDuringGetOrCreate(domainCompetitor)) {
             List<DynamicPerson> teamMembers = new ArrayList<DynamicPerson>();
@@ -139,7 +139,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Pair<Competitor, Boat> createCompetitorWithoutID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, String raceId, BoatClass boatClass) {
-        CompetitorStore competitorAndBoatStore = baseDomainFactory.getCompetitorStore();
+        CompetitorAndBoatStore competitorAndBoatStore = baseDomainFactory.getCompetitorStore();
         List<DynamicPerson> teamMembers = new ArrayList<DynamicPerson>();
         for (String teamMemberName : competitor.getName().split("[-+&]")) {
             teamMembers.add(new PersonImpl(teamMemberName.trim(), getOrCreateNationality(competitor.getThreeLetterIOCCode()),

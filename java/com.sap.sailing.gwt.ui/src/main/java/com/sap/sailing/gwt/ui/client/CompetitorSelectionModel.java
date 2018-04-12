@@ -11,25 +11,25 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
 public class CompetitorSelectionModel implements CompetitorSelectionProvider {
-    protected final Set<CompetitorDTO> allCompetitors;
+    protected final Set<CompetitorWithBoatDTO> allCompetitors;
     
     /**
-     * Keys are {@link CompetitorDTO#getIdAsString()} of their values
+     * Keys are {@link CompetitorWithBoatDTO#getIdAsString()} of their values
      */
-    private final LinkedHashMap<String, CompetitorDTO> selectedCompetitors;
+    private final LinkedHashMap<String, CompetitorWithBoatDTO> selectedCompetitors;
     
     private final Set<CompetitorSelectionChangeListener> listeners;
     
     private final boolean hasMultiSelection;
     
-    private FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet; 
+    private FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> competitorsFilterSet; 
 
     protected final CompetitorColorProvider competitorColorProvider; 
 
@@ -41,7 +41,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         this(hasMultiSelection, competitorColorProvider, null);
     }
 
-    private CompetitorSelectionModel(boolean hasMultiSelection, CompetitorColorProvider competitorColorProvider, FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet) {
+    private CompetitorSelectionModel(boolean hasMultiSelection, CompetitorColorProvider competitorColorProvider, FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> competitorsFilterSet) {
         super();
         this.hasMultiSelection = hasMultiSelection;
         this.competitorColorProvider = competitorColorProvider;
@@ -55,11 +55,11 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
      * Adds a competitor to the {@link #getAllCompetitors() set of all competitors}. If the competitor was not yet
      * contained, it will be deselected.
      */
-    public void add(CompetitorDTO competitor) {
+    public void add(CompetitorWithBoatDTO competitor) {
         add(competitor, true);
     }
     
-    private void add(CompetitorDTO competitor, boolean notifyListeners) {
+    private void add(CompetitorWithBoatDTO competitor, boolean notifyListeners) {
         if (competitor.getColor() != null) {
             competitorColorProvider.addBlockedColor(competitor.getColor());
         }
@@ -79,9 +79,9 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
      * were selected so far.
      */
     public void clear() {
-        Iterator<CompetitorDTO> selIter = getSelectedCompetitors().iterator();
+        Iterator<CompetitorWithBoatDTO> selIter = getSelectedCompetitors().iterator();
         while (selIter.hasNext()) {
-            CompetitorDTO selected = selIter.next();
+            CompetitorWithBoatDTO selected = selIter.next();
             setSelected(selected, false);
             selIter = getSelectedCompetitors().iterator();
         }
@@ -90,9 +90,9 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         fireListChanged(getAllCompetitors());
     }
     
-    public void addAll(Iterable<CompetitorDTO> competitors) {
+    public void addAll(Iterable<CompetitorWithBoatDTO> competitors) {
         boolean changed = false;
-        for (CompetitorDTO competitor : competitors) {
+        for (CompetitorWithBoatDTO competitor : competitors) {
             add(competitor, false);
             changed = true;
         }
@@ -105,7 +105,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
      * Removes the competitor from the {@link #getAllCompetitors() set of all competitor}. If the competitor was previously
      * contained and selected, it is deselected first.
      */
-    public void remove(CompetitorDTO competitor) {
+    public void remove(CompetitorWithBoatDTO competitor) {
         if (isSelected(competitor)) {
             setSelected(competitor, false);
         }
@@ -119,29 +119,29 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     }
     
     @Override
-    public Iterable<CompetitorDTO> getSelectedCompetitors() {
+    public Iterable<CompetitorWithBoatDTO> getSelectedCompetitors() {
         return Collections.unmodifiableCollection(selectedCompetitors.values());
     }
 
     @Override
-    public Iterable<CompetitorDTO> getSelectedFilteredCompetitors() {
-        Set<CompetitorDTO> result = new HashSet<>(selectedCompetitors.values());
+    public Iterable<CompetitorWithBoatDTO> getSelectedFilteredCompetitors() {
+        Set<CompetitorWithBoatDTO> result = new HashSet<>(selectedCompetitors.values());
         result.retainAll(getFilteredCompetitors());
         return result;
     }
 
     @Override
-    public Iterable<CompetitorDTO> getAllCompetitors() {
+    public Iterable<CompetitorWithBoatDTO> getAllCompetitors() {
         return Collections.unmodifiableCollection(allCompetitors);
     }
     
     @Override
-    public Collection<CompetitorDTO> getFilteredCompetitors() {
-        Set<CompetitorDTO> currentFilteredList = new LinkedHashSet<CompetitorDTO>(allCompetitors);
+    public Collection<CompetitorWithBoatDTO> getFilteredCompetitors() {
+        Set<CompetitorWithBoatDTO> currentFilteredList = new LinkedHashSet<CompetitorWithBoatDTO>(allCompetitors);
         if (competitorsFilterSet != null) {
-            for (Filter<CompetitorDTO> filter : competitorsFilterSet.getFilters()) {
-                for (Iterator<CompetitorDTO> i=currentFilteredList.iterator(); i.hasNext(); ) {
-                    CompetitorDTO competitorDTO = i.next();
+            for (Filter<CompetitorWithBoatDTO> filter : competitorsFilterSet.getFilters()) {
+                for (Iterator<CompetitorWithBoatDTO> i=currentFilteredList.iterator(); i.hasNext(); ) {
+                    CompetitorWithBoatDTO competitorDTO = i.next();
                     if (!filter.matches(competitorDTO)) {
                         i.remove();
                     }
@@ -151,7 +151,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         return currentFilteredList;
     }
     
-    public void setSelected(CompetitorDTO competitor, boolean selected, CompetitorSelectionChangeListener... listenersNotToNotify) {
+    public void setSelected(CompetitorWithBoatDTO competitor, boolean selected, CompetitorSelectionChangeListener... listenersNotToNotify) {
         if (selected) {
             if (allCompetitors.contains(competitor) && !selectedCompetitors.containsKey(competitor.getIdAsString())) {
                 selectedCompetitors.put(competitor.getIdAsString(), competitor);
@@ -165,7 +165,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         }
     }
     
-    private void fireAddedToSelection(CompetitorDTO competitor, CompetitorSelectionChangeListener... listenersNotToNotify) {
+    private void fireAddedToSelection(CompetitorWithBoatDTO competitor, CompetitorSelectionChangeListener... listenersNotToNotify) {
         for (CompetitorSelectionChangeListener listener : listeners) {
             if (listenersNotToNotify == null || !Arrays.asList(listenersNotToNotify).contains(listener)) {
                 listener.addedToSelection(competitor);
@@ -173,7 +173,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         }
     }
     
-    private void fireRemovedFromSelection(CompetitorDTO competitor, CompetitorSelectionChangeListener... listenersNotToNotify) {
+    private void fireRemovedFromSelection(CompetitorWithBoatDTO competitor, CompetitorSelectionChangeListener... listenersNotToNotify) {
         for (CompetitorSelectionChangeListener listener : listeners) {
             if (listenersNotToNotify == null || !Arrays.asList(listenersNotToNotify).contains(listener)) {
                 listener.removedFromSelection(competitor);
@@ -181,7 +181,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         }
     }
     
-    private void fireListChanged(Iterable<CompetitorDTO> competitors, CompetitorSelectionChangeListener... listenersNotToNotify) {
+    private void fireListChanged(Iterable<CompetitorWithBoatDTO> competitors, CompetitorSelectionChangeListener... listenersNotToNotify) {
         for (CompetitorSelectionChangeListener listener : listeners) {
             if (listenersNotToNotify == null || !Arrays.asList(listenersNotToNotify).contains(listener)) {
                 listener.competitorsListChanged(competitors);
@@ -190,7 +190,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     }
 
     @Override
-    public boolean isSelected(CompetitorDTO competitor) {
+    public boolean isSelected(CompetitorWithBoatDTO competitor) {
         return selectedCompetitors.containsKey(competitor.getIdAsString());
     }
 
@@ -205,25 +205,25 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     }
 
     @Override
-    public void setSelection(Iterable<CompetitorDTO> newSelection, CompetitorSelectionChangeListener... listenersNotToNotify) {
-        Set<CompetitorDTO> competitorsToRemoveFromSelection = new HashSet<CompetitorDTO>(selectedCompetitors.values());
-        for (CompetitorDTO newSelectedCompetitor : newSelection) {
+    public void setSelection(Iterable<CompetitorWithBoatDTO> newSelection, CompetitorSelectionChangeListener... listenersNotToNotify) {
+        Set<CompetitorWithBoatDTO> competitorsToRemoveFromSelection = new HashSet<CompetitorWithBoatDTO>(selectedCompetitors.values());
+        for (CompetitorWithBoatDTO newSelectedCompetitor : newSelection) {
             setSelected(newSelectedCompetitor, true, listenersNotToNotify);
             competitorsToRemoveFromSelection.remove(newSelectedCompetitor);
         }
-        for (CompetitorDTO competitorToRemoveFromSelection : competitorsToRemoveFromSelection) {
+        for (CompetitorWithBoatDTO competitorToRemoveFromSelection : competitorsToRemoveFromSelection) {
             setSelected(competitorToRemoveFromSelection, false, listenersNotToNotify);
         }
     }
 
     @Override
-    public void setCompetitors(Iterable<CompetitorDTO> newCompetitors, CompetitorSelectionChangeListener... listenersNotToNotify) {
+    public void setCompetitors(Iterable<CompetitorWithBoatDTO> newCompetitors, CompetitorSelectionChangeListener... listenersNotToNotify) {
         boolean changed = false;
-        Map<String, CompetitorDTO> oldCompetitorsToRemove = new HashMap<String, CompetitorDTO>();
-        for (final CompetitorDTO c : allCompetitors) {
+        Map<String, CompetitorWithBoatDTO> oldCompetitorsToRemove = new HashMap<String, CompetitorWithBoatDTO>();
+        for (final CompetitorWithBoatDTO c : allCompetitors) {
             oldCompetitorsToRemove.put(c.getIdAsString(), c);
         }
-        for (CompetitorDTO newCompetitor : newCompetitors) {
+        for (CompetitorWithBoatDTO newCompetitor : newCompetitors) {
             // Search by equality, including all CompetitorDTO fields; if equal object is found, leave it in place;
             // non-equal objects may still represent the same competitor entity; yet, replace the object to obtain the
             // new, changed state; make sure the selection keeps unchanged regarding the selected competitor "entities";
@@ -244,7 +244,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
                 changed = true;
             }
         }
-        for (CompetitorDTO oldCompetitorToRemove : oldCompetitorsToRemove.values()) {
+        for (CompetitorWithBoatDTO oldCompetitorToRemove : oldCompetitorsToRemove.values()) {
             remove(oldCompetitorToRemove);
             changed = true;
         }
@@ -255,26 +255,26 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     }
 
     @Override
-    public Color getColor(CompetitorDTO competitor) {
+    public Color getColor(CompetitorWithBoatDTO competitor) {
         return allCompetitors.contains(competitor) ? competitorColorProvider.getColor(competitor) : null;
     }
 
     @Override
-    public FilterSet<CompetitorDTO, Filter<CompetitorDTO>> getCompetitorsFilterSet() {
+    public FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> getCompetitorsFilterSet() {
         return competitorsFilterSet;
     }
     
     @Override 
-    public FilterSet<CompetitorDTO, Filter<CompetitorDTO>> getOrCreateCompetitorsFilterSet(String nameToAssignToNewFilterSet) {
+    public FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> getOrCreateCompetitorsFilterSet(String nameToAssignToNewFilterSet) {
         if (competitorsFilterSet == null) {
-            competitorsFilterSet = new FilterSet<CompetitorDTO, Filter<CompetitorDTO>>(nameToAssignToNewFilterSet);
+            competitorsFilterSet = new FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>>(nameToAssignToNewFilterSet);
         }
         return getCompetitorsFilterSet();
     }
 
     @Override
-    public void setCompetitorsFilterSet(FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet) {
-        FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet = this.competitorsFilterSet;
+    public void setCompetitorsFilterSet(FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> competitorsFilterSet) {
+        FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> oldFilterSet = this.competitorsFilterSet;
         this.competitorsFilterSet = competitorsFilterSet;
         if (!Util.equalsWithNull(competitorsFilterSet, oldFilterSet)) {
             for (CompetitorSelectionChangeListener listener : listeners) {
@@ -295,9 +295,9 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     @Override
     public void clearAllFilters() {
         if (hasActiveFilters()) {
-            Iterator<CompetitorDTO> selIter = getSelectedCompetitors().iterator();
+            Iterator<CompetitorWithBoatDTO> selIter = getSelectedCompetitors().iterator();
             while (selIter.hasNext()) {
-                CompetitorDTO selected = selIter.next();
+                CompetitorWithBoatDTO selected = selIter.next();
                 setSelected(selected, false);
                 selIter = getSelectedCompetitors().iterator();
             }

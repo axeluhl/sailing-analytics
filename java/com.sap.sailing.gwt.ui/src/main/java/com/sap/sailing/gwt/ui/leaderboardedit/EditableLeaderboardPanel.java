@@ -47,7 +47,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
@@ -93,8 +93,8 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
     final DateBox lastScoreCorrectionTimeBox;
     final TextBox lastScoreCorrectionCommentBox;
 
-    final private CellTable<CompetitorDTO> suppressedCompetitorsTable;
-    final private ListDataProvider<CompetitorDTO> suppressedCompetitorsShown;
+    final private CellTable<CompetitorWithBoatDTO> suppressedCompetitorsTable;
+    final private ListDataProvider<CompetitorWithBoatDTO> suppressedCompetitorsShown;
 
     private CheckBox showUncorrectedTotalPointsCheckbox;
     
@@ -134,16 +134,16 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
      * @author Axel Uhl (d043530)
      * 
      */
-    private class SuppressedSailIDColumn extends LeaderboardSortableColumnWithMinMax<CompetitorDTO, String> {
+    private class SuppressedSailIDColumn extends LeaderboardSortableColumnWithMinMax<CompetitorWithBoatDTO, String> {
         protected SuppressedSailIDColumn() {
             super(new TextCell(), SortingOrder.ASCENDING, EditableLeaderboardPanel.this);
         }
 
         @Override
-        public InvertibleComparator<CompetitorDTO> getComparator() {
-            return new InvertibleComparatorAdapter<CompetitorDTO>() {
+        public InvertibleComparator<CompetitorWithBoatDTO> getComparator() {
+            return new InvertibleComparatorAdapter<CompetitorWithBoatDTO>() {
                 @Override
-                public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+                public int compare(CompetitorWithBoatDTO o1, CompetitorWithBoatDTO o2) {
                     return Collator.getInstance().compare(o1.getSailID(), o2.getSailID());
                 }
             };
@@ -155,7 +155,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
         }
 
         @Override
-        public void render(Context context, CompetitorDTO object, SafeHtmlBuilder sb) {
+        public void render(Context context, CompetitorWithBoatDTO object, SafeHtmlBuilder sb) {
             final String twoLetterIsoCountryCode = object.getTwoLetterIsoCountryCode();
             final ImageResource flagImageResource;
             if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
@@ -171,21 +171,21 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
         }
 
         @Override
-        public String getValue(CompetitorDTO object) {
+        public String getValue(CompetitorWithBoatDTO object) {
             return object.getSailID();
         }
     }
 
-    protected class SuppressedCompetitorColumn extends LeaderboardSortableColumnWithMinMax<CompetitorDTO, CompetitorDTO> {
-        private final CompetitorColumnBase<CompetitorDTO> base;
+    protected class SuppressedCompetitorColumn extends LeaderboardSortableColumnWithMinMax<CompetitorWithBoatDTO, CompetitorWithBoatDTO> {
+        private final CompetitorColumnBase<CompetitorWithBoatDTO> base;
 
-        protected SuppressedCompetitorColumn(CompetitorColumnBase<CompetitorDTO> base) {
+        protected SuppressedCompetitorColumn(CompetitorColumnBase<CompetitorWithBoatDTO> base) {
             super(base.getCell(getLeaderboard()), SortingOrder.ASCENDING, EditableLeaderboardPanel.this);
             this.base = base;
         }
 
         @Override
-        public InvertibleComparator<CompetitorDTO> getComparator() {
+        public InvertibleComparator<CompetitorWithBoatDTO> getComparator() {
             return base.getComparator();
         }
 
@@ -195,12 +195,12 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
         }
 
         @Override
-        public CompetitorDTO getValue(CompetitorDTO competitor) {
+        public CompetitorWithBoatDTO getValue(CompetitorWithBoatDTO competitor) {
             return competitor;
         }
 
         @Override
-        public void render(Context context, CompetitorDTO competitor, SafeHtmlBuilder sb) {
+        public void render(Context context, CompetitorWithBoatDTO competitor, SafeHtmlBuilder sb) {
             String competitorColorBarStyle = "style=\"border: none;\"";
             base.render(competitor, competitorColorBarStyle, sb);
         }
@@ -223,7 +223,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                     @Override
                     public void onSuccess(Void v) {
                         if (getLeaderboard().competitorDisplayNames == null) {
-                            getLeaderboard().competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+                            getLeaderboard().competitorDisplayNames = new HashMap<CompetitorWithBoatDTO, String>();
                         }
                         getLeaderboard().competitorDisplayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
                         cell.setViewData(row, null); // ensure that getValue() is called again
@@ -589,7 +589,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true, new ClassicLeaderboardStyle(),
                 FlagImageResolverImpl.get(), availableDetailTypes);
-        suppressedCompetitorsShown = new ListDataProvider<CompetitorDTO>(new ArrayList<CompetitorDTO>());
+        suppressedCompetitorsShown = new ListDataProvider<CompetitorWithBoatDTO>(new ArrayList<CompetitorWithBoatDTO>());
         suppressedCompetitorsTable = createSuppressedCompetitorsTable();
         ImageResource importIcon = resources.importIcon();
         Anchor importAnchor = new Anchor(AbstractImagePrototype.create(importIcon).getSafeHtml());
@@ -682,31 +682,31 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
 
     }
 
-    private CellTable<CompetitorDTO> createSuppressedCompetitorsTable() {
+    private CellTable<CompetitorWithBoatDTO> createSuppressedCompetitorsTable() {
         final Resources tableResources = GWT.create(AdminConsoleTableResources.class);
-        CellTable<CompetitorDTO> result = new BaseCelltable<CompetitorDTO>(10000, tableResources);
+        CellTable<CompetitorWithBoatDTO> result = new BaseCelltable<CompetitorWithBoatDTO>(10000, tableResources);
         suppressedCompetitorsShown.addDataDisplay(result);
         final SuppressedSailIDColumn suppressedSailIDColumn = new SuppressedSailIDColumn();
         suppressedSailIDColumn.setSortable(true);
         result.addColumn(suppressedSailIDColumn, suppressedSailIDColumn.getHeader());
         final SuppressedCompetitorColumn suppressedCompetitorColumn = new SuppressedCompetitorColumn(
-                new CompetitorColumnBase<CompetitorDTO>(this, stringMessages, new CompetitorFetcher<CompetitorDTO>() {
+                new CompetitorColumnBase<CompetitorWithBoatDTO>(this, stringMessages, new CompetitorFetcher<CompetitorWithBoatDTO>() {
                     @Override
-                    public CompetitorDTO getCompetitor(CompetitorDTO t) {
+                    public CompetitorWithBoatDTO getCompetitor(CompetitorWithBoatDTO t) {
                         return t;
                     }
                 }));
         result.addColumn(suppressedCompetitorColumn, suppressedCompetitorColumn.getHeader());
         suppressedCompetitorColumn.setSortable(true);
-        final Column<CompetitorDTO, String> unsuppressButtonColumn = new Column<CompetitorDTO, String>(new ButtonCell()) {
+        final Column<CompetitorWithBoatDTO, String> unsuppressButtonColumn = new Column<CompetitorWithBoatDTO, String>(new ButtonCell()) {
             @Override
-            public String getValue(CompetitorDTO object) {
+            public String getValue(CompetitorWithBoatDTO object) {
                 return stringMessages.unsuppress();
             }
         };
-        unsuppressButtonColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
+        unsuppressButtonColumn.setFieldUpdater(new FieldUpdater<CompetitorWithBoatDTO, String>() {
             @Override
-            public void update(int index, final CompetitorDTO object, String value) {
+            public void update(int index, final CompetitorWithBoatDTO object, String value) {
                 getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), object.getIdAsString(),
                         /* suppressed */ false, new AsyncCallback<Void>() {
                     @Override
@@ -723,7 +723,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             }
         });
         result.addColumn(unsuppressButtonColumn);
-        final ListHandler<CompetitorDTO> sortHandler = new ListHandler<CompetitorDTO>(suppressedCompetitorsShown.getList());
+        final ListHandler<CompetitorWithBoatDTO> sortHandler = new ListHandler<CompetitorWithBoatDTO>(suppressedCompetitorsShown.getList());
         sortHandler.setComparator(suppressedSailIDColumn, suppressedSailIDColumn.getComparator());
         sortHandler.setComparator(suppressedCompetitorColumn, suppressedCompetitorColumn.getComparator());
         result.addColumnSortHandler(sortHandler);
@@ -758,7 +758,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 new CompetitorColumnBase<LeaderboardRowDTO>(this, stringMessages,
                         new CompetitorFetcher<LeaderboardRowDTO>() {
                     @Override
-                    public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
+                    public CompetitorWithBoatDTO getCompetitor(LeaderboardRowDTO t) {
                         return t.competitor;
                     }
                 }));
@@ -885,7 +885,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                                     @Override
                                     public void onSuccess(Void v) {
                                         if (getLeaderboard().competitorDisplayNames == null) {
-                                            getLeaderboard().competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+                                            getLeaderboard().competitorDisplayNames = new HashMap<CompetitorWithBoatDTO, String>();
                                         }
                                         getLeaderboard().competitorDisplayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
                                         cellForCompetitorName.setViewData(row, null); // ensure that getValue() is called again
@@ -1022,7 +1022,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             lastScoreCorrectionCommentBox.setText(lastScoreCorrectionComment != null ? lastScoreCorrectionComment : "");
             lastScoreCorrectionTimeBox.setValue(lastScoreCorrectionTime != null ? lastScoreCorrectionTime : new Date());
             suppressedCompetitorsShown.getList().clear();
-            for (CompetitorDTO suppressedCompetitor : leaderboard.getSuppressedCompetitors()) {
+            for (CompetitorWithBoatDTO suppressedCompetitor : leaderboard.getSuppressedCompetitors()) {
                 suppressedCompetitorsShown.getList().add(suppressedCompetitor);
             }
         }
