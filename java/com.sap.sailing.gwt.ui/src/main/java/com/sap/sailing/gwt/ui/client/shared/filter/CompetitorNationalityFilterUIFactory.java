@@ -4,7 +4,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sse.common.filter.TextOperator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
@@ -54,7 +54,7 @@ public class CompetitorNationalityFilterUIFactory extends AbstractCompetitorText
     }
 
     @Override
-    public FilterWithUI<CompetitorDTO> createFilterFromUI() {
+    public FilterWithUI<CompetitorWithBoatDTO> createFilterFromUI() {
         CompetitorNationalityFilter result = null;
 
         if(valueTextBox != null && operatorSelectionListBox != null) {

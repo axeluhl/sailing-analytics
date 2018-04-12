@@ -15,7 +15,7 @@ import com.sap.sse.common.Duration;
  */
 public class LeaderboardRowDTO implements Serializable {
     private static final long serialVersionUID = -5421934148931661900L;
-    public CompetitorDTO competitor;
+    public CompetitorWithBoatDTO competitor;
     public BoatDTO boat;
     public Map<String, LeaderboardEntryDTO> fieldsByRaceColumnName;
     public Double carriedPoints;

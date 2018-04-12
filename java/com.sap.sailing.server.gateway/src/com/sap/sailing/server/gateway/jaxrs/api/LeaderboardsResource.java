@@ -74,7 +74,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
@@ -195,7 +195,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
         int counter = 1;
-        for (CompetitorDTO competitor : leaderboardDTO.competitors) {
+        for (CompetitorWithBoatDTO competitor : leaderboardDTO.competitors) {
             LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);
 
             if (maxCompetitorsCount != null && counter > maxCompetitorsCount) {
@@ -210,7 +210,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             JSONObject jsonRaceColumns = new JSONObject();
             jsonCompetitor.put("raceScores", jsonRaceColumns);
             for (RaceColumnDTO raceColumn : leaderboardDTO.getRaceList()) {
-                List<CompetitorDTO> regattaRankedCompetitorsForColumn = leaderboardDTO
+                List<CompetitorWithBoatDTO> regattaRankedCompetitorsForColumn = leaderboardDTO
                         .getCompetitorOrderingPerRaceColumnName().get(raceColumn.getName());
                 JSONObject jsonEntry = new JSONObject();
                 jsonRaceColumns.put(raceColumn.getName(), jsonEntry);
@@ -225,7 +225,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 MaxPointsReason maxPointsReason = leaderboardEntry.reasonForMaxPoints;
                 jsonEntry.put("maxPointsReason", maxPointsReason != null ? maxPointsReason.toString() : null);
                 jsonEntry.put("rank", regattaRankedCompetitorsForColumn.indexOf(competitor) + 1);
-                List<CompetitorDTO> raceRankedCompetitorsInColumn = leaderboardDTO
+                List<CompetitorWithBoatDTO> raceRankedCompetitorsInColumn = leaderboardDTO
                         .getCompetitorsFromBestToWorst(raceColumn);
                 jsonEntry.put("raceRank", raceRankedCompetitorsInColumn.indexOf(competitor) + 1);
                 jsonEntry.put("isDiscarded", leaderboardEntry.discarded);

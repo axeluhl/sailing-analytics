@@ -142,7 +142,7 @@ import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.Regatt
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
@@ -238,8 +238,8 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
@@ -860,9 +860,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 // Un-comment the following lines if you need to update the file used by LeaderboardDTODiffingTest, set a breakpoint
                 // and toggle the storeLeaderboardForTesting flag if you found a good version. See also bug 1417.
+                // The leaderboard that the test wants to use is that of the 505 Worlds 2013, obtained for
+                // an expanded Race R9 at time 2013-05-03T19:17:09Z after the last competitor tracked has finished the last leg. The
+                // total distance traveled in meters has to be expanded for the test to work.
                 boolean storeLeaderboardForTesting = false;
                 if (storeLeaderboardForTesting) {
-                    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File("C:/Projekte/sailing/dev/git/java/com.sap.sailing.domain.test/resources/IncrementalLeaderboardDTO.ser")));
+                    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File("C:/data/SAP/sailing/workspace/java/com.sap.sailing.domain.test/resources/IncrementalLeaderboardDTO.ser")));
                     oos.writeObject(leaderboardDTO);
                     oos.close();
                 }
@@ -1142,7 +1145,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (trackedRace != null) {
                 trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
             }
-            Map<CompetitorDTO, BoatDTO> competitorAndBoatDTOs = baseDomainFactory.convertToCompetitorAndBoatDTOs(r.getCompetitorsAndTheirBoats());
+            Map<CompetitorWithBoatDTO, BoatDTO> competitorAndBoatDTOs = baseDomainFactory.convertToCompetitorAndBoatDTOs(r.getCompetitorsAndTheirBoats());
             RaceWithCompetitorsAndBoatsDTO raceDTO = new RaceWithCompetitorsAndBoatsDTO(raceIdentifier, competitorAndBoatDTOs,
                     trackedRaceDTO, getService().isRaceBeingTracked(regatta, r));
             if (trackedRace != null) {
@@ -1155,13 +1158,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     /**
-     * Converts the {@link Competitor} objects passed as {@code iterable} to {@link CompetitorDTO} objects with an empty boat.
+     * Converts the {@link Competitor} objects passed as {@code iterable} to {@link CompetitorWithBoatDTO} objects with an empty boat.
      * The iteration order in the result matches that of the {@code iterable} passed.
      */
-    private List<CompetitorDTO> convertToCompetitorDTOs(Iterable<? extends Competitor> iterable) {
-        List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
+    private List<CompetitorWithBoatDTO> convertToCompetitorDTOs(Iterable<? extends Competitor> iterable) {
+        List<CompetitorWithBoatDTO> result = new ArrayList<CompetitorWithBoatDTO>();
         for (Competitor c : iterable) {
-            CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(c);
+            CompetitorWithBoatDTO competitorDTO = baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(c);
             result.add(competitorDTO);
         }
         return result;
@@ -1731,8 +1734,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Map<CompetitorDTO, BoatDTO> getCompetitorBoats(RegattaAndRaceIdentifier raceIdentifier) {
-        Map<CompetitorDTO, BoatDTO> result = null;
+    public Map<CompetitorWithBoatDTO, BoatDTO> getCompetitorBoats(RegattaAndRaceIdentifier raceIdentifier) {
+        Map<CompetitorWithBoatDTO, BoatDTO> result = null;
         TrackedRace trackedRace = getService().getExistingTrackedRace(raceIdentifier);
         if(trackedRace != null) {
             result = baseDomainFactory.convertToCompetitorAndBoatDTOs(trackedRace.getRace().getCompetitorsAndTheirBoats());
@@ -1750,7 +1753,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (race != null) {
                 RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), race.getName());
                 TrackedRace trackedRace = getService().getExistingTrackedRace(raceIdentifier);
-                Map<CompetitorDTO, BoatDTO> competitorsAndBoats = baseDomainFactory.convertToCompetitorAndBoatDTOs(race.getCompetitorsAndTheirBoats());
+                Map<CompetitorWithBoatDTO, BoatDTO> competitorsAndBoats = baseDomainFactory.convertToCompetitorAndBoatDTOs(race.getCompetitorsAndTheirBoats());
                 TrackedRaceDTO trackedRaceDTO = null;
                 if (trackedRace != null) {
                     trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
@@ -1813,7 +1816,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             estimatedDuration = getEstimationForTargetTime(timeToGetTheEstimatedDurationFor, estimatedDuration, trackedRace);
         }
         
-        final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions = getBoatPositionsInternal(raceIdentifier,
+        final Map<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions = getBoatPositionsInternal(raceIdentifier,
                 fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate);
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
         final List<SidelineDTO> courseSidelines = getCourseSidelines(raceIdentifier, date);
@@ -1866,18 +1869,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * @return a map where for each competitor participating in the race the list of GPS fixes in increasing
      *         chronological order is provided. The last one is the last position at or before <code>date</code>.
      */
-    private Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getBoatPositionsInternal(RegattaAndRaceIdentifier raceIdentifier,
+    private Map<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getBoatPositionsInternal(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate)
             throws NoWindException {
         Map<Pair<Leg, TimePoint>, LegType> legTypeCache = new HashMap<>();
-        Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>();
+        Map<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             for (Entry<Competitor, Boat> competitorAndBoat : trackedRace.getRace().getCompetitorsAndTheirBoats().entrySet()) {
                 Competitor competitor = competitorAndBoat.getKey();
                 if (fromPerCompetitorIdAsString.containsKey(competitor.getId().toString())) {
-                    CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor, competitorAndBoat.getValue());
+                    CompetitorWithBoatDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor, competitorAndBoat.getValue());
                     List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = new ArrayList<GPSFixDTOWithSpeedWindTackAndLegType>();
                     result.put(competitorDTO, fixesForCompetitor);
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
@@ -2514,7 +2517,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Long delayToLiveInMillisForLatestRace = null;
         leaderboardDTO.name = leaderboard.getName();
         leaderboardDTO.displayName = leaderboard.getDisplayName();
-        leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+        leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorWithBoatDTO, String>();
         leaderboardDTO.competitorsCount = Util.size(leaderboard.getCompetitors());
         leaderboardDTO.boatClassName = leaderboard.getBoatClass()==null?null:leaderboard.getBoatClass().getName();
         leaderboardDTO.type = leaderboard.getLeaderboardType();
@@ -3150,7 +3153,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
+    public CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorWithBoatDTO> competitors, Date from, Date to,
             final long stepSizeInMillis, final DetailType detailType, final String leaderboardGroupName, final String leaderboardName) throws NoWindException {
         CompetitorsRaceDataDTO result = null;
         final TrackedRace trackedRace = getExistingTrackedRace(race);
@@ -3162,8 +3165,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result = new CompetitorsRaceDataDTO(detailType, startTime==null?null:startTime.asDate(), endTime==null?null:endTime.asDate());
             final int MAX_CACHE_SIZE = SailingServiceConstants.MAX_NUMBER_OF_FIXES_TO_QUERY;
             final ConcurrentHashMap<TimePoint, WindLegTypeAndLegBearingCache> cachesByTimePoint = new ConcurrentHashMap<>();
-            Map<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>> resultFutures = new HashMap<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>>();
-            for (final CompetitorDTO competitorDTO : competitors) {
+            Map<CompetitorWithBoatDTO, FutureTask<CompetitorRaceDataDTO>> resultFutures = new HashMap<CompetitorWithBoatDTO, FutureTask<CompetitorRaceDataDTO>>();
+            for (final CompetitorWithBoatDTO competitorDTO : competitors) {
                 FutureTask<CompetitorRaceDataDTO> future = new FutureTask<CompetitorRaceDataDTO>(new Callable<CompetitorRaceDataDTO>() {
                             @Override
                             public CompetitorRaceDataDTO call() throws NoWindException {
@@ -3222,7 +3225,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 resultFutures.put(competitorDTO, future);
                 executor.execute(future);
             }
-            for (Map.Entry<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>> e : resultFutures.entrySet()) {
+            for (Map.Entry<CompetitorWithBoatDTO, FutureTask<CompetitorRaceDataDTO>> e : resultFutures.entrySet()) {
                 CompetitorRaceDataDTO competitorData;
                 try {
                     competitorData = e.getValue().get();
@@ -3240,9 +3243,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, 
+    public List<com.sap.sse.common.Util.Triple<String, List<CompetitorWithBoatDTO>, List<Double>>> getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, 
             Date date, DetailType detailType) throws Exception {
-        List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result = new ArrayList<com.sap.sse.common.Util.Triple<String,List<CompetitorDTO>,List<Double>>>();
+        List<com.sap.sse.common.Util.Triple<String, List<CompetitorWithBoatDTO>, List<Double>>> result = new ArrayList<com.sap.sse.common.Util.Triple<String,List<CompetitorWithBoatDTO>,List<Double>>>();
         // Attention: The reason why we read the data from the LeaderboardDTO and not from the leaderboard directly is to ensure
         // the use of the leaderboard cache.
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
@@ -3258,13 +3261,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 switch (detailType) {
                 case REGATTA_NET_POINTS_SUM:
                     for (Entry<RaceColumn, Map<Competitor, Double>> e : leaderboard.getNetPointsSumAfterRaceColumn(effectiveTimePoint).entrySet()) {
-                        List<CompetitorDTO> competitorDTOs = new ArrayList<>();
+                        List<CompetitorWithBoatDTO> competitorDTOs = new ArrayList<>();
                         List<Double> pointSums = new ArrayList<>();
                         for (Entry<Competitor, Double> e2 : e.getValue().entrySet()) {
                             competitorDTOs.add(baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(e2.getKey()));
                             pointSums.add(e2.getValue());
                         }
-                        result.add(new Triple<String, List<CompetitorDTO>, List<Double>>(e.getKey().getName(), competitorDTOs, pointSums)); 
+                        result.add(new Triple<String, List<CompetitorWithBoatDTO>, List<Double>>(e.getKey().getName(), competitorDTOs, pointSums)); 
                     }
                     break;
                 case REGATTA_RANK:
@@ -3274,13 +3277,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     for (Entry<RaceColumn, List<Competitor>> e : competitorsFromBestToWorst.entrySet()) {
                         int rank = 1;
                         List<Double> values = new ArrayList<Double>();
-                        List<CompetitorDTO> competitorDTOs = new ArrayList<CompetitorDTO>();
+                        List<CompetitorWithBoatDTO> competitorDTOs = new ArrayList<CompetitorWithBoatDTO>();
                         for (Competitor competitor : e.getValue()) {
                             values.add(new Double(rank));
                             competitorDTOs.add(baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(competitor));
                             rank++;
                         }
-                        result.add(new Triple<String, List<CompetitorDTO>, List<Double>>(e.getKey().getName(), competitorDTOs, values));
+                        result.add(new Triple<String, List<CompetitorWithBoatDTO>, List<Double>>(e.getKey().getName(), competitorDTOs, values));
                     }
                     break;
                 default:
@@ -3324,15 +3327,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getDouglasPoints(
-            RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, TimeRange> competitorTimeRanges, double meters)
+            RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorWithBoatDTO, TimeRange> competitorTimeRanges, double meters)
             throws NoWindException {
-        final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<>();
+        final Map<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<>();
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             final MeterDistance maxDistance = new MeterDistance(meters);
             for (Entry<Competitor, Boat> competitorAndBoat : trackedRace.getRace().getCompetitorsAndTheirBoats().entrySet()) {
                 final Competitor competitor = competitorAndBoat.getKey();
-                final CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor, competitorAndBoat.getValue());
+                final CompetitorWithBoatDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor, competitorAndBoat.getValue());
                 if (competitorTimeRanges.containsKey(competitorDTO)) {
                     // get Track of competitor
                     final GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack = trackedRace.getTrack(competitor);
@@ -3379,15 +3382,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Map<CompetitorDTO, List<ManeuverDTO>> getManeuvers(RegattaAndRaceIdentifier raceIdentifier,
-            Map<CompetitorDTO, TimeRange> competitorTimeRanges) throws NoWindException {
-        final Map<CompetitorDTO, List<ManeuverDTO>> result = new HashMap<>();
+    public Map<CompetitorWithBoatDTO, List<ManeuverDTO>> getManeuvers(RegattaAndRaceIdentifier raceIdentifier,
+            Map<CompetitorWithBoatDTO, TimeRange> competitorTimeRanges) throws NoWindException {
+        final Map<CompetitorWithBoatDTO, List<ManeuverDTO>> result = new HashMap<>();
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
-            final Map<CompetitorDTO, Future<List<ManeuverDTO>>> futures = new HashMap<>();
+            final Map<CompetitorWithBoatDTO, Future<List<ManeuverDTO>>> futures = new HashMap<>();
             for (Entry<Competitor, Boat> competitorAndBoat : trackedRace.getRace().getCompetitorsAndTheirBoats().entrySet()) {
                 final Competitor competitor = competitorAndBoat.getKey();
-                final CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor, competitorAndBoat.getValue());
+                final CompetitorWithBoatDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor, competitorAndBoat.getValue());
                 if (competitorTimeRanges.containsKey(competitorDTO)) {
                     final TimeRange timeRange = competitorTimeRanges.get(competitorDTO);
                     final TimePoint from = timeRange.from(), to = timeRange.to();
@@ -3400,7 +3403,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     futures.put(competitorDTO, future);
                 }
             }
-            for (Map.Entry<CompetitorDTO, Future<List<ManeuverDTO>>> competitorAndFuture : futures.entrySet()) {
+            for (Map.Entry<CompetitorWithBoatDTO, Future<List<ManeuverDTO>>> competitorAndFuture : futures.entrySet()) {
                 try {
                     result.put(competitorAndFuture.getKey(), competitorAndFuture.getValue().get());
                 } catch (InterruptedException | ExecutionException e) {
@@ -4928,9 +4931,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<CompetitorDTO> getCompetitors(boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
-        Iterable<CompetitorDTO> result;
-        CompetitorStore competitorStore = getService().getBaseDomainFactory().getCompetitorStore();
+    public Iterable<CompetitorWithBoatDTO> getCompetitors(boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
+        Iterable<CompetitorWithBoatDTO> result;
+        CompetitorAndBoatStore competitorStore = getService().getBaseDomainFactory().getCompetitorStore();
         if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == false) {
             result = convertToCompetitorDTOs(competitorStore.getAllCompetitors());
         } else if (filterCompetitorsWithBoat == true && filterCompetitorsWithoutBoat == false) {
@@ -4944,27 +4947,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName) {
+    public Iterable<CompetitorWithBoatDTO> getCompetitorsOfLeaderboard(String leaderboardName) {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         return convertToCompetitorDTOs(leaderboard.getAllCompetitors());
     }
 
     @Override
-    public Map<CompetitorDTO, BoatDTO> getCompetitorsAndBoatsOfRace(String leaderboardName, String raceColumnName, String fleetName) {
+    public Map<CompetitorWithBoatDTO, BoatDTO> getCompetitorsAndBoatsOfRace(String leaderboardName, String raceColumnName, String fleetName) {
         Map<Competitor, Boat> competitorsAndBoats = getService().getCompetitorToBoatMappingsForRace(leaderboardName, raceColumnName, fleetName);
         return baseDomainFactory.convertToCompetitorAndBoatDTOs(competitorsAndBoats);
     }
     
     @Override
-    public List<CompetitorDTO> addOrUpdateCompetitors(List<CompetitorDTO> competitors) throws URISyntaxException {
-        final List<CompetitorDTO> result = new ArrayList<>();
-        for (final CompetitorDTO competitor : competitors) {
+    public List<CompetitorWithBoatDTO> addOrUpdateCompetitors(List<CompetitorWithBoatDTO> competitors) throws URISyntaxException {
+        final List<CompetitorWithBoatDTO> result = new ArrayList<>();
+        for (final CompetitorWithBoatDTO competitor : competitors) {
             result.add(addOrUpdateCompetitorWithBoat(competitor));
         }
         return result;
     }
 
-    private CompetitorWithBoat addOrUpdateCompetitorWithBoatInternal(CompetitorDTO competitor) throws URISyntaxException {
+    private CompetitorWithBoat addOrUpdateCompetitorWithBoatInternal(CompetitorWithBoatDTO competitor) throws URISyntaxException {
         CompetitorWithBoat result;
         CompetitorWithBoat existingCompetitor = getService().getCompetitorStore().getExistingCompetitorWithBoatByIdAsString(competitor.getIdAsString());
         Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
@@ -4999,7 +5002,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     
-    private Competitor addOrUpdateCompetitorWithoutBoatInternal(CompetitorDTO competitor) throws URISyntaxException {
+    private Competitor addOrUpdateCompetitorWithoutBoatInternal(CompetitorWithBoatDTO competitor) throws URISyntaxException {
         Competitor result;
         Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
         Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
@@ -5014,7 +5017,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()), team,
                                     competitor.getTimeOnTimeFactor(),
                                     competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag());
-            
         } else {
             result = getService().apply(
                             new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor.getShortName(),
@@ -5029,19 +5031,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public CompetitorDTO addOrUpdateCompetitorWithoutBoat(CompetitorDTO competitorDTO) throws URISyntaxException {
+    public CompetitorWithBoatDTO addOrUpdateCompetitorWithoutBoat(CompetitorWithBoatDTO competitorDTO) throws URISyntaxException {
         Competitor competitor = addOrUpdateCompetitorWithoutBoatInternal(competitorDTO);
         return getBaseDomainFactory().convertToCompetitorWithOptionalBoatDTO(competitor);        
     }
     
     @Override
-    public CompetitorDTO addOrUpdateCompetitorWithBoat(CompetitorDTO competitorDTO) throws URISyntaxException {
+    public CompetitorWithBoatDTO addOrUpdateCompetitorWithBoat(CompetitorWithBoatDTO competitorDTO) throws URISyntaxException {
         CompetitorWithBoat competitor = addOrUpdateCompetitorWithBoatInternal(competitorDTO);
         return getBaseDomainFactory().convertToCompetitorWithOptionalBoatDTO(competitor);        
     }
 
     @Override
-    public List<CompetitorDTO> addCompetitors(List<CompetitorDescriptor> competitorDescriptors, String searchTag) throws URISyntaxException {
+    public List<CompetitorWithBoatDTO> addCompetitors(List<CompetitorDescriptor> competitorDescriptors, String searchTag) throws URISyntaxException {
         List<CompetitorWithBoat> competitorsForSaving = new ArrayList<>();
         for (final CompetitorDescriptor competitorDescriptor : competitorDescriptors) {
             competitorsForSaving.add(convertCompetitorDescriptorToCompetitorWithBoat(competitorDescriptor, searchTag));
@@ -5072,14 +5074,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* flag image */ null, team,
                 competitorDescriptor.getTimeOnTimeFactor(),
                 competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag, boat);
-        
         return competitorWithBoat;
     }
 
     @Override
-    public void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors) {
+    public void allowCompetitorResetToDefaults(Iterable<CompetitorWithBoatDTO> competitors) {
         List<String> competitorIdsAsStrings = new ArrayList<String>();
-        for (CompetitorDTO competitor : competitors) {
+        for (CompetitorWithBoatDTO competitor : competitors) {
             competitorIdsAsStrings.add(competitor.getIdAsString());
         }
         getService().apply(new AllowCompetitorResetToDefaults(competitorIdsAsStrings));
@@ -5641,7 +5642,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return raceColumn.getRaceLog(fleet);
     }
 
-    private Competitor getCompetitor(CompetitorWithoutBoatDTO dto) {
+    private Competitor getCompetitor(CompetitorDTO dto) {
         return getService().getCompetitorStore().getExistingCompetitorByIdAsString(dto.getIdAsString());
     }
 
@@ -5651,11 +5652,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            Map<? extends CompetitorWithoutBoatDTO, BoatDTO> competitorAndBoatDTOs)
+            Map<? extends CompetitorDTO, BoatDTO> competitorAndBoatDTOs)
             throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
         Set<Competitor> competitorsToRegister = new HashSet<>();
         Map<Competitor, Boat> competitorToBoatMapping = new HashMap<>();
-        for (Entry<? extends CompetitorWithoutBoatDTO, BoatDTO> competitorAndBoatEntry: competitorAndBoatDTOs.entrySet()) {
+        for (Entry<? extends CompetitorDTO, BoatDTO> competitorAndBoatEntry: competitorAndBoatDTOs.entrySet()) {
             Competitor competitor = getCompetitor(competitorAndBoatEntry.getKey());
             competitorsToRegister.add(competitor);
             competitorToBoatMapping.put(competitor, getBoat(competitorAndBoatEntry.getValue()));
@@ -5679,9 +5680,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            Set<? extends CompetitorWithoutBoatDTO> competitorDTOs) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
+            Set<? extends CompetitorDTO> competitorDTOs) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
         Set<Competitor> competitorsToRegister = new HashSet<>();
-        for (CompetitorWithoutBoatDTO dto : competitorDTOs) {
+        for (CompetitorDTO dto : competitorDTOs) {
             competitorsToRegister.add(getCompetitor(dto));
         }
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
@@ -5703,7 +5704,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void setCompetitorRegistrationsInRegattaLog(String leaderboardName, Set<? extends CompetitorWithoutBoatDTO> competitorDTOs)
+    public void setCompetitorRegistrationsInRegattaLog(String leaderboardName, Set<? extends CompetitorDTO> competitorDTOs)
             throws DoesNotHaveRegattaLogException, NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (!(leaderboard instanceof HasRegattaLike)){
@@ -5711,7 +5712,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         
         Set<Competitor> competitorsToRegister = new HashSet<Competitor>();
-        for (CompetitorWithoutBoatDTO dto : competitorDTOs) {
+        for (CompetitorDTO dto : competitorDTOs) {
             competitorsToRegister.add(getCompetitor(dto));
         }
         
@@ -6027,9 +6028,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true); 
             event = new RegattaLogDeviceMarkMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
                     mark, mapping.getDevice(), from, to);
-        } else if (dto.mappedTo instanceof CompetitorDTO) {
+        } else if (dto.mappedTo instanceof CompetitorWithBoatDTO) {
             Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
-                    ((CompetitorDTO) dto.mappedTo).getIdAsString());
+                    ((CompetitorWithBoatDTO) dto.mappedTo).getIdAsString());
             if (mapping.getDevice().getIdentifierType().equals(ExpeditionSensorDeviceIdentifier.TYPE)) {
                 event = new RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl(
                         now, now, getService().getServerAuthor(), UUID.randomUUID(), 
@@ -6058,10 +6059,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RegattaLogEvent event = null;
         TimePoint from = mapping.getTimeRange().hasOpenBeginning() ? null : mapping.getTimeRange().from();
         TimePoint to = mapping.getTimeRange().hasOpenEnd() ? null : mapping.getTimeRange().to();
-        if (dto.mappedTo instanceof CompetitorDTO) {
+        if (dto.mappedTo instanceof CompetitorWithBoatDTO) {
             DoubleVectorFixImporter importer = getRegisteredImporter(DoubleVectorFixImporter.class, dto.dataType);
             event = importer.createEvent(now, now, getService().getServerAuthor(), UUID.randomUUID(),
-                    getCompetitor((CompetitorDTO) dto.mappedTo), mapping.getDevice(), from, to);
+                    getCompetitor((CompetitorWithBoatDTO) dto.mappedTo), mapping.getDevice(), from, to);
         } else if (dto.mappedTo instanceof BoatDTO) {
             DoubleVectorFixImporter importer = getRegisteredImporter(DoubleVectorFixImporter.class, dto.dataType);
             event = importer.createEvent(now, now, getService().getServerAuthor(), UUID.randomUUID(),
@@ -6092,9 +6093,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true);
             //expect UUIDs
             return new DeviceMappingImpl<Mark>(mark, device, timeRange, dto.originalRaceLogEventIds, RegattaLogDeviceMarkMappingEventImpl.class);
-        } else if (dto.mappedTo instanceof CompetitorDTO) {
+        } else if (dto.mappedTo instanceof CompetitorWithBoatDTO) {
             Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
-                    ((CompetitorDTO) dto.mappedTo).getIdAsString());
+                    ((CompetitorWithBoatDTO) dto.mappedTo).getIdAsString());
             return new DeviceMappingImpl<Competitor>(competitor, device, timeRange, dto.originalRaceLogEventIds, RegattaLogDeviceCompetitorMappingEventImpl.class);
         } else if (dto.mappedTo instanceof BoatDTO) {
             final Boat boat = getService().getCompetitorStore()
@@ -6284,7 +6285,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Map<Integer, Date> getCompetitorRaceLogMarkPassingData(String leaderboardName, String raceColumnName, String fleetName,
-            CompetitorDTO competitor) {
+            CompetitorWithBoatDTO competitor) {
         Map<Integer, Date> result = new HashMap<>();
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         for (Triple<Competitor, Integer, TimePoint> fixedEvent : new MarkPassingDataFinder(raceLog).analyze()) {
@@ -6303,7 +6304,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void updateFixedMarkPassing(String leaderboardName, String raceColumnName, String fleetName, Integer indexOfWaypoint,
-            Date dateOfMarkPassing, CompetitorDTO competitorDTO) {
+            Date dateOfMarkPassing, CompetitorWithBoatDTO competitorDTO) {
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         Competitor competitor = getCompetitor(competitorDTO);
         RaceLogFixedMarkPassingEvent oldFixedMarkPassingEvent = null;
@@ -6331,7 +6332,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void updateSuppressedMarkPassings(String leaderboardName, String raceColumnName, String fleetName,
-            Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO) {
+            Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorWithBoatDTO competitorDTO) {
         RaceLogSuppressedMarkPassingsEvent oldSuppressedMarkPassingEvent = null;
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         Competitor competitor = getCompetitor(competitorDTO);
@@ -6378,7 +6379,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Map<Integer, Date> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO, boolean waitForCalculations) {
+    public Map<Integer, Date> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorWithBoatDTO competitorDTO, boolean waitForCalculations) {
         Map<Integer, Date> result = new HashMap<>();
         final TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
@@ -6493,11 +6494,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto,
-            String leaderboardName, Collection<CompetitorDTO> competitorDtos, String iOSAppUrl, String androidAppUrl,
+            String leaderboardName, Collection<CompetitorWithBoatDTO> competitorDtos, String iOSAppUrl, String androidAppUrl,
             String localeInfoName) throws MailException {
         Event event = getService().getEvent(eventDto.id);
         Set<Competitor> competitors = new HashSet<>();
-        for (CompetitorDTO c : competitorDtos) {
+        for (CompetitorWithBoatDTO c : competitorDtos) {
             competitors.add(getCompetitor(c));
         }
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
@@ -6608,7 +6609,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName,
+    public Collection<CompetitorWithBoatDTO> getCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName,
             String fleetName) throws NotFoundException {
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
@@ -6616,13 +6617,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrationsForLeaderboard(String leaderboardName) throws NotFoundException {
+    public Collection<CompetitorWithBoatDTO> getCompetitorRegistrationsForLeaderboard(String leaderboardName) throws NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         return convertToCompetitorDTOs(leaderboard.getAllCompetitors());
     }
 
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException, NotFoundException {
+    public Collection<CompetitorWithBoatDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException, NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (! (leaderboard instanceof HasRegattaLike)) {
             throw new DoesNotHaveRegattaLogException();
@@ -6632,7 +6633,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName,
+    public Collection<CompetitorWithBoatDTO> getCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName,
             String fleetName) throws NotFoundException {
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
@@ -6640,7 +6641,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public Map<CompetitorDTO, BoatDTO> getCompetitorAndBoatRegistrationsInRaceLog(String leaderboardName, String raceColumnName,
+    public Map<CompetitorWithBoatDTO, BoatDTO> getCompetitorAndBoatRegistrationsInRaceLog(String leaderboardName, String raceColumnName,
             String fleetName) throws NotFoundException {
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
@@ -7002,7 +7003,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName) {
+    public Collection<CompetitorWithBoatDTO> getEliminatedCompetitors(String leaderboardName) {
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null || !(leaderboard instanceof RegattaLeaderboardWithEliminations)) {
             throw new IllegalArgumentException(leaderboardName+" does not match a regatta leaderboard with eliminations");
@@ -7012,9 +7013,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> newEliminatedCompetitorDTOs) {
+    public void setEliminatedCompetitors(String leaderboardName, Set<CompetitorWithBoatDTO> newEliminatedCompetitorDTOs) {
         Set<Competitor> newEliminatedCompetitors = new HashSet<>();
-        for (final CompetitorDTO cDTO : newEliminatedCompetitorDTOs) {
+        for (final CompetitorWithBoatDTO cDTO : newEliminatedCompetitorDTOs) {
             newEliminatedCompetitors.add(getCompetitor(cDTO));
         }
         getService().apply(new UpdateEliminatedCompetitorsInLeaderboard(leaderboardName, newEliminatedCompetitors));
@@ -7123,11 +7124,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 templateDTO.getCompetitorCount(), templateDTO.getFlightMultiplier());
         PairingList<RaceColumn, Fleet, Competitor, Boat> pairingList = getService()
                 .getPairingListFromTemplate(pairingListTemplate, leaderboardName, selectedRaces);
-        List<List<List<Pair<CompetitorWithoutBoatDTO, BoatDTO>>>> result = new ArrayList<>();
+        List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
         for (RaceColumn raceColumn : selectedRaces) {
-            List<List<Pair<CompetitorWithoutBoatDTO, BoatDTO>>> raceColumnList = new ArrayList<>();
+            List<List<Pair<CompetitorDTO, BoatDTO>>> raceColumnList = new ArrayList<>();
             for (Fleet fleet : raceColumn.getFleets()) {
-                List<Pair<CompetitorWithoutBoatDTO, BoatDTO>> fleetList = new ArrayList<>();
+                List<Pair<CompetitorDTO, BoatDTO>> fleetList = new ArrayList<>();
                 for (Pair<Competitor, Boat> competitorAndBoatPair : pairingList.getCompetitors(raceColumn, fleet)) {
                     final Boat boat = competitorAndBoatPair.getB();
                     if (competitorAndBoatPair.getA() != null) {
@@ -7153,17 +7154,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public PairingListDTO getPairingListFromRaceLogs(final String leaderboardName) throws NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        List<List<List<Pair<CompetitorWithoutBoatDTO, BoatDTO>>>> result = new ArrayList<>();
+        List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
         List<String> raceColumnNames = new ArrayList<>();
         PairingListLeaderboardAdapter adapter = new PairingListLeaderboardAdapter();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             if (!raceColumn.isMedalRace()) {
-                List<List<Pair<CompetitorWithoutBoatDTO, BoatDTO>>> raceColumnList = new ArrayList<>();
+                List<List<Pair<CompetitorDTO, BoatDTO>>> raceColumnList = new ArrayList<>();
                 for (Fleet fleet : raceColumn.getFleets()) {
-                    List<Pair<CompetitorWithoutBoatDTO, BoatDTO>> fleetList = new ArrayList<>();
+                    List<Pair<CompetitorDTO, BoatDTO>> fleetList = new ArrayList<>();
                     for (Pair<Competitor, Boat> competitorAndBoatPair : adapter.getCompetitors(raceColumn, fleet)) {
                         final Boat boat = competitorAndBoatPair.getB();
-                        fleetList.add(new Pair<CompetitorWithoutBoatDTO, BoatDTO>(baseDomainFactory.convertToCompetitorDTO(competitorAndBoatPair.getA()),
+                        fleetList.add(new Pair<CompetitorDTO, BoatDTO>(baseDomainFactory.convertToCompetitorDTO(competitorAndBoatPair.getA()),
                                 new BoatDTO(boat.getId().toString(), boat.getName(),
                                         convertToBoatClassDTO(boat.getBoatClass()), boat.getSailID(), 
                                         boat.getColor())));
@@ -7195,10 +7196,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 groupCount = 0;
                 for (Fleet fleet : raceColumn.getFleets()) {
                     raceColumn.enableCompetitorRegistrationOnRaceLog(fleet);
-                    Map<CompetitorWithoutBoatDTO, BoatDTO> competitors = new HashMap<>();
-                    List<Pair<CompetitorWithoutBoatDTO, BoatDTO>> competitorsFromPairingList = pairingListDTO.getPairingList()
+                    Map<CompetitorDTO, BoatDTO> competitors = new HashMap<>();
+                    List<Pair<CompetitorDTO, BoatDTO>> competitorsFromPairingList = pairingListDTO.getPairingList()
                             .get(flightCount).get(groupCount);
-                    for (Pair<CompetitorWithoutBoatDTO, BoatDTO> competitorAndBoatPair : competitorsFromPairingList) {
+                    for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : competitorsFromPairingList) {
                         if (competitorAndBoatPair.getA() != null && competitorAndBoatPair.getA().getName() != null) {
                             competitors.put(competitorAndBoatPair.getA(), competitorAndBoatPair.getB());
                         }
@@ -7211,7 +7212,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 for (Fleet fleet : raceColumn.getFleets()) {
                     this.setCompetitorRegistrationsInRaceLog(leaderboard.getName(), raceColumn.getName(),
-                            fleet.getName(), new HashSet<CompetitorDTO>());
+                            fleet.getName(), new HashSet<CompetitorWithBoatDTO>());
                 }
             }
         }

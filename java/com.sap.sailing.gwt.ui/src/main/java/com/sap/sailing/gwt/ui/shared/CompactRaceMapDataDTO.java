@@ -9,17 +9,17 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 
 /**
  * A compact representation of a {@link RaceMapDataDTO} that represents competitors by their ID only instead of a
- * complete {@link CompetitorDTO} object. This way, a caller of the
+ * complete {@link CompetitorWithBoatDTO} object. This way, a caller of the
  * {@link SailingServiceAsync#getRaceMapData(com.sap.sailing.domain.common.RegattaAndRaceIdentifier, java.util.Date, Map, Map, boolean, com.google.gwt.user.client.rpc.AsyncCallback)}
- * method that has to provide the IDs of all competitors already will already know all those {@link CompetitorDTO}
- * objects already. There is no need to serialize the {@link CompetitorDTO}s either way.
+ * method that has to provide the IDs of all competitors already will already know all those {@link CompetitorWithBoatDTO}
+ * objects already. There is no need to serialize the {@link CompetitorWithBoatDTO}s either way.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -44,7 +44,7 @@ public class CompactRaceMapDataDTO implements IsSerializable {
     
     CompactRaceMapDataDTO() {}
 
-    public CompactRaceMapDataDTO(Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions, CoursePositionsDTO coursePositions,
+    public CompactRaceMapDataDTO(Map<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions, CoursePositionsDTO coursePositions,
            List<SidelineDTO> courseSidelines, QuickRanksDTO quickRanks, long simulationResultVersion, HashSet<String> raceCompetitorIdsAsStrings, Duration estimatedDuration) {
         this.estimatedDuration = estimatedDuration;
         this.boatPositionsByCompetitorIdAsString = new CompactBoatPositionsDTO(boatPositions);
@@ -63,11 +63,11 @@ public class CompactRaceMapDataDTO implements IsSerializable {
         this.simulationResultVersion = simulationResultVersion;
     }
     
-    public RaceMapDataDTO getRaceMapDataDTO(Map<String, CompetitorDTO> competitorsByIdAsString) {
+    public RaceMapDataDTO getRaceMapDataDTO(Map<String, CompetitorWithBoatDTO> competitorsByIdAsString) {
         RaceMapDataDTO result = new RaceMapDataDTO();
         result.quickRanks = new LinkedHashMap<String, QuickRankDTO>(this.quickRanks.size());
         for (CompactQuickRankDTO compactQuickRank : this.quickRanks) {
-            final CompetitorDTO competitorDTO = competitorsByIdAsString.get(compactQuickRank.getCompetitorIdAsString());
+            final CompetitorWithBoatDTO competitorDTO = competitorsByIdAsString.get(compactQuickRank.getCompetitorIdAsString());
             if (competitorDTO != null) {
                 result.quickRanks.put(compactQuickRank.getCompetitorIdAsString(), new QuickRankDTO(competitorDTO, compactQuickRank.getOneBasedRank(), compactQuickRank.getLegNumber()));
             }
