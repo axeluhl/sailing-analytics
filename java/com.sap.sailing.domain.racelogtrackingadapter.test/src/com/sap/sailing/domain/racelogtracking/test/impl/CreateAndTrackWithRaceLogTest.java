@@ -12,6 +12,8 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
@@ -63,6 +65,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
@@ -259,7 +262,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         // now remove the tracked race and track again; again, the explicit tracking times in the race log must prevail
         service.removeRace(regatta, race.getRace());
         TrackedRace race2 = trackAndGetRace(column);
-        assertEquals(explicitStartOfTracking, race2.getStartOfTracking());
+        assertEquals(explicitStartOfTracking, waitForStartOfTracking(race2));
         assertEquals(explicitEndOfTracking, race2.getEndOfTracking());
     }
 
@@ -300,5 +303,36 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         service.getRaceTrackerById(raceLog.getId()).stop(/* preemptive */ false);
         raceLogFixTrackerManager.stop(false, /* willBeRemoved */ false);
         addFixes3(race, comp1, dev1);
+    }
+    
+
+    /**
+     * Waits for startOfTracking being available for a given {@link TrackedRace}.
+     */
+    public static TimePoint waitForStartOfTracking(TrackedRace trackedRace) {
+        final CompletableFuture<TimePoint> future = new CompletableFuture<>();
+
+        final AbstractRaceChangeListener listener = new AbstractRaceChangeListener() {
+            @Override
+            public void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
+                if (newStartOfTracking != null) {
+                    future.complete(newStartOfTracking);
+                    trackedRace.removeListener(this);
+                }
+            }
+        };
+        trackedRace.addListener(listener);
+        final TimePoint startOfTracking = trackedRace.getStartOfTracking();
+        if (startOfTracking != null) {
+            trackedRace.removeListener(listener);
+            return startOfTracking;
+        }
+
+        try {
+            return future.get(10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            trackedRace.removeListener(listener);
+            return null;
+        }
     }
 }
