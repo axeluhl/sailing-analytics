@@ -571,7 +571,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         updateSettings(settings);
         style.afterConstructorHook(contentPanel, this);
     }
-    
+
     public void scrollRowIntoView(int selected) {
         leaderboardTable.getRowElement(selected).scrollIntoView();
     }
@@ -679,8 +679,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
 
         if (newSettings.getOverallDetailsToShow() != null) {
-            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(),
-                    DetailType.getAvailableOverallDetailColumnTypes(), selectedOverallDetailColumns);
+            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), DetailType.getAvailableOverallDetailColumnTypes(),
+                    selectedOverallDetailColumns);
         }
         setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
         setShowAddedScores(newSettings.isShowAddedScores());
