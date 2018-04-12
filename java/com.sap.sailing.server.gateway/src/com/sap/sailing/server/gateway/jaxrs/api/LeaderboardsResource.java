@@ -64,9 +64,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DeviceIdentifier;
@@ -76,7 +74,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
@@ -115,7 +113,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseJsonSe
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 import com.sap.sse.InvalidDateException;
@@ -197,7 +195,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
         int counter = 1;
-        for (CompetitorDTO competitor : leaderboardDTO.competitors) {
+        for (CompetitorWithBoatDTO competitor : leaderboardDTO.competitors) {
             LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);
 
             if (maxCompetitorsCount != null && counter > maxCompetitorsCount) {
@@ -212,7 +210,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             JSONObject jsonRaceColumns = new JSONObject();
             jsonCompetitor.put("raceScores", jsonRaceColumns);
             for (RaceColumnDTO raceColumn : leaderboardDTO.getRaceList()) {
-                List<CompetitorDTO> regattaRankedCompetitorsForColumn = leaderboardDTO
+                List<CompetitorWithBoatDTO> regattaRankedCompetitorsForColumn = leaderboardDTO
                         .getCompetitorOrderingPerRaceColumnName().get(raceColumn.getName());
                 JSONObject jsonEntry = new JSONObject();
                 jsonRaceColumns.put(raceColumn.getName(), jsonEntry);
@@ -227,7 +225,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 MaxPointsReason maxPointsReason = leaderboardEntry.reasonForMaxPoints;
                 jsonEntry.put("maxPointsReason", maxPointsReason != null ? maxPointsReason.toString() : null);
                 jsonEntry.put("rank", regattaRankedCompetitorsForColumn.indexOf(competitor) + 1);
-                List<CompetitorDTO> raceRankedCompetitorsInColumn = leaderboardDTO
+                List<CompetitorWithBoatDTO> raceRankedCompetitorsInColumn = leaderboardDTO
                         .getCompetitorsFromBestToWorst(raceColumn);
                 jsonEntry.put("raceRank", raceRankedCompetitorsInColumn.indexOf(competitor) + 1);
                 jsonEntry.put("isDiscarded", leaderboardEntry.discarded);
@@ -1030,11 +1028,11 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 return result;
             });
         }
-        CompetitorWithBoatJsonSerializer serializer = CompetitorWithBoatJsonSerializer.create();
+        CompetitorAndBoatJsonSerializer serializer = CompetitorAndBoatJsonSerializer.create();
         JSONArray result = new JSONArray();
         for (final Competitor c : competitors) {
             Boat boat = trackedRace.getBoatOfCompetitor(c);
-            JSONObject jsonCompetitor = serializer.serialize(new CompetitorWithBoatImpl(c, (DynamicBoat) boat));
+            JSONObject jsonCompetitor = serializer.serialize(new Pair<>(c, boat));
             result.add(jsonCompetitor);
         }
         String json = result.toJSONString();

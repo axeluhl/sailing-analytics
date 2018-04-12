@@ -19,23 +19,23 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTOImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
-public class TransientCompetitorStoreImpl implements CompetitorStore, Serializable {
-    private static final Logger logger = Logger.getLogger(TransientCompetitorStoreImpl.class.getName());
+public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatStore, Serializable {
+    private static final Logger logger = Logger.getLogger(TransientCompetitorAndBoatStoreImpl.class.getName());
     private static final long serialVersionUID = -4198298775476586931L;
 
     private final Map<Serializable, Competitor> competitorCache;
@@ -52,7 +52,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
      */
     private final Set<Competitor> competitorsToUpdateDuringGetOrCreate;
     
-    private transient WeakHashMap<Competitor, CompetitorWithoutBoatDTO> weakCompetitorDTOCache;
+    private transient WeakHashMap<Competitor, CompetitorDTO> weakCompetitorDTOCache;
 
     private final Set<Boat> boatsToUpdateDuringGetOrCreate;
     
@@ -60,26 +60,26 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     
     private final NamedReentrantReadWriteLock lock;
 
-    public TransientCompetitorStoreImpl() {
+    public TransientCompetitorAndBoatStoreImpl() {
         lock = new NamedReentrantReadWriteLock("CompetitorStore", /* fair */ false);
         competitorCache = new HashMap<Serializable, Competitor>();
         competitorsByIdAsString = new HashMap<String, Competitor>();
         competitorsToUpdateDuringGetOrCreate = new HashSet<Competitor>();
-        weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorWithoutBoatDTO>();
-        competitorUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorUpdateListener>());
+        weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
+        competitorUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorAndBoatStore.CompetitorUpdateListener>());
         boatCache = new HashMap<Serializable, Boat>();
         boatsByIdAsString = new HashMap<String, Boat>();
         boatsToUpdateDuringGetOrCreate = new HashSet<Boat>();
         weakBoatDTOCache = new WeakHashMap<Boat, BoatDTO>();
-        boatUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.BoatUpdateListener>());
+        boatUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorAndBoatStore.BoatUpdateListener>());
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorWithoutBoatDTO>();
-        competitorUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorUpdateListener>());
+        weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
+        competitorUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorAndBoatStore.CompetitorUpdateListener>());
         weakBoatDTOCache = new WeakHashMap<Boat, BoatDTO>();
-        boatUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.BoatUpdateListener>());
+        boatUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorAndBoatStore.BoatUpdateListener>());
     }
 
     @Override
@@ -357,11 +357,11 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public CompetitorWithoutBoatDTO convertToCompetitorDTO(Competitor c) {
+    public CompetitorDTO convertToCompetitorDTO(Competitor c) {
         LockUtil.lockForRead(lock);
         boolean needToUnlockReadLock = true;
         try {
-            CompetitorWithoutBoatDTO competitorDTO = weakCompetitorDTOCache.get(c);
+            CompetitorDTO competitorDTO = weakCompetitorDTOCache.get(c);
             if (competitorDTO == null) {
                 LockUtil.unlockAfterRead(lock);
                 needToUnlockReadLock = false;
@@ -370,7 +370,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                 if (competitorDTO == null) {
                     final Nationality nationality = c.getTeam().getNationality();
                     CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
-                    competitorDTO = new CompetitorWithoutBoatDTOImpl(c.getName(), c.getShortName(), c.getColor(), c.getEmail(), countryCode == null ? ""
+                    competitorDTO = new CompetitorDTOImpl(c.getName(), c.getShortName(), c.getColor(), c.getEmail(), countryCode == null ? ""
                             : countryCode.getTwoLetterISOCode(), countryCode == null ? ""
                             : countryCode.getThreeLetterIOCCode(), countryCode == null ? "" : countryCode.getName(),
                               c.getId().toString(),
@@ -410,8 +410,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     @Override
     public void addNewCompetitorsWithBoat(Iterable<CompetitorWithBoat> competitors) {
         for (CompetitorWithBoat competitor: competitors) {
+            addNewBoat(competitor.getBoat()); // create the boat before the competitor because the competitor references the boat
             addNewCompetitor(competitor);
-            addNewBoat(competitor.getBoat());
         }
     }
 
@@ -419,8 +419,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
         CompetitorWithBoat competitor = new CompetitorWithBoatImpl(id, name, shortName, displayColor, email, flagImage, team,
                 timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+        addNewBoat(boat); // create the boat before the competitor because the competitor references the boat
         addNewCompetitor(competitor);
-        addNewBoat(boat);
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Created competitor "+name+" with ID "+id, new Exception("Here is where it happened"));
         }
@@ -718,19 +718,18 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
     
     @Override
-    public CompetitorDTO convertToCompetitorWithBoatDTO(Competitor competitor, Boat boat) {
-        CompetitorWithoutBoatDTO c = convertToCompetitorDTO(competitor);
+    public CompetitorWithBoatDTO convertToCompetitorWithBoatDTO(Competitor competitor, Boat boat) {
+        CompetitorDTO c = convertToCompetitorDTO(competitor);
         BoatDTO boatDTO = null;
         if (boat != null) {
             boatDTO = convertToBoatDTO(boat); 
         }
-        CompetitorDTO competitorDTO = new CompetitorDTOImpl(c, boatDTO);
-
+        CompetitorWithBoatDTO competitorDTO = new CompetitorWithBoatDTOImpl(c, boatDTO);
         return competitorDTO;
     }
 
     @Override
-    public CompetitorDTO convertToCompetitorWithOptionalBoatDTO(Competitor competitor) {
+    public CompetitorWithBoatDTO convertToCompetitorWithOptionalBoatDTO(Competitor competitor) {
         if (isValidCompetitorWithBoat(competitor)) {
             return convertToCompetitorWithBoatDTO(competitor, ((CompetitorWithBoat) competitor).getBoat());
         } else {
@@ -739,10 +738,10 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats) {
-        Map<CompetitorDTO, BoatDTO> result = new HashMap<>();
+    public Map<CompetitorWithBoatDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats) {
+        Map<CompetitorWithBoatDTO, BoatDTO> result = new HashMap<>();
         for (Entry<Competitor, Boat> entry: competitorsAndBoats.entrySet()) {
-            CompetitorDTO competitorDTO = convertToCompetitorWithOptionalBoatDTO(entry.getKey());
+            CompetitorWithBoatDTO competitorDTO = convertToCompetitorWithOptionalBoatDTO(entry.getKey());
             BoatDTO boatDTO = convertToBoatDTO(entry.getValue());
             result.put(competitorDTO, boatDTO);
         }

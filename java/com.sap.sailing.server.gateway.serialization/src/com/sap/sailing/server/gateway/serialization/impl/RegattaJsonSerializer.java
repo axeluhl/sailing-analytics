@@ -33,30 +33,26 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
 
     public JSONObject serialize(Regatta regatta) {
         JSONObject result = new JSONObject();
-
         result.put(FIELD_NAME, regatta.getName());
         result.put(FIELD_START_DATE, regatta.getStartDate() != null ? regatta.getStartDate().asMillis() : null);
         result.put(FIELD_END_DATE, regatta.getEndDate() != null ? regatta.getEndDate().asMillis() : null);
         result.put(FIELD_SCORINGSYSTEM, regatta.getScoringScheme().getType().name());
         result.put(FIELD_BOATCLASS, regatta.getBoatClass() != null ? regatta.getBoatClass().getName(): null);
         result.put(FIELD_COURSE_AREA_ID, regatta.getDefaultCourseArea() != null ? regatta.getDefaultCourseArea().getId().toString(): null);
-        
-        if(seriesSerializer != null) {
+        if (seriesSerializer != null) {
             JSONArray seriesJson = new JSONArray();
             for (Series series : regatta.getSeries()) {
                 seriesJson.add(seriesSerializer.serialize(series));
             }
             result.put(FIELD_SERIES, seriesJson);
         }
-
-        if(competitorSerializer != null) {
+        if (competitorSerializer != null) {
             JSONArray competitorsJson = new JSONArray();
             for (Competitor competitor: regatta.getAllCompetitors()) {
                 competitorsJson.add(competitorSerializer.serialize(competitor));
             }
             result.put(FIELD_COMPETITORS, competitorsJson);
         }
-        
         return result;
     }
 }

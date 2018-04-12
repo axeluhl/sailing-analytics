@@ -90,6 +90,7 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
         } else {
             stopTrackerIfStillRunning(/* preemptive */ false, /* willBeRemoved */ false);
         }
+        this.notifyAll();
     }
     
     private void addRaceLog(RaceLog raceLog) {
@@ -152,5 +153,12 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
             }
         }
         return false;
+    }
+    
+    public synchronized FixLoaderAndTracker waitForTracker() throws InterruptedException {
+        while (tracker == null) {
+            this.wait();
+        }
+        return tracker;
     }
 }

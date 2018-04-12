@@ -12,7 +12,7 @@ import com.google.gwt.user.cellview.client.DefaultCellTableBuilder;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.MappableToDeviceFormatter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -142,8 +142,8 @@ public class TrackFileImportDeviceIdentifierTableWrapper extends
             td.className(tdClasses.toString());
             td.colSpan(getColumns().size() - 1);
             final String nameOfMappedItem;
-            if (mappableToDevice instanceof CompetitorDTO) {
-                final CompetitorDTO competitorDTO = (CompetitorDTO) mappableToDevice;
+            if (mappableToDevice instanceof CompetitorWithBoatDTO) {
+                final CompetitorWithBoatDTO competitorDTO = (CompetitorWithBoatDTO) mappableToDevice;
                 nameOfMappedItem = competitorDTO.getName();
             } else if (mappableToDevice instanceof BoatDTO) {
                 final BoatDTO boatDTO = (BoatDTO) mappableToDevice;
