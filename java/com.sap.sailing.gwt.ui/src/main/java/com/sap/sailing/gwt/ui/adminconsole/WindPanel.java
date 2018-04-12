@@ -17,8 +17,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -39,19 +37,13 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FileUpload;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.SuggestOracle;
-import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -60,13 +52,9 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.dto.ExpeditionAllInOneConstants;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
 import com.sap.sailing.gwt.ui.adminconsole.WindImportResult.RaceEntry;
-import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResponse;
-import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResultsDialog;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -82,8 +70,6 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
-import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
-import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -98,9 +84,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     private static final String WIND_IMPORT_PARAMETER_RACES = "races";
 
     private static final String EXPEDITON_IMPORT_PARAMETER_BOAT_ID = "boatId";
-    private static final String EXPEDITON_IMPORT_PARAMETER_BOAT_CLASS = "boatClass";
-
-    private static final String URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT = "/../../sailingserver/expedition/import";
+    
     private static final String URL_SAILINGSERVER_EXPEDITION_IMPORT = "/../../sailingserver/expedition-import";
     private static final String URL_SAILINGSERVER_GRIB_IMPORT = "/../../sailingserver/grib-wind-import";
     private static final String URL_SAILINGSERVER_NMEA_IMPORT = "/../../sailingserver/nmea-wind-import";
@@ -456,159 +440,8 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
 
     private CaptionPanel createExpeditionAllInOneImportPanel() {
         final CaptionPanel rootPanel = new CaptionPanel(stringMessages.importFullExpeditionData());
-        final FormPanel formPanel = new FormPanel();
-        final BusyIndicator busyIndicator = new SimpleBusyIndicator();
-        final Button uploadButton = new Button(stringMessages.upload());
-        formPanel.getElement().setAttribute("autocomplete", "off");
-        uploadButton.addClickHandler(event -> {
-            uploadButton.setEnabled(false);
-            busyIndicator.setBusy(true);
-            formPanel.submit();
-        });
-        formPanel.setMethod(FormPanel.METHOD_POST);
-        formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
-        formPanel.setAction(GWT.getHostPageBaseURL() + URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT);
-        rootPanel.add(formPanel);
-        final VerticalPanel contentPanel = new VerticalPanel();
-        formPanel.add(contentPanel);
-        final FileUpload fileUpload = new FileUpload();
-        fileUpload.setName("upload");
-        contentPanel.add(fileUpload);
-        
-        final FlowPanel importModePanel = new FlowPanel();
-        contentPanel.add(importModePanel);
-        final HorizontalPanel regattaNamePanel = new HorizontalPanel();
-        regattaNamePanel.setVisible(false);
-        final HorizontalPanel boatClassPanel = new HorizontalPanel();
-        contentPanel.add(regattaNamePanel);
-        final RadioButton newEventImport = new RadioButton(ExpeditionAllInOneConstants.REQUEST_PARAMETER_IMPORT_MODE, stringMessages.createNewEvent());
-        newEventImport.setFormValue("NEW_EVENT");
-        newEventImport.setValue(true);
-        importModePanel.add(newEventImport);
-        newEventImport.addClickHandler(event -> {
-            regattaNamePanel.setVisible(false);
-            boatClassPanel.setVisible(true);
-        });
-        final RadioButton newCompetitorImport = new RadioButton(ExpeditionAllInOneConstants.REQUEST_PARAMETER_IMPORT_MODE, stringMessages.newExpeditionCompetitor());
-        newCompetitorImport.setFormValue(ExpeditionAllInOneConstants.ImportMode.NEW_COMPETITOR.name());
-        importModePanel.add(newCompetitorImport);
-        newCompetitorImport.addClickHandler(event -> {
-            regattaNamePanel.setVisible(true);
-            boatClassPanel.setVisible(false);
-        });
-        final RadioButton newRaceImport = new RadioButton(ExpeditionAllInOneConstants.REQUEST_PARAMETER_IMPORT_MODE, stringMessages.newExpeditionRace());
-        newRaceImport.setFormValue(ExpeditionAllInOneConstants.ImportMode.NEW_RACE.name());
-        importModePanel.add(newRaceImport);
-        newRaceImport.addClickHandler(event -> {
-            regattaNamePanel.setVisible(true);
-            boatClassPanel.setVisible(false);
-        });
-        
-        regattaNamePanel.setSpacing(5);
-        final Label regattaNameLabel = new Label(stringMessages.regattaName() + ":");
-        regattaNamePanel.add(regattaNameLabel);
-        regattaNamePanel.setCellVerticalAlignment(regattaNameLabel, HasVerticalAlignment.ALIGN_MIDDLE);
-        final TextBox regattaName = new TextBox();
-        regattaName.setName("regattaName");
-
-        final MultiWordSuggestOracle regattaOracle = new MultiWordSuggestOracle(". _");
-        refreshRegattaOracle(regattaOracle);
-        final SuggestBox regattaSuggestBox = new SuggestBox(regattaOracle , regattaName);
-        regattaNamePanel.add(regattaSuggestBox);
-        regattaNamePanel.setCellVerticalAlignment(regattaSuggestBox, HasVerticalAlignment.ALIGN_MIDDLE);
-        boatClassPanel.setSpacing(5);
-        contentPanel.add(boatClassPanel);
-        final Label boatClassLabel = new Label(stringMessages.boatClass() + ":");
-        boatClassPanel.add(boatClassLabel);
-        boatClassPanel.setCellVerticalAlignment(boatClassLabel, HasVerticalAlignment.ALIGN_MIDDLE);
-        final SuggestBox boatClassInput = new SuggestBox(new BoatClassMasterdataSuggestOracle());
-        boatClassInput.getValueBox().setName(EXPEDITON_IMPORT_PARAMETER_BOAT_CLASS);
-        boatClassPanel.add(boatClassInput);
-        boatClassPanel.setCellVerticalAlignment(boatClassInput, HasVerticalAlignment.ALIGN_MIDDLE);
-        final HorizontalPanel controlPanel = new HorizontalPanel();
-        controlPanel.setSpacing(5);
-        controlPanel.add(uploadButton);
-        controlPanel.add(busyIndicator);
-        contentPanel.add(controlPanel);
-        
-        final Runnable validation = () -> {
-            final String filename = fileUpload.getFilename(), boatClass = boatClassInput.getValue();
-            final String regattaNameValue = regattaSuggestBox.getValue();
-            final boolean fileValid = filename != null && !filename.trim().isEmpty();
-            final boolean isNewEventImport = Boolean.TRUE.equals(newEventImport.getValue());
-            final boolean boatClassValid = boatClass != null && !boatClass.trim().isEmpty();
-            final boolean regattaNameValid = regattaNameValue != null && !regattaNameValue.trim().isEmpty();
-            uploadButton.setEnabled(fileValid && (isNewEventImport ? boatClassValid : regattaNameValid));
-        };
-        
-        fileUpload.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                validation.run();
-            }
-        });
-
-        formPanel.addSubmitCompleteHandler(event -> {
-            validation.run();
-            busyIndicator.setBusy(false);
-            final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(event.getResults());
-            if (response == null) {
-                Window.alert(StringMessages.INSTANCE.unexpectedErrorDuringFileImport());
-            } else if (response.hasEventId()) {
-                new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
-                        response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getRaceName(),
-                        response.getRaceColumnName(), response.getFleetName(), response.getGpsDeviceIds(),
-                        response.getSensorDeviceIds(), response.getSensorFixImporterType(), sailingService,
-                        errorReporter, stringMessages);
-                refreshRegattaOracle(regattaOracle);
-            } else {
-                ExpeditionDataImportResultsDialog.showResults(response);
-            }
-        });
-        
-        regattaSuggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
-            @Override
-            public void onSelection(SelectionEvent<Suggestion> event) {
-                final String selected = event.getSelectedItem().getReplacementString();
-                if (selected != null) {
-                    sailingService.getRegattaByName(selected, new AsyncCallback<RegattaDTO>() {
-                        @Override
-                        public void onSuccess(RegattaDTO result) {
-                            validation.run();
-                        }
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Could not determine Regatta " + selected);
-                        }
-                    });
-                }
-            }
-        });
-        regattaSuggestBox.addKeyUpHandler(event -> validation.run());
-        
-        fileUpload.addChangeHandler(event -> validation.run());
-        boatClassInput.addSelectionHandler(event -> validation.run());
-        boatClassInput.addKeyUpHandler(event -> validation.run());
-        validation.run();
-        
+        rootPanel.add(new ExpeditionAllInOneImportPanel(stringMessages, sailingService, errorReporter));
         return rootPanel;
-    }
-
-    private void refreshRegattaOracle(MultiWordSuggestOracle regattaOracle) {
-        sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
-            @Override
-            public void onSuccess(List<RegattaDTO> result) {
-                regattaOracle.clear();
-                for (RegattaDTO regatta : result) {
-                    regattaOracle.add(regatta.getName());
-                }
-            }
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Could not load regattanames " + caught.getMessage());
-            }
-        });
     }
 
     private CaptionPanel createExpeditionWindImportPanel() {
