@@ -3,7 +3,7 @@ package com.sap.sailing.domain.swisstimingadapter;
 import java.util.Collection;
 import java.util.List;
 
-import com.sap.sailing.domain.common.Distance;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 

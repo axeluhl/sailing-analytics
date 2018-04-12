@@ -12,12 +12,9 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
@@ -35,7 +32,10 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 import com.sap.sailing.nmeaconnector.NMEAWindReceiver;
 import com.sap.sailing.nmeaconnector.TimedBearing;
 import com.sap.sailing.nmeaconnector.TimedSpeedWithBearing;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import net.sf.marineapi.nmea.event.AbstractSentenceListener;

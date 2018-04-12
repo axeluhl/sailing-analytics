@@ -11,7 +11,7 @@ import com.sap.sse.gwt.client.DefaultRule_1_0n;
 
 @DefaultLocale("en")
 public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
-        com.sap.sse.gwt.adminconsole.StringMessages, CommonStringMessages {
+        com.sap.sse.gwt.adminconsole.StringMessages, CommonStringMessages, com.sap.sse.datamining.ui.StringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
     
     String manage2Sail();

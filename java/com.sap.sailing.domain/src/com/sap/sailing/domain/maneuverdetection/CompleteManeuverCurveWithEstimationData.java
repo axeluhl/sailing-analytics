@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.maneuverdetection;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 

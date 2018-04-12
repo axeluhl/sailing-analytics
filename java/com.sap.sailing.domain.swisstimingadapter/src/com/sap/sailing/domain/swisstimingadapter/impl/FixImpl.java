@@ -1,11 +1,11 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.TrackerType;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Speed;
 
 public class FixImpl implements Fix {
     private final String boatID;

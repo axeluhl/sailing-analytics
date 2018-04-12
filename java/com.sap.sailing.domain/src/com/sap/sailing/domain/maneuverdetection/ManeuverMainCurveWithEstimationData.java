@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.maneuverdetection;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.annotations.Statistic;
 

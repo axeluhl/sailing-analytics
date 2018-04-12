@@ -1,10 +1,10 @@
 package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Speed;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;

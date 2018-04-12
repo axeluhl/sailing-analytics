@@ -15,11 +15,16 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
-import com.sap.sailing.gwt.ui.datamining.presentation.TabbedResultsPresenter;
-import com.sap.sailing.gwt.ui.datamining.selection.QueryDefinitionProviderWithControls;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
+import com.sap.sse.datamining.ui.AnchorDataMiningSettingsControl;
+import com.sap.sse.datamining.ui.DataMiningService;
+import com.sap.sse.datamining.ui.DataMiningServiceAsync;
+import com.sap.sse.datamining.ui.DataMiningSettingsControl;
+import com.sap.sse.datamining.ui.ResultsPresenter;
+import com.sap.sse.datamining.ui.execution.SimpleQueryRunner;
+import com.sap.sse.datamining.ui.presentation.AbstractTabbedResultsPresenter;
+import com.sap.sse.datamining.ui.selection.QueryDefinitionProviderWithControls;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.resources.Highcharts;
@@ -60,7 +65,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
             public Widget get() {
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null,
                         getStringMessages());
-                ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(/* parent */ null, /* context */ null,
+                ResultsPresenter<?> resultsPresenter = new AbstractTabbedResultsPresenter(/* parent */ null, /* context */ null,
                         /* delegate drillDownCallback */ groupKey -> {
                             queryDefinitionProviderWithControls.drillDown(groupKey, /* onSuccessCallback */ ()->queryRunner.runQuery());
                         }, getStringMessages());

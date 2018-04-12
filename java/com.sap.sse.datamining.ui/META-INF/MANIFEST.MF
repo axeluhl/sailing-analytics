@@ -6,3 +6,12 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
+Export-Package: com.sap.sse.datamining.ui,
+ com.sap.sse.datamining.ui.execution,
+ com.sap.sse.datamining.ui.presentation,
+ com.sap.sse.datamining.ui.presentation.dataproviders,
+ com.sap.sse.datamining.ui.selection
+Require-Bundle: com.sap.sse.gwt;bundle-version="1.0.0",
+ com.sap.sse.datamining.shared;bundle-version="1.0.0",
+ com.sap.sse.common,
+ org.moxieapps.gwt.highcharts;bundle-version="1.6.0"
