@@ -37,22 +37,22 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeseri
                 ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.AVERAGE_COURSE_AFTER_IN_DEGREES);
         Double secondsAfter = (Double) object.get(
                 ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.DURATION_TO_NEXT_MANEUVER_IN_SECONDS);
-        Long gpsFixesCountBefore = (Long) object.get(
+        Integer gpsFixesCountBefore = (Integer) object.get(
                 ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.GPS_FIXES_COUNT_FROM_PREVIOUS_MANEUVER_IN_SECONDS);
-        Long gpsFixesCountAfter = (Long) object.get(
+        Integer gpsFixesCountAfter = (Integer) object.get(
                 ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.GPS_FIXES_COUNT_TO_NEXT_MANEUVER_IN_SECONDS);
-        Long gpsFixesCount = (Long) object
+        Integer gpsFixesCount = (Integer) object
                 .get(ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.GPS_FIXES_COUNT);
         return new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl(boundaries.getTimePointBefore(),
                 boundaries.getTimePointAfter(), boundaries.getSpeedWithBearingBefore(),
                 boundaries.getSpeedWithBearingAfter(), boundaries.getDirectionChangeInDegrees(),
                 boundaries.getLowestSpeed(), convertSpeedWithBearing(avgSpeedBeforeInKnots, avgCogBefore),
-                convertDuration(secondsBefore), convertCount(gpsFixesCountBefore),
+                convertDuration(secondsBefore), gpsFixesCountBefore,
                 convertSpeedWithBearing(avgSpeedAfterInKnots, avgCogAfter), convertDuration(secondsAfter),
-                convertCount(gpsFixesCountAfter), boundaries.getDistanceSailedWithinManeuver(),
+                gpsFixesCountAfter, boundaries.getDistanceSailedWithinManeuver(),
                 boundaries.getDistanceSailedWithinManeuverTowardMiddleAngleProjection(),
                 boundaries.getDistanceSailedIfNotManeuvering(),
-                boundaries.getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering(), convertCount(gpsFixesCount));
+                boundaries.getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering(), gpsFixesCount);
     }
 
     private SpeedWithBearing convertSpeedWithBearing(Double speedInKnots, Double cog) {
@@ -62,10 +62,6 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeseri
 
     private Duration convertDuration(Double seconds) {
         return seconds == null ? null : new MillisecondsDurationImpl((long) (seconds * 1000.0));
-    }
-
-    private Integer convertCount(Long count) {
-        return count == null ? null : count.intValue();
     }
 
 }

@@ -44,8 +44,9 @@ public class CompleteManeuverCurveWithEstimationDataJsonDeserializer
                         CompleteManeuverCurveWithEstimationDataJsonSerializer.CURVE_WITH_UNSTABLE_COURSE_AND_SPEED));
         JSONObject windJson = (JSONObject) object.get(CompleteManeuverCurveWithEstimationDataJsonSerializer.WIND);
         Wind wind = windJson == null ? null : windDeserializer.deserialize(windJson);
-        Long tackingCount = (Long) object.get(CompleteManeuverCurveWithEstimationDataJsonSerializer.TACKING_COUNT);
-        Long jibingCount = (Long) object.get(CompleteManeuverCurveWithEstimationDataJsonSerializer.JIBING_COUNT);
+        Integer tackingCount = (Integer) object
+                .get(CompleteManeuverCurveWithEstimationDataJsonSerializer.TACKING_COUNT);
+        Integer jibingCount = (Integer) object.get(CompleteManeuverCurveWithEstimationDataJsonSerializer.JIBING_COUNT);
         Boolean maneuverStartsByRunningAwayFromWind = (Boolean) object
                 .get(CompleteManeuverCurveWithEstimationDataJsonSerializer.MANEUVER_STARTS_BY_RUNNING_AWAY_FROM_WIND);
         Double relativeBearingToNextMarkBeforeManeuver = (Double) object.get(
@@ -53,7 +54,7 @@ public class CompleteManeuverCurveWithEstimationDataJsonDeserializer
         Double relativeBearingToNextMarkAfterManeuver = (Double) object.get(
                 CompleteManeuverCurveWithEstimationDataJsonSerializer.RELATIVE_BEARING_TO_NEXT_MARK_AFTER_MANEUVER);
         return new CompleteManeuverCurveWithEstimationDataImpl(mainCurve, curveWithUnstableCourseAndSpeed, wind,
-                tackingCount.intValue(), jibingCount.intValue(), maneuverStartsByRunningAwayFromWind,
+                tackingCount, jibingCount, maneuverStartsByRunningAwayFromWind,
                 convertBearing(relativeBearingToNextMarkBeforeManeuver),
                 convertBearing(relativeBearingToNextMarkAfterManeuver), markPassing);
     }
