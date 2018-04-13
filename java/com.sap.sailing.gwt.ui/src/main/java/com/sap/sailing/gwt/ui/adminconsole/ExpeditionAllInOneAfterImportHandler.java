@@ -239,8 +239,8 @@ public class ExpeditionAllInOneAfterImportHandler {
             public void onSuccess(Void result) {
                 final List<Triple<String, String, String>> leaderboardRaceColumnFleetNames = new ArrayList<>();
                 leaderboardRaceColumnFleetNames.add(new Triple<>(leaderboard.name, raceColumnName, fleetName));
-                sailingService.startRaceLogTracking(leaderboardRaceColumnFleetNames, /* trackWind */ true,
-                        /* TODO correctWindByDeclination */ true, new AsyncCallback<Void>() {
+                sailingService.startRaceLogTracking(leaderboardRaceColumnFleetNames, /* trackWind */ false,
+                        /* correctWindByDeclination */ true, new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
                                 new ExpeditionAllInOneImportResultDialog(event.id, regatta.getName(),
