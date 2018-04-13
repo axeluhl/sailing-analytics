@@ -84,7 +84,7 @@ public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
     /**
      * Gets the {@link CompetitorAndBoatStore} of this {@link SharedDomainFactory}.
      */
-    CompetitorAndBoatStore getCompetitorStore();
+    CompetitorAndBoatStore getCompetitorAndBoatStore();
    
     /**
      * If a {@link CourseArea} with the given id already exists, it is returned. Otherwise a new {@link CourseArea} 

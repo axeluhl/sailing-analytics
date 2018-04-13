@@ -59,7 +59,7 @@ public class CreateCompetitor extends AbstractRacingEventServiceOperation<Compet
     public Competitor internalApplyTo(RacingEventService toState) throws Exception {
         DynamicPerson sailor = new PersonImpl(name, nationality, null, null);
         DynamicTeam team = new TeamImpl(name + " team", Collections.singleton(sailor), null);
-        final Competitor result = toState.getBaseDomainFactory().getCompetitorStore()
+        final Competitor result = toState.getBaseDomainFactory().getCompetitorAndBoatStore()
                 .getOrCreateCompetitor(competitorId, name, shortName, displayColor, email, flagImageUri,
                         team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
         return result;

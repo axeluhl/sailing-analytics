@@ -5096,7 +5096,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Iterable<CompetitorWithBoatDTO> getCompetitors(boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
         Iterable<CompetitorWithBoatDTO> result;
-        CompetitorAndBoatStore competitorStore = getService().getBaseDomainFactory().getCompetitorStore();
+        CompetitorAndBoatStore competitorStore = getService().getBaseDomainFactory().getCompetitorAndBoatStore();
         if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == false) {
             result = convertToCompetitorDTOs(competitorStore.getAllCompetitors());
         } else if (filterCompetitorsWithBoat == true && filterCompetitorsWithoutBoat == false) {
@@ -5132,7 +5132,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private CompetitorWithBoat addOrUpdateCompetitorWithBoatInternal(CompetitorWithBoatDTO competitor) throws URISyntaxException {
         CompetitorWithBoat result;
-        CompetitorWithBoat existingCompetitor = getService().getCompetitorStore().getExistingCompetitorWithBoatByIdAsString(competitor.getIdAsString());
+        CompetitorWithBoat existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorWithBoatByIdAsString(competitor.getIdAsString());
         Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
             getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
         if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty() || existingCompetitor == null) {
@@ -5167,7 +5167,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private Competitor addOrUpdateCompetitorWithoutBoatInternal(CompetitorWithBoatDTO competitor) throws URISyntaxException {
         Competitor result;
-        Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
+        Competitor existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
         Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
             getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
         if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty() || existingCompetitor == null) {
@@ -5211,7 +5211,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (final CompetitorDescriptor competitorDescriptor : competitorDescriptors) {
             competitorsForSaving.add(convertCompetitorDescriptorToCompetitorWithBoat(competitorDescriptor, searchTag));
         }
-        getBaseDomainFactory().getCompetitorStore().addNewCompetitorsWithBoat(competitorsForSaving);
+        getBaseDomainFactory().getCompetitorAndBoatStore().addNewCompetitorsWithBoat(competitorsForSaving);
         return convertToCompetitorDTOs(competitorsForSaving);
     }
 
@@ -5251,12 +5251,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Iterable<BoatDTO> getAllBoats() {
-        return convertToBoatDTOs(getService().getBaseDomainFactory().getCompetitorStore().getBoats());
+        return convertToBoatDTOs(getService().getBaseDomainFactory().getCompetitorAndBoatStore().getBoats());
     }
 
     @Override
     public Iterable<BoatDTO> getStandaloneBoats() {
-        return convertToBoatDTOs(getService().getBaseDomainFactory().getCompetitorStore().getStandaloneBoats());
+        return convertToBoatDTOs(getService().getBaseDomainFactory().getCompetitorAndBoatStore().getStandaloneBoats());
     }
 
     @Override
@@ -5265,7 +5265,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private Boat addOrUpdateBoatInternal(BoatDTO boat) {
-        Boat existingBoat = getService().getCompetitorStore().getExistingBoatByIdAsString(boat.getIdAsString());
+        Boat existingBoat = getService().getCompetitorAndBoatStore().getExistingBoatByIdAsString(boat.getIdAsString());
         final Boat result;
         if (boat.getIdAsString() == null || boat.getIdAsString().isEmpty() || existingBoat == null) {
             // new boat
@@ -5291,8 +5291,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public boolean linkBoatToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString, String boatIdAsString) {
         boolean result = false;
-        Boat existingBoat = getService().getCompetitorStore().getExistingBoatByIdAsString(boatIdAsString);
-        Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorIdAsString);
+        Boat existingBoat = getService().getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatIdAsString);
+        Competitor existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorIdAsString);
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null && existingCompetitor != null && existingBoat != null) {
             raceLog.add(new RaceLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), 
@@ -5305,7 +5305,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public boolean unlinkBoatFromCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString) {
         boolean result = false;
-        Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorIdAsString);
+        Competitor existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorIdAsString);
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null && existingCompetitor != null) {
             List<RaceLogRegisterCompetitorEvent> linkEventsToRevoke = new ArrayList<>();
@@ -5330,7 +5330,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public BoatDTO getBoatLinkedToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString) {
         BoatDTO result = null;
-        Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorIdAsString);
+        Competitor existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorIdAsString);
         Map<Competitor, Boat> competitorToBoatMappingsForRace = getService().getCompetitorToBoatMappingsForRace(leaderboardName, raceColumnName, fleetName);
         if (existingCompetitor != null) {
             Boat boatOfCompetitor = competitorToBoatMappingsForRace.get(existingCompetitor);
@@ -5806,11 +5806,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private Competitor getCompetitor(CompetitorDTO dto) {
-        return getService().getCompetitorStore().getExistingCompetitorByIdAsString(dto.getIdAsString());
+        return getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(dto.getIdAsString());
     }
 
     private Boat getBoat(BoatDTO dto) {
-        return getService().getCompetitorStore().getExistingBoatByIdAsString(dto.getIdAsString());
+        return getService().getCompetitorAndBoatStore().getExistingBoatByIdAsString(dto.getIdAsString());
     }
 
     @Override
@@ -6192,7 +6192,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             event = new RegattaLogDeviceMarkMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
                     mark, mapping.getDevice(), from, to);
         } else if (dto.mappedTo instanceof CompetitorWithBoatDTO) {
-            Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
+            Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
                     ((CompetitorWithBoatDTO) dto.mappedTo).getIdAsString());
             if (mapping.getDevice().getIdentifierType().equals(ExpeditionSensorDeviceIdentifier.TYPE)) {
                 event = new RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl(
@@ -6203,7 +6203,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         competitor, mapping.getDevice(), from, to);
             }
         } else if (dto.mappedTo instanceof BoatDTO) {
-            final Boat boat = getService().getCompetitorStore()
+            final Boat boat = getService().getCompetitorAndBoatStore()
                     .getExistingBoatByIdAsString(((BoatDTO) dto.mappedTo).getIdAsString());
             event = new RegattaLogDeviceBoatMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
                     boat, mapping.getDevice(), from, to);
@@ -6257,11 +6257,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             //expect UUIDs
             return new DeviceMappingImpl<Mark>(mark, device, timeRange, dto.originalRaceLogEventIds, RegattaLogDeviceMarkMappingEventImpl.class);
         } else if (dto.mappedTo instanceof CompetitorWithBoatDTO) {
-            Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
+            Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
                     ((CompetitorWithBoatDTO) dto.mappedTo).getIdAsString());
             return new DeviceMappingImpl<Competitor>(competitor, device, timeRange, dto.originalRaceLogEventIds, RegattaLogDeviceCompetitorMappingEventImpl.class);
         } else if (dto.mappedTo instanceof BoatDTO) {
-            final Boat boat = getService().getCompetitorStore()
+            final Boat boat = getService().getCompetitorAndBoatStore()
                     .getExistingBoatByIdAsString(dto.mappedTo.getIdAsString());
             return new DeviceMappingImpl<WithID>(boat, device, timeRange, dto.originalRaceLogEventIds,
                     RegattaLogDeviceBoatMappingEventImpl.class);
