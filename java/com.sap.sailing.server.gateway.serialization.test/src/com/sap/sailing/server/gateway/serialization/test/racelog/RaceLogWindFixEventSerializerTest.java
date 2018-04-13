@@ -53,7 +53,7 @@ public class RaceLogWindFixEventSerializerTest {
         serializer = new RaceLogWindFixEventSerializer(new CompetitorJsonSerializer(new TeamJsonSerializer(
                 new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(new BoatClassJsonSerializer())), new WindJsonSerializer(
                 new PositionJsonSerializer()));
-        deserializer = new RaceLogWindFixEventDeserializer(new CompetitorJsonDeserializer(factory.getCompetitorStore(), /* team deserializer */ null, /* boat deserializer */ null),
+        deserializer = new RaceLogWindFixEventDeserializer(new CompetitorJsonDeserializer(factory.getCompetitorAndBoatStore(), /* team deserializer */ null, /* boat deserializer */ null),
                 new WindJsonDeserializer(new PositionJsonDeserializer()));
         now = MillisecondsTimePoint.now();
         event = new RaceLogWindFixEventImpl(now, author, 0, createWindFix(), /* isMagnetic */ false);

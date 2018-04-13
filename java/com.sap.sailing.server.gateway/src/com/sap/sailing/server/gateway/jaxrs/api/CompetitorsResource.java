@@ -75,7 +75,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     @Path("{competitorId}")
     public Response getCompetitor(@PathParam("competitorId") String competitorIdAsString) {
         Response response;
-        Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
+        Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
                 competitorIdAsString);
         if (competitor == null) {
             response = Response.status(Status.NOT_FOUND)
@@ -92,7 +92,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{competitor-id}/team")
     public Response getTeam(@PathParam("competitor-id") String competitorId) {
-        Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
+        Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorId);
         if (competitor == null) {
             return Response.status(Status.NOT_FOUND)
                     .entity("Could not find a competitor with id '" + StringEscapeUtils.escapeHtml(competitorId) + "'.").type(MediaType.TEXT_PLAIN)
@@ -126,7 +126,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     public String setTeamImage(@PathParam("competitor-id") String competitorId, InputStream uploadedInputStream,
             @HeaderParam("Content-Type") String fileType, @HeaderParam("Content-Length") long sizeInBytes) throws IOException {
         RacingEventService service = getService();
-        CompetitorAndBoatStore store = service.getCompetitorStore();
+        CompetitorAndBoatStore store = service.getCompetitorAndBoatStore();
         Competitor competitor = store.getExistingCompetitorByIdAsString(competitorId);
         if (competitor == null) {
             logger.log(Level.INFO, "Could not find competitor to store image for: " + StringEscapeUtils.escapeHtml(competitorId));
@@ -162,7 +162,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                     .entity("Could not store competitor image").type(MediaType.TEXT_PLAIN).build());
         }
 
-        getService().getCompetitorStore().updateCompetitor(competitorId, competitor.getName(), competitor.getShortName(), 
+        getService().getCompetitorAndBoatStore().updateCompetitor(competitorId, competitor.getName(), competitor.getShortName(), 
                 competitor.getColor(), competitor.getEmail(), 
                 competitor.getTeam().getNationality(), imageUri, competitor.getFlagImage(),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, competitor.getSearchTag());
