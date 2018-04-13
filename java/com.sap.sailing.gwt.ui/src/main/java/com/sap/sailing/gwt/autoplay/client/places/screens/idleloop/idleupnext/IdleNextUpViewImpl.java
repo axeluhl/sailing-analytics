@@ -36,6 +36,7 @@ public class IdleNextUpViewImpl extends Composite implements IdleUpNextView {
 
     public IdleNextUpViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
+        ensureDebugId("IdleNextUpView");
     }
 
     @Override
@@ -53,11 +54,17 @@ public class IdleNextUpViewImpl extends Composite implements IdleUpNextView {
     public void setData(ArrayList<Pair<RegattaAndRaceIdentifier, Date>> data) {
         dataPanel.clear();
         if (data == null) {
-            dataPanel.add(new Label(StringMessages.INSTANCE.noUpcomingRaceDataAvailable()));
+            Label lbl = new Label(StringMessages.INSTANCE.noUpcomingRaceDataAvailable());
+            lbl.ensureDebugId("upComingDataLabel");
+            dataPanel.add(lbl);
         } else if (data.isEmpty()) {
-            dataPanel.add(new Label(StringMessages.INSTANCE.nothingUpcoming()));
+            Label lbl = new Label(StringMessages.INSTANCE.nothingUpcoming());
+            lbl.ensureDebugId("upComingDataLabel");
+            dataPanel.add(lbl);
         } else {
-            dataPanel.add(new Label(StringMessages.INSTANCE.upcoming()));
+            Label lbl = new Label(StringMessages.INSTANCE.upcoming());
+            lbl.ensureDebugId("upComingDataLabel");
+            dataPanel.add(lbl);
             int index = 1;
             for (Pair<RegattaAndRaceIdentifier, Date> race : data) {
                 if (index > MAX_RACES_IN_LIST) {
