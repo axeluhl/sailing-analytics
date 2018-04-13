@@ -2849,7 +2849,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             raceDescription += raceDescription.length() > 0 ?  "/" + rr.getName() : rr.getName();
             // try to find a cached entry list for the regatta
             RegattaResults regattaResults = cachedRegattaEntriesLists.get(rr.xrrEntriesUrl);
-            if (regattaResults == null) {
+            if (regattaResults == null && rr.xrrEntriesUrl != null) {
             	regattaResults = getSwissTimingAdapter().readRegattaEntryListFromXrrUrl(rr.xrrEntriesUrl);
                 if (regattaResults != null) {
                     cachedRegattaEntriesLists.put(rr.xrrEntriesUrl, regattaResults);
