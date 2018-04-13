@@ -195,8 +195,6 @@ public class ExpeditionAllInOneImporter {
         final String windSourceId = filenameWithDateTimeSuffix;
 
         // TODO wild guess...
-        final ScoringSchemeType scoringSchemeType = ScoringSchemeType.LOW_POINT;
-        final RankingMetrics rankingMetric = RankingMetrics.ONE_DESIGN;
         final int[] discardThresholds = new int[0];
 
         final ImportResultDTO jsonHolderForGpsFixImport = new ImportResultDTO(logger);
@@ -248,7 +246,6 @@ public class ExpeditionAllInOneImporter {
         final UUID eventId;
         final String leaderboardGroupName;
         final String regattaNameAndleaderboardName;
-        final Regatta regatta;
         final RegattaLeaderboard regattaLeaderboard;
         // TODO Should we return all TrackedRaces and show several RaceBoard links to the user?
         final DynamicTrackedRace trackedRace;
@@ -265,8 +262,6 @@ public class ExpeditionAllInOneImporter {
             regattaNameAndleaderboardName = filenameWithDateTimeSuffix;
             raceColumnName = filename;
             final RegattaIdentifier regattaIdentifier = new RegattaName(filenameWithDateTimeSuffix);
-            final String courseAreaName = "Default";
-            final UUID courseAreaId = UUID.randomUUID();
             // This is just the default used in the UI
             final Double buoyZoneRadiusInHullLengths = 3.0;
 
@@ -276,36 +271,16 @@ public class ExpeditionAllInOneImporter {
             final Event event = service.addEvent(eventName, description, eventStartDate, eventEndDate, venueName, true,
                     UUID.randomUUID());
             eventId = event.getId();
-            service.addCourseAreas(event.getId(), new String[] { courseAreaName }, new UUID[] { courseAreaId });
+
+            final UUID courseAreaId = addDefaultCourseArea(event);
             
-            final ScoringScheme scoringScheme = service.getBaseDomainFactory().createScoringScheme(scoringSchemeType);
-            
-            final LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParameters = new LinkedHashMap<>();
-            final List<FleetDTO> fleets = new ArrayList<>();
-            fleets.add(new FleetDTO(fleetName, 0, null));
-            seriesCreationParameters.put(seriesName,
-                    new SeriesCreationParametersDTO(fleets, /*isMedal*/ false,
-                            /* isFleetsCanRunInParallel */ false, /*isStartsWithZeroScore*/ false, /*firstColumnIsNonDiscardableCarryForward*/false, /*discardingThresholds*/ null,
-                            /*hasSplitFleetContiguousScoring*/ false, /*maximumNumberOfDiscards*/ null));
-            final RegattaCreationParametersDTO regattaCreationParameters = new RegattaCreationParametersDTO(
-                    seriesCreationParameters);
-            
-            regatta = service.apply(new AddSpecificRegatta(regattaNameAndleaderboardName, boatClassName,
-                /* can boats of competitors change */ false,
-                /* start date */ null, /* end date */ null, UUID.randomUUID(),
-                    regattaCreationParameters, true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, true,
-                    false, rankingMetric));
-            this.ensureBoatClassDetermination(regatta);
-            service.apply(new AddColumnToSeries(regattaIdentifier, seriesName, raceColumnName));
+            final Regatta regatta = createRegattaWithOneRaceColumn(boatClassName, regattaNameAndleaderboardName,
+                    fleetName, raceColumnName, regattaIdentifier, courseAreaId, buoyZoneRadiusInHullLengths,
+                    seriesName);
             regattaLeaderboard = service.apply(new CreateRegattaLeaderboard(regattaIdentifier, null,
                     discardThresholds));
             
-            final LeaderboardGroup leaderboardGroup = service.apply(new CreateLeaderboardGroup(leaderboardGroupName,
-                    description, null, false, Collections.singletonList(regattaNameAndleaderboardName), null, null));
-            service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
-                    event.getEndDate(), event.getVenue().getName(), event.isPublic(),
-                    Collections.singleton(leaderboardGroup.getId()), event.getOfficialWebsiteURL(), event.getBaseURL(),
-                    event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds()));
+            createLeaderboardGroupAndAddItToTheEvent(leaderboardGroupName, regattaNameAndleaderboardName, description, event);
             
             final RaceColumn raceColumn = regattaLeaderboard.getRaceColumns().iterator().next();
             final Fleet fleet = raceColumn.getFleets().iterator().next();
@@ -316,7 +291,7 @@ public class ExpeditionAllInOneImporter {
         } else {
             regattaNameAndleaderboardName = existingRegattaName;
             if (existingRegattaName != null && !existingRegattaName.isEmpty()) {
-                regatta = service.getRegattaByName(existingRegattaName);
+                final Regatta regatta = service.getRegattaByName(existingRegattaName);
                 if (regatta == null) {
                     return new ImporterResult(ERROR_MESSAGE_INVALID_REGATTA);
                 }
@@ -423,6 +398,54 @@ public class ExpeditionAllInOneImporter {
         } catch (Exception e) {
             throw new AllinOneImportException(e, errors);
         }
+    }
+
+    private UUID addDefaultCourseArea(final Event event) {
+        final String courseAreaName = "Default";
+        final UUID courseAreaId = UUID.randomUUID();
+        service.addCourseAreas(event.getId(), new String[] { courseAreaName }, new UUID[] { courseAreaId });
+        return courseAreaId;
+    }
+
+    private Regatta createRegattaWithOneRaceColumn(final String boatClassName, final String regattaNameAndleaderboardName, final String fleetName,
+            final String raceColumnName, final RegattaIdentifier regattaIdentifier, final UUID courseAreaId,
+            final Double buoyZoneRadiusInHullLengths, final String seriesName) throws AllinOneImportException {
+
+        // TODO wild guess...
+        final ScoringSchemeType scoringSchemeType = ScoringSchemeType.LOW_POINT;
+        final RankingMetrics rankingMetric = RankingMetrics.ONE_DESIGN;
+        
+        final Regatta regatta;
+        final ScoringScheme scoringScheme = service.getBaseDomainFactory().createScoringScheme(scoringSchemeType);
+        
+        final LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParameters = new LinkedHashMap<>();
+        final List<FleetDTO> fleets = new ArrayList<>();
+        fleets.add(new FleetDTO(fleetName, 0, null));
+        seriesCreationParameters.put(seriesName,
+                new SeriesCreationParametersDTO(fleets, /*isMedal*/ false,
+                        /* isFleetsCanRunInParallel */ false, /*isStartsWithZeroScore*/ false, /*firstColumnIsNonDiscardableCarryForward*/false, /*discardingThresholds*/ null,
+                        /*hasSplitFleetContiguousScoring*/ false, /*maximumNumberOfDiscards*/ null));
+        final RegattaCreationParametersDTO regattaCreationParameters = new RegattaCreationParametersDTO(
+                seriesCreationParameters);
+        
+        regatta = service.apply(new AddSpecificRegatta(regattaNameAndleaderboardName, boatClassName,
+            /* can boats of competitors change */ false,
+            /* start date */ null, /* end date */ null, UUID.randomUUID(),
+                regattaCreationParameters, true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, true,
+                false, rankingMetric));
+        this.ensureBoatClassDetermination(regatta);
+        service.apply(new AddColumnToSeries(regattaIdentifier, seriesName, raceColumnName));
+        return regatta;
+    }
+
+    private void createLeaderboardGroupAndAddItToTheEvent(final String leaderboardGroupName, final String regattaNameAndleaderboardName,
+            final String description, final Event event) {
+        final LeaderboardGroup leaderboardGroup = service.apply(new CreateLeaderboardGroup(leaderboardGroupName,
+                description, null, false, Collections.singletonList(regattaNameAndleaderboardName), null, null));
+        service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
+                event.getEndDate(), event.getVenue().getName(), event.isPublic(),
+                Collections.singleton(leaderboardGroup.getId()), event.getOfficialWebsiteURL(), event.getBaseURL(),
+                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds()));
     }
 
     private DynamicTrackedRace createTrackedRaceAndSetupRaceTimes(final List<ErrorImportDTO> errors,
