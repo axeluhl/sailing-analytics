@@ -25,8 +25,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String wind();
     String windPanelLabel();
     String refresh();
-    @Override
-    String remove();
     String removeNumber(int count);
     String windSource();
     String dampeningInterval();
@@ -63,8 +61,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String linkToColumn();
     String unlink();
     String leaderboardName();
-    @Override
-    String cancel();
     String pleaseEnterAName();
     String pleaseEnterABoatClass();
     String discardRacesFromHowManyStartedRacesOn();
@@ -76,8 +72,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String renameLeaderboard();
     String addColumnToLeaderboard();
     String pleaseEnterNameForNewRaceColumn();
-    @Override
-    String ok();
     String medalRace();
     String renameRace();
     String openSelectedLeaderboard();
@@ -93,8 +87,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String leaderboard();
     String leaderboards();
     String leaderboardSettings();
-    @Override
-    String settings();
     String page();
     String linkedRaces();
     String selectAtLeastOneLegDetail();
@@ -175,8 +167,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String penaltyCircles();
     String medalRaceIsNull();
     String maneuverTypes();
-    @Override
-    String configuration();
     String chooseChart();
     String distanceTraveled();
     String velocityMadeGoodLong();
@@ -191,15 +181,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String metersUnit();
     String millimetersUnit();
     String degreesUnit();
-    @Override
-    String close();
     String compareCompetitors();
     String description();
     String sailNumber();
     String country();
     String no3LetterCodes();
-    @Override
-    String add();
     String delete();
     String showCharts();
     String raceWithThisNameAlreadyExists();
@@ -266,7 +252,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String blockedApplyButton();
     String multiplierInfo();
     String noPairingListAvailable();
-    String settingsForComponent(String localizedComponentName);
     String noEventsFound();
     String noEventSelected();
     String noLeaderboardsFound();
@@ -303,8 +288,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pleaseEnterNonEmptyDescription();
     String groupWithThisNameAlreadyExists();
     String detailsOfLeaderboardGroup();
-    String edit();
-    String save();
     String abort();
     String noLeaderboardGroupWithNameFound(String groupName);
     String overview();
@@ -1250,14 +1233,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String enterRaceName();
     String enterCourseName();
     String scoringSchemeHighPointFirstGetsTenOrEightDescription();
-    @Override
-    String serverError();
-    @Override
-    String remoteProcedureCall();
-    @Override
-    String serverReplies();
-    @Override
-    String errorCommunicatingWithServer();
     String userManagement();
     String regattaStructureImport();
     String filteredBy();
@@ -1518,8 +1493,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String competitorToolTipMessage(String competitorName, String currentFleetName, String assignedToFleet, String raceName);
     String addMarkToRegatta();
     String selectALeaderboardGroup();
-    @Override
-    String pleaseSelect();
     String requiresValidRegatta();
     String couldNotObtainRace(String regattaLikeName, String raceColumnName, String fleetName, String technicalErrorMessage);
     String errorTryingToCreateEmbeddedMap(String message);
@@ -2021,6 +1994,4 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String TWA();
     String degreesShort();
     String numberOfDataPoints();
-
-
 }
