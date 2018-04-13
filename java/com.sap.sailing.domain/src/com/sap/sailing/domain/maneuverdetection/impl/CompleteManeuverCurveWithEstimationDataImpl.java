@@ -18,14 +18,14 @@ public class CompleteManeuverCurveWithEstimationDataImpl implements CompleteMane
     private final Wind wind;
     private final int tackingCount;
     private final int jibingCount;
-    private final boolean maneuverStartsByRunningAwayFromTheWind;
+    private final boolean maneuverStartsByRunningAwayFromWind;
     private final Bearing relativeBearingToNextMarkBeforeManeuver;
     private final Bearing relativeBearingToNextMarkAfterManeuver;
     private final boolean markPassing;
 
     public CompleteManeuverCurveWithEstimationDataImpl(ManeuverMainCurveWithEstimationData mainCurve,
             ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData curveWithUnstableCourseAndSpeed, Wind wind,
-            int tackingCount, int jibingCount, boolean maneuverStartsByRunningAwayFromTheWind,
+            int tackingCount, int jibingCount, boolean maneuverStartsByRunningAwayFromWind,
             Bearing relativeBearingToNextMarkBeforeManeuver,
             Bearing relativeBearingToNextMarkAfterManeuver, boolean markPassing) {
         this.mainCurve = mainCurve;
@@ -33,7 +33,7 @@ public class CompleteManeuverCurveWithEstimationDataImpl implements CompleteMane
         this.wind = wind;
         this.tackingCount = tackingCount;
         this.jibingCount = jibingCount;
-        this.maneuverStartsByRunningAwayFromTheWind = maneuverStartsByRunningAwayFromTheWind;
+        this.maneuverStartsByRunningAwayFromWind = maneuverStartsByRunningAwayFromWind;
         this.relativeBearingToNextMarkBeforeManeuver = relativeBearingToNextMarkBeforeManeuver;
         this.relativeBearingToNextMarkAfterManeuver = relativeBearingToNextMarkAfterManeuver;
         this.markPassing = markPassing;
@@ -65,8 +65,8 @@ public class CompleteManeuverCurveWithEstimationDataImpl implements CompleteMane
     }
 
     @Override
-    public boolean isManeuverStartsByRunningAwayFromTheWind() {
-        return maneuverStartsByRunningAwayFromTheWind;
+    public boolean isManeuverStartsByRunningAwayFromWind() {
+        return maneuverStartsByRunningAwayFromWind;
     }
 
     @Override

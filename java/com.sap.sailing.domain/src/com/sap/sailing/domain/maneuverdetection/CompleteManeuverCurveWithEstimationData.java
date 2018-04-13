@@ -31,7 +31,7 @@ public interface CompleteManeuverCurveWithEstimationData {
         if (getWind() == null) {
             return ManeuverType.UNKNOWN;
         }
-        return isManeuverStartsByRunningAwayFromTheWind() ? ManeuverType.BEAR_AWAY : ManeuverType.HEAD_UP;
+        return isManeuverStartsByRunningAwayFromWind() ? ManeuverType.BEAR_AWAY : ManeuverType.HEAD_UP;
     }
 
     /**
@@ -73,7 +73,7 @@ public interface CompleteManeuverCurveWithEstimationData {
      *         starts by getting the boat closer to the wind.
      */
     @Dimension(messageKey = "ManeuverStartsByRunningAwayFromTheWind")
-    boolean isManeuverStartsByRunningAwayFromTheWind();
+    boolean isManeuverStartsByRunningAwayFromWind();
 
     /**
      * Gets the relative bearing of the next mark to pass from the boat before the maneuver. The relative bearing is
