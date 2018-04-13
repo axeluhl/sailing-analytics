@@ -9,10 +9,12 @@ import java.util.List;
  */
 public class RaceWithEstimationData {
 
+    private final String regattaName;
     private final String raceName;
     private final List<CompetitorTrackWithEstimationData> competitorTracks;
 
-    public RaceWithEstimationData(String raceName, List<CompetitorTrackWithEstimationData> competitorTracks) {
+    public RaceWithEstimationData(String regattaName, String raceName, List<CompetitorTrackWithEstimationData> competitorTracks) {
+        this.regattaName = regattaName;
         this.raceName = raceName;
         this.competitorTracks = competitorTracks;
     }
@@ -23,6 +25,10 @@ public class RaceWithEstimationData {
 
     public List<CompetitorTrackWithEstimationData> getCompetitorTracks() {
         return competitorTracks;
+    }
+    
+    public String getRegattaName() {
+        return regattaName;
     }
 
 }

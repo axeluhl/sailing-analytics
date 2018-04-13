@@ -44,7 +44,7 @@ public class SapSailingDataImporter {
         importer.importAllRegattas();
     }
 
-    private void importAllRegattas()
+    public void importAllRegattas()
             throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         persistanceManager.dropDb();
         HttpGet getAllRegattas = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH);
