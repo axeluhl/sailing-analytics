@@ -119,7 +119,7 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public Pair<Competitor, Boat> createCompetitorWithID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass) {
-        CompetitorAndBoatStore competitorAndBoatStore = baseDomainFactory.getCompetitorStore();
+        CompetitorAndBoatStore competitorAndBoatStore = baseDomainFactory.getCompetitorAndBoatStore();
         CompetitorWithBoat domainCompetitor = competitorAndBoatStore.getExistingCompetitorWithBoatByIdAsString(competitor.getID());
         if (domainCompetitor == null || competitorAndBoatStore.isCompetitorToUpdateDuringGetOrCreate(domainCompetitor)) {
             List<DynamicPerson> teamMembers = new ArrayList<DynamicPerson>();
@@ -138,7 +138,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Pair<Competitor, Boat> createCompetitorWithoutID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, String raceId, BoatClass boatClass) {
-        CompetitorAndBoatStore competitorAndBoatStore = baseDomainFactory.getCompetitorStore();
+        CompetitorAndBoatStore competitorAndBoatStore = baseDomainFactory.getCompetitorAndBoatStore();
         List<DynamicPerson> teamMembers = new ArrayList<DynamicPerson>();
         for (String teamMemberName : competitor.getName().split("[-+&]")) {
             teamMembers.add(new PersonImpl(teamMemberName.trim(), getOrCreateNationality(competitor.getThreeLetterIOCCode()),

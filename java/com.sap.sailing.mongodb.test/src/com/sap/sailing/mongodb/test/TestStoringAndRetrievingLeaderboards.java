@@ -52,7 +52,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
     
     @Before
     public void clearCompetitorStore() {
-        DomainFactory.INSTANCE.getCompetitorStore().clearCompetitors();
+        DomainFactory.INSTANCE.getCompetitorAndBoatStore().clearCompetitors();
     }
 
     @Test
