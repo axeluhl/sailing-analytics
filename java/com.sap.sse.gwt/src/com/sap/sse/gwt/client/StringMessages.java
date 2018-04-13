@@ -47,7 +47,6 @@ public interface StringMessages extends Messages {
     String reload();
     String empty();
     String error();
-
     String kilometers();
     String meters();
     String nauticalMiles();
@@ -58,4 +57,30 @@ public interface StringMessages extends Messages {
     String minutes();
     String seconds();
     String milliseconds();
+    
+    String run();
+    String copyToClipboard();
+    String code();
+    String floatNumber();
+    String integer();
+    String plainText();
+    String groupName();
+    String valueAscending();
+    String valueDescending();
+    String sortBy();
+    String groupAverageAscending();
+    String groupAverageDescending();
+    String groupMedianAscending();
+    String groupMedianDescending();
+    String choosePresentation();
+    String shownDecimals();
+    String elements(long count);
+    String resultsChart();
+    String cantDisplayDataOfType(String resultType);
+    String groupBy();
+    String angleInDegree();
+    String angleInRadian();
+    String centralAngleInRadian();
+    String centralAngleInDegree();   
+
 }
