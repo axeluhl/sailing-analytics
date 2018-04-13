@@ -246,47 +246,22 @@ public class ExpeditionAllInOneImporter {
         final UUID eventId;
         final String leaderboardGroupName;
         final String regattaNameAndleaderboardName;
-        final RegattaLeaderboard regattaLeaderboard;
         // TODO Should we return all TrackedRaces and show several RaceBoard links to the user?
         final DynamicTrackedRace trackedRace;
         final List<DynamicTrackedRace> trackedRaces = new ArrayList<>();
         final String fleetName;
         final String raceColumnName;
         if (importMode == ImportMode.NEW_EVENT) {
-            final String eventName = filenameWithDateTimeSuffix;
-            final String description = MessageFormat.format("Event imported from expedition file ''{0}'' on {1}",
-                    filenameWithSuffix, importTimeString);
-            // TODO guess venue based on the reverse geocoder?
-            final String venueName = filename;
             leaderboardGroupName = filenameWithDateTimeSuffix;
             regattaNameAndleaderboardName = filenameWithDateTimeSuffix;
             raceColumnName = filename;
-            final RegattaIdentifier regattaIdentifier = new RegattaName(filenameWithDateTimeSuffix);
-            // This is just the default used in the UI
-            final Double buoyZoneRadiusInHullLengths = 3.0;
-
+            eventId = UUID.randomUUID();
             fleetName = LeaderboardNameConstants.DEFAULT_FLEET_NAME;
-            final String seriesName = Series.DEFAULT_NAME;
             
-            final Event event = service.addEvent(eventName, description, eventStartDate, eventEndDate, venueName, true,
-                    UUID.randomUUID());
-            eventId = event.getId();
-
-            final UUID courseAreaId = addDefaultCourseArea(event);
-            
-            final Regatta regatta = createRegattaWithOneRaceColumn(boatClassName, regattaNameAndleaderboardName,
-                    fleetName, raceColumnName, regattaIdentifier, courseAreaId, buoyZoneRadiusInHullLengths,
-                    seriesName);
-            regattaLeaderboard = service.apply(new CreateRegattaLeaderboard(regattaIdentifier, null,
-                    discardThresholds));
-            
-            createLeaderboardGroupAndAddItToTheEvent(leaderboardGroupName, regattaNameAndleaderboardName, description, event);
-            
-            final RaceColumn raceColumn = regattaLeaderboard.getRaceColumns().iterator().next();
-            final Fleet fleet = raceColumn.getFleets().iterator().next();
-            
-            trackedRace = createTrackedRaceAndSetupRaceTimes(errors, trackedRaceName, firstFixAt, lastFixAt, regatta, regattaLeaderboard,
-                    raceColumn, fleet);
+            trackedRace = createEventStructureWithASingleRaceAndTrackIt(filenameWithSuffix, boatClassName, errors, importTimeString, filename,
+                    filenameWithDateTimeSuffix, trackedRaceName, discardThresholds, firstFixAt, lastFixAt,
+                    eventStartDate, eventEndDate, eventId, leaderboardGroupName, regattaNameAndleaderboardName,
+                    fleetName, raceColumnName);
             trackedRaces.add(trackedRace);
         } else {
             regattaNameAndleaderboardName = existingRegattaName;
@@ -299,27 +274,16 @@ public class ExpeditionAllInOneImporter {
                 if (leaderboard == null || !(leaderboard instanceof RegattaLeaderboard)) {
                     return new ImporterResult(ERROR_MESSAGE_INVALID_LEADERBOARD);
                 }
-                regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                final RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
                 
-                Event foundEvent = null;
-                LeaderboardGroup foundLeaderboardGroup = null;
-                search: for (Event event : service.getAllEvents()) {
-                    for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-                        for (Leaderboard lb : leaderboardGroup.getLeaderboards()) {
-                            if (lb.equals(leaderboard)) {
-                                foundEvent = event;
-                                foundLeaderboardGroup = leaderboardGroup;
-                                break search;
-                            }
-                        }
-                    }
-                }
-                if (foundEvent == null) {
+                final Pair<Event, LeaderboardGroup> foundEventAndLeaderboardGroup = findEventAndLeaderboardGroupForExistingLeaderboard(leaderboard);
+                
+                if (foundEventAndLeaderboardGroup == null) {
                     return new ImporterResult(ERROR_MESSAGE_INVALID_LEADERBOARD_EVENT_LINK);
                 }
                 // TODO should we extend the time range of the event to ensure that it includes the newly imported tracks' time ranges?
-                eventId = foundEvent.getId();
-                leaderboardGroupName = foundLeaderboardGroup.getName();
+                eventId = foundEventAndLeaderboardGroup.getA().getId();
+                leaderboardGroupName = foundEventAndLeaderboardGroup.getB().getName();
                 
                 if (importMode == ImportMode.NEW_COMPETITOR) {
                     final Iterable<RaceColumn> raceColumns = regattaLeaderboard.getRaceColumns();
@@ -398,6 +362,58 @@ public class ExpeditionAllInOneImporter {
         } catch (Exception e) {
             throw new AllinOneImportException(e, errors);
         }
+    }
+
+    private Pair<Event, LeaderboardGroup> findEventAndLeaderboardGroupForExistingLeaderboard(final Leaderboard leaderboard) {
+        for (Event event : service.getAllEvents()) {
+            for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                for (Leaderboard lb : leaderboardGroup.getLeaderboards()) {
+                    if (lb.equals(leaderboard)) {
+                        return new Pair<>(event, leaderboardGroup);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private DynamicTrackedRace createEventStructureWithASingleRaceAndTrackIt(final String filenameWithSuffix, final String boatClassName,
+            final List<ErrorImportDTO> errors, final String importTimeString, final String filename,
+            final String filenameWithDateTimeSuffix, final String trackedRaceName, final int[] discardThresholds,
+            TimePoint firstFixAt, TimePoint lastFixAt, final TimePoint eventStartDate, final TimePoint eventEndDate,
+            final UUID eventId, final String leaderboardGroupName, final String regattaNameAndleaderboardName,
+            final String fleetName, final String raceColumnName) throws AllinOneImportException {
+        final DynamicTrackedRace trackedRace;
+        // TODO guess venue based on the reverse geocoder?
+        final String venueName = filename;
+        final String eventName = filenameWithDateTimeSuffix;
+        final String description = MessageFormat.format("Event imported from expedition file ''{0}'' on {1}",
+                filenameWithSuffix, importTimeString);
+        final RegattaIdentifier regattaIdentifier = new RegattaName(filenameWithDateTimeSuffix);
+        // This is just the default used in the UI
+        final Double buoyZoneRadiusInHullLengths = 3.0;
+
+        final String seriesName = Series.DEFAULT_NAME;
+        
+        final Event event = service.addEvent(eventName, description, eventStartDate, eventEndDate, venueName, true,
+                eventId);
+
+        final UUID courseAreaId = addDefaultCourseArea(event);
+        
+        final Regatta regatta = createRegattaWithOneRaceColumn(boatClassName, regattaNameAndleaderboardName,
+                fleetName, raceColumnName, regattaIdentifier, courseAreaId, buoyZoneRadiusInHullLengths,
+                seriesName);
+        final RegattaLeaderboard regattaLeaderboard = service.apply(new CreateRegattaLeaderboard(regattaIdentifier, null,
+                discardThresholds));
+        
+        createLeaderboardGroupAndAddItToTheEvent(leaderboardGroupName, regattaNameAndleaderboardName, description, event);
+        
+        final RaceColumn raceColumn = regattaLeaderboard.getRaceColumns().iterator().next();
+        final Fleet fleet = raceColumn.getFleets().iterator().next();
+        
+        trackedRace = createTrackedRaceAndSetupRaceTimes(errors, trackedRaceName, firstFixAt, lastFixAt, regatta, regattaLeaderboard,
+                raceColumn, fleet);
+        return trackedRace;
     }
 
     private UUID addDefaultCourseArea(final Event event) {
