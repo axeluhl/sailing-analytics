@@ -57,6 +57,7 @@ import com.sap.sailing.domain.common.dto.MetaLeaderboardRaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
+import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -621,39 +622,42 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 entryDTO.calculatedTime = raceDetails.getCorrectedTime();
                 entryDTO.calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead = raceDetails.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead();
                 entryDTO.gapToLeaderInOwnTime = raceDetails.getGapToLeaderInOwnTime();
+                
                 try {
                     BravoFixTrack<Competitor> sensorTrack = trackedRace.getSensorTrack(competitor,
                             BravoFixTrack.TRACK_NAME);
-                    if (sensorTrack != null && sensorTrack.hasExtendedFixes()) {
-                        BravoExtendedFix fix = (BravoExtendedFix) sensorTrack.getFirstFixAtOrAfter(timePoint);
-                        entryDTO.setExpeditionAWA(fix.getExpeditionAWA());
-                        entryDTO.setExpeditionAWS(fix.getExpeditionAWS());
-                        entryDTO.setExpeditionTWA(fix.getExpeditionTWA());
-                        entryDTO.setExpeditionTWS(fix.getExpeditionTWS());
-                        entryDTO.setExpeditionTWD(fix.getExpeditionTWD());
-                        entryDTO.setExpeditionBoatSpeed(fix.getExpeditionBSP());
-                        entryDTO.setExpeditionTargBoatSpeed(fix.getExpeditionBSP_TR());
-                        entryDTO.setExpeditionSOG(fix.getExpeditionSOG());
-                        entryDTO.setExpeditionCOG(fix.getExpeditionCOG());
-                        entryDTO.setExpeditionForestayLoad(fix.getExpeditionForestayLoad());
-                        entryDTO.setExpeditionRake(fix.getExpeditionRake());
-                        entryDTO.setExpeditionHeading(fix.getExpeditionHDG());
-                        entryDTO.setExpeditionHeel(fix.getExpeditionHeel());
-                        entryDTO.setExpeditionTargetHeel(fix.getExpeditionTG_Heell());
-                        entryDTO.setExpeditionTimeToGun(fix.getExpeditionTmToGun());
-                        entryDTO.setExpeditionTimeToBurnToLine(fix.getExpeditionTmToBurn());
-                        entryDTO.setExpeditionDistanceBelowLine(fix.getExpeditionBelowLn());
-                        entryDTO.setExpeditionCourseDetail(fix.getExpeditionCourse());
-                        entryDTO.setExpeditionBaro(fix.getExpeditionBARO());
-                        entryDTO.setExpeditionLoadP(fix.getExpeditionLoadP());
-                        entryDTO.setExpeditionLoadS(fix.getExpeditionLoadS());
-                        entryDTO.setExpeditionJibCarPort(fix.getExpeditionJibCarPort());
-                        entryDTO.setExpeditionJibCarStbd(fix.getExpeditionJibCarStbd());
-                        entryDTO.setExpeditionMastButt(fix.getExpeditionMastButt());
-                        entryDTO.setExpeditionRateOfTurn(fix.getExpeditionRateOfTurn());
-                        
-                        entryDTO.heel = fix.getHeel();
-                        entryDTO.pitch = fix.getPitch();
+                    if (sensorTrack != null) {
+                        final BravoFix bravoFix = sensorTrack.getFirstFixAtOrAfter(timePoint);
+                        entryDTO.heel = bravoFix.getHeel();
+                        entryDTO.pitch = bravoFix.getPitch();
+                        if (sensorTrack.hasExtendedFixes() && bravoFix instanceof BravoExtendedFix) {
+                            BravoExtendedFix fix = (BravoExtendedFix) bravoFix;
+                            entryDTO.setExpeditionAWA(fix.getExpeditionAWA());
+                            entryDTO.setExpeditionAWS(fix.getExpeditionAWS());
+                            entryDTO.setExpeditionTWA(fix.getExpeditionTWA());
+                            entryDTO.setExpeditionTWS(fix.getExpeditionTWS());
+                            entryDTO.setExpeditionTWD(fix.getExpeditionTWD());
+                            entryDTO.setExpeditionBoatSpeed(fix.getExpeditionBSP());
+                            entryDTO.setExpeditionTargBoatSpeed(fix.getExpeditionBSP_TR());
+                            entryDTO.setExpeditionSOG(fix.getExpeditionSOG());
+                            entryDTO.setExpeditionCOG(fix.getExpeditionCOG());
+                            entryDTO.setExpeditionForestayLoad(fix.getExpeditionForestayLoad());
+                            entryDTO.setExpeditionRake(fix.getExpeditionRake());
+                            entryDTO.setExpeditionHeading(fix.getExpeditionHDG());
+                            entryDTO.setExpeditionHeel(fix.getExpeditionHeel());
+                            entryDTO.setExpeditionTargetHeel(fix.getExpeditionTG_Heell());
+                            entryDTO.setExpeditionTimeToGun(fix.getExpeditionTmToGun());
+                            entryDTO.setExpeditionTimeToBurnToLine(fix.getExpeditionTmToBurn());
+                            entryDTO.setExpeditionDistanceBelowLine(fix.getExpeditionBelowLn());
+                            entryDTO.setExpeditionCourseDetail(fix.getExpeditionCourse());
+                            entryDTO.setExpeditionBaro(fix.getExpeditionBARO());
+                            entryDTO.setExpeditionLoadP(fix.getExpeditionLoadP());
+                            entryDTO.setExpeditionLoadS(fix.getExpeditionLoadS());
+                            entryDTO.setExpeditionJibCarPort(fix.getExpeditionJibCarPort());
+                            entryDTO.setExpeditionJibCarStbd(fix.getExpeditionJibCarStbd());
+                            entryDTO.setExpeditionMastButt(fix.getExpeditionMastButt());
+                            entryDTO.setExpeditionRateOfTurn(fix.getExpeditionRateOfTurn());
+                        }
                     }
                 } catch (Exception e) {
                    logger.log(Level.WARNING, "There was an error determining expedition or extended data", e);
