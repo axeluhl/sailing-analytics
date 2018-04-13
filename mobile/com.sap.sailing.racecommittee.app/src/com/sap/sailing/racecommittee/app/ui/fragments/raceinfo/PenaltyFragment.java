@@ -375,7 +375,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
         SharedDomainFactory domainFactory = dataManager.getDataStore().getDomainFactory();
         for (Competitor competitor : getRace().getCompetitors()) {
-            domainFactory.getCompetitorStore().allowCompetitorResetToDefaults(competitor);
+            domainFactory.getCompetitorAndBoatStore().allowCompetitorResetToDefaults(competitor);
         }
         final Loader<?> competitorLoader = getLoaderManager()
             .initLoader(COMPETITOR_LOADER, null, dataManager.createCompetitorsLoader(getRace(), new LoadClient<Map<Competitor, Boat>>() {

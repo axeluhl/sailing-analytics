@@ -36,7 +36,7 @@ public class CreateBoat extends AbstractRacingEventServiceOperation<Boat> {
     @Override
     public Boat internalApplyTo(RacingEventService toState) throws Exception {
         BoatClass boatClass = toState.getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
-        Boat result = toState.getBaseDomainFactory().getCompetitorStore().getOrCreateBoat(boatId, name, boatClass, sailId, color);
+        Boat result = toState.getBaseDomainFactory().getCompetitorAndBoatStore().getOrCreateBoat(boatId, name, boatClass, sailId, color);
         return result;
     }
 

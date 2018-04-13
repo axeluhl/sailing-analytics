@@ -69,9 +69,9 @@ import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
-import com.sap.sailing.domain.base.CompetitorStore.BoatUpdateListener;
-import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore.BoatUpdateListener;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore.CompetitorUpdateListener;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -372,7 +372,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private final NamedReentrantReadWriteLock leaderboardGroupsByNameLock;
 
-    private final CompetitorStore competitorStore;
+    private final CompetitorAndBoatStore competitorAndBoatStore;
 
     /**
      * A set based on a concurrent hash map, therefore being thread safe
@@ -509,11 +509,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         DomainObjectFactory getDomainObjectFactory();
         MongoObjectFactory getMongoObjectFactory();
         com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
-        CompetitorStore getCompetitorStore();
+        CompetitorAndBoatStore getCompetitorAndBoatStore();
     }
 
     /**
-     * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore competitor
+     * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorAndBoatStore competitor
      * store} for competitor and boat management. This base domain factory is then also used for the construction of the
      * {@link DomainObjectFactory}. This constructor variant initially clears the persistent competitor and boat collections,
      * hence removes all previously persistent competitors and boats. This is the default for testing and for backward
@@ -542,7 +542,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * be cleared before the service starts.
      * 
      * @param clearPersistentCompetitorAndBoatStore
-     *            if <code>true</code>, the {@link PersistentCompetitorStore} is created empty, with the corresponding
+     *            if <code>true</code>, the {@link PersistentCompetitorAndBoatStore} is created empty, with the corresponding
      *            database collection cleared as well. Use with caution! When used with <code>false</code>, competitors and boats
      *            created and stored during previous service executions will initially be loaded.
      * @param sailingNotificationService
@@ -560,7 +560,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
                         .getDefaultMongoObjectFactory(serviceFinderFactory);
-                private final PersistentCompetitorStore competitorStore = new PersistentCompetitorStore(
+                private final PersistentCompetitorAndBoatStore competitorStore = new PersistentCompetitorAndBoatStore(
                         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory),
                         clearPersistentCompetitorAndBoatStore, serviceFinderFactory, raceLogResolver);
 
@@ -580,7 +580,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
 
                 @Override
-                public CompetitorStore getCompetitorStore() {
+                public CompetitorAndBoatStore getCompetitorAndBoatStore() {
                     return competitorStore;
                 }
             };
@@ -595,7 +595,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
                         .getDefaultMongoObjectFactory(serviceFinderFactory);
-                private final PersistentCompetitorStore competitorStore = new PersistentCompetitorStore(
+                private final PersistentCompetitorAndBoatStore competitorStore = new PersistentCompetitorAndBoatStore(
                         mongoObjectFactory, clearPersistentCompetitorStore, serviceFinderFactory, raceLogResolver);
 
                 @Override
@@ -614,7 +614,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
 
                 @Override
-                public CompetitorStore getCompetitorStore() {
+                public CompetitorAndBoatStore getCompetitorAndBoatStore() {
                     return competitorStore;
                 }
             };
@@ -642,8 +642,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
 
                 @Override
-                public CompetitorStore getCompetitorStore() {
-                    return getBaseDomainFactory().getCompetitorStore();
+                public CompetitorAndBoatStore getCompetitorAndBoatStore() {
+                    return getBaseDomainFactory().getCompetitorAndBoatStore();
                 }
             };
         }, mediaDB, windStore, sensorFixStore, null, null, /* sailingNotificationService */ null,
@@ -692,14 +692,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.baseDomainFactory = constructorParameters.getBaseDomainFactory();
         this.mongoObjectFactory = constructorParameters.getMongoObjectFactory();
         this.mediaDB = mediaDb;
-        this.competitorStore = constructorParameters.getCompetitorStore();
+        this.competitorAndBoatStore = constructorParameters.getCompetitorAndBoatStore();
         try {
             this.windStore = windStore == null ? MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory,
                     domainObjectFactory) : windStore;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        this.competitorStore.addCompetitorUpdateListener(new CompetitorUpdateListener() {
+        this.competitorAndBoatStore.addCompetitorUpdateListener(new CompetitorUpdateListener() {
             @Override
             public void competitorUpdated(Competitor competitor) {
                 replicate(new UpdateCompetitor(competitor.getId().toString(), competitor.getName(), competitor.getShortName(), competitor
@@ -717,7 +717,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
             }
         });
-        this.competitorStore.addBoatUpdateListener(new BoatUpdateListener() {
+        this.competitorAndBoatStore.addBoatUpdateListener(new BoatUpdateListener() {
             @Override
             public void boatUpdated(Boat boat) {
                 replicate(new UpdateBoat(boat.getId().toString(), boat.getName(), boat.getColor(), boat.getSailID()));
@@ -860,7 +860,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             mediaTrackDeleted(mediaTrack);
         }
         // TODO clear user store? See bug 2430.
-        this.competitorStore.clear();
+        this.competitorAndBoatStore.clear();
         this.windStore.clear();
         getRaceLogStore().clear();
         getRegattaLogStore().clear();
@@ -1417,7 +1417,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, getBaseDomainFactory()
                     .getOrCreateBoatClass(boatClassName), /* canBoatsOfCompetitorsChangePerRace*/ false, 
                     /* startDate */null, /* endDate */null, this,
-                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), id, null);
+                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), id, /* course area */ null);
             logger.info("Created default regatta " + result.getName() + " (" + hashCode() + ") on " + this);
             onRegattaLikeAdded(result);
             cacheAndReplicateDefaultRegatta(result);
@@ -2928,8 +2928,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             logoutput.append(String.format("%3s\n", lg.toString()));
         }
         logger.info("Serializing persisted competitors...");
-        oos.writeObject(competitorStore);
-        logoutput.append("Serialized " + competitorStore.getCompetitorsCount() + " persisted competitors\n");
+        oos.writeObject(competitorAndBoatStore);
+        logoutput.append("Serialized " + competitorAndBoatStore.getCompetitorsCount() + " persisted competitors\n");
 
         logger.info("Serializing configuration map...");
         oos.writeObject(configurationMap);
@@ -3037,25 +3037,25 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // only copy the competitors from the deserialized competitor store; don't use it because it will have set
         // a default Mongo object factory
         logger.info("Reading competitors...");
-        for (Competitor competitor : ((CompetitorStore) ois.readObject()).getAllCompetitors()) {
+        for (Competitor competitor : ((CompetitorAndBoatStore) ois.readObject()).getAllCompetitors()) {
             DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
             // the following should actually be redundant because during de-serialization the Competitor objects,
             // whose classes implement IsManagedByCache, should already have been got/created from/in the
             // competitor store
             if (dynamicCompetitor.hasBoat()) {
-                competitorStore.getOrCreateCompetitorWithBoat(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getShortName(),
+                competitorAndBoatStore.getOrCreateCompetitorWithBoat(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getShortName(),
                         dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(),
                         dynamicCompetitor.getTeam(), dynamicCompetitor.getTimeOnTimeFactor(),
                         dynamicCompetitor.getTimeOnDistanceAllowancePerNauticalMile(), dynamicCompetitor.getSearchTag(),
                         ((DynamicCompetitorWithBoat) dynamicCompetitor).getBoat());
             } else {
-                competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getShortName(),
+                competitorAndBoatStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getShortName(),
                         dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(),
                         dynamicCompetitor.getTeam(), dynamicCompetitor.getTimeOnTimeFactor(),
                         dynamicCompetitor.getTimeOnDistanceAllowancePerNauticalMile(), dynamicCompetitor.getSearchTag());
             }
         }
-        logoutput.append("Received " + competitorStore.getCompetitorsCount() + " NEW competitors\n");
+        logoutput.append("Received " + competitorAndBoatStore.getCompetitorsCount() + " NEW competitors\n");
 
         logger.info("Reading device configurations...");
         configurationMap.putAll((DeviceConfigurationMapImpl) ois.readObject());
@@ -3157,7 +3157,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         connectivityParametersByRace.clear();
         eventsById.clear();
         mediaLibrary.clear();
-        competitorStore.clearCompetitors();
+        competitorAndBoatStore.clearCompetitors();
         remoteSailingServerSet.clear();
         if (notificationService != null) {
             notificationService.stop();
@@ -3692,8 +3692,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public CompetitorStore getCompetitorStore() {
-        return competitorStore;
+    public CompetitorAndBoatStore getCompetitorAndBoatStore() {
+        return competitorAndBoatStore;
     }
 
     @Override

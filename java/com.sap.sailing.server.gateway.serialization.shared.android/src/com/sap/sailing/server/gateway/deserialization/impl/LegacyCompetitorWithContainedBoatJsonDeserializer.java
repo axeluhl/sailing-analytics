@@ -85,13 +85,10 @@ public class LegacyCompetitorWithContainedBoatJsonDeserializer implements JsonDe
             if (boatJsonDeserializer != null && object.get(CompetitorJsonConstants.FIELD_BOAT) != null) {
                 boat = boatJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
                         CompetitorJsonConstants.FIELD_BOAT));
-                String sailID = (String) object.get(CompetitorJsonConstants.FIELD_SAIL_ID);
-                boat.setSailId(sailID);
             }
             final Double timeOnTimeFactor = (Double) object.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR);
             final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = (Double) object
                     .get(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
-            
             CompetitorWithBoat competitorWithBoat = new CompetitorWithBoatImpl(competitorId, name, shortName, displayColor, email,
                     flagImageURI, team, timeOnTimeFactor,
                     timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null : 

@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
@@ -121,7 +121,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
                     }
 
                     @Override
-                    public void onSelectionChange(CompetitorDTO competitor) {
+                    public void onSelectionChange(CompetitorWithBoatDTO competitor) {
                         selectedItem = competitor;
                         qrWidget.setMappedItem(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
                                 competitor.getIdAsString());

@@ -282,17 +282,15 @@ public class OnlineDataManager extends DataManager {
                 JsonDeserializer<Pair<Competitor, Boat>> competitorAndBoatDeserializer = CompetitorAndBoatJsonDeserializer.create(domainFactory);
                 DataParser<Map<Competitor, Boat>> parser = new CompetitorsDataParser(competitorAndBoatDeserializer);
                 DataHandler<Map<Competitor, Boat>> handler = new CompetitorsDataHandler(OnlineDataManager.this, managedRace);
-
-                // https://dev.sapsailing.com/sailingserver/api/v1/regattas/ESS%202016%20Cardiff/races/Race%2016/startorder
                 Uri.Builder uri = Uri.parse(preferences.getServerBaseURL()).buildUpon();
                 uri.appendPath("sailingserver");
                 uri.appendPath("api");
                 uri.appendPath("v1");
-                uri.appendPath("regattas");
+                uri.appendPath("leaderboards");
                 uri.appendPath(managedRace.getIdentifier().getRaceGroup().getName());
-                uri.appendPath("races");
-                uri.appendPath(managedRace.getName());
                 uri.appendPath("startorder");
+                uri.appendQueryParameter(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, managedRace.getIdentifier().getRaceColumnName());
+                uri.appendQueryParameter(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, managedRace.getIdentifier().getFleet().getName());
                 return new OnlineDataLoader<>(context, new URL(uri.build().toString()), parser, handler);
             }
         }, getContext());

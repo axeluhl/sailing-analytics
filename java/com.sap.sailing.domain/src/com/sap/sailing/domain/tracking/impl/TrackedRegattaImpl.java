@@ -1,16 +1,15 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.awt.EventQueue;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -55,11 +54,10 @@ public class TrackedRegattaImpl implements TrackedRegatta {
      */
     private final Map<RaceDefinition, TrackedRace> trackedRaces;
     
-    private transient ConcurrentMap<RaceListener, RaceListener> raceListeners;
-    
     /**
-     * This {@link WorkQueue} is used to do all event related work. This ensures that e.g. events are fired in order.
-     * The following cases need to be handles through this queue:
+     * These are the {@link RaceListener RaceListeners} attached to this {@link TrackedRegatta}. For every
+     * {@link RaceListener} there is a {@link WorkQueue} to do all event related work for the specific listener. This
+     * ensures that e.g. events are received in order. The following cases need to be handles through this queue:
      * <ul>
      * <li>Firing events when adding/removing {@link TrackedRace} instances (see {@link #enqueEvent}). The list of
      * listeners to fire the event to need to be the list of listeners existing when enqueuing the event. This ensures
@@ -73,21 +71,26 @@ public class TrackedRegattaImpl implements TrackedRegatta {
      * to know when it is guaranteed that no more event will be fired to the listener.
      * </ul>
      */
-    private transient WorkQueue eventQueue;
-
+    private transient ConcurrentMap<RaceListener, WorkQueue> raceListeners;
+    
+    /**
+     * Guards access to {@link #raceListeners}.
+     */
+    private final NamedReentrantReadWriteLock raceListenersLock;
+    
     public TrackedRegattaImpl(Regatta regatta) {
         super();
         trackedRacesLock = new NamedReentrantReadWriteLock("trackeRaces lock for tracked regatta "+regatta.getName(), /* fair */ false);
         this.regatta = regatta;
         this.trackedRaces = new HashMap<RaceDefinition, TrackedRace>();
-        raceListeners = new ConcurrentHashMap<RaceListener, RaceListener>();
-        eventQueue = new WorkQueue();
+        raceListeners = new ConcurrentHashMap<>();
+        raceListenersLock = new NamedReentrantReadWriteLock(
+                "raceListeners lock for tracked regatta " + regatta.getName(), /* fair */ false);
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        this.raceListeners = new ConcurrentHashMap<RaceListener, RaceListener>();
-        eventQueue = new WorkQueue();
+        this.raceListeners = new ConcurrentHashMap<>();
     }
     
     @Override
@@ -150,19 +153,18 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     }
     
     /**
-     * Firing events is handled through {@link #eventQueue} to ensure that events are fired in order. This method
-     * enqueues an event while ensuring that the set of listeners is freezed to prevent events to be fired twice to a
-     * specific listener. Any Listener attached after will receive a consistent set of already added {@link TrackedRace
-     * TrackedRaces}. Firing events may not be done directly but only by using this method.
+     * Firing events is handled through {@link EventQueue} instances per {@link RaceListener} to ensure that events are fired in order. This method
+     * enqueues an event for each currently known listeners.
      */
     protected void enqueEvent(Consumer<RaceListener> fireEventCallback, Optional<ThreadLocalTransporter> threadLocalTransporter) {
-        final Set<RaceListener> listenersToInform = new HashSet<>(raceListeners.keySet());
         threadLocalTransporter.ifPresent(ThreadLocalTransporter::rememberThreadLocalStates);
-        eventQueue.addWork(() -> {
-            withBeforeAndAfterHandling(threadLocalTransporter, () -> {
-                for (RaceListener listener : listenersToInform) {
-                    fireEventCallback.accept(listener);
-                }
+        LockUtil.executeWithReadLock(raceListenersLock, () -> {
+            raceListeners.forEach((listener, eventQueue) -> {
+                eventQueue.addWork(() -> {
+                    withBeforeAndAfterHandling(threadLocalTransporter, () -> {
+                        fireEventCallback.accept(listener);
+                    });
+                });
             });
         });
     }
@@ -255,15 +257,21 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     public void addRaceListener(RaceListener listener, Optional<ThreadLocalTransporter> threadLocalTransporter) {
         lockTrackedRacesForRead();
         try {
-            raceListeners.put(listener, listener);
-            final List<TrackedRace> trackedRacesCopy = new ArrayList<>();
-            Util.addAll(getTrackedRaces(), trackedRacesCopy);
-            threadLocalTransporter.ifPresent(ThreadLocalTransporter::rememberThreadLocalStates);
-            eventQueue.addWork(() -> {
-                withBeforeAndAfterHandling(threadLocalTransporter, () -> {
-                    for (TrackedRace trackedRace : trackedRacesCopy) {
-                        listener.raceAdded(trackedRace);
-                    }
+            LockUtil.executeWithWriteLock(raceListenersLock, () -> {
+                // This prevents the creation of another WorkQueue if an already known listener is added a second time
+                raceListeners.computeIfAbsent(listener, listenerToAdd -> {
+                    final WorkQueue eventQueue = new WorkQueue();
+                    final List<TrackedRace> trackedRacesCopy = new ArrayList<>();
+                    Util.addAll(getTrackedRaces(), trackedRacesCopy);
+                    threadLocalTransporter.ifPresent(ThreadLocalTransporter::rememberThreadLocalStates);
+                    eventQueue.addWork(() -> {
+                        withBeforeAndAfterHandling(threadLocalTransporter, () -> {
+                            for (TrackedRace trackedRace : trackedRacesCopy) {
+                                listenerToAdd.raceAdded(trackedRace);
+                            }
+                        });
+                    });
+                    return eventQueue;
                 });
             });
         } finally {
@@ -276,7 +284,9 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         final CompletableFuture<Boolean> result = new CompletableFuture<Boolean>();
         lockTrackedRacesForRead();
         try {
-            if (raceListeners.remove(listener) != null) {
+            final WorkQueue eventQueue = LockUtil.executeWithWriteLockAndResult(raceListenersLock,
+                    () -> raceListeners.remove(listener));
+            if (eventQueue != null) {
                 eventQueue.addWork(() -> {
                     result.complete(Boolean.TRUE);
                 });

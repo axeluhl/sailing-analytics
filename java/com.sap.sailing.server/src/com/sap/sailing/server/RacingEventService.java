@@ -25,7 +25,7 @@ import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
@@ -603,7 +603,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     AbstractLogEventAuthor getServerAuthor();
     
-    CompetitorStore getCompetitorStore();
+    CompetitorAndBoatStore getCompetitorAndBoatStore();
     
     TypeBasedServiceFinderFactory getTypeBasedServiceFinderFactory();
 

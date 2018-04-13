@@ -18,7 +18,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -51,10 +51,10 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
- * Tests replication of boats in conjunction with the {@link CompetitorStore} concepts, particularly the
+ * Tests replication of boats in conjunction with the {@link CompetitorAndBoatStore} concepts, particularly the
  * possibility to allow for boat data to be updated, either explicitly or implicitly from a tracking provider
  * after marking the boat using
- * {@link CompetitorStore#allowBoatResetToDefaults(com.sap.sailing.domain.base.Boat)}.
+ * {@link CompetitorAndBoatStore#allowBoatResetToDefaults(com.sap.sailing.domain.base.Boat)}.
  * 
  * @author Frank Mittag
  * 
@@ -62,7 +62,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class BoatReplicationTest extends AbstractServerReplicationTest {
     /**
      * Add a tracked race to the master that includes a competitor; check that the boat was properly replicated to
-     * the replica's {@link CompetitorStore}. Afterwards, use the {@link UpdateBoat} operation on the master to
+     * the replica's {@link CompetitorAndBoatStore}. Afterwards, use the {@link UpdateBoat} operation on the master to
      * perform an explicit update; ensure that the update arrived on the replica. Then execute an
      * {@link AllowBoatResetToDefaults} operation on the master, afterwards update the boat on the master,
      * @throws URISyntaxException 
@@ -121,7 +121,7 @@ public class BoatReplicationTest extends AbstractServerReplicationTest {
         // now allow for resetting to default through some event, such as receiving a GPS position
         master.apply(new AllowBoatResetToDefaults(Collections.singleton(boat.getId().toString())));
         // modify the boat on the master "from below" without an UpdateBoat operation, only locally:
-        master.getBaseDomainFactory().getCompetitorStore().updateBoat(boat.getId().toString(), boatName, boat.getColor(), boat.getSailID());
+        master.getBaseDomainFactory().getCompetitorAndBoatStore().updateBoat(boat.getId().toString(), boatName, boat.getColor(), boat.getSailID());
 
         
         final RegattaAndRaceIdentifier raceIdentifier = masterRegatta.getRaceIdentifier(raceDefinition);
@@ -146,7 +146,7 @@ public class BoatReplicationTest extends AbstractServerReplicationTest {
         BoatClass boatClass = new BoatClassImpl("Kielzugvogel", true);
         Boat boat = master.getBaseDomainFactory().getOrCreateBoat(123, boatName, boatClass, "GER 123", null);
         Thread.sleep(1000);
-        assertTrue(StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorStore().getBoats().spliterator(), /* parallel */ false).anyMatch(
+        assertTrue(StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorAndBoatStore().getBoats().spliterator(), /* parallel */ false).anyMatch(
                 b-> b.getId().equals(boat.getId())));
     }
 }

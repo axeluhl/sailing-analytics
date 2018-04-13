@@ -4,7 +4,7 @@ import java.net.URI;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore.CompetitorUpdateListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -60,7 +60,7 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
     
     @Override
     public Competitor internalApplyTo(RacingEventService toState) throws Exception {
-        Competitor result = toState.getBaseDomainFactory().getCompetitorStore()
+        Competitor result = toState.getBaseDomainFactory().getCompetitorAndBoatStore()
                 .updateCompetitor(idAsString, newName, newShortName, newDisplayColor, newEmail, newNationality,
                         newTeamImageUri, newFlagImageUri, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, newSearchTag);
         return result;
