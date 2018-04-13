@@ -49,22 +49,22 @@ public class PersistentCompetitorAndBoatStore extends TransientCompetitorAndBoat
     private static final Logger logger = Logger.getLogger(PersistentCompetitorAndBoatStore.class.getName());
     
     /**
-     * @param clearCompetitorsAndBaots
+     * @param clearCompetitorsAndBoats
      *            if <code>true</code>, the persistent competitor and boats store is initially cleared, with all persistent
      *            competitor and boat data removed; use with caution!
      */
-    public PersistentCompetitorAndBoatStore(MongoObjectFactory storeTo, boolean clearCompetitorsAndBaots, 
+    public PersistentCompetitorAndBoatStore(MongoObjectFactory storeTo, boolean clearCompetitorsAndBoats, 
             TypeBasedServiceFinderFactory serviceFinderFactory, RaceLogResolver raceLogResolver) {
         DomainFactoryImpl baseDomainFactory = new DomainFactoryImpl(this, raceLogResolver);
         this.loadFrom = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, baseDomainFactory, serviceFinderFactory);
         this.storeTo = storeTo;
         migrateCompetitorsIfRequired();
-        if (clearCompetitorsAndBaots) {
+        if (clearCompetitorsAndBoats) {
             storeTo.removeAllBoats();
             storeTo.removeAllCompetitors();
         } else {
             Collection<Boat> allBoats = loadFrom.loadAllBoats();
-            for (Boat boat: allBoats) {
+            for (Boat boat : allBoats) {
                 super.addNewBoat(boat);
             }
             Collection<Competitor> allCompetitors = loadFrom.loadAllCompetitors();

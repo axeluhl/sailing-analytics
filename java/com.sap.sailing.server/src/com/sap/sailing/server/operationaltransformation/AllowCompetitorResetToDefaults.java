@@ -21,7 +21,7 @@ public class AllowCompetitorResetToDefaults extends AbstractRacingEventServiceOp
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        final CompetitorAndBoatStore competitorStore = toState.getBaseDomainFactory().getCompetitorStore();
+        final CompetitorAndBoatStore competitorStore = toState.getBaseDomainFactory().getCompetitorAndBoatStore();
         for (String competitorIdAsString : competitorIdsAsStrings) {
             Competitor competitor = competitorStore.getExistingCompetitorByIdAsString(competitorIdAsString);
             if (competitor != null) {

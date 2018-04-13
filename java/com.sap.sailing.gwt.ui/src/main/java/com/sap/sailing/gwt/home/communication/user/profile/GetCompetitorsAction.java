@@ -37,7 +37,7 @@ public class GetCompetitorsAction implements SailingAction<SortedSetResult<Simpl
     @Override
     @GwtIncompatible
     public SortedSetResult<SimpleCompetitorWithIdDTO> execute(SailingDispatchContext ctx) throws DispatchException {
-        CompetitorAndBoatStore competitorStore = ctx.getRacingEventService().getCompetitorStore();
+        CompetitorAndBoatStore competitorStore = ctx.getRacingEventService().getCompetitorAndBoatStore();
         SortedSetResult<SimpleCompetitorWithIdDTO> result = new SortedSetResult<>();
         for (String id : ids) {
             Competitor competitor = competitorStore.getExistingCompetitorByIdAsString(id);

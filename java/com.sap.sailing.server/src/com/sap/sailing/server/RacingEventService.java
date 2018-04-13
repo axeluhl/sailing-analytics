@@ -603,7 +603,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     AbstractLogEventAuthor getServerAuthor();
     
-    CompetitorAndBoatStore getCompetitorStore();
+    CompetitorAndBoatStore getCompetitorAndBoatStore();
     
     TypeBasedServiceFinderFactory getTypeBasedServiceFinderFactory();
 

@@ -372,7 +372,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private final NamedReentrantReadWriteLock leaderboardGroupsByNameLock;
 
-    private final CompetitorAndBoatStore competitorStore;
+    private final CompetitorAndBoatStore competitorAndBoatStore;
 
     /**
      * A set based on a concurrent hash map, therefore being thread safe
@@ -509,11 +509,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         DomainObjectFactory getDomainObjectFactory();
         MongoObjectFactory getMongoObjectFactory();
         com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
-        CompetitorAndBoatStore getCompetitorStore();
+        CompetitorAndBoatStore getCompetitorAndBoatStore();
     }
 
     /**
-     * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore competitor
+     * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorAndBoatStore competitor
      * store} for competitor and boat management. This base domain factory is then also used for the construction of the
      * {@link DomainObjectFactory}. This constructor variant initially clears the persistent competitor and boat collections,
      * hence removes all previously persistent competitors and boats. This is the default for testing and for backward
@@ -580,7 +580,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
 
                 @Override
-                public CompetitorAndBoatStore getCompetitorStore() {
+                public CompetitorAndBoatStore getCompetitorAndBoatStore() {
                     return competitorStore;
                 }
             };
@@ -614,7 +614,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
 
                 @Override
-                public CompetitorAndBoatStore getCompetitorStore() {
+                public CompetitorAndBoatStore getCompetitorAndBoatStore() {
                     return competitorStore;
                 }
             };
@@ -642,8 +642,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
 
                 @Override
-                public CompetitorAndBoatStore getCompetitorStore() {
-                    return getBaseDomainFactory().getCompetitorStore();
+                public CompetitorAndBoatStore getCompetitorAndBoatStore() {
+                    return getBaseDomainFactory().getCompetitorAndBoatStore();
                 }
             };
         }, mediaDB, windStore, sensorFixStore, null, null, /* sailingNotificationService */ null,
@@ -692,14 +692,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.baseDomainFactory = constructorParameters.getBaseDomainFactory();
         this.mongoObjectFactory = constructorParameters.getMongoObjectFactory();
         this.mediaDB = mediaDb;
-        this.competitorStore = constructorParameters.getCompetitorStore();
+        this.competitorAndBoatStore = constructorParameters.getCompetitorAndBoatStore();
         try {
             this.windStore = windStore == null ? MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory,
                     domainObjectFactory) : windStore;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        this.competitorStore.addCompetitorUpdateListener(new CompetitorUpdateListener() {
+        this.competitorAndBoatStore.addCompetitorUpdateListener(new CompetitorUpdateListener() {
             @Override
             public void competitorUpdated(Competitor competitor) {
                 replicate(new UpdateCompetitor(competitor.getId().toString(), competitor.getName(), competitor.getShortName(), competitor
@@ -717,7 +717,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
             }
         });
-        this.competitorStore.addBoatUpdateListener(new BoatUpdateListener() {
+        this.competitorAndBoatStore.addBoatUpdateListener(new BoatUpdateListener() {
             @Override
             public void boatUpdated(Boat boat) {
                 replicate(new UpdateBoat(boat.getId().toString(), boat.getName(), boat.getColor(), boat.getSailID()));
@@ -860,7 +860,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             mediaTrackDeleted(mediaTrack);
         }
         // TODO clear user store? See bug 2430.
-        this.competitorStore.clear();
+        this.competitorAndBoatStore.clear();
         this.windStore.clear();
         getRaceLogStore().clear();
         getRegattaLogStore().clear();
@@ -2928,8 +2928,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             logoutput.append(String.format("%3s\n", lg.toString()));
         }
         logger.info("Serializing persisted competitors...");
-        oos.writeObject(competitorStore);
-        logoutput.append("Serialized " + competitorStore.getCompetitorsCount() + " persisted competitors\n");
+        oos.writeObject(competitorAndBoatStore);
+        logoutput.append("Serialized " + competitorAndBoatStore.getCompetitorsCount() + " persisted competitors\n");
 
         logger.info("Serializing configuration map...");
         oos.writeObject(configurationMap);
@@ -3043,19 +3043,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             // whose classes implement IsManagedByCache, should already have been got/created from/in the
             // competitor store
             if (dynamicCompetitor.hasBoat()) {
-                competitorStore.getOrCreateCompetitorWithBoat(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getShortName(),
+                competitorAndBoatStore.getOrCreateCompetitorWithBoat(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getShortName(),
                         dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(),
                         dynamicCompetitor.getTeam(), dynamicCompetitor.getTimeOnTimeFactor(),
                         dynamicCompetitor.getTimeOnDistanceAllowancePerNauticalMile(), dynamicCompetitor.getSearchTag(),
                         ((DynamicCompetitorWithBoat) dynamicCompetitor).getBoat());
             } else {
-                competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getShortName(),
+                competitorAndBoatStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getShortName(),
                         dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(),
                         dynamicCompetitor.getTeam(), dynamicCompetitor.getTimeOnTimeFactor(),
                         dynamicCompetitor.getTimeOnDistanceAllowancePerNauticalMile(), dynamicCompetitor.getSearchTag());
             }
         }
-        logoutput.append("Received " + competitorStore.getCompetitorsCount() + " NEW competitors\n");
+        logoutput.append("Received " + competitorAndBoatStore.getCompetitorsCount() + " NEW competitors\n");
 
         logger.info("Reading device configurations...");
         configurationMap.putAll((DeviceConfigurationMapImpl) ois.readObject());
@@ -3157,7 +3157,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         connectivityParametersByRace.clear();
         eventsById.clear();
         mediaLibrary.clear();
-        competitorStore.clearCompetitors();
+        competitorAndBoatStore.clearCompetitors();
         remoteSailingServerSet.clear();
         if (notificationService != null) {
             notificationService.stop();
@@ -3692,8 +3692,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public CompetitorAndBoatStore getCompetitorStore() {
-        return competitorStore;
+    public CompetitorAndBoatStore getCompetitorAndBoatStore() {
+        return competitorAndBoatStore;
     }
 
     @Override

@@ -103,7 +103,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         series.addRaceColumn(columnName, /* trackedRegattaRegistry */null);
         leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         adapter = RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(DomainFactory.INSTANCE);
-        DomainFactory.INSTANCE.getCompetitorStore().clear();
+        DomainFactory.INSTANCE.getCompetitorAndBoatStore().clear();
     }
     
     @After
