@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
@@ -147,7 +148,7 @@ public class DomainFactoryImpl implements DomainFactory {
         DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
         String competitorID = getCompetitorID(competitor.getBoatID(), competitor.getName(), raceId, boatClass);
         // TODO wouldn't the boat also need to be constructed using competitorAndBoatStore.getOrCreateBoat...?
-        DynamicBoat domainBoat = new BoatImpl(getBoatID(competitor.getBoatID(), competitor.getName(), raceId, boatClass), null, boatClass, competitor.getBoatID(), null);
+        DynamicBoat domainBoat = new BoatImpl(UUID.randomUUID(), null, boatClass, competitor.getBoatID(), null);
         CompetitorWithBoat domainCompetitor = competitorAndBoatStore.getOrCreateCompetitorWithBoat(competitorID,
                 competitor.getName(), null /* short name */, null /*displayColor*/, null /*email*/, null, team,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, domainBoat);
@@ -159,10 +160,6 @@ public class DomainFactoryImpl implements DomainFactory {
         return createCompetitorWithoutID(new CompetitorWithoutID(boatID, threeLetterIOCCode, name), raceId, boatClass);
     }
 
-    private String getBoatID(String competitorBoatID, String competitorName, String raceId, BoatClass boatClass) {
-        return getCompetitorID(competitorBoatID, competitorName, raceId, boatClass);
-    }
-    
     private String getCompetitorID(String boatID, String name, String raceId, BoatClass boatClass) {
         String result = null;
         if (boatClass != null) {
