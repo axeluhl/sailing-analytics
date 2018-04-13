@@ -236,8 +236,8 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
@@ -4770,15 +4770,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final String query = null;
         URL serverAddress = null;
         InputStream inputStream = null;
-        HttpURLConnection connection = null;
+        URLConnection connection = null;
         try {
             URL base = createBaseUrl(url);
-        	serverAddress = createUrl(base, path, query);
-        	connection = HttpUrlConnectionHelper.redirectConnection(serverAddress);
+            serverAddress = createUrl(base, path, query);
+            connection = HttpUrlConnectionHelper.redirectConnection(serverAddress);
             inputStream = connection.getInputStream();
-
             InputStreamReader in = new InputStreamReader(inputStream, "UTF-8");
-
             org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
             org.json.simple.JSONArray array = (org.json.simple.JSONArray) parser.parse(in);
             List<String> names = new ArrayList<String>();
@@ -4790,8 +4788,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throw new RuntimeException(e); 
         } finally {
             // close the connection
-            if (connection != null) {
-                connection.disconnect();
+            if (connection != null && connection instanceof HttpURLConnection) {
+                ((HttpURLConnection) connection).disconnect();
             }
             try {
                 if (inputStream != null) {
@@ -4843,8 +4841,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 } catch (UnsupportedEncodingException e1) {
                     throw new RuntimeException(e1);
                 }
-                HttpURLConnection connection = null;
-
+                URLConnection connection = null;
                 URL serverAddress = null;
                 InputStream inputStream = null;
                 try {
@@ -4879,8 +4876,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 } finally {
                     // close the connection, set all objects to null
                     getService().setDataImportDeleteProgressFromMapTimerWithReplication(importOperationId);
-                    if (connection != null) {
-                        connection.disconnect();
+                    if (connection != null && connection instanceof HttpURLConnection) {
+                        ((HttpURLConnection) connection).disconnect();
                     }
                     connection = null;
                     long timeToImport = System.currentTimeMillis() - startTime;
@@ -5567,9 +5564,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     	// can take up to two hours.
     	private static final int DEFAULT_TIMEOUT_IN_SECONDS = 60*60*2;
 
-        private final HttpURLConnection connection;
+        private final URLConnection connection;
 
-        protected TimeoutExtendingInputStream(InputStream in, HttpURLConnection connection) {
+        protected TimeoutExtendingInputStream(InputStream in, URLConnection connection) {
             super(in);
             this.connection = connection;
         }
