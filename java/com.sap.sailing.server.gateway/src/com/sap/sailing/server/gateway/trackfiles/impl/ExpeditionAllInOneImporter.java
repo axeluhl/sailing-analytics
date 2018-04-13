@@ -310,7 +310,7 @@ public class ExpeditionAllInOneImporter {
             final RaceColumn raceColumn = regattaLeaderboard.getRaceColumns().iterator().next();
             final Fleet fleet = raceColumn.getFleets().iterator().next();
             
-            trackedRace = createTrackedAndSetupRaceTimes(errors, trackedRaceName, firstFixAt, lastFixAt, regatta, regattaLeaderboard,
+            trackedRace = createTrackedRaceAndSetupRaceTimes(errors, trackedRaceName, firstFixAt, lastFixAt, regatta, regattaLeaderboard,
                     raceColumn, fleet);
             trackedRaces.add(trackedRace);
         } else {
@@ -396,7 +396,7 @@ public class ExpeditionAllInOneImporter {
                     raceColumnName = regatta.getRaceColumnByName(filename) == null ? filename : filenameWithDateTimeSuffix;
                     final RaceColumn raceColumn = service.apply(new AddColumnToSeries(regatta.getRegattaIdentifier(), series.getName(), raceColumnName));
 
-                    trackedRace = createTrackedAndSetupRaceTimes(errors, trackedRaceName, firstFixAt, lastFixAt, regatta, regattaLeaderboard,
+                    trackedRace = createTrackedRaceAndSetupRaceTimes(errors, trackedRaceName, firstFixAt, lastFixAt, regatta, regattaLeaderboard,
                             raceColumn, fleet);
                     trackedRaces.add(trackedRace);
                 } else {
@@ -425,7 +425,7 @@ public class ExpeditionAllInOneImporter {
         }
     }
 
-    private DynamicTrackedRace createTrackedAndSetupRaceTimes(final List<ErrorImportDTO> errors,
+    private DynamicTrackedRace createTrackedRaceAndSetupRaceTimes(final List<ErrorImportDTO> errors,
             final String trackedRaceName, TimePoint firstFixAt, TimePoint lastFixAt, final Regatta regatta,
             final RegattaLeaderboard regattaLeaderboard, final RaceColumn raceColumn, final Fleet fleet)
             throws AllinOneImportException {
