@@ -40,7 +40,8 @@ public class ManeuverMainCurveWithEstimationDataJsonDeserializer
                 .get(ManeuverMainCurveWithEstimationDataJsonSerializer.AVG_TURNING_RATE_IN_DEGREES_PER_SECOND);
         Double maxTurningRateInDegreesPerSecond = (Double) object
                 .get(ManeuverMainCurveWithEstimationDataJsonSerializer.MAX_TURNING_RATE_IN_DEGREES_PER_SECOND);
-        Integer gpsFixesCount = (Integer) object.get(ManeuverMainCurveWithEstimationDataJsonSerializer.GPS_FIXES_COUNT);
+        Integer gpsFixesCount = CompleteManeuverCurveWithEstimationDataJsonDeserializer
+                .getInteger(object.get(ManeuverMainCurveWithEstimationDataJsonSerializer.GPS_FIXES_COUNT));
         return new ManeuverMainCurveWithEstimationDataImpl(boundaries.getTimePointBefore(),
                 boundaries.getTimePointAfter(), boundaries.getSpeedWithBearingBefore(),
                 boundaries.getSpeedWithBearingAfter(), boundaries.getDirectionChangeInDegrees(),
@@ -56,4 +57,5 @@ public class ManeuverMainCurveWithEstimationDataJsonDeserializer
                 boundaries.getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering(),
                 avgTurningRateInDegreesPerSecond, gpsFixesCount);
     }
+
 }

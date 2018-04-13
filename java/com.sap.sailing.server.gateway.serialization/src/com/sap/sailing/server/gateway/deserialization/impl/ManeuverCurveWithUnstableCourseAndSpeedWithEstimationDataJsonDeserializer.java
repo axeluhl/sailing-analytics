@@ -37,12 +37,12 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeseri
                 ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.AVERAGE_COURSE_AFTER_IN_DEGREES);
         Double secondsAfter = (Double) object.get(
                 ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.DURATION_TO_NEXT_MANEUVER_IN_SECONDS);
-        Integer gpsFixesCountBefore = (Integer) object.get(
-                ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.GPS_FIXES_COUNT_FROM_PREVIOUS_MANEUVER_IN_SECONDS);
-        Integer gpsFixesCountAfter = (Integer) object.get(
-                ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.GPS_FIXES_COUNT_TO_NEXT_MANEUVER_IN_SECONDS);
-        Integer gpsFixesCount = (Integer) object
-                .get(ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.GPS_FIXES_COUNT);
+        Integer gpsFixesCountBefore = CompleteManeuverCurveWithEstimationDataJsonDeserializer.getInteger(object.get(
+                ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.GPS_FIXES_COUNT_FROM_PREVIOUS_MANEUVER_IN_SECONDS));
+        Integer gpsFixesCountAfter = CompleteManeuverCurveWithEstimationDataJsonDeserializer.getInteger(object.get(
+                ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.GPS_FIXES_COUNT_TO_NEXT_MANEUVER_IN_SECONDS));
+        Integer gpsFixesCount = CompleteManeuverCurveWithEstimationDataJsonDeserializer.getInteger(
+                object.get(ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.GPS_FIXES_COUNT));
         return new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl(boundaries.getTimePointBefore(),
                 boundaries.getTimePointAfter(), boundaries.getSpeedWithBearingBefore(),
                 boundaries.getSpeedWithBearingAfter(), boundaries.getDirectionChangeInDegrees(),
