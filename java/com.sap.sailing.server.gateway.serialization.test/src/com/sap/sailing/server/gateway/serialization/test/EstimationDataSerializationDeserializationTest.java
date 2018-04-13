@@ -8,7 +8,10 @@ import java.text.SimpleDateFormat;
 import org.json.simple.JSONObject;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.BoatHullType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -26,11 +29,13 @@ import com.sap.sailing.domain.maneuverdetection.impl.ManeuverCurveWithUnstableCo
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverMainCurveWithEstimationDataImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CompleteManeuverCurveWithEstimationDataJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.DetailedBoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverMainCurveWithEstimationDataJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurveWithEstimationDataJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DetailedBoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverMainCurveWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
@@ -354,6 +359,28 @@ public class EstimationDataSerializationDeserializationTest {
                 deserialized.getMainCurve().getDistanceSailedIfNotManeuvering());
         assertEquals(distanceSailedTowardMiddleAngleProjectionIfNotManeuveringMainCurve,
                 deserialized.getMainCurve().getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering());
+    }
+
+    @Test
+    public void testDetailedBoatClass() throws JsonDeserializationException {
+        String name = "bla";
+        boolean typicallyStartsUpwind = true;
+        String displayName = "A bla";
+        Distance hullLength = new MeterDistance(11);
+        Distance hullBeam = new MeterDistance(4.01);
+        BoatHullType hullType = BoatHullType.SURFERBOARD;
+        BoatClass boatClass = new BoatClassImpl(name, typicallyStartsUpwind, displayName, hullLength, hullBeam,
+                hullType);
+        DetailedBoatClassJsonSerializer serializer = new DetailedBoatClassJsonSerializer();
+        JSONObject json = serializer.serialize(boatClass);
+        DetailedBoatClassJsonDeserializer deserializer = new DetailedBoatClassJsonDeserializer();
+        BoatClass deserialized = deserializer.deserialize(json);
+        assertEquals(name, deserialized.getName());
+        assertEquals(typicallyStartsUpwind, deserialized.typicallyStartsUpwind());
+        assertEquals(displayName, deserialized.getDisplayName());
+        assertEquals(hullLength, deserialized.getHullLength());
+        assertEquals(hullBeam, deserialized.getHullBeam());
+        assertEquals(hullType, deserialized.getHullType());
     }
 
 }
