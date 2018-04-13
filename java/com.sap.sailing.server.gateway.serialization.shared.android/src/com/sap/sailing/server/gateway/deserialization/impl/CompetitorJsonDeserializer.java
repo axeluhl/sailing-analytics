@@ -25,7 +25,7 @@ import com.sap.sse.common.impl.RGBColor;
 public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> {
     private final CompetitorFactory competitorWithBoatFactory;
     private final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
-    private final JsonDeserializer<DynamicBoat> boatJsonDeserializer;
+    private final BoatJsonDeserializer boatJsonDeserializer;
     private static final Logger logger = Logger.getLogger(CompetitorJsonDeserializer.class.getName());
 
     public static CompetitorJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
@@ -37,7 +37,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
         this(competitorWithBoatFactory, null, /* boatDeserializer */ null);
     }
 
-    public CompetitorJsonDeserializer(CompetitorFactory competitorWithBoatFactory, JsonDeserializer<DynamicTeam> teamJsonDeserializer, JsonDeserializer<DynamicBoat> boatDeserializer) {
+    public CompetitorJsonDeserializer(CompetitorFactory competitorWithBoatFactory, JsonDeserializer<DynamicTeam> teamJsonDeserializer, BoatJsonDeserializer boatDeserializer) {
         this.competitorWithBoatFactory = competitorWithBoatFactory;
         this.teamJsonDeserializer = teamJsonDeserializer;
         this.boatJsonDeserializer = boatDeserializer;
@@ -80,7 +80,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
                 team = teamJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
                         CompetitorJsonConstants.FIELD_TEAM));
             }
-            final DynamicBoat boat = getBoat(object);
+            final DynamicBoat boat = getBoat(object, /* default ID */ competitorId);
             final Double timeOnTimeFactor = (Double) object.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR);
             final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = (Double) object
                     .get(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
@@ -106,13 +106,16 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
      * Looks for the {@link CompetitorJsonConstants#FIELD_BOAT} field and if present and there is a
      * {@link #boatJsonDeserializer} set, the boat is deserialized from that field and returned; otherwise, {@code null}
      * is returned.
+     * 
+     * @param defaultId
+     *            in case no boat ID can be read, e.g., from older competitor/boat representations, a default boat ID
+     *            can be passed, such as the boat owning competitor's ID
      */
-    protected DynamicBoat getBoat(JSONObject object) throws ClassNotFoundException, NoSuchMethodException,
+    protected DynamicBoat getBoat(JSONObject object, Serializable defaultId) throws ClassNotFoundException, NoSuchMethodException,
             InstantiationException, IllegalAccessException, InvocationTargetException, JsonDeserializationException {
         final DynamicBoat boat;
         if (boatJsonDeserializer != null && object.get(CompetitorJsonConstants.FIELD_BOAT) != null) {
-            boat = boatJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
-                    CompetitorJsonConstants.FIELD_BOAT));
+            boat = boatJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object, CompetitorJsonConstants.FIELD_BOAT), defaultId);
         } else {
             boat = null;
         }
