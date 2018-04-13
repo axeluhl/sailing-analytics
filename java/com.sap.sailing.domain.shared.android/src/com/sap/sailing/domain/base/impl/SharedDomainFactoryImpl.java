@@ -333,23 +333,23 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public CompetitorAndBoatStore getCompetitorStore() {
+    public CompetitorAndBoatStore getCompetitorAndBoatStore() {
         return competitorAndBoatStore;
     }
 
     @Override
     public Competitor getExistingCompetitorById(Serializable competitorId) {
-        return getCompetitorStore().getExistingCompetitorById(competitorId);
+        return getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
     }
 
     @Override
     public CompetitorWithBoat getExistingCompetitorWithBoatById(Serializable competitorId) {
-        return getCompetitorStore().getExistingCompetitorWithBoatById(competitorId);
+        return getCompetitorAndBoatStore().getExistingCompetitorWithBoatById(competitorId);
     }
 
     @Override
     public boolean isCompetitorToUpdateDuringGetOrCreate(Competitor competitor) {
-        return getCompetitorStore().isCompetitorToUpdateDuringGetOrCreate(competitor);
+        return getCompetitorAndBoatStore().isCompetitorToUpdateDuringGetOrCreate(competitor);
     }
 
     @Override
@@ -359,7 +359,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
         }
-        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, shortname, displayColor, email, flagImage, team,
+        return getCompetitorAndBoatStore().getOrCreateCompetitor(competitorId, name, shortname, displayColor, email, flagImage, team,
                 timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
     }
 
@@ -370,23 +370,23 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
         }
-        return getCompetitorStore().getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email, flagImageURI, team,
+        return getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email, flagImageURI, team,
                 timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
     }
 
     @Override
     public DynamicBoat getExistingBoatById(Serializable boatId) {
-        return getCompetitorStore().getExistingBoatById(boatId);
+        return getCompetitorAndBoatStore().getExistingBoatById(boatId);
     }
 
     @Override
     public boolean isBoatToUpdateDuringGetOrCreate(Boat boat) {
-        return getCompetitorStore().isBoatToUpdateDuringGetOrCreate(boat);
+        return getCompetitorAndBoatStore().isBoatToUpdateDuringGetOrCreate(boat);
     }
 
     @Override
     public DynamicBoat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color) {
-        return getCompetitorStore().getOrCreateBoat(id, name, boatClass, sailId, color);
+        return getCompetitorAndBoatStore().getOrCreateBoat(id, name, boatClass, sailId, color);
     }
 
     @Override

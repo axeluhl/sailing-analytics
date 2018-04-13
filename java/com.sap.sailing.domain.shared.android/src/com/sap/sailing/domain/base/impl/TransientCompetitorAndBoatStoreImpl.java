@@ -518,7 +518,11 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
     protected void addNewBoat(DynamicBoat boat) {
         LockUtil.lockForWrite(lock);
         try {
-            boatCache.put(boat.getId(), boat);
+            final Boat existingBoatWithEqualId = boatCache.put(boat.getId(), boat);
+            if (existingBoatWithEqualId != null && existingBoatWithEqualId != boat) {
+                logger.warning("Replaced existing boat "+existingBoatWithEqualId+" with ID "+existingBoatWithEqualId.getId()+
+                        " by another boat with equal ID: "+boat);
+            }
             boatsByIdAsString.put(boat.getId().toString(), boat);
         } finally {
             LockUtil.unlockAfterWrite(lock);

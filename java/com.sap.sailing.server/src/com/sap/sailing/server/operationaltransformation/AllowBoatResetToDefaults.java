@@ -21,7 +21,7 @@ public class AllowBoatResetToDefaults extends AbstractRacingEventServiceOperatio
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        final CompetitorAndBoatStore competitorAndBoatStore = toState.getBaseDomainFactory().getCompetitorStore();
+        final CompetitorAndBoatStore competitorAndBoatStore = toState.getBaseDomainFactory().getCompetitorAndBoatStore();
         for (String boatIdAsString : boatIdsAsStrings) {
             DynamicBoat boat = competitorAndBoatStore.getExistingBoatByIdAsString(boatIdAsString);
             if (boat != null) {

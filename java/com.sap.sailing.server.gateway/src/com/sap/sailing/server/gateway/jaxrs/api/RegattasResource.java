@@ -295,7 +295,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 competitorId = competitorIdAsString;
             }
 
-            final Competitor competitor = getService().getCompetitorStore().getExistingCompetitorById(competitorId);
+            final Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
             if (competitor == null) {
                 response = getBadCompetitorIdResponse(competitorId);
             } else {
@@ -328,7 +328,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             final Boat boat = new BoatImpl(UUID.randomUUID(), user.getName(),
                     getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true),
                     sailId);
-            final CompetitorWithBoat competitor = getService().getCompetitorStore().getOrCreateCompetitorWithBoat(UUID.randomUUID(),
+            final CompetitorWithBoat competitor = getService().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(UUID.randomUUID(),
                     user.getFullName() == null ? user.getName() : user.getFullName(), /* shortName */ null,
                     /* displayColor */ null, user.getEmail(), /* flagImageURI */ null,
                     new TeamImpl(user.getName(), Collections.singleton(new PersonImpl(user.getFullName() == null ? user.getName() : user.getFullName(),
@@ -363,7 +363,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 competitorId = competitorIdAsString;
             }
 
-            final Competitor competitor = getService().getCompetitorStore().getExistingCompetitorById(competitorId);
+            final Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
             if (competitor == null) {
                 response = getBadCompetitorIdResponse(competitorId);
             } else {

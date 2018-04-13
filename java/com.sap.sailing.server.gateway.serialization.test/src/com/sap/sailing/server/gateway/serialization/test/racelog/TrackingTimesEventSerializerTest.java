@@ -45,7 +45,7 @@ public class TrackingTimesEventSerializerTest {
     }
 
     private JsonDeserializer<DynamicCompetitor> createCompetitorDeserializer() {
-        return new CompetitorJsonDeserializer(DomainFactory.INSTANCE.getCompetitorStore());
+        return new CompetitorJsonDeserializer(DomainFactory.INSTANCE.getCompetitorAndBoatStore());
     }
 
     private JsonDeserializer<RaceLogEvent> createEndOfTrackingEventDeserializer() {

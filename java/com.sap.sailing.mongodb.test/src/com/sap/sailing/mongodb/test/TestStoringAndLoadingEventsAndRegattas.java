@@ -429,8 +429,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         DynamicCompetitorWithBoat competitorWithBoat2 = AbstractLeaderboardTest.createCompetitorWithBoat("Humba2");
         DynamicBoat boat1= AbstractLeaderboardTest.createBoat("Humba1 Boot");
         DynamicBoat boat2 = AbstractLeaderboardTest.createBoat("Humba2 Boot");
-        res.getCompetitorStore().addNewCompetitors(Arrays.asList(competitorWithBoat1, competitorWithBoat2));
-        res.getCompetitorStore().addNewBoats(Arrays.asList(boat1, boat2));
+        res.getCompetitorAndBoatStore().addNewCompetitors(Arrays.asList(competitorWithBoat1, competitorWithBoat2));
+        res.getCompetitorAndBoatStore().addNewBoats(Arrays.asList(boat1, boat2));
         regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitorWithBoat1));
         regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitorWithBoat2));
         assertTrue(Util.contains(regatta.getAllCompetitors(), competitorWithBoat1));
