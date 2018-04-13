@@ -146,11 +146,12 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
         String competitorID = getCompetitorID(competitor.getBoatID(), competitor.getName(), raceId, boatClass);
+        // TODO wouldn't the boat also need to be constructed using competitorAndBoatStore.getOrCreateBoat...?
         DynamicBoat domainBoat = new BoatImpl(getBoatID(competitor.getBoatID(), competitor.getName(), raceId, boatClass), null, boatClass, competitor.getBoatID(), null);
-        Competitor domainCompetitor = competitorAndBoatStore.getOrCreateCompetitorWithBoat(competitorID,
+        CompetitorWithBoat domainCompetitor = competitorAndBoatStore.getOrCreateCompetitorWithBoat(competitorID,
                 competitor.getName(), null /* short name */, null /*displayColor*/, null /*email*/, null, team,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, domainBoat);
-        return new Pair<Competitor, Boat>(domainCompetitor, domainBoat);
+        return new Pair<Competitor, Boat>(domainCompetitor, domainCompetitor.getBoat());
     }
 
     @Override
