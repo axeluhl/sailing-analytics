@@ -35,7 +35,7 @@ public class RaceLogRevokeEventImpl extends RevokeEventImpl<RaceLogEventVisitor>
     }
 
     @Override
-    public List<Competitor> getInvolvedCompetitors() {
+    public <T extends Competitor> List<T> getInvolvedCompetitors() {
         return raceLogEventData.getInvolvedCompetitors();
     }
 

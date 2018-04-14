@@ -264,7 +264,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     private Map<Competitor,Boat> createCompetitorsAndBoats(StartList startList, String raceId, BoatClass boatClass) {
-        Map<Competitor,Boat> result = new LinkedHashMap<>();
+        Map<Competitor, Boat> result = new LinkedHashMap<>();
         for (com.sap.sailing.domain.swisstimingadapter.Competitor swissTimingCompetitor : startList.getCompetitors()) {
             Pair<Competitor,Boat> domainCompetitorAndBoat;
             if (swissTimingCompetitor.getID() != null) {

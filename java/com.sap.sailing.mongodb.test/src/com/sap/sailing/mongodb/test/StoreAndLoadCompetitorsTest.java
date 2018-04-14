@@ -100,7 +100,7 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
         c.setFlagImage(flagImageURI1);
         mongoObjectFactory.storeCompetitor(c);
         
-        Collection<Competitor> allCompetitors = domainObjectFactory.loadAllCompetitors();
+        Collection<DynamicCompetitor> allCompetitors = domainObjectFactory.loadAllCompetitors();
         assertEquals(1, Util.size(allCompetitors));
         DynamicCompetitor loadedCompetitor = (DynamicCompetitor) allCompetitors.iterator().next();
         assertEquals(flagImageURI1, loadedCompetitor.getFlagImage());

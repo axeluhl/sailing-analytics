@@ -330,7 +330,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getRacesOfSwissTimingEvent(String eventJsonUrl, AsyncCallback<SwissTimingEventRecordDTO> asyncCallback);
 
-    void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, int port,
+    void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
             AsyncCallback<Void> asyncCallback);
 
     void getCountryCodes(AsyncCallback<String[]> callback);

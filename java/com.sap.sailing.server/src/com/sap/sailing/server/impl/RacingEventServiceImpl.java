@@ -68,10 +68,12 @@ import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsAndBoatsIn
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore.BoatUpdateListener;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore.CompetitorUpdateListener;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -81,6 +83,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -96,11 +99,17 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
+import com.sap.sailing.domain.base.impl.DynamicPerson;
+import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.EventImpl;
+import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
+import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.DeviceIdentifier;
@@ -4294,5 +4303,30 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             Util.addAll(event.getWindFinderReviewedSpotsCollectionIds(), result);
         }
         return result;
+    }
+    
+    /**
+     * Creates a new {@link CompetitorWithBoat} objects from a {@link CompetitorDescriptor}.
+     * 
+     * @param searchTag
+     *            set as the {@link Competitor#getSearchTag() searchTag} property of all new competitors
+     */
+    @Override
+    public DynamicCompetitorWithBoat convertCompetitorDescriptorToCompetitorWithBoat(CompetitorDescriptor competitorDescriptor, String searchTag) {
+        Nationality nationality = (competitorDescriptor.getCountryCode() == null
+                || competitorDescriptor.getCountryCode().getThreeLetterIOCCode() == null
+                || competitorDescriptor.getCountryCode().getThreeLetterIOCCode().isEmpty()) ? null
+                        : getBaseDomainFactory().getOrCreateNationality(competitorDescriptor.getCountryCode().getThreeLetterIOCCode());
+        UUID competitorUUID = competitorDescriptor.getCompetitorUUID() != null ? competitorDescriptor.getCompetitorUUID() : UUID.randomUUID();
+        UUID boatUUID = competitorDescriptor.getBoatUUID() != null ? competitorDescriptor.getBoatUUID() : UUID.randomUUID();
+        DynamicPerson sailor = new PersonImpl(competitorDescriptor.getName(), nationality, null, null);
+        DynamicTeam team = new TeamImpl(competitorDescriptor.getName(), Collections.singleton(sailor), null);
+        BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitorDescriptor.getBoatClassName());
+        DynamicBoat boat = getCompetitorAndBoatStore().getOrCreateBoat(competitorUUID, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber(), /* color */ null);
+        DynamicCompetitorWithBoat competitorWithBoat = getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(boatUUID,
+                competitorDescriptor.getName(), competitorDescriptor.getShortName(), /* color */ null, /* eMail */ null,
+                /* flag image */ null, team, competitorDescriptor.getTimeOnTimeFactor(),
+                competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag, boat);
+        return competitorWithBoat;
     }
 }

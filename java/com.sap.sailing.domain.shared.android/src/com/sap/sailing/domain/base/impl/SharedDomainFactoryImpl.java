@@ -353,7 +353,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, String shortname, Color displayColor, String email,
+    public DynamicCompetitor getOrCreateCompetitor(Serializable competitorId, String name, String shortname, Color displayColor, String email,
             URI flagImage, DynamicTeam team, Double timeOnTimeFactor,
             Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         if (logger.isLoggable(Level.FINEST)) {
@@ -364,7 +364,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public CompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName,
+    public DynamicCompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName,
             Color displayColor, String email, URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor,
             Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
         if (logger.isLoggable(Level.FINEST)) {
@@ -375,7 +375,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public Boat getExistingBoatById(Serializable boatId) {
+    public DynamicBoat getExistingBoatById(Serializable boatId) {
         return getCompetitorAndBoatStore().getExistingBoatById(boatId);
     }
 
@@ -385,7 +385,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public Boat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color) {
+    public DynamicBoat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color) {
         return getCompetitorAndBoatStore().getOrCreateBoat(id, name, boatClass, sailId, color);
     }
 
