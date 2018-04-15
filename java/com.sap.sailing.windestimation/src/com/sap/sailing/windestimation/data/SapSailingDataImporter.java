@@ -32,11 +32,11 @@ public class SapSailingDataImporter {
     public static final String REST_API_RACES_PATH = "/races";
     public static final String REST_API_ESTIMATION_DATA_PATH = "/completeManeuverCurvesWithEstimationData";
     private final HttpClient client;
-    private final PersistanceManager persistanceManager;
+    private final PersistenceManager persistanceManager;
 
     public SapSailingDataImporter() throws UnknownHostException {
         this.client = new SystemDefaultHttpClient();
-        this.persistanceManager = new PersistanceManager();
+        this.persistanceManager = new PersistenceManager();
     }
 
     public static void main(String[] args) throws Exception {

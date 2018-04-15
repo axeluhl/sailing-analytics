@@ -32,7 +32,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class PersistanceManager {
+public class PersistenceManager {
 
     private static final int DB_PORT = 27017;
     private static final String DB_HOST = "127.0.0.1";
@@ -53,7 +53,7 @@ public class PersistanceManager {
     private final DetailedBoatClassJsonDeserializer boatClassDeserializer = new DetailedBoatClassJsonDeserializer();
     private final JSONParser jsonParser = new JSONParser();
 
-    public PersistanceManager() throws UnknownHostException {
+    public PersistenceManager() throws UnknownHostException {
         db = new MongoClient(DB_HOST, DB_PORT).getDB(DB_NAME);
     }
 
