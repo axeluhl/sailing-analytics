@@ -83,13 +83,13 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurveWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurvesWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DefaultWindTrackJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DetailedBoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DistanceJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverMainCurveWithEstimationDataJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.ManeuverWindJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuversJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkPassingsJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
@@ -1043,11 +1043,11 @@ public class RegattasResource extends AbstractSailingServerResource {
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 CompleteManeuverCurvesWithEstimationDataJsonSerializer serializer = new CompleteManeuverCurvesWithEstimationDataJsonSerializer(
-                        new BoatClassJsonSerializer(),
+                        new DetailedBoatClassJsonSerializer(),
                         new CompleteManeuverCurveWithEstimationDataJsonSerializer(
                                 new ManeuverMainCurveWithEstimationDataJsonSerializer(),
                                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer(),
-                                new ManeuverWindJsonSerializer()));
+                                new WindJsonSerializer(new PositionJsonSerializer())));
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
                 return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();

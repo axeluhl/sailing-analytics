@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.maneuverdetection;
 
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sse.common.Duration;
 
 /**
@@ -12,7 +11,7 @@ import com.sap.sse.common.Duration;
  *
  */
 public interface ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData
-        extends ManeuverCurveBoundaries, HasDetailedManeuverLoss {
+        extends ManeuverCurveBoundariesWithDetailedManeuverLoss {
 
     /**
      * Gets the average speed and course measured from the end of the previous maneuver until the start of this
