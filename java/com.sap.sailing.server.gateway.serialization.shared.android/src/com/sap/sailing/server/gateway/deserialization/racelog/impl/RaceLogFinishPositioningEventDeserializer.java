@@ -14,6 +14,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -24,7 +25,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class RaceLogFinishPositioningEventDeserializer extends BaseRaceLogEventDeserializer {
     
-    public RaceLogFinishPositioningEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer) {
+    public RaceLogFinishPositioningEventDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer) {
         super(competitorDeserializer);
     }
 

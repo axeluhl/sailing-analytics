@@ -60,7 +60,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         competitors = new ArrayList<>();
         for (int i=0; i<numberOfCompetitors; i++) {
             final String competitorName = "C"+i;
-            competitors.add(service.getBaseDomainFactory().getCompetitorStore().getOrCreateCompetitor(UUID.randomUUID(),
+            competitors.add(service.getBaseDomainFactory().getCompetitorAndBoatStore().getOrCreateCompetitor(UUID.randomUUID(),
                     competitorName, "c", /* displayColor */ Color.RED, /* email */ null, /* flagImageURI */ null,
                     new TeamImpl("STG", Collections.singleton(
                             new PersonImpl(competitorName, new NationalityImpl("GER"),

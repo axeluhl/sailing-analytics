@@ -6,9 +6,9 @@ public class SwissTimingConfigurationImpl implements SwissTimingConfiguration {
     private final String name;
     private final String jsonURL;
     private final String hostname;
-    private final int port;
+    private final Integer port;
     
-    public SwissTimingConfigurationImpl(String name, String jsonURL, String hostname, int port) {
+    public SwissTimingConfigurationImpl(String name, String jsonURL, String hostname, Integer port) {
         super();
         this.name = name;
         this.jsonURL = jsonURL;
@@ -32,7 +32,7 @@ public class SwissTimingConfigurationImpl implements SwissTimingConfiguration {
     }
 
     @Override
-    public int getPort() {
+    public Integer getPort() {
         return port;
     }
 

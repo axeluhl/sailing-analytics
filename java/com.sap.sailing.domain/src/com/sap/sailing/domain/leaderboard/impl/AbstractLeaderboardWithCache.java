@@ -56,6 +56,8 @@ import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.MetaLeaderboardRaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
+import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -66,6 +68,7 @@ import com.sap.sailing.domain.leaderboard.meta.MetaLeaderboardColumn;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -619,6 +622,46 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 entryDTO.calculatedTime = raceDetails.getCorrectedTime();
                 entryDTO.calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead = raceDetails.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead();
                 entryDTO.gapToLeaderInOwnTime = raceDetails.getGapToLeaderInOwnTime();
+                
+                try {
+                    BravoFixTrack<Competitor> sensorTrack = trackedRace.getSensorTrack(competitor,
+                            BravoFixTrack.TRACK_NAME);
+                    if (sensorTrack != null) {
+                        final BravoFix bravoFix = sensorTrack.getFirstFixAtOrAfter(timePoint);
+                        entryDTO.heel = bravoFix.getHeel();
+                        entryDTO.pitch = bravoFix.getPitch();
+                        if (sensorTrack.hasExtendedFixes() && bravoFix instanceof BravoExtendedFix) {
+                            BravoExtendedFix fix = (BravoExtendedFix) bravoFix;
+                            entryDTO.setExpeditionAWA(fix.getExpeditionAWA());
+                            entryDTO.setExpeditionAWS(fix.getExpeditionAWS());
+                            entryDTO.setExpeditionTWA(fix.getExpeditionTWA());
+                            entryDTO.setExpeditionTWS(fix.getExpeditionTWS());
+                            entryDTO.setExpeditionTWD(fix.getExpeditionTWD());
+                            entryDTO.setExpeditionBoatSpeed(fix.getExpeditionBSP());
+                            entryDTO.setExpeditionTargBoatSpeed(fix.getExpeditionBSP_TR());
+                            entryDTO.setExpeditionSOG(fix.getExpeditionSOG());
+                            entryDTO.setExpeditionCOG(fix.getExpeditionCOG());
+                            entryDTO.setExpeditionForestayLoad(fix.getExpeditionForestayLoad());
+                            entryDTO.setExpeditionRake(fix.getExpeditionRake());
+                            entryDTO.setExpeditionHeading(fix.getExpeditionHDG());
+                            entryDTO.setExpeditionHeel(fix.getExpeditionHeel());
+                            entryDTO.setExpeditionTargetHeel(fix.getExpeditionTG_Heell());
+                            entryDTO.setExpeditionTimeToGun(fix.getExpeditionTmToGun());
+                            entryDTO.setExpeditionTimeToBurnToLine(fix.getExpeditionTmToBurn());
+                            entryDTO.setExpeditionDistanceBelowLine(fix.getExpeditionBelowLn());
+                            entryDTO.setExpeditionCourseDetail(fix.getExpeditionCourse());
+                            entryDTO.setExpeditionBaro(fix.getExpeditionBARO());
+                            entryDTO.setExpeditionLoadP(fix.getExpeditionLoadP());
+                            entryDTO.setExpeditionLoadS(fix.getExpeditionLoadS());
+                            entryDTO.setExpeditionJibCarPort(fix.getExpeditionJibCarPort());
+                            entryDTO.setExpeditionJibCarStbd(fix.getExpeditionJibCarStbd());
+                            entryDTO.setExpeditionMastButt(fix.getExpeditionMastButt());
+                            entryDTO.setExpeditionRateOfTurn(fix.getExpeditionRateOfTurn());
+                        }
+                    }
+                } catch (Exception e) {
+                   logger.log(Level.WARNING, "There was an error determining expedition or extended data", e);
+                }
                 final TimePoint startOfRace = trackedRace.getStartOfRace();
                 if (startOfRace != null) {
                     Waypoint startWaypoint = trackedRace.getRace().getCourse().getFirstWaypoint();
@@ -873,7 +916,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
             result.averageSignedCrossTrackErrorInMeters = averageSignedCrossTrackError == null ? null : averageSignedCrossTrackError.getMeters();
             Double speedOverGroundInKnots;
-            if (trackedLeg.hasFinishedLeg(timePoint))  {
+            final boolean hasFinishedLeg = trackedLeg.hasFinishedLeg(timePoint);
+            if (hasFinishedLeg) {
                 speedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
                 final Distance averageRideHeight = trackedLeg.getAverageRideHeight(timePoint);
                 result.currentRideHeightInMeters = averageRideHeight == null ? null : averageRideHeight.getMeters();
@@ -901,7 +945,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             final Duration estimatedTimeToNextMarkInSeconds = trackedLeg.getEstimatedTimeToNextMark(timePoint, WindPositionMode.EXACT, cache);
             result.estimatedTimeToNextWaypointInSeconds = estimatedTimeToNextMarkInSeconds==null?null:estimatedTimeToNextMarkInSeconds.asSeconds();
             result.timeInMilliseconds = time.asMillis();
-            result.finished = trackedLeg.hasFinishedLeg(timePoint);
+            result.finished = hasFinishedLeg;
             final TimePoint legFinishTime = trackedLeg.getFinishTime();
             // See bug 3829: there is an unlikely possibility that legFinishTime is null and the call to hasFinishedLeg below
             // says that the leg has already finished. This can happen if the corresponding mark passing arrives between the two
@@ -994,6 +1038,49 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                     }
                 }
             }
+            BiFunction<BiFunction<TrackedLegOfCompetitor, TimePoint, Double>, BiFunction<TrackedLegOfCompetitor, TimePoint, Double>, Double> extractDoubleValue = (
+                    currentValueExtractor, averageValueExtractor) -> (hasFinishedLeg
+                            ? averageValueExtractor.apply(trackedLeg, timePoint) : currentValueExtractor.apply(trackedLeg, timePoint));
+            result.setExpeditionAWA(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionAWA, TrackedLegOfCompetitor::getAverageExpeditionAWA));
+            result.setExpeditionAWS(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionAWS, TrackedLegOfCompetitor::getAverageExpeditionAWS));
+            result.setExpeditionTWA(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTWA, TrackedLegOfCompetitor::getAverageExpeditionTWA));
+            result.setExpeditionTWS(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTWS, TrackedLegOfCompetitor::getAverageExpeditionTWS));
+            result.setExpeditionTWD(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTWD, TrackedLegOfCompetitor::getAverageExpeditionTWD));
+            result.setExpeditionTargTWA(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTargTWA, TrackedLegOfCompetitor::getAverageExpeditionTargTWA));
+            result.setExpeditionBoatSpeed(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionBoatSpeed, TrackedLegOfCompetitor::getAverageExpeditionBoatSpeed));
+            result.setExpeditionTargBoatSpeed(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTargBoatSpeed, TrackedLegOfCompetitor::getAverageExpeditionTargBoatSpeed));
+            result.setExpeditionSOG(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionSOG, TrackedLegOfCompetitor::getAverageExpeditionSOG));
+            result.setExpeditionCOG(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionCOG, TrackedLegOfCompetitor::getAverageExpeditionCOG));
+            result.setExpeditionForestayLoad(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionForestayLoad, TrackedLegOfCompetitor::getAverageExpeditionForestayLoad));
+            result.setExpeditionRake(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionRake, TrackedLegOfCompetitor::getAverageExpeditionRake));
+            result.setExpeditionCourseDetail(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionCourseDetail, TrackedLegOfCompetitor::getAverageExpeditionCourseDetail));
+            result.setExpeditionHeading(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionHeading, TrackedLegOfCompetitor::getAverageExpeditionHeading));
+            result.setExpeditionVMG(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionVMG, TrackedLegOfCompetitor::getAverageExpeditionVMG));
+            result.setExpeditionVMGTargVMGDelta(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionVMGTargVMGDelta, TrackedLegOfCompetitor::getAverageExpeditionVMGTargVMGDelta));
+            result.setExpeditionRateOfTurn(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionRateOfTurn, TrackedLegOfCompetitor::getAverageExpeditionRateOfTurn));
+            result.setExpeditionRudderAngle(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionRudderAngle, TrackedLegOfCompetitor::getAverageExpeditionRudderAngle));
+            result.setExpeditionHeel(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionHeel, TrackedLegOfCompetitor::getAverageExpeditionHeel));
+            result.setExpeditionTargetHeel(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTargetHeel, TrackedLegOfCompetitor::getAverageExpeditionTargetHeel));
+            result.setExpeditionTimeToPortLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToPortLayline, TrackedLegOfCompetitor::getAverageExpeditionTimeToPortLayline));
+            result.setExpeditionTimeToStbLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToStbLayline, TrackedLegOfCompetitor::getAverageExpeditionTimeToStbLayline));
+            result.setExpeditionDistToPortLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistToPortLayline, TrackedLegOfCompetitor::getAverageExpeditionDistToPortLayline));
+            result.setExpeditionDistToStbLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistToStbLayline, TrackedLegOfCompetitor::getAverageExpeditionDistToStbLayline));
+            result.setExpeditionTimeToGUN(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToGUN, TrackedLegOfCompetitor::getAverageExpeditionTimeToGUN));
+            result.setExpeditionTimeToCommitteeBoat(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToCommitteeBoat, TrackedLegOfCompetitor::getAverageExpeditionTimeToCommitteeBoat));
+            result.setExpeditionTimeToPin(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToPin, TrackedLegOfCompetitor::getAverageExpeditionTimeToPin));
+            result.setExpeditionTimeToBurnToLine(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToLine, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToLine));
+            result.setExpeditionTimeToBurnToCommitteeBoat(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToCommitteeBoat, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToCommitteeBoat));
+            result.setExpeditionTimeToBurnToPin(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToPin, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToPin));
+            result.setExpeditionDistanceToCommitteeBoat(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceToCommitteeBoat, TrackedLegOfCompetitor::getAverageExpeditionDistanceToCommitteeBoat));
+            result.setExpeditionDistanceToPinDetail(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceToPinDetail, TrackedLegOfCompetitor::getAverageExpeditionDistanceToPinDetail));
+            result.setExpeditionDistanceBelowLine(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceBelowLine, TrackedLegOfCompetitor::getAverageExpeditionDistanceBelowLine));
+            result.setExpeditionLineSquareForWindDirection(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionLineSquareForWindDirection, TrackedLegOfCompetitor::getAverageExpeditionLineSquareForWindDirection));
+            result.setExpeditionBaroIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionBaroIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionBaroIfAvailable));
+            result.setExpeditionLoadSIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionLoadSIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionLoadSIfAvailable));
+            result.setExpeditionLoadPIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionLoadPIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionLoadPIfAvailable));
+            result.setExpeditionJibCarPortIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionJibCarPortIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionJibCarPortIfAvailable));
+            result.setExpeditionJibCarStbdIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionJibCarStbdIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionJibCarStbdIfAvailable));
+            result.setExpeditionMastButtIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionMastButtIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionMastButtIfAvailable));
         }
         return result;
     }

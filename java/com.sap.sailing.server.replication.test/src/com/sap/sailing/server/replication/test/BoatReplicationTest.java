@@ -121,7 +121,7 @@ public class BoatReplicationTest extends AbstractServerReplicationTest {
         // now allow for resetting to default through some event, such as receiving a GPS position
         master.apply(new AllowBoatResetToDefaults(Collections.singleton(boat.getId().toString())));
         // modify the boat on the master "from below" without an UpdateBoat operation, only locally:
-        master.getBaseDomainFactory().getCompetitorStore().updateBoat(boat.getId().toString(), boatName, boat.getColor(), boat.getSailID());
+        master.getBaseDomainFactory().getCompetitorAndBoatStore().updateBoat(boat.getId().toString(), boatName, boat.getColor(), boat.getSailID());
 
         
         final RegattaAndRaceIdentifier raceIdentifier = masterRegatta.getRaceIdentifier(raceDefinition);
@@ -146,7 +146,7 @@ public class BoatReplicationTest extends AbstractServerReplicationTest {
         BoatClass boatClass = new BoatClassImpl("Kielzugvogel", true);
         Boat boat = master.getBaseDomainFactory().getOrCreateBoat(123, boatName, boatClass, "GER 123", null);
         Thread.sleep(1000);
-        assertTrue(StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorStore().getBoats().spliterator(), /* parallel */ false).anyMatch(
+        assertTrue(StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorAndBoatStore().getBoats().spliterator(), /* parallel */ false).anyMatch(
                 b-> b.getId().equals(boat.getId())));
     }
 }

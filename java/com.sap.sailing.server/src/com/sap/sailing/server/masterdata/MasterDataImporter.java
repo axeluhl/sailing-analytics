@@ -65,7 +65,7 @@ public class MasterDataImporter {
     }
 
     private void setAllowCompetitorsDataToBeReset(List<Serializable> competitorIds) {
-        CompetitorAndBoatStore store = baseDomainFactory.getCompetitorStore();
+        CompetitorAndBoatStore store = baseDomainFactory.getCompetitorAndBoatStore();
         for (Serializable id : competitorIds) {
             Competitor competitor = baseDomainFactory.getExistingCompetitorById(id);
             if (competitor != null) {

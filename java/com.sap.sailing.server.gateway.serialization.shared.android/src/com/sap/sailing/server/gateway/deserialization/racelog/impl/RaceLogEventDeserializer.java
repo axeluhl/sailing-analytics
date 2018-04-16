@@ -3,8 +3,8 @@ package com.sap.sailing.server.gateway.deserialization.racelog.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.SmartphoneUUIDIdentifier;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -55,7 +55,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
 	
     public static RaceLogEventDeserializer create(SharedDomainFactory domainFactory,
             JsonDeserializer<DeviceIdentifier> deviceDeserializer) {
-    	JsonDeserializer<Competitor> competitorDeserializer = CompetitorJsonDeserializer.create(domainFactory);
+    	JsonDeserializer<DynamicCompetitor> competitorDeserializer = CompetitorJsonDeserializer.create(domainFactory);
         return new RaceLogEventDeserializer(
                 new RaceLogFlagEventDeserializer(competitorDeserializer),
                 new RaceLogStartTimeEventDeserializer(competitorDeserializer), 

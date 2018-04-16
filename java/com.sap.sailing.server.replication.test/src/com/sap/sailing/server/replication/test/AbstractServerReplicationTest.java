@@ -53,7 +53,7 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                     @Override public DomainObjectFactory getDomainObjectFactory() { return PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, baseDomainFactory); }
                     @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
                     @Override public DomainFactory getBaseDomainFactory() { return baseDomainFactory; }
-                    @Override public CompetitorAndBoatStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
+                    @Override public CompetitorAndBoatStore getCompetitorAndBoatStore() { return getBaseDomainFactory().getCompetitorAndBoatStore(); }
                 };
             }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, null, null, /* sailingNotificationService */ null,
                     /* trackedRaceStatisticsCache */ null, /* restoreTrackedRaces */ false);
@@ -72,7 +72,7 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                             @Override public DomainObjectFactory getDomainObjectFactory() { return domainObjectFactory; }
                             @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
                             @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
-                            @Override public CompetitorAndBoatStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
+                            @Override public CompetitorAndBoatStore getCompetitorAndBoatStore() { return getBaseDomainFactory().getCompetitorAndBoatStore(); }
                         };
                     }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE,
                     /* serviceFinderFactory */ null, null, /* sailingNotificationService */ null,

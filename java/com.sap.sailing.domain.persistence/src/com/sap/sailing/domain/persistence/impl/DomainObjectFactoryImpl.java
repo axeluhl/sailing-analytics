@@ -158,6 +158,8 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -428,7 +430,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 () -> (RegattaLeaderboard) leaderboardRegistry.getLeaderboardByName(wrappedRegattaLeaderboardName),
                 leaderboardName);
         for (Object eliminatedCompetitorId : eliminatedCompetitorIds) {
-            Competitor eliminatedCompetitor = baseDomainFactory.getCompetitorStore()
+            Competitor eliminatedCompetitor = baseDomainFactory.getCompetitorAndBoatStore()
                     .getExistingCompetitorById((Serializable) eliminatedCompetitorId);
             if (eliminatedCompetitor == null) {
                 logger.warning("Couldn't find eliminated competitor with ID " + eliminatedCompetitorId);
@@ -1642,7 +1644,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final Serializable boatId = (Serializable) dbObject.get(FieldNames.RACE_LOG_BOAT_ID.name());
         // legacy RaceLogRegisterCompetitorEvent's do not have a boatId, it's expected that the
         // corresponding competitors have the type CompetitorWithBoat
-        Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
+        Competitor competitor = baseDomainFactory.getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
         final Optional<DBObject> dbObjectForUpdate;
         if (competitor == null) {
             logger.severe("Competitor with ID "+competitorId+" not found; can't register with boat with ID "+boatId+" for race");
@@ -1676,7 +1678,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             TimePoint logicalTimePoint, Serializable id, Integer passId, Serializable boatId, Competitor competitor) {
         final RaceLogRegisterCompetitorEvent result;
         // a boat was explicitly specified; use it
-        Boat boat = baseDomainFactory.getCompetitorStore().getExistingBoatById(boatId);
+        Boat boat = baseDomainFactory.getCompetitorAndBoatStore().getExistingBoatById(boatId);
         if (boat != null) {
             result = new RaceLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, passId, competitor, boat);
         } else {
@@ -1851,7 +1853,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         List<Competitor> competitors = new ArrayList<Competitor>();
         for (Object object : dbCompetitorList) {
             Serializable competitorId = (Serializable) object;
-            Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
+            Competitor competitor = baseDomainFactory.getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
             competitors.add(competitor);
         }
         return competitors;
@@ -2011,13 +2013,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private Competitor getCompetitorByID(DBObject dbObject) {
         Serializable competitorId = (Serializable) dbObject.get(FieldNames.REGATTA_LOG_COMPETITOR_ID.name());
-        Competitor comp = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
+        Competitor comp = baseDomainFactory.getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
         return comp;
     }
 
     private Boat getBoatByID(DBObject dbObject) {
         Serializable boatId = (Serializable) dbObject.get(FieldNames.REGATTA_LOG_BOAT_ID.name());
-        Boat boat = baseDomainFactory.getCompetitorStore().getExistingBoatById(boatId);
+        Boat boat = baseDomainFactory.getCompetitorAndBoatStore().getExistingBoatById(boatId);
         return boat;
     }
 
@@ -2158,7 +2160,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject) {
         return this.loadRegattaLogDeviceMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
                 regattaLogIdentifier, outerDBObject,
-                () -> baseDomainFactory.getCompetitorStore()
+                () -> baseDomainFactory.getCompetitorAndBoatStore()
                         .getExistingBoatById((Serializable) dbObject.get(FieldNames.RACE_LOG_BOAT_ID.name())),
                 RegattaLogDeviceBoatMappingEventImpl::new,
                 result -> new MongoObjectFactoryImpl(database, serviceFinderFactory)
@@ -2393,13 +2395,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Collection<Competitor> loadAllCompetitors() {
-        Map<Serializable, Competitor> competitorsById = new HashMap<>();
+    public Collection<DynamicCompetitor> loadAllCompetitors() {
+        Map<Serializable, DynamicCompetitor> competitorsById = new HashMap<>();
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         try {
             for (DBObject o : collection.find()) {
                 JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
-                Competitor c = competitorWithBoatRefDeserializer.deserialize(json);
+                DynamicCompetitor c = competitorWithBoatRefDeserializer.deserialize(json);
                 // ensure that in case there should be multiple competitors with equal IDs in the DB
                 // only one will survive
                 if (competitorsById.containsKey(c.getId())) {
@@ -2455,13 +2457,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Collection<Boat> loadAllBoats() {
-        ArrayList<Boat> result = new ArrayList<Boat>();
+    public Collection<DynamicBoat> loadAllBoats() {
+        ArrayList<DynamicBoat> result = new ArrayList<>();
         DBCollection collection = database.getCollection(CollectionNames.BOATS.name());
         try {
             for (DBObject o : collection.find()) {
                 JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
-                Boat b = boatDeserializer.deserialize(json);
+                DynamicBoat b = boatDeserializer.deserialize(json);
                 result.add(b);
             }
         } catch (Exception e) {

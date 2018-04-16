@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -258,9 +259,10 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
         return result;
     }
 
-    public static DetailType[] getAvailableManeuverDetailColumnTypes() {
-        return new DetailType[] { DetailType.TACK, DetailType.AVERAGE_TACK_LOSS_IN_METERS,
-                DetailType.JIBE, DetailType.AVERAGE_JIBE_LOSS_IN_METERS, DetailType.PENALTY_CIRCLE, DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS };
+    public static List<DetailType> getAvailableManeuverDetailColumnTypes() {
+        return Arrays.asList(new DetailType[] { DetailType.TACK, DetailType.AVERAGE_TACK_LOSS_IN_METERS,
+                DetailType.JIBE, DetailType.AVERAGE_JIBE_LOSS_IN_METERS, DetailType.PENALTY_CIRCLE,
+                DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS });
     }
 
     @Override

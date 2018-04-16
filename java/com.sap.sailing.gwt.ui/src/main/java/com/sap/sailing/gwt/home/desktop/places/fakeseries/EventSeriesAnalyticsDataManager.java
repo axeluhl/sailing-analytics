@@ -59,11 +59,15 @@ public class EventSeriesAnalyticsDataManager {
         this.overallLeaderboardPanel = null;
         this.multiCompetitorChart = null;
     }
+    
+    public SailingServiceAsync getSailingService() {
+        return sailingService;
+    }
 
     public MultiRaceLeaderboardPanel createMultiRaceOverallLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             final MultiRaceLeaderboardSettings leaderboardSettings,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
-            boolean autoExpandLastRaceColumn) {
+            boolean autoExpandLastRaceColumn, Iterable<DetailType> availableDetailTypes) {
         if(overallLeaderboardPanel == null) {
             overallLeaderboardPanel = new MultiRaceLeaderboardPanel(parent, context, sailingService, asyncActionsExecutor,
                     leaderboardSettings, true, 
@@ -72,7 +76,7 @@ public class EventSeriesAnalyticsDataManager {
                     /* showSelectionCheckbox */ true,
                     /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
                     /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle(),
-                    flagImageResolver);
+                    flagImageResolver, availableDetailTypes);
         }
         return overallLeaderboardPanel;
     }
@@ -93,12 +97,12 @@ public class EventSeriesAnalyticsDataManager {
     public MultiLeaderboardProxyPanel createMultiLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             MultiRaceLeaderboardSettings leaderboardSettings,
             String preselectedLeaderboardName,  String leaderboardGroupName,
-            String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
+            String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn, Iterable<DetailType> availableDetailTypes) {
         if(multiLeaderboardPanel == null) {
             multiLeaderboardPanel = new MultiLeaderboardProxyPanel(parent, context, sailingService, metaLeaderboardName,
                     asyncActionsExecutor, timer, true /* isEmbedded */,
                     preselectedLeaderboardName, errorReporter, StringMessages.INSTANCE,
-                    showRaceDetails, autoExpandLastRaceColumn, leaderboardSettings, flagImageResolver);
+                    showRaceDetails, autoExpandLastRaceColumn, leaderboardSettings, flagImageResolver, availableDetailTypes);
         }
         return multiLeaderboardPanel;
     }
