@@ -286,7 +286,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         final Named mappedTo;
         if (competitorId != null) {
             // map to a competitor
-            final Competitor mappedToCompetitor = domainFactory.getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
+            final Competitor mappedToCompetitor = domainFactory.getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorId);
             mappedTo = mappedToCompetitor;
             if (mappedToCompetitor == null) {
                 logger.warning("No competitor found for id " + competitorId);
@@ -304,7 +304,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     from, /* to */ null);
         } else if (boatId != null) {
             // map to a boat
-            final Boat mappedToBoat = domainFactory.getCompetitorStore().getExistingBoatByIdAsString(boatId);
+            final Boat mappedToBoat = domainFactory.getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatId);
             mappedTo = mappedToBoat;
             if (mappedToBoat == null) {
                 logger.warning("No boat found for id " + boatId);
@@ -378,7 +378,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         }
         final NamedWithID mappedTo;
         if (competitorId != null) {
-            final Competitor mappedToCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
+            final Competitor mappedToCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorId);
             mappedTo = mappedToCompetitor;
             if (mappedToCompetitor == null) {
                 logger.warning("No competitor found for id " + competitorId);
@@ -386,7 +386,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                         .type(MediaType.TEXT_PLAIN).build();
             }
         } else if (boatId != null) {
-            final Boat mappedToBoat = getService().getCompetitorStore().getExistingBoatByIdAsString(boatId);
+            final Boat mappedToBoat = getService().getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatId);
             mappedTo = mappedToBoat;
             if (mappedToBoat == null) {
                 logger.warning("No boat found for id " + boatId);
@@ -433,7 +433,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @PathParam("competitorId") String competitorIdAsString) {
         Response response;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
+        Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
                 competitorIdAsString);
 
         if (competitor == null) {

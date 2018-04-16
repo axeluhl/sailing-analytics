@@ -281,25 +281,23 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         int gpsFixesCountToNextManeuver = 0;
         try {
             track.lockForRead();
+            boolean considerPreviousManeuver = previousManeuverCurve != null && previousManeuverCurve
+                    .getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter()
+                    .before(maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore());
+            boolean considerNextManeuver = nextManeuverCurve != null && nextManeuverCurve
+                    .getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore()
+                    .after(maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter());
             for (GPSFixMoving fix : track.getFixes(
-                    previousManeuverCurve != null && previousManeuverCurve
-                            .getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter()
-                            .before(maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries()
-                                    .getTimePointBefore())
-                                            ? previousManeuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries()
-                                                    .getTimePointAfter()
-                                            : maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries()
-                                                    .getTimePointBefore(),
-                    true,
-                    nextManeuverCurve != null && nextManeuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries()
-                            .getTimePointBefore()
-                            .after(maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries()
-                                    .getTimePointAfter())
-                                            ? nextManeuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries()
-                                                    .getTimePointBefore()
-                                            : maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries()
-                                                    .getTimePointAfter(),
-                    true)) {
+                    considerPreviousManeuver
+                            ? previousManeuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries()
+                                    .getTimePointAfter()
+                            : maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore(),
+                    !considerPreviousManeuver,
+                    considerNextManeuver
+                            ? nextManeuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries()
+                                    .getTimePointBefore()
+                            : maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter(),
+                    !considerNextManeuver)) {
                 if (fix.getTimePoint().before(
                         maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore())) {
                     ++gpsFixesCountFromPreviousManeuver;
@@ -373,8 +371,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         Wind wind = trackedRace.getWind(maneuverPosition, maneuverTimePoint);
         int numberOfJibes = getNumberOfJibes(mainCurve, wind);
         int numberOfTacks = getNumberOfTacks(mainCurve, wind);
-        boolean maneuverStartsByRunningAwayFromTheWind = (mainCurve.getSpeedWithBearingBefore().getBearing()
-                .getDegrees() - 180) * mainCurve.getDirectionChangeInDegrees() < 0;
+        boolean maneuverStartsByRunningAwayFromWind = (mainCurve.getSpeedWithBearingBefore().getBearing().getDegrees()
+                - 180) * mainCurve.getDirectionChangeInDegrees() < 0;
         Bearing relativeBearingToNextMarkPassingBeforeManeuver = getRelativeBearingToNextMark(
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore(), maneuverCurve
                         .getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingBefore().getBearing());
@@ -382,7 +380,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter(), maneuverCurve
                         .getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingAfter().getBearing());
         return new CompleteManeuverCurveWithEstimationDataImpl(mainCurve, curveWithUnstableCourseAndSpeed, wind,
-                numberOfTacks, numberOfJibes, maneuverStartsByRunningAwayFromTheWind,
+                numberOfTacks, numberOfJibes, maneuverStartsByRunningAwayFromWind,
                 relativeBearingToNextMarkPassingBeforeManeuver, relativeBearingToNextMarkPassingAfterManeuver,
                 maneuverCurve.isMarkPassing());
     }

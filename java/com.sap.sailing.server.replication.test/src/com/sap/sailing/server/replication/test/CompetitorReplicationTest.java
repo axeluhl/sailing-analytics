@@ -135,7 +135,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         // now allow for resetting to default through some event, such as receiving a GPS position
         master.apply(new AllowCompetitorResetToDefaults(Collections.singleton(competitor.getId().toString())));
         // modify the competitor on the master "from below" without an UpdateCompetitor operation, only locally:
-        master.getBaseDomainFactory().getCompetitorStore().updateCompetitor(competitor.getId().toString(), competitorName, competitorShortName, Color.RED, competitor.getEmail(),
+        master.getBaseDomainFactory().getCompetitorAndBoatStore().updateCompetitor(competitor.getId().toString(), competitorName, competitorShortName, Color.RED, competitor.getEmail(),
                 competitor.getTeam().getNationality(), competitor.getTeam().getImage(), competitor.getFlagImage(), 
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         final RegattaAndRaceIdentifier raceIdentifier = masterRegatta.getRaceIdentifier(raceDefinition);
@@ -166,7 +166,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
                         /* dateOfBirth */null, "This is Rigo, the coach")),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
         Thread.sleep(1000);
-        assertTrue(StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorStore().getAllCompetitors().spliterator(), /* parallel */ false).anyMatch(
+        assertTrue(StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorAndBoatStore().getAllCompetitors().spliterator(), /* parallel */ false).anyMatch(
                 c->
                     c.getId().equals(competitor.getId())));
     }

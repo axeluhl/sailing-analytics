@@ -17,17 +17,20 @@ public class CompleteManeuverCurveWithEstimationDataJsonSerializer
     public static final String MAIN_CURVE = "mainCurve";
     public static final String CURVE_WITH_UNSTABLE_COURSE_AND_SPEED = "curveWithUnstableCourseAndSpeed";
     public static final String WIND = "wind";
+    public static final String TACKING_COUNT = "tackingCount";
+    public static final String JIBING_COUNT = "jibingCount";
+    public static final String MANEUVER_STARTS_BY_RUNNING_AWAY_FROM_WIND = "maneuverStartsByRunningAwayFromWind";
     public static final String RELATIVE_BEARING_TO_NEXT_MARK_BEFORE_MANEUVER = "relativeBearingToNextMarkBeforeManeuver";
     public static final String RELATIVE_BEARING_TO_NEXT_MARK_AFTER_MANEUVER = "relativeBearingToNextMarkAfterManeuver";
 
     private final ManeuverCurveBoundariesJsonSerializer mainCurveSerializer;
     private final ManeuverCurveBoundariesJsonSerializer curveWithUnstableCourseAndSpeedSerializer;
-    private final ManeuverWindJsonSerializer windSerializer;
+    private final WindJsonSerializer windSerializer;
 
     public CompleteManeuverCurveWithEstimationDataJsonSerializer(
             ManeuverCurveBoundariesJsonSerializer mainCurveSerializer,
             ManeuverCurveBoundariesJsonSerializer curveWithUnstableCourseAndSpeedSerializer,
-            ManeuverWindJsonSerializer windSerializer) {
+            WindJsonSerializer windSerializer) {
         this.mainCurveSerializer = mainCurveSerializer;
         this.curveWithUnstableCourseAndSpeedSerializer = curveWithUnstableCourseAndSpeedSerializer;
         this.windSerializer = windSerializer;
@@ -42,6 +45,10 @@ public class CompleteManeuverCurveWithEstimationDataJsonSerializer
                 .serialize(maneuverWithEstimationData.getCurveWithUnstableCourseAndSpeed()));
         result.put(WIND, maneuverWithEstimationData.getWind() == null ? null
                 : windSerializer.serialize(maneuverWithEstimationData.getWind()));
+        result.put(TACKING_COUNT, maneuverWithEstimationData.getTackingCount());
+        result.put(JIBING_COUNT, maneuverWithEstimationData.getJibingCount());
+        result.put(MANEUVER_STARTS_BY_RUNNING_AWAY_FROM_WIND,
+                maneuverWithEstimationData.isManeuverStartsByRunningAwayFromWind());
         result.put(RELATIVE_BEARING_TO_NEXT_MARK_BEFORE_MANEUVER,
                 maneuverWithEstimationData.getRelativeBearingToNextMarkBeforeManeuver() == null ? null
                         : maneuverWithEstimationData.getRelativeBearingToNextMarkBeforeManeuver().getDegrees());

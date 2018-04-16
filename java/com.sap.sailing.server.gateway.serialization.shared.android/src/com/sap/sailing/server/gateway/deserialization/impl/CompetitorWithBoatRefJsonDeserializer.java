@@ -37,7 +37,7 @@ public class CompetitorWithBoatRefJsonDeserializer extends CompetitorJsonDeseria
      * up in the {@link #boatFactory} and the lookup result is returned; otherwise, {@code null} is returned.
      */
     @Override
-    protected DynamicBoat getBoat(JSONObject object) throws ClassNotFoundException, NoSuchMethodException,
+    protected DynamicBoat getBoat(JSONObject object, Serializable defaultId) throws ClassNotFoundException, NoSuchMethodException,
             InstantiationException, IllegalAccessException, InvocationTargetException {
         // if we find a boat identifier we try to find the boat with the boatfactory
         Serializable boatId = (Serializable) object.get(CompetitorJsonConstants.FIELD_BOAT_ID);

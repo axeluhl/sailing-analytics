@@ -1395,7 +1395,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void storeBoats(Iterable<Boat> boats) {
+    public void storeBoats(Iterable<? extends Boat> boats) {
         if (boats != null && !Util.isEmpty(boats)) {
             DBCollection collection = database.getCollection(CollectionNames.BOATS.name());
             List<DBObject> boatsDB = new ArrayList<>();

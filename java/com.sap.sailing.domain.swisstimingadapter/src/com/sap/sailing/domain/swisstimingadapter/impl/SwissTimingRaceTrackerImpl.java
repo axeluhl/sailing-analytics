@@ -471,7 +471,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
             this.notifyAll();
         }
         // temp
-        CompetitorAndBoatStore competitorStore = domainFactory.getBaseDomainFactory().getCompetitorStore();
+        CompetitorAndBoatStore competitorStore = domainFactory.getBaseDomainFactory().getCompetitorAndBoatStore();
         for (com.sap.sailing.domain.swisstimingadapter.Competitor c : startList.getCompetitors()) {
             Competitor existingCompetitor = competitorStore.getExistingCompetitorByIdAsString(c.getID());
             if (existingCompetitor != null) {
