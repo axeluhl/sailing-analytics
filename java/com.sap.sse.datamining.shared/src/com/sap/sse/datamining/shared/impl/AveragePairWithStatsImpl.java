@@ -4,7 +4,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.shared.data.AveragePairWithStats;
 
 public class AveragePairWithStatsImpl<T> implements AveragePairWithStats<T> {
-    private static final long serialVersionUID = -3094183173270210846L;
+    private static final long serialVersionUID = -2643300186690471524L;
     private final Pair<T, T> average;
     private final Pair<T, T> min;
     private final Pair<T, T> max;
@@ -61,7 +61,7 @@ public class AveragePairWithStatsImpl<T> implements AveragePairWithStats<T> {
 
     @Override
     public String toString() {
-        return "AverageWithStatsImpl [average=" + average + ", min=" + min + ", max=" + max + ", median=" + median
+        return "AveragePairWithStatsImpl [average=" + average + ", min=" + min + ", max=" + max + ", median=" + median
                 + ", standardDeviation=" + standardDeviation + ", count=" + count + ", resultType=" + resultType + "]";
     }
 
