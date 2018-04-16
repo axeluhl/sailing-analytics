@@ -49,6 +49,8 @@ import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RaceColumnInSeriesImpl;
@@ -423,10 +425,10 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 "123", regattaProxy.getSeries(), regattaProxy.isPersistent(), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
                 /* defaultCourseAreaId */ null, /*buoyZoneRadiusInHullLengths*/ 2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
-        CompetitorWithBoat competitorWithBoat1 = AbstractLeaderboardTest.createCompetitorWithBoat("Humba1");
-        CompetitorWithBoat competitorWithBoat2 = AbstractLeaderboardTest.createCompetitorWithBoat("Humba2");
-        Boat boat1= AbstractLeaderboardTest.createBoat("Humba1 Boot");
-        Boat boat2 = AbstractLeaderboardTest.createBoat("Humba2 Boot");
+        DynamicCompetitorWithBoat competitorWithBoat1 = AbstractLeaderboardTest.createCompetitorWithBoat("Humba1");
+        DynamicCompetitorWithBoat competitorWithBoat2 = AbstractLeaderboardTest.createCompetitorWithBoat("Humba2");
+        DynamicBoat boat1= AbstractLeaderboardTest.createBoat("Humba1 Boot");
+        DynamicBoat boat2 = AbstractLeaderboardTest.createBoat("Humba2 Boot");
         res.getCompetitorAndBoatStore().addNewCompetitors(Arrays.asList(competitorWithBoat1, competitorWithBoat2));
         res.getCompetitorAndBoatStore().addNewBoats(Arrays.asList(boat1, boat2));
         regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitorWithBoat1));

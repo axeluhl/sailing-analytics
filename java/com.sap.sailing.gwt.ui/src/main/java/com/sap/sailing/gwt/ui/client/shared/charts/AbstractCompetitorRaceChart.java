@@ -738,8 +738,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     private boolean isYAxisReversed(DetailType detailType) {
-        return detailType == DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD
-                || detailType == DetailType.GAP_TO_LEADER_IN_SECONDS || detailType == DetailType.RACE_RANK
+        return detailType == DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD
+                || detailType == DetailType.LEG_GAP_TO_LEADER_IN_SECONDS || detailType == DetailType.RACE_RANK
                 || detailType == DetailType.REGATTA_RANK || detailType == DetailType.OVERALL_RANK;
     }
 

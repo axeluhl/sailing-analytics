@@ -330,7 +330,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getRacesOfSwissTimingEvent(String eventJsonUrl, AsyncCallback<SwissTimingEventRecordDTO> asyncCallback);
 
-    void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, int port,
+    void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
             AsyncCallback<Void> asyncCallback);
 
     void getCountryCodes(AsyncCallback<String[]> callback);
@@ -907,7 +907,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * an option for charts, if it actually recorded for the race.
      */
     void determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier,
-            AsyncCallback<List<DetailType>> callback);
+            AsyncCallback<Iterable<DetailType>> callback);
 
     void getExpeditionDeviceConfigurations(AsyncCallback<List<ExpeditionDeviceConfiguration>> callback);
 
@@ -967,6 +967,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             final Iterable<String> selectedFlightNames,PairingListDTO pairingListDTO, AsyncCallback<Void> callback);
     
     void getRaceDisplayNamesFromLeaderboard(final String leaderboardName, List<String> raceColumnNames, AsyncCallback<List<String>> callback);
+
+    void getAvailableDetailTypesForLeaderboard(String leaderboardName,
+            AsyncCallback<Iterable<DetailType>> asyncCallback);
 
     void canSliceRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> callback);
 

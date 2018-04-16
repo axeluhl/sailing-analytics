@@ -5,12 +5,12 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class SwissTimingConfigurationDTO implements IsSerializable {
     private String name;
     private String jsonURL;
-    private  String hostname;
-    private  int port;
+    private String hostname;
+    private Integer port;
     
     public SwissTimingConfigurationDTO() {}
 
-    public SwissTimingConfigurationDTO(String name, String jsonURL, String hostname, int port) {
+    public SwissTimingConfigurationDTO(String name, String jsonURL, String hostname, Integer port) {
         super();
         this.name = name;
         this.jsonURL = jsonURL;
@@ -30,7 +30,7 @@ public class SwissTimingConfigurationDTO implements IsSerializable {
         return hostname;
     }
 
-    public int getPort() {
+    public Integer getPort() {
         return port;
     }
     

@@ -5,6 +5,8 @@ import java.net.URI;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
+import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
@@ -36,7 +38,7 @@ public interface CompetitorAndBoatStore extends CompetitorFactory, BoatFactory {
      * must call {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam...)} to cause an update of the
      * competitor's values.
      */
-    Competitor getExistingCompetitorByIdAsString(String idAsString);
+    DynamicCompetitor getExistingCompetitorByIdAsString(String idAsString);
 
     /**
      * If a valid competitor is returned and the caller has information available that could be used to update the competitor,
@@ -96,9 +98,9 @@ public interface CompetitorAndBoatStore extends CompetitorFactory, BoatFactory {
             Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
             Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag);
 
-    void addNewCompetitors(Iterable<Competitor> competitors);
+    void addNewCompetitors(Iterable<DynamicCompetitor> competitors);
 
-    void addNewCompetitorsWithBoat(Iterable<CompetitorWithBoat> competitorsWithBoat);
+    void addNewCompetitorsWithBoat(Iterable<DynamicCompetitorWithBoat> competitorsWithBoat);
 
     CompetitorDTO convertToCompetitorDTO(Competitor competitor);
 
@@ -106,7 +108,7 @@ public interface CompetitorAndBoatStore extends CompetitorFactory, BoatFactory {
 
     CompetitorWithBoatDTO convertToCompetitorWithOptionalBoatDTO(Competitor c);
 
-    Map<CompetitorWithBoatDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats);
+    Map<CompetitorWithBoatDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, ? extends Boat> competitorsAndBoats);
     
     /**
      * Listeners added here are notified whenever {@link #updateCompetitor(String, String, Color, String, Nationality)} is called
@@ -133,7 +135,7 @@ public interface CompetitorAndBoatStore extends CompetitorFactory, BoatFactory {
      * the caller must check the result of {@link #isBoatToUpdateDuringGetOrCreate(Competitor)}, and if <code>true</code>,
      * must call {@link #getOrCreateBoat(..)} to cause an update of the boat's values.
      */
-    Boat getExistingBoatByIdAsString(String idAsString);
+    DynamicBoat getExistingBoatByIdAsString(String idAsString);
     
     /**
      * When a boat is queried using {@link #getOrCreateBoat(...)},
@@ -144,7 +146,7 @@ public interface CompetitorAndBoatStore extends CompetitorFactory, BoatFactory {
      * next call to {@link #getOrCreateBoat(...)} with <code>boat</code>'s {@link Boat#getId() ID} will
      * {@link #updateBoat(...)} the boat in its updatable properties such as sail ID and the color.
      */
-    void allowBoatResetToDefaults(Boat boat);
+    void allowBoatResetToDefaults(DynamicBoat boat);
 
     int getBoatsCount();
 
@@ -184,7 +186,7 @@ public interface CompetitorAndBoatStore extends CompetitorFactory, BoatFactory {
      */
     Boat updateBoat(String idAsString, String newName, Color newColor, String newSailId);
 
-    void addNewBoats(Iterable<Boat> boats);
+    void addNewBoats(Iterable<DynamicBoat> boats);
 
     BoatDTO convertToBoatDTO(Boat boat);
     

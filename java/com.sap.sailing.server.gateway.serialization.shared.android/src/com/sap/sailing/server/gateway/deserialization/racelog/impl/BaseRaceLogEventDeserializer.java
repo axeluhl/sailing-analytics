@@ -11,6 +11,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
@@ -20,9 +21,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {
 
-    protected JsonDeserializer<Competitor> competitorDeserializer;
+    protected JsonDeserializer<DynamicCompetitor> competitorDeserializer;
     
-    public BaseRaceLogEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer) {
+    public BaseRaceLogEventDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer) {
         this.competitorDeserializer = competitorDeserializer;
     }
     
@@ -38,11 +39,10 @@ public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<R
         Number passId = (Number) object.get(BaseRaceLogEventSerializer.FIELD_PASS_ID);
         
         JSONArray jsonCompetitors = Helpers.getNestedArraySafe(object, BaseRaceLogEventSerializer.FIELD_COMPETITORS);
-        List<Competitor> competitors = new ArrayList<Competitor>();
-        
+        List<Competitor> competitors = new ArrayList<>();
         for (Object competitorObject : jsonCompetitors) {
             JSONObject jsonCompetitor = (JSONObject) competitorObject;
-            Competitor competitor = competitorDeserializer.deserialize(jsonCompetitor);
+            DynamicCompetitor competitor = competitorDeserializer.deserialize(jsonCompetitor);
             competitors.add(competitor);
         }
         final String authorName = (String) object.get(BaseRaceLogEventSerializer.FIELD_AUTHOR_NAME);

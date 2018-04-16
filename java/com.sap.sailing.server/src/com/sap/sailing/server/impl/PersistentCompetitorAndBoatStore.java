@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.TransientCompetitorAndBoatStoreImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -63,12 +64,12 @@ public class PersistentCompetitorAndBoatStore extends TransientCompetitorAndBoat
             storeTo.removeAllBoats();
             storeTo.removeAllCompetitors();
         } else {
-            Collection<Boat> allBoats = loadFrom.loadAllBoats();
-            for (Boat boat : allBoats) {
+            Collection<DynamicBoat> allBoats = loadFrom.loadAllBoats();
+            for (DynamicBoat boat : allBoats) {
                 super.addNewBoat(boat);
             }
-            Collection<Competitor> allCompetitors = loadFrom.loadAllCompetitors();
-            for (Competitor competitor : allCompetitors) {
+            Collection<DynamicCompetitor> allCompetitors = loadFrom.loadAllCompetitors();
+            for (DynamicCompetitor competitor : allCompetitors) {
                 super.addNewCompetitor(competitor);
             }
         }
@@ -129,7 +130,7 @@ public class PersistentCompetitorAndBoatStore extends TransientCompetitorAndBoat
     }
 
     @Override
-    protected void addNewCompetitor(Competitor competitor) {
+    protected void addNewCompetitor(DynamicCompetitor competitor) {
         storeTo.storeCompetitor(competitor);
         super.addNewCompetitor(competitor);
     }
@@ -156,7 +157,7 @@ public class PersistentCompetitorAndBoatStore extends TransientCompetitorAndBoat
     }
     
     @Override
-    public void addNewCompetitors(Iterable<Competitor> competitors) {
+    public void addNewCompetitors(Iterable<DynamicCompetitor> competitors) {
         storeTo.storeCompetitors(competitors);
         super.addNewCompetitors(competitors);
     }
@@ -172,7 +173,7 @@ public class PersistentCompetitorAndBoatStore extends TransientCompetitorAndBoat
     }
     
     @Override
-    protected void addNewBoat(Boat boat) {
+    protected void addNewBoat(DynamicBoat boat) {
         storeTo.storeBoat(boat);
         super.addNewBoat(boat);
     }
@@ -196,7 +197,7 @@ public class PersistentCompetitorAndBoatStore extends TransientCompetitorAndBoat
     }
     
     @Override
-    public void addNewBoats(Iterable<Boat> boats) {
+    public void addNewBoats(Iterable<DynamicBoat> boats) {
         storeTo.storeBoats(boats);
         super.addNewBoats(boats);
     }

@@ -1,10 +1,12 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveLifecycle;
@@ -73,7 +75,7 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
                         cf.getAutoPlayCtx().getLifeOrPreLiveRace(), cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(),
                         /** leaderboardGroupName */
                         null, /** eventId */
-                        null, cf.getErrorReporter(), StringMessages.INSTANCE, null, raceTimesInfoProvider, true, false);
+                        null, cf.getErrorReporter(), StringMessages.INSTANCE, null, raceTimesInfoProvider, true, false, Arrays.asList(DetailType.values()));
                 setPlaceToGo(new LiveRaceWithRaceboardPlace(raceboardPerspective));
                 firePlaceChangeAndStartTimer();
 
