@@ -1,8 +1,10 @@
 package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,6 +22,7 @@ import com.sap.sailing.domain.common.dto.ExpeditionAllInOneConstants.ImportMode;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.server.gateway.impl.AbstractFileUploadServlet;
 import com.sap.sailing.server.gateway.trackfiles.impl.ExpeditionAllInOneImporter.ImporterResult;
+import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 /**
@@ -32,18 +35,18 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
     private static final long serialVersionUID = 1120226743039934620L;
     private static final Logger logger = Logger.getLogger(ExpeditionAllInOneImportServlet.class.getName());
 
-    private static final String ERROR_MESSAGE_IMPORT_FILE_MISSING = "No file to import found!";
-    private static final String ERROR_MESSAGE_BOAT_CLASS_MISSING = "No boat class name found!";
-    private static final String ERROR_MESSAGE_REGATTA_MISSING = "No regatta name found!";
-    private static final String ERROR_MESSAGE_UNKNOWN_IMPORT_MODE = "Unknown import mode!";
+    private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
 
     private ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> raceLogTrackingAdapterTracker;
+    private ResourceBundleStringMessagesImpl serverStringMessages;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         raceLogTrackingAdapterTracker = ServiceTrackerFactory.createAndOpen(getContext(),
                 RaceLogTrackingAdapterFactory.class);
+        serverStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME,
+                this.getClass().getClassLoader(), StandardCharsets.UTF_8.name());
     }
 
     /**
@@ -60,6 +63,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
             String boatClassName = null;
             String regattaName = null;
             String importModeName = null;
+            Locale locale = Locale.ENGLISH;
             for (FileItem fi : fileItems) {
                 if (!fi.isFormField()) {
                     fileName = fi.getName();
@@ -77,7 +81,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
                 }
             }
             if (fileItem == null) {
-                throw new AllinOneImportException(ERROR_MESSAGE_IMPORT_FILE_MISSING);
+                throw new AllinOneImportException(serverStringMessages.get(locale, "allInOneErrorImportFileMissing"));
             }
             final ImportMode importMode;
             if (importModeName == null) {
@@ -86,19 +90,19 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
                 try {
                     importMode = ImportMode.valueOf(importModeName);
                 } catch (Exception e) {
-                    throw new AllinOneImportException(ERROR_MESSAGE_UNKNOWN_IMPORT_MODE);
+                    throw new AllinOneImportException(serverStringMessages.get(locale, "allInOneErrorUnknownImportMode"));
                 }
             }
             if (importMode == ImportMode.NEW_EVENT) {
                 if (boatClassName == null || boatClassName.isEmpty()) {
-                    throw new AllinOneImportException(ERROR_MESSAGE_BOAT_CLASS_MISSING);
+                    throw new AllinOneImportException(serverStringMessages.get(locale, "allInOneErrorMissingBoatClass"));
                 }
             } else {
                 if (regattaName == null || regattaName.isEmpty()) {
-                    throw new AllinOneImportException(ERROR_MESSAGE_REGATTA_MISSING);
+                    throw new AllinOneImportException(serverStringMessages.get(locale, "allInOneErrorMissingRegattaClass"));
                 }
             }
-            importerResult = new ExpeditionAllInOneImporter(getService(),
+            importerResult = new ExpeditionAllInOneImporter(serverStringMessages, locale, getService(),
                     raceLogTrackingAdapterTracker.getService().getAdapter(getService().getBaseDomainFactory()),
                     getServiceFinderFactory(), getContext()).importFiles(fileName, fileItem, boatClassName, importMode, regattaName);
         } catch (AllinOneImportException e) {
