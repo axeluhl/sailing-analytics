@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -108,6 +109,8 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
 
         regattaOracle = new RegattaSuggestOracle();
         final SuggestBox regattaSuggestBox = new SuggestBox(regattaOracle, regattaName);
+        regattaSuggestBox.getValueBox().getElement().getStyle().setProperty("minWidth", 30, Unit.EM);
+        regattaSuggestBox.getValueBox().getElement().setAttribute("placeholder", stringMessages.startTypingForSuggestions());
         regattaNamePanel.add(regattaSuggestBox);
         regattaNamePanel.setCellVerticalAlignment(regattaSuggestBox, HasVerticalAlignment.ALIGN_MIDDLE);
         boatClassPanel.setSpacing(5);
@@ -116,6 +119,8 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
         boatClassPanel.add(boatClassLabel);
         boatClassPanel.setCellVerticalAlignment(boatClassLabel, HasVerticalAlignment.ALIGN_MIDDLE);
         final SuggestBox boatClassInput = new SuggestBox(new BoatClassMasterdataSuggestOracle());
+        boatClassInput.getValueBox().getElement().getStyle().setProperty("minWidth", 30, Unit.EM);
+        boatClassInput.getValueBox().getElement().setAttribute("placeholder", stringMessages.startTypingForSuggestions());
         boatClassInput.getValueBox().setName(ExpeditionAllInOneConstants.REQUEST_PARAMETER_BOAT_CLASS);
         boatClassPanel.add(boatClassInput);
         boatClassPanel.setCellVerticalAlignment(boatClassInput, HasVerticalAlignment.ALIGN_MIDDLE);
