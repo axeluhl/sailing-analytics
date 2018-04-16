@@ -117,8 +117,7 @@ public class ExpeditionAllInOneImporter {
     private final BundleContext context;
 
     private ResourceBundleStringMessagesImpl serverStringMessages;
-
-    private Locale locale;
+    private Locale uiLocale;
 
     public static class ImporterResult {
         final UUID eventId;
@@ -161,10 +160,10 @@ public class ExpeditionAllInOneImporter {
         }
     }
 
-    public ExpeditionAllInOneImporter(ResourceBundleStringMessagesImpl serverStringMessages, Locale locale, final RacingEventService service, RaceLogTrackingAdapter adapter,
+    public ExpeditionAllInOneImporter(ResourceBundleStringMessagesImpl serverStringMessages, Locale uiLocale, final RacingEventService service, RaceLogTrackingAdapter adapter,
             final TypeBasedServiceFinderFactory serviceFinderFactory, final BundleContext context) {
         this.serverStringMessages = serverStringMessages;
-        this.locale = locale;
+        this.uiLocale = uiLocale;
         this.service = service;
         this.adapter = adapter;
         this.serviceFinderFactory = serviceFinderFactory;
@@ -190,7 +189,7 @@ public class ExpeditionAllInOneImporter {
             new TrackFilesImporter(service, serviceFinderFactory, context).importFixes(jsonHolderForGpsFixImport,
                     GPSFixImporter.EXPEDITION_TYPE, filesForGpsFixImport);
             this.ensureSuccessfulImport(jsonHolderForGpsFixImport,
-                    serverStringMessages.get(locale, "allInOneErrorGPSDataImportFailed"));
+                    serverStringMessages.get(uiLocale, "allInOneErrorGPSDataImportFailed"));
         } catch (IOException e1) {
             errors.addAll(jsonHolderForGpsFixImport.getErrorList());
             throw new AllinOneImportException(e1, errors);
@@ -205,7 +204,7 @@ public class ExpeditionAllInOneImporter {
             new SensorDataImporter(service, context).importFiles(false, jsonHolderForSensorFixImport,
                     importerNamesAndFilesForSensorFixImport);
             this.ensureSuccessfulImport(jsonHolderForSensorFixImport,
-                    serverStringMessages.get(locale, "allInOneErrorSensorDataImportFailed"));
+                    serverStringMessages.get(uiLocale, "allInOneErrorSensorDataImportFailed"));
         } catch (IOException e1) {
             errors.addAll(jsonHolderForSensorFixImport.getErrorList());
             throw new AllinOneImportException(e1, errors);
@@ -257,18 +256,18 @@ public class ExpeditionAllInOneImporter {
             if (existingRegattaName != null && !existingRegattaName.isEmpty()) {
                 final Regatta regatta = service.getRegattaByName(existingRegattaName);
                 if (regatta == null) {
-                    return new ImporterResult(serverStringMessages.get(locale, "allInOneErrorInvalidData"));
+                    return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidData"));
                 }
                 final Leaderboard leaderboard = service.getLeaderboardByName(existingRegattaName);
                 if (leaderboard == null || !(leaderboard instanceof RegattaLeaderboard)) {
-                    return new ImporterResult(serverStringMessages.get(locale, "allInOneErrorInvalidLeaderBoard"));
+                    return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidLeaderBoard"));
                 }
                 final RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
                 
                 final Pair<Event, LeaderboardGroup> foundEventAndLeaderboardGroup = findEventAndLeaderboardGroupForExistingLeaderboard(leaderboard);
                 
                 if (foundEventAndLeaderboardGroup == null) {
-                    return new ImporterResult(serverStringMessages.get(locale, "allInOneErrorInvalidLeaderBoardEventLink"));
+                    return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidLeaderBoardEventLink"));
                 }
                 // TODO should we extend the time range of the event to ensure that it includes the newly imported tracks' time ranges?
                 eventId = foundEventAndLeaderboardGroup.getA().getId();
@@ -277,7 +276,7 @@ public class ExpeditionAllInOneImporter {
                 if (importMode == ImportMode.NEW_COMPETITOR) {
                     final Iterable<RaceColumn> raceColumns = regattaLeaderboard.getRaceColumns();
                     if (Util.isEmpty(raceColumns)) {
-                        return new ImporterResult(serverStringMessages.get(locale, "allInOneErrorInvalidRace"));
+                        return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidRace"));
                     }
                     try {
                         Fleet firstFleet = null;
@@ -286,7 +285,7 @@ public class ExpeditionAllInOneImporter {
                         for (RaceColumn raceColumn : raceColumns) {
                             final Iterable<? extends Fleet> fleets = raceColumn.getFleets();
                             if (Util.size(fleets) != 1) {
-                                return new ImporterResult(serverStringMessages.get(locale, "allInOneErrorSplitFleetNotSupported"));
+                                return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorSplitFleetNotSupported"));
                             }
                             final Fleet fleet = fleets.iterator().next();
                             DynamicTrackedRace trackedRaceForColumn = (DynamicTrackedRace) raceColumn.getTrackedRace(fleet);
@@ -310,12 +309,12 @@ public class ExpeditionAllInOneImporter {
                 } else if (importMode == ImportMode.NEW_RACE){
                     final Iterable<? extends Series> seriesInRegatta = regatta.getSeries();
                     if (Util.isEmpty(seriesInRegatta)) {
-                        return new ImporterResult(serverStringMessages.get(locale, "allInOneErrorInvalidSeries"));
+                        return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidSeries"));
                     }
                     final Series series = Util.get(seriesInRegatta, Util.size(seriesInRegatta) - 1);
                     final Iterable<? extends Fleet> fleets = series.getFleets();
                     if (Util.size(fleets) != 1) {
-                        return new ImporterResult(serverStringMessages.get(locale, "allInOneErrorMultiSeries"));
+                        return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorMultiSeries"));
                     }
                     final Fleet fleet = fleets.iterator().next();
                     fleetName = fleet.getName();
@@ -327,10 +326,10 @@ public class ExpeditionAllInOneImporter {
                             raceColumn, fleet);
                     trackedRaces.add(trackedRace);
                 } else {
-                    return new ImporterResult(serverStringMessages.get(locale, "allInOneErrorInvalidImportMode") + importMode);
+                    return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidImportMode") + importMode);
                 }
             } else {
-                return new ImporterResult(serverStringMessages.get(locale, "allInOneErrorInvalidRegattaName"));
+                return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidRegattaName"));
             }
         }
 
@@ -504,7 +503,7 @@ public class ExpeditionAllInOneImporter {
 
     private void ensureBoatClassDetermination(Regatta regatta) throws AllinOneImportException {
         if (regatta.getBoatClass() == null) {
-            throw new AllinOneImportException(serverStringMessages.get(locale, "allInOneErrorBoatClassDeterminationFailed"));
+            throw new AllinOneImportException(serverStringMessages.get(uiLocale, "allInOneErrorBoatClassDeterminationFailed"));
         }
     }
 }

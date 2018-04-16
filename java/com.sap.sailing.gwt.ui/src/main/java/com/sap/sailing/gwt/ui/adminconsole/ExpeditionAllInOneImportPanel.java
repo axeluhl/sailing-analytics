@@ -1,10 +1,12 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -13,6 +15,7 @@ import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
@@ -59,6 +62,8 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
         formPanel.setAction(GWT.getHostPageBaseURL() + URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT);
         final VerticalPanel contentPanel = new VerticalPanel();
         formPanel.add(contentPanel);
+        final Hidden localeField = new Hidden(ExpeditionAllInOneConstants.REQUEST_PARAMETER_LOCALE, LocaleInfo.getCurrentLocale().getLocaleName());
+        contentPanel.add(localeField);
         final FileUpload fileUpload = new FileUpload();
         fileUpload.setName("upload");
         contentPanel.add(fileUpload);
@@ -104,6 +109,8 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
 
         regattaOracle = new RegattaSuggestOracle();
         final SuggestBox regattaSuggestBox = new SuggestBox(regattaOracle, regattaName);
+        regattaSuggestBox.getValueBox().getElement().getStyle().setProperty("minWidth", 30, Unit.EM);
+        regattaSuggestBox.getValueBox().getElement().setAttribute("placeholder", stringMessages.startTypingForSuggestions());
         regattaNamePanel.add(regattaSuggestBox);
         regattaNamePanel.setCellVerticalAlignment(regattaSuggestBox, HasVerticalAlignment.ALIGN_MIDDLE);
         boatClassPanel.setSpacing(5);
@@ -112,6 +119,8 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
         boatClassPanel.add(boatClassLabel);
         boatClassPanel.setCellVerticalAlignment(boatClassLabel, HasVerticalAlignment.ALIGN_MIDDLE);
         final SuggestBox boatClassInput = new SuggestBox(new BoatClassMasterdataSuggestOracle());
+        boatClassInput.getValueBox().getElement().getStyle().setProperty("minWidth", 30, Unit.EM);
+        boatClassInput.getValueBox().getElement().setAttribute("placeholder", stringMessages.startTypingForSuggestions());
         boatClassInput.getValueBox().setName(ExpeditionAllInOneConstants.REQUEST_PARAMETER_BOAT_CLASS);
         boatClassPanel.add(boatClassInput);
         boatClassPanel.setCellVerticalAlignment(boatClassInput, HasVerticalAlignment.ALIGN_MIDDLE);
