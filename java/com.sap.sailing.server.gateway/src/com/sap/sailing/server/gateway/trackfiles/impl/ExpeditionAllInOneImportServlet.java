@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,6 +61,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
             String boatClassName = null;
             String regattaName = null;
             String importModeName = null;
+            String localeName = null;
             for (FileItem fi : fileItems) {
                 if (!fi.isFormField()) {
                     fileName = fi.getName();
@@ -74,6 +76,19 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
                     if (ExpeditionAllInOneConstants.REQUEST_PARAMETER_IMPORT_MODE.equals(fi.getFieldName())) {
                         importModeName = fi.getString();
                     }
+                    if (ExpeditionAllInOneConstants.REQUEST_PARAMETER_LOCALE.equals(fi.getFieldName())) {
+                        localeName = fi.getString();
+                    }
+                }
+            }
+            Locale uiLocale;
+            if (localeName == null) {
+                uiLocale = Locale.ENGLISH;
+            } else {
+                try {
+                    uiLocale = Locale.forLanguageTag(localeName);
+                } catch (Exception e) {
+                    uiLocale = Locale.ENGLISH;
                 }
             }
             if (fileItem == null) {
