@@ -77,7 +77,7 @@ import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 /**
  * Importer for expedition data that imports all available data for a boat:
@@ -116,7 +116,7 @@ public class ExpeditionAllInOneImporter {
     private final TypeBasedServiceFinderFactory serviceFinderFactory;
     private final BundleContext context;
 
-    private ResourceBundleStringMessagesImpl serverStringMessages;
+    private ResourceBundleStringMessages serverStringMessages;
     private Locale uiLocale;
 
     public static class ImporterResult {
@@ -160,7 +160,7 @@ public class ExpeditionAllInOneImporter {
         }
     }
 
-    public ExpeditionAllInOneImporter(ResourceBundleStringMessagesImpl serverStringMessages, Locale uiLocale, final RacingEventService service, RaceLogTrackingAdapter adapter,
+    public ExpeditionAllInOneImporter(ResourceBundleStringMessages serverStringMessages, Locale uiLocale, final RacingEventService service, RaceLogTrackingAdapter adapter,
             final TypeBasedServiceFinderFactory serviceFinderFactory, final BundleContext context) {
         this.serverStringMessages = serverStringMessages;
         this.uiLocale = uiLocale;

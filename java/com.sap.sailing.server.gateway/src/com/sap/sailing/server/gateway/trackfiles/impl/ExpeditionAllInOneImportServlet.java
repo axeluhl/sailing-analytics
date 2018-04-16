@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.dto.ExpeditionAllInOneConstants.ImportMode;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.server.gateway.impl.AbstractFileUploadServlet;
 import com.sap.sailing.server.gateway.trackfiles.impl.ExpeditionAllInOneImporter.ImporterResult;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -38,7 +39,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
 
     private ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> raceLogTrackingAdapterTracker;
-    private ResourceBundleStringMessagesImpl serverStringMessages;
+    private ResourceBundleStringMessages serverStringMessages;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
