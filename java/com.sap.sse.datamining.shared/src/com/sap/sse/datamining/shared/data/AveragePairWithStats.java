@@ -4,15 +4,6 @@ import java.io.Serializable;
 
 import com.sap.sse.common.Util.Pair;
 
-/**
- * Result of an averaging operation, augmented by statistical data explaining a bit more about how the average was
- * computed, including minimum and maximum values, count, median, as well as standard deviation. All but count will have
- * the same type of the average value whereas the count is an integer-like data type.
- * 
- * @author Axel Uhl (d043530)
- *
- * @param <T>
- */
 public interface AveragePairWithStats<T> extends Serializable {
     Pair<T, T> getAverage();
     Pair<T, T> getMin();
