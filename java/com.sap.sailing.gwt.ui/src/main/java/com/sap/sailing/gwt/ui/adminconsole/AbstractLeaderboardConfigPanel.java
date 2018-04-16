@@ -269,7 +269,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 return selectedRaceColumnAndFleetName.getA().getRaceIdentifier(selectedRaceColumnAndFleetName.getB()).equals(selectedRace.getRaceIdentifier());
             }
         };
-        
         trackedRaceListHandlerRegistration = refreshableTrackedRaceSelectionModel.addSelectionChangeHandler(trackedRaceListHandler);
         Button reloadAllRaceLogs = new Button(stringMessages.reloadAllRaceLogs());
         reloadAllRaceLogs.ensureDebugId("ReloadAllRaceLogsButton");
@@ -499,6 +498,10 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     protected String getSelectedLeaderboardName() {
         return getSelectedLeaderboard() != null ? getSelectedLeaderboard().name : null;
+    }
+
+    protected boolean canBoatsOfCompetitorsChangePerRace() {
+        return getSelectedLeaderboard() != null ? getSelectedLeaderboard().canBoatsOfCompetitorsChangePerRace: false;
     }
 
     protected abstract void leaderboardSelectionChanged();

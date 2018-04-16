@@ -86,7 +86,7 @@ public class ConfirmationPlace extends AbstractBasePlace implements HasMobileVer
 
         @Override
         public String getToken(ConfirmationPlace place) {
-            return place.getAction().name();
+            return place.getAction().name()+"?u="+URL.encodeQueryString(place.getName())+"&v="+URL.encodeQueryString(place.getValidationSecret());
         }
     }
 }

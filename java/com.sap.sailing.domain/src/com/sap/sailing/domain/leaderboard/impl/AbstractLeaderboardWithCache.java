@@ -47,7 +47,7 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.dto.BasicRaceDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
@@ -66,6 +66,7 @@ import com.sap.sailing.domain.leaderboard.meta.MetaLeaderboardColumn;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -357,16 +358,24 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
                         .getScoringScheme().isHigherBetter(), new UUIDGenerator(), addOverallDetails);
         result.type = getLeaderboardType();
-        result.competitors = new ArrayList<CompetitorDTO>();
+        result.competitors = new ArrayList<CompetitorWithBoatDTO>();
         result.name = this.getName();
         result.displayName = this.getDisplayName();
-        result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+        result.competitorDisplayNames = new HashMap<CompetitorWithBoatDTO, String>();
+        boolean isLeaderboardThatHasRegattaLike = this instanceof LeaderboardThatHasRegattaLike;
+        if (isLeaderboardThatHasRegattaLike) {
+            LeaderboardThatHasRegattaLike regattaLikeLeaderboard = (LeaderboardThatHasRegattaLike) this;
+            result.canBoatsOfCompetitorsChangePerRace = regattaLikeLeaderboard.getRegattaLike().canBoatsOfCompetitorsChangePerRace();
+        } else {
+            result.canBoatsOfCompetitorsChangePerRace = false;
+        }
+
         for (Competitor suppressedCompetitor : this.getSuppressedCompetitors()) {
-            result.setSuppressed(baseDomainFactory.convertToCompetitorDTO(suppressedCompetitor), true);
+            result.setSuppressed(baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(suppressedCompetitor), true);
         }
         // Now create the race columns and, as a future task, set their competitorsFromBestToWorst, then wait for all these
         // futures to finish:
-        Map<RaceColumn, Future<List<CompetitorDTO>>> competitorsFromBestToWorstTasks = new HashMap<>();
+        Map<RaceColumn, Future<List<CompetitorWithBoatDTO>>> competitorsFromBestToWorstTasks = new HashMap<>();
         for (final RaceColumn raceColumn : this.getRaceColumns()) {
             boolean isMetaLeaderboardColumn = raceColumn instanceof MetaLeaderboardColumn;
             RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
@@ -374,8 +383,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                     raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                     isMetaLeaderboardColumn);
             if (isMetaLeaderboardColumn && raceColumnDTO instanceof MetaLeaderboardRaceColumnDTO) {
-                calculateRacesMetadata((MetaLeaderboardColumn) raceColumn, (MetaLeaderboardRaceColumnDTO) raceColumnDTO,
-                        trackedRegattaRegistry, baseDomainFactory);
+                calculateRacesMetadata((MetaLeaderboardColumn) raceColumn, (MetaLeaderboardRaceColumnDTO) raceColumnDTO, baseDomainFactory);
             }
             for (Fleet fleet : raceColumn.getFleets()) {
                 RegattaAndRaceIdentifier raceIdentifier = null;
@@ -394,12 +402,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn);
             }
-            Future<List<CompetitorDTO>> task = executor.submit(
+            Future<List<CompetitorWithBoatDTO>> task = executor.submit(
                     () -> baseDomainFactory.getCompetitorDTOList(AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
             competitorsFromBestToWorstTasks.put(raceColumn, task);
         }
         // wait for the competitor orderings to have been computed for all race columns before continuing; subsequent tasks may depend on these data
-        for (Map.Entry<RaceColumn, Future<List<CompetitorDTO>>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
+        for (Map.Entry<RaceColumn, Future<List<CompetitorWithBoatDTO>>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
             try {
                 result.setCompetitorsFromBestToWorst(raceColumnAndTaskToJoin.getKey().getName(), raceColumnAndTaskToJoin.getValue().get());
             } catch (InterruptedException e) {
@@ -417,7 +425,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
         }
         result.setDelayToLiveInMillisForLatestRace(this.getDelayToLiveInMillis());
-        result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
+        result.rows = new HashMap<CompetitorWithBoatDTO, LeaderboardRowDTO>();
         result.hasCarriedPoints = this.hasCarriedPoints();
         if (this.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
             result.discardThresholds = ((ThresholdBasedResultDiscardingRule) this.getResultDiscardingRule())
@@ -450,7 +458,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
         }
         for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint)) {
-            CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+            CompetitorWithBoatDTO competitorDTO = baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(competitor);
             LeaderboardRowDTO row = new LeaderboardRowDTO();
             row.competitor = competitorDTO;
             row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
@@ -501,6 +509,16 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             String displayName = this.getDisplayName(competitor);
             if (displayName != null) {
                 result.competitorDisplayNames.put(competitorDTO, displayName);
+            }
+            // in case boats can't change set the also the boat on the row to simplify access
+            if (result.canBoatsOfCompetitorsChangePerRace == false && !row.fieldsByRaceColumnName.isEmpty()) {
+                // find a raceColumn where a boat is available
+                for (LeaderboardEntryDTO leaderboardEntry : row.fieldsByRaceColumnName.values()) {
+                    if (leaderboardEntry.boat != null) {
+                        row.boat = leaderboardEntry.boat;
+                        break;
+                    }
+                }
             }
         }
         logger.info("computeLeaderboardByName(" + this.getName() + ", " + timePoint + ", "
@@ -560,6 +578,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
         TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
+        // TODO bug2822: Should this rather come from raceColumn.getBoatOfCompetitor() ?
+        entryDTO.boat = trackedRace == null ? null : baseDomainFactory.convertToBoatDTO(trackedRace.getBoatOfCompetitor(competitor));
         entryDTO.totalPoints = entry.getTotalPoints();
         if (fillTotalPointsUncorrected) {
             entryDTO.totalPointsUncorrected = entry.getTotalPointsUncorrected();
@@ -654,7 +674,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     }
 
     private void calculateRacesMetadata(MetaLeaderboardColumn metaLeaderboardColumn, MetaLeaderboardRaceColumnDTO columnDTO,
-            TrackedRegattaRegistry trackedRegattaRegistry, final DomainFactory baseDomainFactory) {
+            final DomainFactory baseDomainFactory) {
         for (final RaceColumn raceColumn : metaLeaderboardColumn.getLeaderboard().getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
@@ -1175,7 +1195,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         }
         return result;
     }
-    
+
     @Override
     public Iterable<Competitor> getAllCompetitors() {
         return getAllCompetitorsWithRaceDefinitionsConsidered().getB();

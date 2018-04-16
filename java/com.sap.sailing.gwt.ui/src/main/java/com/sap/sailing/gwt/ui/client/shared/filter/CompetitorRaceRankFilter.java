@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
@@ -18,8 +18,8 @@ import com.sap.sse.common.filter.AbstractNumberFilter;
  * @author Frank
  * 
  */
-public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO, Integer> implements
-        LeaderboardFilterContext, SelectedRaceFilterContext, FilterWithUI<CompetitorDTO> {
+public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorWithBoatDTO, Integer> implements
+        LeaderboardFilterContext, SelectedRaceFilterContext, FilterWithUI<CompetitorWithBoatDTO> {
     public static final String FILTER_NAME = "Race Rank";
 
     private LeaderboardFetcher leaderboardFetcher;
@@ -39,7 +39,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
     }
 
     @Override
-    public boolean matches(CompetitorDTO competitorDTO) {
+    public boolean matches(CompetitorWithBoatDTO competitorDTO) {
         final boolean result;
         Integer raceRank = null;
         if (value != null && operator != null) {
@@ -63,7 +63,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
     /**
      * @return <code>null</code> if no rank could be determined for <code>competitorDTO</code>, a 1-based rank otherwise
      */
-    private Integer getRankFromLeaderboard(CompetitorDTO competitorDTO) {
+    private Integer getRankFromLeaderboard(CompetitorWithBoatDTO competitorDTO) {
         Integer raceRank = null;
         RaceColumnDTO theRaceColumnDTOThatContainsCompetitorRace = null;
         for (RaceColumnDTO raceColumnDTO : getLeaderboard().getRaceList()) {
@@ -80,26 +80,26 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
         // competitorsFromBestToWorst then would not contain those competitors that don't have a score
         // assigned yet.
         final LeaderboardRowDTO competitorRow = getLeaderboard().rows.get(competitorDTO);
-        LinkedHashSet<CompetitorDTO> competitorsRankedInColumn = new LinkedHashSet<CompetitorDTO>();
+        LinkedHashSet<CompetitorWithBoatDTO> competitorsRankedInColumn = new LinkedHashSet<CompetitorWithBoatDTO>();
         if (theRaceColumnDTOThatContainsCompetitorRace != null && competitorRow != null) {
             LeaderboardEntryDTO entryDTO = competitorRow.fieldsByRaceColumnName
                     .get(theRaceColumnDTOThatContainsCompetitorRace.getName());
 
             // first collect those competitors in their order that have a rank
-            for (CompetitorDTO competitor : getLeaderboard().getCompetitorsFromBestToWorst(
+            for (CompetitorWithBoatDTO competitor : getLeaderboard().getCompetitorsFromBestToWorst(
                     theRaceColumnDTOThatContainsCompetitorRace)) {
                 competitorsRankedInColumn.add(competitor);
             }
             // then add all competitors for which no ranking has been provided
-            for (CompetitorDTO competitor : getLeaderboard().competitors) {
+            for (CompetitorWithBoatDTO competitor : getLeaderboard().competitors) {
                 if (!competitorsRankedInColumn.contains(competitor)) {
                     competitorsRankedInColumn.add(competitor);
                 }
             }
             raceRank = 0;
-            for (Iterator<CompetitorDTO> competitorIter = competitorsRankedInColumn.iterator(); competitorIter
+            for (Iterator<CompetitorWithBoatDTO> competitorIter = competitorsRankedInColumn.iterator(); competitorIter
                     .hasNext();) {
-                CompetitorDTO competitor = competitorIter.next();
+                CompetitorWithBoatDTO competitor = competitorIter.next();
                 LeaderboardEntryDTO entryDTOIterated = getLeaderboard().rows.get(competitor).fieldsByRaceColumnName
                         .get(theRaceColumnDTOThatContainsCompetitorRace.getName());
                 // the competitor counts for the selected race if the fleet matches or is unknown
@@ -181,7 +181,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
     }
 
     @Override
-    public FilterUIFactory<CompetitorDTO> createUIFactory() {
+    public FilterUIFactory<CompetitorWithBoatDTO> createUIFactory() {
         return new CompetitorRaceRankFilterUIFactory(this);
     }
 }

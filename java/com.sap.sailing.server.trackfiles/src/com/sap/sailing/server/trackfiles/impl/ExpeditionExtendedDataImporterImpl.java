@@ -23,8 +23,11 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceBoatSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceBoatExpeditionExtendedMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.sensordata.ExpeditionExtendedSensorDataMetadata;
@@ -78,6 +81,14 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
             AbstractLogEventAuthor author, Serializable id, Competitor mappedTo, DeviceIdentifier device,
             TimePoint from, TimePoint to) {
         return new RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl(createdAt, logicalTimePoint, author, id,
+                mappedTo, device, from, to);
+    }
+    
+    @Override
+    public RegattaLogDeviceBoatSensorDataMappingEvent createEvent(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable id, Boat mappedTo, DeviceIdentifier device,
+            TimePoint from, TimePoint to) {
+        return new RegattaLogDeviceBoatExpeditionExtendedMappingEventImpl(createdAt, logicalTimePoint, author, id,
                 mappedTo, device, from, to);
     }
 

@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.sap.sse.common.Util.Pair;
 
-public class PairingListDTO implements Serializable{
+public class PairingListDTO implements Serializable {
     
     private static final long serialVersionUID = 102220422437194196L;
     private List<List<List<Pair<CompetitorDTO, BoatDTO>>>> pairingList;

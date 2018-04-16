@@ -1,8 +1,8 @@
 package com.sap.sailing.dashboards.gwt.client.popups.competitorselection.table;
 
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 
 public interface CompetitorTableRowSelectionListener {
 
-    public void didSelectedRowWithCompetitorName(CompetitorDTO competitor);
+    public void didSelectedRowWithCompetitorName(CompetitorWithBoatDTO competitor);
 }

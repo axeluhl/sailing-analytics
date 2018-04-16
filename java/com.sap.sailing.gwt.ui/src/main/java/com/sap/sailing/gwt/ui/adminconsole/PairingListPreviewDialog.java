@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.dom.client.Style;
@@ -19,35 +21,35 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class PairingListPreviewDialog extends DataEntryDialog<Void> {
     
     private final StringMessages stringMessages;
     private final PairingListDTO pairingListDTO;
-    private final List<String> fleetNames;
+    private final List<String> raceDisplayNames;
     private final Button print;
     private final String leaderboardName;
     
-    public PairingListPreviewDialog(PairingListDTO pairingListDTO, List<String> fleetNames, StringMessages stringMessages,String leaderboardName) {
+    public PairingListPreviewDialog(PairingListDTO pairingListDTO, List<String> raceDisplayNames, StringMessages stringMessages,String leaderboardName) {
         super(stringMessages.pairingList() + " " + stringMessages.printView(), "", stringMessages.ok(), stringMessages.cancel(), null, null);
         this.stringMessages = stringMessages;
         this.pairingListDTO = pairingListDTO;
-        this.fleetNames = fleetNames;
-        this.leaderboardName=leaderboardName;
-        this.print= new Button(stringMessages.print());
+        this.raceDisplayNames = raceDisplayNames;
+        this.leaderboardName = leaderboardName;
+        this.print = new Button(stringMessages.print());
         this.print.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 Widget pairingListPanel = getPairingListGrid();
                 printPairingListGrid(
-                        "<div class='printHeader'><img src='images/home/logo-small@2x.png' </img>"
+                        "<div class='printHeader'><img src='images/home/logo-small@2x.png' />"
                                 + "<b class='title'>"
                                 + SafeHtmlUtils.fromString(leaderboardName)
                                 .asString()
@@ -71,9 +73,9 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
         return scrollPanel;
     }
     
-    private Widget getPairingListGrid() {
-        final List<BoatDTO> boats = pairingListDTO.getBoats();
-
+    public Widget getPairingListGrid() {
+        final List<BoatDTO> boats = new ArrayList<>(pairingListDTO.getBoats());
+        Collections.sort(boats, getBoatsComparator());
         final int flightCount = pairingListDTO.getPairingList().size();
         final int groupCount = pairingListDTO.getPairingList().get(0).size();
         final int boatCount = boats.size();
@@ -82,29 +84,31 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
         pairingListGrid.getElement().setId("grid");
         pairingListGrid.setCellPadding(15);
         pairingListGrid.getElement().setAttribute("style", "border-collapse: collapse");
-
         int flightIndexInGrid = 1;
         int groupIndex = 1;
         int boatIndex = 0;
-        
         for (BoatDTO boat : boats) {
-            pairingListGrid.setWidget(0, boatIndex + 2, new Label(boat.getName()));
+            pairingListGrid.setWidget(0, boatIndex + 2, new Label(getBoatDisplayName(boat)));
             pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setTextAlign(TextAlign.CENTER);
             pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setPadding(10, Unit.PX);
             if (boat.getColor() != null) {
                 pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setBackgroundColor(
                         boat.getColor().getAsHtml());
+                if (isDark(boat.getColor())) {
+                    pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setColor(Color.WHITE.getAsHtml());
+                }
             } else {
                 pairingListGrid.getCellFormatter().getElement(0, boatIndex + 2).getStyle().setBackgroundColor(
                         "#cecece");
             }
             boatIndex++;
         }
-        String color = "";
-        pairingListGrid.getCellFormatter().getElement(0, 0).getStyle().setBackgroundColor("#cecece");
-        pairingListGrid.getCellFormatter().getElement(0, 1).getStyle().setBackgroundColor("#cecece");
+        final String BACKGROUND_SHADE = "#cecece";
+        String color = BACKGROUND_SHADE;
+        pairingListGrid.getCellFormatter().getElement(0, 0).getStyle().setBackgroundColor(BACKGROUND_SHADE);
+        pairingListGrid.getCellFormatter().getElement(0, 1).getStyle().setBackgroundColor(BACKGROUND_SHADE);
         for (List<List<Pair<CompetitorDTO, BoatDTO>>> flight : pairingListDTO.getPairingList()) {
-            color = (color.equals("none") ? "#cecece" : "none");
+            color = (color.equals("none") ? BACKGROUND_SHADE : "none");
             // setting up race
             int currentRaceInGridCells = (((flightIndexInGrid - 1) * groupCount) + 1);
             pairingListGrid.setWidget(currentRaceInGridCells, 0,
@@ -116,34 +120,30 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
                 // setting up fleet
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setPadding(3, Unit.PX);
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 0).getStyle().setBackgroundColor(color);
-                //TODO add column for race 1-45 (default)
                 pairingListGrid.setWidget(groupIndex, 1,
-                        new Label(fleetNames.get(groupIndex-1)));
+                        new Label(raceDisplayNames.get(groupIndex-1)));
                 // setting up fleets style
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 1).getStyle().setPadding(3, Unit.PX);
                 pairingListGrid.getCellFormatter().getElement(groupIndex, 1).getStyle().setBackgroundColor(color);
-                
                 if (group.size() < boatCount) {
-                    List<BoatDTO> boatsToRemove = new ArrayList<>(boats);
+                    List<BoatDTO> unusedBoats = new ArrayList<>(boats);
                     for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : group) {
-                        boatsToRemove.remove(competitorAndBoatPair.getB());
+                        unusedBoats.remove(competitorAndBoatPair.getB());
                     }
-                    for (BoatDTO boat : boatsToRemove) {
-                        group.add(new Pair<CompetitorDTO, BoatDTO>(new CompetitorDTOImpl(), boat));
+                    for (BoatDTO unusedBoat : unusedBoats) {
+                        group.add(new Pair<>(null, unusedBoat));
                     }
                 }
-                
-                
                 for (Pair<CompetitorDTO, BoatDTO> competitorAndBoatPair : group) {
                     int boatIndexInGrid = boats.indexOf(competitorAndBoatPair.getB()) + 2;
-                    if (competitorAndBoatPair.getA().getName() == null) {
+                    if (competitorAndBoatPair.getA() == null) {
                         pairingListGrid.setWidget(groupIndex, boatIndexInGrid, new Label(stringMessages.empty()));
                         pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                                 .setColor(Color.RED.toString());
                     } else {
-                        // TODO change competitor name to competitor shorthand symbol
+                        final String shortName = competitorAndBoatPair.getA().getShortName();
                         pairingListGrid.setWidget(groupIndex, boatIndexInGrid,
-                                new Label(competitorAndBoatPair.getA().getSailID()));
+                                new Label(shortName == null ? competitorAndBoatPair.getA().getName() : shortName));
                     }
                     pairingListGrid.getCellFormatter().getElement(groupIndex, boatIndexInGrid).getStyle()
                             .setFontWeight(Style.FontWeight.BOLD);
@@ -170,6 +170,24 @@ public class PairingListPreviewDialog extends DataEntryDialog<Void> {
         result.add(pairingListPanel);
 
         return pairingListPanel;
+    }
+
+    private String getBoatDisplayName(BoatDTO boat) {
+        return boat.getName()==null?boat.getSailId():boat.getName();
+    }
+
+    /**
+     * Compare boats such that a natural ordering in the pairing list display is achieved. This
+     * is based on the natural comparator principle, using the string that will be displayed for the boats.
+     */
+    private Comparator<BoatDTO> getBoatsComparator() {
+        final Comparator<String> naturalComparator = new NaturalComparator();
+        return (b1, b2)->naturalComparator.compare(getBoatDisplayName(b1), getBoatDisplayName(b2));
+    }
+
+    private boolean isDark(Color color) {
+        final Triple<Integer, Integer, Integer> rgb = color.getAsRGB();
+        return rgb.getA()+rgb.getB()+rgb.getC() < 100;
     }
 
     private native void printPairingListGrid(String pageHTMLContent) /*-{

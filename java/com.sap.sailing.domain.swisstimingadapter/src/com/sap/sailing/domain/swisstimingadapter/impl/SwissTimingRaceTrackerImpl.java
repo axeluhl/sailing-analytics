@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -471,7 +471,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
             this.notifyAll();
         }
         // temp
-        CompetitorStore competitorStore = domainFactory.getBaseDomainFactory().getCompetitorStore();
+        CompetitorAndBoatStore competitorStore = domainFactory.getBaseDomainFactory().getCompetitorAndBoatStore();
         for (com.sap.sailing.domain.swisstimingadapter.Competitor c : startList.getCompetitors()) {
             Competitor existingCompetitor = competitorStore.getExistingCompetitorByIdAsString(c.getID());
             if (existingCompetitor != null) {

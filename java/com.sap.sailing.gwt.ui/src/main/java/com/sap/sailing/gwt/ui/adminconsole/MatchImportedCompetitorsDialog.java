@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorDescriptorTableWrapper.CompetitorsToImportToExistingLinking;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -34,14 +34,14 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * optionally defining mappings from the importable competitors to existing competitors where instead of creating a new
  * competitor by means of import the existing one shall be used. Then, the user can make a selection in the table with
  * the importable competitors, including those for which a mapping to an existing competitor was defined. Pressing OK
- * will produce a set of {@link CompetitorDTO}s where the ones coming from the set of already existing competitors have
- * a non-{@code null} {@link CompetitorDTO#getIdAsString() ID} whereas the ones to import have all <em>but</em> an
- * {@link CompetitorDTO#getIdAsString() ID}.
+ * will produce a set of {@link CompetitorWithBoatDTO}s where the ones coming from the set of already existing competitors have
+ * a non-{@code null} {@link CompetitorWithBoatDTO#getIdAsString() ID} whereas the ones to import have all <em>but</em> an
+ * {@link CompetitorWithBoatDTO#getIdAsString() ID}.
  * <p>
  * 
  * The result is a {@link Map} whose keys are all competitors selected for import and whose values are {@code null}
- * in case the competitor shall really be imported and hence be created anew, or a valid {@link CompetitorDTO} with
- * a valid {@link CompetitorDTO#getIdAsString() ID}, representing an already existing competitor that shall be used
+ * in case the competitor shall really be imported and hence be created anew, or a valid {@link CompetitorWithBoatDTO} with
+ * a valid {@link CompetitorWithBoatDTO#getIdAsString() ID}, representing an already existing competitor that shall be used
  * instead of the key competitor descriptor.<p>
  * 
  * Use an {@link ImportCompetitorCallback} or subclass thereof as the {@link DialogCallback} passed to the constructor
@@ -53,10 +53,10 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * @author Alexander Tatarinovich
  *
  */
-public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<CompetitorDescriptor, CompetitorDTO>, String>> {
+public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<CompetitorDescriptor, CompetitorWithBoatDTO>, String>> {
 
     private CompetitorDescriptorTableWrapper<RefreshableMultiSelectionModel<CompetitorDescriptor>> importedCompetitorsTable;
-    private CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> existingCompetitorsTable;
+    private CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorWithBoatDTO>> existingCompetitorsTable;
     
     private TextBox searchTagField;
 
@@ -67,12 +67,12 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
     private final Iterable<CompetitorDescriptor> CompetitorDescriptors;
     private final CompetitorImportMatcher competitorImportMatcher;
 
-    private final Map<CompetitorDescriptor, CompetitorDTO> existingCompetitorsByImported = new HashMap<>();
+    private final Map<CompetitorDescriptor, CompetitorWithBoatDTO> existingCompetitorsByImported = new HashMap<>();
 
     public MatchImportedCompetitorsDialog(final Iterable<CompetitorDescriptor> CompetitorDescriptors,
-            final Iterable<CompetitorDTO> existingCompetitor, StringMessages stringMessages,
+            final Iterable<CompetitorWithBoatDTO> existingCompetitor, StringMessages stringMessages,
             SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            DialogCallback<Pair<Map<CompetitorDescriptor, CompetitorDTO>, String>> callback) {
+            DialogCallback<Pair<Map<CompetitorDescriptor, CompetitorWithBoatDTO>, String>> callback) {
         super(stringMessages.importCompetitors(), stringMessages.chooseWhichCompetitorsShouldBeImported(),
                 stringMessages.ok(), stringMessages.cancel(), /* validator */ null, callback);
         this.stringMessages = stringMessages;
@@ -91,11 +91,11 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
     protected Widget getAdditionalWidget() {
         existingCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages,
                 errorReporter, /* multiSelection */
-                false, /* enablePager */true);
+                false, /* enablePager */true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         final CompetitorsToImportToExistingLinking linker = new CompetitorsToImportToExistingLinking() {
             @Override
             public void unlinkCompetitor(CompetitorDescriptor competitor) {
-                final CompetitorDTO existingCompetitor = existingCompetitorsByImported.remove(competitor);
+                final CompetitorWithBoatDTO existingCompetitor = existingCompetitorsByImported.remove(competitor);
                 if (existingCompetitor != null) {
                     existingCompetitorsTable.getSelectionModel().setSelected(existingCompetitor, false);
                     refreshInImportTable(competitor);
@@ -103,7 +103,7 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
             }
 
             @Override
-            public CompetitorDTO getExistingCompetitorToUseInsteadOf(CompetitorDescriptor competitor) {
+            public CompetitorWithBoatDTO getExistingCompetitorToUseInsteadOf(CompetitorDescriptor competitor) {
                 return existingCompetitorsByImported.get(competitor);
             }
         };
@@ -116,7 +116,7 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
         importedCompetitorSelectionModel
                 .addSelectionChangeHandler(getHandlerForImportedCompetitorsModel(importedCompetitorSelectionModel));
 
-        final RefreshableSingleSelectionModel<CompetitorDTO> existingCompetitorSelectionModel = existingCompetitorsTable
+        final RefreshableSingleSelectionModel<CompetitorWithBoatDTO> existingCompetitorSelectionModel = existingCompetitorsTable
                 .getSelectionModel();
         existingCompetitorSelectionModel.addSelectionChangeHandler(getHandlerForExistingCompetitorsModel(
                 importedCompetitorSelectionModel, existingCompetitorSelectionModel));
@@ -147,13 +147,13 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
 
     private Handler getHandlerForExistingCompetitorsModel(
             final RefreshableMultiSelectionModel<CompetitorDescriptor> importedCompetitorSelectionModel,
-            final RefreshableSingleSelectionModel<CompetitorDTO> existingCompetitorSelectionModel) {
+            final RefreshableSingleSelectionModel<CompetitorWithBoatDTO> existingCompetitorSelectionModel) {
         return new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 Set<CompetitorDescriptor> competitorDescriptors = importedCompetitorSelectionModel.getSelectedSet();
                 if (competitorDescriptors.size() == 1) {
-                    final CompetitorDTO selectedCompetitor = existingCompetitorSelectionModel.getSelectedObject();
+                    final CompetitorWithBoatDTO selectedCompetitor = existingCompetitorSelectionModel.getSelectedObject();
                     final CompetitorDescriptor competitorFromImport = competitorDescriptors.iterator().next();
                     final boolean changed;
                     if (selectedCompetitor == null) {
@@ -188,7 +188,7 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
                     try {
                         existingCompetitorsTable.refreshCompetitorList(
                                 competitorImportMatcher.getMatchesCompetitors(selectedCompetitorDescriptor));
-                        CompetitorDTO competitor = existingCompetitorsByImported.get(selectedCompetitorDescriptor);
+                        CompetitorWithBoatDTO competitor = existingCompetitorsByImported.get(selectedCompetitorDescriptor);
                         if (competitor != null && !existingCompetitorsTable.getSelectionModel().isSelected(competitor)) {
                             existingCompetitorsTable.getSelectionModel().setSelected(competitor, true);
                         }
@@ -201,8 +201,8 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
     }
 
     @Override
-    protected Pair<Map<CompetitorDescriptor, CompetitorDTO>, String> getResult() {
-        final Map<CompetitorDescriptor, CompetitorDTO> result = new HashMap<>();
+    protected Pair<Map<CompetitorDescriptor, CompetitorWithBoatDTO>, String> getResult() {
+        final Map<CompetitorDescriptor, CompetitorWithBoatDTO> result = new HashMap<>();
         for (CompetitorDescriptor competitorDescriptor : importedCompetitorsTable.getSelectionModel().getSelectedSet()) {
             result.put(competitorDescriptor, existingCompetitorsByImported.get(competitorDescriptor));
         }

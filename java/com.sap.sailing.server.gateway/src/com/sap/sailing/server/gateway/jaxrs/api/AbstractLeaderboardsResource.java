@@ -8,12 +8,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -54,10 +55,14 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         for (Competitor competitor : leaderboard.getCompetitors()) {
             JSONObject jsonCompetitor = new JSONObject();
             jsonCompetitor.put("name", competitor.getName());
+            jsonCompetitor.put("shortName", competitor.getShortName());
             final String displayName = leaderboard.getDisplayName(competitor);
             jsonCompetitor.put("displayName", displayName == null ? competitor.getName() : displayName);
             jsonCompetitor.put("id", competitor.getId().toString());
-            jsonCompetitor.put("sailID", competitor.getBoat().getSailID());
+            if (competitor.hasBoat()) {
+                CompetitorWithBoat competitorWithBoat = (CompetitorWithBoat) competitor; 
+                jsonCompetitor.put("sailID", competitorWithBoat.getBoat().getSailID());
+            }
             Nationality nationality = competitor.getTeam().getNationality();
             jsonCompetitor.put("nationality", nationality != null ? nationality.getThreeLetterIOCAcronym() : null);
             jsonCompetitor.put("countryCode", nationality != null ? (nationality.getCountryCode() != null ? nationality
@@ -103,8 +108,9 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         }
     }
 
-    protected void writeCompetitorBaseData(JSONObject jsonCompetitor, CompetitorDTO competitor, LeaderboardDTO leaderboard) {
+    protected void writeCompetitorBaseData(JSONObject jsonCompetitor, CompetitorWithBoatDTO competitor, LeaderboardDTO leaderboard) {
         jsonCompetitor.put("name", competitor.getName());
+        jsonCompetitor.put("shortName", competitor.getShortName());
         final String displayName = leaderboard.getDisplayName(competitor);
         jsonCompetitor.put("displayName", displayName == null ? competitor.getName() : displayName);
         jsonCompetitor.put("id", competitor.getIdAsString());

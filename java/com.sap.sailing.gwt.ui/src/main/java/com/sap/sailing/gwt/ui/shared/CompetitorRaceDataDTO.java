@@ -9,14 +9,14 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 
 public class CompetitorRaceDataDTO implements IsSerializable {
     
-    private CompetitorDTO competitor;
+    private CompetitorWithBoatDTO competitor;
     private DetailType detailType;
 
     /**
@@ -30,7 +30,7 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     
     CompetitorRaceDataDTO() {}
     
-    public CompetitorRaceDataDTO(CompetitorDTO competitor, DetailType detailType, 
+    public CompetitorRaceDataDTO(CompetitorWithBoatDTO competitor, DetailType detailType, 
             Collection<Util.Triple<String, Date, Double>> markPassingsData, Collection<Util.Pair<Date, Double>> raceData) {
         this.competitor = competitor;
         this.detailType = detailType;
@@ -40,7 +40,7 @@ public class CompetitorRaceDataDTO implements IsSerializable {
         addAllRaceData(raceData);
     }
 
-    public CompetitorDTO getCompetitor() {
+    public CompetitorWithBoatDTO getCompetitor() {
         return competitor;
     }
 

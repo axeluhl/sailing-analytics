@@ -7,16 +7,16 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
@@ -34,7 +34,7 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private RaceEndWithBoatsView view;
     private SingleRaceLeaderboardPanel leaderboardPanel;
-    private CompetitorSelectionModel competitorSelectionProvider;
+    private RaceCompetitorSelectionModel competitorSelectionProvider;
     private Timer timer;
 
     public RaceEndWithBoatsPresenterImpl(AbstractRaceEndWithImagesTop3Place place, AutoPlayClientFactory clientFactory,
@@ -61,16 +61,16 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
         final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
                 /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, /* raceDetailsToShow */ null,
                 /* overallDetailsToShow */ null, /* delayBetweenAutoAdvancesInMilliseconds */ null,
-                /* showAddedScores */ false, /* showCompetitorSailIdColumn */ false,
+                /* showAddedScores */ false, /* showCompetitorShortNameColumn */ true,
                 /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ false,
-                /* showRaceRankColumn */ true);
+                /* showCompetitorBoatInfoColumn */ false, /* showRaceRankColumn */ true);
 
-        competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ false);
+        competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ false);
 
         timer = new com.sap.sse.gwt.client.player.Timer(PlayModes.Live,
                 PlayStates.Paused,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
-        leaderboardPanel = new SingleRaceLeaderboardPanel(null,null,sailingService, new AsyncActionsExecutor(), leaderboardSettings,
+        leaderboardPanel = new SingleRaceLeaderboardPanel(null, null, sailingService, new AsyncActionsExecutor(), leaderboardSettings,
                 true, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(true),
@@ -107,7 +107,7 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
                 raceColumn = column;
             }
         }
-        List<CompetitorDTO> sortedCompetitors = leaderboardPanel.getLeaderboard()
+        List<CompetitorWithBoatDTO> sortedCompetitors = leaderboardPanel.getLeaderboard()
                 .getCompetitorsFromBestToWorst(raceColumn);
 
         if (sortedCompetitors.size() >= 3) {

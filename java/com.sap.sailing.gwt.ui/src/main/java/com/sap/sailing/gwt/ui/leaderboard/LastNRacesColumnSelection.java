@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
@@ -111,7 +111,7 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
     }
 
     private boolean hasScoreCorrections(LeaderboardDTO leaderboard, RaceColumnDTO column) {
-        for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : leaderboard.rows.entrySet()) {
+        for (Map.Entry<CompetitorWithBoatDTO, LeaderboardRowDTO> e : leaderboard.rows.entrySet()) {
             LeaderboardEntryDTO entry = e.getValue().fieldsByRaceColumnName.get(column.getName());
             if (entry != null && entry.hasScoreCorrection()) {
                 return true;

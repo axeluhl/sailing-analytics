@@ -206,8 +206,8 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogFinishPositioningListChangeEvent() {
-        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.RED, 
-                "someone@nowhere.de", null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP", Color.RED, 
+                "someone@nowhere.de", null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK));
         RaceLogFinishPositioningListChangedEvent event = new RaceLogFinishPositioningListChangedEventImpl(now, author, 0, storedPositioningList);
@@ -220,7 +220,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
             assertEquals(event.getLogicalTimePoint(), loadedPositioningEvent.getLogicalTimePoint());
             assertEquals(event.getPassId(), loadedPositioningEvent.getPassId());
             assertEquals(event.getId(), loadedPositioningEvent.getId());
-            assertEquals(event.getInvolvedBoats().size(), loadedPositioningEvent.getInvolvedBoats().size());
+            assertEquals(event.getInvolvedCompetitors().size(), loadedPositioningEvent.getInvolvedCompetitors().size());
             assertCompetitorResultsEqual(event.getPositionedCompetitorsIDsNamesMaxPointsReasons(), loadedPositioningEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
@@ -230,8 +230,8 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogFinishPositioningConfirmedEvent() {   
-        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.RED, 
-                "someone@nowhere.de", null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP", Color.RED, 
+                "someone@nowhere.de", null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK));
         RaceLogFinishPositioningConfirmedEvent event = new RaceLogFinishPositioningConfirmedEventImpl(now, author, 0, storedPositioningList);
@@ -244,7 +244,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
             assertEquals(event.getLogicalTimePoint(), loadedConfirmedEvent.getLogicalTimePoint());
             assertEquals(event.getPassId(), loadedConfirmedEvent.getPassId());
             assertEquals(event.getId(), loadedConfirmedEvent.getId());
-            assertEquals(event.getInvolvedBoats().size(), loadedConfirmedEvent.getInvolvedBoats().size());
+            assertEquals(event.getInvolvedCompetitors().size(), loadedConfirmedEvent.getInvolvedCompetitors().size());
             assertCompetitorResultsEqual(event.getPositionedCompetitorsIDsNamesMaxPointsReasons(), loadedConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
@@ -266,7 +266,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
             RaceLogFinishPositioningConfirmedEvent loadedConfirmedEvent = (RaceLogFinishPositioningConfirmedEvent) loadedEvent;
             assertEquals(now, loadedConfirmedEvent.getLogicalTimePoint());
             assertEquals(0, loadedConfirmedEvent.getPassId());
-            assertEquals(0, loadedConfirmedEvent.getInvolvedBoats().size());
+            assertEquals(0, loadedConfirmedEvent.getInvolvedCompetitors().size());
             assertNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons()); 
             assertNull(loadedConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));

@@ -4,7 +4,9 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceBoatSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
@@ -21,5 +23,12 @@ public interface DoubleVectorFixImporter extends BaseDoubleVectorFixImporter {
      */
     RegattaLogDeviceCompetitorSensorDataMappingEvent createEvent(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable id, Competitor mappedTo, DeviceIdentifier device,
+            TimePoint from, TimePoint to);
+    
+    /**
+     * Creates the {@link RegattaLogEvent} for the DeviceMapping.
+     */
+    RegattaLogDeviceBoatSensorDataMappingEvent createEvent(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable id, Boat mappedTo, DeviceIdentifier device,
             TimePoint from, TimePoint to);
 }

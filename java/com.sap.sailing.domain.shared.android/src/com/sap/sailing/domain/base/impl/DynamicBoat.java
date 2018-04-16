@@ -1,13 +1,13 @@
 package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.base.BoatChangeListener;
+import com.sap.sse.common.Color;
+import com.sap.sse.common.Renamable;
 
-public interface DynamicBoat extends Boat {
-    void setSailId(String newSailId);
+public interface DynamicBoat extends Boat, Renamable {
+    void setSailId(String sailId);
 
-    void addBoatChangeListener(BoatChangeListener listener);
+    void setName(String name);
 
-    void removeCompetitorChangeListener(BoatChangeListener listener);
-
+    void setColor(Color color);
 }

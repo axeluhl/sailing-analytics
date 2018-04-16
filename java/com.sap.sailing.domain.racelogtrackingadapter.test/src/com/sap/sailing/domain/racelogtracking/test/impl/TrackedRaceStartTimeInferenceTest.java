@@ -8,6 +8,8 @@ import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -18,6 +20,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -59,18 +62,22 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     @Test
     public void testStartTimeInferencePrecedenceOrder() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
-        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null, null,
+        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(comp, boat);
+        competitorsAndBoats.put(comp2, boat2);
         Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark));
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author, new MillisecondsTimePoint(1), 0, mark2));
         Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
                 new WaypointImpl(mark2) }));
-        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(new Competitor[] { comp, comp2 }));
+        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
 
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
-                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
-                null, /* endDate */null, null, null, "a", null));
+                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */ null, /* endDate */null, null, null, "a", null));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
                 /* useMarkPassingCalculator */ false,
@@ -132,17 +139,21 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     @Test
     public void testStartTimeChangeNotificationForFirstUpdateThroughRaceLog() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
-        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null, null,
+        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(comp, boat);
+        competitorsAndBoats.put(comp2, boat2);
         Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark));
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author, new MillisecondsTimePoint(1), 0, mark2));
         Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
                 new WaypointImpl(mark2) }));
-        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(new Competitor[] { comp, comp2 }));
+        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
-                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
-                null, /* endDate */null, null, null, "a", null));
+                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */ null, /* endDate */null, null, null, "a", null));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
                 /* useMarkPassingCalculator */ false,
@@ -170,17 +181,21 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     @Test
     public void testStartTimeChangeNotificationForFirstUpdateThroughStartMarkPassing() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
-        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null, null,
+        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(comp, boat);
+        competitorsAndBoats.put(comp2, boat2);
         Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark));
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author, new MillisecondsTimePoint(1), 0, mark2));
         Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
                 new WaypointImpl(mark2) }));
-        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(new Competitor[] { comp, comp2 }));
+        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
-                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
-                null, /* endDate */null, null, null, "a", null));
+                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */ null, /* endDate */null, null, null, "a", null));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
                 /* useMarkPassingCalculator */ false,
@@ -211,17 +226,21 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     @Test
     public void testStartAndEndTrackingTimeInferencePrecedenceOrderTriggersListener() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
-        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null, null,
+        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(comp, boat);
+        competitorsAndBoats.put(comp2, boat2);
         Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark));
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author, new MillisecondsTimePoint(1), 0, mark2));
         Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
                 new WaypointImpl(mark2) }));
-        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(new Competitor[] { comp, comp2 }));
+        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
-                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
-                null, /* endDate */null, null, null, "a", null));
+                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */ null, /* endDate */null, null, null, "a", null));
         assertTrue(regatta.getRegatta().useStartTimeInference());
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
@@ -321,17 +340,21 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     @Test
     public void testStartAndEndOfTrackingTimeChangeNotificationForFirstUpdateThroughRaceLog() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
-        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null, null,
+        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("boat2", "boat2", boatClass, "USA 123", null);
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(comp, boat);
+        competitorsAndBoats.put(comp2, boat2);
         Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark));
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author, new MillisecondsTimePoint(1), 0, mark2));
         Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
                 new WaypointImpl(mark2) }));
-        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(new Competitor[] { comp, comp2 }));
+        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
-                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
-                null, /* endDate */null, null, null, "a", null));
+                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */null, /* endDate */null, null, null, "a", null));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
                 /* useMarkPassingCalculator */ false,

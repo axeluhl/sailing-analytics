@@ -53,6 +53,47 @@ public class FunnelPlotOptions extends BaseProportionalPlotOptions<FunnelPlotOpt
     }
 
     /**
+     * Convenience method for setting the 'height' option of a funnel chart.  Equivalent to:
+     * <pre><code>
+     *     funnelPlotOptions.setOption("height", 12);
+     * </code></pre>
+     * The height of the funnel or pyramid. If it is a number it defines the pixel height,
+     * if it is a percentage string it is the percentage of the plot area height.
+     * <p/>
+     * Note that this method is intended for setting the height to a fixed pixel amount.  If instead you want to
+     * set the height as percentage of the plot siz you can use the {@link #setHeight(String)} instead.
+     * <p/>
+     * @param height The height of a funnel in pixels
+     * @return A reference to this {@link PiePlotOptions} instance for convenient method chaining.
+     * @see FunnelPlotOptions#setHeight(String)
+     * @since 1.7.0
+     */
+    public FunnelPlotOptions setHeight(Number height) {
+        return this.setOption("height", height);
+    }
+
+    /**
+     * Convenience method for setting the 'height' option of a funnel chart.  Equivalent to:
+     * <pre><code>
+     *     funnelPlotOptions.setOption("height", "12%");
+     * </code></pre>
+     * The height of the funnel or pyramid. If it is a number it defines the pixel height,
+     * if it is a percentage string it is the percentage of the plot area height.
+     * <p/>
+     * Note that this method is intended for setting the height to a percentage of the plot size.
+     * If instead you want to set the height as a set number of pixels you can use the {@link #setHeight(Number)}
+     * instead.
+     * <p/>
+     * @param height The height of a funnel as a percentage of the plot size
+     * @return A reference to this {@link PiePlotOptions} instance for convenient method chaining.
+     * @see FunnelPlotOptions#setHeight(Number)
+     * @since 1.7.0
+     */
+    public FunnelPlotOptions setHeight(String height) {
+        return this.setOption("height", height);
+    }
+
+    /**
      * Convenience method for setting the "height" option for the funnel plot options.  Equivalent to:
      * <pre><code>
      *     funnelPlotOptions.setOptions("height", 4.0);

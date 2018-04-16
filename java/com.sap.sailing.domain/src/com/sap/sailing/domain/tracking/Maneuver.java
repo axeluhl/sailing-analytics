@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
@@ -101,13 +102,13 @@ public interface Maneuver extends GPSFix {
     ManeuverCurveBoundaries getManeuverBoundaries();
 
     /**
-     * The maximal angular velocity recorded within the main curve at maneuver climax.
+     * The maximal turning rate recorded within the main curve at maneuver climax.
      * 
-     * @return The maximal angular velocity in degrees per second
+     * @return The maximal turning rate in degrees per second
      * @see #getTimePoint()
      */
-    @Statistic(messageKey = "MaxAngularVelocityInDegreesPerSecond", resultDecimals = 4, ordinal = 4)
-    double getMaxAngularVelocityInDegreesPerSecond();
+    @Statistic(messageKey = "MaxTurningRateInDegreesPerSecond", resultDecimals = 4, ordinal = 4)
+    double getMaxTurningRateInDegreesPerSecond();
 
     /**
      * Gets the speed with bearing at maneuver start, which is at {@link #getManeuverBoundaries()}.getTimePointBefore().
@@ -144,7 +145,13 @@ public interface Maneuver extends GPSFix {
     Speed getLowestSpeed();
 
     /**
-     * Gets the mark passing which is contained within maneuver. In case if no mark passing was passed, {@code null} is
+     * Gets the duration of the maneuver which lasts from {@link #getManeuverBoundaries()}.getTimePointBefore() until
+     * {@link #getManeuverBoundaries()}.getTimePointAfter().
+     */
+    Duration getDuration();
+
+    /**
+     * Gets the mark passing which is contained within maneuver curve. In case if no mark was passed, {@code null} is
      * returned.
      */
     MarkPassing getMarkPassing();
@@ -160,5 +167,12 @@ public interface Maneuver extends GPSFix {
      */
     @Dimension(messageKey = "ToSide", ordinal = 16)
     NauticalSide getToSide();
+
+    /**
+     * Gets the average turning rate recorded within the maneuver main curve. It is calculated by absolute course change
+     * within main curve divided by maneuver main curve duration.
+     */
+    @Statistic(messageKey = "AvgTurningRateInDegreesPerSecond", resultDecimals = 4)
+    double getAvgTurningRateInDegreesPerSecond();
 
 }

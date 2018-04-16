@@ -24,14 +24,16 @@ import android.widget.TextView;
 
 public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapter.ViewHolder> {
 
-    private Context mContext;
-    private CompetitorResultsList<CompetitorResultWithIdImpl> mCompetitor;
+    private final Context mContext;
+    private final CompetitorResultsList<CompetitorResultWithIdImpl> mCompetitor;
+    private final boolean mCanBoatsOfCompetitorsChangePerRace;
     private FinishEvents mListener;
 
-    public FinishListAdapter(Context context, CompetitorResultsList<CompetitorResultWithIdImpl> competitor) {
+    public FinishListAdapter(Context context, CompetitorResultsList<CompetitorResultWithIdImpl> competitor, boolean canBoatsOfCompetitorsChangePerRace) {
         setHasStableIds(true);
         mContext = context;
         mCompetitor = competitor;
+        mCanBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
     }
 
     public void setListener(FinishEvents listener) {
@@ -51,6 +53,14 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
             holder.position.setText(String.valueOf(item.getOneBasedRank()));
         } else {
             holder.position.setText(null);
+        }
+        holder.vesselId.setVisibility(View.GONE);
+        if (mCanBoatsOfCompetitorsChangePerRace && item.getBoat() != null) {
+            holder.vesselId.setVisibility(View.VISIBLE);
+            holder.vesselId.setText(item.getBoat().getSailID());
+            if (item.getBoat().getColor() != null) {
+                ViewHelper.setColors(holder.vesselId, item.getBoat().getColor().getAsHtml());
+            }
         }
         holder.competitor.setText(item.getCompetitorDisplayName());
         int dragState = holder.getDragStateFlags();

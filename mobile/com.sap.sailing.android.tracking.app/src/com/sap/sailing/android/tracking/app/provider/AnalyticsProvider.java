@@ -2,6 +2,17 @@ package com.sap.sailing.android.tracking.app.provider;
 
 import java.util.Arrays;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.SelectionBuilder;
+import com.sap.sailing.android.tracking.app.BuildConfig;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Boat;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Checkin;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Mark;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase.Tables;
+
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -12,19 +23,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.provider.BaseColumns;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.SelectionBuilder;
-import com.sap.sailing.android.tracking.app.BuildConfig;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Checkin;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase.Tables;
+import android.support.annotation.NonNull;
 
 public class AnalyticsProvider extends ContentProvider {
 
-    private static final String TAG = AnalyticsProvider.class.getName();
+    private static final String TAG = AnalyticsProvider.class.getSimpleName();
+
+    public static final String ALL_JOINED = "leaderboards_events_competitors_marks_joined";
 
     private AnalyticsDatabase mOpenHelper;
 
@@ -47,10 +52,13 @@ public class AnalyticsProvider extends ContentProvider {
 
     private static final int EVENT_GPS_FIXES_JOINED = 700;
 
-    private static final int LEADERBOARDS_EVENTS_COMPETITORS_MARKS_JOINED = 800;
+    private static final int LEADERBOARDS_EVENTS_COMPETITORS_MARKS_BOATS_JOINED = 800;
 
     private static final int MARK = 900;
     private static final int MARK_ID = 901;
+
+    private static final int BOAT = 1000;
+    private static final int BOAT_ID = 1001;
 
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -73,10 +81,13 @@ public class AnalyticsProvider extends ContentProvider {
 
         matcher.addURI(authority, "event_gps_fix_joined", EVENT_GPS_FIXES_JOINED);
 
-        matcher.addURI(authority, "leaderboards_events_competitors_marks_joined", LEADERBOARDS_EVENTS_COMPETITORS_MARKS_JOINED);
+        matcher.addURI(authority, "leaderboards_events_competitors_marks_joined", LEADERBOARDS_EVENTS_COMPETITORS_MARKS_BOATS_JOINED);
 
         matcher.addURI(authority, Tables.MARKS, MARK);
         matcher.addURI(authority, Tables.MARKS + "/*", MARK_ID);
+
+        matcher.addURI(authority, Tables.BOATS, BOAT);
+        matcher.addURI(authority, Tables.BOATS + "/*", BOAT_ID);
 
         return matcher;
     }
@@ -88,7 +99,7 @@ public class AnalyticsProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         if (BuildConfig.DEBUG) {
             ExLog.i(getContext(), TAG,
                 "query() called with: uri = [" + uri + "], projection = [" + Arrays.toString(projection) + "], selection = ["
@@ -108,8 +119,8 @@ public class AnalyticsProvider extends ContentProvider {
                 table = Tables.EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS;
                 break;
 
-            case LEADERBOARDS_EVENTS_COMPETITORS_MARKS_JOINED:
-                table = Tables.LEADERBOARDS_JOIN_EVENTS_JOIN_COMPETITORS_JOIN_MARKS;
+            case LEADERBOARDS_EVENTS_COMPETITORS_MARKS_BOATS_JOINED:
+                table = Tables.LEADERBOARDS_JOIN_EVENTS_JOIN_COMPETITORS_JOIN_MARKS_JOINS_BOATS;
                 break;
 
             default:
@@ -132,7 +143,7 @@ public class AnalyticsProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         switch (sUriMatcher.match(uri)) {
             case COMPETITOR:
                 return Competitor.CONTENT_TYPE;
@@ -159,10 +170,16 @@ public class AnalyticsProvider extends ContentProvider {
                 return Checkin.CONTENT_ITEM_TYPE;
 
             case MARK:
-                return AnalyticsContract.Mark.CONTENT_TYPE;
+                return Mark.CONTENT_TYPE;
 
             case MARK_ID:
-                return AnalyticsContract.Mark.CONTENT_ITEM_TYPE;
+                return Mark.CONTENT_ITEM_TYPE;
+
+            case BOAT:
+                return Boat.CONTENT_TYPE;
+
+            case BOAT_ID:
+                return Boat.CONTENT_ITEM_TYPE;
 
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -170,7 +187,7 @@ public class AnalyticsProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(@NonNull Uri uri, ContentValues values) {
         if (BuildConfig.DEBUG) {
             String message = "insert: uri=" + uri + " values=[" + values.toString() + "]";
             ExLog.i(getContext(), TAG, message);
@@ -199,18 +216,22 @@ public class AnalyticsProvider extends ContentProvider {
                 table = Tables.MARKS;
                 break;
 
+            case BOAT:
+                table = Tables.BOATS;
+                break;
+
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
         long id = db.insertOrThrow(table, null, values);
-        notifyChange(AnalyticsContract.LeaderboardsEventsCompetitorsMarksJoined.CONTENT_URI);
+        notifyChange(AnalyticsContract.LeaderboardsEventsCompetitorsMarksBoatsJoined.CONTENT_URI);
         notifyChange(uri);
         return uri.buildUpon().appendPath(String.valueOf(id)).build();
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         if (BuildConfig.DEBUG) {
             ExLog.i(getContext(), TAG, "delete() called with: uri = [" + uri + "], selection = [" + selection
                 + "], selectionArgs = [" + Arrays.toString(selectionArgs) + "]");
@@ -240,18 +261,22 @@ public class AnalyticsProvider extends ContentProvider {
                 table = Tables.MARKS;
                 break;
 
+            case BOAT:
+                table = Tables.BOATS;
+                break;
+
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
         int rowsDeleted = db.delete(table, selection, selectionArgs);
-        notifyChange(AnalyticsContract.LeaderboardsEventsCompetitorsMarksJoined.CONTENT_URI);
+        notifyChange(AnalyticsContract.LeaderboardsEventsCompetitorsMarksBoatsJoined.CONTENT_URI);
         notifyChange(uri);
         return rowsDeleted;
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         if (BuildConfig.DEBUG) {
             ExLog.i(getContext(), TAG, "update() called with: uri = [" + uri + "], values = [" + values + "], selection = [" + selection + "], selectionArgs = ["
                 + Arrays.toString(selectionArgs) + "]");
@@ -264,9 +289,11 @@ public class AnalyticsProvider extends ContentProvider {
     }
 
     private void notifyChange(Uri uri) {
-        ContentResolver cr = getContext().getContentResolver();
-        if (cr != null) {
-            cr.notifyChange(uri, null);
+        if (getContext() != null) {
+            ContentResolver cr = getContext().getContentResolver();
+            if (cr != null) {
+                cr.notifyChange(uri, null);
+            }
         }
     }
 
@@ -303,6 +330,12 @@ public class AnalyticsProvider extends ContentProvider {
 
             case MARK_ID:
                 return builder.table(Tables.MARKS).where(BaseColumns._ID + " = ?", uri.getLastPathSegment());
+
+            case BOAT:
+                return builder.table(Tables.BOATS);
+
+            case BOAT_ID:
+                return builder.table(Tables.BOATS).where(BaseColumns._ID + " = ?", uri.getLastPathSegment());
 
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

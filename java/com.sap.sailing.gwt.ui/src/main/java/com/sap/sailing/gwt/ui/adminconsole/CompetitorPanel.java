@@ -12,8 +12,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorImportProviderSelectionDialog.MatchImportedCompetitorsDialogFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -30,8 +30,8 @@ import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
  * 
  */
 public class CompetitorPanel extends SimplePanel implements BusyDisplay {
-    private final CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> competitorTable;
-    private final RefreshableMultiSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
+    private final CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorWithBoatDTO>> competitorTable;
+    private final RefreshableMultiSelectionModel<CompetitorWithBoatDTO> refreshableCompetitorSelectionModel;
     private final String leaderboardName;
 
     private final BusyIndicator busyIndicator;
@@ -45,8 +45,9 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
         super();
         this.leaderboardName = leaderboardName;
-        this.competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true);
-        this.refreshableCompetitorSelectionModel = (RefreshableMultiSelectionModel<CompetitorDTO>) competitorTable.getSelectionModel();
+        this.competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true, 
+                /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
+        this.refreshableCompetitorSelectionModel = (RefreshableMultiSelectionModel<CompetitorWithBoatDTO>) competitorTable.getSelectionModel();
 
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
 
@@ -89,7 +90,7 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
         selectAllButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                for (CompetitorDTO c : competitorTable.getDataProvider().getList()) {
+                for (CompetitorWithBoatDTO c : competitorTable.getDataProvider().getList()) {
                     refreshableCompetitorSelectionModel.setSelected(c, true);
                 }
             }
@@ -127,7 +128,7 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
             inviteCompetitorsButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    Set<CompetitorDTO> competitors = refreshableCompetitorSelectionModel.getSelectedSet();
+                    Set<CompetitorWithBoatDTO> competitors = refreshableCompetitorSelectionModel.getSelectedSet();
                     CompetitorInvitationHelper helper = new CompetitorInvitationHelper(sailingService, stringMessages, errorReporter);
                     helper.inviteCompetitors(competitors, leaderboardName);
                 }
@@ -159,11 +160,11 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
             @Override
             public MatchImportedCompetitorsDialog createMatchImportedCompetitorsDialog(
                     final Iterable<CompetitorDescriptor> competitorDescriptors,
-                    final Iterable<CompetitorDTO> competitors) {
+                    final Iterable<CompetitorWithBoatDTO> competitors) {
                 ImportCompetitorCallback importCompetitorCallback = new ImportCompetitorCallback(sailingService,
                         errorReporter, stringMessages) {
                     @Override
-                    public void registerCompetitors(Set<CompetitorDTO> competitorDTOs) {
+                    public void registerCompetitors(Set<CompetitorWithBoatDTO> competitorDTOs) {
                         super.registerCompetitors(competitorDTOs);
                         refreshCompetitorList();
                     }
@@ -175,9 +176,11 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
     }
 
     private void openAddCompetitorDialog() {
-        competitorTable.openEditCompetitorDialog(new CompetitorDTOImpl(), /* boat class to be used from CompetitorDTO */ null);
+        CompetitorWithBoatDTOImpl competitorDTO = new CompetitorWithBoatDTOImpl();
+        competitorDTO.setBoat(null);
+        competitorTable.openEditCompetitorWithoutBoatDialog(competitorDTO);
     }
-    
+
     public void refreshCompetitorList() {
         competitorTable.refreshCompetitorList(leaderboardName);
     }

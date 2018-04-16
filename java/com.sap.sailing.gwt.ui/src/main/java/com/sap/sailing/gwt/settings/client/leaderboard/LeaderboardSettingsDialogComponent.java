@@ -33,19 +33,22 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected final Map<DetailType, CheckBox> overallDetailCheckboxes;
     protected final StringMessages stringMessages;
     protected LongBox refreshIntervalInSecondsBox;
+    protected final boolean canBoatInfoBeShown;
     
     protected RadioButton explicitRaceColumnSelectionRadioBtn;
     protected RadioButton lastNRacesColumnSelectionRadioBtn;
     protected IntegerBox numberOfLastRacesToShowBox;
     protected CheckBox showAddedScoresCheckBox;
-    protected CheckBox showCompetitorSailIdColumnheckBox;
+    protected CheckBox showCompetitorShortNameColumnCheckBox;
     protected CheckBox showCompetitorFullNameColumnCheckBox;
+    protected CheckBox showCompetitorBoatInfoColumnCheckBox;
     protected CheckBox isCompetitorNationalityColumnVisible;
     protected T initialSettings;
 
-    public LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages) {
+    public LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages, boolean canBoatInfoBeShown) {
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
+        this.canBoatInfoBeShown = canBoatInfoBeShown;
         
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
@@ -164,17 +167,21 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         
         FlowPanel overallDetailDialogContentSecondLine = new FlowPanel();
         overallDetailDialogContentSecondLine.addStyleName("dialogInnerContent");
-        showCompetitorSailIdColumnheckBox = dialog.createCheckbox(stringMessages.showCompetitorSailIdColumn());
-        showCompetitorSailIdColumnheckBox.setTitle(stringMessages.showCompetitorSailIdColumnTooltip(stringMessages.alwaysShowCompetitorNationalityColumn()));
-        showCompetitorSailIdColumnheckBox.setValue(initialSettings.isShowCompetitorSailIdColumn());
-        overallDetailDialogContentSecondLine.add(showCompetitorSailIdColumnheckBox);
+        showCompetitorShortNameColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorShortNameColumn());
+        showCompetitorShortNameColumnCheckBox.setTitle(stringMessages.showCompetitorShortNameColumnTooltip(stringMessages.alwaysShowCompetitorNationalityColumn()));
+        showCompetitorShortNameColumnCheckBox.setValue(initialSettings.isShowCompetitorShortNameColumn());
+        overallDetailDialogContentSecondLine.add(showCompetitorShortNameColumnCheckBox);
+        showCompetitorFullNameColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorFullNameColumn());
+        showCompetitorFullNameColumnCheckBox.setValue(initialSettings.isShowCompetitorFullNameColumn());
+        overallDetailDialogContentSecondLine.add(showCompetitorFullNameColumnCheckBox);
+        showCompetitorBoatInfoColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorBoatColumn());
+        showCompetitorBoatInfoColumnCheckBox.setValue(initialSettings.isShowCompetitorBoatInfoColumn());
+        overallDetailDialogContentSecondLine.add(showCompetitorBoatInfoColumnCheckBox);
+        showCompetitorBoatInfoColumnCheckBox.setVisible(canBoatInfoBeShown);
         isCompetitorNationalityColumnVisible = dialog.createCheckbox(stringMessages.alwaysShowCompetitorNationalityColumn());
         isCompetitorNationalityColumnVisible.setTitle(stringMessages.alwaysShowCompetitorNationalityColumnTooltip());
         isCompetitorNationalityColumnVisible.setValue(initialSettings.isShowCompetitorNationality());
         overallDetailDialogContentSecondLine.add(isCompetitorNationalityColumnVisible);
-        showCompetitorFullNameColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorFullNameColumn());
-        showCompetitorFullNameColumnCheckBox.setValue(initialSettings.isShowCompetitorFullNameColumn());
-        overallDetailDialogContentSecondLine.add(showCompetitorFullNameColumnCheckBox);
 
         overallDetailDialog.add(overallDetailDialogContent);
         overallDetailDialog.add(overallDetailDialogContentSecondLine);

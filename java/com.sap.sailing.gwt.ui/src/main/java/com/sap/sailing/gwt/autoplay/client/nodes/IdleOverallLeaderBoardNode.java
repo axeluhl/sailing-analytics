@@ -32,7 +32,6 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
     public IdleOverallLeaderBoardNode(AutoPlayClientFactory cf) {
         super(IdleOverallLeaderBoardNode.class.getName());
         this.cf = cf;
-
     }
 
     public void onStart() {
@@ -42,13 +41,12 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
 
         List<DetailType> raceDetails = new ArrayList<>();
         // raceDetails.add(DetailType.RACE_RANK);
-
         final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(
                 /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, raceDetails, overallDetails,
                 /* namesOfRaceColumnsToShow */ null, /* numberOfLastRacesToShow */ null,
                 /* delayBetweenAutoAdvancesInMilliseconds */ null, RaceColumnSelectionStrategies.EXPLICIT,
-                /* showAddedScores */ true, /* showCompetitorSailIdColumn */ true,
-                /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ true);
+                /* showAddedScores */ true, /* showCompetitorShortNameColumn */ true,
+                /* showCompetitorFullNameColumn */ false, /* showCompetitorBoatInfoColumn */ false, /* isCompetitorNationalityColumnVisible */ true);
 
         timer = new Timer(
                 // perform the first request as "live" but don't by default auto-play

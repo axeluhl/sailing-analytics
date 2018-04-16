@@ -15,16 +15,15 @@ import com.sap.sse.common.Duration;
  * 
  */
 public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serializable {
-    private static final long serialVersionUID = -4997852354821083154L;
+    private static final long serialVersionUID = 3019126418065082622L;
     private String countryName;
     private String twoLetterIsoCountryCode;
     private String threeLetterIocCountryCode;
     private Color color;
+    private String shortName;
     private String email;
     private String searchTag;
     private String idAsString;
-    private BoatClassDTO boatClass;
-    private BoatDTO boat;
     private String imageURL;
     private String flagImageURL;
     private Double timeOnTimeFactor;
@@ -32,10 +31,11 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     
     public CompetitorDTOImpl() {}
     
-    public CompetitorDTOImpl(String name, Color color, String email, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
+    public CompetitorDTOImpl(String name, String shortName, Color color, String email, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
             String countryName, String idAsString, String imageURL, String flagImageURL, 
-            BoatDTO boat, BoatClassDTO boatClass, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
+            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         super(name);
+        this.shortName = shortName;
         this.color = color;
         this.email = email;
         this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
@@ -44,8 +44,6 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         this.idAsString = idAsString;
         this.imageURL = imageURL;
         this.flagImageURL = flagImageURL;
-        this.boat = boat;
-        this.boatClass = boatClass;
         this.timeOnTimeFactor = timeOnTimeFactor;
         this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
         this.searchTag = searchTag;
@@ -55,11 +53,10 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((boatClass == null) ? 0 : boatClass.hashCode());
-        result = prime * result + ((boat == null) ? 0 : boat.hashCode());
         result = prime * result + ((idAsString == null) ? 0 : idAsString.hashCode());
         result = prime * result + ((color == null) ? 0 : color.hashCode());
         result = prime * result + ((email == null) ? 0 : email.hashCode());
+        result = prime * result + ((shortName == null) ? 0 : shortName.hashCode());
         result = prime * result + ((threeLetterIocCountryCode == null) ? 0 : threeLetterIocCountryCode.hashCode());
         result = prime * result + ((imageURL == null) ? 0 : imageURL.hashCode());
         result = prime * result + ((flagImageURL == null) ? 0 : flagImageURL.hashCode());
@@ -78,16 +75,6 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         if (getClass() != obj.getClass())
             return false;
         CompetitorDTOImpl other = (CompetitorDTOImpl) obj;
-        if (boatClass == null) {
-            if (other.boatClass != null)
-                return false;
-        } else if (!boatClass.equals(other.boatClass))
-            return false;
-        if (boat == null) {
-            if (other.boat != null)
-                return false;
-        } else if (!boat.equals(other.boat))
-            return false;
         if (idAsString == null) {
             if (other.idAsString != null)
                 return false;
@@ -107,6 +94,11 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
             if (other.email != null)
                 return false;
         } else if (!email.equals(other.email))
+            return false;
+        if (shortName == null) {
+            if (other.shortName != null)
+                return false;
+        } else if (!shortName.equals(other.shortName))
             return false;
         if (imageURL == null) {
             if (other.imageURL != null)
@@ -152,10 +144,10 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     }
 
     @Override
-    public String getSailID() {
-        return boat==null?null:boat.getSailId();
+    public String getShortName() {
+        return shortName;
     }
-    
+
     @Override
     public String getImageURL() {
         return imageURL;
@@ -169,16 +161,6 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     @Override
     public String getIdAsString() {
         return idAsString;
-    }
-
-    @Override
-    public BoatClassDTO getBoatClass() {
-        return boatClass;
-    }
-
-    @Override
-    public CompetitorDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion) {
-        return this;
     }
 
     @Override
@@ -218,10 +200,5 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     @Override
     public Duration getTimeOnDistanceAllowancePerNauticalMile() {
         return timeOnDistanceAllowancePerNauticalMile;
-    }
-
-    @Override
-    public BoatDTO getBoat() {
-        return boat;
     }
 }

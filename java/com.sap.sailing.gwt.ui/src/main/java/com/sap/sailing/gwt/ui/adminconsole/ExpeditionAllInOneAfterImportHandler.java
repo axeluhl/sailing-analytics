@@ -10,7 +10,7 @@ import java.util.UUID;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
@@ -93,9 +93,10 @@ public class ExpeditionAllInOneAfterImportHandler {
     private void showCompetitorRegistration() {
         new RegattaLogCompetitorRegistrationDialog(regatta.boatClass == null ? null : regatta.boatClass.getName(),
                 sailingService, stringMessages, errorReporter, true, leaderboard.getName(),
-                new CancelImportDialogCallback<Set<CompetitorDTO>>() {
+                leaderboard.canBoatsOfCompetitorsChangePerRace,
+                new CancelImportDialogCallback<Set<CompetitorWithBoatDTO>>() {
             @Override
-            public void ok(final Set<CompetitorDTO> competitors) {
+            public void ok(final Set<CompetitorWithBoatDTO> competitors) {
                 if (competitors.isEmpty()) {
                     Window.alert(stringMessages.importCanceledNoCompetitorAdded());
                 } else {
@@ -116,11 +117,11 @@ public class ExpeditionAllInOneAfterImportHandler {
         }).show();
     }
     
-    private void mapCompetitorsToGPSFixDeviceIds(final Set<CompetitorDTO> mappedCompetitors) {
+    private void mapCompetitorsToGPSFixDeviceIds(final Set<CompetitorWithBoatDTO> mappedCompetitors) {
         if (gpsFixesDeviceIDs.size() == 1 && mappedCompetitors.size() == 1) {
             // If there is exactly one device and one Competitor, the mapping is automatically added without user interaction
             final TrackFileImportDeviceIdentifierDTO deviceIdentifierDTO = gpsFixesDeviceIDs.iterator().next();
-            final CompetitorDTO competitor = mappedCompetitors.iterator().next();
+            final CompetitorWithBoatDTO competitor = mappedCompetitors.iterator().next();
             saveCompetitorGPSMapping(mappedCompetitors, Collections.singleton(new DeviceMappingDTO(deviceIdentifierDTO, deviceIdentifierDTO.from, deviceIdentifierDTO.to, competitor, null)));
         } else {
             new RegattaLogFixesAddMappingsDialog(sailingService, errorReporter, stringMessages,
@@ -135,17 +136,17 @@ public class ExpeditionAllInOneAfterImportHandler {
         }
     }
 
-    private void saveCompetitorGPSMapping(final Set<CompetitorDTO> mappedCompetitors, final Collection<DeviceMappingDTO> mappings) {
+    private void saveCompetitorGPSMapping(final Set<CompetitorWithBoatDTO> mappedCompetitors, final Collection<DeviceMappingDTO> mappings) {
         new AddDeviceMappingsToRegattaLog(leaderboard.getName(), mappings, () -> {
             mapCompetitorsToSensorFixDeviceIds(mappedCompetitors);
         });
     }
 
-    private final void mapCompetitorsToSensorFixDeviceIds(final Set<CompetitorDTO> mappedCompetitors) {
+    private final void mapCompetitorsToSensorFixDeviceIds(final Set<CompetitorWithBoatDTO> mappedCompetitors) {
         if (sensorFixesDeviceIDs.size() == 1 && mappedCompetitors.size() == 1) {
             // If there is exactly one device and one Competitor, the mapping is automatically added without user interaction
             final TrackFileImportDeviceIdentifierDTO deviceIdentifierDTO = sensorFixesDeviceIDs.iterator().next();
-            final CompetitorDTO competitor = mappedCompetitors.iterator().next();
+            final CompetitorWithBoatDTO competitor = mappedCompetitors.iterator().next();
             saveCompetitorSensorFixMapping(Collections.singleton(new TypedDeviceMappingDTO(deviceIdentifierDTO, deviceIdentifierDTO.from, deviceIdentifierDTO.to, competitor, null, sensorImporterType)));
         } else if (sensorFixesDeviceIDs.size() > 0) {
             new RegattaLogSensorDataAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboard.getName(),

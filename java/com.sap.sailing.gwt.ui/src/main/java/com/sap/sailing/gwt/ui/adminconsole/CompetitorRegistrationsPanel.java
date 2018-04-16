@@ -20,8 +20,8 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorImportProviderSelectionDialog.MatchImportedCompetitorsDialogFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -37,26 +37,25 @@ import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
  * Shows two competitor tables next to each other; the table on the left is that of the "registered" competitors, the table
  * on the right is the "pool" of all competitors with those already "registered" removed. Between the tables are buttons
  * to move competitors left and right, thereby assigning them to the "registered" set or moving them back to the pool.
- * The {@link #getResult result} consists of all {@link CompetitorDTO competitors} in the table of "registered" competitors.<p>
+ * The {@link #getResult result} consists of all {@link CompetitorWithBoatDTO competitors} in the table of "registered" competitors.<p>
  * 
  * @author Axel Uhl (D043530)
  *
  */
 public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDisplay {
-    protected CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> allCompetitorsTable;
-    protected CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> registeredCompetitorsTable;
-    protected final boolean filterByLeaderBoardInitially = false;
-    final StringMessages stringMessages;
-    final ErrorReporter errorReporter;
+    private final CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorWithBoatDTO>> allCompetitorsTable;
+    private final CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorWithBoatDTO>> registeredCompetitorsTable;
+    private final ErrorReporter errorReporter;
     private Button registerBtn;
     private Button unregisterBtn;
+    private Button addCompetitorWithBoatButton;
     private Button addCompetitorButton;
     private CheckBox showOnlyCompetitorsOfLogCheckBox;
-    protected String leaderboardName;
+    private final String leaderboardName;
     private final BusyIndicator busyIndicator;
     private final ImportCompetitorCallback importCompetitorCallback;
     private final Runnable validator;
-    private final Consumer<AsyncCallback<Collection<CompetitorDTO>>> registeredCompetitorsRetriever;
+    private final Consumer<AsyncCallback<Collection<CompetitorWithBoatDTO>>> registeredCompetitorsRetriever;
     private final boolean restrictPoolToLeaderboard;
 
     /**
@@ -78,10 +77,9 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
      */
     protected CompetitorRegistrationsPanel(final SailingServiceAsync sailingService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
-            String leaderboardName, final String boatClass, Runnable validator,
-            Consumer<AsyncCallback<Collection<CompetitorDTO>>> registeredCompetitorsRetriever,
+            String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, Runnable validator,
+            Consumer<AsyncCallback<Collection<CompetitorWithBoatDTO>>> registeredCompetitorsRetriever,
             boolean restrictPoolToLeaderboard, Widget... additionalWidgetsBeforeTables) {
-        this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.restrictPoolToLeaderboard = restrictPoolToLeaderboard;
         this.validator = validator;
@@ -94,7 +92,17 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         addCompetitorButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                registeredCompetitorsTable.openEditCompetitorDialog(new CompetitorDTOImpl(), boatClass);
+                CompetitorWithBoatDTOImpl competitorDTO = new CompetitorWithBoatDTOImpl();
+                competitorDTO.setBoat(null);
+                registeredCompetitorsTable.openEditCompetitorWithoutBoatDialog(competitorDTO);
+            }
+        });
+        addCompetitorWithBoatButton = new Button(stringMessages.add(stringMessages.competitorWithBoat()));
+        addCompetitorWithBoatButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                CompetitorWithBoatDTOImpl competitorDTO = new CompetitorWithBoatDTOImpl();
+                registeredCompetitorsTable.openEditCompetitorWithBoatDialog(competitorDTO, boatClass);
             }
         });
 
@@ -102,7 +110,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         inviteCompetitorsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Set<CompetitorDTO> competitors = registeredCompetitorsTable.getSelectionModel().getSelectedSet();
+                Set<CompetitorWithBoatDTO> competitors = registeredCompetitorsTable.getSelectionModel().getSelectedSet();
                 CompetitorInvitationHelper helper = new CompetitorInvitationHelper(sailingService, stringMessages,
                         errorReporter);
                 helper.inviteCompetitors(competitors, leaderboardName);
@@ -135,9 +143,9 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         final CaptionPanel allCompetitorsPanel = new CaptionPanel(stringMessages.competitorPool());
         final CaptionPanel registeredCompetitorsPanel = new CaptionPanel(stringMessages.registeredCompetitors());
         allCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */
-                true, /* enablePager */true);
+                true, /* enablePager */true, /* filterCompetitorWithBoat */ canBoatsOfCompetitorsChangePerRace, /* filterCompetitorsWithoutBoat */ !canBoatsOfCompetitorsChangePerRace);
         registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */
-                true, /* enablePager */false);
+                true, /* enablePager */false,  /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         allCompetitorsPanel.add(allCompetitorsTable);
         registeredCompetitorsPanel.add(registeredCompetitorsTable);
         VerticalPanel movePanel = new VerticalPanel();
@@ -163,7 +171,11 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         competitorRegistrationPanel.add(movePanel);
         competitorRegistrationPanel.setCellVerticalAlignment(movePanel, HasVerticalAlignment.ALIGN_MIDDLE);
         competitorRegistrationPanel.add(allCompetitorsPanel);
-        buttonPanel.add(addCompetitorButton);
+        if (canBoatsOfCompetitorsChangePerRace) {
+            buttonPanel.add(addCompetitorButton);
+        } else {
+            buttonPanel.add(addCompetitorWithBoatButton);
+        }
         buttonPanel.add(inviteCompetitorsButton);
         buttonPanel.add(competitorImportButton);
         buttonPanel.add(busyIndicator);
@@ -197,7 +209,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
             @Override
             public MatchImportedCompetitorsDialog createMatchImportedCompetitorsDialog(
                     final Iterable<CompetitorDescriptor> competitorDescriptors,
-                    final Iterable<CompetitorDTO> competitors) {
+                    final Iterable<CompetitorWithBoatDTO> competitors) {
                 return new MatchImportedCompetitorsDialog(competitorDescriptors, competitors, stringMessages,
                         sailingService, errorReporter, importCompetitorCallback);
             }
@@ -209,18 +221,18 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         busyIndicator.setBusy(isBusy);
     }
 
-    protected void move(CompetitorTableWrapper<?> from, CompetitorTableWrapper<?> to, Iterable<CompetitorDTO> toMove) {
+    protected void move(CompetitorTableWrapper<?> from, CompetitorTableWrapper<?> to, Iterable<CompetitorWithBoatDTO> toMove) {
         from.getFilterField().removeAll(toMove);
         to.getFilterField().addAll(toMove);
     }
     
-    protected void addImportedCompetitorsToRegisteredCompetitorsTableAndRemoveFromAllCompetitorsTable(Iterable<CompetitorDTO> competitorsImported) {
+    protected void addImportedCompetitorsToRegisteredCompetitorsTableAndRemoveFromAllCompetitorsTable(Iterable<CompetitorWithBoatDTO> competitorsImported) {
         allCompetitorsTable.getFilterField().removeAll(competitorsImported);
         registeredCompetitorsTable.getFilterField().addAll(competitorsImported);
     }
 
-    private void moveSelected(CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> from,
-            CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> to) {
+    private void moveSelected(CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorWithBoatDTO>> from,
+            CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorWithBoatDTO>> to) {
         move(from, to, from.getSelectionModel().getSelectedSet());
         validateAndUpdate();
     }
@@ -236,12 +248,12 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
     }
 
     private void setRegisterableCompetitorsAndRegisteredCompetitors() {
-        allCompetitorsTable.refreshCompetitorList(this.restrictPoolToLeaderboard ? leaderboardName : null, new Callback<Iterable<CompetitorDTO>, Throwable>() {
+        allCompetitorsTable.refreshCompetitorList(this.restrictPoolToLeaderboard ? leaderboardName : null, new Callback<Iterable<CompetitorWithBoatDTO>, Throwable>() {
             @Override
-            public void onSuccess(Iterable<CompetitorDTO> result) {
-                registeredCompetitorsRetriever.accept(new AsyncCallback<Collection<CompetitorDTO>>() {
+            public void onSuccess(Iterable<CompetitorWithBoatDTO> result) {
+                registeredCompetitorsRetriever.accept(new AsyncCallback<Collection<CompetitorWithBoatDTO>>() {
                     @Override
-                    public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
+                    public void onSuccess(Collection<CompetitorWithBoatDTO> registeredCompetitors) {
                         moveFromPoolToRegistered(registeredCompetitors);
                         validateAndUpdate();
                     }
@@ -263,9 +275,11 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
     public void deactivateRegistrationButtons(String tooltip){
         registerBtn.setEnabled(false);
         unregisterBtn.setEnabled(false);
+        addCompetitorWithBoatButton.setEnabled(false);
         addCompetitorButton.setEnabled(false);
         registerBtn.setTitle(tooltip);
         unregisterBtn.setTitle(tooltip);
+        addCompetitorWithBoatButton.setTitle(tooltip);
         addCompetitorButton.setTitle(tooltip);
         validateAndUpdate();
     }
@@ -279,15 +293,17 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
     public void activateRegistrationButtons(){
         registerBtn.setEnabled(true);
         unregisterBtn.setEnabled(true);
+        addCompetitorWithBoatButton.setEnabled(true);
         addCompetitorButton.setEnabled(true);
         registerBtn.setTitle("");
         unregisterBtn.setTitle("");
+        addCompetitorWithBoatButton.setTitle("");
         addCompetitorButton.setTitle("");
         validateAndUpdate();
     }
 
-    public Set<CompetitorDTO> getResult() {
-        final Set<CompetitorDTO> registeredCompetitors = new HashSet<>();
+    public Set<CompetitorWithBoatDTO> getResult() {
+        final Set<CompetitorWithBoatDTO> registeredCompetitors = new HashSet<>();
         Util.addAll(registeredCompetitorsTable.getAllCompetitors(), registeredCompetitors);
         return registeredCompetitors;
     }
@@ -300,7 +316,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         allCompetitorsTable.grayOutCompetitors(competitors);
     }
 
-    public void moveFromPoolToRegistered(Collection<CompetitorDTO> registeredCompetitors) {
+    public void moveFromPoolToRegistered(Collection<CompetitorWithBoatDTO> registeredCompetitors) {
         move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
     }
 }
