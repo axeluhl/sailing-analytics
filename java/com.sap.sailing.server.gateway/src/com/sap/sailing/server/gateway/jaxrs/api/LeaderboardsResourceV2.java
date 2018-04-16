@@ -225,7 +225,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, 
-                DetailType.CURRENT_LEG };
+                DetailType.RACE_CURRENT_LEG };
     }
 
     private DetailType[] getAvailableRaceDetailColumnTypes() {
@@ -236,7 +236,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, 
                 DetailType.NUMBER_OF_MANEUVERS,
-                DetailType.CURRENT_LEG };
+                DetailType.RACE_CURRENT_LEG };
     }
 
     private Pair<String, Object> getValueForRaceDetailType(DetailType type, LeaderboardEntryDTO entry, LegEntryDTO currentLegEntry) {
@@ -299,7 +299,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 }
                 value = numberOfManeuvers;
                 break;
-            case CURRENT_LEG:
+            case RACE_CURRENT_LEG:
                 name = "currentLeg";
                 int currentLegNumber = entry.getOneBasedCurrentLegNumber();
                 if (currentLegNumber > 0) {

@@ -724,7 +724,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * Used to determine for a Chart the available Detailtypes. This is for example used to only show the RideHeight as
      * an option for charts if it actually recorded for the race.
      */
-    List<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier);
+    Iterable<DetailType> determineDetailTypesForCompetitorChart(String leaderboardGroupName, RegattaAndRaceIdentifier identifier);
 
     List<ExpeditionDeviceConfiguration> getExpeditionDeviceConfigurations();
 
@@ -750,6 +750,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             throws NotFoundException, CompetitorRegistrationOnRaceLogDisabledException;
     
     List<String> getRaceDisplayNamesFromLeaderboard(String leaderboardName, List<String> raceColumnNames) throws NotFoundException;
+    
+    Iterable<DetailType> getAvailableDetailTypesForLeaderboard(String leaderboardName);
 
     SpotDTO getWindFinderSpot(String spotId) throws Exception;
     
