@@ -54,7 +54,6 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
         chart = createChart();
         chartPanel.setWidget(chart);
         series = new ArrayList<>();
-//        redrawAllCharts();
 
     }
     
@@ -82,10 +81,6 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
             }
         }));
         return chart;
-    }
-
-    private void redrawAllCharts() {
-        internalShowResults(result);
     }
 
     @Override
