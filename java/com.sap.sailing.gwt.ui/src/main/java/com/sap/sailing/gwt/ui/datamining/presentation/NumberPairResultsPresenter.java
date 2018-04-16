@@ -126,11 +126,6 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
     }
 
     @Override
-    public String getDependentCssClassName() {
-        return "NumberPair";
-    }
-
-    @Override
     public Settings getSettings() {
         return null;
     }
@@ -138,6 +133,12 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
     @Override
     public String getId() {
         return "NumberPairResultsPresenter";
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
