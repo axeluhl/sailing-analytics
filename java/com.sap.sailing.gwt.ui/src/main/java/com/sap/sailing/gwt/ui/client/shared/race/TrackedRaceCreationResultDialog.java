@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.client.shared.race;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.user.client.ui.Anchor;
@@ -20,7 +22,12 @@ public class TrackedRaceCreationResultDialog extends DataEntryDialog<Void> {
 
     private final VerticalPanel verticalPanel;
 
-    public TrackedRaceCreationResultDialog(String title, String message, UUID eventId, String regattaName, String raceName,
+    public TrackedRaceCreationResultDialog(String title, String message, UUID eventId, String regattaName, String raceNames,
+            String leaderboardName, String leaderboardGroupName) {
+        this(title, message, eventId, regattaName, Arrays.asList(new String[] { raceNames }), leaderboardName, leaderboardGroupName);
+    }
+    
+    public TrackedRaceCreationResultDialog(String title, String message, UUID eventId, String regattaName, List<String> raceNames,
             String leaderboardName, String leaderboardGroupName) {
         super(title, message,
                 StringMessages.INSTANCE.ok(), StringMessages.INSTANCE.cancel(), /* validator */ null,
@@ -36,11 +43,13 @@ public class TrackedRaceCreationResultDialog extends DataEntryDialog<Void> {
 
         verticalPanel = new VerticalPanel();
         verticalPanel.setSpacing(20);
-        Anchor raceboardAnchor = new Anchor(StringMessages.INSTANCE.importFinishedGotoRaceboard(),
-                EntryPointWithSettingsLinkFactory.createRaceBoardLinkWithDefaultSettings(eventId, leaderboardName,
-                        leaderboardGroupName, regattaName, raceName));
-        raceboardAnchor.setTarget("_blank");
-        verticalPanel.add(raceboardAnchor);
+        for(String raceName:raceNames) {
+            Anchor raceboardAnchor = new Anchor(StringMessages.INSTANCE.importFinishedGotoRaceboard(),
+                    EntryPointWithSettingsLinkFactory.createRaceBoardLinkWithDefaultSettings(eventId, leaderboardName,
+                            leaderboardGroupName, regattaName, raceName));
+            raceboardAnchor.setTarget("_blank");
+            verticalPanel.add(raceboardAnchor);
+        }
         
         if (eventId != null) {
             Anchor eventAnchor = new Anchor(StringMessages.INSTANCE.importFinishedGotoEvent(),

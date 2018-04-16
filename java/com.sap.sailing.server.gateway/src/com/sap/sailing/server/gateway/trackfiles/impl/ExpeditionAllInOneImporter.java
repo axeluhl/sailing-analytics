@@ -76,6 +76,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
@@ -121,7 +122,8 @@ public class ExpeditionAllInOneImporter {
 
     public static class ImporterResult {
         final UUID eventId;
-        final String leaderboardName, leaderboardGroupName, regattaName, raceName, raceColumnName, fleetName;
+        final List<Triple<String, String, String>> raceNameRaceColumnNameFleetnameList = new ArrayList<>();
+        final String leaderboardName, leaderboardGroupName, regattaName;
         final List<TrackImportDTO> importGpsFixData, importSensorFixData;
         final String sensorFixImporterType;
         final List<ErrorImportDTO> errorList = new ArrayList<>();
@@ -150,9 +152,7 @@ public class ExpeditionAllInOneImporter {
             this.leaderboardName = leaderboardName;
             this.leaderboardGroupName = leaderboardGroupName;
             this.regattaName = regattaAndRaceIdentifier.getRegattaName();
-            this.raceName = regattaAndRaceIdentifier.getRaceName();
-            this.raceColumnName = raceColumnName;
-            this.fleetName = fleetName;
+            raceNameRaceColumnNameFleetnameList.add(new Triple<String, String, String>(regattaAndRaceIdentifier.getRaceName(), raceColumnName, fleetName));
             this.importGpsFixData = importGpsFixData;
             this.importSensorFixData = importSensorFixData;
             this.sensorFixImporterType = sensorFixImporterType;

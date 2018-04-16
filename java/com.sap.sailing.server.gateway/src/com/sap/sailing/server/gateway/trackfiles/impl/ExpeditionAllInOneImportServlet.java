@@ -136,9 +136,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
         json.put("leaderboardName", importerResult.leaderboardName);
         json.put("leaderboardGroupName", importerResult.leaderboardGroupName);
         json.put("regattaName", importerResult.regattaName);
-        json.put("raceName", importerResult.raceName);
-        json.put("raceColumnName", importerResult.raceColumnName);
-        json.put("fleetName", importerResult.fleetName);
+        json.put("raceNameRaceColumnNameFleetNameList", ImportResultSerializer.serializeRaceList(importerResult.raceNameRaceColumnNameFleetnameList));
         json.put("errors", ImportResultSerializer.serializeErrorList(importerResult.errorList));
         json.put("gpsDeviceIds", ImportResultSerializer.serializeTrackList(importerResult.importGpsFixData));
         json.put("sensorDeviceIds", ImportResultSerializer.serializeTrackList(importerResult.importSensorFixData));

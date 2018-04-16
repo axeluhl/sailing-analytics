@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -7,9 +8,9 @@ import com.sap.sailing.gwt.ui.client.shared.race.TrackedRaceCreationResultDialog
 
 public class ExpeditionAllInOneImportResultDialog extends TrackedRaceCreationResultDialog {
 
-    public ExpeditionAllInOneImportResultDialog(UUID eventId, String regattaName, String raceName,
+    public ExpeditionAllInOneImportResultDialog(UUID eventId, String regattaName, List<String> raceNames,
             String leaderboardName, String leaderboardGroupName) {
         super(StringMessages.INSTANCE.importFinished(), StringMessages.INSTANCE.importFinishedMessage(), eventId,
-                regattaName, raceName, leaderboardName, leaderboardGroupName);
+                regattaName, raceNames, leaderboardName, leaderboardGroupName);
     }
 }

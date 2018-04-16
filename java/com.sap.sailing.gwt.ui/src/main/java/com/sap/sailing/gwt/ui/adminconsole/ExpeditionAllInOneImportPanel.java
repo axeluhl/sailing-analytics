@@ -147,13 +147,14 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
         formPanel.addSubmitCompleteHandler(event -> {
             validation.run();
             busyIndicator.setBusy(false);
+            GWT.debugger();
             final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(event.getResults());
             if (response == null) {
                 Window.alert(StringMessages.INSTANCE.unexpectedErrorDuringFileImport());
             } else if (response.hasEventId()) {
+                
                 new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
-                        response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getRaceName(),
-                        response.getRaceColumnName(), response.getFleetName(), response.getGpsDeviceIds(),
+                        response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getRaceEntries(), response.getGpsDeviceIds(),
                         response.getSensorDeviceIds(), response.getSensorFixImporterType(), sailingService,
                         errorReporter, stringMessages);
                 regattaRefresher.fillRegattas();
