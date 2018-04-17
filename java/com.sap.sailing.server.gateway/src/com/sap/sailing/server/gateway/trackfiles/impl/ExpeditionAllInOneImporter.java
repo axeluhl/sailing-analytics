@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -431,32 +431,33 @@ public class ExpeditionAllInOneImporter {
                     .getOrCreate(f.getDevice());
             final TimePoint end = f.getRange().to();
             try {
-                service.getSensorFixStore().loadFixes(new Consumer<GPSFix>() {
-                    @Override
-                    public void accept(GPSFix lastFix) {
-                        Position pos = lastFix.getPosition();
-                        if (pos != null) {
-                            try {
-                                Placemark reverseVenue = ReverseGeocoder.INSTANCE.getPlacemarkFirst(pos, VENUE_RANGE_CHECK,
-                                        new Placemark.ByPopulationDistanceRatio(pos));
-                                if (reverseVenue != null) {
-                                    String newVenueName = reverseVenue.getName();
-                                    Event event = service.getEvent(eventId);
-                                    Iterable<UUID> leaderboardGroups = StreamSupport
-                                            .stream(event.getLeaderboardGroups().spliterator(), false).map(t -> t.getId())
-                                            .collect(Collectors.toList());
-                                    service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(),
-                                            event.getStartDate(), event.getEndDate(), newVenueName, event.isPublic(),
-                                            leaderboardGroups, event.getOfficialWebsiteURL(), event.getBaseURL(),
-                                            event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(),
-                                            event.getWindFinderReviewedSpotsCollectionIds()));
-                                }
-                            } catch (IOException | ParseException e) {
-                                logger.log(Level.WARNING, "Could not reverse determine location " + pos, e);
+                final CompletableFuture<GPSFix> waitForFix = new CompletableFuture<>();
+                service.getSensorFixStore().loadFixes(waitForFix::complete, deviceIdentifier, end, end, true);
+                GPSFix gpsFix = waitForFix.getNow(null);
+                if (gpsFix != null) {
+                    Position pos = gpsFix.getPosition();
+                    if (pos != null) {
+                        try {
+                            Placemark reverseVenue = ReverseGeocoder.INSTANCE.getPlacemarkFirst(pos, VENUE_RANGE_CHECK,
+                                    new Placemark.ByPopulationDistanceRatio(pos));
+                            if (reverseVenue != null) {
+                                String newVenueName = reverseVenue.getName();
+                                Event event = service.getEvent(eventId);
+                                Iterable<UUID> leaderboardGroups = StreamSupport
+                                        .stream(event.getLeaderboardGroups().spliterator(), false).map(t -> t.getId())
+                                        .collect(Collectors.toList());
+                                service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(),
+                                        event.getStartDate(), event.getEndDate(), newVenueName, event.isPublic(),
+                                        leaderboardGroups, event.getOfficialWebsiteURL(), event.getBaseURL(),
+                                        event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(),
+                                        event.getWindFinderReviewedSpotsCollectionIds()));
+                                break;
                             }
+                        } catch (IOException | ParseException e) {
+                            logger.log(Level.WARNING, "Could not reverse determine location " + pos, e);
                         }
                     }
-                }, deviceIdentifier, end, end, true);
+                }
             } catch (NoCorrespondingServiceRegisteredException | TransformationException e) {
                 logger.log(Level.WARNING, "Could not reverse determine location", e);
             }
