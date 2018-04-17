@@ -235,7 +235,7 @@ public class ExpeditionAllInOneAfterImportHandler {
             String fleetName= race.getC();
             racesToStopAndStartTrackingFor.add(new RegattaNameAndRaceName(regattaName, raceName));
             leaderboardRaceColumnFleetNames.add(new Triple<>(leaderboard.name, raceColumnName, fleetName));
-            raceNames.add(new Pair<String, String>(raceName, fleetName));
+            raceNames.add(new Pair<String, String>(raceName, raceColumnName));
         }
         
         sailingService.removeAndUntrackRaces(racesToStopAndStartTrackingFor, new AsyncCallback<Void>() {
