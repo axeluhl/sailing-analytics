@@ -248,7 +248,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             }
         } catch (Exception e) {
             // broken messages are ignored
-            logger.warning("Exception caught during parsing of message '" + message.getMessage() + "' : " + e.getMessage());
+            logger.log(Level.WARNING, "Exception caught during parsing of message '" + message.getMessage() + "' : " + e.getMessage(), e);
         }
     }
     
@@ -356,7 +356,13 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         assert message.getType() == MessageType.RPD;
         String[] sections = message.getSections();
         String raceID = sections[1];
-        RaceStatus status = RaceStatus.values()[Integer.valueOf(sections[2])];
+        final RaceStatus status;
+        if (sections[2].contains(",")) {
+            final String[] raceStatusIntAndRacingStatusInt = sections[2].split(",");
+            status = RaceStatus.values()[Integer.valueOf(raceStatusIntAndRacingStatusInt[0])];
+        } else {
+            status = RaceStatus.values()[Integer.valueOf(sections[2])];
+        }
         TimePoint timePoint = new MillisecondsTimePoint(parseTimeAndDateISO(sections[3], raceID));
         lastRPDMessageTimePoint = timePoint;
         String dateISO = sections[3].substring(0, sections[3].indexOf('T'));
@@ -531,6 +537,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                             logger.info("Requesting messages starting from sequence number " + (maxSequenceNumber + 1)+" in "+this);
                             // already received a numbered message; ask only for newer messages with greater sequence number
                             lsnArgs.add(new Long(maxSequenceNumber + 1).toString());
+                        } else {
+                            logger.info("Requesting messages starting from the beginning in "+this);
+                            lsnArgs.add("1");
                         }
                         final SailMasterMessage lsnRequest = createSailMasterMessage(MessageType.LSN,
                                 lsnArgs.toArray(new String[0]));
