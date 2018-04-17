@@ -1,10 +1,8 @@
 package com.sap.sailing.windestimation.impl;
 
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 
 public interface IManeuverSpeedRetriever {
-    SpeedWithBearing getLowestSpeedWithinManeuverMainCurve(Maneuver maneuver);
-
-    SpeedWithBearing getHighestSpeedWithinManeuverMainCurve(Maneuver maneuver);
+    SpeedWithBearing getHighestSpeedWithinManeuverMainCurve(CompleteManeuverCurveWithEstimationData maneuverCurve);
 }

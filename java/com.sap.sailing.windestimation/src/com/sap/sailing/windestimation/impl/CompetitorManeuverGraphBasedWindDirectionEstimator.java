@@ -1,8 +1,8 @@
 package com.sap.sailing.windestimation.impl;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.windestimation.ManeuverBasedWindDirectionEstimator;
 import com.sap.sailing.windestimation.impl.maneuvergraph.ManeuverSequenceGraph;
 
@@ -12,18 +12,18 @@ import com.sap.sailing.windestimation.impl.maneuvergraph.ManeuverSequenceGraph;
  *
  */
 public class CompetitorManeuverGraphBasedWindDirectionEstimator implements ManeuverBasedWindDirectionEstimator {
-    
-    private final PolarDataService polarService;
-    private final IManeuverSpeedRetriever maneuverSpeedRetriever;
 
-    public CompetitorManeuverGraphBasedWindDirectionEstimator(PolarDataService polarService, IManeuverSpeedRetriever maneuverSpeedRetriever) {
+    private final PolarDataService polarService;
+
+    public CompetitorManeuverGraphBasedWindDirectionEstimator(PolarDataService polarService) {
         this.polarService = polarService;
-        this.maneuverSpeedRetriever = maneuverSpeedRetriever;
     }
 
     @Override
-    public Iterable<WindTrackCandidate> computeWindTrackCandidates(BoatClass boatClass, Iterable<Maneuver> competitorManeuvers) {
-        ManeuverSequenceGraph maneuverSequenceGraph = new ManeuverSequenceGraph(boatClass, polarService, maneuverSpeedRetriever, competitorManeuvers);
+    public Iterable<WindTrackCandidate> computeWindTrackCandidates(BoatClass boatClass,
+            Iterable<CompleteManeuverCurveWithEstimationData> competitorManeuvers) {
+        ManeuverSequenceGraph maneuverSequenceGraph = new ManeuverSequenceGraph(boatClass, polarService,
+                competitorManeuvers);
         maneuverSequenceGraph.computePossiblePathsWithDistances();
         return maneuverSequenceGraph.computeWindDirectionCandidates();
     }

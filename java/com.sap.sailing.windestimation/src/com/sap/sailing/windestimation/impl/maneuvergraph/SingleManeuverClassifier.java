@@ -6,54 +6,46 @@ import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sailing.windestimation.impl.IManeuverSpeedRetriever;
 import com.sap.sse.common.Util.Pair;
 
 public class SingleManeuverClassifier {
 
     private final BoatClass boatClass;
     private final PolarDataService polarService;
-    private final IManeuverSpeedRetriever maneuverSpeedRetriever;
 
-    public SingleManeuverClassifier(BoatClass boatClass, PolarDataService polarService,
-            IManeuverSpeedRetriever maneuverSpeedRetriever) {
+    public SingleManeuverClassifier(BoatClass boatClass, PolarDataService polarService) {
         this.boatClass = boatClass;
         this.polarService = polarService;
-        this.maneuverSpeedRetriever = maneuverSpeedRetriever;
     }
 
-    public SingleManeuverClassificationResult computeClassificationResult(Maneuver maneuver) {
-        SpeedWithBearing lowestSpeedWithinManeuverMainCurve = maneuverSpeedRetriever
-                .getLowestSpeedWithinManeuverMainCurve(maneuver);
-        double lowestSpeedWithBeginningSpeedRatio = maneuverSpeedRetriever
-                .getLowestSpeedWithinManeuverMainCurve(maneuver).getKnots()
-                / maneuver.getMainCurveBoundaries().getSpeedWithBearingBefore().getKnots();
-        double courseChangeDegUntilLowestSpeed = maneuver.getMainCurveBoundaries().getSpeedWithBearingBefore()
-                .getBearing().getDifferenceTo(lowestSpeedWithinManeuverMainCurve.getBearing()).getDegrees();
-        if (courseChangeDegUntilLowestSpeed * maneuver.getMainCurveBoundaries().getDirectionChangeInDegrees() < 0) {
+    public SingleManeuverClassificationResult classifyManeuver(CompleteManeuverCurveWithEstimationData maneuverCurve) {
+        SpeedWithBearing lowestSpeedWithinManeuverMainCurve = maneuverCurve.getMainCurve().getLowestSpeed();
+        double lowestSpeedWithBeginningSpeedRatio = lowestSpeedWithinManeuverMainCurve.getKnots()
+                / maneuverCurve.getMainCurve().getSpeedWithBearingBefore().getKnots();
+        double courseChangeDegUntilLowestSpeed = maneuverCurve.getMainCurve().getSpeedWithBearingBefore().getBearing()
+                .getDifferenceTo(lowestSpeedWithinManeuverMainCurve.getBearing()).getDegrees();
+        if (courseChangeDegUntilLowestSpeed * maneuverCurve.getMainCurve().getDirectionChangeInDegrees() < 0) {
             courseChangeDegUntilLowestSpeed = courseChangeDegUntilLowestSpeed < 0
                     ? courseChangeDegUntilLowestSpeed + 360 : courseChangeDegUntilLowestSpeed - 360;
         }
-        double highestSpeedWithBeginningSpeedRatio = maneuverSpeedRetriever
-                .getHighestSpeedWithinManeuverMainCurve(maneuver).getKnots()
-                / maneuver.getMainCurveBoundaries().getSpeedWithBearingBefore().getKnots();
-        double enteringExitingSpeedRatio = maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries()
+        double highestSpeedWithBeginningSpeedRatio = maneuverCurve.getMainCurve().getHighestSpeed().getKnots()
+                / maneuverCurve.getMainCurve().getSpeedWithBearingBefore().getKnots();
+        double enteringExitingSpeedRatio = maneuverCurve.getCurveWithUnstableCourseAndSpeed()
                 .getSpeedWithBearingBefore().getKnots()
-                / maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingAfter().getKnots();
-        double courseChangeDeg = maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries()
-                .getDirectionChangeInDegrees();
+                / maneuverCurve.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots();
+        double courseChangeDeg = maneuverCurve.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees();
         double[] presumedManeuverTypeLikelihoodsByAngleAnalysis = new double[PresumedManeuverType.values().length];
         double[] presumedManeuverTypeLikelihoodsBySpeedAnalysis = new double[presumedManeuverTypeLikelihoodsByAngleAnalysis.length];
         SpeedWithBearingWithConfidence<Void> speedWithTwaIfTack = null;
         SpeedWithBearingWithConfidence<Void> speedWithTwaIfJibe = null;
         double absCourseChangeDeg = Math.abs(courseChangeDeg);
-        if (Math.abs(maneuver.getMainCurveBoundaries().getDirectionChangeInDegrees()) <= 45) {
+        if (Math.abs(maneuverCurve.getMainCurve().getDirectionChangeInDegrees()) <= 45) {
             // jibe, bear away, head up
             Pair<Double, SpeedWithBearingWithConfidence<Void>> jibeLikelihoodWithTwaTws = polarService
                     .getManeuverLikelihoodAndTwsTwa(boatClass,
-                            maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingBefore(),
+                            maneuverCurve.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore(),
                             courseChangeDeg, ManeuverType.JIBE);
             if (jibeLikelihoodWithTwaTws.getA() == 0) {
                 presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType.HEAD_UP_BEAR_AWAY.ordinal()] = 0.8;
@@ -74,7 +66,7 @@ public class SingleManeuverClassifier {
             }
         } else if (absCourseChangeDeg <= 110) {
             // tack, jibe, mark passings, head up, bear away
-            SpeedWithBearing speedWithBearingBefore = maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries()
+            SpeedWithBearing speedWithBearingBefore = maneuverCurve.getCurveWithUnstableCourseAndSpeed()
                     .getSpeedWithBearingBefore();
             Pair<Double, SpeedWithBearingWithConfidence<Void>> tackLikelihoodWithTwaTws = polarService
                     .getManeuverLikelihoodAndTwsTwa(boatClass, speedWithBearingBefore, courseChangeDeg,
@@ -83,8 +75,8 @@ public class SingleManeuverClassifier {
                     .getManeuverLikelihoodAndTwsTwa(boatClass, speedWithBearingBefore, courseChangeDeg,
                             ManeuverType.JIBE);
 
-            double markPassingLikelihoodBonus = (Math
-                    .abs(maneuver.getMainCurveBoundaries().getDirectionChangeInDegrees()) - 70) / 100;
+            double markPassingLikelihoodBonus = (Math.abs(maneuverCurve.getMainCurve().getDirectionChangeInDegrees())
+                    - 70) / 100;
             if (markPassingLikelihoodBonus < -0.4) {
                 markPassingLikelihoodBonus = -0.4;
             } else if (markPassingLikelihoodBonus > 0.4) {
@@ -192,8 +184,9 @@ public class SingleManeuverClassifier {
             // => course at lowest speed refers upwind
             presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType._360.ordinal()] = 1.0;
         }
-        Bearing middleManeuverCourse = maneuver.getSpeedWithBearingBefore().getBearing()
-                .middle(maneuver.getSpeedWithBearingAfter().getBearing());
+        Bearing middleManeuverCourse = maneuverCurve.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore()
+                .getBearing()
+                .middle(maneuverCurve.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing());
         return new SingleManeuverClassificationResult(middleManeuverCourse, lowestSpeedWithBeginningSpeedRatio,
                 courseChangeDegUntilLowestSpeed, highestSpeedWithBeginningSpeedRatio, enteringExitingSpeedRatio,
                 courseChangeDeg, presumedManeuverTypeLikelihoodsByAngleAnalysis,

@@ -1,7 +1,7 @@
 package com.sap.sailing.windestimation.impl.maneuvergraph;
 
 import com.sap.sailing.domain.common.NauticalSide;
-import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 
 /**
  * 
@@ -13,20 +13,20 @@ public class ManeuverNodesLevel {
     private ManeuverNodesLevel previousLevel = null;
     private ManeuverNodesLevel nextLevel = null;
 
-    private final Maneuver maneuver;
+    private final CompleteManeuverCurveWithEstimationData maneuver;
     private final SingleManeuverClassificationResult maneuverClassificationResult;
 
     private final double[] bestDistancesFromStart = new double[FineGrainedPointOfSail.values().length];
     private final FineGrainedPointOfSail[] bestPrecedingNodesForThisNodes = new FineGrainedPointOfSail[bestDistancesFromStart.length];
 
-    public ManeuverNodesLevel(Maneuver maneuver, SingleManeuverClassifier singleManeuverClassifier,
-            ManeuverNodesLevel previousLevel) {
+    public ManeuverNodesLevel(CompleteManeuverCurveWithEstimationData maneuver,
+            SingleManeuverClassifier singleManeuverClassifier, ManeuverNodesLevel previousLevel) {
         this.maneuver = maneuver;
         if (previousLevel != null) {
             this.previousLevel = previousLevel;
             previousLevel.setNextLevel(this);
         }
-        maneuverClassificationResult = singleManeuverClassifier.computeClassificationResult(maneuver);
+        maneuverClassificationResult = singleManeuverClassifier.classifyManeuver(maneuver);
     }
 
     void setNextLevel(ManeuverNodesLevel nextLevel) {
@@ -45,7 +45,7 @@ public class ManeuverNodesLevel {
         return previousLevel;
     }
 
-    public Maneuver getManeuver() {
+    public CompleteManeuverCurveWithEstimationData getManeuver() {
         return maneuver;
     }
 
@@ -56,7 +56,7 @@ public class ManeuverNodesLevel {
     public double getDistanceToNodeFromStart(FineGrainedPointOfSail node) {
         return bestDistancesFromStart[node.ordinal()];
     }
-    
+
     public FineGrainedPointOfSail getBestPrecedingNode(FineGrainedPointOfSail node) {
         return bestPrecedingNodesForThisNodes[node.ordinal()];
     }
@@ -73,9 +73,9 @@ public class ManeuverNodesLevel {
                         likelihoodForPointOfSailBeforeManeuver);
             } else {
                 double courseChangeDegFromPreviousPointOfSailBefore = this.previousLevel.getManeuver()
-                        .getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingBefore().getBearing()
-                        .getDifferenceTo(maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries()
-                                .getSpeedWithBearingBefore().getBearing())
+                        .getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getBearing()
+                        .getDifferenceTo(
+                                maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getBearing())
                         .getDegrees();
                 double bestDistanceThroughPreviousLevel = Double.MAX_VALUE;
                 FineGrainedPointOfSail bestPreviousLevelPointOfSailBeforeManeuver = null;
@@ -146,13 +146,11 @@ public class ManeuverNodesLevel {
     private boolean isMarkPassingNeighbour() {
         boolean markPassingIsNeighbour = false;
         if (previousLevel != null && previousLevel.getManeuver().isMarkPassing()
-                && previousLevel.getManeuver().getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter()
-                        .until(maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore())
-                        .asSeconds() <= 24
+                && previousLevel.getManeuver().getCurveWithUnstableCourseAndSpeed().getTimePointAfter()
+                        .until(maneuver.getCurveWithUnstableCourseAndSpeed().getTimePointBefore()).asSeconds() <= 24
                 || nextLevel != null && nextLevel.getManeuver().isMarkPassing()
-                        && maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries()
-                                .getTimePointAfter().until(nextLevel.getManeuver()
-                                        .getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore())
+                        && maneuver.getCurveWithUnstableCourseAndSpeed().getTimePointAfter().until(
+                                nextLevel.getManeuver().getCurveWithUnstableCourseAndSpeed().getTimePointBefore())
                                 .asSeconds() <= 24) {
             markPassingIsNeighbour = true;
         }
