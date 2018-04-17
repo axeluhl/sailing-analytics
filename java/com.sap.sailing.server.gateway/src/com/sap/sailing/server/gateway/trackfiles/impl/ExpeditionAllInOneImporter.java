@@ -34,10 +34,8 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RankingMetrics;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -129,13 +127,13 @@ public class ExpeditionAllInOneImporter {
         final List<ErrorImportDTO> errorList = new ArrayList<>();
 
         public ImporterResult(String error) {
-            this(null, "", "", new RegattaNameAndRaceName("", ""), "", "", Collections.emptyList(),
+            this(null, "", "", "", Collections.emptyList(), Collections.emptyList(),
                     Collections.emptyList(), "", Collections.emptyList());
             errorList.add(new ErrorImportDTO(error));
         }
 
         public ImporterResult(Throwable exception, List<ErrorImportDTO> additionalErrors) {
-            this(null, "", "", new RegattaNameAndRaceName("", ""), "", "", Collections.emptyList(),
+            this(null, "", "","", Collections.emptyList(), Collections.emptyList(),
                     Collections.emptyList(), "", Collections.emptyList());
             errorList.add(new ErrorImportDTO(exception.getClass().getName(), exception.getMessage()));
             if (additionalErrors != null) {
@@ -144,15 +142,16 @@ public class ExpeditionAllInOneImporter {
         }
 
         private ImporterResult(final UUID eventId, final String leaderboardName, String leaderboardGroupName,
-                final RegattaAndRaceIdentifier regattaAndRaceIdentifier, final String raceColumnName,
-                final String fleetName, final List<TrackImportDTO> importGpsFixData,
-                final List<TrackImportDTO> importSensorFixData, final String sensorFixImporterType,
-                List<ErrorImportDTO> errors) {
+                final String regattaName, List<Triple<String, String, String>> raceNameRaceColumnNameFleetnameList,
+                final List<TrackImportDTO> importGpsFixData, final List<TrackImportDTO> importSensorFixData,
+                final String sensorFixImporterType, List<ErrorImportDTO> errors) {
             this.eventId = eventId;
             this.leaderboardName = leaderboardName;
             this.leaderboardGroupName = leaderboardGroupName;
-            this.regattaName = regattaAndRaceIdentifier.getRegattaName();
-            raceNameRaceColumnNameFleetnameList.add(new Triple<String, String, String>(regattaAndRaceIdentifier.getRaceName(), raceColumnName, fleetName));
+            this.regattaName = regattaName;
+            if (raceNameRaceColumnNameFleetnameList != null) {
+                this.raceNameRaceColumnNameFleetnameList.addAll(raceNameRaceColumnNameFleetnameList);
+            }
             this.importGpsFixData = importGpsFixData;
             this.importSensorFixData = importSensorFixData;
             this.sensorFixImporterType = sensorFixImporterType;
@@ -234,23 +233,21 @@ public class ExpeditionAllInOneImporter {
         final UUID eventId;
         final String leaderboardGroupName;
         final String regattaNameAndleaderboardName;
-        // TODO Should we return all TrackedRaces and show several RaceBoard links to the user?
-        final DynamicTrackedRace trackedRace;
+        final List<Triple<String, String, String>> raceNameRaceColumnNameFleetnameList = new ArrayList<>();
         final List<DynamicTrackedRace> trackedRaces = new ArrayList<>();
-        final String fleetName;
-        final String raceColumnName;
         if (importMode == ImportMode.NEW_EVENT) {
             leaderboardGroupName = filenameWithDateTimeSuffix;
             regattaNameAndleaderboardName = filenameWithDateTimeSuffix;
-            raceColumnName = filename;
+            String raceColumnName = filename;
             eventId = UUID.randomUUID();
-            fleetName = LeaderboardNameConstants.DEFAULT_FLEET_NAME;
+            String fleetName = LeaderboardNameConstants.DEFAULT_FLEET_NAME;
             
-            trackedRace = createEventStructureWithASingleRaceAndTrackIt(filenameWithSuffix, boatClassName, errors, importTimeString, filename,
+            final DynamicTrackedRace trackedRace = createEventStructureWithASingleRaceAndTrackIt(filenameWithSuffix, boatClassName, errors, importTimeString, filename,
                     filenameWithDateTimeSuffix, trackedRaceName, discardThresholds, firstFixAt, lastFixAt,
                     eventStartDate, eventEndDate, eventId, leaderboardGroupName, regattaNameAndleaderboardName,
                     fleetName, raceColumnName);
             trackedRaces.add(trackedRace);
+            raceNameRaceColumnNameFleetnameList.add(new Triple<>(trackedRaceName, raceColumnName, fleetName));
         } else {
             regattaNameAndleaderboardName = existingRegattaName;
             if (existingRegattaName != null && !existingRegattaName.isEmpty()) {
@@ -279,9 +276,6 @@ public class ExpeditionAllInOneImporter {
                         return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidRace"));
                     }
                     try {
-                        Fleet firstFleet = null;
-                        DynamicTrackedRace firstTrackedRace = null;
-                        RaceColumn firstRaceColumn = null;
                         for (RaceColumn raceColumn : raceColumns) {
                             final Iterable<? extends Fleet> fleets = raceColumn.getFleets();
                             if (Util.size(fleets) != 1) {
@@ -293,16 +287,10 @@ public class ExpeditionAllInOneImporter {
                                 trackedRaceForColumn = trackRace(regattaLeaderboard, raceColumn, fleet);
                             }
                             trackedRaces.add(trackedRaceForColumn);
-                            if (firstTrackedRace == null) {
-                                firstTrackedRace = trackedRaceForColumn;
-                                firstFleet = fleet;
-                                firstRaceColumn = raceColumn;
-                            }
+                            raceNameRaceColumnNameFleetnameList
+                                    .add(new Triple<>(trackedRaceForColumn.getRaceIdentifier().getRaceName(),
+                                            raceColumn.getName(), fleet.getName()));
                         }
-                        // TODO we remember the first trackedRace for now. Should we remember all?
-                        trackedRace = firstTrackedRace;
-                        fleetName = firstFleet.getName();
-                        raceColumnName = firstRaceColumn.getName();
                     } catch (Exception e) {
                         throw new AllinOneImportException(e, errors);
                     }
@@ -317,14 +305,15 @@ public class ExpeditionAllInOneImporter {
                         return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorMultiSeries"));
                     }
                     final Fleet fleet = fleets.iterator().next();
-                    fleetName = fleet.getName();
+                    final String fleetName = fleet.getName();
                     // When uploading files with identical name, the second RaceColumn will be named with the upload time in its name
-                    raceColumnName = regatta.getRaceColumnByName(filename) == null ? filename : filenameWithDateTimeSuffix;
+                    final String raceColumnName = regatta.getRaceColumnByName(filename) == null ? filename : filenameWithDateTimeSuffix;
                     final RaceColumn raceColumn = service.apply(new AddColumnToSeries(regatta.getRegattaIdentifier(), series.getName(), raceColumnName));
 
-                    trackedRace = createTrackedRaceAndSetupRaceTimes(errors, trackedRaceName, firstFixAt, lastFixAt, regatta, regattaLeaderboard,
+                    final DynamicTrackedRace trackedRace = createTrackedRaceAndSetupRaceTimes(errors, trackedRaceName, firstFixAt, lastFixAt, regatta, regattaLeaderboard,
                             raceColumn, fleet);
                     trackedRaces.add(trackedRace);
+                    raceNameRaceColumnNameFleetnameList.add(new Triple<>(trackedRaceName, raceColumnName, fleetName));
                 } else {
                     return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidImportMode") + importMode);
                 }
@@ -343,7 +332,7 @@ public class ExpeditionAllInOneImporter {
                     trackedRaces, streamsWithFilenames);
             
             return new ImporterResult(eventId, regattaNameAndleaderboardName, leaderboardGroupName,
-                    trackedRace.getRaceIdentifier(), raceColumnName, fleetName,
+                    regattaNameAndleaderboardName, raceNameRaceColumnNameFleetnameList,
                     jsonHolderForGpsFixImport.getImportResult(), jsonHolderForSensorFixImport.getImportResult(),
                     sensorFixImporterType, errors);
         } catch (Exception e) {
