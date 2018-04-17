@@ -310,7 +310,7 @@ public class ExpeditionAllInOneImporter {
                     } catch (Exception e) {
                         throw new AllinOneImportException(e, errors);
                     }
-                } else if (importMode == ImportMode.NEW_RACE){
+                } else if (importMode == ImportMode.NEW_RACE) {
                     final Iterable<? extends Series> seriesInRegatta = regatta.getSeries();
                     if (Util.isEmpty(seriesInRegatta)) {
                         return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidSeries"));
