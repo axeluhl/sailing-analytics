@@ -51,7 +51,7 @@ public class TrackedRaceCreationResultDialog extends DataEntryDialog<Void> {
         verticalPanel.setSpacing(20);
         boolean multiRace = raceNameRaceColumnName.size() > 1;
         for (Pair<String, String> raceName : raceNameRaceColumnName) {
-            String anchorLabel = multiRace ? StringMessages.INSTANCE.importFinishedGotoRaceboard() + raceName.getB()
+            String anchorLabel = multiRace ? StringMessages.INSTANCE.importFinishedGotoRaceboardWithName(raceName.getB())
                     : StringMessages.INSTANCE.importFinishedGotoRaceboard();
             Anchor raceboardAnchor = new Anchor(anchorLabel,
                     EntryPointWithSettingsLinkFactory.createRaceBoardLinkWithDefaultSettings(eventId, leaderboardName,
