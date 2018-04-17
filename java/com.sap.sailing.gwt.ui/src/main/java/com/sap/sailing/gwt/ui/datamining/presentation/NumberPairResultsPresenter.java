@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.datamining.presentation;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
-import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Color;
@@ -12,9 +11,6 @@ import org.moxieapps.gwt.highcharts.client.Exporting;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.Series.Type;
-import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
-import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
-import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -77,6 +73,7 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
     protected void internalShowResults(QueryResultDTO<?> r) {
         result = r;
         for (Entry<GroupKey, ?> resultEntry : result.getResults().entrySet()) {
+            @SuppressWarnings("unchecked")
             AveragePairWithStats<Number> value = (AveragePairWithStats<Number>) resultEntry.getValue();
             
             Point point = new Point(value.getAverage().getA(), value.getAverage().getB());

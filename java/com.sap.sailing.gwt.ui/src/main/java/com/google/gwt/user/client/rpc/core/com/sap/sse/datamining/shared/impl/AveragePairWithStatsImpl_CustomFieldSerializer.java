@@ -19,6 +19,7 @@ public class AveragePairWithStatsImpl_CustomFieldSerializer extends CustomFieldS
         return instantiate(streamReader);
     }
 
+    @SuppressWarnings("unchecked")
     public static AveragePairWithStatsImpl instantiate(SerializationStreamReader streamReader) throws SerializationException {
         final Pair average = (Pair) streamReader.readObject();
         final Pair min = (Pair) streamReader.readObject();
@@ -27,7 +28,7 @@ public class AveragePairWithStatsImpl_CustomFieldSerializer extends CustomFieldS
         final Pair standardDeviation = (Pair) streamReader.readObject();
         final String resultType = streamReader.readString();
         final long count = streamReader.readLong();
-        return new AveragePairWithStatsImpl<Pair>(average, min, max, median, standardDeviation, count, resultType);
+        return new AveragePairWithStatsImpl<Object>(average, min, max, median, standardDeviation, count, resultType);
     }
 
     @Override
