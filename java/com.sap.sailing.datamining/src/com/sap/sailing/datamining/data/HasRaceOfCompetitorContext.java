@@ -79,4 +79,7 @@ public interface HasRaceOfCompetitorContext {
     
     @Statistic(messageKey="LineLengthAtStart", resultDecimals=1)
     public Distance getLineLengthAtStart();
+
+    @Statistic(messageKey="WindwardDistanceToStarboardSideAtStart", resultDecimals=2)
+    Distance getWindwardDistanceToStarboardSideAtStart();
 }

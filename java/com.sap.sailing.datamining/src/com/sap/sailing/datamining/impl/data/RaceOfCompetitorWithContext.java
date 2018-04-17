@@ -127,6 +127,26 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
+    public Distance getWindwardDistanceToStarboardSideAtStart() {
+        TrackedRace trackedRace = getTrackedRace();
+        TimePoint startOfRace = trackedRace.getStartOfRace();
+        LineDetails startLine = trackedRace.getStartLine(startOfRace);
+        Mark starboardMark = startLine.getStarboardMarkWhileApproachingLine();
+        if (starboardMark == null) {
+            return null;
+        }
+        
+        GPSFixTrack<Mark, GPSFix> starboardMarkTrack = trackedRace.getOrCreateTrack(starboardMark);
+        Position advantageousMarkPosition = starboardMarkTrack.getEstimatedPosition(startOfRace, false);
+        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(getCompetitor());
+        Position competitorPosition = competitorTrack.getEstimatedPosition(startOfRace, false);
+
+        TrackedLeg trackedLeg = trackedRace.getTrackedLeg(trackedRace.getRace().getCourse().getFirstLeg());
+        Distance distance = trackedLeg.getWindwardDistance(competitorPosition, advantageousMarkPosition, startOfRace, WindPositionMode.LEG_MIDDLE);
+        return distance;
+    }
+    
+    @Override
     public ClusterDTO getPercentageClusterForRelativeScore() {
         Double relativeScore = getTrackedRaceContext().getRelativeScoreForCompetitor(getCompetitor());
         if (relativeScore == null) {
