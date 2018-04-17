@@ -15,11 +15,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.apache.commons.fileupload.FileItem;
+import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -35,6 +38,8 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.Placemark;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -47,19 +52,24 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.ErrorImportDTO;
 import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.TrackImportDTO;
@@ -72,6 +82,7 @@ import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
@@ -111,6 +122,8 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 public class ExpeditionAllInOneImporter {
 
     private static final Logger logger = Logger.getLogger(ExpeditionAllInOneImporter.class.getName());
+
+    private static final double VENUE_RANGE_CHECK = 10;
 
     private final RacingEventService service;
     private final RaceLogTrackingAdapter adapter;
@@ -196,6 +209,7 @@ public class ExpeditionAllInOneImporter {
             throw new AllinOneImportException(e1, errors);
         }
         errors.addAll(jsonHolderForGpsFixImport.getErrorList());
+        
 
         final ImportResultDTO jsonHolderForSensorFixImport = new ImportResultDTO(logger);
         final String sensorFixImporterType = DoubleVectorFixImporter.EXPEDITION_EXTENDED_TYPE;
@@ -228,7 +242,6 @@ public class ExpeditionAllInOneImporter {
                 lastFixAt = deviceTrackEnd;
             }
         }
-
         final TimePoint eventStartDate = firstFixAt;
         final TimePoint eventEndDate = lastFixAt;
         
@@ -243,13 +256,13 @@ public class ExpeditionAllInOneImporter {
             String raceColumnName = filename;
             eventId = UUID.randomUUID();
             String fleetName = LeaderboardNameConstants.DEFAULT_FLEET_NAME;
-            
             final DynamicTrackedRace trackedRace = createEventStructureWithASingleRaceAndTrackIt(filenameWithSuffix, boatClassName, errors, importTimeString, filename,
                     filenameWithDateTimeSuffix, trackedRaceName, discardThresholds, firstFixAt, lastFixAt,
                     eventStartDate, eventEndDate, eventId, leaderboardGroupName, regattaNameAndleaderboardName,
                     fleetName, raceColumnName);
             trackedRaces.add(trackedRace);
             raceNameRaceColumnNameFleetnameList.add(new Triple<>(trackedRaceName, raceColumnName, fleetName));
+            updateVenueName(filename, jsonHolderForGpsFixImport.getImportResult(), eventId);
         } else {
             regattaNameAndleaderboardName = existingRegattaName;
             if (existingRegattaName != null && !existingRegattaName.isEmpty()) {
@@ -354,7 +367,11 @@ public class ExpeditionAllInOneImporter {
             endDate = lastFixAt;
         }
         Iterable<UUID> leaderboardGroups = StreamSupport.stream(event.getLeaderboardGroups().spliterator(), false).map(t -> t.getId()).collect(Collectors.toList()); 
-        service.updateEvent(eventId, event.getName(), event.getDescription(), startDate, endDate, event.getVenue().getName(), event.isPublic(), leaderboardGroups, event.getOfficialWebsiteURL(), event.getBaseURL(), event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(),event.getWindFinderReviewedSpotsCollectionIds());
+
+        service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(), startDate,
+                endDate, event.getVenue().getName(), event.isPublic(),
+                leaderboardGroups, event.getOfficialWebsiteURL(), event.getBaseURL(),
+                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds()));
     }
 
     private Pair<Event, LeaderboardGroup> findEventAndLeaderboardGroupForExistingLeaderboard(final Leaderboard leaderboard) {
@@ -377,8 +394,7 @@ public class ExpeditionAllInOneImporter {
             final UUID eventId, final String leaderboardGroupName, final String regattaNameAndleaderboardName,
             final String fleetName, final String raceColumnName) throws AllinOneImportException {
         final DynamicTrackedRace trackedRace;
-        // TODO guess venue based on the reverse geocoder?
-        final String venueName = filename;
+        
         final String eventName = filenameWithDateTimeSuffix;
         final String description = MessageFormat.format("Event imported from expedition file ''{0}'' on {1}",
                 filenameWithSuffix, importTimeString);
@@ -388,7 +404,7 @@ public class ExpeditionAllInOneImporter {
 
         final String seriesName = Series.DEFAULT_NAME;
         
-        final Event event = service.addEvent(eventName, description, eventStartDate, eventEndDate, venueName, true,
+        final Event event = service.addEvent(eventName, description, eventStartDate, eventEndDate, filename, true,
                 eventId);
 
         final UUID courseAreaId = addDefaultCourseArea(event);
@@ -407,6 +423,44 @@ public class ExpeditionAllInOneImporter {
         trackedRace = createTrackedRaceAndSetupRaceTimes(errors, trackedRaceName, firstFixAt, lastFixAt, regatta, regattaLeaderboard,
                 raceColumn, fleet);
         return trackedRace;
+    }
+
+    private void updateVenueName(String filename, List<TrackImportDTO> list, UUID eventId) {
+        for (TrackImportDTO f : list) {
+            TrackFileImportDeviceIdentifier deviceIdentifier = TrackFileImportDeviceIdentifierImpl
+                    .getOrCreate(f.getDevice());
+            final TimePoint end = f.getRange().to();
+            try {
+                service.getSensorFixStore().loadFixes(new Consumer<GPSFix>() {
+                    @Override
+                    public void accept(GPSFix lastFix) {
+                        Position pos = lastFix.getPosition();
+                        if (pos != null) {
+                            try {
+                                Placemark reverseVenue = ReverseGeocoder.INSTANCE.getPlacemarkFirst(pos, VENUE_RANGE_CHECK,
+                                        new Placemark.ByPopulationDistanceRatio(pos));
+                                if (reverseVenue != null) {
+                                    String newVenueName = reverseVenue.getName();
+                                    Event event = service.getEvent(eventId);
+                                    Iterable<UUID> leaderboardGroups = StreamSupport
+                                            .stream(event.getLeaderboardGroups().spliterator(), false).map(t -> t.getId())
+                                            .collect(Collectors.toList());
+                                    service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(),
+                                            event.getStartDate(), event.getEndDate(), newVenueName, event.isPublic(),
+                                            leaderboardGroups, event.getOfficialWebsiteURL(), event.getBaseURL(),
+                                            event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(),
+                                            event.getWindFinderReviewedSpotsCollectionIds()));
+                                }
+                            } catch (IOException | ParseException e) {
+                                logger.log(Level.WARNING, "Could not reverse determine location " + pos, e);
+                            }
+                        }
+                    }
+                }, deviceIdentifier, end, end, true);
+            } catch (NoCorrespondingServiceRegisteredException | TransformationException e) {
+                logger.log(Level.WARNING, "Could not reverse determine location", e);
+            }
+        }
     }
 
     private UUID addDefaultCourseArea(final Event event) {
