@@ -1,12 +1,9 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
+import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Color;
@@ -22,13 +19,9 @@ import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.AveragePairWithStats;
-import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
-import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -70,16 +63,7 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
                 .setChartTitle(new ChartTitle().setText(getStringMessages().dataMiningResult()));
         chart.setExporting(new Exporting().setEnabled(false));
         chart.getXAxis().setAllowDecimals(false);
-        chart.getYAxis().setAxisTitleText("Result").setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
-            @Override
-            public String format(AxisLabelsData axisLabelsData) {
-                try {
-                    return axisLabelsData.getValueAsDouble() + "";
-                } catch (Exception e) {
-                    return "";
-                }
-            }
-        }));
+        chart.getYAxis().setAxisTitleText("");
         return chart;
     }
 
@@ -92,22 +76,22 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
     @Override
     protected void internalShowResults(QueryResultDTO<?> r) {
         result = r;
-//        createAndAddSeriesToChart();
         for (Entry<GroupKey, ?> resultEntry : result.getResults().entrySet()) {
             AveragePairWithStats<Number> value = (AveragePairWithStats<Number>) resultEntry.getValue();
             
             Point point = new Point(value.getAverage().getA(), value.getAverage().getB());
+            point.setName(resultEntry.getKey().asString());
             series.add(point);
         }
+        chart.getXAxis().setAxisTitleText(result.getResultSignifier());
         
-        chart.addSeries(chart.createSeries().setType(Type.SCATTER).setPoints(series.toArray(new Point[series.size()])));
-        chart.redraw();
+        chart.addSeries(chart.createSeries().setName("Test").setType(Type.SCATTER).setPoints(series.toArray(new Point[series.size()])));
     }
 
 
     @Override
     public String getLocalizedShortName() {
-        return "NumberPair";
+        return getStringMessages().numberPairResultsPresenter();
     }
 
     @Override
