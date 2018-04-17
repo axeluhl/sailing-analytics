@@ -128,6 +128,12 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     
     @Override
     public Distance getAbsoluteWindwardDistanceToStarboardSideAtStart() {
+        TrackedLegOfCompetitor firstTrackedLegOfCompetitor = getTrackedRace().getTrackedLeg(competitor, getTrackedRace().getRace().getCourse().getFirstLeg());
+        TimePoint competitorStartTime = firstTrackedLegOfCompetitor.getStartTime();
+        if(competitorStartTime == null) {
+            return null;
+        }
+        
         TrackedRace trackedRace = getTrackedRace();
         TimePoint startOfRace = trackedRace.getStartOfRace();
         LineDetails startLine = trackedRace.getStartLine(startOfRace);
@@ -279,6 +285,11 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
             return null;
         }
         return getTrackedRace().getStartLine(competitorStartTime).getLength();
+    }
+    
+    @Override
+    public Pair<Double, Double> getRelativeDistanceToStarboardSideAtStartVsFinalRank(){
+        return new Pair<>(getNormalizedDistanceToStarboardSideAtStart(), getTrackedRaceContext().getRankAtFinishForCompetitor(getCompetitor()));
     }
     
 }

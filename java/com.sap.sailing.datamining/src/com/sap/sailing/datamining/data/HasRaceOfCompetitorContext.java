@@ -82,4 +82,7 @@ public interface HasRaceOfCompetitorContext {
 
     @Statistic(messageKey="AbsoluteWindwardDistanceToStarboardSideAtStart", resultDecimals=2)
     Distance getAbsoluteWindwardDistanceToStarboardSideAtStart();
+    
+    @Statistic(messageKey="DistanceToStarboadSideAtStartVsFinalRank", resultDecimals=2)
+    Pair<Double, Double> getRelativeDistanceToStarboardSideAtStartVsFinalRank();
 }
