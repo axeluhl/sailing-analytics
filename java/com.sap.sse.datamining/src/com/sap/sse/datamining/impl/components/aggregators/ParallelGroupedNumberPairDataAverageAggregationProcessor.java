@@ -16,6 +16,7 @@ import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.AveragePairWithStats;
 import com.sap.sse.datamining.shared.impl.AveragePairWithStatsImpl;
 
+@SuppressWarnings("rawtypes")
 public class ParallelGroupedNumberPairDataAverageAggregationProcessor
             extends AbstractParallelGroupedDataStoringAggregationProcessor<Pair, AveragePairWithStats<Number>> {
     private static final Class<?> _c = AveragePairWithStats.class;
@@ -44,7 +45,6 @@ public class ParallelGroupedNumberPairDataAverageAggregationProcessor
         maxPerKey = new HashMap<>();
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected void storeElement(GroupedDataEntry<Pair> element) {
         if (element.getDataEntry() != null) {
