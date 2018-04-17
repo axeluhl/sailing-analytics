@@ -49,7 +49,7 @@ public class PersistenceManager {
     private final CompleteManeuverCurveWithEstimationDataJsonDeserializer completeManeuverCurveDeserializer = new CompleteManeuverCurveWithEstimationDataJsonDeserializer(
             new ManeuverMainCurveWithEstimationDataJsonDeserializer(),
             new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer(),
-            new WindJsonDeserializer(new PositionJsonDeserializer()));
+            new WindJsonDeserializer(new PositionJsonDeserializer()), new PositionJsonDeserializer());
     private final DetailedBoatClassJsonDeserializer boatClassDeserializer = new DetailedBoatClassJsonDeserializer();
     private final JSONParser jsonParser = new JSONParser();
 

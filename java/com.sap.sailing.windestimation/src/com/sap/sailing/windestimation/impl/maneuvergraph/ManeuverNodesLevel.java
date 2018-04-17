@@ -62,11 +62,9 @@ public class ManeuverNodesLevel {
     }
 
     public void computeDistances() {
-        boolean markPassingIsNeighbour = isMarkPassingNeighbour();
         for (FineGrainedPointOfSail pointOfSailBeforeManeuver : FineGrainedPointOfSail.values()) {
-            double likelihoodForPointOfSailBeforeManeuver = markPassingIsNeighbour
-                    ? 1 / CoarseGrainedPointOfSail.values().length
-                    : maneuverClassificationResult.getLikelihoodForPointOfSailBeforeManeuver(
+            double likelihoodForPointOfSailBeforeManeuver = 
+                    maneuverClassificationResult.getLikelihoodForPointOfSailBeforeManeuver(
                             pointOfSailBeforeManeuver.getCoarseGrainedPointOfSail());
             if (this.previousLevel == null) {
                 this.bestDistancesFromStart[pointOfSailBeforeManeuver.ordinal()] = convertLikelihoodToDistance(
@@ -141,20 +139,6 @@ public class ManeuverNodesLevel {
             targetCourseChangeDeviation -= 180;
         }
         return 1 / (1 + (targetCourseChangeDeviation / 5)) * likelihoodForPointOfSailBeforeManeuver + 0.001;
-    }
-
-    private boolean isMarkPassingNeighbour() {
-        boolean markPassingIsNeighbour = false;
-        if (previousLevel != null && previousLevel.getManeuver().isMarkPassing()
-                && previousLevel.getManeuver().getCurveWithUnstableCourseAndSpeed().getTimePointAfter()
-                        .until(maneuver.getCurveWithUnstableCourseAndSpeed().getTimePointBefore()).asSeconds() <= 24
-                || nextLevel != null && nextLevel.getManeuver().isMarkPassing()
-                        && maneuver.getCurveWithUnstableCourseAndSpeed().getTimePointAfter().until(
-                                nextLevel.getManeuver().getCurveWithUnstableCourseAndSpeed().getTimePointBefore())
-                                .asSeconds() <= 24) {
-            markPassingIsNeighbour = true;
-        }
-        return markPassingIsNeighbour;
     }
 
     private double convertLikelihoodToDistance(double likelihoodForPointOfSailBeforeManeuver) {
