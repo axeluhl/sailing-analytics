@@ -250,4 +250,14 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         return getTrackedRace().getDistanceTraveledIncludingGateStart(getCompetitor(), MillisecondsTimePoint.now());
     }
     
+    @Override 
+    public Distance getLineLengthAtStart() {
+        TrackedLegOfCompetitor firstTrackedLegOfCompetitor = getTrackedRace().getTrackedLeg(competitor, getTrackedRace().getRace().getCourse().getFirstLeg());
+        TimePoint competitorStartTime = firstTrackedLegOfCompetitor.getStartTime();
+        if (competitorStartTime == null) {
+            return null;
+        }
+        return getTrackedRace().getStartLine(competitorStartTime).getLength();
+    }
+    
 }

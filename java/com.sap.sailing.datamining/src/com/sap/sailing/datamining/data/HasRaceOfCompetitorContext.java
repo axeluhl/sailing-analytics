@@ -77,4 +77,6 @@ public interface HasRaceOfCompetitorContext {
     @Statistic(messageKey="DistanceTraveled", resultDecimals=1)
     public Distance getDistanceTraveled();
     
+    @Statistic(messageKey="LineLengthAtStart", resultDecimals=1)
+    public Distance getLineLengthAtStart();
 }
