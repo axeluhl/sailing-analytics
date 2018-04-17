@@ -16,6 +16,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.fileupload.FileItem;
 import org.osgi.framework.BundleContext;
@@ -266,8 +268,9 @@ public class ExpeditionAllInOneImporter {
                 if (foundEventAndLeaderboardGroup == null) {
                     return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidLeaderBoardEventLink"));
                 }
-                // TODO should we extend the time range of the event to ensure that it includes the newly imported tracks' time ranges?
+                
                 eventId = foundEventAndLeaderboardGroup.getA().getId();
+                ensureEventLongEnough(firstFixAt, lastFixAt, eventId);
                 leaderboardGroupName = foundEventAndLeaderboardGroup.getB().getName();
                 
                 if (importMode == ImportMode.NEW_COMPETITOR) {
@@ -338,6 +341,20 @@ public class ExpeditionAllInOneImporter {
         } catch (Exception e) {
             throw new AllinOneImportException(e, errors);
         }
+    }
+
+    private void ensureEventLongEnough(TimePoint firstFixAt, TimePoint lastFixAt, UUID eventId) {
+        Event event = service.getEvent(eventId);
+        TimePoint startDate = event.getStartDate();
+        if(firstFixAt.before(startDate)) {
+            startDate = firstFixAt;
+        }
+        TimePoint endDate = event.getEndDate();
+        if(lastFixAt.after(endDate)) {
+            endDate = lastFixAt;
+        }
+        Iterable<UUID> leaderboardGroups = StreamSupport.stream(event.getLeaderboardGroups().spliterator(), false).map(t -> t.getId()).collect(Collectors.toList()); 
+        service.updateEvent(eventId, event.getName(), event.getDescription(), startDate, endDate, event.getVenue().getName(), event.isPublic(), leaderboardGroups, event.getOfficialWebsiteURL(), event.getBaseURL(), event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(),event.getWindFinderReviewedSpotsCollectionIds());
     }
 
     private Pair<Event, LeaderboardGroup> findEventAndLeaderboardGroupForExistingLeaderboard(final Leaderboard leaderboard) {
