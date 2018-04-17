@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -227,14 +228,14 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final void continueWithMappedDevices() {
         List<RegattaNameAndRaceName> racesToStopAndStartTrackingFor = new ArrayList<>();
         final List<Triple<String, String, String>> leaderboardRaceColumnFleetNames = new ArrayList<>();
-        final List<String> raceNames = new ArrayList<>();
+        final List<Pair<String, String>> raceNames = new ArrayList<>();
         for(Triple<String, String, String> race:raceEntries) {
             String raceName = race.getA();
             String raceColumnName = race.getB();
             String fleetName= race.getC();
             racesToStopAndStartTrackingFor.add(new RegattaNameAndRaceName(regattaName, raceName));
             leaderboardRaceColumnFleetNames.add(new Triple<>(leaderboard.name, raceColumnName, fleetName));
-            raceNames.add(raceName);
+            raceNames.add(new Pair<String, String>(raceName, fleetName));
         }
         
         sailingService.removeAndUntrackRaces(racesToStopAndStartTrackingFor, new AsyncCallback<Void>() {
@@ -249,7 +250,6 @@ public class ExpeditionAllInOneAfterImportHandler {
                         /* correctWindByDeclination */ true, new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
-                                
                                 new ExpeditionAllInOneImportResultDialog(event.id, regatta.getName(),
                                         raceNames, leaderboard.getName(),
                                         leaderboardGroupName).show();
