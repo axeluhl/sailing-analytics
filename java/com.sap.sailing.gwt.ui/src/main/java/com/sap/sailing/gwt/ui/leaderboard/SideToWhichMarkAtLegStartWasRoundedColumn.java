@@ -12,7 +12,7 @@ public class SideToWhichMarkAtLegStartWasRoundedColumn extends DetailTypeColumn<
     public SideToWhichMarkAtLegStartWasRoundedColumn(String title, DataExtractor<NauticalSide, LeaderboardRowDTO> field,
             String headerStyle, String columnStyle, StringMessages stringMessages,
             DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
-        super(DetailType.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED, field, new TextCell(), headerStyle, columnStyle, displayedLeaderboardRowsProvider);
+        super(DetailType.LEG_SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED, field, new TextCell(), headerStyle, columnStyle, displayedLeaderboardRowsProvider);
         this.stringMessages = stringMessages;
     }
 

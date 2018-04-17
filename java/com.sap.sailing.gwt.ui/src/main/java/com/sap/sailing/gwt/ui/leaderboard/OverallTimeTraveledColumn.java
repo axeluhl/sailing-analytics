@@ -20,7 +20,7 @@ import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.DataExtractor;
 
 public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue<LeaderboardRowDTO> {
     
-    private static final DetailType DETAIL_TYPE = DetailType.TOTAL_TIME_SAILED_IN_SECONDS;
+    private static final DetailType DETAIL_TYPE = DetailType.OVERALL_TOTAL_TIME_SAILED_IN_SECONDS;
 
     private StringMessages stringMessages;
 

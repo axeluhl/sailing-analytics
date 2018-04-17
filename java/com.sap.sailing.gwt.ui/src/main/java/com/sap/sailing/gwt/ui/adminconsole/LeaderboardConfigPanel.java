@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -32,6 +34,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -77,6 +80,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattasDisplayer,
 TrackedRaceChangedListener, LeaderboardsDisplayer {
+    private static final Logger logger = Logger.getLogger(LeaderboardConfigPanel.class.getName());
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     
     private final boolean showRaceDetails;
@@ -330,7 +334,18 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     });
                     editCompetitorsDialog.show();
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
-                    openLeaderboardUrlConfigDialog(leaderboardDTO);
+                    sailingService.getAvailableDetailTypesForLeaderboard(leaderboardDTO.name, new AsyncCallback<Iterable<DetailType>>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            logger.log(Level.WARNING, "Could not load detailtypes for leaderboard", caught);
+                        }
+
+                        @Override
+                        public void onSuccess(Iterable<DetailType> result) {
+                            openLeaderboardUrlConfigDialog(leaderboardDTO, result);
+                        }
+                    });
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML.equals(value)) {
                     Window.open(UriUtils.fromString("/export/xml?domain=leaderboard&name=" + leaderboardDTO.name).asString(), "", null);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_OPEN_COACH_DASHBOARD.equals(value)) {
@@ -593,15 +608,16 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
      * checkbox for driving the {@link #LeaderboardUrlSettings.PARAM_EMBEDDED} field.
      * 
      * @param leaderboard
+     * @param availableDetailType 
      * 
      * @see LeaderboardEntryPoint#getUrl(String, LeaderboardSettings, boolean)
      */
-    private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard) {
+    private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard, Iterable<DetailType> availableDetailType) {
         final AbstractLeaderboardPerspectiveLifecycle lifeCycle;
         if (leaderboard.type.isMetaLeaderboard()) {
-            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringMessages, leaderboard);
+            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType);
         } else {
-            lifeCycle = new LeaderboardPerspectiveLifecycle(stringMessages, leaderboard);
+            lifeCycle = new LeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType);
         }
         final LeaderboardContextDefinition leaderboardContextSettings = new LeaderboardContextDefinition(leaderboard.name,
                 leaderboard.getDisplayName());
