@@ -33,9 +33,7 @@ The general procedure for linking a video to a race is explained [[here|wiki/how
 
 ### Local Video (no Upload Required)
 
-First of all, you'll need a web server running locally which allows you to make a directory on your local hard disk containing your video files accessible through HTTP. [[Here|wiki/howto/setup/webserver/chrome-webserver]] is a description of how to set this up, using a little web server that runs integrated in your Chrome browser.
-
-More specifically, [[this section|https://wiki.sapsailing.com/wiki/howto/setup/webserver/chrome-webserver#setup-locally-hosted-360-videos_adding-a-360-video]] then explains how to link a panoramic 360° video, choosing the correct file type.
+First of all, you'll need a web server running locally which allows you to make a directory on your local hard disk containing your video files accessible through HTTP. [[Here|wiki/howto/setup/webserver/nginx-webserver]] is a description of how to set this up, using a little web server that runs on all platforms.
 
 ### Uploading through AdminConsole
 
