@@ -10,7 +10,6 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -84,7 +83,6 @@ public class SettingsTest extends AbstractSeleniumTest {
      * settings and global settings.
      */
     @Test
-    @Ignore
     public void testRaceBoardPageSettingsStorage() throws InterruptedException, UnsupportedEncodingException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         EventConfigurationPanelPO events = adminConsole.goToEvents();
@@ -196,8 +194,8 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assert.assertTrue(mapSettings.isWindUp());
         // verify default mode settings override system defaults
         Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
-        // Verify custom user settings override system defaults
-        Assert.assertTrue(mapSettings.isTransparentHoverlines());
+        // Verify custom user settings are independent for modes
+        Assert.assertFalse(mapSettings.isTransparentHoverlines());
         mapSettings.setWindUp(false);
         mapSettings.setTransparentHoverlines(false);
         mapSettings.pressOk();
@@ -219,7 +217,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         mapSettings = raceboard.openMapSettings();
         // Verify that mode settings are overridden by document settings
         Assert.assertFalse(mapSettings.isWindUp());
-        // verify that document settings are able to override custom user settings by a system default value
+        // Verify custom user settings are independent for modes
         Assert.assertFalse(mapSettings.isTransparentHoverlines());
 
         //FIXME uncomment when START_ANALYSIS mode can be handled by remote CI server
