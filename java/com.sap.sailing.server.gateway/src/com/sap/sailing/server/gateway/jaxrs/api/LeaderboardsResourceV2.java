@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -136,6 +137,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             }
             JSONObject jsonCompetitor = new JSONObject();
             writeCompetitorBaseData(jsonCompetitor, competitor, leaderboardDTO);
+            BoatDTO rowBoatDTO = leaderboardRowDTO.boat;
+            if (rowBoatDTO != null) {
+                JSONObject jsonBoat = new JSONObject();
+                writeBoatData(jsonBoat, rowBoatDTO);
+                jsonCompetitor.put("boat", jsonBoat);
+            }
             jsonCompetitor.put("rank", competitorCounter);
             jsonCompetitor.put("carriedPoints", leaderboardRowDTO.carriedPoints);
             jsonCompetitor.put("netPoints", leaderboardRowDTO.netPoints);
@@ -147,6 +154,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 JSONObject jsonEntry = new JSONObject();
                 jsonRaceColumns.put(raceColumnName, jsonEntry);
                 LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
+                BoatDTO entryBoatDTO = leaderboardEntry.boat;
+                if (entryBoatDTO != null) {
+                    JSONObject jsonBoat = new JSONObject();
+                    writeBoatData(jsonBoat, rowBoatDTO);
+                    jsonCompetitor.put("boat", jsonBoat);
+                }
                 final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
                 jsonEntry.put("fleet", fleetOfCompetitor == null ? "" : fleetOfCompetitor.getName());
                 jsonEntry.put("totalPoints", leaderboardEntry.totalPoints);

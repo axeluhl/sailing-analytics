@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -117,9 +118,18 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         final String displayName = leaderboard.getDisplayName(competitor);
         jsonCompetitor.put("displayName", displayName == null ? competitor.getName() : displayName);
         jsonCompetitor.put("id", competitor.getIdAsString());
-        jsonCompetitor.put("sailID", competitor.getSailID());
+        jsonCompetitor.put("sailID", competitor.getSailID());  // only for backward compatibility
         jsonCompetitor.put("nationality", competitor.getThreeLetterIocCountryCode());
         jsonCompetitor.put("countryCode", competitor.getTwoLetterIsoCountryCode());
+    }
+
+    protected void writeBoatData(JSONObject jsonBoat, BoatDTO boat) {
+        jsonBoat.put("name", boat.getName());
+        jsonBoat.put("displayName", boat.getDisplayName());
+        jsonBoat.put("id", boat.getIdAsString());
+        jsonBoat.put("sailId", boat.getSailId());
+        jsonBoat.put("boatClass", boat.getBoatClass().getName());
+        jsonBoat.put("color", boat.getColor() != null ? boat.getColor().toString() : null);
     }
 
     private void writeCommonLeaderboardData(JSONObject jsonLeaderboard, Leaderboard leaderboard,
