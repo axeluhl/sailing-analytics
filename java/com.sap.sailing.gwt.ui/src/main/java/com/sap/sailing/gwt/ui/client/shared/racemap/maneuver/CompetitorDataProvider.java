@@ -29,12 +29,12 @@ public class CompetitorDataProvider<C extends CompetitorDTO, D> {
 
     public CompetitorDataProvider(final Supplier<Date> startOfTrackingProvider,
             final Supplier<Date> endOfTrackingProvider, final Supplier<TimePoint> liveTimePointProvider,
-            final Supplier<Boolean> isReplayingProvider, final Function<D, Date> measurementTimePointProvider) {
+            final Supplier<Boolean> isReplayingProvider, final Function<D, Long> measurementTimePointMillisProvider) {
         this.startOfTrackingProvider = () -> new MillisecondsTimePoint(startOfTrackingProvider.get());
         this.endOfTrackingProvider = () -> new MillisecondsTimePoint(endOfTrackingProvider.get());
         this.liveTimePointProvider = liveTimePointProvider;
         this.isReplayingProvider = isReplayingProvider;
-        this.measurementTimePointProvider = m -> new MillisecondsTimePoint(measurementTimePointProvider.apply(m));
+        this.measurementTimePointProvider = m -> new MillisecondsTimePoint(measurementTimePointMillisProvider.apply(m));
     }
 
     public void reset() {
@@ -61,10 +61,10 @@ public class CompetitorDataProvider<C extends CompetitorDTO, D> {
     }
 
     public void update(final Iterable<C> competitors, final boolean incremental) {
-        final Map<C, TimeRange> competitorUpdateTimeRanges = new HashMap<>();
-        competitors.forEach(c -> getData(c).getUpdateTimeRange().ifPresent(t -> competitorUpdateTimeRanges.put(c, t)));
-        if (!competitorUpdateTimeRanges.isEmpty()) {
-            this.loadData(competitorUpdateTimeRanges, result -> {
+        final Map<C, TimeRange> compTimeRanges = new HashMap<>();
+        competitors.forEach(c -> getData(c).getUpdateTimeRange(incremental).ifPresent(t -> compTimeRanges.put(c, t)));
+        if (!compTimeRanges.isEmpty()) {
+            this.loadData(compTimeRanges, result -> {
                 final Set<C> competitorToRefresh = new HashSet<>();
                 for (Entry<C, List<D>> entry : result.entrySet()) {
                     final C competitor = entry.getKey();
@@ -97,16 +97,21 @@ public class CompetitorDataProvider<C extends CompetitorDTO, D> {
         private final LinkedList<D> records = new LinkedList<>();
         private boolean noDataRequested = true;
 
-        private Optional<TimeRange> getUpdateTimeRange() {
+        private Optional<TimeRange> getUpdateTimeRange(final boolean incremental) {
             final Optional<TimeRange> result;
-            if (noDataRequested) {
+            if (noDataRequested || records.isEmpty() || !incremental) {
                 result = Optional.of(new TimeRangeImpl(startOfTrackingProvider.get(), getEndTimePoint(), true));
             } else {
                 if (isReplayingProvider.get()) {
                     result = Optional.empty();
                 } else {
                     final TimePoint lastestMeasurementTimePoint = measurementTimePointProvider.apply(records.getLast());
-                    result = Optional.of(new TimeRangeImpl(lastestMeasurementTimePoint, getEndTimePoint(), true));
+                    final TimePoint endTimePoint = getEndTimePoint();
+                    if (!endTimePoint.after(lastestMeasurementTimePoint)) {
+                        result = Optional.empty();
+                    } else {
+                        result = Optional.of(new TimeRangeImpl(lastestMeasurementTimePoint, endTimePoint, true));
+                    }
                 }
             }
             this.noDataRequested = false;

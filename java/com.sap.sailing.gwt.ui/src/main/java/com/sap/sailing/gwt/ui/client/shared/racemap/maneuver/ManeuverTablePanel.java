@@ -118,7 +118,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
         this.competitorDataProvider = new CompetitorDataProvider<CompetitorWithBoatDTO, ManeuverDTO>(
                 timeRangeWithZoomProvider::getFromTime, timeRangeWithZoomProvider::getToTime, timer::getLiveTimePoint,
-                () -> timer.getPlayMode() == PlayModes.Replay, m -> m.timePoint) {
+                this::isReplaying, m -> m.timePoint.getTime() + 2500) {
             @Override
             protected void loadData(Map<CompetitorWithBoatDTO, TimeRange> competitorTimeRanges,
                     Consumer<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>> callback) {
