@@ -379,10 +379,10 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         Bearing relativeBearingToNextMarkPassingAfterManeuver = getRelativeBearingToNextMark(
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter(), maneuverCurve
                         .getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingAfter().getBearing());
-        return new CompleteManeuverCurveWithEstimationDataImpl(mainCurve, curveWithUnstableCourseAndSpeed, wind,
-                numberOfTacks, numberOfJibes, maneuverStartsByRunningAwayFromWind,
-                relativeBearingToNextMarkPassingBeforeManeuver, relativeBearingToNextMarkPassingAfterManeuver,
-                maneuverCurve.isMarkPassing());
+        return new CompleteManeuverCurveWithEstimationDataImpl(maneuverPosition, mainCurve,
+                curveWithUnstableCourseAndSpeed, wind, numberOfTacks, numberOfJibes,
+                maneuverStartsByRunningAwayFromWind, relativeBearingToNextMarkPassingBeforeManeuver,
+                relativeBearingToNextMarkPassingAfterManeuver, maneuverCurve.isMarkPassing());
     }
 
     /**

@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
@@ -24,18 +25,22 @@ public class CompleteManeuverCurveWithEstimationDataJsonDeserializer
     private final ManeuverMainCurveWithEstimationDataJsonDeserializer mainCurveDeserializer;
     private final ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer curveWithUnstableCourseAndSpeedDeserializer;
     private final WindJsonDeserializer windDeserializer;
+    private final PositionJsonDeserializer positionDeserializer;
 
     public CompleteManeuverCurveWithEstimationDataJsonDeserializer(
             ManeuverMainCurveWithEstimationDataJsonDeserializer mainCurveDeserializer,
             ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer curveWithUnstableCourseAndSpeedDeserializer,
-            WindJsonDeserializer windDeserializer) {
+            WindJsonDeserializer windDeserializer, PositionJsonDeserializer positionDeserializer) {
         this.mainCurveDeserializer = mainCurveDeserializer;
         this.curveWithUnstableCourseAndSpeedDeserializer = curveWithUnstableCourseAndSpeedDeserializer;
         this.windDeserializer = windDeserializer;
+        this.positionDeserializer = positionDeserializer;
     }
 
     @Override
     public CompleteManeuverCurveWithEstimationData deserialize(JSONObject object) throws JsonDeserializationException {
+        Position position = positionDeserializer
+                .deserialize((JSONObject) object.get(CompleteManeuverCurveWithEstimationDataJsonSerializer.POSITION));
         boolean markPassing = (Boolean) object.get(CompleteManeuverCurveWithEstimationDataJsonSerializer.MARK_PASSING);
         ManeuverMainCurveWithEstimationData mainCurve = mainCurveDeserializer
                 .deserialize((JSONObject) object.get(CompleteManeuverCurveWithEstimationDataJsonSerializer.MAIN_CURVE));
@@ -54,8 +59,8 @@ public class CompleteManeuverCurveWithEstimationDataJsonDeserializer
                 CompleteManeuverCurveWithEstimationDataJsonSerializer.RELATIVE_BEARING_TO_NEXT_MARK_BEFORE_MANEUVER);
         Double relativeBearingToNextMarkAfterManeuver = (Double) object.get(
                 CompleteManeuverCurveWithEstimationDataJsonSerializer.RELATIVE_BEARING_TO_NEXT_MARK_AFTER_MANEUVER);
-        return new CompleteManeuverCurveWithEstimationDataImpl(mainCurve, curveWithUnstableCourseAndSpeed, wind,
-                tackingCount, jibingCount, maneuverStartsByRunningAwayFromWind,
+        return new CompleteManeuverCurveWithEstimationDataImpl(position, mainCurve, curveWithUnstableCourseAndSpeed,
+                wind, tackingCount, jibingCount, maneuverStartsByRunningAwayFromWind,
                 convertBearing(relativeBearingToNextMarkBeforeManeuver),
                 convertBearing(relativeBearingToNextMarkAfterManeuver), markPassing);
     }
