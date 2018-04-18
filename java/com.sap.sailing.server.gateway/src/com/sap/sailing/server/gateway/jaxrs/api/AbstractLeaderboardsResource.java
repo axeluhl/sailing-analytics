@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -96,6 +97,8 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         jsonLeaderboard.put("displayName", displayName == null ? leaderboard.name : displayName);
         jsonLeaderboard.put("resultTimepoint", leaderboard.getTimePoint() != null ? leaderboard.getTimePoint().getTime() : null);
         jsonLeaderboard.put("resultState", resultState.name());
+        jsonLeaderboard.put("type", leaderboard.type);
+        jsonLeaderboard.put("canBoatsOfCompetitorsChangePerRace", leaderboard.canBoatsOfCompetitorsChangePerRace);
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
         jsonLeaderboard.put("higherScoreIsBetter", leaderboard.isHigherScoreBetter());
         jsonLeaderboard.put("scoringComment", leaderboard.getComment());
@@ -126,6 +129,13 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         jsonLeaderboard.put("displayName", displayName == null ? leaderboard.getName() : displayName);
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.asMillis() : null);
         jsonLeaderboard.put("resultState", resultState.name());
+        jsonLeaderboard.put("type", leaderboard.getLeaderboardType().toString());
+        if (leaderboard instanceof RegattaLeaderboard) {
+            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+            jsonLeaderboard.put("canBoatsOfCompetitorsChangePerRace", regattaLeaderboard.getRegatta().canBoatsOfCompetitorsChangePerRace());
+        } else {
+            jsonLeaderboard.put("canBoatsOfCompetitorsChangePerRace", false);
+        }
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
         if (scoreCorrection != null) {
