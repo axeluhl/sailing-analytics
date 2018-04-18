@@ -119,6 +119,7 @@ public class EstimationDataSerializationDeserializationTest {
         DegreePosition windPosition = new DegreePosition(54.325246, 10.148556);
         Wind wind = new WindImpl(windPosition, windTimePoint, windSpeedWithBearing);
 
+        DegreePosition maneuverPosition = new DegreePosition(50.325246, 11.148556);
         int jibingCount = 203;
         int tackingCount = 12345;
         boolean maneuverStartsByRunningAwayFromWind = true;
@@ -126,20 +127,22 @@ public class EstimationDataSerializationDeserializationTest {
         Bearing relativeBearingToNextMarkAfterManeuver = new DegreeBearingImpl(10.01);
         boolean markPassing = true;
 
-        CompleteManeuverCurveWithEstimationData toSerialize = new CompleteManeuverCurveWithEstimationDataImpl(mainCurve,
-                curve, wind, tackingCount, jibingCount, maneuverStartsByRunningAwayFromWind,
-                relativeBearingToNextMarkBeforeManeuver, relativeBearingToNextMarkAfterManeuver, markPassing);
+        CompleteManeuverCurveWithEstimationData toSerialize = new CompleteManeuverCurveWithEstimationDataImpl(
+                maneuverPosition, mainCurve, curve, wind, tackingCount, jibingCount,
+                maneuverStartsByRunningAwayFromWind, relativeBearingToNextMarkBeforeManeuver,
+                relativeBearingToNextMarkAfterManeuver, markPassing);
         CompleteManeuverCurveWithEstimationDataJsonSerializer serializer = new CompleteManeuverCurveWithEstimationDataJsonSerializer(
                 new ManeuverMainCurveWithEstimationDataJsonSerializer(),
                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer(),
-                new WindJsonSerializer(new PositionJsonSerializer()));
+                new WindJsonSerializer(new PositionJsonSerializer()), new PositionJsonSerializer());
         JSONObject json = serializer.serialize(toSerialize);
         CompleteManeuverCurveWithEstimationDataJsonDeserializer deserializer = new CompleteManeuverCurveWithEstimationDataJsonDeserializer(
                 new ManeuverMainCurveWithEstimationDataJsonDeserializer(),
                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer(),
-                new WindJsonDeserializer(new PositionJsonDeserializer()));
+                new WindJsonDeserializer(new PositionJsonDeserializer()), new PositionJsonDeserializer());
         CompleteManeuverCurveWithEstimationData deserialized = deserializer.deserialize(json);
 
+        assertEquals(maneuverPosition, deserialized.getPosition());
         assertEquals(tackingCount, deserialized.getTackingCount());
         assertEquals(jibingCount, deserialized.getJibingCount());
         assertEquals(maneuverStartsByRunningAwayFromWind, deserialized.isManeuverStartsByRunningAwayFromWind());
@@ -279,21 +282,24 @@ public class EstimationDataSerializationDeserializationTest {
         Bearing relativeBearingToNextMarkBeforeManeuver = null;
         Bearing relativeBearingToNextMarkAfterManeuver = null;
         boolean markPassing = false;
+        DegreePosition maneuverPosition = new DegreePosition(50.325246, 11.148556);
 
-        CompleteManeuverCurveWithEstimationData toSerialize = new CompleteManeuverCurveWithEstimationDataImpl(mainCurve,
-                curve, wind, tackingCount, jibingCount, maneuverStartsByRunningAwayFromWind,
-                relativeBearingToNextMarkBeforeManeuver, relativeBearingToNextMarkAfterManeuver, markPassing);
+        CompleteManeuverCurveWithEstimationData toSerialize = new CompleteManeuverCurveWithEstimationDataImpl(
+                maneuverPosition, mainCurve, curve, wind, tackingCount, jibingCount,
+                maneuverStartsByRunningAwayFromWind, relativeBearingToNextMarkBeforeManeuver,
+                relativeBearingToNextMarkAfterManeuver, markPassing);
         CompleteManeuverCurveWithEstimationDataJsonSerializer serializer = new CompleteManeuverCurveWithEstimationDataJsonSerializer(
                 new ManeuverMainCurveWithEstimationDataJsonSerializer(),
                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer(),
-                new WindJsonSerializer(new PositionJsonSerializer()));
+                new WindJsonSerializer(new PositionJsonSerializer()), new PositionJsonSerializer());
         JSONObject json = serializer.serialize(toSerialize);
         CompleteManeuverCurveWithEstimationDataJsonDeserializer deserializer = new CompleteManeuverCurveWithEstimationDataJsonDeserializer(
                 new ManeuverMainCurveWithEstimationDataJsonDeserializer(),
                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer(),
-                new WindJsonDeserializer(new PositionJsonDeserializer()));
+                new WindJsonDeserializer(new PositionJsonDeserializer()), new PositionJsonDeserializer());
         CompleteManeuverCurveWithEstimationData deserialized = deserializer.deserialize(json);
 
+        assertEquals(maneuverPosition, deserialized.getPosition());
         assertEquals(tackingCount, deserialized.getTackingCount());
         assertEquals(jibingCount, deserialized.getJibingCount());
         assertEquals(maneuverStartsByRunningAwayFromWind, deserialized.isManeuverStartsByRunningAwayFromWind());

@@ -54,7 +54,7 @@ public interface SailMasterConnector {
     /**
      * Enables receiving RPD (Race Position Data) events to be emitted by the server. If such events are received, they
      * are forwarded to {@link #addSailMasterListener(SailMasterListener) registered} listeners by calling their
-     * {@link SailMasterListener#receivedRacePositionData(String, RaceStatus, TimePoint, TimePoint, Long, Integer, com.sap.sailing.domain.common.Distance, java.util.Collection)}
+     * {@link SailMasterListener#receivedRacePositionData(String, RaceStatus, RacingStatus, TimePoint, TimePoint, Long, Integer, com.sap.sailing.domain.common.Distance, java.util.Collection)}
      * method.
      */
     void enableRacePositionData() throws UnknownHostException, IOException, InterruptedException;
