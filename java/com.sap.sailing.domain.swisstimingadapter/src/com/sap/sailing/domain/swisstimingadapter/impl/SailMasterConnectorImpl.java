@@ -46,6 +46,7 @@ import com.sap.sailing.domain.swisstimingadapter.Mark.MarkType;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceStatus;
+import com.sap.sailing.domain.swisstimingadapter.RacingStatus;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
@@ -248,7 +249,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             }
         } catch (Exception e) {
             // broken messages are ignored
-            logger.warning("Exception caught during parsing of message '" + message.getMessage() + "' : " + e.getMessage());
+            logger.log(Level.WARNING, "Exception caught during parsing of message '" + message.getMessage() + "' : " + e.getMessage(), e);
         }
     }
     
@@ -356,7 +357,16 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         assert message.getType() == MessageType.RPD;
         String[] sections = message.getSections();
         String raceID = sections[1];
-        RaceStatus status = RaceStatus.values()[Integer.valueOf(sections[2])];
+        final RaceStatus raceStatus;
+        final RacingStatus racingStatus;
+        if (sections[2].contains(",")) {
+            final String[] raceStatusIntAndRacingStatusInt = sections[2].split(",");
+            raceStatus = RaceStatus.values()[Integer.valueOf(raceStatusIntAndRacingStatusInt[0])];
+            racingStatus = RacingStatus.values()[Integer.valueOf(raceStatusIntAndRacingStatusInt[1])];
+        } else {
+            raceStatus = RaceStatus.values()[Integer.valueOf(sections[2])];
+            racingStatus = null;
+        }
         TimePoint timePoint = new MillisecondsTimePoint(parseTimeAndDateISO(sections[3], raceID));
         lastRPDMessageTimePoint = timePoint;
         String dateISO = sections[3].substring(0, sections[3].indexOf('T'));
@@ -420,8 +430,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         Set<SailMasterListener> allListeners = getListeners();
         for (SailMasterListener listener : allListeners) {
             try {
-                listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
-                        nextMarkIndexForLeader, distanceToNextMarkForLeader, fixes);
+                listener.receivedRacePositionData(raceID, raceStatus, racingStatus, timePoint, startTimeEstimatedStartTime,
+                        millisecondsSinceRaceStart, nextMarkIndexForLeader, distanceToNextMarkForLeader, fixes);
             } catch (Exception e) {
                 logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+e.getMessage());
                 logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersRPD", e);
@@ -531,6 +541,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                             logger.info("Requesting messages starting from sequence number " + (maxSequenceNumber + 1)+" in "+this);
                             // already received a numbered message; ask only for newer messages with greater sequence number
                             lsnArgs.add(new Long(maxSequenceNumber + 1).toString());
+                        } else {
+                            logger.info("Requesting messages starting from the beginning in "+this);
+                            lsnArgs.add("1");
                         }
                         final SailMasterMessage lsnRequest = createSailMasterMessage(MessageType.LSN,
                                 lsnArgs.toArray(new String[0]));
