@@ -467,7 +467,9 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             hasRaceColumns = true;
             for (final Fleet fleet : rc.getFleets()) {
                 RaceDefinition raceDefinition = rc.getRaceDefinition(fleet);
-                Util.addAll(raceDefinition.getBoats(), result);
+                if (raceDefinition != null) {
+                    Util.addAll(raceDefinition.getBoats(), result);
+                }
             }
         }
         final RegattaLog regattaLog = getRegattaLog();
