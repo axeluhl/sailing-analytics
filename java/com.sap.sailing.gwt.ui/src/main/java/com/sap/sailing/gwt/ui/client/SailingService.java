@@ -28,13 +28,14 @@ import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.ServiceException;
 import com.sap.sailing.domain.common.UnableToCloseDeviceMappingException;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
@@ -764,8 +765,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     /**
      * Slices a new race from the race specified by the given {@link RegattaAndRaceIdentifier} using the given time range.
      * A new {@link RaceColumn} with the given name is added to the {@link RegattaLeaderboard}.
+     * @throws ServiceException 
+     * @throws NotFoundException 
      */
-    RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo);
+    RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo) throws ServiceException, NotFoundException;
 
     /**
      * Returns specific data needed for the slicing UI.

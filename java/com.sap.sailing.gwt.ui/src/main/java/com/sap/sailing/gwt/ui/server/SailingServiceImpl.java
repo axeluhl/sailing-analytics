@@ -17,6 +17,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -224,6 +225,7 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForC
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.ServiceException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
@@ -546,6 +548,7 @@ import com.sap.sse.gwt.shared.replication.ReplicaDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationMasterDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
@@ -573,6 +576,8 @@ import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
  */
 public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements SailingService, RaceFetcher, RegattaFetcher {
     private static final Logger logger = Logger.getLogger(SailingServiceImpl.class.getName());
+
+    private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
 
     private static final long serialVersionUID = 9031688830194537489L;
 
@@ -623,6 +628,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private static final int LEADERBOARD_DIFFERENCE_CACHE_SIZE = 50;
 
+    private ResourceBundleStringMessages serverStringMessages;
 
     private final LinkedHashMap<String, LeaderboardDTO> leaderboardByNameResultsCacheById;
 
@@ -693,6 +699,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
         // core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
         executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
+        
+        serverStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME,
+                this.getClass().getClassLoader(), StandardCharsets.UTF_8.name());
     }
     
     /**
@@ -7496,23 +7505,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName,
-            TimePoint sliceFrom, TimePoint sliceTo) {
+            TimePoint sliceFrom, TimePoint sliceTo) throws ServiceException, NotFoundException {
+        Locale locale = Locale.ENGLISH;
+        
         SecurityUtils.getSubject().checkPermission(Permission.MANAGE_TRACKED_RACES.getStringPermissionForObjects(Mode.UPDATE));
         if (!canSliceRace(raceIdentifier)) {
-            throw new RuntimeException("Can not slice race");
+            throw new ServiceException(serverStringMessages.get(locale, "slicingCannotSliceRace"));
         }
         final String trackedRaceName = newRaceColumnName;
         final RegattaIdentifier regattaIdentifier = new RegattaName(raceIdentifier.getRegattaName());
         final Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta.getRaceColumnByName(newRaceColumnName) != null) {
-            throw new RuntimeException("The race column name is already used in the given regatta");
+            throw new ServiceException(serverStringMessages.get(locale, "slicingRaceColumnAlreadyUsedThe"));
         }
         final DynamicTrackedRace trackedRaceToSlice = getService().getTrackedRace(raceIdentifier);
         final TimePoint startOfTrackingOfRaceToSlice = trackedRaceToSlice.getStartOfTracking();
         final TimePoint endOfTrackingOfRaceToSlice = trackedRaceToSlice.getEndOfTracking();
         if (sliceFrom == null || sliceTo == null || startOfTrackingOfRaceToSlice.after(sliceFrom)
                 || (endOfTrackingOfRaceToSlice != null && endOfTrackingOfRaceToSlice.before(sliceTo))) {
-            throw new RuntimeException("The TimeRange to slice is not part of the race");
+            throw new ServiceException(serverStringMessages.get(locale, "slicingTimeRangeOutOfBounds"));
         }
         final RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) getService().getLeaderboardByName(raceIdentifier.getRegattaName());
         final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regattaLeaderboard.getRaceColumnAndFleet(trackedRaceToSlice);
@@ -7743,7 +7754,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
             final DynamicTrackedRace trackedRace = WaitForTrackedRaceUtil.waitForTrackedRace(raceColumn, fleet, 10);
             if (trackedRace == null) {
-                throw new IllegalStateException("Could not obtain sliced race");
+                throw new ServiceException(serverStringMessages.get(locale, "slicingCouldNotObtainRace"));
             }
             for (WindSource windSourceToCopy : trackedRaceToSlice.getWindSources()) {
                 if (windSourceToCopy.canBeStored()) {
@@ -7774,7 +7785,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             return trackedRace.getRaceIdentifier();
         } catch (Exception e) {
-            throw new RuntimeException("Error while slicing race", e);
+            throw new ServiceException(serverStringMessages.get(locale, "slicingError"));
         }
     }
 

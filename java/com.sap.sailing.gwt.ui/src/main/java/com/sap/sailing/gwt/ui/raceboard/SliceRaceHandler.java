@@ -147,8 +147,9 @@ public class SliceRaceHandler {
 
                                             @Override
                                             public void onFailure(Throwable caught) {
-                                                errorReporter
-                                                        .reportError(StringMessages.INSTANCE.errorWhileSlicingARace());
+                                                errorReporter.reportError(
+                                                        StringMessages.INSTANCE.errorWhileSlicingARace(),
+                                                        caught.getMessage());
                                             }
 
                                             @Override
