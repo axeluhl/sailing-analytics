@@ -53,26 +53,29 @@ public class CompetitorDataProvider<C extends CompetitorDTO, D> {
     }
 
     public void update(final C competitor) {
-        this.update(Collections.singletonList(competitor));
+        this.update(Collections.singletonList(competitor), false);
     }
 
     public void update(final Iterable<C> competitors) {
-        final Map<C, Update> competitorUpdates = new HashMap<>();
-        competitors.forEach(c -> getData(c).requiresUpdate().ifPresent(u -> competitorUpdates.put(c, u)));
-        if (!competitorUpdates.isEmpty()) {
-            this.loadData(map(competitorUpdates, Update::getTimeRange), result -> {
+        this.update(competitors, true);
+    }
+
+    public void update(final Iterable<C> competitors, final boolean incremental) {
+        final Map<C, TimeRange> competitorUpdateTimeRanges = new HashMap<>();
+        competitors.forEach(c -> getData(c).getUpdateTimeRange().ifPresent(t -> competitorUpdateTimeRanges.put(c, t)));
+        if (!competitorUpdateTimeRanges.isEmpty()) {
+            this.loadData(competitorUpdateTimeRanges, result -> {
                 final Set<C> competitorToRefresh = new HashSet<>();
                 for (Entry<C, List<D>> entry : result.entrySet()) {
                     final C competitor = entry.getKey();
-                    final boolean wasIncrementalUpdate = competitorUpdates.get(competitor).isIncremental();
                     final List<D> records = entry.getValue();
                     final CompetitorData data = CompetitorDataProvider.this.getData(competitor);
-                    if (wasIncrementalUpdate && !data.getRecords().isEmpty() && !records.isEmpty()) {
+                    if (incremental && !data.getRecords().isEmpty() && !records.isEmpty()) {
                         competitorToRefresh.add(competitor);
                     }
-                    data.update(records, wasIncrementalUpdate);
+                    data.update(records, incremental);
                 }
-                CompetitorDataProvider.this.update(competitorToRefresh);
+                CompetitorDataProvider.this.update(competitorToRefresh, false);
             });
         }
     }
@@ -82,13 +85,9 @@ public class CompetitorDataProvider<C extends CompetitorDTO, D> {
     }
 
     public final Map<C, List<D>> getData() {
-        return map(cache, CompetitorData::getRecords);
-    }
-
-    private <S, T> Map<C, T> map(final Map<C, S> source, final Function<S, T> mapper) {
-        final Map<C, T> result = new HashMap<>(source.size());
-        for (Entry<C, S> entry : source.entrySet()) {
-            result.put(entry.getKey(), mapper.apply(entry.getValue()));
+        final Map<C, List<D>> result = new HashMap<>(cache.size());
+        for (Entry<C, CompetitorData> entry : cache.entrySet()) {
+            result.put(entry.getKey(), entry.getValue().getRecords());
         }
         return result;
     }
@@ -98,23 +97,25 @@ public class CompetitorDataProvider<C extends CompetitorDTO, D> {
         private final LinkedList<D> records = new LinkedList<>();
         private boolean noDataRequested = true;
 
-        private Optional<Update> requiresUpdate() {
-            final Optional<Update> result;
-            if (isReplayingProvider.get()) {
-                if (noDataRequested) {
-                    result = Update.novating(getStartTimePoint(), getEndTimePoint());
-                } else {
-                    result = Update.none();
-                }
+        private Optional<TimeRange> getUpdateTimeRange() {
+            final Optional<TimeRange> result;
+            if (noDataRequested) {
+                result = Optional.of(new TimeRangeImpl(startOfTrackingProvider.get(), getEndTimePoint(), true));
             } else {
-                if (noDataRequested) {
-                    result = Update.novating(getStartTimePoint(), getEndTimePoint());
+                if (isReplayingProvider.get()) {
+                    result = Optional.empty();
                 } else {
-                    result = Update.incremental(getLatestMeasurementTimePoint(), getEndTimePoint());
+                    final TimePoint lastestMeasurementTimePoint = measurementTimePointProvider.apply(records.getLast());
+                    result = Optional.of(new TimeRangeImpl(lastestMeasurementTimePoint, getEndTimePoint(), true));
                 }
             }
             this.noDataRequested = false;
             return result;
+        }
+
+        private TimePoint getEndTimePoint() {
+            final TimePoint end = endOfTrackingProvider.get(), live = liveTimePointProvider.get();
+            return end == null ? live : new MillisecondsTimePoint(Math.min(end.asMillis(), live.asMillis()));
         }
 
         private void update(final List<D> records, final boolean append) {
@@ -127,50 +128,6 @@ public class CompetitorDataProvider<C extends CompetitorDTO, D> {
         private List<D> getRecords() {
             return records;
         }
-
-        private TimePoint getStartTimePoint() {
-            return startOfTrackingProvider.get();
-        }
-
-        private TimePoint getEndTimePoint() {
-            final TimePoint end = endOfTrackingProvider.get(), live = liveTimePointProvider.get();
-            return end == null ? live : new MillisecondsTimePoint(Math.max(end.asMillis(), live.asMillis()));
-        }
-
-        private TimePoint getLatestMeasurementTimePoint() {
-            return measurementTimePointProvider.apply(records.getLast());
-        }
-    }
-
-    private static class Update {
-        private final TimeRange timeRange;
-        private final boolean incremental;
-
-        private static Optional<Update> none() {
-            return Optional.empty();
-        }
-
-        private static Optional<Update> incremental(final TimePoint from, final TimePoint to) {
-            return Optional.of(new Update(from, to, true));
-        }
-
-        private static Optional<Update> novating(final TimePoint from, final TimePoint to) {
-            return Optional.of(new Update(from, to, false));
-        }
-
-        private Update(final TimePoint from, final TimePoint to, boolean incremental) {
-            this.timeRange = new TimeRangeImpl(from, to, true);
-            this.incremental = incremental;
-        }
-
-        private TimeRange getTimeRange() {
-            return timeRange;
-        }
-
-        private boolean isIncremental() {
-            return incremental;
-        }
-
     }
 
 }
