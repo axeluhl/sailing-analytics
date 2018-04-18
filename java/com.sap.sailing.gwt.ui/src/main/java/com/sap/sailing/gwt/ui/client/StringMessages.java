@@ -2071,6 +2071,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String importFinished();
     String importFinishedMessage();
     String importFinishedGotoRaceboard();
+    String importFinishedGotoRaceboardWithName(String name);
     String importFinishedGotoEvent();
     String chooseAName();
     String errorFillingRaceLogsFromPairingList(String message);
@@ -2148,4 +2149,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String expeditionRaceJibCarStbd();
     String expeditionRaceMastButt();
     String milliBarUnits();
+    String newExpeditionRace();
+    String newExpeditionCompetitor();
+    String selectOneCompetitorToMapTheImportedData();
+    String startTypingForSuggestions(); 
 }
