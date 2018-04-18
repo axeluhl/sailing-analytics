@@ -52,6 +52,10 @@ public class CompetitorDataProvider<C extends CompetitorDTO, D> {
     protected void loadData(final Map<C, TimeRange> competitorTimeRanges, final Consumer<Map<C, List<D>>> callback) {
     }
 
+    protected boolean triggerFullUpdateAfterIncrementalUpdate(final List<D> existingData, final List<D> updatedData) {
+        return false;
+    }
+
     public void update(final C competitor) {
         this.update(Collections.singletonList(competitor), false);
     }
@@ -68,12 +72,12 @@ public class CompetitorDataProvider<C extends CompetitorDTO, D> {
                 final Set<C> competitorToRefresh = new HashSet<>();
                 for (Entry<C, List<D>> entry : result.entrySet()) {
                     final C competitor = entry.getKey();
-                    final List<D> records = entry.getValue();
+                    final List<D> loadedRecords = entry.getValue();
                     final CompetitorData data = CompetitorDataProvider.this.getData(competitor);
-                    if (incremental && !data.getRecords().isEmpty() && !records.isEmpty()) {
+                    if (incremental && triggerFullUpdateAfterIncrementalUpdate(data.getRecords(), loadedRecords)) {
                         competitorToRefresh.add(competitor);
                     }
-                    data.update(records, incremental);
+                    data.update(loadedRecords, incremental);
                 }
                 CompetitorDataProvider.this.update(competitorToRefresh, false);
             });

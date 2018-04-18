@@ -138,6 +138,12 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                             }
                         });
             }
+
+            @Override
+            protected boolean triggerFullUpdateAfterIncrementalUpdate(final List<ManeuverDTO> existingData,
+                    final List<ManeuverDTO> updatedData) {
+                return !existingData.isEmpty() && !updatedData.isEmpty();
+            }
         };
 
         this.competitorSelectionModel.addCompetitorSelectionChangeListener(this);
