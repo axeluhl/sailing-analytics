@@ -157,7 +157,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 BoatDTO entryBoatDTO = leaderboardEntry.boat;
                 if (entryBoatDTO != null) {
                     JSONObject jsonBoat = new JSONObject();
-                    writeBoatData(jsonBoat, rowBoatDTO);
+                    writeBoatData(jsonBoat, entryBoatDTO);
                     jsonCompetitor.put("boat", jsonBoat);
                 }
                 final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
