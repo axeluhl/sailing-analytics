@@ -5,19 +5,19 @@ import com.google.gwt.resources.client.ImageResource;
 
 public interface DataMiningResources extends ClientBundle { // TODO extract resource files
 
-    @Source("com/sap/sailing/gwt/ui/client/images/close.png")
+    @Source("com/sap/sse/datamining/ui/images/close.png")
     ImageResource closeIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/arrow_left.png")
+    @Source("com/sap/sse/datamining/ui/images/arrow_left.png")
     ImageResource arrowLeftIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/arrow_right.png")
+    @Source("com/sap/sse/datamining/ui/images/arrow_right.png")
     ImageResource arrowRightIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/plusicon_small.png")
+    @Source("com/sap/sse/datamining/ui/images/plusicon_small.png")
     ImageResource plusIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/magnifier_small.png")
+    @Source("com/sap/sse/datamining/ui/images/magnifier_small.png")
     ImageResource searchIcon();
 
 }
