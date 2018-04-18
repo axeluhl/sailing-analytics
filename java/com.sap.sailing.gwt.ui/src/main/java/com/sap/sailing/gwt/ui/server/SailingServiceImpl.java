@@ -7505,7 +7505,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName,
-            TimePoint sliceFrom, TimePoint sliceTo) throws ServiceException, NotFoundException {
+            TimePoint sliceFrom, TimePoint sliceTo) throws ServiceException {
         final Locale locale = getClientLocale();
         
         SecurityUtils.getSubject().checkPermission(Permission.MANAGE_TRACKED_RACES.getStringPermissionForObjects(Mode.UPDATE));

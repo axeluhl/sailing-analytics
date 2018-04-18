@@ -766,9 +766,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * Slices a new race from the race specified by the given {@link RegattaAndRaceIdentifier} using the given time range.
      * A new {@link RaceColumn} with the given name is added to the {@link RegattaLeaderboard}.
      * @throws ServiceException 
-     * @throws NotFoundException 
      */
-    RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo) throws ServiceException, NotFoundException;
+    RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo) throws ServiceException;
 
     /**
      * Returns specific data needed for the slicing UI.
