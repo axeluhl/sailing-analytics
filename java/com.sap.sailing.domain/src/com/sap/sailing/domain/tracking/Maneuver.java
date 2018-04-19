@@ -147,8 +147,6 @@ public interface Maneuver extends GPSFix {
     /**
      * Gets the duration of the maneuver which lasts from {@link #getManeuverBoundaries()}.getTimePointBefore() until
      * {@link #getManeuverBoundaries()}.getTimePointAfter().
-     * 
-     * @return
      */
     Duration getDuration();
 
