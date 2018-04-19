@@ -38,7 +38,7 @@ import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
-import com.sap.sailing.gwt.ui.actions.GetManeuversForCompetitors;
+import com.sap.sailing.gwt.ui.actions.GetManeuversForCompetitorsAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
@@ -512,7 +512,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 final AsyncCallback<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>> callback) {
             if (incremental) {
                 asyncActionsExecutor.execute(
-                        new GetManeuversForCompetitors(sailingService, raceIdentifier, competitorTimeRanges), callback);
+                        new GetManeuversForCompetitorsAction(sailingService, raceIdentifier, competitorTimeRanges), callback);
             } else {
                 // AsyncActionExecutor is explicitly not used here, to ensure full updates are always executed.
                 // Because full updates are triggered in specific situations only, this won't cause server overload.

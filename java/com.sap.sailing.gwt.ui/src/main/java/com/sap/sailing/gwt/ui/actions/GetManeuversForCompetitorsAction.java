@@ -11,21 +11,22 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.gwt.client.async.AsyncAction;
 
-public class GetManeuversForCompetitors implements AsyncAction<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>> {
+public class GetManeuversForCompetitorsAction implements AsyncAction<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>> {
 
     private final SailingServiceAsync sailingService;
     private final RegattaAndRaceIdentifier raceIdentifier;
     private final Map<CompetitorWithBoatDTO, TimeRange> competitorTimeRanges;
 
-    public GetManeuversForCompetitors(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier,
-            Map<CompetitorWithBoatDTO, TimeRange> competitorTimeRanges) {
+    public GetManeuversForCompetitorsAction(final SailingServiceAsync sailingService,
+            final RegattaAndRaceIdentifier raceIdentifier,
+            final Map<CompetitorWithBoatDTO, TimeRange> competitorTimeRanges) {
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.competitorTimeRanges = competitorTimeRanges;
     }
 
     @Override
-    public void execute(AsyncCallback<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>> callback) {
+    public void execute(final AsyncCallback<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>> callback) {
         sailingService.getManeuvers(raceIdentifier, competitorTimeRanges, callback);
     }
 
