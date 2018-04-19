@@ -460,8 +460,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public Iterable<Boat> getAllBoats() {
-        Set<Boat> result = new HashSet<Boat>();
-        
+        Set<Boat> result = new HashSet<>();
         boolean hasRaceColumns = false;
         for (RaceColumn rc : getRaceColumns()) {
             hasRaceColumns = true;
@@ -474,12 +473,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         }
         final RegattaLog regattaLog = getRegattaLog();
         if (!hasRaceColumns) {
-            // If no race exists, the regatta log-provided competitor registrations will not have
+            // If no race exists, the regatta log-provided boat registrations will not have
             // been considered yet; add them:
             final Map<Competitor, Boat> regattaLogProvidedCompetitorsAndBoats = new CompetitorsAndBoatsInLogAnalyzer<>(regattaLog).analyze();
             Util.addAll(regattaLogProvidedCompetitorsAndBoats.values(), result);
         }
-
         return result;
     }
 

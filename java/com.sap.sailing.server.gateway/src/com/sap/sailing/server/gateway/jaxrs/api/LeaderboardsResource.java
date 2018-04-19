@@ -149,7 +149,6 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @DefaultValue("Live") @QueryParam("resultState") ResultStates resultState,
             @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount) {
         Response response;
-
         TimePoint requestTimePoint = MillisecondsTimePoint.now();
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
@@ -166,10 +165,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint,
                             maxCompetitorsCount);
                 }
-
                 StringWriter sw = new StringWriter();
                 jsonLeaderboard.writeJSONString(sw);
-
                 String json = sw.getBuffer().toString();
                 response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
@@ -177,7 +174,6 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                         .type(MediaType.TEXT_PLAIN).build();
             }
         }
-
         return response;
     }
 
@@ -188,17 +184,13 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 resultTimePoint, Collections.<String> emptyList(), /* addOverallDetails */
                 false, getService(), getService().getBaseDomainFactory(),
                 /* fillTotalPointsUncorrected */false);
-
         JSONObject jsonLeaderboard = new JSONObject();
-
         writeCommonLeaderboardData(jsonLeaderboard, leaderboardDTO, resultState, maxCompetitorsCount);
-
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
         int counter = 1;
         for (CompetitorWithBoatDTO competitor : leaderboardDTO.competitors) {
             LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);
-
             if (maxCompetitorsCount != null && counter > maxCompetitorsCount) {
                 break;
             }
@@ -215,9 +207,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                         .getCompetitorOrderingPerRaceColumnName().get(raceColumn.getName());
                 JSONObject jsonEntry = new JSONObject();
                 jsonRaceColumns.put(raceColumn.getName(), jsonEntry);
-                LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumn
-                        .getName());
-
+                LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumn.getName());
                 final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
                 jsonEntry.put("fleet", fleetOfCompetitor == null ? "" : fleetOfCompetitor.getName());
                 jsonEntry.put("totalPoints", leaderboardEntry.totalPoints);
