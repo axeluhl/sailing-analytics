@@ -143,12 +143,12 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         }
         
         GPSFixTrack<Mark, GPSFix> starboardMarkTrack = trackedRace.getOrCreateTrack(starboardMark);
-        Position advantageousMarkPosition = starboardMarkTrack.getEstimatedPosition(startOfRace, false);
+        Position starboardMarkPosition = starboardMarkTrack.getEstimatedPosition(startOfRace, false);
         GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(getCompetitor());
         Position competitorPosition = competitorTrack.getEstimatedPosition(startOfRace, false);
 
         TrackedLeg trackedLeg = trackedRace.getTrackedLeg(trackedRace.getRace().getCourse().getFirstLeg());
-        Distance distance = trackedLeg.getAbsoluteWindwardDistance(competitorPosition, advantageousMarkPosition, startOfRace, WindPositionMode.LEG_MIDDLE);
+        Distance distance = trackedLeg.getAbsoluteWindwardDistance(competitorPosition, starboardMarkPosition, startOfRace, WindPositionMode.LEG_MIDDLE);
         
         return distance;
     }
