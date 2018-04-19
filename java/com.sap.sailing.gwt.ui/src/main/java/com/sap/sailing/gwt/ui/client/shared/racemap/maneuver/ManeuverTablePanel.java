@@ -133,12 +133,12 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 final ManeuverTableData selected = selectionModel.getSelectedObject();
-                if (selected != null
-                        && (timer.getPlayMode() == PlayModes.Replay || hasCanReplayDuringLiveRacesPermission)) {
-                    timer.pause();
-                    timer.setTime(selected.getTimePointBefore().getTime());
-                } else if (selected != null) {
-                    selectionModel.clear();
+                if (selected != null) {
+                    if (timer.getPlayMode() == PlayModes.Replay || hasCanReplayDuringLiveRacesPermission) {
+                        timer.setTime(selected.getTimePointBefore().getTime());
+                    } else {
+                        selectionModel.clear();
+                    }
                 }
             }
         });
