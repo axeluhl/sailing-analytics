@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +16,6 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker.Symbol;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
-import com.google.gwt.maps.client.overlays.Circle;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -37,8 +34,6 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
     private final SimpleLayoutPanel chartPanel;
     private final Chart chart;
     private final Map<GroupKey, Series> seriesMappedByGroupKey;
-    private final GroupKey simpleResultSeriesKey;
-
 
     public NumberPairResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context, stringMessages);
@@ -50,7 +45,6 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
                 chart.redraw();
             }
         };
-        simpleResultSeriesKey = new GenericGroupKey<>(stringMessages.results());
         chart = createChart();
         chartPanel.setWidget(chart);
     }
@@ -90,20 +84,17 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
         for (GroupKey groupKey : getCurrentResult().getResults().keySet()) {
             GroupKey seriesKey = groupKeyToSeriesKey(groupKey);
             if (!seriesMappedByGroupKey.containsKey(seriesKey)) {
-                seriesMappedByGroupKey.put(seriesKey, chart.createSeries().setPlotOptions(new SeriesPlotOptions().setShowInLegend(false).setMarker(new Marker().setSymbol(Symbol.CIRCLE))).setName(seriesKey.asString()));
+                Series series = chart.createSeries().setPlotOptions(new SeriesPlotOptions().setShowInLegend(false).setMarker(new Marker().setSymbol(Symbol.CIRCLE))).setName(seriesKey.asString());
+                seriesMappedByGroupKey.put(seriesKey, series);
+                chart.addSeries(series, false, false);
             }
-        }
-        List<GroupKey> sortedSeriesKeys = new ArrayList<>(seriesMappedByGroupKey.keySet());
-        Collections.sort(sortedSeriesKeys);
-        for (GroupKey seriesKey : sortedSeriesKeys) {
-            chart.addSeries(seriesMappedByGroupKey.get(seriesKey), false, false);
         }
     }
 
 
     @Override
-    protected void internalShowResults(QueryResultDTO<?> r) {
-        result = r;
+    protected void internalShowResults(QueryResultDTO<?> res) {
+        result = res;
         createAndAddSeriesToChart();
         for (Entry<GroupKey, ?> resultEntry : result.getResults().entrySet()) {
             @SuppressWarnings("unchecked")
@@ -115,9 +106,6 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
 
         }
         chart.getXAxis().setAxisTitleText(result.getResultSignifier());
-        
-//        chart.addSeries(chart.createSeries().setName("Test").setType(Type.SCATTER).setPoints(series.toArray(new Point[series.size()])));
-        chart.redraw();
     }
 
 
@@ -153,7 +141,6 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
 
     @Override
     public String getDependentCssClassName() {
-        // TODO Auto-generated method stub
         return null;
     }
 
