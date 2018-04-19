@@ -101,14 +101,16 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             final TimeRangeWithZoomModel timeRangeWithZoomProvider, final LeaderBoardStyle style,
             final UserService userService) {
         super(parent, context);
-        userService.addUserStatusEventHandler(new UserStatusEventHandler() {
+        final UserStatusEventHandler userStatusChangeHandler = new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
                 hasCanReplayDuringLiveRacesPermission = user != null
                         && user.hasPermission(Permission.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission(),
                                 SailingPermissionsForRoleProvider.INSTANCE);
             }
-        });
+        };
+        userService.addUserStatusEventHandler(userStatusChangeHandler);
+        userStatusChangeHandler.onUserStatusChange(userService.getCurrentUser(), /* preAuthenticated */ true);
         this.resources.css().ensureInjected();
         this.settings = initialSettings;
         this.competitorSelectionModel = competitorSelectionModel;
@@ -134,11 +136,11 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             public void onSelectionChange(SelectionChangeEvent event) {
                 final ManeuverTableData selected = selectionModel.getSelectedObject();
                 if (selected != null) {
-                    if (timer.getPlayMode() == PlayModes.Replay || hasCanReplayDuringLiveRacesPermission) {
-                        timer.setTime(selected.getTimePointBefore().getTime());
-                    } else {
-                        selectionModel.clear();
+                    if (!hasCanReplayDuringLiveRacesPermission) {
+                        timer.pause();
                     }
+                    timer.setPlayMode(PlayModes.Replay);
+                    timer.setTime(selected.getTimePointBefore().getTime());
                 }
             }
         });

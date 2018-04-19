@@ -182,7 +182,6 @@ public abstract class CachedRaceDataProvider<K, D> {
         final Map<K, TimeRange> entriesToLoadDataFor = getEntriesToLoadDataFor(entries, incremental);
         if (!entriesToLoadDataFor.isEmpty()) {
             this.loadData(entriesToLoadDataFor, incremental, new AsyncCallback<Map<K, List<D>>>() {
-
                 @Override
                 public void onSuccess(Map<K, List<D>> result) {
                     final Set<K> entriesToTriggerFullUpdateFor = new HashSet<>();
