@@ -1652,9 +1652,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result = null; // the competitor wasn't found
             dbObjectForUpdate = Optional.empty();
         } else if (boatId == null) {
-            final Boat boat;
-            if (competitor.hasBoat() && (boat=((CompetitorWithBoat) competitor).getBoat()) != null) {
-                result = new RaceLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, passId, competitor, boat);
+            if (competitor.hasBoat()) {
+                result = new RaceLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, passId, competitor, ((CompetitorWithBoat) competitor).getBoat());
             } else {
                 logger.warning("Bug2822: Competitor with ID "+competitorId+" already seems to have been migrated to one without boat."+
                         " But the RaceLogRegisterCompetitorEventImpl event loaded does not specify one either. We'll try to find a boat...");
