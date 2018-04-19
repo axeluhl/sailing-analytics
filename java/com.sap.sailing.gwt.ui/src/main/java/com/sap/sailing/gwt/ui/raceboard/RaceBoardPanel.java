@@ -394,8 +394,7 @@ public class RaceBoardPanel
         }
         maneuverTablePanel = new ManeuverTablePanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
                 selectedRaceIdentifier, stringMessages, competitorSelectionProvider, errorReporter, timer,
-                maneuverTableSettings, timeRangeWithZoomModel, raceTimesInfoProvider, new ClassicLeaderboardStyle(),
-                userService);
+                maneuverTableSettings, timeRangeWithZoomModel, new ClassicLeaderboardStyle(), userService);
         maneuverTablePanel.getEntryWidget().setTitle(stringMessages.maneuverTable());
         componentsForSideBySideViewer.add(maneuverTablePanel);
         editMarkPassingPanel = new EditMarkPassingsPanel(this, getComponentContext(), sailingService,

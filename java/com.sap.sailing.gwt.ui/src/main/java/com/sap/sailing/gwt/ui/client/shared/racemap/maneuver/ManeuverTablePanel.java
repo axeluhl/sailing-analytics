@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell.Context;
@@ -42,8 +43,6 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
-import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
-import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
@@ -53,7 +52,6 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel.LeaderBoardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.MinMaxRenderer;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
-import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
@@ -61,6 +59,7 @@ import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.TimeRangeProvider;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -74,7 +73,9 @@ import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTableSettings>
-        implements CompetitorSelectionChangeListener, TimeListener, RaceTimesInfoProviderListener {
+        implements CompetitorSelectionChangeListener, TimeListener {
+
+    private static final Supplier<Long> LOADING_OFFSET_TO_NEXT_MANEUVER_PROVIDER = () -> 2500L;
 
     private final ManeuverTablePanelResources resources = GWT.create(ManeuverTablePanelResources.class);
 
@@ -87,21 +88,18 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private final Label importantMessageLabel = new Label();
     private final SortedCellTableWithStylableHeaders<ManeuverTableData> maneuverCellTable;
     private final SortableColumn<ManeuverTableData, ?> competitorColumn, timeColumn;
-    private final Timer timer;
-    private final RaceTimesInfoProvider raceTimesInfoProvider;
-    private final CompetitorDataProvider<CompetitorWithBoatDTO, ManeuverDTO> competitorDataProvider;
+    private final CachedRaceDataProvider<CompetitorWithBoatDTO, ManeuverDTO> competitorDataProvider;
 
     private ManeuverTableSettings settings;
     private boolean hasCanReplayDuringLiveRacesPermission;
 
-
     public ManeuverTablePanel(final Component<?> parent, ComponentContext<?> context,
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
-            final RegattaAndRaceIdentifier raceIdentifier,
-            final StringMessages stringMessages, final CompetitorSelectionProvider competitorSelectionModel,
-            final ErrorReporter errorReporter, final Timer timer, final ManeuverTableSettings initialSettings,
-            final TimeRangeWithZoomModel timeRangeWithZoomProvider, final RaceTimesInfoProvider raceTimesInfoProvider,
-            final LeaderBoardStyle style, final UserService userService) {
+            final RegattaAndRaceIdentifier raceIdentifier, final StringMessages stringMessages,
+            final CompetitorSelectionProvider competitorSelectionModel, final ErrorReporter errorReporter,
+            final Timer timer, final ManeuverTableSettings initialSettings,
+            final TimeRangeWithZoomModel timeRangeWithZoomProvider, final LeaderBoardStyle style,
+            final UserService userService) {
         super(parent, context);
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
@@ -115,41 +113,10 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         this.settings = initialSettings;
         this.competitorSelectionModel = competitorSelectionModel;
         this.stringMessages = stringMessages;
-        this.timer = timer;
-        this.raceTimesInfoProvider = raceTimesInfoProvider;
-
-        this.competitorDataProvider = new CompetitorDataProvider<CompetitorWithBoatDTO, ManeuverDTO>(
-                timeRangeWithZoomProvider::getFromTime, timeRangeWithZoomProvider::getToTime, timer::getLiveTimePoint,
-                this::isReplaying, m -> m.timePoint.getTime() + 2500) {
-            @Override
-            protected void loadData(boolean incremental, Map<CompetitorWithBoatDTO, TimeRange> competitorTimeRanges,
-                    AsyncCallback<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>> callback) {
-                if (incremental) {
-                    asyncActionsExecutor.execute(
-                            new GetManeuversForCompetitors(sailingService, raceIdentifier, competitorTimeRanges),
-                            callback);
-                } else {
-                    // AsyncActionExecutor is explicitly not used here, to ensure full updates are always executed.
-                    // Because full updates are triggered in specific situations only, this won't cause server overload.
-                    sailingService.getManeuvers(raceIdentifier, competitorTimeRanges, callback);
-                }
-            }
-
-            @Override
-            protected void onCompetitorsDataChange(final Iterable<CompetitorWithBoatDTO> updatedCompetitors) {
-                ManeuverTablePanel.this.rerender();
-            }
-
-            @Override
-            protected boolean triggerFullUpdateAfterIncrementalUpdate(final List<ManeuverDTO> existingData,
-                    final List<ManeuverDTO> updatedData) {
-                return !existingData.isEmpty() && !updatedData.isEmpty();
-            }
-        };
-
+        this.competitorDataProvider = new CachedManeuverTableDataProvider(timeRangeWithZoomProvider, timer,
+                raceIdentifier, sailingService, asyncActionsExecutor);
         this.competitorSelectionModel.addCompetitorSelectionChangeListener(this);
-        this.timer.addTimeListener(this);
-        this.raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
+        timer.addTimeListener(this);
         final FlowPanel rootPanel = new FlowPanel();
         rootPanel.addStyleName(resources.css().maneuverPanel());
         this.contentPanel.addStyleName(resources.css().contentContainer());
@@ -166,7 +133,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 final ManeuverTableData selected = selectionModel.getSelectedObject();
-                if (selected != null && (isReplaying() || hasCanReplayDuringLiveRacesPermission)) {
+                if (selected != null
+                        && (timer.getPlayMode() == PlayModes.Replay || hasCanReplayDuringLiveRacesPermission)) {
                     timer.pause();
                     timer.setTime(selected.getTimePointBefore().getTime());
                 } else if (selected != null) {
@@ -414,7 +382,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
     private void updateManeuverTableData() {
         final ArrayList<ManeuverTableData> data = new ArrayList<>();
-        for (final Entry<CompetitorWithBoatDTO, List<ManeuverDTO>> entry : competitorDataProvider.getData()
+        for (final Entry<CompetitorWithBoatDTO, List<ManeuverDTO>> entry : competitorDataProvider.getCachedData()
                 .entrySet()) {
             for (ManeuverDTO maneuver : entry.getValue()) {
                 if (settings.getSelectedManeuverTypes().contains(maneuver.type)) {
@@ -450,6 +418,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     public void addedToSelection(CompetitorWithBoatDTO competitor) {
         if (isVisible()) {
             this.competitorDataProvider.ensureCompetitor(competitor);
+            this.rerender();
         }
     }
 
@@ -522,15 +491,38 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             this.competitorDataProvider.updateCompetitorData();
         }
     }
-    
-    @Override
-    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
-            long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
 
+    private class CachedManeuverTableDataProvider extends CachedRaceDataProvider<CompetitorWithBoatDTO, ManeuverDTO> {
+        private final AsyncActionsExecutor asyncActionsExecutor;
+        private final RegattaAndRaceIdentifier raceIdentifier;
+        private final SailingServiceAsync sailingService;
+
+        private CachedManeuverTableDataProvider(final TimeRangeProvider timeRangeProvider, final Timer timer,
+                final RegattaAndRaceIdentifier raceIdentifier, final SailingServiceAsync sailingService,
+                final AsyncActionsExecutor asyncActionsExecutor) {
+            super(timeRangeProvider, timer, m -> m.timePoint, LOADING_OFFSET_TO_NEXT_MANEUVER_PROVIDER, true);
+            this.asyncActionsExecutor = asyncActionsExecutor;
+            this.raceIdentifier = raceIdentifier;
+            this.sailingService = sailingService;
+        }
+
+        @Override
+        protected void loadData(final Map<CompetitorWithBoatDTO, TimeRange> competitorTimeRanges,
+                final boolean incremental,
+                final AsyncCallback<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>> callback) {
+            if (incremental) {
+                asyncActionsExecutor.execute(
+                        new GetManeuversForCompetitors(sailingService, raceIdentifier, competitorTimeRanges), callback);
+            } else {
+                // AsyncActionExecutor is explicitly not used here, to ensure full updates are always executed.
+                // Because full updates are triggered in specific situations only, this won't cause server overload.
+                sailingService.getManeuvers(raceIdentifier, competitorTimeRanges, callback);
+            }
+        }
+
+        @Override
+        protected void onCompetitorsDataChange(final Iterable<CompetitorWithBoatDTO> updatedCompetitors) {
+            ManeuverTablePanel.this.rerender();
+        }
     }
-
-    private boolean isReplaying() {
-        return this.timer.getPlayMode() == PlayModes.Replay;
-    }
-
 }
