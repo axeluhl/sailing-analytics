@@ -20,12 +20,12 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
-public class CompetitorDataProvider<C extends CompetitorDTO, D> {
+public abstract class CompetitorDataProvider<C extends CompetitorDTO, D> {
 
     private final Supplier<TimePoint> startOfTrackingProvider, endOfTrackingProvider, liveTimePointProvider;
     private final Supplier<Boolean> isReplayingProvider;
     private final Function<D, TimePoint> measurementTimePointProvider;
-    private final Map<C, CompetitorData> cache = new HashMap<>();
+    private final Map<C, CompetitorDataCache> cache = new HashMap<>();
 
     public CompetitorDataProvider(final Supplier<Date> startOfTrackingProvider,
             final Supplier<Date> endOfTrackingProvider, final Supplier<TimePoint> liveTimePointProvider,
@@ -37,67 +37,80 @@ public class CompetitorDataProvider<C extends CompetitorDTO, D> {
         this.measurementTimePointProvider = m -> new MillisecondsTimePoint(measurementTimePointMillisProvider.apply(m));
     }
 
-    public void reset() {
-        this.cache.clear();
-    }
-
-    public void reset(final C competitor) {
-        this.cache.remove(competitor);
-    }
-
-    public boolean isEmpty() {
-        return this.cache.isEmpty();
-    }
-
-    protected void loadData(final boolean incremental, final Map<C, TimeRange> competitorTimeRanges,
-            final Consumer<Map<C, List<D>>> callback) {
-    }
+    protected abstract void loadData(final boolean incremental, final Map<C, TimeRange> competitorTimeRanges,
+            final Consumer<Map<C, List<D>>> callback);
 
     protected boolean triggerFullUpdateAfterIncrementalUpdate(final List<D> existingData, final List<D> updatedData) {
         return false;
     }
 
-    public void update(final C competitor) {
-        this.update(Collections.singletonList(competitor), false);
+    public void removeAllCompetitors() {
+        this.cache.clear();
     }
 
-    public void update(final Iterable<C> competitors) {
-        this.update(competitors, true);
+    public void removeCompetitor(final C competitor) {
+        this.cache.remove(competitor);
     }
 
-    public void update(final Iterable<C> competitors, final boolean incremental) {
+    public boolean hasCachedData() {
+        return !this.cache.isEmpty();
+    }
+
+    public void updateCachedData() {
+        this.update(cache.keySet(), true);
+    }
+
+    public void ensureCompetitor(final C competitor) {
+        this.ensureCompetitors(Collections.singleton(competitor));
+    }
+
+    public void ensureCompetitors(final Iterable<C> competitors) {
+        final Set<C> competitorsToUpdate = new HashSet<>();
+        for (final C comp : competitors) {
+            if (this.cache.putIfAbsent(comp, new CompetitorDataCache()) == null) {
+                competitorsToUpdate.add(comp);
+            }
+        }
+        this.update(competitorsToUpdate, false);
+    }
+
+    private void update(final Iterable<C> competitors, final boolean incremental) {
         final Map<C, TimeRange> compTimeRanges = new HashMap<>();
-        competitors.forEach(c -> getData(c).getUpdateTimeRange(incremental).ifPresent(t -> compTimeRanges.put(c, t)));
+        competitors.forEach(c -> getDataCache(c)
+                .ifPresent(d -> d.getUpdateTimeRange(incremental).ifPresent(t -> compTimeRanges.put(c, t))));
         if (!compTimeRanges.isEmpty()) {
             this.loadData(incremental, compTimeRanges, result -> {
                 final Set<C> competitorsToTriggerFullUpdateFor = new HashSet<>();
                 for (Entry<C, List<D>> entry : result.entrySet()) {
                     final C competitor = entry.getKey();
                     final List<D> loadedRecords = entry.getValue();
-                    final CompetitorData data = CompetitorDataProvider.this.getData(competitor);
-                    if (incremental && triggerFullUpdateAfterIncrementalUpdate(data.getRecords(), loadedRecords)) {
-                        competitorsToTriggerFullUpdateFor.add(competitor);
+
+                    final CompetitorDataCache data = cache.get(competitor);
+                    if (data != null) {
+                        if (incremental && triggerFullUpdateAfterIncrementalUpdate(data.getRecords(), loadedRecords)) {
+                            competitorsToTriggerFullUpdateFor.add(competitor);
+                        }
+                        data.update(loadedRecords, incremental);
                     }
-                    data.update(loadedRecords, incremental);
                 }
                 CompetitorDataProvider.this.update(competitorsToTriggerFullUpdateFor, false);
             });
         }
     }
 
-    private CompetitorData getData(final C competitor) {
-        return this.cache.computeIfAbsent(competitor, c -> new CompetitorData());
+    private Optional<CompetitorDataCache> getDataCache(final C competitor) {
+        return Optional.ofNullable(cache.get(competitor));
     }
 
     public final Map<C, List<D>> getData() {
         final Map<C, List<D>> result = new HashMap<>(cache.size());
-        for (Entry<C, CompetitorData> entry : cache.entrySet()) {
+        for (Entry<C, CompetitorDataCache> entry : cache.entrySet()) {
             result.put(entry.getKey(), entry.getValue().getRecords());
         }
         return result;
     }
 
-    private class CompetitorData {
+    private class CompetitorDataCache {
 
         private final LinkedList<D> records = new LinkedList<>();
         private boolean noDataRequested = true;

@@ -134,7 +134,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        competitorDataProvider.reset();
+                        competitorDataProvider.removeAllCompetitors();
                         ManeuverTablePanel.this.rerender();
                     }
                 };
@@ -399,7 +399,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             if (Util.isEmpty(competitorSelectionModel.getSelectedCompetitors())) {
                 this.importantMessageLabel.setText(stringMessages.selectAtLeastOneCompetitorManeuver());
                 this.contentPanel.setWidget(importantMessageLabel);
-            } else if (competitorDataProvider.isEmpty()) {
+            } else if (!competitorDataProvider.hasCachedData()) {
                 this.importantMessageLabel.setText(stringMessages.noDataFound());
                 this.contentPanel.setWidget(importantMessageLabel);
             } else {
@@ -448,24 +448,24 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         final boolean wasVisible = isVisible();
         super.setVisible(visible);
         if (wasVisible && !visible) {
-            this.competitorDataProvider.reset();
+            this.competitorDataProvider.removeAllCompetitors();
         } else if (!wasVisible && visible) {
             this.rerender();
-            this.competitorDataProvider.update(competitorSelectionModel.getSelectedCompetitors());
+            this.competitorDataProvider.ensureCompetitors(competitorSelectionModel.getSelectedCompetitors());
         }
     }
 
     @Override
     public void addedToSelection(CompetitorWithBoatDTO competitor) {
         if (isVisible()) {
-            this.competitorDataProvider.update(competitor);
+            this.competitorDataProvider.ensureCompetitor(competitor);
         }
     }
 
     @Override
     public void removedFromSelection(CompetitorWithBoatDTO competitor) {
         if (isVisible()) {
-            this.competitorDataProvider.reset(competitor);
+            this.competitorDataProvider.removeCompetitor(competitor);
             this.rerender();
         }
     }
@@ -528,7 +528,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
         if (isVisible()) {
-            this.competitorDataProvider.update(competitorSelectionModel.getSelectedCompetitors());
+            this.competitorDataProvider.updateCachedData();
         }
     }
     
