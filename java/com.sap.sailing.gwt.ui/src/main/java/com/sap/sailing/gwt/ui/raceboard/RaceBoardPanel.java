@@ -362,7 +362,6 @@ public class RaceBoardPanel
         WindChartSettings windChartSettings = settings.findSettingsByComponentId(windChartLifecycle.getComponentId());
         ManeuverTableLifecycle maneuverTableLifecycle = getPerspectiveLifecycle().getManeuverTable();
         ManeuverTableSettings maneuverTableSettings = settings.findSettingsByComponentId(maneuverTableLifecycle.getComponentId());
-        
         MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle = getPerspectiveLifecycle().getMultiCompetitorRaceChartLifecycle();
         MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = settings
                 .findSettingsByComponentId(multiCompetitorRaceChartLifecycle.getComponentId());

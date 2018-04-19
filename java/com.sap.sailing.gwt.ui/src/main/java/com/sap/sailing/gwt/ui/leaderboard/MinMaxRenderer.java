@@ -22,9 +22,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
  * 
  */
 public class MinMaxRenderer<T> {
-    
-
-    
     protected static final String BACKGROUND_BAR_STYLE_BAD = "minMaxBackgroundBarBad";
     protected static final String BACKGROUND_BAR_STYLE_OK = "minMaxBackgroundBar";
     protected static final String BACKGROUND_BAR_STYLE_GOOD = "minMaxBackgroundBarGood";
@@ -59,19 +56,15 @@ public class MinMaxRenderer<T> {
                     + "</div>")
             SafeHtml renderNegativeFromMiddle(String value, String cssClass, String title, SafeStyles style);
         }
-
         protected static final MyTemplate T = GWT.create(MyTemplate.class);
-
         SafeHtml render(String value, String cssClass, String title, int percentage) {
             SafeStylesBuilder sb = new SafeStylesBuilder();
             sb.trustedNameAndValue("background-size", percentage + "% 25px");
             return T.render(value, cssClass, title, sb.toSafeStyles());
         }
-
         SafeHtml renderMiddle(String value, String cssClass, String title) {
             return T.renderMiddle(value, cssClass, title);
         }
-
         SafeHtml renderPositiveFromMiddle(String value, String cssClass, String title, double percentage) {
             SafeStylesBuilder sb = new SafeStylesBuilder();
             sb.width(percentage, Unit.PCT);
@@ -80,7 +73,6 @@ public class MinMaxRenderer<T> {
             sb.trustedNameAndValue("background-repeat", "repeat-x");
             return T.renderPositiveFromMiddle(value, cssClass, title, sb.toSafeStyles());
         }
-
         SafeHtml renderNegativeFromMiddle(String value, String cssClass, String title, double percentage) {
             SafeStylesBuilder sb = new SafeStylesBuilder();
             sb.width(percentage, Unit.PCT);
@@ -91,8 +83,6 @@ public class MinMaxRenderer<T> {
             return T.renderNegativeFromMiddle(value, cssClass, title, sb.toSafeStyles());
         }
     }
-
-
 
     /**
      * Renders the value and the percentage bar of the columns {@link DetailTypeColumn} and
@@ -183,5 +173,4 @@ public class MinMaxRenderer<T> {
     protected HasStringAndDoubleValue<T> getValueProvider() {
         return valueProvider;
     }
-
 }
