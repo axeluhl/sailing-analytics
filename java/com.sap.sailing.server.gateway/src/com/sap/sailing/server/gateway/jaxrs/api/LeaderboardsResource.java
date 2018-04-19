@@ -159,12 +159,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             try {
                 TimePoint timePoint = calculateTimePointForResultState(leaderboard, resultState);
                 JSONObject jsonLeaderboard;
-                if (timePoint != null || resultState == ResultStates.Live) {
-                    jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount);
-                } else {
-                    jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint,
-                            maxCompetitorsCount);
-                }
+                jsonLeaderboard = getLeaderboardJson(resultState, maxCompetitorsCount, requestTimePoint, leaderboard, timePoint,
+                        /* race column names */ null, /* race detail names */ null);
                 StringWriter sw = new StringWriter();
                 jsonLeaderboard.writeJSONString(sw);
                 String json = sw.getBuffer().toString();
@@ -177,15 +173,17 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         return response;
     }
 
-    private JSONObject getLeaderboardJson(Leaderboard leaderboard,
-            TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount)
+    @Override
+    protected JSONObject getLeaderboardJson(Leaderboard leaderboard,
+            TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount, List<String> raceColumnNames,
+            List<String> raceDetailNames)
             throws NoWindException, InterruptedException, ExecutionException {
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(
                 resultTimePoint, Collections.<String> emptyList(), /* addOverallDetails */
                 false, getService(), getService().getBaseDomainFactory(),
                 /* fillTotalPointsUncorrected */false);
         JSONObject jsonLeaderboard = new JSONObject();
-        writeCommonLeaderboardData(jsonLeaderboard, leaderboardDTO, resultState, maxCompetitorsCount);
+        writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, resultTimePoint, maxCompetitorsCount);
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
         int counter = 1;

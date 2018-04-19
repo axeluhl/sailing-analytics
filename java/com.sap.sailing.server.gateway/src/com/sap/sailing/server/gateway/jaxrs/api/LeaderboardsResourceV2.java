@@ -95,7 +95,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         return response;
     }
 
-    private JSONObject getLeaderboardJson(Leaderboard leaderboard,
+    @Override
+    protected JSONObject getLeaderboardJson(Leaderboard leaderboard,
             TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount,
             List<String> raceColumnNames, List<String> raceDetailNames)
             throws NoWindException, InterruptedException, ExecutionException {
@@ -106,7 +107,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 false, getService(), getService().getBaseDomainFactory(),
                 /* fillTotalPointsUncorrected */false);
         JSONObject jsonLeaderboard = new JSONObject();
-        writeCommonLeaderboardData(jsonLeaderboard, leaderboardDTO, resultState, maxCompetitorsCount);
+        writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, resultTimePoint, maxCompetitorsCount);
         Map<String, Map<String, Map<CompetitorWithBoatDTO, Integer>>> competitorRanksPerRaceColumnsAndFleets = new HashMap<>();
         for (String raceColumnName : raceColumnsToShow) {
             List<CompetitorWithBoatDTO> competitorsFromBestToWorst = leaderboardDTO.getCompetitorsFromBestToWorst(raceColumnName);
