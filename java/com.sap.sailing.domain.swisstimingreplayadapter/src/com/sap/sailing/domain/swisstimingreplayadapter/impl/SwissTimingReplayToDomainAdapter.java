@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.swisstimingreplayadapter.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -308,7 +309,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
             competitorByHashValue.put(hashValue, competitorAndBoat.getA());
         } else {
             // consider it a mark
-            Mark mark = domainFactory.getOrCreateMark(sailNumberOrTrackerID.trim());
+            Mark mark = domainFactory.getOrCreateMark(sailNumberOrTrackerID.trim(), name);
             Map<String, Mark> marksOfCurrentRace = marksPerRaceIDPerMarkID.get(currentRaceID);
             if (marksOfCurrentRace == null) {
                 marksOfCurrentRace = new HashMap<>();
@@ -323,12 +324,12 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
     @Override
     public void mark(MarkType markType, String name, byte index, String id1, String id2, short windSpeedInKnots,
             short trueWindDirectionInDegrees) {
-        final List<String> markNames = new ArrayList<>();
-        markNames.add(id1.trim());
+        final List<Serializable> markNamesAsIds = new ArrayList<>();
+        markNamesAsIds.add(id1.trim());
         if (id2 != null && !id2.trim().isEmpty()) {
-            markNames.add(id2.trim());
+            markNamesAsIds.add(id2.trim());
         }
-        final ControlPoint controlPoint = domainFactory.getOrCreateControlPoint(markNames, getMarkType(markType));
+        final ControlPoint controlPoint = domainFactory.getOrCreateControlPoint(name, markNamesAsIds, getMarkType(markType));
         if (index == 0) {
             currentCourseDefinition = new ArrayList<>();
         }

@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
@@ -13,7 +15,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
  *
  */
 public interface Fix {
-    String getBoatID();
+    Serializable getTrackedObjectId();
     
     TrackerType getTrackerType();
     

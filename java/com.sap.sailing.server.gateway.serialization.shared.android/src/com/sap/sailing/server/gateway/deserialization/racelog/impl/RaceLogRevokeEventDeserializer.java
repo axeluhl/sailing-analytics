@@ -12,9 +12,9 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogRevokeEventSerializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.util.impl.UUIDHelper;
 
 public class RaceLogRevokeEventDeserializer extends BaseRaceLogEventDeserializer {	
     public RaceLogRevokeEventDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer) {
@@ -24,7 +24,7 @@ public class RaceLogRevokeEventDeserializer extends BaseRaceLogEventDeserializer
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
-    	Serializable revokedEventId = Helpers.tryUuidConversion(
+    	Serializable revokedEventId = UUIDHelper.tryUuidConversion(
     			(Serializable) object.get(RaceLogRevokeEventSerializer.FIELD_REVOKED_EVENT_ID));
         String revokedEventType = (String) object.get(RaceLogRevokeEventSerializer.FIELD_REVOKED_EVENT_TYPE);
         String revokedEventShortInfo = (String) object.get(RaceLogRevokeEventSerializer.FIELD_REVOKED_EVENT_SHORT_INFO);
