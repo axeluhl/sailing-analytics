@@ -98,7 +98,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         jsonLeaderboard.put("displayName", displayName == null ? leaderboard.name : displayName);
         jsonLeaderboard.put("resultTimepoint", leaderboard.getTimePoint() != null ? leaderboard.getTimePoint().getTime() : null);
         jsonLeaderboard.put("resultState", resultState.name());
-        jsonLeaderboard.put("type", leaderboard.type);
+        jsonLeaderboard.put("type", leaderboard.type.name());
         jsonLeaderboard.put("canBoatsOfCompetitorsChangePerRace", leaderboard.canBoatsOfCompetitorsChangePerRace);
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
         jsonLeaderboard.put("higherScoreIsBetter", leaderboard.isHigherScoreBetter());
@@ -139,7 +139,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         jsonLeaderboard.put("displayName", displayName == null ? leaderboard.getName() : displayName);
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.asMillis() : null);
         jsonLeaderboard.put("resultState", resultState.name());
-        jsonLeaderboard.put("type", leaderboard.getLeaderboardType().toString());
+        jsonLeaderboard.put("type", leaderboard.getLeaderboardType().name());
         if (leaderboard instanceof RegattaLeaderboard) {
             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
             jsonLeaderboard.put("canBoatsOfCompetitorsChangePerRace", regattaLeaderboard.getRegatta().canBoatsOfCompetitorsChangePerRace());
