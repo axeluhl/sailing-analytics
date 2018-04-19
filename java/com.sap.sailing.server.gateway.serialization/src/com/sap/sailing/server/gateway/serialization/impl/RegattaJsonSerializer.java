@@ -5,7 +5,6 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -25,7 +24,6 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
 
     private final JsonSerializer<Series> seriesSerializer;
     private final JsonSerializer<Competitor> competitorSerializer;
-    private final JsonSerializer<CompetitorWithBoat> competitorWithBoatSerializer;
     private final JsonSerializer<Boat> boatSerializer;
 
     public RegattaJsonSerializer() {
@@ -37,7 +35,6 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
         this.seriesSerializer = seriesSerializer;
         this.competitorSerializer = competitorSerializer;
         this.boatSerializer = boatSerializer;
-        this.competitorWithBoatSerializer = competitorSerializer != null ? new CompetitorWithBoatRefJsonSerializer(competitorSerializer) : null; 
     }
 
     public JSONObject serialize(Regatta regatta) {
@@ -60,17 +57,13 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
         if (competitorSerializer != null) {
             JSONArray competitorsJson = new JSONArray();
             for (Competitor competitor : regatta.getAllCompetitors()) {
-                if (competitor.hasBoat()) {
-                    competitorsJson.add(competitorWithBoatSerializer.serialize((CompetitorWithBoat) competitor));
-                } else {
-                    competitorsJson.add(competitorSerializer.serialize(competitor));
-                }
+                competitorsJson.add(competitorSerializer.serialize(competitor));
             }
             result.put(FIELD_COMPETITORS, competitorsJson);
         }
-        if (boatSerializer != null) {
+        if (regatta.canBoatsOfCompetitorsChangePerRace() && boatSerializer != null) {
             JSONArray boatsJson = new JSONArray();
-            for (Boat boat: regatta.getAllBoats()) {
+            for (Boat boat : regatta.getAllBoats()) {
                 boatsJson.add(boatSerializer.serialize(boat));
             }
             result.put(FIELD_BOATS, boatsJson);

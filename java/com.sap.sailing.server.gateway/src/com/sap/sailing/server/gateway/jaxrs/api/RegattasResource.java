@@ -215,9 +215,9 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
             NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
-            CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
-                    new PersonJsonSerializer(nationalityJsonSerializer)), null);
             BoatJsonSerializer boatJsonSerializer = new BoatJsonSerializer(new BoatClassJsonSerializer());
+            CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
+                    new PersonJsonSerializer(nationalityJsonSerializer)), boatJsonSerializer);
             JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(null, competitorJsonSerializer, boatJsonSerializer);
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
             String json = serializedRegatta.toJSONString();
