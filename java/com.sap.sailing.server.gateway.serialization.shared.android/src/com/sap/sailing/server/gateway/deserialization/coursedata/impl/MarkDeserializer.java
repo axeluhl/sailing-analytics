@@ -9,10 +9,10 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.AbstractColor;
+import com.sap.sse.util.impl.UUIDHelper;
 
 /**
  * Deserializer for marks.
@@ -27,7 +27,7 @@ public class MarkDeserializer implements JsonDeserializer<Mark> {
 
     @Override
     public Mark deserialize(JSONObject object) throws JsonDeserializationException {
-        Serializable id = Helpers.tryUuidConversion((Serializable) object.get(MarkJsonSerializer.FIELD_ID));
+        Serializable id = UUIDHelper.tryUuidConversion((Serializable) object.get(MarkJsonSerializer.FIELD_ID));
         String colorAsString = (String) object.get(MarkJsonSerializer.FIELD_COLOR);
         Color color = colorAsString == null ? null : AbstractColor.getCssColor(colorAsString);
         String pattern = (String) object.get(MarkJsonSerializer.FIELD_PATTERN);

@@ -18,6 +18,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.impl.UUIDHelper;
 
 public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {
 
@@ -55,7 +56,7 @@ public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<R
         }
         return deserialize(
                 object, 
-                Helpers.tryUuidConversion(id),
+                UUIDHelper.tryUuidConversion(id),
                 new MillisecondsTimePoint(createdAt.longValue()),
                 author, 
                 timeStamp == null ? null : new MillisecondsTimePoint(timeStamp.longValue()),
