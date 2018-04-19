@@ -44,7 +44,7 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
     private static final String COMPETITOR_THREE_LETTER_IOC_CODE = "competitorThreeLetterIocCode";
     private static final String COMPETITOR_NAME = "competitorName";
     private static final String COMPETITOR_BOAT_ID = "competitorBoatId";
-    private static final String COMPETITOR_ID = "competitorId";
+    private static final String COMPETITOR_ID_AS_STRING = "competitorId"; // the competitor ID as String
     private static final String USE_INTERNAL_MARK_PASSING_ALGORITHM = "useInternalMarkPassingAlgorithm";
     private static final String DELAY_TO_LIVE_IN_MILLIS = "delayToLiveInMillis";
     private static final String START_LIST = "startList";
@@ -107,7 +107,7 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
     
     private DBObject createCompetitorDBObject(Competitor competitor) {
         final DBObject result = new BasicDBObject();
-        result.put(COMPETITOR_ID, competitor.getID());
+        result.put(COMPETITOR_ID_AS_STRING, competitor.getIdAsString());
         result.put(COMPETITOR_BOAT_ID, competitor.getBoatID());
         result.put(COMPETITOR_NAME, competitor.getName());
         result.put(COMPETITOR_THREE_LETTER_IOC_CODE, competitor.getThreeLetterIOCCode());
@@ -150,15 +150,15 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
 
     private Competitor createCompetitorFromDBObject(DBObject competitorDBObject) {
         final Competitor result;
-        final String competitorId = (String) competitorDBObject.get(COMPETITOR_ID);
+        final String competitorIdAsString = (String) competitorDBObject.get(COMPETITOR_ID_AS_STRING);
         final String boatID = (String) competitorDBObject.get(COMPETITOR_BOAT_ID);
         final String threeLetterIOCCode = (String) competitorDBObject.get(COMPETITOR_THREE_LETTER_IOC_CODE);
         final String name = (String) competitorDBObject.get(COMPETITOR_NAME);
         final BasicDBList crewDBObject = (BasicDBList) competitorDBObject.get(COMPETITOR_CREW);
-        if (competitorId == null) {
+        if (competitorIdAsString == null) {
             result = new CompetitorWithoutID(boatID, threeLetterIOCCode, name);
         } else {
-            result = new CompetitorWithID(competitorId, boatID, threeLetterIOCCode, name, createCrewFromDBObject(crewDBObject));
+            result = new CompetitorWithID(competitorIdAsString, boatID, threeLetterIOCCode, name, createCrewFromDBObject(crewDBObject));
         }
         return result;
     }

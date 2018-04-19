@@ -239,11 +239,11 @@ public class SailMasterConnectivityTest {
         Iterator<Mark> mi = course1.getMarks().iterator();
         Mark m11 = mi.next();
         assertEquals("Lee Gate", m11.getDescription());
-        assertEquals(Arrays.asList(new String[] { "LG1", "LG2" }), m11.getDevices());
+        assertEquals(Arrays.asList(new String[] { "LG1", "LG2" }), m11.getDeviceIds());
         assertEquals(1, m11.getIndex());
         Mark m12 = mi.next();
         assertEquals("Windward", m12.getDescription());
-        assertEquals(Arrays.asList(new String[] { "WW1" }), m12.getDevices());
+        assertEquals(Arrays.asList(new String[] { "WW1" }), m12.getDeviceIds());
         assertEquals(2, m12.getIndex());
 
         Race r2 = connector4712.getRace();
@@ -253,15 +253,15 @@ public class SailMasterConnectivityTest {
         mi = course2.getMarks().iterator();
         Mark m21 = mi.next();
         assertEquals("Lee Gate", m21.getDescription());
-        assertEquals(Arrays.asList(new String[] { "LG1", "LG2" }), m21.getDevices());
+        assertEquals(Arrays.asList(new String[] { "LG1", "LG2" }), m21.getDeviceIds());
         assertEquals(1, m21.getIndex());
         Mark m22 = mi.next();
         assertEquals("Windward", m22.getDescription());
-        assertEquals(Arrays.asList(new String[] { "WW1" }), m22.getDevices());
+        assertEquals(Arrays.asList(new String[] { "WW1" }), m22.getDeviceIds());
         assertEquals(2, m22.getIndex());
         Mark m23 = mi.next();
         assertEquals("Offset", m23.getDescription());
-        assertEquals(Arrays.asList(new String[] { "OS1" }), m23.getDevices());
+        assertEquals(Arrays.asList(new String[] { "OS1" }), m23.getDeviceIds());
         assertEquals(3, m23.getIndex());
     }
     

@@ -493,6 +493,15 @@ public class Util {
         return joinStrings(separator, Arrays.asList(strings));
     }
 
+    public static String join(String separator, Object... objects) {
+        final String[] strings = new String[objects.length];
+        int i=0;
+        for (Object o : objects) {
+            strings[i++] = o.toString();
+        }
+        return joinStrings(separator, Arrays.asList(strings));
+    }
+
     public static String joinStrings(String separator, Iterable<String> strings) {
         StringBuilder result = new StringBuilder();
         boolean first = true;

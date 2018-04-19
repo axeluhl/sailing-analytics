@@ -263,6 +263,7 @@ import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
 import com.sap.sse.util.ThreadPoolUtil;
+import com.sap.sse.util.impl.UUIDHelper;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -1626,7 +1627,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogEvent loadRaceLogRevokeEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors,
             DBObject dbObject) {
-        Serializable revokedEventId = Helpers
+        Serializable revokedEventId = UUIDHelper
                 .tryUuidConversion((Serializable) dbObject.get(FieldNames.RACE_LOG_REVOKED_EVENT_ID.name()));
         String revokedEventType = (String) dbObject.get(FieldNames.RACE_LOG_REVOKED_EVENT_TYPE.name());
         String revokedEventShortInfo = (String) dbObject.get(FieldNames.RACE_LOG_REVOKED_EVENT_SHORT_INFO.name());
@@ -2044,7 +2045,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private RegattaLogRevokeEvent loadRegattaLogRevokeEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
-        Serializable revokedEventId = Helpers
+        Serializable revokedEventId = UUIDHelper
                 .tryUuidConversion((Serializable) dbObject.get(FieldNames.REGATTA_LOG_REVOKED_EVENT_ID.name()));
         String revokedEventType = (String) dbObject.get(FieldNames.REGATTA_LOG_REVOKED_EVENT_TYPE.name());
         String revokedEventShortInfo = (String) dbObject.get(FieldNames.REGATTA_LOG_REVOKED_EVENT_SHORT_INFO.name());
@@ -2092,7 +2093,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RegattaLogCloseOpenEndedDeviceMappingEvent loadRegattaLogCloseOpenEndedDeviceMappingEvent(
             TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
             DBObject dbObject) {
-        Serializable deviceMappingEventId = Helpers
+        Serializable deviceMappingEventId = UUIDHelper
                 .tryUuidConversion((Serializable) dbObject.get(FieldNames.REGATTA_LOG_DEVICE_MAPPING_EVENT_ID.name()));
         TimePoint closingTimePointInclusive = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
         return new RegattaLogCloseOpenEndedDeviceMappingEventImpl(createdAt, author, logicalTimePoint, id,

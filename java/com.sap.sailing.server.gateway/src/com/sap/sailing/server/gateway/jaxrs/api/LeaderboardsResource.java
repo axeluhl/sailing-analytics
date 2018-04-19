@@ -124,6 +124,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.impl.UUIDHelper;
 
 @Path("/v1/leaderboards")
 public class LeaderboardsResource extends AbstractLeaderboardsResource {
@@ -322,7 +323,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     from, /* to */ null);
         } else {
             // map to a mark
-            final Mark mappedToMark = domainFactory.getExistingMarkById(Helpers.tryUuidConversion(markId));
+            final Mark mappedToMark = domainFactory.getExistingMarkById(UUIDHelper.tryUuidConversion(markId));
             mappedTo = mappedToMark;
             if (mappedToMark == null) {
                 logger.warning("No mark found for id " + markId);
@@ -396,7 +397,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         } else {
             // map to mark
             DomainFactory domainFactory = getService().getDomainObjectFactory().getBaseDomainFactory();
-            final Mark mappedToMark = domainFactory.getExistingMarkById(Helpers.tryUuidConversion(markId));
+            final Mark mappedToMark = domainFactory.getExistingMarkById(UUIDHelper.tryUuidConversion(markId));
             mappedTo = mappedToMark;
             if (mappedToMark == null) {
                 logger.warning("No mark found for id " + markId);

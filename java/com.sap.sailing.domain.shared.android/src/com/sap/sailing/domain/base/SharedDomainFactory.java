@@ -113,4 +113,6 @@ public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
     RaceLogResolver getRaceLogResolver();
 
     Mark getOrCreateMark(String name, MarkType markType);
+
+    Mark getOrCreateMark(Serializable id, String name, MarkType markType);
 }
