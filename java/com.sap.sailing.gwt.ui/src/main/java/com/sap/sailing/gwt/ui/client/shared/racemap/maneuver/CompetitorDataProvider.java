@@ -10,10 +10,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -21,6 +23,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 public abstract class CompetitorDataProvider<C extends CompetitorDTO, D> {
+
+    private static final Logger LOGGER = Logger.getLogger(CompetitorDataProvider.class.getName());
 
     private final Supplier<TimePoint> startOfTrackingProvider, endOfTrackingProvider, liveTimePointProvider;
     private final Supplier<Boolean> isReplayingProvider;
@@ -38,7 +42,9 @@ public abstract class CompetitorDataProvider<C extends CompetitorDTO, D> {
     }
 
     protected abstract void loadData(final boolean incremental, final Map<C, TimeRange> competitorTimeRanges,
-            final Consumer<Map<C, List<D>>> callback);
+            final AsyncCallback<Map<C, List<D>>> callback);
+
+    protected abstract void onCompetitorsDataChange(final Iterable<C> updatedCompetitors);
 
     protected boolean triggerFullUpdateAfterIncrementalUpdate(final List<D> existingData, final List<D> updatedData) {
         return false;
@@ -79,21 +85,37 @@ public abstract class CompetitorDataProvider<C extends CompetitorDTO, D> {
         competitors.forEach(c -> getDataCache(c)
                 .ifPresent(d -> d.getUpdateTimeRange(incremental).ifPresent(t -> compTimeRanges.put(c, t))));
         if (!compTimeRanges.isEmpty()) {
-            this.loadData(incremental, compTimeRanges, result -> {
-                final Set<C> competitorsToTriggerFullUpdateFor = new HashSet<>();
-                for (Entry<C, List<D>> entry : result.entrySet()) {
-                    final C competitor = entry.getKey();
-                    final List<D> loadedRecords = entry.getValue();
+            this.loadData(incremental, compTimeRanges, new AsyncCallback<Map<C, List<D>>>() {
 
-                    final CompetitorDataCache data = cache.get(competitor);
-                    if (data != null) {
-                        if (incremental && triggerFullUpdateAfterIncrementalUpdate(data.getRecords(), loadedRecords)) {
-                            competitorsToTriggerFullUpdateFor.add(competitor);
+                @Override
+                public void onSuccess(Map<C, List<D>> result) {
+                    final Set<C> competitorsToTriggerFullUpdateFor = new HashSet<>();
+                    final Set<C> updatedCompetitors = new HashSet<>();
+                    for (Entry<C, List<D>> entry : result.entrySet()) {
+                        final C competitor = entry.getKey();
+                        final List<D> loadedRecords = entry.getValue();
+                        final CompetitorDataCache data = cache.get(competitor);
+                        if (data != null) {
+                            if (incremental
+                                    && triggerFullUpdateAfterIncrementalUpdate(data.getRecords(), loadedRecords)) {
+                                competitorsToTriggerFullUpdateFor.add(competitor);
+                            }
+                            if (!loadedRecords.isEmpty()) {
+                                updatedCompetitors.add(competitor);
+                            }
+                            data.update(loadedRecords, incremental);
                         }
-                        data.update(loadedRecords, incremental);
                     }
+                    if (!updatedCompetitors.isEmpty()) {
+                        CompetitorDataProvider.this.onCompetitorsDataChange(updatedCompetitors);
+                    }
+                    CompetitorDataProvider.this.update(competitorsToTriggerFullUpdateFor, false);
                 }
-                CompetitorDataProvider.this.update(competitorsToTriggerFullUpdateFor, false);
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    LOGGER.log(Level.SEVERE, "Failed to load competitor data!", caught);
+                }
             });
         }
     }

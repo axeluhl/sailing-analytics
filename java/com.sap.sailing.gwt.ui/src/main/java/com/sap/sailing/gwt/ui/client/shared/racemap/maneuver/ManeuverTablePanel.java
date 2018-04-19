@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -124,29 +123,21 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 this::isReplaying, m -> m.timePoint.getTime() + 2500) {
             @Override
             protected void loadData(boolean incremental, Map<CompetitorWithBoatDTO, TimeRange> competitorTimeRanges,
-                    Consumer<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>> callback) {
-                final AsyncCallback<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>> asyncCallback = new AsyncCallback<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>>() {
-                    @Override
-                    public void onSuccess(Map<CompetitorWithBoatDTO, List<ManeuverDTO>> result) {
-                        callback.accept(result);
-                        ManeuverTablePanel.this.rerender();
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        competitorDataProvider.removeAllCompetitors();
-                        ManeuverTablePanel.this.rerender();
-                    }
-                };
+                    AsyncCallback<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>> callback) {
                 if (incremental) {
                     asyncActionsExecutor.execute(
                             new GetManeuversForCompetitors(sailingService, raceIdentifier, competitorTimeRanges),
-                            asyncCallback);
+                            callback);
                 } else {
                     // AsyncActionExecutor is explicitly not used here, to ensure full updates are always executed.
                     // Because full updates are triggered in specific situations only, this won't cause server overload.
-                    sailingService.getManeuvers(raceIdentifier, competitorTimeRanges, asyncCallback);
+                    sailingService.getManeuvers(raceIdentifier, competitorTimeRanges, callback);
                 }
+            }
+
+            @Override
+            protected void onCompetitorsDataChange(final Iterable<CompetitorWithBoatDTO> updatedCompetitors) {
+                ManeuverTablePanel.this.rerender();
             }
 
             @Override
