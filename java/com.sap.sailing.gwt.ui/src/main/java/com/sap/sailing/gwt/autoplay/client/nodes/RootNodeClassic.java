@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.nodes;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.RootNodeBase;
@@ -51,6 +52,18 @@ public class RootNodeClassic extends RootNodeBase {
             event.getCaught().printStackTrace();
         }
         transitionTo(idle);
+    }
+
+    @Override
+    protected long getSwitchBeforeRaceStartInMillies() {
+        AutoplayPerspectiveOwnSettings ownSettings = getClientFactory().getAutoPlayCtx().getAutoplaySettings().getPerspectiveOwnSettings();
+        return ownSettings.getTimeToSwitchBeforeRaceStart() * 1000;
+    }
+
+    @Override
+    protected long getWaitTimeAfterRaceEndInMillis() {
+        AutoplayPerspectiveOwnSettings ownSettings = getClientFactory().getAutoPlayCtx().getAutoplaySettings().getPerspectiveOwnSettings();
+        return ownSettings.getWaitTimeAfterRaceEndInMillis() * 1000;
     }
 
 }

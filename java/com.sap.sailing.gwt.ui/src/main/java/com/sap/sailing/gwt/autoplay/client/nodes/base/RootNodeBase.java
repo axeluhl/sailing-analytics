@@ -95,7 +95,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
 
         this.leaderBoardName = cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName();
         AutoplayHelper.getLiveRace(cf.getSailingService(), cf.getErrorReporter(), cf.getAutoPlayCtx().getEvent(),
-                leaderBoardName, cf.getDispatch(), new AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>>() {
+                leaderBoardName, cf.getDispatch(), getWaitTimeAfterRaceEndInMillis(), getSwitchBeforeRaceStartInMillies(), new AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>>() {
                     @Override
                     public void onSuccess(Pair<Long, RegattaAndRaceIdentifier> result) {
                         errorCount = 0;
@@ -141,6 +141,10 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                     }
                 });
     }
+
+    protected abstract long getSwitchBeforeRaceStartInMillies();
+
+    protected abstract long getWaitTimeAfterRaceEndInMillis();
 
     private final void setCurrentState(boolean isPreLiveRace, RegattaAndRaceIdentifier liveRace, RootNodeState goingTo,
             RootNodeState comingFrom) {

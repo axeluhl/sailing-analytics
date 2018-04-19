@@ -16,6 +16,7 @@ public class AutoplaySettingsDialogComponent implements SettingsDialogComponent<
     private CheckBox fullScreen;
     private CheckBox switchToLiveRaceAutomatically;
     private IntegerBox timeBeforeRaceStartInput;
+    private IntegerBox waitTimeAfterRaceEndInput;
 
     AutoplaySettingsDialogComponent(AutoplayPerspectiveOwnSettings settings) {
         this.initialSettings = settings;
@@ -40,6 +41,12 @@ public class AutoplaySettingsDialogComponent implements SettingsDialogComponent<
         
         timeBeforeRaceStartInput = dialog.createIntegerBox(initialSettings.getTimeToSwitchBeforeRaceStart(), 5);
         vp.add(timeBeforeRaceStartInput);
+        
+        Label timeAfterRaceEndDescription = new Label(stringMessages.timeAfterRaceEnd());
+        vp.add(timeAfterRaceEndDescription);
+        
+        waitTimeAfterRaceEndInput = dialog.createIntegerBox(initialSettings.getWaitTimeAfterRaceEndInMillis(), 5);
+        vp.add(waitTimeAfterRaceEndInput);
 
         return vp;
     }
@@ -47,7 +54,7 @@ public class AutoplaySettingsDialogComponent implements SettingsDialogComponent<
     @Override
     public AutoplayPerspectiveOwnSettings getResult() {
         return new AutoplayPerspectiveOwnSettings(fullScreen.getValue(), switchToLiveRaceAutomatically.getValue(),
-                timeBeforeRaceStartInput.getValue());
+                timeBeforeRaceStartInput.getValue(), waitTimeAfterRaceEndInput.getValue());
     }
 
     @Override

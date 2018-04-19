@@ -1299,6 +1299,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String startBrowserFullscreen();
     String switchToLiveRaceAutomatically();
     String timeBeforeRaceStart();
+    String timeAfterRaceEnd(); 
     String showXYDiagram();
     String xyDiagram();
     String boatSpeed();
@@ -2152,5 +2153,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String newExpeditionRace();
     String newExpeditionCompetitor();
     String selectOneCompetitorToMapTheImportedData();
-    String startTypingForSuggestions(); 
+    String startTypingForSuggestions();
 }
