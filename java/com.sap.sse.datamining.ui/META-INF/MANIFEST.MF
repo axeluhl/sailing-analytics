@@ -18,3 +18,4 @@ Require-Bundle: com.sap.sse.gwt;bundle-version="1.0.0",
  com.sap.sse.datamining.shared;bundle-version="1.0.0",
  com.sap.sse.common,
  org.moxieapps.gwt.highcharts;bundle-version="1.6.0"
+Automatic-Module-Name: com.sap.sse.datamining.ui
