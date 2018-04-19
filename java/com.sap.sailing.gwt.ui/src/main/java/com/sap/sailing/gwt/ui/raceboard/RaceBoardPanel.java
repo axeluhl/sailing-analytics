@@ -392,9 +392,10 @@ public class RaceBoardPanel
             componentsForSideBySideViewer.add(windChart);
             
         }
-        maneuverTablePanel = new ManeuverTablePanel(this, getComponentContext(), sailingService, selectedRaceIdentifier,
-                stringMessages, competitorSelectionProvider, errorReporter, timer, maneuverTableSettings,
-                timeRangeWithZoomModel, raceTimesInfoProvider, new ClassicLeaderboardStyle(), userService);
+        maneuverTablePanel = new ManeuverTablePanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
+                selectedRaceIdentifier, stringMessages, competitorSelectionProvider, errorReporter, timer,
+                maneuverTableSettings, timeRangeWithZoomModel, raceTimesInfoProvider, new ClassicLeaderboardStyle(),
+                userService);
         maneuverTablePanel.getEntryWidget().setTitle(stringMessages.maneuverTable());
         componentsForSideBySideViewer.add(maneuverTablePanel);
         editMarkPassingPanel = new EditMarkPassingsPanel(this, getComponentContext(), sailingService,

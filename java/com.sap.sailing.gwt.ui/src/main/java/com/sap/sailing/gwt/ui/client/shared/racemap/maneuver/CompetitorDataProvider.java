@@ -49,7 +49,8 @@ public class CompetitorDataProvider<C extends CompetitorDTO, D> {
         return this.cache.isEmpty();
     }
 
-    protected void loadData(final Map<C, TimeRange> competitorTimeRanges, final Consumer<Map<C, List<D>>> callback) {
+    protected void loadData(final boolean incremental, final Map<C, TimeRange> competitorTimeRanges,
+            final Consumer<Map<C, List<D>>> callback) {
     }
 
     protected boolean triggerFullUpdateAfterIncrementalUpdate(final List<D> existingData, final List<D> updatedData) {
@@ -68,18 +69,18 @@ public class CompetitorDataProvider<C extends CompetitorDTO, D> {
         final Map<C, TimeRange> compTimeRanges = new HashMap<>();
         competitors.forEach(c -> getData(c).getUpdateTimeRange(incremental).ifPresent(t -> compTimeRanges.put(c, t)));
         if (!compTimeRanges.isEmpty()) {
-            this.loadData(compTimeRanges, result -> {
-                final Set<C> competitorToRefresh = new HashSet<>();
+            this.loadData(incremental, compTimeRanges, result -> {
+                final Set<C> competitorsToTriggerFullUpdateFor = new HashSet<>();
                 for (Entry<C, List<D>> entry : result.entrySet()) {
                     final C competitor = entry.getKey();
                     final List<D> loadedRecords = entry.getValue();
                     final CompetitorData data = CompetitorDataProvider.this.getData(competitor);
                     if (incremental && triggerFullUpdateAfterIncrementalUpdate(data.getRecords(), loadedRecords)) {
-                        competitorToRefresh.add(competitor);
+                        competitorsToTriggerFullUpdateFor.add(competitor);
                     }
                     data.update(loadedRecords, incremental);
                 }
-                CompetitorDataProvider.this.update(competitorToRefresh, false);
+                CompetitorDataProvider.this.update(competitorsToTriggerFullUpdateFor, false);
             });
         }
     }

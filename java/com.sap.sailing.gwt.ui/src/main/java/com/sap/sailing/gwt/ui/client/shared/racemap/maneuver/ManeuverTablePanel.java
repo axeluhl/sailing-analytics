@@ -38,6 +38,7 @@ import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
+import com.sap.sailing.gwt.ui.actions.GetManeuversForCompetitors;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
@@ -59,6 +60,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
@@ -94,12 +96,13 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private boolean hasCanReplayDuringLiveRacesPermission;
 
 
-    public ManeuverTablePanel(Component<?> parent, ComponentContext<?> context,
-            final SailingServiceAsync sailingService, final RegattaAndRaceIdentifier raceIdentifier,
+    public ManeuverTablePanel(final Component<?> parent, ComponentContext<?> context,
+            final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
+            final RegattaAndRaceIdentifier raceIdentifier,
             final StringMessages stringMessages, final CompetitorSelectionProvider competitorSelectionModel,
-            final ErrorReporter errorReporter, final Timer timer, ManeuverTableSettings initialSettings,
-            TimeRangeWithZoomModel timeRangeWithZoomProvider, RaceTimesInfoProvider raceTimesInfoProvider,
-            LeaderBoardStyle style, UserService userService) {
+            final ErrorReporter errorReporter, final Timer timer, final ManeuverTableSettings initialSettings,
+            final TimeRangeWithZoomModel timeRangeWithZoomProvider, final RaceTimesInfoProvider raceTimesInfoProvider,
+            final LeaderBoardStyle style, final UserService userService) {
         super(parent, context);
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
@@ -120,23 +123,30 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 timeRangeWithZoomProvider::getFromTime, timeRangeWithZoomProvider::getToTime, timer::getLiveTimePoint,
                 this::isReplaying, m -> m.timePoint.getTime() + 2500) {
             @Override
-            protected void loadData(Map<CompetitorWithBoatDTO, TimeRange> competitorTimeRanges,
+            protected void loadData(boolean incremental, Map<CompetitorWithBoatDTO, TimeRange> competitorTimeRanges,
                     Consumer<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>> callback) {
-                sailingService.getManeuvers(raceIdentifier, competitorTimeRanges,
-                        new AsyncCallback<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>>() {
+                final AsyncCallback<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>> asyncCallback = new AsyncCallback<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>>() {
+                    @Override
+                    public void onSuccess(Map<CompetitorWithBoatDTO, List<ManeuverDTO>> result) {
+                        callback.accept(result);
+                        ManeuverTablePanel.this.rerender();
+                    }
 
-                            @Override
-                            public void onSuccess(Map<CompetitorWithBoatDTO, List<ManeuverDTO>> result) {
-                                callback.accept(result);
-                                ManeuverTablePanel.this.rerender();
-                            }
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                competitorDataProvider.reset();
-                                ManeuverTablePanel.this.rerender();
-                            }
-                        });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        competitorDataProvider.reset();
+                        ManeuverTablePanel.this.rerender();
+                    }
+                };
+                if (incremental) {
+                    asyncActionsExecutor.execute(
+                            new GetManeuversForCompetitors(sailingService, raceIdentifier, competitorTimeRanges),
+                            asyncCallback);
+                } else {
+                    // AsyncActionExecutor is explicitly not used here, to ensure full updates are always executed.
+                    // Because full updates are triggered in specific situations only, this won't cause server overload.
+                    sailingService.getManeuvers(raceIdentifier, competitorTimeRanges, asyncCallback);
+                }
             }
 
             @Override
