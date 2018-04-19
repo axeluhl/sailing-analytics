@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,7 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+import org.moxieapps.gwt.highcharts.client.Series.Type;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker.Symbol;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
@@ -36,10 +39,11 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
     private QueryResultDTO<?> result;
     private final SimpleLayoutPanel chartPanel;
     private final Chart chart;
+    private final Map<GroupKey, Series> seriesMappedByGroupKey;
 
     public NumberPairResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context, stringMessages);
-
+        seriesMappedByGroupKey = new HashMap<>();
         chartPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {
@@ -85,17 +89,37 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
     @Override
     protected void internalShowResults(QueryResultDTO<?> res) {
         result = res;
-        
-        Series series = chart.createSeries().setPlotOptions(new SeriesPlotOptions().setMarker(new Marker().setSymbol(Symbol.CIRCLE)));
+        createAndAddSeriesToChart();
+
         for (Entry<GroupKey, ?> resultEntry : result.getResults().entrySet()) {
             @SuppressWarnings("unchecked")
             AveragePairWithStats<Number> value = (AveragePairWithStats<Number>) resultEntry.getValue();
             Point point = new Point(value.getAverage().getA(), value.getAverage().getB());
             point.setName(resultEntry.getKey().asString());
-            series.addPoint(point);     
+            seriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
+            .addPoint(point, false, false, false);   
         }
         chart.getXAxis().setAxisTitleText(result.getResultSignifier());
-        chart.addSeries(series, false, false);
+    }
+    
+    private void createAndAddSeriesToChart() {
+        for (GroupKey groupKey : result.getResults().keySet()) {
+            GroupKey seriesKey = groupKeyToSeriesKey(groupKey);
+            if (!seriesMappedByGroupKey.containsKey(seriesKey)) {
+                seriesMappedByGroupKey.put(seriesKey, chart.createSeries().setPlotOptions(new SeriesPlotOptions().setMarker(new Marker().setSymbol(Symbol.CIRCLE))).setName(seriesKey.asString()));
+                chart.addSeries(seriesMappedByGroupKey.get(seriesKey), false, false);
+            }
+        }
+
+    }
+    
+    private GroupKey groupKeyToSeriesKey(GroupKey groupKey) {
+        if (groupKey.hasSubKeys()) {
+            List<? extends GroupKey> subKeys = GroupKey.Util.getSubKeys(groupKey);
+            return subKeys.size() == 1 ? subKeys.get(0) : new CompoundGroupKey(subKeys);
+        } else {
+            return new GenericGroupKey<>(stringMessages.results());
+        }
     }
 
 
