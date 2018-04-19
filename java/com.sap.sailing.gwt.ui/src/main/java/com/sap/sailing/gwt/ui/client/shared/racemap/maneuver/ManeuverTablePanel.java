@@ -187,7 +187,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                     return Double.compare(Math.abs(o1v), Math.abs(o2v));
                 }
             };
-
             final HasStringAndDoubleValue<ManeuverTableData> dataProvider = new HasStringAndDoubleValue<ManeuverTableData>() {
                 @Override
                 public String getStringValueToRender(ManeuverTableData row) {
@@ -205,8 +204,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 }
             };
 
-            final MinMaxRenderer<ManeuverTableData> renderer = new MinMaxRenderer<ManeuverTableData>(dataProvider,
-                    comparatorWithAbs);
+            final MinMaxRenderer<ManeuverTableData> renderer = new MinMaxRenderer<ManeuverTableData>(dataProvider, comparatorWithAbs);
 
             @Override
             public InvertibleComparator<ManeuverTableData> getComparator() {
@@ -263,7 +261,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     }
 
     private SortableColumn<ManeuverTableData, Date> createTimeColumn() {
-
         final InvertibleComparator<ManeuverTableData> comparator = new InvertibleComparatorAdapter<ManeuverTableData>() {
             @Override
             public int compare(ManeuverTableData o1, ManeuverTableData o2) {
@@ -382,8 +379,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
     private void updateManeuverTableData() {
         final ArrayList<ManeuverTableData> data = new ArrayList<>();
-        for (final Entry<CompetitorWithBoatDTO, List<ManeuverDTO>> entry : competitorDataProvider.getCachedData()
-                .entrySet()) {
+        for (final Entry<CompetitorWithBoatDTO, List<ManeuverDTO>> entry : competitorDataProvider.getCachedData().entrySet()) {
             for (ManeuverDTO maneuver : entry.getValue()) {
                 if (settings.getSelectedManeuverTypes().contains(maneuver.type)) {
                     data.add(new ManeuverTableData(entry.getKey(), maneuver));
