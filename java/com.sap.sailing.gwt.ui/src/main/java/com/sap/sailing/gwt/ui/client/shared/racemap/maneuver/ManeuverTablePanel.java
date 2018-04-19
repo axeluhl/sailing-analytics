@@ -512,10 +512,11 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 final AsyncCallback<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>> callback) {
             if (incremental) {
                 asyncActionsExecutor.execute(
-                        new GetManeuversForCompetitorsAction(sailingService, raceIdentifier, competitorTimeRanges), callback);
+                        new GetManeuversForCompetitorsAction(sailingService, raceIdentifier, competitorTimeRanges),
+                        callback);
             } else {
                 // AsyncActionExecutor is explicitly not used here, to ensure full updates are always executed.
-                // Because full updates are triggered in specific situations only, this won't cause server overload.
+                // Because full updates are triggered in specific situations only, this shouldn't cause server overload.
                 sailingService.getManeuvers(raceIdentifier, competitorTimeRanges, callback);
             }
         }

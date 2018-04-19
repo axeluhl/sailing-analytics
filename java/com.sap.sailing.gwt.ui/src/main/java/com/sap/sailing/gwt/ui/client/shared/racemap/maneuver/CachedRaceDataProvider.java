@@ -24,6 +24,19 @@ import com.sap.sse.gwt.client.player.TimeRangeProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
+/**
+ * Abstract provider for grouped race data which supports full and incremental updates as well as caching functionality.
+ * Triggering of updates mainly depends on the supplied {@link TimeRangeProvider time range provider}'s
+ * {@link TimeRangeProvider#getFromTime() start} and {@link TimeRangeProvider#getToTime() end} of tracking and the
+ * supplied {@link Timer timer}'s {@link Timer#getPlayMode() play mode} and {@link Timer#getLiveTimePoint() live time
+ * point} or are forced by adding {@link #ensureEntry(Object) one} or {@link #ensureEntries(Iterable) more} new entries
+ * to this race data provider.
+ *
+ * @param <K>
+ *            the actual cache entry type to group data by
+ * @param <D>
+ *            the actual type of cached data sequences
+ */
 public abstract class CachedRaceDataProvider<K, D> {
 
     private static final Logger LOGGER = Logger.getLogger(CachedRaceDataProvider.class.getName());
@@ -34,6 +47,22 @@ public abstract class CachedRaceDataProvider<K, D> {
     private final Map<K, EntryDataCache> cache = new HashMap<>();
     private final boolean triggerFullUpdateOnNewData;
 
+    /**
+     * Creates a new {@link CachedRaceDataProvider} instance configured by the provided parameter values.
+     * 
+     * @param timeRangeProvider
+     *            {@link TimeRangeProvider} to determine current start and end of tracking
+     * @param timer
+     *            {@link Timer} to determine the current {@link PlayModes play mode} and live time point
+     * @param dataTimePointProvider
+     *            {@link Function} to determine the a data's actual time point
+     * @param dataOffsetProvider
+     *            {@link Supplier} to determine the offset to load from after the latest received data to avoid loading
+     *            of duplicated data in case of micro displacements and shifts for data sequences with specific timing
+     * @param triggerFullUpdateOnNewData
+     *            flag to determine whether or not the data for an entry should be fully updated if an incremental
+     *            update provides new data, e.g. to consolidate data sequences
+     */
     public CachedRaceDataProvider(final TimeRangeProvider timeRangeProvider, final Timer timer,
             final Function<D, Date> dataTimePointProvider, final Supplier<Long> dataOffsetProvider,
             final boolean triggerFullUpdateOnNewData) {
@@ -47,31 +76,84 @@ public abstract class CachedRaceDataProvider<K, D> {
         this.triggerFullUpdateOnNewData = triggerFullUpdateOnNewData;
     }
 
+    /**
+     * If at least one of this {@link CachedRaceDataProvider provider}'s entries need to be updated, this method is
+     * called with the entries to load data for including their respective {@link TimeRange time ranges}, a flag to
+     * specify the type of update and a {@link AsyncCallback callback} to actually update this provider's cached data.
+     * 
+     * @param entryTimeRanges
+     *            {@link Map} of the entries and their respective {@link TimeRange time ranges} to load data for
+     * @param incremental
+     *            flag to specify whether the update is incremental or not
+     * @param callback
+     *            {@link AsyncCallback} which updates the provider's cached data if it was loaded
+     *            {@link AsyncCallback#onSuccess(Object) successfully}
+     */
     protected abstract void loadData(final Map<K, TimeRange> entryTimeRanges, final boolean incremental,
             final AsyncCallback<Map<K, List<D>>> callback);
 
+    /**
+     * Callback method which is invoked if {@link #loadData(Map, boolean, AsyncCallback) loading} actually contained
+     * data sequences for at least one of the provider's entries.
+     * 
+     * @param updatedEntries
+     *            the entries which loading actually contained data for
+     */
     protected abstract void onEntriesDataChange(final Iterable<K> updatedEntries);
 
+    /**
+     * Removes all entries from this {@link CachedRaceDataProvider provider}.
+     */
     public final void removeAllEntries() {
         this.cache.clear();
     }
 
+    /**
+     * Removes the specified entry from this {@link CachedRaceDataProvider provider}.
+     * 
+     * @param entry
+     *            the entry to remove
+     */
     public final void removeEntry(final K entry) {
         this.cache.remove(entry);
     }
 
+    /**
+     * Determine whether or not data sequences for at least one entry are cached by this {@link CachedRaceDataProvider
+     * provider}.
+     * 
+     * @return <code>true</code> if there is a data sequences for at least one entry, <code>false</code> otherwise
+     */
     public final boolean hasCachedData() {
         return this.cache.values().stream().anyMatch(EntryDataCache::hasCachedRecords);
     }
 
+    /**
+     * Updates all entries of this {@link CachedRaceDataProvider provider} by triggering an according incremental
+     * {@link #loadData(Map, boolean, AsyncCallback) data loading} if necessary.
+     */
     public final void updateEntryData() {
         this.update(cache.keySet(), true);
     }
 
+    /**
+     * Ensures the provided entry in this {@link CachedRaceDataProvider provider} and triggers a full update if the
+     * entry has not been present before.
+     * 
+     * @param entry
+     *            the entry to ensure
+     */
     public final void ensureEntry(final K entry) {
         this.ensureEntries(Collections.singleton(entry));
     }
 
+    /**
+     * Ensures the provided entries in this {@link CachedRaceDataProvider provider} and triggers a full update for those
+     * entries which has not been present before.
+     * 
+     * @param entry
+     *            the entries to ensure
+     */
     public final void ensureEntries(final Iterable<K> entries) {
         final Set<K> entriesToUpdate = new HashSet<>();
         for (final K entry : entries) {
@@ -82,6 +164,12 @@ public abstract class CachedRaceDataProvider<K, D> {
         this.update(entriesToUpdate, false);
     }
 
+    /**
+     * Provides access to all cached data sequences which are cache by this {@link CachedRaceDataProvider provider}
+     * grouped by the respective entries.
+     * 
+     * @return {@link Map} of entries and their associated cached data sequences
+     */
     public final Map<K, List<D>> getCachedData() {
         final Map<K, List<D>> result = new HashMap<>(cache.size());
         for (Entry<K, EntryDataCache> entry : cache.entrySet()) {
