@@ -62,7 +62,7 @@ public abstract class CompetitorDataProvider<C extends CompetitorDTO, D> {
         return !this.cache.isEmpty();
     }
 
-    public void updateCachedData() {
+    public void updateCompetitorData() {
         this.update(cache.keySet(), true);
     }
 
@@ -82,7 +82,7 @@ public abstract class CompetitorDataProvider<C extends CompetitorDTO, D> {
 
     private void update(final Iterable<C> competitors, final boolean incremental) {
         final Map<C, TimeRange> compTimeRanges = new HashMap<>();
-        competitors.forEach(c -> getDataCache(c)
+        competitors.forEach(c -> getCompetitorDataCache(c)
                 .ifPresent(d -> d.getUpdateTimeRange(incremental).ifPresent(t -> compTimeRanges.put(c, t))));
         if (!compTimeRanges.isEmpty()) {
             this.loadData(incremental, compTimeRanges, new AsyncCallback<Map<C, List<D>>>() {
@@ -97,13 +97,13 @@ public abstract class CompetitorDataProvider<C extends CompetitorDTO, D> {
                         final CompetitorDataCache data = cache.get(competitor);
                         if (data != null) {
                             if (incremental
-                                    && triggerFullUpdateAfterIncrementalUpdate(data.getRecords(), loadedRecords)) {
+                                    && triggerFullUpdateAfterIncrementalUpdate(data.getCachedRecords(), loadedRecords)) {
                                 competitorsToTriggerFullUpdateFor.add(competitor);
                             }
                             if (!loadedRecords.isEmpty()) {
                                 updatedCompetitors.add(competitor);
                             }
-                            data.update(loadedRecords, incremental);
+                            data.updateCachedRecords(loadedRecords, incremental);
                         }
                     }
                     if (!updatedCompetitors.isEmpty()) {
@@ -120,14 +120,14 @@ public abstract class CompetitorDataProvider<C extends CompetitorDTO, D> {
         }
     }
 
-    private Optional<CompetitorDataCache> getDataCache(final C competitor) {
+    private Optional<CompetitorDataCache> getCompetitorDataCache(final C competitor) {
         return Optional.ofNullable(cache.get(competitor));
     }
 
     public final Map<C, List<D>> getData() {
         final Map<C, List<D>> result = new HashMap<>(cache.size());
         for (Entry<C, CompetitorDataCache> entry : cache.entrySet()) {
-            result.put(entry.getKey(), entry.getValue().getRecords());
+            result.put(entry.getKey(), entry.getValue().getCachedRecords());
         }
         return result;
     }
@@ -163,14 +163,14 @@ public abstract class CompetitorDataProvider<C extends CompetitorDTO, D> {
             return end == null ? live : new MillisecondsTimePoint(Math.min(end.asMillis(), live.asMillis()));
         }
 
-        private void update(final List<D> records, final boolean append) {
+        private void updateCachedRecords(final List<D> records, final boolean append) {
             if (!append) {
                 this.records.clear();
             }
             this.records.addAll(records);
         }
 
-        private List<D> getRecords() {
+        private List<D> getCachedRecords() {
             return records;
         }
     }

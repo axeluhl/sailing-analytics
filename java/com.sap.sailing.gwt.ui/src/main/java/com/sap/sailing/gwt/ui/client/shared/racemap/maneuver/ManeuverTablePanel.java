@@ -519,7 +519,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
         if (isVisible()) {
-            this.competitorDataProvider.updateCachedData();
+            this.competitorDataProvider.updateCompetitorData();
         }
     }
     
