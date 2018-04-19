@@ -70,7 +70,7 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
             
             @Override
             public String format(ToolTipData toolTipData) {
-                return "<center><b>"+toolTipData.getPointName()+"</b><br>("+toolTipData.getPoint().getX()+","+toolTipData.getYAsString()+")</center>";
+                return "<b>"+toolTipData.getPointName()+"</b><br>("+toolTipData.getPoint().getX()+","+toolTipData.getYAsString()+")";
             }
         }));
         
