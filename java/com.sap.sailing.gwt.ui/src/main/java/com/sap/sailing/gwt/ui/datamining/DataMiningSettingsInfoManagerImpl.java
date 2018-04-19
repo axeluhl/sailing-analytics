@@ -16,8 +16,8 @@ import com.sap.sailing.gwt.ui.polarmining.PolarDataMiningSettingsDialogComponent
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettingsImpl;
 import com.sap.sse.common.settings.SerializableSettings;
-import com.sap.sse.datamining.ui.DataMiningSettingsInfo;
-import com.sap.sse.datamining.ui.DataMiningSettingsInfoManager;
+import com.sap.sse.datamining.ui.client.DataMiningSettingsInfo;
+import com.sap.sse.datamining.ui.client.DataMiningSettingsInfoManager;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class DataMiningSettingsInfoManagerImpl implements DataMiningSettingsInfoManager {

@@ -6,11 +6,14 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Export-Package: com.sap.sse.datamining.ui,
- com.sap.sse.datamining.ui.execution,
- com.sap.sse.datamining.ui.presentation,
- com.sap.sse.datamining.ui.presentation.dataproviders,
- com.sap.sse.datamining.ui.selection
+Export-Package: com.sap.sse.datamining.ui.client,
+ com.sap.sse.datamining.ui.client.developer,
+ com.sap.sse.datamining.ui.client.execution,
+ com.sap.sse.datamining.ui.client.presentation,
+ com.sap.sse.datamining.ui.client.presentation.dataproviders,
+ com.sap.sse.datamining.ui.client.selection,
+ com.sap.sse.datamining.ui.client.selection.filter,
+ com.sap.sse.datamining.ui.client.settings
 Require-Bundle: com.sap.sse.gwt;bundle-version="1.0.0",
  com.sap.sse.datamining.shared;bundle-version="1.0.0",
  com.sap.sse.common,

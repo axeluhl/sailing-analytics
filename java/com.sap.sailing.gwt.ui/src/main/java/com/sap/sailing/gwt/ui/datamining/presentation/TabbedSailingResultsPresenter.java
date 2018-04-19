@@ -4,9 +4,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.polarmining.PolarBackendResultsPresenter;
 import com.sap.sailing.gwt.ui.polarmining.PolarResultsPresenter;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
-import com.sap.sse.datamining.ui.presentation.AbstractTabbedResultsPresenter;
-import com.sap.sse.datamining.ui.presentation.MultiResultsPresenter;
-import com.sap.sse.datamining.ui.presentation.ResultsChart.DrillDownCallback;
+import com.sap.sse.datamining.ui.client.presentation.AbstractTabbedResultsPresenter;
+import com.sap.sse.datamining.ui.client.presentation.MultiResultsPresenter;
+import com.sap.sse.datamining.ui.client.presentation.ResultsChart.DrillDownCallback;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 

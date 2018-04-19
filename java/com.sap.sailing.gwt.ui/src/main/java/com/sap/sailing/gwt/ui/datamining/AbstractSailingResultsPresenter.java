@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.datamining;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.datamining.ui.presentation.AbstractResultsPresenter;
+import com.sap.sse.datamining.ui.client.presentation.AbstractResultsPresenter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
