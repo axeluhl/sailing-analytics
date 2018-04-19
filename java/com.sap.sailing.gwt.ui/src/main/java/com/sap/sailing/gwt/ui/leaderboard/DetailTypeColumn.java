@@ -14,17 +14,17 @@ public abstract class DetailTypeColumn<FieldType extends Comparable<?>, Renderin
     private static final String HtmlConstantToInlineHeadersWithAndWithoutUnit = "&nbsp;";
     
     private final String title;
-    private final DataExtractor<FieldType,T> field;
+    private final DataExtractor<FieldType, T> field;
     private final String headerStyle;
     private final String columnStyle;
     private final String unit;
     private final String tooltip;
     
-    public interface DataExtractor<T extends Comparable<?>,Z> {
+    public interface DataExtractor<T extends Comparable<?>, Z> {
         T get(Z row);
     }
 
-    protected DetailTypeColumn(DetailType detailType, DataExtractor<FieldType,T> field, Cell<RenderingType> cell,
+    protected DetailTypeColumn(DetailType detailType, DataExtractor<FieldType, T> field, Cell<RenderingType> cell,
             String headerStyle, String columnStyle, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
         super(cell, detailType.getDefaultSortingOrder(), displayedLeaderboardRowsProvider);
         setHorizontalAlignment(ALIGN_CENTER);
@@ -45,7 +45,7 @@ public abstract class DetailTypeColumn<FieldType extends Comparable<?>, Renderin
         return headerStyle;
     }
 
-    protected DataExtractor<FieldType,T> getField() {
+    protected DataExtractor<FieldType, T> getField() {
         return field;
     }
 

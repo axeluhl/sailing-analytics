@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.Collection;
 import java.util.Comparator;
 
 import com.google.gwt.cell.client.Cell.Context;
@@ -149,7 +148,7 @@ public class MinMaxRenderer<T> {
      * @param displayedLeaderboardRowsProvider
      *            The values of {@link LeaderboardRowDTO}s to determine the minimum and maximum values for.
      */
-    public void updateMinMax(Collection<T> displayedLeaderboardRowsProvider) {
+    public void updateMinMax(Iterable<T> displayedLeaderboardRowsProvider) {
         T minimumRow = null;
         T maximumRow = null;
         for (T row : displayedLeaderboardRowsProvider) {

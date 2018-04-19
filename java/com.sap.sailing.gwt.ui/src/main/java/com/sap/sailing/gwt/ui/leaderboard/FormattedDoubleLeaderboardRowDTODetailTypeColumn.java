@@ -19,7 +19,6 @@ public class FormattedDoubleLeaderboardRowDTODetailTypeColumn extends DetailType
     /**
      * Creates a new column for the given {@link DetailType}. Have a look at
      * {@link DetailTypeFormatter#getUnit(DetailType)}, to see if the given type is supported.
-     * @param displayedLeaderboardRowsProvider TODO
      */
     public FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType detailType, DataExtractor<Double,LeaderboardRowDTO> field, String headerStyle,
             String columnStyle, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
@@ -93,5 +92,4 @@ public class FormattedDoubleLeaderboardRowDTODetailTypeColumn extends DetailType
         }
         return null;
     }
-
 }
