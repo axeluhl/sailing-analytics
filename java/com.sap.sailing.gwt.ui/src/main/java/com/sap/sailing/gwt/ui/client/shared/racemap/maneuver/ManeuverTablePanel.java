@@ -407,17 +407,17 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         final boolean wasVisible = isVisible();
         super.setVisible(visible);
         if (wasVisible && !visible) {
-            this.competitorDataProvider.removeAllCompetitors();
+            this.competitorDataProvider.removeAllEntries();
         } else if (!wasVisible && visible) {
             this.rerender();
-            this.competitorDataProvider.ensureCompetitors(competitorSelectionModel.getSelectedCompetitors());
+            this.competitorDataProvider.ensureEntries(competitorSelectionModel.getSelectedCompetitors());
         }
     }
 
     @Override
     public void addedToSelection(CompetitorWithBoatDTO competitor) {
         if (isVisible()) {
-            this.competitorDataProvider.ensureCompetitor(competitor);
+            this.competitorDataProvider.ensureEntry(competitor);
             this.rerender();
         }
     }
@@ -425,7 +425,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     @Override
     public void removedFromSelection(CompetitorWithBoatDTO competitor) {
         if (isVisible()) {
-            this.competitorDataProvider.removeCompetitor(competitor);
+            this.competitorDataProvider.removeEntry(competitor);
             this.rerender();
         }
     }
@@ -488,7 +488,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
         if (isVisible()) {
-            this.competitorDataProvider.updateCompetitorData();
+            this.competitorDataProvider.updateEntryData();
         }
     }
 
@@ -521,7 +521,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         }
 
         @Override
-        protected void onCompetitorsDataChange(final Iterable<CompetitorWithBoatDTO> updatedCompetitors) {
+        protected void onEntriesDataChange(final Iterable<CompetitorWithBoatDTO> updatedCompetitors) {
             ManeuverTablePanel.this.rerender();
         }
     }
