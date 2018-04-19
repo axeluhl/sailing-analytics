@@ -140,17 +140,17 @@ public interface Maneuver extends GPSFix {
     double getDirectionChangeInDegrees();
 
     /**
+     * Gets lowest speed recorded within {@link #getManeuverBoundaries()}.
+     */
+    Speed getLowestSpeed();
+
+    /**
      * Gets the duration of the maneuver which lasts from {@link #getManeuverBoundaries()}.getTimePointBefore() until
      * {@link #getManeuverBoundaries()}.getTimePointAfter().
      * 
      * @return
      */
     Duration getDuration();
-
-    /**
-     * Gets lowest speed recorded within {@link #getManeuverBoundaries()}.
-     */
-    Speed getLowestSpeed();
 
     /**
      * Gets the mark passing which is contained within maneuver curve. In case if no mark was passed, {@code null} is

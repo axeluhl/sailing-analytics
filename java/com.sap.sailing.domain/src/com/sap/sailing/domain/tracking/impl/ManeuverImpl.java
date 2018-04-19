@@ -115,6 +115,11 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     }
 
     @Override
+    public Duration getDuration() {
+        return getManeuverBoundaries().getDuration();
+    }
+
+    @Override
     public MarkPassing getMarkPassing() {
         return markPassing;
     }
@@ -129,11 +134,6 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
         return getMainCurveBoundaries().getDirectionChangeInDegrees() < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
     }
     
-    @Override
-    public Duration getDuration() {
-        return getManeuverBoundaries().getDuration();
-    }
-
     @Override
     public double getAvgTurningRateInDegreesPerSecond() {
         return Math.abs(getMainCurveBoundaries().getDirectionChangeInDegrees())
