@@ -13,6 +13,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 public class CompleteManeuverCurveWithEstimationDataJsonSerializer
         implements JsonSerializer<CompleteManeuverCurveWithEstimationData> {
 
+    public static final String POSITION = "position";
     public static final String MARK_PASSING = "markPassing";
     public static final String MAIN_CURVE = "mainCurve";
     public static final String CURVE_WITH_UNSTABLE_COURSE_AND_SPEED = "curveWithUnstableCourseAndSpeed";
@@ -26,19 +27,22 @@ public class CompleteManeuverCurveWithEstimationDataJsonSerializer
     private final ManeuverCurveBoundariesJsonSerializer mainCurveSerializer;
     private final ManeuverCurveBoundariesJsonSerializer curveWithUnstableCourseAndSpeedSerializer;
     private final WindJsonSerializer windSerializer;
+    private final PositionJsonSerializer positionSerializer;
 
     public CompleteManeuverCurveWithEstimationDataJsonSerializer(
             ManeuverCurveBoundariesJsonSerializer mainCurveSerializer,
             ManeuverCurveBoundariesJsonSerializer curveWithUnstableCourseAndSpeedSerializer,
-            WindJsonSerializer windSerializer) {
+            WindJsonSerializer windSerializer, PositionJsonSerializer positionSerializer) {
         this.mainCurveSerializer = mainCurveSerializer;
         this.curveWithUnstableCourseAndSpeedSerializer = curveWithUnstableCourseAndSpeedSerializer;
         this.windSerializer = windSerializer;
+        this.positionSerializer = positionSerializer;
     }
 
     @Override
     public JSONObject serialize(CompleteManeuverCurveWithEstimationData maneuverWithEstimationData) {
         final JSONObject result = new JSONObject();
+        result.put(POSITION, positionSerializer.serialize(maneuverWithEstimationData.getPosition()));
         result.put(MARK_PASSING, maneuverWithEstimationData.isMarkPassing());
         result.put(MAIN_CURVE, mainCurveSerializer.serialize(maneuverWithEstimationData.getMainCurve()));
         result.put(CURVE_WITH_UNSTABLE_COURSE_AND_SPEED, curveWithUnstableCourseAndSpeedSerializer

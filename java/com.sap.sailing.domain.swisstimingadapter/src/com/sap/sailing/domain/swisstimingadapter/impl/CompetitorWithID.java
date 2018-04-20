@@ -5,17 +5,17 @@ import java.util.List;
 import com.sap.sailing.domain.swisstimingadapter.CrewMember;
 
 public class CompetitorWithID extends AbstractCompetitor {
-    private final String id;
+    private final String idAsString;
     private List<CrewMember> crew;
     
-    public CompetitorWithID(String id, String boatID, String threeLetterIOCCode, String name, List<CrewMember> crew) {
+    public CompetitorWithID(String idAsString, String boatID, String threeLetterIOCCode, String name, List<CrewMember> crew) {
         super(boatID, threeLetterIOCCode, name);
-        this.id = id;
+        this.idAsString = idAsString;
         this.crew = crew;
     }
 
-    public String getID() {
-        return id;
+    public String getIdAsString() {
+        return idAsString;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class CompetitorWithID extends AbstractCompetitor {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((crew == null) ? 0 : crew.hashCode());
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((idAsString == null) ? 0 : idAsString.hashCode());
         return result;
     }
 
@@ -46,10 +46,10 @@ public class CompetitorWithID extends AbstractCompetitor {
                 return false;
         } else if (!crew.equals(other.crew))
             return false;
-        if (id == null) {
-            if (other.id != null)
+        if (idAsString == null) {
+            if (other.idAsString != null)
                 return false;
-        } else if (!id.equals(other.id))
+        } else if (!idAsString.equals(other.idAsString))
             return false;
         return true;
     }
@@ -57,6 +57,6 @@ public class CompetitorWithID extends AbstractCompetitor {
     @Override
     public String toString() {
         return "CompetitorWithID [boatID=" + getBoatID() + ", threeLetterIOCCode=" + getThreeLetterIOCCode() + ", name=" + getName()
-                + ", id=" + id + ", crew=" + getCrew() + "]";
+                + ", id=" + idAsString + ", crew=" + getCrew() + "]";
     }
 }

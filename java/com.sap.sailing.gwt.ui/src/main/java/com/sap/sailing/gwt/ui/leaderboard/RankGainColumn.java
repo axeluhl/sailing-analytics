@@ -14,7 +14,7 @@ public class RankGainColumn extends DetailTypeColumn<Integer, Integer> {
 	
     public RankGainColumn(String title, LegDetailField<Integer> field, String headerStyle, String columnStyle,
             DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
-        super(DetailType.RANK_GAIN, field, new RankGainCell(), headerStyle, columnStyle, displayedLeaderboardRowsProvider);
+        super(DetailType.LEG_RANK_GAIN, field, new RankGainCell(), headerStyle, columnStyle, displayedLeaderboardRowsProvider);
     }
 
     @Override

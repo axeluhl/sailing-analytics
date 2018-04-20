@@ -10,7 +10,6 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -84,7 +83,6 @@ public class SettingsTest extends AbstractSeleniumTest {
      * settings and global settings.
      */
     @Test
-    @Ignore
     public void testRaceBoardPageSettingsStorage() throws InterruptedException, UnsupportedEncodingException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         EventConfigurationPanelPO events = adminConsole.goToEvents();
@@ -196,8 +194,8 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assert.assertTrue(mapSettings.isWindUp());
         // verify default mode settings override system defaults
         Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
-        // Verify custom user settings override system defaults
-        Assert.assertTrue(mapSettings.isTransparentHoverlines());
+        // Verify custom user settings are independent for modes
+        Assert.assertFalse(mapSettings.isTransparentHoverlines());
         mapSettings.setWindUp(false);
         mapSettings.setTransparentHoverlines(false);
         mapSettings.pressOk();
@@ -219,7 +217,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         mapSettings = raceboard.openMapSettings();
         // Verify that mode settings are overridden by document settings
         Assert.assertFalse(mapSettings.isWindUp());
-        // verify that document settings are able to override custom user settings by a system default value
+        // Verify custom user settings are independent for modes
         Assert.assertFalse(mapSettings.isTransparentHoverlines());
 
         //FIXME uncomment when START_ANALYSIS mode can be handled by remote CI server
@@ -451,7 +449,7 @@ public class SettingsTest extends AbstractSeleniumTest {
                 DetailCheckboxInfo.RACE_DISTANCE_INCLUDING_GATE_START, DetailCheckboxInfo.RACE_TIME,
                 DetailCheckboxInfo.RACE_CALCULATED_TIME,
                 DetailCheckboxInfo.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
-                DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND, DetailCheckboxInfo.RACE_CURRENT_RIDE_HEIGHT,
+                DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND,
                 DetailCheckboxInfo.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, DetailCheckboxInfo.NUMBER_OF_MANEUVERS,
                 DetailCheckboxInfo.DISPLAY_LEGS, DetailCheckboxInfo.CURRENT_LEG,
                 DetailCheckboxInfo.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR,
@@ -469,7 +467,7 @@ public class SettingsTest extends AbstractSeleniumTest {
                 DetailCheckboxInfo.DISTANCE_INCLUDING_START, DetailCheckboxInfo.GAP_TO_LEADER,
                 DetailCheckboxInfo.GAP_CHANGE_SINCE_LEG_START,
                 DetailCheckboxInfo.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED,
-                DetailCheckboxInfo.CURRENT_SPEED_OVER_GROUND, DetailCheckboxInfo.CURRENT_RIDE_HEIGHT,
+                DetailCheckboxInfo.CURRENT_SPEED_OVER_GROUND,
                 DetailCheckboxInfo.WINDWARD_DISTANCE_TO_GO, DetailCheckboxInfo.NUMBER_OF_MANEVEURS,
                 DetailCheckboxInfo.ESTIMATED_TIME_TO_NEXT_WAYPOINT, DetailCheckboxInfo.VELOCITY_MADE_GOOD,
                 DetailCheckboxInfo.TIME, DetailCheckboxInfo.CORRECTED_TIME,

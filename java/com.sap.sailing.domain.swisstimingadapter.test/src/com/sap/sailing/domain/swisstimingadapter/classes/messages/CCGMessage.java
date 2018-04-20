@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.swisstimingadapter.Mark;
+import com.sap.sse.common.Util;
 
 public class CCGMessage {
     private String raceId;
@@ -37,17 +38,11 @@ public class CCGMessage {
 
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-
         String s = "";
         for (Mark m : markList) {
             s = s + "|" + m.getIndex() + ";" + m.getDescription() + ";";
-            for (String str : m.getDevices()) {
-                s = s + str + ";";
-            }
-            s = s.substring(0, s.length() - 1);
+            s += Util.join(";", m.getDeviceIds());
         }
         return "CCG|" +raceId + "|" +  markList.size() + s;
     }
-
 }

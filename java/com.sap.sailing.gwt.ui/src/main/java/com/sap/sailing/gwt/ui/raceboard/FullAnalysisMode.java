@@ -49,7 +49,7 @@ public class FullAnalysisMode extends AbstractRaceBoardMode {
     private void adjustLeaderboardSettings() {
         final SingleRaceLeaderboardPanel leaderboardPanel = getLeaderboardPanel();
         final List<DetailType> raceDetailsToShow = new ArrayList<>();
-        raceDetailsToShow.add(DetailType.DISPLAY_LEGS);
+        raceDetailsToShow.add(DetailType.RACE_DISPLAY_LEGS);
         raceDetailsToShow.add(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TRAVELED);
         raceDetailsToShow.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
