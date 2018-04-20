@@ -1470,9 +1470,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String defaultName();
     String exampleTextForName();
     String flightsCount(@PluralCount(DefaultRule_1_0n.class) int count);
-    String queryDefinitionViewer();
     String resultsFoundForSearch(@PluralCount(DefaultRule_1_0n.class) int amount, String searchText);
-    String useClassGetName();
     String errorLoadingDataWithTryAgain();
     String addGalleryPhoto();
     String addStageImage();

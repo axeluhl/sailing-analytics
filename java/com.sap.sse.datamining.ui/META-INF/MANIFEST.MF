@@ -5,7 +5,12 @@ Bundle-SymbolicName: com.sap.sse.datamining.ui
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-ActivationPolicy: lazy
+Require-Bundle: com.sap.sse.gwt,
+ com.sap.sse.common,
+ com.sap.sse.datamining.shared,
+ org.moxieapps.gwt.highcharts,
+ com.google.gwt.servlet;bundle-version="2.8.2",
+ com.google.gwt.user;bundle-version="2.8.2";resolution:=optional
 Export-Package: com.sap.sse.datamining.ui.client,
  com.sap.sse.datamining.ui.client.developer,
  com.sap.sse.datamining.ui.client.execution,
@@ -14,8 +19,4 @@ Export-Package: com.sap.sse.datamining.ui.client,
  com.sap.sse.datamining.ui.client.selection,
  com.sap.sse.datamining.ui.client.selection.filter,
  com.sap.sse.datamining.ui.client.settings
-Require-Bundle: com.sap.sse.gwt;bundle-version="1.0.0",
- com.sap.sse.datamining.shared;bundle-version="1.0.0",
- com.sap.sse.common,
- org.moxieapps.gwt.highcharts;bundle-version="1.6.0"
-Automatic-Module-Name: com.sap.sse.datamining.ui
+Bundle-ActivationPolicy: lazy
