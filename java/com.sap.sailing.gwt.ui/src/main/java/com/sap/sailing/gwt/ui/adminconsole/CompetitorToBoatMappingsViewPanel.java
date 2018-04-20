@@ -67,7 +67,7 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
         HorizontalPanel buttonPanel = new HorizontalPanel();
         buttonPanel.setSpacing(5);
         mainPanel.add(buttonPanel);
-        Grid grid = new Grid(1,2);
+        Grid grid = new Grid(1, 2);
         grid.setWidget(0, 0, competitorsPanel);
         grid.setWidget(0, 1, boatsPanel);
         grid.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
