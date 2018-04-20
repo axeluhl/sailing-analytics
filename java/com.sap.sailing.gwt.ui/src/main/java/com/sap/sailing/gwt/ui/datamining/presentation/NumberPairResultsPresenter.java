@@ -14,11 +14,14 @@ import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.Exporting;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.ToolTip;
+import org.moxieapps.gwt.highcharts.client.ToolTipData;
+import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+import org.moxieapps.gwt.highcharts.client.Series.Type;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker.Symbol;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
-import com.google.gwt.maps.client.overlays.Circle;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -37,8 +40,6 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
     private final SimpleLayoutPanel chartPanel;
     private final Chart chart;
     private final Map<GroupKey, Series> seriesMappedByGroupKey;
-    private final GroupKey simpleResultSeriesKey;
-
 
     public NumberPairResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context, stringMessages);
@@ -50,7 +51,6 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
                 chart.redraw();
             }
         };
-        simpleResultSeriesKey = new GenericGroupKey<>(stringMessages.results());
         chart = createChart();
         chartPanel.setWidget(chart);
     }
@@ -69,6 +69,15 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
         chart.setExporting(new Exporting().setEnabled(false));
         chart.getXAxis().setAllowDecimals(false);
         chart.getYAxis().setAxisTitleText("");
+        
+        chart.setToolTip(new ToolTip().setFormatter(new ToolTipFormatter() {
+            
+            @Override
+            public String format(ToolTipData toolTipData) {
+                return "<b>"+toolTipData.getPointName()+"</b><br>X: "+toolTipData.getPoint().getX()+"<br>Y: "+toolTipData.getYAsString();
+            }
+        }));
+        
         return chart;
     }
 
@@ -76,48 +85,41 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
     protected Widget getPresentationWidget() {
         return chartPanel;
     }
-    
-    private GroupKey groupKeyToSeriesKey(GroupKey groupKey) {
-        if (groupKey.hasSubKeys()) {
-            List<? extends GroupKey> subKeys = GroupKey.Util.getSubKeys(groupKey);
-            return subKeys.size() == 1 ? subKeys.get(0) : new CompoundGroupKey(subKeys);
-        } else {
-            return groupKey;
-        }
-    }
-    
-    private void createAndAddSeriesToChart() {
-        for (GroupKey groupKey : getCurrentResult().getResults().keySet()) {
-            GroupKey seriesKey = groupKeyToSeriesKey(groupKey);
-            if (!seriesMappedByGroupKey.containsKey(seriesKey)) {
-                seriesMappedByGroupKey.put(seriesKey, chart.createSeries().setPlotOptions(new SeriesPlotOptions().setShowInLegend(false).setMarker(new Marker().setSymbol(Symbol.CIRCLE))).setName(seriesKey.asString()));
-            }
-        }
-        List<GroupKey> sortedSeriesKeys = new ArrayList<>(seriesMappedByGroupKey.keySet());
-        Collections.sort(sortedSeriesKeys);
-        for (GroupKey seriesKey : sortedSeriesKeys) {
-            chart.addSeries(seriesMappedByGroupKey.get(seriesKey), false, false);
-        }
-    }
-
 
     @Override
-    protected void internalShowResults(QueryResultDTO<?> r) {
-        result = r;
+    protected void internalShowResults(QueryResultDTO<?> res) {
+        result = res;
         createAndAddSeriesToChart();
+
         for (Entry<GroupKey, ?> resultEntry : result.getResults().entrySet()) {
             @SuppressWarnings("unchecked")
             AveragePairWithStats<Number> value = (AveragePairWithStats<Number>) resultEntry.getValue();
             Point point = new Point(value.getAverage().getA(), value.getAverage().getB());
             point.setName(resultEntry.getKey().asString());
             seriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
-            .addPoint(point, false, false, false);
-
+            .addPoint(point, false, false, false);   
         }
         chart.getXAxis().setAxisTitleText(result.getResultSignifier());
-        
-//        chart.addSeries(chart.createSeries().setName("Test").setType(Type.SCATTER).setPoints(series.toArray(new Point[series.size()])));
-        chart.redraw();
+    }
+    
+    private void createAndAddSeriesToChart() {
+        for (GroupKey groupKey : result.getResults().keySet()) {
+            GroupKey seriesKey = groupKeyToSeriesKey(groupKey);
+            if (!seriesMappedByGroupKey.containsKey(seriesKey)) {
+                seriesMappedByGroupKey.put(seriesKey, chart.createSeries().setPlotOptions(new SeriesPlotOptions().setMarker(new Marker().setSymbol(Symbol.CIRCLE))).setName(seriesKey.asString()));
+                chart.addSeries(seriesMappedByGroupKey.get(seriesKey), false, false);
+            }
+        }
+
+    }
+    
+    private GroupKey groupKeyToSeriesKey(GroupKey groupKey) {
+        if (groupKey.hasSubKeys()) {
+            List<? extends GroupKey> subKeys = GroupKey.Util.getSubKeys(groupKey);
+            return subKeys.size() == 1 ? subKeys.get(0) : new CompoundGroupKey(subKeys);
+        } else {
+            return new GenericGroupKey<>(stringMessages.results());
+        }
     }
 
 
@@ -153,7 +155,6 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
 
     @Override
     public String getDependentCssClassName() {
-        // TODO Auto-generated method stub
         return null;
     }
 
