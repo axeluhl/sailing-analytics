@@ -14,7 +14,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -180,14 +180,14 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
     }
 
     public void refreshBoatListFromRace(String leaderboardName, String raceColumnName, String fleetName) {
-        final AsyncCallback<Map<CompetitorWithBoatDTO, BoatDTO>> myCallback = new AsyncCallback<Map<CompetitorWithBoatDTO, BoatDTO>>() {
+        final AsyncCallback<Map<? extends CompetitorDTO, BoatDTO>> myCallback = new AsyncCallback<Map<? extends CompetitorDTO, BoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call refreshBoatListFromRace() - Failure: " + caught.getMessage());
             }
 
             @Override
-            public void onSuccess(Map<CompetitorWithBoatDTO, BoatDTO> result) {
+            public void onSuccess(Map<? extends CompetitorDTO, BoatDTO> result) {
                 filterBoats(result.values());
             }
         };

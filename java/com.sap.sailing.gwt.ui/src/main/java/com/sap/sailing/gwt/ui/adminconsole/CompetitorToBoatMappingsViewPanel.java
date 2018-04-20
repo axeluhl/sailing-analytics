@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -24,7 +24,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
  * 
  */
 public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
-    private final CompactCompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorWithBoatDTO>> competitorTable;
+    private final CompactCompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
     private final CompactBoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>> boatTable;
     private final String leaderboardName;
     private final String raceColumnName;
@@ -33,7 +33,7 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     
-    private final RefreshableSelectionModel<CompetitorWithBoatDTO> refreshableCompetitorSelectionModel;
+    private final RefreshableSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
 
     public CompetitorToBoatMappingsViewPanel(final SailingServiceAsync sailingService, final StringMessages stringMessages,
             final ErrorReporter errorReporter, final String leaderboardName, final String raceColumnName, final String fleetName) {
@@ -78,7 +78,7 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
     }
 
     private void competitorSelectionChanged() {
-        CompetitorWithBoatDTO selectedCompetitor = getSelectedCompetitor();
+        CompetitorDTO selectedCompetitor = getSelectedCompetitor();
         if (selectedCompetitor != null) {
             selectBoatForCompetitor(selectedCompetitor);
         } else {
@@ -90,7 +90,7 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
         boatTable.selectBoat(boat);
     }
 
-    private void selectBoatForCompetitor(CompetitorWithBoatDTO selectedCompetitor) {
+    private void selectBoatForCompetitor(CompetitorDTO selectedCompetitor) {
         sailingService.getBoatLinkedToCompetitorForRace(leaderboardName,
                 raceColumnName, fleetName, selectedCompetitor.getIdAsString(), new MarkedAsyncCallback<BoatDTO>(
                         new AsyncCallback<BoatDTO>() {
@@ -112,7 +112,7 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
                         }));
     }
 
-    private CompetitorWithBoatDTO getSelectedCompetitor() {
+    private CompetitorDTO getSelectedCompetitor() {
         if (competitorTable.getSelectionModel().getSelectedSet().isEmpty()) {
             return null;
         }

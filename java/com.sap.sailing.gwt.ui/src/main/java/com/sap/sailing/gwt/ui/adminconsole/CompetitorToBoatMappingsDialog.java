@@ -18,9 +18,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
@@ -32,27 +33,27 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * @author Frank Mittag
  * 
  */
-public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<CompetitorWithBoatDTO, BoatDTO>> {
-    private final CompactCompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorWithBoatDTO>> competitorTable;
+public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<CompetitorDTO, BoatDTO>> {
+    private final CompactCompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
     private final CompactBoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>> boatTable;
     
     private final RefreshableSelectionModel<BoatDTO> refreshableBoatSelectionModel;
-    private final RefreshableSelectionModel<CompetitorWithBoatDTO> refreshableCompetitorSelectionModel;
+    private final RefreshableSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
 
     private final StringMessages stringMessages;
     private final SelectionChangeEvent.Handler boatListHandler;
     private HandlerRegistration boatListHandlerRegistration;
 
-    private final Map<CompetitorWithBoatDTO, BoatDTO> competitorToBoatMappings; 
+    private final Map<CompetitorDTO, BoatDTO> competitorToBoatMappings; 
     
-    protected static class CompetitorToBoatMappingValidator implements Validator<Map<CompetitorWithBoatDTO, BoatDTO>> {        
+    protected static class CompetitorToBoatMappingValidator implements Validator<Map<CompetitorDTO, BoatDTO>> {        
         public CompetitorToBoatMappingValidator() {
         }
 
         @Override
-        public String getErrorMessage(Map<CompetitorWithBoatDTO, BoatDTO> valueToValidate) {
+        public String getErrorMessage(Map<CompetitorDTO, BoatDTO> valueToValidate) {
             String errorMessage = null;
-            for (Map.Entry<CompetitorWithBoatDTO, BoatDTO> competitorAndBoatEntry: valueToValidate.entrySet()) {
+            for (Map.Entry<CompetitorDTO, BoatDTO> competitorAndBoatEntry : valueToValidate.entrySet()) {
                 if (competitorAndBoatEntry.getValue() == null) {
                     errorMessage = "It's required that all competitors have an assigned boat.";
                     break;
@@ -64,19 +65,18 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
     }
     
     public CompetitorToBoatMappingsDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages,
-            final ErrorReporter errorReporter, Map<CompetitorWithBoatDTO, BoatDTO> competitorsAndBoats, DialogCallback<Map<CompetitorWithBoatDTO, BoatDTO>> callback) {
+            final ErrorReporter errorReporter, Map<CompetitorDTO, BoatDTO> competitorsAndBoats, DialogCallback<Map<CompetitorDTO, BoatDTO>> callback) {
         super(stringMessages.actionEditCompetitorToBoatAssignments(), null, stringMessages.ok(), stringMessages.cancel(), new CompetitorToBoatMappingValidator(), callback);
-
         this.stringMessages = stringMessages;
         this.competitorToBoatMappings = new HashMap<>(competitorsAndBoats);
 
         this.competitorTable = new CompactCompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
         this.boatTable = new CompactBoatTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
 
-        ImagesBarColumn<CompetitorWithBoatDTO, CompactCompetitorConfigImagesBarCell> competitorActionColumn = new ImagesBarColumn<>(new CompactCompetitorConfigImagesBarCell(stringMessages));
-        competitorActionColumn.setFieldUpdater(new FieldUpdater<CompetitorWithBoatDTO, String>() {
+        ImagesBarColumn<CompetitorDTO, CompactCompetitorConfigImagesBarCell> competitorActionColumn = new ImagesBarColumn<>(new CompactCompetitorConfigImagesBarCell(stringMessages));
+        competitorActionColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
             @Override
-            public void update(int index, CompetitorWithBoatDTO competitor, String value) {
+            public void update(int index, CompetitorDTO competitor, String value) {
                 if (CompactCompetitorConfigImagesBarCell.ACTION_UNLINK.equals(value)) {
                     unlinkBoatFromCompetitor(competitor);
                     validateAndUpdate();
@@ -92,7 +92,7 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
             @Override
             public void onSelectionChange(SelectionChangeEvent event) { 
                 Set<BoatDTO> selectedBoats = refreshableBoatSelectionModel.getSelectedSet();
-                 CompetitorWithBoatDTO selectedCompetitor = getSelectedCompetitor();
+                CompetitorDTO selectedCompetitor = getSelectedCompetitor();
                 // if no competitor is selected, ignore the boat selection change
                 if (selectedCompetitor != null) {
                     if (selectedBoats.isEmpty()) {
@@ -121,12 +121,12 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
                 validateAndUpdate();
             }
 
-            private boolean hasLinkedBoat(CompetitorWithBoatDTO selectedCompetitor) {
-                return selectedCompetitor.getBoat() != null;
+            private boolean hasLinkedBoat(CompetitorDTO selectedCompetitor) {
+                return competitorToBoatMappings.get(selectedCompetitor) != null;
             }
             
-            private boolean isLinkedToBoat(CompetitorWithBoatDTO selectedCompetitor, BoatDTO selectedBoat){
-                return selectedBoat.equals(selectedCompetitor.getBoat());
+            private boolean isLinkedToBoat(CompetitorDTO selectedCompetitor, BoatDTO selectedBoat){
+                return Util.equalsWithNull(selectedBoat, competitorToBoatMappings.get(selectedCompetitor));
             }
             
             private boolean isBoatUsed(BoatDTO selectedBoat){
@@ -137,14 +137,11 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
                         break;
                     }
                 }
-                        
                 return boatAlreadyUsed;
             }
-
         };
         // boat selection changes should only have an effect in case the 'actions' are enabled
         boatListHandlerRegistration = refreshableBoatSelectionModel.addSelectionChangeHandler(boatListHandler);
-
         refreshableCompetitorSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
                 // If the selection on the competitorTable changes,
@@ -154,33 +151,20 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
                 competitorSelectionChanged();
             }
         });
-        
-        // Attention: We use the boatDTO property of the CompetitorDTO to make the CompetitorTable aware of linked boats
-        for (Map.Entry<CompetitorWithBoatDTO, BoatDTO> competitorAndBoatEntry: competitorToBoatMappings.entrySet()) {
-            CompetitorWithBoatDTO c = competitorAndBoatEntry.getKey();
-            if (competitorAndBoatEntry.getValue() != null) {
-                c.setBoat(competitorAndBoatEntry.getValue());
-            }
-        }
-
-        competitorTable.refreshCompetitorList(competitorToBoatMappings.keySet());
+        competitorTable.refreshCompetitorList(competitorToBoatMappings);
         boatTable.refreshBoatList();
     }
 
-    private void linkBoatToSelectedCompetitor(CompetitorWithBoatDTO selectedCompetitor, BoatDTO selectedBoat) {
-        competitorToBoatMappings.remove(selectedCompetitor);
-        selectedCompetitor.setBoat(selectedBoat);
+    private void linkBoatToSelectedCompetitor(CompetitorDTO selectedCompetitor, BoatDTO selectedBoat) {
         competitorToBoatMappings.put(selectedCompetitor, selectedBoat);
-        
         competitorTable.getDataProvider().refresh();
         competitorTable.getTable().redraw();
     }
 
-    private void unlinkBoatFromCompetitor(CompetitorWithBoatDTO selectedCompetitor) {
+    private void unlinkBoatFromCompetitor(CompetitorDTO selectedCompetitor) {
         competitorToBoatMappings.remove(selectedCompetitor);
-        selectedCompetitor.setBoat(null);
         competitorToBoatMappings.put(selectedCompetitor, null);
-
+        competitorTable.refreshCompetitorList(competitorToBoatMappings);
         boatTable.getSelectionModel().clear();
         competitorTable.getDataProvider().refresh();
         competitorTable.getTable().redraw();
@@ -188,7 +172,7 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
     }
 
     private void competitorSelectionChanged() {
-        CompetitorWithBoatDTO selectedCompetitor = getSelectedCompetitor();
+        CompetitorDTO selectedCompetitor = getSelectedCompetitor();
         if (selectedCompetitor != null) {
             selectBoatForCompetitor(selectedCompetitor);
         } else {
@@ -200,11 +184,11 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
         boatTable.selectBoat(boat);
     }
 
-    private void selectBoatForCompetitor(CompetitorWithBoatDTO selectedCompetitor) {
+    private void selectBoatForCompetitor(CompetitorDTO selectedCompetitor) {
         removeBoatListHandlerTemporarily();
-        // BoatDTO boat = competitorToBoatMappings.get(selectedCompetitor);
-        if (selectedCompetitor.getBoat() != null) {
-            selectBoatInList(selectedCompetitor.getBoat());
+        final BoatDTO boatForCompetitor = competitorToBoatMappings.get(selectedCompetitor);
+        if (boatForCompetitor != null) {
+            selectBoatInList(boatForCompetitor);
         } else {
             boatTable.clearSelection();
         }
@@ -238,7 +222,7 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
         });
     }
 
-    private CompetitorWithBoatDTO getSelectedCompetitor() {
+    private CompetitorDTO getSelectedCompetitor() {
         if (competitorTable.getSelectionModel().getSelectedSet().isEmpty()) {
             return null;
         }
@@ -273,7 +257,7 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
     }
         
     @Override
-    protected Map<CompetitorWithBoatDTO, BoatDTO> getResult() {
+    protected Map<CompetitorDTO, BoatDTO> getResult() {
         return competitorToBoatMappings;
     }
 }
