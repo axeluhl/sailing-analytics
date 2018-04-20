@@ -43,7 +43,6 @@ import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @Path("/v2/leaderboards")
 public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
