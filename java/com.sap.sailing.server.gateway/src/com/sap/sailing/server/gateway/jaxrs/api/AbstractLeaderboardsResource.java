@@ -1,7 +1,8 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
-import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
@@ -14,10 +15,11 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -89,43 +91,40 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         return jsonLeaderboard;
     }
     
-    protected void writeCommonLeaderboardData(JSONObject jsonLeaderboard, LeaderboardDTO leaderboard,
-            ResultStates resultState, Integer maxCompetitorsCount) {
-        jsonLeaderboard.put("name", leaderboard.name);
-        final String displayName = leaderboard.getDisplayName();
-        jsonLeaderboard.put("displayName", displayName == null ? leaderboard.name : displayName);
-        jsonLeaderboard.put("resultTimepoint", leaderboard.getTimePoint() != null ? leaderboard.getTimePoint().getTime() : null);
-        jsonLeaderboard.put("resultState", resultState.name());
-        jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
-        jsonLeaderboard.put("higherScoreIsBetter", leaderboard.isHigherScoreBetter());
-        jsonLeaderboard.put("scoringComment", leaderboard.getComment());
-        Date lastUpdateTimepoint = leaderboard.getTimePointOfLastCorrectionsValidity();
-        jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.getTime() : null);
-        JSONArray jsonColumnNames = new JSONArray();
-        jsonLeaderboard.put("columnNames", jsonColumnNames);
-        for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-            jsonColumnNames.add(raceColumn.getName());
-        }
-    }
-
     protected void writeCompetitorBaseData(JSONObject jsonCompetitor, CompetitorWithBoatDTO competitor, LeaderboardDTO leaderboard) {
         jsonCompetitor.put("name", competitor.getName());
         jsonCompetitor.put("shortName", competitor.getShortName());
         final String displayName = leaderboard.getDisplayName(competitor);
         jsonCompetitor.put("displayName", displayName == null ? competitor.getName() : displayName);
         jsonCompetitor.put("id", competitor.getIdAsString());
-        jsonCompetitor.put("sailID", competitor.getSailID());
+        jsonCompetitor.put("sailID", competitor.getSailID());  // only for backward compatibility
         jsonCompetitor.put("nationality", competitor.getThreeLetterIocCountryCode());
         jsonCompetitor.put("countryCode", competitor.getTwoLetterIsoCountryCode());
     }
 
-    private void writeCommonLeaderboardData(JSONObject jsonLeaderboard, Leaderboard leaderboard,
+    protected void writeBoatData(JSONObject jsonBoat, BoatDTO boat) {
+        jsonBoat.put("name", boat.getName());
+        jsonBoat.put("displayName", boat.getDisplayName());
+        jsonBoat.put("id", boat.getIdAsString());
+        jsonBoat.put("sailId", boat.getSailId());
+        jsonBoat.put("boatClass", boat.getBoatClass().getName());
+        jsonBoat.put("color", boat.getColor() != null ? boat.getColor().toString() : null);
+    }
+
+    protected void writeCommonLeaderboardData(JSONObject jsonLeaderboard, Leaderboard leaderboard,
             ResultStates resultState, TimePoint resultTimePoint, Integer maxCompetitorsCount) {
         jsonLeaderboard.put("name", leaderboard.getName());
         final String displayName = leaderboard.getDisplayName();
         jsonLeaderboard.put("displayName", displayName == null ? leaderboard.getName() : displayName);
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.asMillis() : null);
         jsonLeaderboard.put("resultState", resultState.name());
+        jsonLeaderboard.put("type", leaderboard.getLeaderboardType().name());
+        if (leaderboard instanceof RegattaLeaderboard) {
+            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+            jsonLeaderboard.put("canBoatsOfCompetitorsChangePerRace", regattaLeaderboard.getRegatta().canBoatsOfCompetitorsChangePerRace());
+        } else {
+            jsonLeaderboard.put("canBoatsOfCompetitorsChangePerRace", false);
+        }
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
         if (scoreCorrection != null) {
@@ -189,4 +188,23 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         }
         return result;
     }
+
+    protected abstract JSONObject getLeaderboardJson(Leaderboard leaderboard, TimePoint resultTimePoint,
+            ResultStates resultState, Integer maxCompetitorsCount, List<String> raceColumnNames,
+            List<String> raceDetailNames) throws NoWindException, InterruptedException, ExecutionException;
+
+    protected JSONObject getLeaderboardJson(ResultStates resultState, Integer maxCompetitorsCount,
+            TimePoint requestTimePoint, Leaderboard leaderboard, TimePoint timePoint, List<String> raceColumnNames,
+            List<String> raceDetailNames)
+            throws NoWindException, InterruptedException, ExecutionException {
+                final JSONObject jsonLeaderboard;
+                if (timePoint != null || resultState == ResultStates.Live) {
+                    jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount, raceColumnNames, raceDetailNames);
+                } else {
+                    jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint,
+                            maxCompetitorsCount);
+                }
+                return jsonLeaderboard;
+            }
+
 }

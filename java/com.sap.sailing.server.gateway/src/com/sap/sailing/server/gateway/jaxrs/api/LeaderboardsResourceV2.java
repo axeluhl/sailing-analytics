@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -94,7 +95,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         return response;
     }
 
-    private JSONObject getLeaderboardJson(Leaderboard leaderboard,
+    @Override
+    protected JSONObject getLeaderboardJson(Leaderboard leaderboard,
             TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount,
             List<String> raceColumnNames, List<String> raceDetailNames)
             throws NoWindException, InterruptedException, ExecutionException {
@@ -105,7 +107,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 false, getService(), getService().getBaseDomainFactory(),
                 /* fillTotalPointsUncorrected */false);
         JSONObject jsonLeaderboard = new JSONObject();
-        writeCommonLeaderboardData(jsonLeaderboard, leaderboardDTO, resultState, maxCompetitorsCount);
+        writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, resultTimePoint, maxCompetitorsCount);
         Map<String, Map<String, Map<CompetitorWithBoatDTO, Integer>>> competitorRanksPerRaceColumnsAndFleets = new HashMap<>();
         for (String raceColumnName : raceColumnsToShow) {
             List<CompetitorWithBoatDTO> competitorsFromBestToWorst = leaderboardDTO.getCompetitorsFromBestToWorst(raceColumnName);
@@ -136,6 +138,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             }
             JSONObject jsonCompetitor = new JSONObject();
             writeCompetitorBaseData(jsonCompetitor, competitor, leaderboardDTO);
+            BoatDTO rowBoatDTO = leaderboardRowDTO.boat;
+            if (rowBoatDTO != null) {
+                JSONObject jsonBoat = new JSONObject();
+                writeBoatData(jsonBoat, rowBoatDTO);
+                jsonCompetitor.put("boat", jsonBoat);
+            }
             jsonCompetitor.put("rank", competitorCounter);
             jsonCompetitor.put("carriedPoints", leaderboardRowDTO.carriedPoints);
             jsonCompetitor.put("netPoints", leaderboardRowDTO.netPoints);
@@ -147,6 +155,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 JSONObject jsonEntry = new JSONObject();
                 jsonRaceColumns.put(raceColumnName, jsonEntry);
                 LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
+                BoatDTO entryBoatDTO = leaderboardEntry.boat;
+                if (entryBoatDTO != null) {
+                    JSONObject jsonBoat = new JSONObject();
+                    writeBoatData(jsonBoat, entryBoatDTO);
+                    jsonEntry.put("boat", jsonBoat);
+                }
                 final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
                 jsonEntry.put("fleet", fleetOfCompetitor == null ? "" : fleetOfCompetitor.getName());
                 jsonEntry.put("totalPoints", leaderboardEntry.totalPoints);
