@@ -3,7 +3,7 @@ package com.sap.sse.datamining.ui.client;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 
-public interface DataMiningResources extends ClientBundle { // TODO extract resource files
+public interface DataMiningResources extends ClientBundle {
 
     @Source("com/sap/sse/datamining/ui/images/close.png")
     ImageResource closeIcon();
