@@ -85,4 +85,10 @@ public interface HasRaceOfCompetitorContext {
     
     @Statistic(messageKey="DistanceToStarboadSideAtStartVsFinalRank", resultDecimals=2)
     Pair<Double, Double> getRelativeDistanceToStarboardSideAtStartVsFinalRank();
+    
+    @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLineVsRelativeDistanceToAdvantageousEndOfLine", resultDecimals=2)
+    Pair<Double, Double> getWindwardDistanceToAdvantageousEndOfLineVsRelativeDistanceToAdvantageousEndOfLine();
+    
+    @Statistic(messageKey="RelativeDistanceToAdvantageousEndOfLine", resultDecimals=2)
+    Double getRelativeDistanceToAdvantageousEndOfLine();
 }

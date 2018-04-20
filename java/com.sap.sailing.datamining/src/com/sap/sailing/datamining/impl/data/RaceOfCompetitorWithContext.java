@@ -292,4 +292,40 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         return new Pair<>(getNormalizedDistanceToStarboardSideAtStart(), getTrackedRaceContext().getRankAtFinishForCompetitor(getCompetitor()));
     }
     
+    @Override
+    public Pair<Double, Double> getWindwardDistanceToAdvantageousEndOfLineVsRelativeDistanceToAdvantageousEndOfLine(){
+        return new Pair<>(getWindwardDistanceToAdvantageousLineEndAtStart().getMeters(), getRelativeDistanceToAdvantageousEndOfLine());
+    }
+    
+    @Override
+    public Double getRelativeDistanceToAdvantageousEndOfLine() {
+        TrackedRace trackedRace = getTrackedRace();
+        TimePoint startOfRace = trackedRace.getStartOfRace();
+        LineDetails startLine = trackedRace.getStartLine(startOfRace);
+        Mark advantageousMark = null;
+        switch (startLine.getAdvantageousSideWhileApproachingLine()) {
+        case PORT:
+            advantageousMark = startLine.getPortMarkWhileApproachingLine();
+            break;
+        case STARBOARD:
+            advantageousMark = startLine.getStarboardMarkWhileApproachingLine();
+            break;
+        }
+        if (advantageousMark == null) {
+            return null;
+        }
+        
+        GPSFixTrack<Mark, GPSFix> advantageousMarkTrack = trackedRace.getOrCreateTrack(advantageousMark);
+        Position advantageousMarkPosition = advantageousMarkTrack.getEstimatedPosition(startOfRace, false);
+        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(getCompetitor());
+        Position competitorPosition = competitorTrack.getEstimatedPosition(startOfRace, false);
+        
+        Double distance = competitorPosition.getDistance(advantageousMarkPosition).getMeters();
+        
+        TrackedLegOfCompetitor firstTrackedLegOfCompetitor = getTrackedRace().getTrackedLeg(competitor, trackedRace.getRace().getCourse().getFirstLeg());
+        TimePoint competitorStartTime = firstTrackedLegOfCompetitor.getStartTime();
+        Double length = trackedRace.getStartLine(competitorStartTime).getLength().getMeters();
+        return distance / length;
+    }
+    
 }
