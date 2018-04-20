@@ -1,5 +1,6 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -112,11 +113,11 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
     }
 
     protected void writeCommonLeaderboardData(JSONObject jsonLeaderboard, Leaderboard leaderboard,
-            ResultStates resultState, TimePoint resultTimePoint, Integer maxCompetitorsCount) {
+            ResultStates resultState, Date resultTimePoint, Integer maxCompetitorsCount) {
         jsonLeaderboard.put("name", leaderboard.getName());
         final String displayName = leaderboard.getDisplayName();
         jsonLeaderboard.put("displayName", displayName == null ? leaderboard.getName() : displayName);
-        jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.asMillis() : null);
+        jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.getTime() : null);
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("type", leaderboard.getLeaderboardType().name());
         if (leaderboard instanceof RegattaLeaderboard) {
