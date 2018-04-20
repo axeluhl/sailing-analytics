@@ -49,8 +49,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         return result;
     }
 
-    protected JSONObject createEmptyLeaderboardJson(Leaderboard leaderboard, ResultStates resultState,
-            TimePoint requestTimePoint, Integer maxCompetitorsCount) throws NoWindException {
+    protected JSONObject createEmptyLeaderboardJson(Leaderboard leaderboard, ResultStates resultState, Integer maxCompetitorsCount) throws NoWindException {
         JSONObject jsonLeaderboard = new JSONObject();
         writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, null, maxCompetitorsCount);
         JSONArray jsonCompetitorEntries = new JSONArray();
@@ -202,8 +201,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
                 if (timePoint != null || resultState == ResultStates.Live) {
                     jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount, raceColumnNames, raceDetailNames);
                 } else {
-                    jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint,
-                            maxCompetitorsCount);
+                    jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount);
                 }
                 return jsonLeaderboard;
             }
