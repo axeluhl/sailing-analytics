@@ -74,7 +74,7 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
             
             @Override
             public String format(ToolTipData toolTipData) {
-                return "<b>"+toolTipData.getPointName()+"</b><br>("+toolTipData.getPoint().getX()+","+toolTipData.getYAsString()+")";
+                return "<b>"+toolTipData.getPointName()+"</b><br>X: "+toolTipData.getPoint().getX()+"<br>Y: "+toolTipData.getYAsString();
             }
         }));
         
