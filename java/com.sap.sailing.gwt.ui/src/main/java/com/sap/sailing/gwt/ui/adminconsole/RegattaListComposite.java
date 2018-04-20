@@ -169,6 +169,9 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 return regatta.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no();
             }
         };
+        regattaCanBoatsOfCompetitorsChangePerRaceColumn.setSortable(true);
+        columnSortHandler.setComparator(regattaCanBoatsOfCompetitorsChangePerRaceColumn,
+                (r1, r2)->Boolean.valueOf(r1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(r2.canBoatsOfCompetitorsChangePerRace)));
 
         TextColumn<RegattaDTO> startEndDateColumn = new TextColumn<RegattaDTO>() {
             @Override

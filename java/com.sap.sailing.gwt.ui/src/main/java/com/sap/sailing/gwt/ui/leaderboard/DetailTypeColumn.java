@@ -5,27 +5,26 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
-import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 
-public abstract class DetailTypeColumn<FieldType extends Comparable<?>, RenderingType> extends
-        LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, RenderingType> {
+public abstract class DetailTypeColumn<FieldType extends Comparable<?>, RenderingType, T> extends
+        LeaderboardSortableColumnWithMinMax<T, RenderingType> {
     
     private static final String HtmlConstantToInlineHeadersWithAndWithoutUnit = "&nbsp;";
     
     private final String title;
-    private final LegDetailField<FieldType> field;
+    private final DataExtractor<FieldType, T> field;
     private final String headerStyle;
     private final String columnStyle;
     private final String unit;
     private final String tooltip;
     
-    public interface LegDetailField<T extends Comparable<?>> {
-        T get(LeaderboardRowDTO row);
+    public interface DataExtractor<T extends Comparable<?>, Z> {
+        T get(Z row);
     }
 
-    protected DetailTypeColumn(DetailType detailType, LegDetailField<FieldType> field, Cell<RenderingType> cell,
+    protected DetailTypeColumn(DetailType detailType, DataExtractor<FieldType, T> field, Cell<RenderingType> cell,
             String headerStyle, String columnStyle, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
         super(cell, detailType.getDefaultSortingOrder(), displayedLeaderboardRowsProvider);
         setHorizontalAlignment(ALIGN_CENTER);
@@ -46,7 +45,7 @@ public abstract class DetailTypeColumn<FieldType extends Comparable<?>, Renderin
         return headerStyle;
     }
 
-    protected LegDetailField<FieldType> getField() {
+    protected DataExtractor<FieldType, T> getField() {
         return field;
     }
 
@@ -56,10 +55,10 @@ public abstract class DetailTypeColumn<FieldType extends Comparable<?>, Renderin
     }
 
     @Override
-    public InvertibleComparator<LeaderboardRowDTO> getComparator() {
-        return new InvertibleComparatorAdapter<LeaderboardRowDTO>(getPreferredSortingOrder().isAscending()) {
+    public InvertibleComparator<T> getComparator() {
+        return new InvertibleComparatorAdapter<T>(getPreferredSortingOrder().isAscending()) {
             @Override
-            public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
+            public int compare(T o1, T o2) {
                 try {
                     @SuppressWarnings("unchecked")
                     Comparable<FieldType> value1 = (Comparable<FieldType>) getFieldValue(o1);
@@ -89,7 +88,7 @@ public abstract class DetailTypeColumn<FieldType extends Comparable<?>, Renderin
      * {@link #getComparator() comparator}. This default implementation uses the {@link #getField()} to obtain the logic
      * for extracting a comparable value from the <code>row</code>.
      */
-    protected FieldType getFieldValue(LeaderboardRowDTO row) {
+    protected FieldType getFieldValue(T row) {
         return getField().get(row);
     }
 

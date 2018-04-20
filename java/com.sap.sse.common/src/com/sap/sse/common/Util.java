@@ -28,9 +28,9 @@ public class Util {
     
         private transient int hashCode;
     
-        @SuppressWarnings("unused")
         // required for some serialization frameworks such as GWT RPC
-        private Pair() {
+        @Deprecated
+        protected Pair() {
         }
 
         public Pair(A a, B b) {

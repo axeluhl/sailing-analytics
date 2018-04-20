@@ -10,9 +10,9 @@ import com.sap.sailing.gwt.ui.client.DurationAsHoursMinutesSecondsFormatter;
  * @author Axel Uhl (D043530)
  *
  */
-public class TotalTimeColumn extends FormattedDoubleDetailTypeColumn {
+public class TotalTimeColumn extends FormattedDoubleLeaderboardRowDTODetailTypeColumn {
 
-    protected TotalTimeColumn(DetailType detailType, LegDetailField<Double> field, String headerStyle,
+    protected TotalTimeColumn(DetailType detailType, DataExtractor<Double, LeaderboardRowDTO> field, String headerStyle,
             String columnStyle, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
         super(detailType, field, headerStyle, columnStyle, displayedLeaderboardRowsProvider);
     }

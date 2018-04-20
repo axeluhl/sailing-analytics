@@ -2154,4 +2154,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String newExpeditionCompetitor();
     String selectOneCompetitorToMapTheImportedData();
     String startTypingForSuggestions(); 
+    String maneuverTable();
+    String speedIn();
+    String speedOut();
+    String selectAtLeastOneCompetitorManeuver();
+    String noDataManeuverTable();
 }

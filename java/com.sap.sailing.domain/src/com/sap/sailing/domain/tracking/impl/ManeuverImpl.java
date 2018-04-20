@@ -133,7 +133,7 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     public NauticalSide getToSide() {
         return getMainCurveBoundaries().getDirectionChangeInDegrees() < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
     }
-
+    
     @Override
     public double getAvgTurningRateInDegreesPerSecond() {
         return Math.abs(getMainCurveBoundaries().getDirectionChangeInDegrees())
