@@ -136,7 +136,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             public void onSelectionChange(SelectionChangeEvent event) {
                 final ManeuverTableData selected = selectionModel.getSelectedObject();
                 if (selected != null) {
-                    if (!hasCanReplayDuringLiveRacesPermission) {
+                    if (timer.getPlayMode() == PlayModes.Live && !hasCanReplayDuringLiveRacesPermission) {
                         timer.pause();
                     }
                     timer.setPlayMode(PlayModes.Replay);
