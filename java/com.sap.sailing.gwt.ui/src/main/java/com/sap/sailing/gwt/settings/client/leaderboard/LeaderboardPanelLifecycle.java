@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
@@ -9,8 +10,11 @@ public abstract class LeaderboardPanelLifecycle<T extends LeaderboardSettings>
 
     protected final StringMessages stringMessages;
 
-    public LeaderboardPanelLifecycle(StringMessages stringMessages) {
+    protected final Iterable<DetailType> availableDetailTypes;
+
+    public LeaderboardPanelLifecycle(StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
         this.stringMessages = stringMessages;
+        this.availableDetailTypes = availableDetailTypes;
     }
 
     @Override

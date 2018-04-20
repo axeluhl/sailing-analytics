@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
@@ -26,6 +28,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
 public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
+    private static final Logger logger = Logger.getLogger(IdleOverallLeaderBoardNode.class.getName());
     private final AutoPlayClientFactory cf;
     private Timer timer;
 
@@ -66,7 +69,7 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
                                     cf.getSailingService(), new AsyncActionsExecutor(), leaderboardSettings, false,
                                     provider, timer, null, overallLeaderboardName, cf.getErrorReporter(),
                                     StringMessages.INSTANCE, false, null, false, null, false, true, false, false, false,
-                                    new SixtyInchLeaderBoardStyle(true), FlagImageResolverImpl.get());
+                                    new SixtyInchLeaderBoardStyle(true), FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
 
                             IdleOverallLeaderBoardPlace place = new IdleOverallLeaderBoardPlace(leaderboardPanel);
 
@@ -75,15 +78,14 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
                             getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getEvent().getName(),
                                     cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName()));
                         } else {
-                            GWT.log("Not found any overleaderboardname");
+                            logger.warning("Not found any overleaderboardname");
                         }
                     }
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        // DO NOTHING
+                        logger.log(Level.SEVERE, "Remote call for Leaderboard loading failed", caught);
                     }
-
                 }));
     }
 

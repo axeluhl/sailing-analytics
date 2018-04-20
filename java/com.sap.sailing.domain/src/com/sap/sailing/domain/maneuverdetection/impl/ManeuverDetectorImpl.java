@@ -277,16 +277,40 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         }
         int gpsFixCountWithinMainCurve = 0;
         int gpsFixCountWithinWholeCurve = 0;
+        int gpsFixesCountFromPreviousManeuver = 0;
+        int gpsFixesCountToNextManeuver = 0;
         try {
             track.lockForRead();
+            boolean considerPreviousManeuver = previousManeuverCurve != null && previousManeuverCurve
+                    .getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter()
+                    .before(maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore());
+            boolean considerNextManeuver = nextManeuverCurve != null && nextManeuverCurve
+                    .getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore()
+                    .after(maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter());
             for (GPSFixMoving fix : track.getFixes(
-                    maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore(), true,
-                    maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter(), true)) {
-                if (!fix.getTimePoint().before(maneuverCurve.getMainCurveBoundaries().getTimePointBefore())
-                        && !fix.getTimePoint().after(maneuverCurve.getMainCurveBoundaries().getTimePointAfter())) {
-                    ++gpsFixCountWithinMainCurve;
+                    considerPreviousManeuver
+                            ? previousManeuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries()
+                                    .getTimePointAfter()
+                            : maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore(),
+                    !considerPreviousManeuver,
+                    considerNextManeuver
+                            ? nextManeuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries()
+                                    .getTimePointBefore()
+                            : maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter(),
+                    !considerNextManeuver)) {
+                if (fix.getTimePoint().before(
+                        maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore())) {
+                    ++gpsFixesCountFromPreviousManeuver;
+                } else if (fix.getTimePoint().after(
+                        maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter())) {
+                    ++gpsFixesCountToNextManeuver;
+                } else {
+                    if (!fix.getTimePoint().before(maneuverCurve.getMainCurveBoundaries().getTimePointBefore())
+                            && !fix.getTimePoint().after(maneuverCurve.getMainCurveBoundaries().getTimePointAfter())) {
+                        ++gpsFixCountWithinMainCurve;
+                    }
+                    ++gpsFixCountWithinWholeCurve;
                 }
-                ++gpsFixCountWithinWholeCurve;
             }
         } finally {
             track.unlockAfterRead();
@@ -338,26 +362,27 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getDirectionChangeInDegrees(),
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getLowestSpeed(),
                 durationAndAvgSpeedWithBearingBefore.getB(), durationAndAvgSpeedWithBearingBefore.getA(),
-                durationAndAvgSpeedWithBearingAfter.getB(), durationAndAvgSpeedWithBearingAfter.getA(),
-                distanceSailedWithinManeuver, projectedManeuverLoss.getDistanceSailed(), distanceSailedIfNotManeuvering,
+                gpsFixesCountFromPreviousManeuver, durationAndAvgSpeedWithBearingAfter.getB(),
+                durationAndAvgSpeedWithBearingAfter.getA(), gpsFixesCountToNextManeuver, distanceSailedWithinManeuver,
+                projectedManeuverLoss.getDistanceSailed(), distanceSailedIfNotManeuvering,
                 projectedManeuverLoss.getDistanceSailedIfNotManeuvering(), gpsFixCountWithinWholeCurve);
         TimePoint maneuverTimePoint = maneuverCurve.getMainCurveBoundaries().getTimePoint();
         Position maneuverPosition = track.getEstimatedPosition(maneuverTimePoint, /* extrapolate */false);
         Wind wind = trackedRace.getWind(maneuverPosition, maneuverTimePoint);
         int numberOfJibes = getNumberOfJibes(mainCurve, wind);
         int numberOfTacks = getNumberOfTacks(mainCurve, wind);
-        boolean maneuverStartsByRunningAwayFromTheWind = (mainCurve.getSpeedWithBearingBefore().getBearing()
-                .getDegrees() - 180) * mainCurve.getDirectionChangeInDegrees() < 0;
+        boolean maneuverStartsByRunningAwayFromWind = (mainCurve.getSpeedWithBearingBefore().getBearing().getDegrees()
+                - 180) * mainCurve.getDirectionChangeInDegrees() < 0;
         Bearing relativeBearingToNextMarkPassingBeforeManeuver = getRelativeBearingToNextMark(
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore(), maneuverCurve
                         .getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingBefore().getBearing());
         Bearing relativeBearingToNextMarkPassingAfterManeuver = getRelativeBearingToNextMark(
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter(), maneuverCurve
                         .getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingAfter().getBearing());
-        return new CompleteManeuverCurveWithEstimationDataImpl(mainCurve, curveWithUnstableCourseAndSpeed, wind,
-                numberOfTacks, numberOfJibes, maneuverStartsByRunningAwayFromTheWind,
-                relativeBearingToNextMarkPassingBeforeManeuver, relativeBearingToNextMarkPassingAfterManeuver,
-                maneuverCurve.isMarkPassing());
+        return new CompleteManeuverCurveWithEstimationDataImpl(maneuverPosition, mainCurve,
+                curveWithUnstableCourseAndSpeed, wind, numberOfTacks, numberOfJibes,
+                maneuverStartsByRunningAwayFromWind, relativeBearingToNextMarkPassingBeforeManeuver,
+                relativeBearingToNextMarkPassingAfterManeuver, maneuverCurve.isMarkPassing());
     }
 
     /**
@@ -511,9 +536,12 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      *         <code>to</code>, or else the list of maneuver spots with corresponding maneuvers detected.
      */
     protected List<ManeuverSpot> detectManeuvers(TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
-        return detectManeuvers(trackedRace.approximate(competitor,
-                trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass().getMaximumDistanceForCourseApproximation(),
-                earliestManeuverStart, latestManeuverEnd), earliestManeuverStart, latestManeuverEnd);
+        return detectManeuvers(
+                trackedRace.approximate(competitor,
+                        trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass()
+                                .getMaximumDistanceForCourseApproximation(),
+                        earliestManeuverStart, latestManeuverEnd),
+                earliestManeuverStart, latestManeuverEnd);
     }
 
     /**
@@ -592,7 +620,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         if (lastCourseChangeDirection != newCourseChangeDirection) {
             return false;
         }
-        Distance threeHullLengths = trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass().getHullLength().scale(3);
+        Distance threeHullLengths = trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass().getHullLength()
+                .scale(3);
         if (currentFix.getTimePoint().asMillis()
                 - previousFix.getTimePoint().asMillis() > getApproximateManeuverDuration().asMillis()
                 && currentFix.getPosition().getDistance(previousFix.getPosition()).compareTo(threeHullLengths) > 0) {

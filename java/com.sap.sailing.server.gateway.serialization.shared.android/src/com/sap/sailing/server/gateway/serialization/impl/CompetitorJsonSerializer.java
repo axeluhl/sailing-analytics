@@ -7,7 +7,9 @@ import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
@@ -15,21 +17,46 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.CountryCode;
 
+/**
+ * Serializes a {@link Competitor} or {@link CompetitorWithBoat} object. If a {@link CompetitorWithBoat} object,
+ * the {@link CompetitorJsonConstants#FIELD_BOAT} field will be filled with a boat document as serialized by the
+ * {@link BoatJsonSerializer}. For {@link Competitor} objects with {@link Competitor#hasBoat()}{@code == false} the
+ * {@link CompetitorJsonConstants#FIELD_BOAT} field will not be set. This can also be used by the corresponding
+ * de-serializer to identify which class implementing the {@link Competitor} interface to instantiate. 
+ */
 public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     public static final String FIELD_ID = "id";
     
     private final JsonSerializer<Team> teamJsonSerializer;
+    private final JsonSerializer<Boat> boatJsonSerializer;
 
+    /**
+     * Creates a serializer for {@link Competitor} objects which by default, if the competitor
+     * {@link Competitor#hasBoat() has a boat attached} will serialize the boat in the
+     * {@link CompetitorJsonConstants#FIELD_BOAT} field of the resulting document. See {@link #create(boolean)} for a
+     * variant where callers can choose whether the {@link CompetitorJsonConstants#FIELD_BOAT} field shall be filled or
+     * not.
+     */
     public static CompetitorJsonSerializer create() {
-        return new CompetitorJsonSerializer(TeamJsonSerializer.create());
+        return create(/* serialize boat */ true);
+    }
+
+    /**
+     * Creates a serializer for {@link Competitor} objects which if {@code serializeBoat==true} and if the competitor
+     * {@link Competitor#hasBoat() has a boat attached} will serialize the boat in the
+     * {@link CompetitorJsonConstants#FIELD_BOAT} field of the resulting document.
+     */
+    public static CompetitorJsonSerializer create(boolean serializeBoat) {
+        return new CompetitorJsonSerializer(TeamJsonSerializer.create(), serializeBoat?BoatJsonSerializer.create():null);
     }
 
     public CompetitorJsonSerializer() {
-        this(null);
+        this(null, null);
     }
 
-    public CompetitorJsonSerializer(JsonSerializer<Team> teamJsonSerializer) {
+    public CompetitorJsonSerializer(JsonSerializer<Team> teamJsonSerializer, JsonSerializer<Boat> boatJsonSerializer) {
         this.teamJsonSerializer = teamJsonSerializer;
+        this.boatJsonSerializer = boatJsonSerializer;
     }
     
     public static JSONObject getCompetitorIdQuery(Competitor competitor) {
@@ -68,6 +95,9 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         if (teamJsonSerializer != null) {
             result.put(CompetitorJsonConstants.FIELD_TEAM, teamJsonSerializer.serialize(competitor.getTeam()));
         }
+        if (boatJsonSerializer != null && competitor.hasBoat()) {
+            result.put(CompetitorJsonConstants.FIELD_BOAT, boatJsonSerializer.serialize(((CompetitorWithBoat) competitor).getBoat()));
+        }
         result.put(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR, competitor.getTimeOnTimeFactor());
         result.put(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                 competitor.getTimeOnDistanceAllowancePerNauticalMile() == null ? null :
@@ -75,7 +105,7 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         return result;
     }
 
-    protected Color getColor(Competitor competitor ) {
+    protected Color getColor(Competitor competitor) {
         return competitor.getColor();
     }
 }

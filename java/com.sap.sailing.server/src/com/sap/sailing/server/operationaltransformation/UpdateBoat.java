@@ -34,7 +34,7 @@ public class UpdateBoat extends AbstractRacingEventServiceOperation<Boat> {
     
     @Override
     public Boat internalApplyTo(RacingEventService toState) throws Exception {
-        Boat result = toState.getBaseDomainFactory().getCompetitorStore().updateBoat(idAsString, newName, newColor, newSailId);
+        Boat result = toState.getBaseDomainFactory().getCompetitorAndBoatStore().updateBoat(idAsString, newName, newColor, newSailId);
         return result;
     }
 

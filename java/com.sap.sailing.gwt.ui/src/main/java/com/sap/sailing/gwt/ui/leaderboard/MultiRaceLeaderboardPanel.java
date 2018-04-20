@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -45,9 +46,9 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             MultiRaceLeaderboardSettings settings, boolean isEmbedded,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages, boolean showRaceDetails,
-            LeaderBoardStyle style, FlagImageResolver flagImageResolver) {
+            LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
-                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails, style, flagImageResolver);
+                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails, style, flagImageResolver, availableDetailTypes);
         initialize(settings);
     }
 
@@ -59,11 +60,11 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
-            boolean enableSyncScroller, LeaderBoardStyle style, FlagImageResolver flagImageResolver) {
+            boolean enableSyncScroller, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
                 timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails,
                 competitorSearchTextBox, showSelectionCheckbox, optionalRaceTimesInfoProvider, autoExpandLastRaceColumn,
-                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller, style, flagImageResolver);
+                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller, style, flagImageResolver, availableDetailTypes);
         initialize(settings);
     }
 
@@ -71,9 +72,9 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             MultiRaceLeaderboardSettings settings, CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
-            boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver) {
+            boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, competitorSelectionProvider,
-                leaderboardName, errorReporter, stringMessages, showRaceDetails,style, flagImageResolver);
+                leaderboardName, errorReporter, stringMessages, showRaceDetails,style, flagImageResolver, availableDetailTypes);
         initialize(settings);
     }
 
@@ -112,13 +113,13 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     }
 
     @Override
-    public String getCompetitorColor(CompetitorDTO competitor) {
+    public String getCompetitorColor(CompetitorWithBoatDTO competitor) {
         // not used for multi
         return null;
     }
 
     @Override
-    public boolean renderBoatColorIfNecessary(CompetitorDTO competitor, SafeHtmlBuilder sb) {
+    public boolean renderBoatColorIfNecessary(CompetitorWithBoatDTO competitor, SafeHtmlBuilder sb) {
         return false;
     }
 
@@ -142,7 +143,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             raceRankFilter.setQuickRankProvider(this.competitorFilterPanel.getQuickRankProvider());
             raceRankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
             raceRankFilter.setValue(maxRaceRank);
-            FilterSet<CompetitorDTO, Filter<CompetitorDTO>> activeFilterSet = competitorSelectionProvider
+            FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> activeFilterSet = competitorSelectionProvider
                     .getOrCreateCompetitorsFilterSet(stringMessages.topNCompetitorsByRaceRank(maxRaceRank));
             activeFilterSet.addFilter(raceRankFilter);
             competitorSelectionProvider.setCompetitorsFilterSet(activeFilterSet);
@@ -155,11 +156,11 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
      * the race identified by {@link #preSelectedRace} otherwise.
      */
     @Override
-    public Map<CompetitorDTO, LeaderboardRowDTO> getRowsToDisplay() {
-        Map<CompetitorDTO, LeaderboardRowDTO> result;
-        Iterable<CompetitorDTO> allFilteredCompetitors = competitorSelectionProvider.getFilteredCompetitors();
-        result = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
-        for (CompetitorDTO competitor : leaderboard.rows.keySet()) {
+    public Map<CompetitorWithBoatDTO, LeaderboardRowDTO> getRowsToDisplay() {
+        Map<CompetitorWithBoatDTO, LeaderboardRowDTO> result;
+        Iterable<CompetitorWithBoatDTO> allFilteredCompetitors = competitorSelectionProvider.getFilteredCompetitors();
+        result = new HashMap<CompetitorWithBoatDTO, LeaderboardRowDTO>();
+        for (CompetitorWithBoatDTO competitor : leaderboard.rows.keySet()) {
             if (Util.contains(allFilteredCompetitors, competitor)) {
                 result.put(competitor, leaderboard.rows.get(competitor));
             }
@@ -171,7 +172,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     public SettingsDialogComponent<MultiRaceLeaderboardSettings> getSettingsDialogComponent(
             MultiRaceLeaderboardSettings useTheseSettings) {
         return new MultiRaceLeaderboardSettingsDialogComponent((MultiRaceLeaderboardSettings) useTheseSettings,
-                leaderboard.getNamesOfRaceColumns(), stringMessages, !leaderboard.canBoatsOfCompetitorsChangePerRace);
+                leaderboard.getNamesOfRaceColumns(), stringMessages, availableDetailTypes, !leaderboard.canBoatsOfCompetitorsChangePerRace);
     }
 
     @Override

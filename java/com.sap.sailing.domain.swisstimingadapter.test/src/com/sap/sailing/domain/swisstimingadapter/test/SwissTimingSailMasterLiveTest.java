@@ -24,6 +24,7 @@ import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceStatus;
+import com.sap.sailing.domain.swisstimingadapter.RacingStatus;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
@@ -164,9 +165,9 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     }
 
     @Override
-    public void receivedRacePositionData(String raceID, RaceStatus status, TimePoint timePoint, TimePoint startTime,
-            Long millisecondsSinceRaceStart, Integer nextMarkIndexForLeader, Distance distanceToNextMarkForLeader,
-            Collection<Fix> fixes) {
+    public void receivedRacePositionData(String raceID, RaceStatus raceStatus, RacingStatus racingStatus, TimePoint timePoint,
+            TimePoint startTime, Long millisecondsSinceRaceStart, Integer nextMarkIndexForLeader,
+            Distance distanceToNextMarkForLeader, Collection<Fix> fixes) {
         System.out.print(".");
         rpdCounter++;
     }

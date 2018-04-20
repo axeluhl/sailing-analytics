@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.CompetitorDescriptor;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sse.common.Util;
 
 /**
@@ -16,18 +16,18 @@ import com.sap.sse.common.Util;
  */
 public class CompetitorImportMatcher {
     //FIXME: Not sure about the amount of data. May be need to implement some cache for that.
-    private final Iterable<CompetitorDTO> existingCompetitorDTOs;
+    private final Iterable<CompetitorWithBoatDTO> existingCompetitorDTOs;
 
-    public CompetitorImportMatcher(Iterable<CompetitorDTO> existingCompetitors) {
+    public CompetitorImportMatcher(Iterable<CompetitorWithBoatDTO> existingCompetitors) {
         this.existingCompetitorDTOs = existingCompetitors;
     }
 
-    public Set<CompetitorDTO> getMatchesCompetitors(CompetitorDescriptor competitorDescriptor) {
-        Set<CompetitorDTO> matchesCompetitor = new HashSet<>();
+    public Set<CompetitorWithBoatDTO> getMatchesCompetitors(CompetitorDescriptor competitorDescriptor) {
+        Set<CompetitorWithBoatDTO> matchesCompetitor = new HashSet<>();
         if (competitorDescriptor == null) {
             return matchesCompetitor;
         }
-        for (CompetitorDTO existingCompetitor : existingCompetitorDTOs) {
+        for (CompetitorWithBoatDTO existingCompetitor : existingCompetitorDTOs) {
             if (isEqual(competitorDescriptor, existingCompetitor)) {
                 matchesCompetitor.add(existingCompetitor);
             }
@@ -35,7 +35,7 @@ public class CompetitorImportMatcher {
         return matchesCompetitor;
     }
 
-    private boolean isEqual(CompetitorDescriptor competitorDescriptor, CompetitorDTO existingCompetitor) {
+    private boolean isEqual(CompetitorDescriptor competitorDescriptor, CompetitorWithBoatDTO existingCompetitor) {
         return Util.equalsWithNull(competitorDescriptor.getName(), existingCompetitor.getName(), /* ignoreCase */ true)
                 && Util.equalsWithNull(removeSpaces(competitorDescriptor.getSailNumber()), removeSpaces(existingCompetitor.getSailID()), /* ignoreCase */ true)
                 && compareCountryCode(competitorDescriptor, existingCompetitor);
@@ -45,7 +45,7 @@ public class CompetitorImportMatcher {
         return s==null?null:s.replace(" ", "").replace("\t", "");
     }
 
-    private boolean compareCountryCode(CompetitorDescriptor competitorDescriptor, CompetitorDTO existingCompetitor) {
+    private boolean compareCountryCode(CompetitorDescriptor competitorDescriptor, CompetitorWithBoatDTO existingCompetitor) {
         return Util.equalsWithNull(competitorDescriptor.getCountryCode() == null ? null : competitorDescriptor.getCountryCode().getThreeLetterIOCCode(),
                         existingCompetitor.getThreeLetterIocCountryCode(), /* ignoreCase */ true);
     }

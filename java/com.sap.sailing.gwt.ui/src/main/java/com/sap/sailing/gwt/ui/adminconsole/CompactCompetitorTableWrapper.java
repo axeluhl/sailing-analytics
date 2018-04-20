@@ -16,7 +16,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -36,57 +36,57 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  *
  * @param <S>
  */
-public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<CompetitorDTO>> extends TableWrapper<CompetitorDTO, S> {
-    private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
+public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<CompetitorWithBoatDTO>> extends TableWrapper<CompetitorWithBoatDTO, S> {
+    private final LabeledAbstractFilterablePanel<CompetitorWithBoatDTO> filterField;
     
     public CompactCompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager) {
         super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
-                new EntityIdentityComparator<CompetitorDTO>() {
+                new EntityIdentityComparator<CompetitorWithBoatDTO>() {
                     @Override
-                    public boolean representSameEntity(CompetitorDTO dto1, CompetitorDTO dto2) {
+                    public boolean representSameEntity(CompetitorWithBoatDTO dto1, CompetitorWithBoatDTO dto2) {
                         return dto1.getIdAsString().equals(dto2.getIdAsString());
                     }
                     @Override
-                    public int hashCode(CompetitorDTO t) {
+                    public int hashCode(CompetitorWithBoatDTO t) {
                         return t.getIdAsString().hashCode();
                     }
                 });
-        ListHandler<CompetitorDTO> competitorColumnListHandler = getColumnSortHandler();
+        ListHandler<CompetitorWithBoatDTO> competitorColumnListHandler = getColumnSortHandler();
         
         // competitors table
-        TextColumn<CompetitorDTO> competitorNameColumn = new TextColumn<CompetitorDTO>() {
+        TextColumn<CompetitorWithBoatDTO> competitorNameColumn = new TextColumn<CompetitorWithBoatDTO>() {
             @Override
-            public String getValue(CompetitorDTO competitor) {
+            public String getValue(CompetitorWithBoatDTO competitor) {
                 return competitor.getName();
             }
         };
         competitorNameColumn.setSortable(true);
-        competitorColumnListHandler.setComparator(competitorNameColumn, new Comparator<CompetitorDTO>() {
+        competitorColumnListHandler.setComparator(competitorNameColumn, new Comparator<CompetitorWithBoatDTO>() {
             @Override
-            public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+            public int compare(CompetitorWithBoatDTO o1, CompetitorWithBoatDTO o2) {
                 return o1.getName().compareTo(o2.getName());
             }
         });
 
-        TextColumn<CompetitorDTO> competitorShortNameColumn = new TextColumn<CompetitorDTO>() {
+        TextColumn<CompetitorWithBoatDTO> competitorShortNameColumn = new TextColumn<CompetitorWithBoatDTO>() {
             @Override
-            public String getValue(CompetitorDTO competitor) {
+            public String getValue(CompetitorWithBoatDTO competitor) {
                 return competitor.getShortName();
             }
         };
         competitorShortNameColumn.setSortable(true);
-        competitorColumnListHandler.setComparator(competitorShortNameColumn, new Comparator<CompetitorDTO>() {
+        competitorColumnListHandler.setComparator(competitorShortNameColumn, new Comparator<CompetitorWithBoatDTO>() {
             private final NaturalComparator comparator = new NaturalComparator(/* case sensitive */ false);
             @Override
-            public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+            public int compare(CompetitorWithBoatDTO o1, CompetitorWithBoatDTO o2) {
                 return comparator.compare(o1.getShortName(), o2.getShortName());
             }
         });
 
-        Column<CompetitorDTO, SafeHtml> flagImageColumn = new Column<CompetitorDTO, SafeHtml>(new SafeHtmlCell()) {
+        Column<CompetitorWithBoatDTO, SafeHtml> flagImageColumn = new Column<CompetitorWithBoatDTO, SafeHtml>(new SafeHtmlCell()) {
             @Override
-            public SafeHtml getValue(CompetitorDTO competitor) {
+            public SafeHtml getValue(CompetitorWithBoatDTO competitor) {
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
                 ImageResourceRenderer renderer = new ImageResourceRenderer();
                 final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
@@ -110,32 +110,32 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
             }
         };
 
-        TextColumn<CompetitorDTO> competitorSearchTagColumn = new TextColumn<CompetitorDTO>() {
+        TextColumn<CompetitorWithBoatDTO> competitorSearchTagColumn = new TextColumn<CompetitorWithBoatDTO>() {
             @Override
-            public String getValue(CompetitorDTO competitor) {
+            public String getValue(CompetitorWithBoatDTO competitor) {
                 return competitor.getSearchTag();
             }
         };
         competitorSearchTagColumn.setSortable(true);
-        competitorColumnListHandler.setComparator(competitorSearchTagColumn, new Comparator<CompetitorDTO>() {
+        competitorColumnListHandler.setComparator(competitorSearchTagColumn, new Comparator<CompetitorWithBoatDTO>() {
             @Override
-            public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+            public int compare(CompetitorWithBoatDTO o1, CompetitorWithBoatDTO o2) {
                 return new NaturalComparator(false).compare(o1.getSearchTag(), o2.getSearchTag());
             }
         });
 
-        TextColumn<CompetitorDTO> isBoatLinkedColumn = new TextColumn<CompetitorDTO>() {
+        TextColumn<CompetitorWithBoatDTO> isBoatLinkedColumn = new TextColumn<CompetitorWithBoatDTO>() {
             @Override
-            public String getValue(CompetitorDTO competitor) {
+            public String getValue(CompetitorWithBoatDTO competitor) {
                 boolean hasBoat = competitor.getBoat() != null;
                 return hasBoat ? stringMessages.yes() : stringMessages.no();
             }
         };
         
-        filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(stringMessages.filterCompetitors()),
-                new ArrayList<CompetitorDTO>(), table, dataProvider) {
+        filterField = new LabeledAbstractFilterablePanel<CompetitorWithBoatDTO>(new Label(stringMessages.filterCompetitors()),
+                new ArrayList<CompetitorWithBoatDTO>(), table, dataProvider) {
             @Override
-            public Iterable<String> getSearchableStrings(CompetitorDTO t) {
+            public Iterable<String> getSearchableStrings(CompetitorWithBoatDTO t) {
                 List<String> string = new ArrayList<String>();
                 string.add(t.getName());
                 string.add(t.getShortName());
@@ -155,34 +155,34 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
         table.ensureDebugId("CompactCompetitorsTable");
     }
     
-    public Iterable<CompetitorDTO> getAllCompetitors() {
+    public Iterable<CompetitorWithBoatDTO> getAllCompetitors() {
         return filterField.getAll();
     }
     
-    public LabeledAbstractFilterablePanel<CompetitorDTO> getFilterField() {
+    public LabeledAbstractFilterablePanel<CompetitorWithBoatDTO> getFilterField() {
         return filterField;
     }
     
-    public void refreshCompetitorList(Iterable<CompetitorDTO> competitors) {
+    public void refreshCompetitorList(Iterable<CompetitorWithBoatDTO> competitors) {
         getFilteredCompetitors(competitors);
     }
     
     public void refreshCompetitorListFromRace(String leaderboardName, String raceColumnName, String fleetName) {
-        final AsyncCallback<Map<CompetitorDTO, BoatDTO>> myCallback = new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
+        final AsyncCallback<Map<CompetitorWithBoatDTO, BoatDTO>> myCallback = new AsyncCallback<Map<CompetitorWithBoatDTO, BoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
             }
 
             @Override
-            public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
+            public void onSuccess(Map<CompetitorWithBoatDTO, BoatDTO> result) {
                 refreshCompetitorList(result.keySet());
             }
         };
         sailingService.getCompetitorsAndBoatsOfRace(leaderboardName, raceColumnName, fleetName, myCallback);
     }
 
-    private void getFilteredCompetitors(Iterable<CompetitorDTO> result) {
+    private void getFilteredCompetitors(Iterable<CompetitorWithBoatDTO> result) {
         filterField.updateAll(result);
     }
 }

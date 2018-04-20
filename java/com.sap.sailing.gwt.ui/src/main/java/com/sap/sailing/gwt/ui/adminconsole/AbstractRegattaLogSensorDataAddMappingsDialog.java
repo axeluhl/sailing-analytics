@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -30,11 +30,11 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
     private final SimplePanel importWidgetHolder;
     protected final TrackFileImportDeviceIdentifierTableWrapper deviceIdTable;
     private final BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>> boatTable;
-    private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
+    private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorWithBoatDTO>> competitorTable;
     private final StringMessages stringMessages;
 
     private TrackFileImportDeviceIdentifierDTO deviceToSelect;
-    private CompetitorDTO compToSelect;
+    private CompetitorWithBoatDTO compToSelect;
     private BoatDTO boatToSelect;
     private boolean inInstableTransitionState = false;
 
@@ -92,9 +92,9 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
 
     private void getCompetitorRegistrations(SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
         sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName,
-                new AsyncCallback<Collection<CompetitorDTO>>() {
+                new AsyncCallback<Collection<CompetitorWithBoatDTO>>() {
                     @Override
-                    public void onSuccess(Collection<CompetitorDTO> result) {
+                    public void onSuccess(Collection<CompetitorWithBoatDTO> result) {
                         competitorTable.refreshCompetitorList(result);
                     }
 
@@ -174,8 +174,8 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
         if (!inInstableTransitionState) {
             deviceIdTable.setMappedObjectForSelectedDevice(mappedTo);
 
-            if (mappedTo instanceof CompetitorDTO) {
-                compToSelect = (CompetitorDTO) mappedTo;
+            if (mappedTo instanceof CompetitorWithBoatDTO) {
+                compToSelect = (CompetitorWithBoatDTO) mappedTo;
                 boatToSelect = null;
             } else if (mappedTo instanceof BoatDTO) {
                 compToSelect = null;
@@ -194,8 +194,8 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
 
             if (deviceId != null) {
                 final MappableToDevice mappedTo = deviceIdTable.getMappedObjectForDeviceId(deviceId);
-                if (mappedTo instanceof CompetitorDTO) {
-                    compToSelect = (CompetitorDTO) mappedTo;
+                if (mappedTo instanceof CompetitorWithBoatDTO) {
+                    compToSelect = (CompetitorWithBoatDTO) mappedTo;
                 } else if (mappedTo instanceof BoatDTO) {
                     boatToSelect = (BoatDTO) mappedTo;
                 }

@@ -10,8 +10,8 @@ import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -59,13 +59,13 @@ public interface DomainFactory extends SharedDomainFactory {
     
     ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType);
 
-    CompetitorWithoutBoatDTO convertToCompetitorDTO(Competitor competitor);
+    CompetitorDTO convertToCompetitorDTO(Competitor competitor);
 
-    CompetitorDTO convertToCompetitorWithOptionalBoatDTO(Competitor competitor);
+    CompetitorWithBoatDTO convertToCompetitorWithOptionalBoatDTO(Competitor competitor);
 
-    CompetitorDTO convertToCompetitorDTO(Competitor competitor, Boat boat);
+    CompetitorWithBoatDTO convertToCompetitorDTO(Competitor competitor, Boat boat);
 
-    Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats);
+    Map<CompetitorWithBoatDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, ? extends Boat> competitorsAndBoats);
 
     BoatDTO convertToBoatDTO(Boat boat);
 
@@ -78,11 +78,11 @@ public interface DomainFactory extends SharedDomainFactory {
 
     PlacemarkDTO convertToPlacemarkDTO(Placemark placemark);
 
-    List<CompetitorDTO> getCompetitorDTOList(Map<Competitor, Boat> competitors);
+    List<CompetitorWithBoatDTO> getCompetitorDTOList(Map<Competitor, Boat> competitors);
 
-    List<CompetitorDTO> getCompetitorDTOList(Iterable<Competitor> competitors);
+    List<CompetitorWithBoatDTO> getCompetitorDTOList(Iterable<Competitor> competitors);
 
-    List<CompetitorDTO> getCompetitorDTOList(List<Pair<Competitor, Boat>> competitors);
+    List<CompetitorWithBoatDTO> getCompetitorDTOList(List<Pair<Competitor, Boat>> competitors);
     
     TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace);
 

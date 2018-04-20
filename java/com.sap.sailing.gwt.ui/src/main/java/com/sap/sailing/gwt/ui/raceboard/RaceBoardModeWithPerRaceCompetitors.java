@@ -4,13 +4,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
 import com.sap.sse.common.Util;
 
 public abstract class RaceBoardModeWithPerRaceCompetitors extends AbstractRaceBoardMode implements CompetitorsForRaceDefinedListener {
-    private Iterable<CompetitorDTO> competitorsInRace;
+    private Iterable<CompetitorWithBoatDTO> competitorsInRace;
 
     abstract protected void updateCompetitorSelection();
 
@@ -26,8 +26,8 @@ public abstract class RaceBoardModeWithPerRaceCompetitors extends AbstractRaceBo
 
     protected void updateCompetitorSelection(final int howManyTopCompetitorsInRaceToSelect, LeaderboardDTO leaderboard) {
         if (leaderboard != null) {
-            final List<CompetitorDTO> competitorsFromBestToWorstInColumn = leaderboard.getCompetitorsFromBestToWorst(getRaceColumn());
-            final Set<CompetitorDTO> competitorsToSelect = new HashSet<>();
+            final List<CompetitorWithBoatDTO> competitorsFromBestToWorstInColumn = leaderboard.getCompetitorsFromBestToWorst(getRaceColumn());
+            final Set<CompetitorWithBoatDTO> competitorsToSelect = new HashSet<>();
             int numberOfSelectedCompetitors = 0;
             for (int i=0; numberOfSelectedCompetitors<howManyTopCompetitorsInRaceToSelect && i<competitorsFromBestToWorstInColumn.size(); i++) {
                 if (getCompetitorsInRace() == null || Util.contains(getCompetitorsInRace(), competitorsFromBestToWorstInColumn.get(i))) {
@@ -40,12 +40,12 @@ public abstract class RaceBoardModeWithPerRaceCompetitors extends AbstractRaceBo
     }
 
     @Override
-    public void competitorsForRaceDefined(Iterable<CompetitorDTO> competitorsInRace) {
+    public void competitorsForRaceDefined(Iterable<CompetitorWithBoatDTO> competitorsInRace) {
         this.competitorsInRace = competitorsInRace;
         trigger();
     }
     
-    protected Iterable<CompetitorDTO> getCompetitorsInRace() {
+    protected Iterable<CompetitorWithBoatDTO> getCompetitorsInRace() {
         return competitorsInRace;
     }
 

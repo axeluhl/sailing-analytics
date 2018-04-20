@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 
 public interface CompetitorFetcher<T> {
-    CompetitorDTO getCompetitor(T t);
+    CompetitorWithBoatDTO getCompetitor(T t);
 }
