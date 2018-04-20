@@ -49,6 +49,30 @@ public enum BravoExtendedSensorDataMetadata implements ColumnMetadata {
     LON("Lon", /* expectedInLogfile */ true), //
     COG("COG", /* expectedInLogfile */ true), //
     SOG("SOG", /* expectedInLogfile */ true), //
+    EXPEDITION_AWA(null, /* expectedInLogfile */ false), //
+    EXPEDITION_AWS(null, /* expectedInLogfile */ false), //
+    EXPEDITION_TWA(null, /* expectedInLogfile */ false), //
+    EXPEDITION_TWS(null, /* expectedInLogfile */ false), //
+    EXPEDITION_TWD(null, /* expectedInLogfile */ false), //
+    EXPEDITION_BSP(null, /* expectedInLogfile */ false), //
+    EXPEDITION_BSP_TR(null, /* expectedInLogfile */ false), //
+    EXPEDITION_SOG(null, /* expectedInLogfile */ false), //
+    EXPEDITION_COG(null, /* expectedInLogfile */ false), //
+    EXPEDITION_FORESTAY(null, /* expectedInLogfile */ false), //
+    EXPEDITION_RAKE(null, /* expectedInLogfile */ false), //
+    EXPEDITION_HDG(null, /* expectedInLogfile */ false), //
+    EXPEDITION_HEEL(null, /* expectedInLogfile */ false), //
+    EXPEDITION_TGHEEL(null, /* expectedInLogfile */ false), //
+    EXPEDITION_TMTOGUN(null, /* expectedInLogfile */ false), //
+    EXPEDITION_TMTOBURN(null, /* expectedInLogfile */ false),  //
+    EXPEDITION_BELOWLN(null, /* expectedInLogfile */ false), //
+    EXPEDITION_BARO(null, /* expectedInLogfile */ false), //
+    EXPEDITION_LOAD_P(null, /* expectedInLogfile */ false), //
+    EXPEDITION_LOAD_S(null, /* expectedInLogfile */ false), //
+    EXPEDITION_JIB_CAR_PORT(null, /* expectedInLogfile */ false), //
+    EXPEDITION_JIB_CAR_STBD(null, /* expectedInLogfile */ false), //
+    EXPEDITION_MAST_BUTT(null, /* expectedInLogfile */ false), //
+    EXPEDITION_RATE_OF_TURN(null, /* expectedInLogfile */ false), //
     ;
 
     private final String columnName;

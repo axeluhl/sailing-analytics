@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.ErrorImportDTO;
 import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.TrackImportDTO;
+import com.sap.sse.common.Util.Triple;
 
 /**
  * Utility class providing convenience methods to serialize import result objects into JSON objects.
@@ -34,6 +35,18 @@ class ImportResultSerializer {
     static JSONArray serializeErrorList(List<ErrorImportDTO> errorList) {
         return serializeList(errorList, ImportResultSerializer::serializeError);
     }
+    
+    public static JSONArray serializeRaceList(List<Triple<String, String, String>> raceNameRaceColumnNameFleetnameList) {
+        return serializeList(raceNameRaceColumnNameFleetnameList, ImportResultSerializer::serializeRaceEntry);
+    }
+
+    private static JSONObject serializeRaceEntry(Triple<String, String, String> entry) {
+        final JSONObject json = new JSONObject();
+        json.put("raceName", entry.getA());
+        json.put("raceColumnName", entry.getB());
+        json.put("fleetName", entry.getC());
+        return json;
+    }
 
     private static JSONObject serializeError(ErrorImportDTO error) {
         final JSONObject json = new JSONObject();
@@ -44,4 +57,6 @@ class ImportResultSerializer {
         json.put("message", error.getMessage());
         return json;
     }
+
+
 }

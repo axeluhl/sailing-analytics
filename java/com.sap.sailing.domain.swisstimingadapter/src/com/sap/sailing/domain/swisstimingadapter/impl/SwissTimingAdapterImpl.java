@@ -99,7 +99,6 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
                 teams.put(t.getTeamID(), t);
             }
         }
-
         for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
             if (o instanceof Event) {
                 Event event = (Event) o;

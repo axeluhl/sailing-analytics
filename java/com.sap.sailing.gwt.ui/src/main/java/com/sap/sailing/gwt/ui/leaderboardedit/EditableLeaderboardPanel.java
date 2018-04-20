@@ -43,6 +43,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.SortingOrder;
@@ -583,11 +584,11 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
 
     public EditableLeaderboardPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, UserAgentDetails userAgent) {
+            final StringMessages stringMessages, UserAgentDetails userAgent, Iterable<DetailType> availableDetailTypes) {
         super(null, null, sailingService, asyncActionsExecutor, new MultiRaceLeaderboardSettings(),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true, new ClassicLeaderboardStyle(),
-                FlagImageResolverImpl.get());
+                FlagImageResolverImpl.get(), availableDetailTypes);
         suppressedCompetitorsShown = new ListDataProvider<CompetitorWithBoatDTO>(new ArrayList<CompetitorWithBoatDTO>());
         suppressedCompetitorsTable = createSuppressedCompetitorsTable();
         ImageResource importIcon = resources.importIcon();

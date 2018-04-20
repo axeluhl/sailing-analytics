@@ -12,7 +12,7 @@ public class MultiCompetitorRaceChartSettings extends ChartSettings {
     @Override
     protected void addChildSettings() {
         super.addChildSettings();
-        firstDetailType = new EnumSetting<>("firstDetailType", this, DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, DetailType::valueOf);
+        firstDetailType = new EnumSetting<>("firstDetailType", this, DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, DetailType::valueOf);
         secondDetailType = new EnumSetting<>("secondDetailType", this, null, DetailType::valueOf);
     }
     
