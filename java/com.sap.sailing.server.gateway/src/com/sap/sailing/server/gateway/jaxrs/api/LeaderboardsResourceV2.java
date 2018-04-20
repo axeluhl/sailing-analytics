@@ -43,7 +43,6 @@ import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @Path("/v2/leaderboards")
 public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
@@ -57,8 +56,6 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             @QueryParam("time") String time, @QueryParam("timeasmillis") Long timeasmillis,
             @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount) {
         Response response;
-
-        TimePoint requestTimePoint = MillisecondsTimePoint.now();     
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
             response = Response.status(Status.NOT_FOUND)
@@ -77,13 +74,10 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 if (timePoint != null || resultState == ResultStates.Live) {
                     jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount, raceColumnNames, raceDetails);
                 } else {
-                    jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint,
-                            maxCompetitorsCount);
+                    jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount);
                 }
-
                 StringWriter sw = new StringWriter();
                 jsonLeaderboard.writeJSONString(sw);
-
                 String json = sw.getBuffer().toString();
                 response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
@@ -91,7 +85,6 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                         .type(MediaType.TEXT_PLAIN).build();
             }
         }
-
         return response;
     }
 
