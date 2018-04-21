@@ -127,6 +127,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
             public List<String> getSearchableStrings(MediaTrack t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.title);
+                strings.add(t.url);
                 if (t.startTime == null) {
                     GWT.log("startTime of media track "+t.title+" undefined");
                 } else {
