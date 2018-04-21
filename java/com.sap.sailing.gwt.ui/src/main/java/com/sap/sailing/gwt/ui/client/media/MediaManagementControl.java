@@ -110,7 +110,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
     private void addOverlappingMediaTracksTo(Collection<MediaTrack> reachableVideoTracks,
             Collection<MediaTrack> reachableAudioTracks) {
         for (MediaTrack mediaTrack : mediaPlayerManager.getOverlappingMediaTracks()) {
-            if (isPotentiallyPlayable(mediaTrack)) {
+            if (isPotentiallyPlayable(mediaTrack) && mediaTrack.mimeType != null) {
                 switch (mediaTrack.mimeType.mediaType) {
                 case video:
                     reachableVideoTracks.add(mediaTrack);
