@@ -44,9 +44,6 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 public class AutoplayHelper {
-    private static final long PRE_RACE_DELAY = 180000;
-    private static final long WAIT_TIME_AFTER_END_OF_RACE_MIILIS = 60 * 1000; // 1 min
-
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     private static Timer fastCurrentTimeProvider = new Timer(PlayModes.Live,
             /* delayBetweenAutoAdvancesInMilliseconds */1000l);
@@ -66,8 +63,8 @@ public class AutoplayHelper {
     }
 
     public static void getLiveRace(SailingServiceAsync sailingService, ErrorReporter errorReporter, EventDTO event,
-            String leaderBoardName, SailingDispatchSystem dispatch,
-            AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>> callback) {
+            String leaderBoardName, SailingDispatchSystem dispatch, long waitTimeAfterRaceEndInMillis,
+            long switchBeforeRaceStartInMillis, AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>> callback) {
         if (fastCurrentTimeProvider.getRefreshInterval() != 1000) {
             fastCurrentTimeProvider.setRefreshInterval(1000);
         }
@@ -98,7 +95,8 @@ public class AutoplayHelper {
                 fastCurrentTimeProvider.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest,
                         clientTimeWhenResponseWasReceived);
                 Pair<Long, RegattaAndRaceIdentifier> timeToStartAndRaceIdentifier = checkForLiveRace(
-                        selectedLeaderboard, serverTimeDuringRequest, raceTimesInfoProvider);
+                        selectedLeaderboard, serverTimeDuringRequest, raceTimesInfoProvider,
+                        waitTimeAfterRaceEndInMillis, switchBeforeRaceStartInMillis);
                 callback.onSuccess(timeToStartAndRaceIdentifier);
                 // kill old provider!
                 raceTimesInfoProvider.terminate();
@@ -125,7 +123,8 @@ public class AutoplayHelper {
      * Side effect free method to get a LifeRace from a timesProvider and a leaderboard
      */
     public static Pair<Long, RegattaAndRaceIdentifier> checkForLiveRace(AbstractLeaderboardDTO currentLeaderboard,
-            Date serverTimeDuringRequest, RaceTimesInfoProvider raceTimesInfoProvider) {
+            Date serverTimeDuringRequest, RaceTimesInfoProvider raceTimesInfoProvider,
+            long waitTimeAfterRaceEndInMillis, long switchBeforeRaceStartInMillis) {
         Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
         for (RaceColumnDTO race : currentLeaderboard.getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
@@ -134,15 +133,16 @@ public class AutoplayHelper {
                     RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
                     boolean notNullInRequiredValues = raceTimes != null && raceTimes.startOfTracking != null
                             && raceTimes.getStartOfRace() != null;
+                    
                     boolean raceHasNotEndedOrOnlyRecentlyEnded = raceTimes.endOfRace == null
                             || serverTimeDuringRequest.getTime()
                                     - raceTimes.delayToLiveInMs < raceTimes.endOfRace.getTime()
-                                            + WAIT_TIME_AFTER_END_OF_RACE_MIILIS;
+                                            + waitTimeAfterRaceEndInMillis;
 
                     if (notNullInRequiredValues && raceHasNotEndedOrOnlyRecentlyEnded) {
                         long startTimeInMs = raceTimes.getStartOfRace().getTime();
                         long startIn = startTimeInMs - serverTimeDuringRequest.getTime() - raceTimes.delayToLiveInMs;
-                        if (startIn <= PRE_RACE_DELAY && startIn > NEGATIVE_SANITY_CHECK) {
+                        if (startIn <= switchBeforeRaceStartInMillis && startIn > NEGATIVE_SANITY_CHECK) {
                             startOfLifeRace = raceTimes.getStartOfRace();
                             return new Pair<Long, RegattaAndRaceIdentifier>(startIn, raceIdentifier);
                         }
