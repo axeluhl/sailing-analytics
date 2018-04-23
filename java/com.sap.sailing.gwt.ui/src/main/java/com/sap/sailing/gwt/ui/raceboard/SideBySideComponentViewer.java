@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaSingleSelectionControl;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel;
+import com.sap.sailing.gwt.ui.client.shared.racemap.maneuver.ManeuverTablePanel;
 import com.sap.sailing.gwt.ui.raceboard.TouchSplitLayoutPanel.Splitter;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
@@ -81,7 +82,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> rightComponentP,
             final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components,
             final StringMessages stringMessages, UserService userService, EditMarkPassingsPanel markPassingsPanel,
-            EditMarkPositionPanel markPositionPanel) {
+            EditMarkPositionPanel markPositionPanel, ManeuverTablePanel maneuverTablePanel) {
         this.mediaPlayerManagerComponent = mediaPlayerManagerComponent;
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
@@ -92,7 +93,6 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         this.markPassingsPanel = markPassingsPanel;
         this.markPositionPanel = markPositionPanel;
         markPositionPanel.setComponentViewer(this);
-        userService.addUserStatusEventHandler(this);
         mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener() {
             public void notifyStateChange() {
                 String caption;
@@ -169,7 +169,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                 mediaPlayerManagerComponent.getDependentCssClassName()));
             additionalVerticalButtons.add(new Pair<Button, String>(mediaManagementButton,
                     "managemedia"));
-        onUserStatusChange(userService.getCurrentUser());
+        userService.addUserStatusEventHandler(this, true);
         // ensure that toggle buttons are positioned right
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons,
                 additionalVerticalButtons);
@@ -305,7 +305,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     }
 
     @Override
-    public void onUserStatusChange(UserDTO user) {
+    public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
         final Splitter markPassingsSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
         final Splitter markPositionSplitter = splitLayoutPanel.getAssociatedSplitter(markPositionPanel);
         boolean forceLayout = false;

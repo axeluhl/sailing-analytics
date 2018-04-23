@@ -5,44 +5,12 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources" />
-    <ui:style gss="true">
-        .iconGPS, .iconWind, .iconVideo, .iconAudio{
-            position: relative;
-            display: none;
-            margin-left: 0.666666666666667em;
-            padding-left: 2.333333333333333em;
-            background-size: 1.666666666666667rem 1.666666666666667rem;
-            background-position: left;
-            background-repeat: no-repeat;
-        }
-        .iconGPS {
-            background-image:url('images/home/raw_gps_fixes.png');
-        }
-        .iconWind {
-            background-image:url('images/home/icon-wind.png');
-        }
-        .iconVideo {
-            background-image:url('images/home/icon-video.png');
-            border-left: 1px solid #ccc;
-        }
-        .iconAudio {
-            background-image:url('images/home/icon-audio.png');
-            border-left: 1px solid #ccc;
-        }
-        .legend {
-            text-align: right;
-            vertical-align: baseline;
-            line-height: 1.333em;
-            padding-right:0px;
-            margin: 0 0 .5em;
-        }
-    </ui:style>
     <g:HTMLPanel addStyleNames="{local_res.css.raceslistlive}">
         <h3 ui:field="titleUi" class="{res.mediaCss.column} {res.mediaCss.medium12} {res.mediaCss.large4}"/>
-        <div ui:field="legend" class="{res.mediaCss.column} {res.mediaCss.medium12} {res.mediaCss.large8} {style.legend}">
-            <div ui:field="iconWind" class="{style.iconWind}"><ui:text from='{i18n.eventRegattaRacesLegendWind}'/></div>
-            <div ui:field="iconVideo" class="{style.iconVideo}"><ui:text from='{i18n.eventRegattaRacesLegendVideo}'/></div>
-            <div ui:field="iconAudio" class="{style.iconAudio}"><ui:text from='{i18n.eventRegattaRacesLegendAudio}'/></div>
+        <div ui:field="legend" class="{res.mediaCss.column} {res.mediaCss.medium12} {res.mediaCss.large8} {local_res.css.legend}">
+            <div ui:field="iconWind" class="{local_res.css.iconWind}"><ui:text from='{i18n.eventRegattaRacesLegendWind}'/></div>
+            <div ui:field="iconVideo" class="{local_res.css.iconVideo}"><ui:text from='{i18n.eventRegattaRacesLegendVideo}'/></div>
+            <div ui:field="iconAudio" class="{local_res.css.iconAudio}"><ui:text from='{i18n.eventRegattaRacesLegendAudio}'/></div>
         </div>
         <div style="display: none;" ui:field="infoUi"></div>
         <div style="display: none; font-weight: bold; font-style: italic;" ui:field="noContentPlaceholderUi"></div>

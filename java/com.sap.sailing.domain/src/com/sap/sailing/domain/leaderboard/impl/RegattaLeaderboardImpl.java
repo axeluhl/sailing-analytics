@@ -116,7 +116,7 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
         return regatta.getAllCompetitorsWithRaceDefinitionsConsidered();
     }
-
+    
     @Override
     public IsRegattaLike getRegattaLike() {
         return regatta;
@@ -135,5 +135,9 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     @Override
     public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
         return getRegatta().getOrCreateCompetitorsProvider();
+    }
+    
+    public void setFleetsCanRunInParallelToTrue() {
+        this.getRegattaLike().setFleetsCanRunInParallelToTrue();
     }
 }

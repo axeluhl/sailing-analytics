@@ -8,7 +8,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -17,12 +17,6 @@ import com.sap.sse.common.TimePoint;
 public abstract class AbstractRegattaLogDeviceCompetitorSensorDataMappingEventImpl extends RegattaLogDeviceMappingEventImpl<Competitor>
         implements RegattaLogDeviceCompetitorSensorDataMappingEvent {
     private static final long serialVersionUID = -1494030544804758753L;
-
-    public interface Factory<T extends RegattaLogDeviceCompetitorSensorDataMappingEvent> {
-        T create(TimePoint createdAt, TimePoint logicalTimePoint,
-                AbstractLogEventAuthor author, Serializable pId, Competitor mappedTo, DeviceIdentifier device,
-                TimePoint from, TimePoint to);
-    }
 
     public AbstractRegattaLogDeviceCompetitorSensorDataMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable pId, Competitor mappedTo, DeviceIdentifier device,

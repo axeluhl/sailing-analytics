@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.RunnableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,13 +40,14 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.dto.BasicRaceDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
@@ -53,6 +56,8 @@ import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.MetaLeaderboardRaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
+import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -63,10 +68,11 @@ import com.sap.sailing.domain.leaderboard.meta.MetaLeaderboardColumn;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sailing.domain.tracking.BravoFixTrack;
+import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.MarkPassingManeuver;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -84,6 +90,9 @@ import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     private static final long serialVersionUID = -5651389357061229100L;
     private static final Logger logger = Logger.getLogger(AbstractLeaderboardWithCache.class.getName());
+    
+    private final MaxPointsReason[] MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES = new MaxPointsReason[] {
+            MaxPointsReason.DNS, MaxPointsReason.DNF, MaxPointsReason.DNC };
     private transient LiveLeaderboardUpdater liveLeaderboardUpdater;
     protected static final ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
     private transient LeaderboardDTOCache leaderboardDTOCache;
@@ -346,22 +355,30 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
         final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
-        final LeaderboardDTO result = new LeaderboardDTO(this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
+        final LeaderboardDTO result = new LeaderboardDTO(timePoint.asDate(), this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
                 : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(), 
                 this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(),
                 this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
                         .getScoringScheme().isHigherBetter(), new UUIDGenerator(), addOverallDetails);
         result.type = getLeaderboardType();
-        result.competitors = new ArrayList<CompetitorDTO>();
+        result.competitors = new ArrayList<CompetitorWithBoatDTO>();
         result.name = this.getName();
         result.displayName = this.getDisplayName();
-        result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+        result.competitorDisplayNames = new HashMap<CompetitorWithBoatDTO, String>();
+        boolean isLeaderboardThatHasRegattaLike = this instanceof LeaderboardThatHasRegattaLike;
+        if (isLeaderboardThatHasRegattaLike) {
+            LeaderboardThatHasRegattaLike regattaLikeLeaderboard = (LeaderboardThatHasRegattaLike) this;
+            result.canBoatsOfCompetitorsChangePerRace = regattaLikeLeaderboard.getRegattaLike().canBoatsOfCompetitorsChangePerRace();
+        } else {
+            result.canBoatsOfCompetitorsChangePerRace = false;
+        }
+
         for (Competitor suppressedCompetitor : this.getSuppressedCompetitors()) {
-            result.setSuppressed(baseDomainFactory.convertToCompetitorDTO(suppressedCompetitor), true);
+            result.setSuppressed(baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(suppressedCompetitor), true);
         }
         // Now create the race columns and, as a future task, set their competitorsFromBestToWorst, then wait for all these
         // futures to finish:
-        Map<RaceColumn, Future<List<CompetitorDTO>>> competitorsFromBestToWorstTasks = new HashMap<>();
+        Map<RaceColumn, Future<List<CompetitorWithBoatDTO>>> competitorsFromBestToWorstTasks = new HashMap<>();
         for (final RaceColumn raceColumn : this.getRaceColumns()) {
             boolean isMetaLeaderboardColumn = raceColumn instanceof MetaLeaderboardColumn;
             RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
@@ -369,8 +386,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                     raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                     isMetaLeaderboardColumn);
             if (isMetaLeaderboardColumn && raceColumnDTO instanceof MetaLeaderboardRaceColumnDTO) {
-                calculateRacesMetadata((MetaLeaderboardColumn) raceColumn, (MetaLeaderboardRaceColumnDTO) raceColumnDTO,
-                        trackedRegattaRegistry, baseDomainFactory);
+                calculateRacesMetadata((MetaLeaderboardColumn) raceColumn, (MetaLeaderboardRaceColumnDTO) raceColumnDTO, baseDomainFactory);
             }
             for (Fleet fleet : raceColumn.getFleets()) {
                 RegattaAndRaceIdentifier raceIdentifier = null;
@@ -389,12 +405,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn);
             }
-            Future<List<CompetitorDTO>> task = executor.submit(
+            Future<List<CompetitorWithBoatDTO>> task = executor.submit(
                     () -> baseDomainFactory.getCompetitorDTOList(AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
             competitorsFromBestToWorstTasks.put(raceColumn, task);
         }
         // wait for the competitor orderings to have been computed for all race columns before continuing; subsequent tasks may depend on these data
-        for (Map.Entry<RaceColumn, Future<List<CompetitorDTO>>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
+        for (Map.Entry<RaceColumn, Future<List<CompetitorWithBoatDTO>>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
             try {
                 result.setCompetitorsFromBestToWorst(raceColumnAndTaskToJoin.getKey().getName(), raceColumnAndTaskToJoin.getValue().get());
             } catch (InterruptedException e) {
@@ -412,7 +428,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
         }
         result.setDelayToLiveInMillisForLatestRace(this.getDelayToLiveInMillis());
-        result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
+        result.rows = new HashMap<CompetitorWithBoatDTO, LeaderboardRowDTO>();
         result.hasCarriedPoints = this.hasCarriedPoints();
         if (this.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
             result.discardThresholds = ((ThresholdBasedResultDiscardingRule) this.getResultDiscardingRule())
@@ -445,7 +461,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
         }
         for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint)) {
-            CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+            CompetitorWithBoatDTO competitorDTO = baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(competitor);
             LeaderboardRowDTO row = new LeaderboardRowDTO();
             row.competitor = competitorDTO;
             row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
@@ -487,10 +503,25 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                                     + ". Leaving empty.", e);
                 }
             }
+            
+            if (addOverallDetails) {
+                //this reuses several prior calculated fields, so must be evaluated after them
+                row.totalScoredRaces = this.getTotalRaces(competitor, row, timePoint);
+            }
             result.rows.put(competitorDTO, row);
             String displayName = this.getDisplayName(competitor);
             if (displayName != null) {
                 result.competitorDisplayNames.put(competitorDTO, displayName);
+            }
+            // in case boats can't change set the also the boat on the row to simplify access
+            if (result.canBoatsOfCompetitorsChangePerRace == false && !row.fieldsByRaceColumnName.isEmpty()) {
+                // find a raceColumn where a boat is available
+                for (LeaderboardEntryDTO leaderboardEntry : row.fieldsByRaceColumnName.values()) {
+                    if (leaderboardEntry.boat != null) {
+                        row.boat = leaderboardEntry.boat;
+                        break;
+                    }
+                }
             }
         }
         logger.info("computeLeaderboardByName(" + this.getName() + ", " + timePoint + ", "
@@ -498,7 +529,39 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
         return result;
     }
-    
+ 
+    private Integer getTotalRaces(Competitor competitor, LeaderboardRowDTO row, TimePoint timePoint) {
+        int amount = 0;
+        for (RaceColumn raceColumn : getRaceColumns()) {
+            // reuse calculations already done earlier
+            LeaderboardEntryDTO entry = row.fieldsByRaceColumnName.get(raceColumn.getName());
+            if (entry.netPoints != null) {
+                if (entry.reasonForMaxPoints.equals(MaxPointsReason.NONE)
+                        || !Util.contains(Arrays.asList(MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES),
+                                entry.reasonForMaxPoints)) {
+                    if (raceColumn instanceof MetaLeaderboardColumn) {
+                        Leaderboard leaderBoardForMeta = ((MetaLeaderboardColumn) raceColumn).getLeaderboard();
+                        for (RaceColumn subRace : leaderBoardForMeta.getRaceColumns()) {
+                            Double netPointsForSubRace = leaderBoardForMeta.getNetPoints(competitor, subRace, timePoint);
+                            MaxPointsReason subMaxPointsReason = leaderBoardForMeta.getMaxPointsReason(competitor, subRace, timePoint);
+                            if(netPointsForSubRace != null){
+                                if (subMaxPointsReason.equals(MaxPointsReason.NONE) || !Util.contains(
+                                        Arrays.asList(MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES),
+                                        subMaxPointsReason)) {
+                                    amount++;
+                                }
+                            }
+                        }
+                    } else {
+                        amount++;
+                    }
+
+                }
+            }
+        }
+        return amount;
+    }
+
     /**
      * @param waitForLatestAnalyses
      *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that
@@ -518,6 +581,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
         TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
+        // TODO bug2822: Should this rather come from raceColumn.getBoatOfCompetitor() ?
+        entryDTO.boat = trackedRace == null ? null : baseDomainFactory.convertToBoatDTO(trackedRace.getBoatOfCompetitor(competitor));
         entryDTO.totalPoints = entry.getTotalPoints();
         if (fillTotalPointsUncorrected) {
             entryDTO.totalPointsUncorrected = entry.getTotalPointsUncorrected();
@@ -557,6 +622,46 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 entryDTO.calculatedTime = raceDetails.getCorrectedTime();
                 entryDTO.calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead = raceDetails.getCorrectedTimeAtEstimatedArrivalAtCompetitorFarthestAhead();
                 entryDTO.gapToLeaderInOwnTime = raceDetails.getGapToLeaderInOwnTime();
+                
+                try {
+                    BravoFixTrack<Competitor> sensorTrack = trackedRace.getSensorTrack(competitor,
+                            BravoFixTrack.TRACK_NAME);
+                    if (sensorTrack != null) {
+                        final BravoFix bravoFix = sensorTrack.getFirstFixAtOrAfter(timePoint);
+                        entryDTO.heel = bravoFix.getHeel();
+                        entryDTO.pitch = bravoFix.getPitch();
+                        if (sensorTrack.hasExtendedFixes() && bravoFix instanceof BravoExtendedFix) {
+                            BravoExtendedFix fix = (BravoExtendedFix) bravoFix;
+                            entryDTO.setExpeditionAWA(fix.getExpeditionAWA());
+                            entryDTO.setExpeditionAWS(fix.getExpeditionAWS());
+                            entryDTO.setExpeditionTWA(fix.getExpeditionTWA());
+                            entryDTO.setExpeditionTWS(fix.getExpeditionTWS());
+                            entryDTO.setExpeditionTWD(fix.getExpeditionTWD());
+                            entryDTO.setExpeditionBoatSpeed(fix.getExpeditionBSP());
+                            entryDTO.setExpeditionTargBoatSpeed(fix.getExpeditionBSP_TR());
+                            entryDTO.setExpeditionSOG(fix.getExpeditionSOG());
+                            entryDTO.setExpeditionCOG(fix.getExpeditionCOG());
+                            entryDTO.setExpeditionForestayLoad(fix.getExpeditionForestayLoad());
+                            entryDTO.setExpeditionRake(fix.getExpeditionRake());
+                            entryDTO.setExpeditionHeading(fix.getExpeditionHDG());
+                            entryDTO.setExpeditionHeel(fix.getExpeditionHeel());
+                            entryDTO.setExpeditionTargetHeel(fix.getExpeditionTG_Heell());
+                            entryDTO.setExpeditionTimeToGun(fix.getExpeditionTmToGun());
+                            entryDTO.setExpeditionTimeToBurnToLine(fix.getExpeditionTmToBurn());
+                            entryDTO.setExpeditionDistanceBelowLine(fix.getExpeditionBelowLn());
+                            entryDTO.setExpeditionCourseDetail(fix.getExpeditionCourse());
+                            entryDTO.setExpeditionBaro(fix.getExpeditionBARO());
+                            entryDTO.setExpeditionLoadP(fix.getExpeditionLoadP());
+                            entryDTO.setExpeditionLoadS(fix.getExpeditionLoadS());
+                            entryDTO.setExpeditionJibCarPort(fix.getExpeditionJibCarPort());
+                            entryDTO.setExpeditionJibCarStbd(fix.getExpeditionJibCarStbd());
+                            entryDTO.setExpeditionMastButt(fix.getExpeditionMastButt());
+                            entryDTO.setExpeditionRateOfTurn(fix.getExpeditionRateOfTurn());
+                        }
+                    }
+                } catch (Exception e) {
+                   logger.log(Level.WARNING, "There was an error determining expedition or extended data", e);
+                }
                 final TimePoint startOfRace = trackedRace.getStartOfRace();
                 if (startOfRace != null) {
                     Waypoint startWaypoint = trackedRace.getRace().getCourse().getFirstWaypoint();
@@ -612,7 +717,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     }
 
     private void calculateRacesMetadata(MetaLeaderboardColumn metaLeaderboardColumn, MetaLeaderboardRaceColumnDTO columnDTO,
-            TrackedRegattaRegistry trackedRegattaRegistry, final DomainFactory baseDomainFactory) {
+            final DomainFactory baseDomainFactory) {
         for (final RaceColumn raceColumn : metaLeaderboardColumn.getLeaderboard().getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
@@ -642,8 +747,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         row.totalTimeSailedReachingInSeconds = totalTimeSailedReaching==null?null:totalTimeSailedReaching.asSeconds();
         final Duration totalTimeSailed = this.getTotalTimeSailed(competitor, timePoint);
         row.totalTimeSailedInSeconds = totalTimeSailed==null?null:totalTimeSailed.asSeconds();
-        final Distance totalDistanceTraveledInMeters = this.getTotalDistanceTraveled(competitor, timePoint);
-        row.totalDistanceTraveledInMeters = totalDistanceTraveledInMeters==null?null:totalDistanceTraveledInMeters.getMeters();
+        final Distance totalDistanceTraveled = this.getTotalDistanceTraveled(competitor, timePoint);
+        row.totalDistanceTraveledInMeters = totalDistanceTraveled==null?null:totalDistanceTraveled.getMeters();
+        final Distance totalDistanceFoiled = this.getTotalDistanceFoiled(competitor, timePoint);
+        row.totalDistanceFoiledInMeters = totalDistanceFoiled==null?null:totalDistanceFoiled.getMeters();
+        final Duration totalDurationFoiled = this.getTotalDurationFoiled(competitor, timePoint);
+        row.totalDurationFoiledInSeconds = totalDurationFoiled==null?null:totalDurationFoiled.asSeconds();
     }
 
     private LeaderboardDTOCache getLeaderboardDTOCache() {
@@ -807,7 +916,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
             result.averageSignedCrossTrackErrorInMeters = averageSignedCrossTrackError == null ? null : averageSignedCrossTrackError.getMeters();
             Double speedOverGroundInKnots;
-            if (trackedLeg.hasFinishedLeg(timePoint))  {
+            final boolean hasFinishedLeg = trackedLeg.hasFinishedLeg(timePoint);
+            if (hasFinishedLeg) {
                 speedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
                 final Distance averageRideHeight = trackedLeg.getAverageRideHeight(timePoint);
                 result.currentRideHeightInMeters = averageRideHeight == null ? null : averageRideHeight.getMeters();
@@ -821,6 +931,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             result.currentHeelInDegrees = heel == null ? null : heel.getDegrees();
             Bearing pitch = trackedLeg.getPitch(timePoint);
             result.currentPitchInDegrees = pitch == null ? null : pitch.getDegrees();
+            
+            Distance distanceFoiled = trackedLeg.getDistanceFoiled(timePoint);
+            result.currentDistanceFoiledInMeters = distanceFoiled == null ? null : distanceFoiled.getMeters();
+            Duration durationFoiled = trackedLeg.getDurationFoiled(timePoint);
+            result.currentDurationFoiledInSeconds = durationFoiled == null ? null : durationFoiled.asSeconds();
+
             result.currentSpeedOverGroundInKnots = speedOverGroundInKnots == null ? null : speedOverGroundInKnots;
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);
             result.distanceTraveledInMeters = distanceTraveled == null ? null : distanceTraveled.getMeters();
@@ -829,7 +945,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             final Duration estimatedTimeToNextMarkInSeconds = trackedLeg.getEstimatedTimeToNextMark(timePoint, WindPositionMode.EXACT, cache);
             result.estimatedTimeToNextWaypointInSeconds = estimatedTimeToNextMarkInSeconds==null?null:estimatedTimeToNextMarkInSeconds.asSeconds();
             result.timeInMilliseconds = time.asMillis();
-            result.finished = trackedLeg.hasFinishedLeg(timePoint);
+            result.finished = hasFinishedLeg;
             final TimePoint legFinishTime = trackedLeg.getFinishTime();
             // See bug 3829: there is an unlikely possibility that legFinishTime is null and the call to hasFinishedLeg below
             // says that the leg has already finished. This can happen if the corresponding mark passing arrives between the two
@@ -858,7 +974,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             if (trackedLeg.hasFinishedLeg(timePoint)) {
                 velocityMadeGood = trackedLeg.getAverageVelocityMadeGood(timePoint);
             } else {
-                velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT);
+                velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache);
             }
             result.velocityMadeGoodInKnots = velocityMadeGood == null ? null : velocityMadeGood.getKnots();
             Distance windwardDistanceToGo = trackedLeg.getWindwardDistanceToGo(timePoint, WindPositionMode.LEG_MIDDLE);
@@ -897,18 +1013,17 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                                 }
                             }
                             break;
-                        case MARK_PASSING:
-                            // analyze all mark passings, not only those after this leg's start, to catch the mark passing
-                            // maneuver starting this leg, even if its time point is slightly before the mark passing starting this leg
-                            MarkPassingManeuver mpm = (MarkPassingManeuver) maneuver;
-                            if (mpm.getWaypointPassed() == trackedLeg.getLeg().getFrom()) {
-                                result.sideToWhichMarkAtLegStartWasRounded = mpm.getSide();
-                            }
-                            break;
                         default:
                             /* Do nothing here.
                              * Throwing an exception destroys the toggling (and maybe other behaviour) of the leaderboard.
                              */
+                        }
+                        if(maneuver.isMarkPassing()) {
+                            // analyze all mark passings, not only those after this leg's start, to catch the mark passing
+                            // maneuver starting this leg, even if its time point is slightly before the mark passing starting this leg
+                            if (maneuver.getMarkPassing().getWaypoint() == trackedLeg.getLeg().getFrom()) {
+                                result.sideToWhichMarkAtLegStartWasRounded = maneuver.getToSide();
+                            }
                         }
                     }
                     result.averageManeuverLossInMeters = new HashMap<ManeuverType, Double>();
@@ -923,6 +1038,49 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                     }
                 }
             }
+            BiFunction<BiFunction<TrackedLegOfCompetitor, TimePoint, Double>, BiFunction<TrackedLegOfCompetitor, TimePoint, Double>, Double> extractDoubleValue = (
+                    currentValueExtractor, averageValueExtractor) -> (hasFinishedLeg
+                            ? averageValueExtractor.apply(trackedLeg, timePoint) : currentValueExtractor.apply(trackedLeg, timePoint));
+            result.setExpeditionAWA(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionAWA, TrackedLegOfCompetitor::getAverageExpeditionAWA));
+            result.setExpeditionAWS(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionAWS, TrackedLegOfCompetitor::getAverageExpeditionAWS));
+            result.setExpeditionTWA(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTWA, TrackedLegOfCompetitor::getAverageExpeditionTWA));
+            result.setExpeditionTWS(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTWS, TrackedLegOfCompetitor::getAverageExpeditionTWS));
+            result.setExpeditionTWD(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTWD, TrackedLegOfCompetitor::getAverageExpeditionTWD));
+            result.setExpeditionTargTWA(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTargTWA, TrackedLegOfCompetitor::getAverageExpeditionTargTWA));
+            result.setExpeditionBoatSpeed(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionBoatSpeed, TrackedLegOfCompetitor::getAverageExpeditionBoatSpeed));
+            result.setExpeditionTargBoatSpeed(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTargBoatSpeed, TrackedLegOfCompetitor::getAverageExpeditionTargBoatSpeed));
+            result.setExpeditionSOG(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionSOG, TrackedLegOfCompetitor::getAverageExpeditionSOG));
+            result.setExpeditionCOG(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionCOG, TrackedLegOfCompetitor::getAverageExpeditionCOG));
+            result.setExpeditionForestayLoad(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionForestayLoad, TrackedLegOfCompetitor::getAverageExpeditionForestayLoad));
+            result.setExpeditionRake(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionRake, TrackedLegOfCompetitor::getAverageExpeditionRake));
+            result.setExpeditionCourseDetail(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionCourseDetail, TrackedLegOfCompetitor::getAverageExpeditionCourseDetail));
+            result.setExpeditionHeading(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionHeading, TrackedLegOfCompetitor::getAverageExpeditionHeading));
+            result.setExpeditionVMG(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionVMG, TrackedLegOfCompetitor::getAverageExpeditionVMG));
+            result.setExpeditionVMGTargVMGDelta(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionVMGTargVMGDelta, TrackedLegOfCompetitor::getAverageExpeditionVMGTargVMGDelta));
+            result.setExpeditionRateOfTurn(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionRateOfTurn, TrackedLegOfCompetitor::getAverageExpeditionRateOfTurn));
+            result.setExpeditionRudderAngle(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionRudderAngle, TrackedLegOfCompetitor::getAverageExpeditionRudderAngle));
+            result.setExpeditionHeel(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionHeel, TrackedLegOfCompetitor::getAverageExpeditionHeel));
+            result.setExpeditionTargetHeel(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTargetHeel, TrackedLegOfCompetitor::getAverageExpeditionTargetHeel));
+            result.setExpeditionTimeToPortLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToPortLayline, TrackedLegOfCompetitor::getAverageExpeditionTimeToPortLayline));
+            result.setExpeditionTimeToStbLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToStbLayline, TrackedLegOfCompetitor::getAverageExpeditionTimeToStbLayline));
+            result.setExpeditionDistToPortLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistToPortLayline, TrackedLegOfCompetitor::getAverageExpeditionDistToPortLayline));
+            result.setExpeditionDistToStbLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistToStbLayline, TrackedLegOfCompetitor::getAverageExpeditionDistToStbLayline));
+            result.setExpeditionTimeToGUN(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToGUN, TrackedLegOfCompetitor::getAverageExpeditionTimeToGUN));
+            result.setExpeditionTimeToCommitteeBoat(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToCommitteeBoat, TrackedLegOfCompetitor::getAverageExpeditionTimeToCommitteeBoat));
+            result.setExpeditionTimeToPin(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToPin, TrackedLegOfCompetitor::getAverageExpeditionTimeToPin));
+            result.setExpeditionTimeToBurnToLine(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToLine, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToLine));
+            result.setExpeditionTimeToBurnToCommitteeBoat(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToCommitteeBoat, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToCommitteeBoat));
+            result.setExpeditionTimeToBurnToPin(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToPin, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToPin));
+            result.setExpeditionDistanceToCommitteeBoat(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceToCommitteeBoat, TrackedLegOfCompetitor::getAverageExpeditionDistanceToCommitteeBoat));
+            result.setExpeditionDistanceToPinDetail(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceToPinDetail, TrackedLegOfCompetitor::getAverageExpeditionDistanceToPinDetail));
+            result.setExpeditionDistanceBelowLine(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceBelowLine, TrackedLegOfCompetitor::getAverageExpeditionDistanceBelowLine));
+            result.setExpeditionLineSquareForWindDirection(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionLineSquareForWindDirection, TrackedLegOfCompetitor::getAverageExpeditionLineSquareForWindDirection));
+            result.setExpeditionBaroIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionBaroIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionBaroIfAvailable));
+            result.setExpeditionLoadSIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionLoadSIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionLoadSIfAvailable));
+            result.setExpeditionLoadPIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionLoadPIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionLoadPIfAvailable));
+            result.setExpeditionJibCarPortIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionJibCarPortIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionJibCarPortIfAvailable));
+            result.setExpeditionJibCarStbdIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionJibCarStbdIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionJibCarStbdIfAvailable));
+            result.setExpeditionMastButtIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionMastButtIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionMastButtIfAvailable));
         }
         return result;
     }
@@ -1012,12 +1170,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                                     legTypeCache.put(trackedLeg, trackedLegType);
                                 }
                                 if (legType == trackedLegType) {
-                                    Duration timeSpentOnDownwind = trackedLegOfCompetitor.getTime(timePoint);
-                                    if (timeSpentOnDownwind != null) {
+                                    Duration timeSpentInLegOfType = trackedLegOfCompetitor.getTime(timePoint);
+                                    if (timeSpentInLegOfType != null) {
                                         if (result == null) {
-                                            result = timeSpentOnDownwind;
+                                            result = timeSpentInLegOfType;
                                         } else {
-                                            result = result.plus(timeSpentOnDownwind);
+                                            result = result.plus(timeSpentInLegOfType);
                                         }
                                     } else {
                                         // Although the competitor has started the leg, no value was produced. This
@@ -1082,18 +1240,37 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
 
     @Override
     public Distance getTotalDistanceTraveled(Competitor competitor, TimePoint timePoint) {
-        Distance result = null;
+        return getTotals(competitor, timePoint, Distance::add, TrackedRace::getDistanceTraveled);
+    }
+    
+    @Override
+    public Distance getTotalDistanceFoiled(Competitor competitor, TimePoint timePoint) {
+        return getTotals(competitor, timePoint, Distance::add, TrackedRace::getDistanceFoiled);
+    }
+    
+    @Override
+    public Duration getTotalDurationFoiled(Competitor competitor, TimePoint timePoint) {
+        return getTotals(competitor, timePoint, Duration::plus, TrackedRace::getDurationFoiled);
+    }
+    
+    @FunctionalInterface
+    private static interface ValueFromRaceGetter<T> {
+        T get(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint);
+    }
+    
+    private <T> T getTotals(Competitor competitor, TimePoint timePoint, BiFunction<T, T, T> adder, ValueFromRaceGetter<T> valueGetter) {
+        T result = null;
         for (TrackedRace trackedRace : getTrackedRaces()) {
             TimePoint startOfRace;
             if (Util.contains(trackedRace.getRace().getCompetitors(), competitor) &&
                     (startOfRace=trackedRace.getStartOfRace()) != null &&
                     !startOfRace.after(timePoint)) {
-                Distance distanceSailedInRace = trackedRace.getDistanceTraveled(competitor, timePoint);
+                T distanceSailedInRace = valueGetter.get(trackedRace, competitor, timePoint);
                 if (distanceSailedInRace != null) {
                     if (result == null) {
                         result = distanceSailedInRace;
                     } else {
-                        result = result.add(distanceSailedInRace);
+                        result = adder.apply(result, distanceSailedInRace);
                     }
                 } else {
                     // if competitor has not finished one single race in the whole
@@ -1105,7 +1282,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         }
         return result;
     }
-    
+
     @Override
     public Iterable<Competitor> getAllCompetitors() {
         return getAllCompetitorsWithRaceDefinitionsConsidered().getB();
@@ -1118,4 +1295,13 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         }
     }
 
+    @Override
+    public boolean hasScores(Competitor competitor, TimePoint timePoint) {
+        for (final RaceColumn raceColumn : getRaceColumns()) {
+            if (getTotalPoints(competitor, raceColumn, timePoint) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

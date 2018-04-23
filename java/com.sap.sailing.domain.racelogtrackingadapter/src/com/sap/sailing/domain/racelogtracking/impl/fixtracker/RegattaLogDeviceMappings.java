@@ -15,6 +15,8 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceBoatMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceBoatSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
@@ -22,8 +24,8 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMap
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.tracking.DynamicTrack;
@@ -70,7 +72,12 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     private final RegattaLogEventVisitor regattaLogEventVisitor = new BaseRegattaLogEventVisitor() {
         @Override
         public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
-            logger.log(Level.FINE, "New mapping for: " + event.getMappedTo() + "; device: " + event.getDevice());
+            logger.log(Level.FINE, "New CompetitorSensorDataMapping for: " + event.getMappedTo() + "; device: " + event.getDevice());
+            updateMappings();
+        }
+        @Override
+        public void visit(RegattaLogDeviceBoatSensorDataMappingEvent event) {
+            logger.log(Level.FINE, "New BoatSensorDataMapping for: " + event.getMappedTo() + "; device: " + event.getDevice());
             updateMappings();
         }
 
@@ -85,6 +92,12 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
             logger.log(Level.FINE,
                     "New DeviceCompetitorMapping for: " + event.getMappedTo() + "; device: " + event.getDevice());
+            updateMappings();
+        }
+        
+        public void visit(RegattaLogDeviceBoatMappingEvent event) {
+            logger.log(Level.FINE,
+                    "New DeviceBoatMappingEvent for: " + event.getMappedTo() + "; device: " + event.getDevice());
             updateMappings();
         }
 

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -15,6 +16,7 @@ import com.sap.sailing.domain.base.LeaderboardBase;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardType;
@@ -98,6 +100,8 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      */
     Iterable<Competitor> getAllCompetitors();
 
+    Iterable<Boat> getAllBoats();
+
     /**
      * Same as {@link #getAllCompetitors()}, only that additionally the method returns as a first element in a pair
      * which {@link RaceDefinition}s were used in order to fetch their {@link RaceDefinition#getCompetitors()} to
@@ -140,7 +144,12 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * It will, however, continue to be returned from {@link #getAllCompetitors()}.
      */
     void setSuppressed(Competitor competitor, boolean suppressed);
-    
+
+    /**
+     * Retrieves the boat of a given competitor for the specified raceColumn and fleet.
+     */
+    Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet);
+
     /**
      * Returns the first fleet found in the sequence of this leaderboard's {@link #getRaceColumns() race columns}'
      * {@link RaceColumn#getFleets() fleets} whose name equals <code>fleetName</code>. If no such fleet is found,
@@ -191,7 +200,8 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * exactly <i>n</i> races. Still, this method pretends such a time point would have existed, actually ignoring
      * the <i>times</i> at which a race took place but only looking at the resulting scores and discards.<p>
      * 
-     * When computing the net points sum after all columns up to and including the race column that is the key of the resulting
+     * When computing the ne
+     * t points sum after all columns up to and including the race column that is the key of the resulting
      * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
      * in the respective column just completed.
      * 
@@ -269,7 +279,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *         competitor doesn't appear in any of the race column's attached tracked races. A 0.0 score is returned
      *         if the competitor's result for <code>race</code> is discarded.
      */
-    Double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
+    Double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint);
 
     /**
      * Tells whether the contribution of <code>raceColumn</code> is discarded in the current leaderboard's standings for
@@ -481,6 +491,26 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *         leaderboard
      */
     Distance getTotalDistanceTraveled(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * Computes the distance the <code>competitor</code> has been foiling in the tracked races in this leaderboard, starting
+     * to count in each race when the competitor passes the start line, aggregating up to <code>timePoint</code> or the
+     * end of the last race, whichever is first.
+     * 
+     * @return <code>null</code> if the <code>competitor</code> hasn't foiled any distance in any tracked race in this
+     *         leaderboard
+     */
+    Distance getTotalDistanceFoiled(Competitor competitor, TimePoint timePoint);
+    
+    /**
+     * Computes the duration the <code>competitor</code> has foiled in the tracked races in this leaderboard, starting
+     * to count in each race when the competitor passes the start line, aggregating up to <code>timePoint</code> or the
+     * end of the last race, whichever is first.
+     * 
+     * @return <code>null</code> if the <code>competitor</code> hasn't foiled at any time in any tracked race in this
+     *         leaderboard
+     */
+    Duration getTotalDurationFoiled(Competitor competitor, TimePoint timePoint);
     
     /**
      * Same as {@link #getNetPoints(Competitor, RaceColumn, TimePoint)}, only that for determining the discarded
@@ -568,4 +598,10 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     BoatClass getBoatClass();
     
     LeaderboardType getLeaderboardType();
+
+    /**
+     * Tells if there is at least one non-{@code null} score for the given {@code competitor} in the
+     * leaderboard.
+     */
+    boolean hasScores(Competitor competitor, TimePoint timePoint);
 }

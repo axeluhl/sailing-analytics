@@ -23,7 +23,7 @@
   text-align: right;
   padding: 0.666666666666667em;
   padding-right: 2.666666666666667em;
-  background-image: url("images/home/arrow-down-grey.png");
+  background-image: resourceUrl("arrowDownGrey");
   background-size: 1.333333333333333em 1.333333333333333em;
   background-position: center;
   background-repeat: no-repeat;
@@ -107,7 +107,7 @@
   vertical-align: middle;
   width: 1.066666666666667em;
   height: 1.066666666666667em;
-  background-image: url("../images/home/icon-green-check.svg");
+  background-image: resourceUrl("greenCheck");
   background-repeat: no-repeat;
   background-size: contain;
   margin-right: 0.333333333333333em;

@@ -1,9 +1,7 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
-import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
@@ -12,7 +10,6 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 
 public class Helpers {
-    
     private final static Logger logger = Logger.getLogger(Helpers.class.getName());
 
     public static JSONArray toJSONArraySafe(Object object) throws JsonDeserializationException {
@@ -62,19 +59,4 @@ public class Helpers {
         }
         return result;
     }
-
-    /**
-     * If the {@link Object#toString() string representation} of {@code serializableId} {@link UUID#fromString(String) parses}
-     * as a {@link UUID}, the resulting {@link UUID} is returned. Otherwise, the {@code serializableId} parameter's value
-     * is returned unchanged.
-     */
-    public static Serializable tryUuidConversion(Serializable serializableId) {
-        try {
-            return UUID.fromString(serializableId.toString());
-        } catch (IllegalArgumentException iae) {
-            logger.warning("The serializable " + serializableId.toString() + " could not be converted to a UUID");
-        }
-        return serializableId;
-    }
-
 }

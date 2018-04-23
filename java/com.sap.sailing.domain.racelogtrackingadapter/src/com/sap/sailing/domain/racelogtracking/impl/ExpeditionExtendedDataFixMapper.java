@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceBoatExpeditionExtendedMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
@@ -11,7 +12,7 @@ import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.impl.BravoFixTrackImpl;
+import com.sap.sailing.domain.tracking.impl.CompetitorBravoFixTrackImpl;
 
 /**
  * {@link SensorFixMapper} implementation to product {@link BravoExtendedFix}es from {@link DoubleVectorFix}es
@@ -25,7 +26,8 @@ public class ExpeditionExtendedDataFixMapper implements SensorFixMapper<BravoFix
     @Override
     public DynamicSensorFixTrack<Competitor, BravoFix> getTrack(DynamicTrackedRace race, Competitor key) {
         return race.getOrCreateSensorTrack(key, BravoFixTrack.TRACK_NAME, 
-                () -> new BravoFixTrackImpl<Competitor>(key, BravoFixTrack.TRACK_NAME, /* hasExtendedFixes */ true));
+                () -> new CompetitorBravoFixTrackImpl(key, BravoFixTrack.TRACK_NAME, /* hasExtendedFixes */ true,
+                        race.getTrack(key)));
     }
     
     @Override
@@ -35,6 +37,7 @@ public class ExpeditionExtendedDataFixMapper implements SensorFixMapper<BravoFix
     
     @Override
     public boolean isResponsibleFor(Class<? extends RegattaLogDeviceMappingEvent<?>> eventType) {
-        return RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl.class.isAssignableFrom(eventType);
+        return RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl.class.isAssignableFrom(eventType)
+                || RegattaLogDeviceBoatExpeditionExtendedMappingEventImpl.class.isAssignableFrom(eventType);
     }
 }

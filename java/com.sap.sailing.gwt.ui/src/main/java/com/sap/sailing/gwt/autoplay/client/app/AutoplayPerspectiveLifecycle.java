@@ -7,6 +7,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * This lifecycle contains the necessary child lifecycles to allow AutoPlay to create and use both, a Leaderboard for
@@ -17,10 +18,10 @@ public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<A
     private LeaderboardWithZoomingPerspectiveLifecycle leaderboardLifecycle;
     private RaceBoardPerspectiveLifecycle raceboardLifecycle;
 
-    public AutoplayPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard) {
-        leaderboardLifecycle = new LeaderboardWithZoomingPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
+    public AutoplayPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, UserService userService, Iterable<DetailType> availableDetailTypes) {
+        leaderboardLifecycle = new LeaderboardWithZoomingPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE, availableDetailTypes);
         //As we cannot know, if Bravo data is available later on, we will offer DetailTypes, that might be relevant despite not having data for them yet
-        raceboardLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE, DetailType.getAutoplayDetailTypesForChart());
+        raceboardLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE, DetailType.getAutoplayDetailTypesForChart(), userService, availableDetailTypes);
         addLifeCycle(leaderboardLifecycle);
         addLifeCycle(raceboardLifecycle);
     }

@@ -109,7 +109,7 @@ public class EditProfileEntryPoint implements EntryPoint {
         if (usernameFromURL == null) {
             userService.addUserStatusEventHandler(new UserStatusEventHandler() {
                 @Override
-                public void onUserStatusChange(UserDTO user) {
+                public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
                     if (user == null) {
                         nameText.setText("");
                         emailText.setText("");

@@ -1,11 +1,11 @@
 package com.sap.sse.security.ui.authentication.generic.sapheader;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.sap.sse.security.ui.authentication.generic.resource.AuthenticationResources;
 
 
-public interface SAPHeaderWithAuthenticationResources extends ClientBundle {
+public interface SAPHeaderWithAuthenticationResources extends AuthenticationResources {
     public static final SAPHeaderWithAuthenticationResources INSTANCE = GWT.create(SAPHeaderWithAuthenticationResources.class);
     
     @Source("header-with-authentication.gss")

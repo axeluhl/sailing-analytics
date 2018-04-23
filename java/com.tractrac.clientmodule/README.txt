@@ -15,6 +15,55 @@ It contains also some files:
 
  - test.sh -> script that compiles the code in the src folder, creates the test.jar library and execute the code of the example.
  - Manifest.txt -> manifest used to create the test.jar file
+********************************************
+************* TracAPI 3.10.0 ***************
+********************************************
+This is a final version. It changes the implementation of the ISensorData interface, breaking the
+backward compatibility:
+
+Release date: 02/03/2018
+Build number: a0cbb8116ab0917334b9b323db6664671a05f79b
+
+ 1) Features
+
+ - Updating the interface ISensorData (Requested by Axel Uhl, 01/03/2018)
+
+
+********************************************
+************* TracAPI 3.9.0 ****************
+********************************************
+This is a final version. It changes the implementation of the ISensorData interface, breaking the
+backward compatibility:
+
+Release date: 01/03/2018
+Build number: 8fdd19ee81b3ccbfc2694963e8e398346eebde7a
+
+ 1) Features
+
+ - Updating the interface ISensorData (Requested by Axel Uhl and Jakob Odum, 22/11/2017)
+ - Support for https downloading MTBs (Requested by Axel Uhl, 07/01/2018)
+
+********************************************
+************* TracAPI 3.8.0 ****************
+********************************************
+This is a final version. It change the signature of a method, breaking the
+backward compatibility:
+
+- com.tractrac.model.lib.api.event.RaceStatusType enum. UNKNOWN value of this enum type has been renamed to PENDING.
+
+This version provides a new JavaDoc version.
+
+Release date: 22/11/2017
+Build number: 14453
+
+ 1) Features
+
+ - com.tractrac.model.lib.api.event.RaceStatusType enum. UNKNOWN value of this enum type has been renamed to PENDING.
+ (Requested by Chris Terkelsen 24/10/2017)
+ - Support for sensor data. IRaceSubscriber has been updated adding methods to retrieve sensor data (Requested by SAP)
+ - When the tracking of a race is initialized, TracAPI also sends the positions of the controls using the tracking start time
+ as timestamp (Requested by Axel Uhl, 14/11/2017)
+
 
 ********************************************
 ************* TracAPI 3.7.7 ****************
@@ -23,7 +72,7 @@ This is a final version. It fixes bugs in the implementation
 It keeps the backward compatibility.
 
 Release date: 29/10/2017
-Build number: 14418
+Build number: 14453
 
  1) Bugs
 

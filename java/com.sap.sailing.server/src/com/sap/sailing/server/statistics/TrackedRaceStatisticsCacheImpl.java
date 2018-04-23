@@ -76,7 +76,12 @@ public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRac
     /**
      * For testing purposes only!
      */
-    public TrackedRaceStatistics getStatisticsWaitingForLatest(TrackedRace trackedRace) {
+    public TrackedRaceStatistics getStatisticsWaitingForLatest(TrackedRace trackedRace) throws InterruptedException {
+        synchronized (listeners) {
+            while (!listeners.containsKey(trackedRace)) {
+                listeners.wait();
+            }
+        }
         return cache.get(trackedRace, true);
     }
     
@@ -84,9 +89,12 @@ public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRac
     protected void onRaceAdded(RegattaAndRaceIdentifier raceIdentifier, DynamicTrackedRegatta trackedRegatta,
             DynamicTrackedRace trackedRace) {
         Listener listener = new Listener(trackedRace);
-        listeners.put(trackedRace, listener);
-        trackedRace.addListener(listener);
-        triggerUpdateDirect(trackedRace);
+        synchronized (listeners) {
+            listeners.put(trackedRace, listener);
+            trackedRace.addListener(listener);
+            triggerUpdateDirect(trackedRace);
+            listeners.notifyAll();
+        }
     }
 
     private void triggerUpdateScheduled(final DynamicTrackedRace trackedRace) {
@@ -116,9 +124,12 @@ public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRac
 
     @Override
     protected void onRaceRemoved(DynamicTrackedRace trackedRace) {
-        Listener listener = listeners.remove(trackedRace);
-        if (listener != null) {
-            trackedRace.removeListener(listener);
+        synchronized (listeners) {
+            Listener listener = listeners.remove(trackedRace);
+            if (listener != null) {
+                trackedRace.removeListener(listener);
+            }
+            listeners.notifyAll();
         }
 
         // To prevent leakage of TrackedRace instances as keys in the cache,

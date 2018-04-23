@@ -16,13 +16,17 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.regatta.MappingEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceBoatMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceBoatSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
@@ -33,7 +37,6 @@ import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
@@ -170,102 +173,139 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         public void fixReceived(DeviceIdentifier device, Timed fix) {
             if (!preemptiveStopRequested.get() && trackedRace.getStartOfTracking() != null) {
                 final TimePoint timePoint = fix.getTimePoint();
-                deviceMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(), (mapping) -> {
-                    mapping.getRegattaLogEvent().accept(new MappingEventVisitor() {
-                        @Override
-                        public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
-                            if (preemptiveStopRequested.get()) {
-                                return;
+                deviceMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(), new Consumer<DeviceMappingWithRegattaLogEvent<WithID>>() {
+                    @Override
+                    public void accept(DeviceMappingWithRegattaLogEvent<WithID> mapping) {
+                        mapping.getRegattaLogEvent().accept(new MappingEventVisitor() {
+                            @Override
+                            public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
+                                recordSensorFixForCompetitor(event.getMappedTo(), event);
                             }
-                            SensorFixMapper<SensorFix, DynamicSensorFixTrack<Competitor, SensorFix>, Competitor> mapper = sensorFixMapperFactory
-                                    .createCompetitorMapper(event.getClass());
-                            DynamicSensorFixTrack<Competitor, SensorFix> track = mapper.getTrack(trackedRace,
-                                    event.getMappedTo());
-                            if (track != null && trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint())) {
-                                mapper.addFix(track, (DoubleVectorFix) fix);
+                            
+                            @Override
+                            public void visit(RegattaLogDeviceBoatSensorDataMappingEvent event) {
+                                final Boat boat = event.getMappedTo();
+                                final Competitor competitor = trackedRace.getCompetitorOfBoat(boat);
+                                if (competitor != null) {
+                                    recordSensorFixForCompetitor(competitor, event);
+                                } else {
+                                    logger.log(Level.WARNING,
+                                            "Could not record fix for boat because no competitor could be determined. Boat: "
+                                                    + boat);
+                                }
                             }
-                        }
-                        
-                        @Override
-                        public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
-                            if (preemptiveStopRequested.get()) {
-                                return;
+                            
+                            private void recordSensorFixForCompetitor(Competitor competitor, RegattaLogDeviceMappingEvent<?> event) {
+                                if (preemptiveStopRequested.get()) {
+                                    return;
+                                }
+                                @SuppressWarnings("unchecked")
+                                SensorFixMapper<SensorFix, DynamicSensorFixTrack<Competitor, SensorFix>, Competitor> mapper = sensorFixMapperFactory
+                                        .createCompetitorMapper((Class<? extends RegattaLogDeviceMappingEvent<?>>) event.getClass());
+                                DynamicSensorFixTrack<Competitor, SensorFix> track = mapper.getTrack(trackedRace,
+                                        competitor);
+                                if (track != null && trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint())) {
+                                    mapper.addFix(track, (DoubleVectorFix) fix);
+                                }
                             }
-                            Competitor comp = event.getMappedTo();
-                            if (fix instanceof GPSFixMoving) {
-                                trackedRace.recordFix(comp, (GPSFixMoving) fix);
-                            } else {
-                                logger.log(Level.WARNING,
-                                        String.format(
-                                                "Could not add fix for competitor (%s) in race (%s), as it"
-                                                        + " is no GPSFixMoving, meaning it is missing COG/SOG values",
-                                                        comp, trackedRace.getRace().getName()));
+                            
+                            @Override
+                            public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
+                                recordForCompetitor(event.getMappedTo());
                             }
-                        }
-                        
-                        @Override
-                        public void visit(RegattaLogDeviceMarkMappingEvent event) {
-                            if (preemptiveStopRequested.get()) {
-                                return;
+                            
+                            @Override
+                            public void visit(RegattaLogDeviceBoatMappingEvent event) {
+                                final Boat boat = event.getMappedTo();
+                                final Competitor comp = trackedRace.getCompetitorOfBoat(boat);
+                                if (comp != null) {
+                                    recordForCompetitor(comp);
+                                } else {
+                                    logger.log(Level.WARNING,
+                                            "Could not record fix for boat because no competitor could be determined. Boat: "
+                                                    + boat);
+                                }
                             }
-                            Mark mark = event.getMappedTo();
-                            final DynamicGPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
-                            final GPSFix firstFixAtOrAfter;
-                            final boolean forceFix;
-                            if (trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint())) {
-                                forceFix = false;
-                            } else {
-                                markTrack.lockForRead();
-                                try {
-                                    if (Util.isEmpty(markTrack.getRawFixes())
-                                            || (firstFixAtOrAfter = markTrack.getFirstFixAtOrAfter(timePoint)) != null
-                                            && firstFixAtOrAfter.getTimePoint().equals(timePoint)) {
-                                        // either the first fix or overwriting an existing one
-                                        forceFix = true;
-                                    } else {
-                                        // checking if the given fix is "better" than an existing one
-                                        TimePoint startOfTracking = trackedRace.getStartOfTracking();
-                                        TimePoint endOfTracking = trackedRace.getStartOfTracking();
-                                        if (startOfTracking != null) {
-                                            GPSFix fixAfterStartOfTracking = markTrack
-                                                    .getFirstFixAtOrAfter(startOfTracking);
-                                            if (fixAfterStartOfTracking == null
-                                                    || !trackedRace.isWithinStartAndEndOfTracking(
-                                                            fixAfterStartOfTracking.getTimePoint())) {
-                                                // There is no fix in the tracking interval, so this fix could be "better"
-                                                // than ones already available in the track
-                                                // Better means closer before/after the beginning/end of the tracking
-                                                // interval
-                                                if (timePoint.before(startOfTracking)) {
-                                                    // check if it is closer to the beginning of the tracking interval
-                                                    GPSFix fixBeforeStartOfTracking = markTrack
-                                                            .getLastFixAtOrBefore(startOfTracking);
-                                                    forceFix = (fixBeforeStartOfTracking == null
-                                                            || fixBeforeStartOfTracking.getTimePoint().before(timePoint));
-                                                } else if (endOfTracking != null && timePoint.after(endOfTracking)) {
-                                                    // check if it is closer to the end of the tracking interval
-                                                    GPSFix fixAfterEndOfTracking = markTrack
-                                                            .getFirstFixAtOrAfter(endOfTracking);
-                                                    forceFix = (fixAfterEndOfTracking == null
-                                                            || fixAfterEndOfTracking.getTimePoint().after(timePoint));
+                            
+                            public void recordForCompetitor(Competitor comp) {
+                                if (preemptiveStopRequested.get()) {
+                                    return;
+                                }
+                                if (fix instanceof GPSFixMoving) {
+                                    trackedRace.recordFix(comp, (GPSFixMoving) fix);
+                                } else {
+                                    logger.log(Level.WARNING,
+                                            String.format(
+                                                    "Could not add fix for competitor (%s) in race (%s), as it"
+                                                            + " is no GPSFixMoving, meaning it is missing COG/SOG values",
+                                                            comp, trackedRace.getRace().getName()));
+                                }
+                            }
+                            
+                            @Override
+                            public void visit(RegattaLogDeviceMarkMappingEvent event) {
+                                if (preemptiveStopRequested.get()) {
+                                    return;
+                                }
+                                Mark mark = event.getMappedTo();
+                                final DynamicGPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
+                                final GPSFix firstFixAtOrAfter;
+                                final boolean forceFix;
+                                if (trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint())) {
+                                    forceFix = false;
+                                } else {
+                                    markTrack.lockForRead();
+                                    try {
+                                        if (Util.isEmpty(markTrack.getRawFixes())
+                                                || (firstFixAtOrAfter = markTrack.getFirstFixAtOrAfter(timePoint)) != null
+                                                && firstFixAtOrAfter.getTimePoint().equals(timePoint)) {
+                                            // either the first fix or overwriting an existing one
+                                            forceFix = true;
+                                        } else {
+                                            // checking if the given fix is "better" than an existing one
+                                            TimePoint startOfTracking = trackedRace.getStartOfTracking();
+                                            TimePoint endOfTracking = trackedRace.getStartOfTracking();
+                                            if (startOfTracking != null) {
+                                                GPSFix fixAfterStartOfTracking = markTrack
+                                                        .getFirstFixAtOrAfter(startOfTracking);
+                                                if (fixAfterStartOfTracking == null
+                                                        || !trackedRace.isWithinStartAndEndOfTracking(
+                                                                fixAfterStartOfTracking.getTimePoint())) {
+                                                    // There is no fix in the tracking interval, so this fix could be "better"
+                                                    // than ones already available in the track
+                                                    // Better means closer before/after the beginning/end of the tracking
+                                                    // interval
+                                                    if (timePoint.before(startOfTracking)) {
+                                                        // check if it is closer to the beginning of the tracking interval
+                                                        GPSFix fixBeforeStartOfTracking = markTrack
+                                                                .getLastFixAtOrBefore(startOfTracking);
+                                                        forceFix = (fixBeforeStartOfTracking == null
+                                                                || fixBeforeStartOfTracking.getTimePoint().before(timePoint));
+                                                    } else if (endOfTracking != null && timePoint.after(endOfTracking)) {
+                                                        // check if it is closer to the end of the tracking interval
+                                                        GPSFix fixAfterEndOfTracking = markTrack
+                                                                .getFirstFixAtOrAfter(endOfTracking);
+                                                        forceFix = (fixAfterEndOfTracking == null
+                                                                || fixAfterEndOfTracking.getTimePoint().after(timePoint));
+                                                    } else {
+                                                        forceFix = false;
+                                                    }
                                                 } else {
+                                                    // there is already a fix in the tracking interval
                                                     forceFix = false;
                                                 }
                                             } else {
-                                                // there is already a fix in the tracking interval
                                                 forceFix = false;
                                             }
-                                        } else {
-                                            forceFix = false;
                                         }
+                                    } finally {
+                                        markTrack.unlockAfterRead();
                                     }
-                                } finally {
-                                    markTrack.unlockAfterRead();
                                 }
+                                trackedRace.recordFix(mark, (GPSFix) fix, /* only when in tracking interval */ !forceFix);
                             }
-                            trackedRace.recordFix(mark, (GPSFix) fix, /* only when in tracking interval */ !forceFix);
-                        }
-                    });
+                        });
+                    }
                 });
             }
         }
@@ -378,9 +418,30 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             mappingEvent.accept(new MappingEventVisitor() {
                 @Override
                 public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
+                    final Competitor competitor = event.getMappedTo();
+                    loadSensorFixesForCompetitor(timeRangeToLoad, progressConsumer, stopCallback, event, competitor);
+                }
+                
+                @Override
+                public void visit(RegattaLogDeviceBoatSensorDataMappingEvent event) {
+                    final Boat boat = event.getMappedTo();
+                    final Competitor competitor = trackedRace.getCompetitorOfBoat(boat);
+                    if (competitor != null) {
+                        loadSensorFixesForCompetitor(timeRangeToLoad, progressConsumer, stopCallback, event, competitor);
+                    } else {
+                        logger.log(Level.WARNING,
+                                "Could not load fixes for boat because no competitor could be determined. Boat: "
+                                        + boat);
+                    }
+                }
+
+                private void loadSensorFixesForCompetitor(TimeRange timeRangeToLoad, final Consumer<Double> progressConsumer,
+                        final BooleanSupplier stopCallback, RegattaLogDeviceMappingEvent<?> event,
+                        final Competitor competitor) {
+                    @SuppressWarnings("unchecked")
                     SensorFixMapper<Timed, DynamicTrack<Timed>, Competitor> mapper = sensorFixMapperFactory
-                            .createCompetitorMapper(event.getClass());
-                    DynamicTrack<Timed> track = mapper.getTrack(trackedRace, event.getMappedTo());
+                            .createCompetitorMapper((Class<? extends RegattaLogDeviceMappingEvent<?>>) event.getClass());
+                    DynamicTrack<Timed> track = mapper.getTrack(trackedRace, competitor);
                     if (track != null) {
                         // for split-fleet racing, device mappings coming from the regatta log may not be relevant
                         // for the trackedRace because the competitors may not compete in it; in this case, the
@@ -398,7 +459,24 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 
                 @Override
                 public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
-                    DynamicGPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(event.getMappedTo());
+                    loadForCompetitor(event.getMappedTo(), event);
+                }
+                
+                @Override
+                public void visit(RegattaLogDeviceBoatMappingEvent event) {
+                    final Boat boat = event.getMappedTo();
+                    final Competitor comp = trackedRace.getCompetitorOfBoat(boat);
+                    if (comp != null) {
+                        loadForCompetitor(comp, event);
+                    } else {
+                        logger.log(Level.WARNING,
+                                "Could not load fixes for boat because no competitor could be determined. Boat: "
+                                        + boat);
+                    }
+                }
+                
+                private void loadForCompetitor(Competitor competitor, RegattaLogDeviceMappingEvent<?> event) {
+                    DynamicGPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     if (track != null) {
                         // for split-fleet racing, device mappings coming from the regatta log may not be relevant
                         // for the trackedRace because the competitors may not compete in it; in this case, the
@@ -408,7 +486,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                     timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false,
                                     stopCallback, progressConsumer);
                         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                            logger.log(Level.WARNING, "Could not load competitor track " + event.getMappedTo() + "; device "
+                            logger.log(Level.WARNING, "Could not load competitor track " + competitor + "; device "
                                     + event.getDevice());
                         }
                     }
@@ -442,7 +520,17 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 }
                 
                 @Override
+                public void visit(RegattaLogDeviceBoatSensorDataMappingEvent event) {
+                    throw new UnsupportedOperationException();
+                }
+                
+                @Override
                 public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
+                    throw new UnsupportedOperationException();
+                }
+                
+                @Override
+                public void visit(RegattaLogDeviceBoatMappingEvent event) {
                     throw new UnsupportedOperationException();
                 }
                 
@@ -650,7 +738,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             updateStatusAndProgressWithErrorHandling();
             try {
                 load(this::updateProgress, preemptiveStopRequested::get);
-            } finally {
+            } catch (Throwable e) {
+                logger.log(Level.SEVERE, "Error while loading fixes, this is most likely a critical error! ", e);
+            }
+            finally {
                 isFinished = true;
                 updateProgress(1d);
             }

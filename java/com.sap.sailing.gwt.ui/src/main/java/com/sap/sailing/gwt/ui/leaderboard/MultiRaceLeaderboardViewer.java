@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveLif
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.OverallLeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
@@ -38,11 +39,11 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
             final Timer timer, 
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, DetailType chartDetailType) {
+            final StringMessages stringMessages, DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         this(parent, componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
                 sailingService, asyncActionsExecutor, timer,
                 leaderboardGroupName, leaderboardName, errorReporter,
-                stringMessages, chartDetailType);
+                stringMessages, chartDetailType, availableDetailTypes);
     }
 
     private MultiRaceLeaderboardViewer(Component<?> parent,
@@ -53,7 +54,7 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
             final Timer timer, 
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, DetailType chartDetailType) {
+            final StringMessages stringMessages, DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
         init(new MultiRaceLeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
@@ -63,7 +64,7 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null,
                 settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
                 /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
-                /* enableSyncScroller */ false, new ClassicLeaderboardStyle()));
+                /* enableSyncScroller */ false, new ClassicLeaderboardStyle(), FlagImageResolverImpl.get(), availableDetailTypes));
 
         final LeaderboardPerspectiveOwnSettings perspectiveSettings = settings.getPerspectiveOwnSettings();
         final boolean showCharts = perspectiveSettings.isShowCharts();
@@ -105,7 +106,7 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
                                         leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages,
                                         false, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null,
                                         false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
-                                        /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
+                                        /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, FlagImageResolverImpl.get(), availableDetailTypes);
                                 mainPanel.add(overallLeaderboardPanel);
                                 addChildComponent(overallLeaderboardPanel);
                                 addComponentToNavigationMenu(overallLeaderboardPanel, true, stringMessages.seriesLeaderboard(),

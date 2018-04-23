@@ -71,12 +71,15 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
         this.events = new ArrayList<EventDTO>();
         eventSelectionBox = new ListBox();
         eventSelectionBox.setMultipleSelect(false);
+        eventSelectionBox.ensureDebugId("eventSelectionBox");
         leaderboardSelectionBox = new ListBox();
         leaderboardSelectionBox.setMultipleSelect(false);
+        leaderboardSelectionBox.ensureDebugId("leaderboardSelectionBox");
         localeSelectionBox = new ListBox();
         localeSelectionBox.setMultipleSelect(false);
         configurationSelectionBox = new ListBox();
         configurationSelectionBox.addItem("--", "");
+        configurationSelectionBox.ensureDebugId("configurationSelectionBox");
 
         for (AutoPlayType apt : AutoPlayType.values()) {
             configurationSelectionBox.addItem(apt.getName(), apt.name());
@@ -95,6 +98,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
         this.ensureDebugId("AutoPlayStartView");
 
         configStarter.getElement().getStyle().setDisplay(Display.BLOCK);
+        configStarter.ensureDebugId("startURL");
 
         validate();
     }
@@ -151,7 +155,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
                         settings = newSettings;
                         updateURL();
                     }
-                }, settings, apcd);
+                }, settings, apcd, currentPresenter.getUserService());
     }
 
     private boolean validate() {
@@ -185,14 +189,16 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
             configuratedUrl = null;
             startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             settingsButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
-            configStarter.setText("");
+            configStarter.setText(StringMessages.INSTANCE.invalidSelection());
+            configStarter.setEnabled(false);
         } else {
+            configStarter.setEnabled(true);
+            configStarter.setText(StringMessages.INSTANCE.loading());
             settingsButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             apcd = new AutoPlayContextDefinitionImpl(selectedAutoPlayType, selectedEvent.id, selectedLeaderboardName);
-            apcd.getType().getConfig().loadSettingsDefault(selectedEvent, selectedLeaderboard,
+            apcd.getType().getConfig().loadSettingsDefault(selectedEvent, selectedLeaderboard, currentPresenter.getUserService(),
                     new OnSettingsCallback() {
-
                         @Override
                         public void newSettings(PerspectiveCompositeSettings<?> newSettings) {
                             settings = newSettings;
@@ -285,5 +291,4 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
     public void showLoading() {
         startAutoPlayButton.setEnabled(false);
     }
-
 }

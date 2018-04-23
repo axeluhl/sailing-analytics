@@ -18,6 +18,7 @@ import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -425,13 +426,13 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     }
 
     @Override
-    public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
+    public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         return getNetPoints(competitor, raceColumn, getRaceColumns(), timePoint);
     }
 
     @Override
     public Double getNetPoints(Competitor competitor, RaceColumn raceColumn,
-            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) throws NoWindException {
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
         final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule()
                 .getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint);
         return getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
@@ -793,7 +794,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         Speed result = null;
         final Duration totalTimeSailed = this.getTotalTimeSailed(competitor, timePoint);
         final Distance totalDistanceSailed = this.getTotalDistanceTraveled(competitor, timePoint);
-        if (totalDistanceSailed != null && totalTimeSailed != null && !totalTimeSailed.equals(Distance.NULL)) {
+        if (totalDistanceSailed != null && totalTimeSailed != null && !totalTimeSailed.equals(Duration.NULL)) {
             result = totalDistanceSailed.inTime(totalTimeSailed);
         }
         return result;
@@ -908,8 +909,13 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
 
     @Override
     public BoatClass getBoatClass() {
-        return Util.getDominantObject(StreamSupport.stream(getCompetitors().spliterator(), /* parallel */ false).
-                map(c->c.getBoat().getBoatClass()).collect(Collectors.toList()));
+        Set<Boat> allBoats = new HashSet<>();
+        for (final RaceColumn raceColumn : getRaceColumns()) {
+            Map<Competitor, Boat> competitorsAndTheirBoats = raceColumn.getAllCompetitorsAndTheirBoats();
+            allBoats.addAll(competitorsAndTheirBoats.values());
+        }
+        return Util.getDominantObject(StreamSupport.stream(allBoats.spliterator(), /* parallel */ false).
+                map(b->b.getBoatClass()).collect(Collectors.toList()));
     }
 
 }

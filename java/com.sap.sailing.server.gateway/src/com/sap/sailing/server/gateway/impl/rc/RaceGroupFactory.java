@@ -52,8 +52,8 @@ public class RaceGroupFactory {
         CourseArea courseArea = leaderboard.getDefaultCourseArea();
         Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
         Iterable<SeriesWithRows> series = getSeries(leaderboard);
-        return new RaceGroupImpl(name, leaderboard.getDisplayName(), regatta.getBoatClass(), courseArea,
-                series, regatta.getRegattaConfiguration());
+        return new RaceGroupImpl(name, leaderboard.getDisplayName(), regatta.getBoatClass(), regatta.canBoatsOfCompetitorsChangePerRace(), 
+                courseArea, series, regatta.getRegattaConfiguration());
     }
 
     /**
@@ -67,7 +67,7 @@ public class RaceGroupFactory {
         BoatClass boatClass = null;
         RegattaConfiguration configuration = null;
         Iterable<SeriesWithRows> series = getSeries(leaderboard);
-        return new RaceGroupImpl(name, leaderboard.getDisplayName(), boatClass, courseArea, series, configuration);
+        return new RaceGroupImpl(name, leaderboard.getDisplayName(), boatClass, false, courseArea, series, configuration);
     }
 
     private Iterable<SeriesWithRows> getSeries(Leaderboard leaderboard) {

@@ -4,11 +4,10 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 
 public class RaceboardDataDTO implements IsSerializable {
-    private Map<CompetitorDTO, BoatDTO> competitorAndTheirBoats;
-    private RaceWithCompetitorsDTO race;
+    private RaceWithCompetitorsAndBoatsDTO race;
     private boolean isValidLeaderboardGroup;
     private boolean isValidLeaderboard;
     private boolean isValidEvent;
@@ -16,24 +15,22 @@ public class RaceboardDataDTO implements IsSerializable {
     // for GWT
     RaceboardDataDTO() {}
     
-    public RaceboardDataDTO(RaceWithCompetitorsDTO race, Map<CompetitorDTO, BoatDTO> competitorAndTheirBoats, 
-            boolean isValidLeaderboard, boolean isValidLeaderboardGroup, boolean isValidEvent) {
+    public RaceboardDataDTO(RaceWithCompetitorsAndBoatsDTO race, boolean isValidLeaderboard, boolean isValidLeaderboardGroup, boolean isValidEvent) {
         this.race = race;
-        this.competitorAndTheirBoats = competitorAndTheirBoats;
         this.isValidLeaderboard = isValidLeaderboard;
         this.isValidLeaderboardGroup = isValidLeaderboardGroup;
         this.isValidEvent = isValidEvent;
     }
 
-    public Map<CompetitorDTO, BoatDTO> getCompetitorAndTheirBoats() {
-        return competitorAndTheirBoats;
+    public Map<CompetitorWithBoatDTO, BoatDTO> getCompetitorAndTheirBoats() {
+        return race.getCompetitorsAndBoats();
     }
 
-    public Iterable<CompetitorDTO> getCompetitors() {
+    public Iterable<CompetitorWithBoatDTO> getCompetitors() {
         return race.getCompetitors();
     }
 
-    public RaceWithCompetitorsDTO getRace() {
+    public RaceWithCompetitorsAndBoatsDTO getRace() {
         return race;
     }
 

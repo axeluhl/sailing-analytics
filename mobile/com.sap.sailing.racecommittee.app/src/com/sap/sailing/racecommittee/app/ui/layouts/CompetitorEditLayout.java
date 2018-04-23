@@ -10,6 +10,7 @@ import java.util.Locale;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
@@ -48,12 +49,12 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
 
     private boolean mRestricted;
 
-    public CompetitorEditLayout(Context context, CompetitorResultWithIdImpl competitor, int maxPos) {
-        this(context, null, competitor, maxPos, true);
+    public CompetitorEditLayout(Context context, CompetitorResultWithIdImpl competitor, int maxPos, boolean hasWarning) {
+        this(context, null, competitor, maxPos, true, hasWarning);
     }
 
     public CompetitorEditLayout(final Context context, final TimePoint startTime, CompetitorResultWithIdImpl competitor, int maxPos,
-        boolean restrictedView) {
+        boolean restrictedView, boolean hasWarning) {
         super(context);
 
         mRestricted = restrictedView;
@@ -72,6 +73,10 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
         View position = ViewHelper.get(layout, R.id.competitor_position_layout);
         if (position != null) {
             position.setVisibility(restrictedView ? GONE : VISIBLE);
+        }
+        View warning = ViewHelper.get(layout, R.id.competitor_warning_message);
+        if (warning != null) {
+            warning.setVisibility(hasWarning ? VISIBLE : GONE);
         }
 
         mCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
@@ -215,8 +220,8 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
             comment = mComment.getText().toString();
         }
         CompetitorResult result = new CompetitorResultImpl(mCompetitor.getCompetitorId(), mCompetitor
-            .getCompetitorDisplayName(), oneBaseRank, maxPointsReason, score, finishingTime, comment);
-        return new CompetitorResultWithIdImpl(mCompetitor.getId(), result);
+            .getCompetitorDisplayName(), oneBaseRank, maxPointsReason, score, finishingTime, comment, MergeState.OK);
+        return new CompetitorResultWithIdImpl(mCompetitor.getId(), mCompetitor.getBoat(), result);
     }
 
     @Override

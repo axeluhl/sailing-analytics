@@ -34,7 +34,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
     protected void addChildComponent(Component<? extends Settings> childComponent) {
         Component<? extends Settings> old = childComponents.put(childComponent.getId(), childComponent);
         if (old != null) {
-            throw new IllegalStateException("Child with same id is already added");
+            throw new IllegalStateException("Child with same id is already added " + childComponent.getId());
         }
     }
     

@@ -16,6 +16,7 @@ public class CompetitorResultEditableImpl implements CompetitorResult {
     private Double mScore;
     private TimePoint mFinishingTime;
     private String mComment;
+    private MergeState mMergeState;
 
     private boolean mDirty;
     private boolean mChecked;
@@ -28,6 +29,7 @@ public class CompetitorResultEditableImpl implements CompetitorResult {
         mScore = result.getScore();
         mFinishingTime = result.getFinishingTime();
         mComment = result.getComment();
+        mMergeState = result.getMergeState();
     }
 
     @Override
@@ -107,6 +109,25 @@ public class CompetitorResultEditableImpl implements CompetitorResult {
 
     public void setChecked(boolean checked) {
         mChecked = checked;
+    }
+    
+    public MergeState getMergeState() {
+        return mMergeState == null ? MergeState.OK : mMergeState; // default for having de-serialized an old version
+    }
+
+    public void setMergeState(MergeState mergeState) {
+        this.mMergeState = mergeState;
+    }
+
+    public void setValue(CompetitorResult result) {
+        mCompetitorId = result.getCompetitorId();
+        mCompetitorDisplayName = result.getCompetitorDisplayName();
+        mOneBasedRank = result.getOneBasedRank();
+        mMaxPointsReason = result.getMaxPointsReason();
+        mScore = result.getScore();
+        mFinishingTime = result.getFinishingTime();
+        mComment = result.getComment();
+        mMergeState = result.getMergeState();
     }
 
     @Override

@@ -22,33 +22,35 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
+import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
-public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO> {
+public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDTO> {
     protected StringMessages stringMessages;
     protected TextBox nameEntryField;
     protected TextArea descriptionEntryField;
     protected TextBox venueEntryField;
-    protected BetterDateTimeBox startDateBox;
-    protected BetterDateTimeBox endDateBox;
+    protected DateAndTimeInput startDateBox;
+    protected DateAndTimeInput endDateBox;
     protected CheckBox isPublicCheckBox;
     protected UUID id;
     protected TextBox baseURLEntryField;
     protected CourseAreaListInlineEditorComposite courseAreaNameList;
     protected StringConstantsListEditorComposite leaderboardGroupList;
+    protected StringListInlineEditorComposite windFinderSpotCollectionIdsComposite;
     protected Map<String, LeaderboardGroupDTO> availableLeaderboardGroupsByName;
     protected ImagesListComposite imagesListComposite;
     protected VideosListComposite videosListComposite;
@@ -94,7 +96,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
             // remark: startDate == null and endDate == null is valid
             if (startDate != null && endDate != null) {
                 if (startDate.after(endDate)) {
-                    datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate(); 
+                    datesErrorMessage = stringMessages.startDateMustBeforeEndDate(); 
                 }
             } else if ((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
                 datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();
@@ -160,6 +162,9 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         imagesListComposite = new ImagesListComposite(sailingService, stringMessages);
         videosListComposite = new VideosListComposite(stringMessages);
         externalLinksComposite = new ExternalLinksComposite(stringMessages);
+        windFinderSpotCollectionIdsComposite = new StringListInlineEditorComposite(Collections.<String> emptyList(),
+                new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
+                        Collections.emptyList(), stringMessages.enterIdOfWindfinderReviewedSpotCollection(), 80));
     }
 
     @Override
@@ -189,6 +194,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
             result.addVideo(video);
         }
         result.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
+        result.setWindFinderReviewedSpotsCollection(windFinderSpotCollectionIdsComposite.getValue());
         return result;
     }
 
@@ -240,6 +246,9 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         final ScrollPanel videosTab = new ScrollPanel(videosListComposite);
         videosTab.ensureDebugId("VideosTab");
         tabPanel.add(videosTab, stringMessages.videos());
+        final ScrollPanel windFinderTab = new ScrollPanel(windFinderSpotCollectionIdsComposite);
+        windFinderTab.ensureDebugId("WindFinderTab");
+        tabPanel.add(windFinderTab, stringMessages.windFinder());
         return panel;
     }
 

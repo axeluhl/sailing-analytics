@@ -7,6 +7,9 @@ import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 
 public interface HasLeaderboardContext {
+    @Connector(scanForStatistics=false)
+    public HasLeaderboardGroupContext getLeaderboardGroupContext();
+    
     Leaderboard getLeaderboard();
 
     PolarDataService getPolarDataService();

@@ -104,9 +104,12 @@
         <module>com.sap.sailing.datamining.shared</module>
         <module>com.sap.sailing.domain.persistence</module>
         <module>com.sap.sailing.domain.deckmanadapter</module>
+        <module>com.sap.sailing.domain.bravoadapter</module>
         <module>com.sap.sailing.domain.expeditionadapter</module>
         <module>com.sap.sailing.domain.tractracadapter</module>
         <module>com.sap.sailing.domain.tractracadapter.persistence</module>
+        <module>com.sap.sailing.domain.windfinderadapter</module>
+        <module>com.sap.sailing.domain.windfinderadapter.test</module>
         <module>com.sap.sailing.domain.igtimiadapter</module>
         <module>com.sap.sailing.domain.igtimiadapter.persistence</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter</module>
@@ -208,6 +211,7 @@
         <module>com.sap.sailing.polars.datamining</module>
         <module>com.sap.sailing.polars.datamining.shared</module>
         <module>com.sap.sailing.polars.test</module>
+		<module>org.mp4parser.isoparser</module>
         <!--
         com.sap.sailing.targetplatform.base
         left out on purpose: only invoke maven manually to build target platform
@@ -499,6 +503,7 @@
         <execution>
           <configuration>
             <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2560m -Djava.io.tmpdir=${env.TMP}</extraJvmArgs>
+             <fragmentCount>4</fragmentCount>
             <!--
             <userAgents>chrome</userAgents>
           -->

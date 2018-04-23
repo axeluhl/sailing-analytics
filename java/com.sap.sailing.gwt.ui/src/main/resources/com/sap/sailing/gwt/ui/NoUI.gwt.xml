@@ -32,11 +32,6 @@
         
     <inherits name="com.sap.sse.gwt.dispatch.Dispatch" />
     
-	<!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
-	<!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
-	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
-	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
-	
 	<super-source path="jre" />
 
 	<set-property name="gwt.logging.enabled" value="TRUE"/> 

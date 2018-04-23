@@ -32,7 +32,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardDataEntriesAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -63,7 +63,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
     
     private static final int LINE_WIDTH = 1;
     protected final CompetitorSelectionProvider competitorSelectionProvider;
-    protected final Map<CompetitorDTO, Series> competitorSeries;
+    protected final Map<CompetitorWithBoatDTO, Series> competitorSeries;
     protected Chart chart;
     protected final Timer timer;
     private DetailType selectedDetailType;
@@ -75,7 +75,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
     private final List<String> raceColumnNamesWithData;
     protected final String leaderboardName;
     protected final StringMessages stringMessages;
-    
+
     public AbstractCompetitorLeaderboardChart(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, String leaderboardName,
@@ -91,7 +91,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
         this.leaderboardName = leaderboardName;
         this.selectedDetailType = detailType;
 
-        competitorSeries = new HashMap<CompetitorDTO, Series>();
+        competitorSeries = new HashMap<CompetitorWithBoatDTO, Series>();
         raceColumnNames = new ArrayList<String>();
         raceColumnNamesWithData = new ArrayList<String>();
     }
@@ -108,7 +108,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
         return chart;
     }
 
-    protected boolean isCompetitorVisible(CompetitorDTO competitor) {
+    protected boolean isCompetitorVisible(CompetitorWithBoatDTO competitor) {
         return Util.isEmpty(competitorSelectionProvider.getSelectedCompetitors()) || competitorSelectionProvider.isSelected(competitor);
     }
     
@@ -193,7 +193,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
         chart.removeAllSeries();
     }
     
-    protected Series getOrCreateSeries(CompetitorDTO competitor) {
+    protected Series getOrCreateSeries(CompetitorWithBoatDTO competitor) {
         Series result = competitorSeries.get(competitor);
         if (result == null) {
             result = chart.createSeries().setType(Series.Type.LINE).setName(competitor.getName());
@@ -233,9 +233,9 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
                 sailingService, leaderboardName, /* date */ null, selectedDetailType);
         
         asyncActionsExecutor.execute(getLeaderboardDataEntriesAction, LODA_LEADERBOARD_CHART_DATA_CATEGORY,
-                new AsyncCallback<List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>>>() {
+                new AsyncCallback<List<com.sap.sse.common.Util.Triple<String, List<CompetitorWithBoatDTO>, List<Double>>>>() {
                     @Override
-                    public void onSuccess(List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result) {
+                    public void onSuccess(List<com.sap.sse.common.Util.Triple<String, List<CompetitorWithBoatDTO>, List<Double>>> result) {
                         List<Series> chartSeries = new ArrayList<Series>(Arrays.asList(chart.getSeries()));
                         chart.hideLoading();
                         setWidget(chart);
@@ -271,7 +271,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
                 });
     }
 
-    private void fillTotalRanksSeries(List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result, List<Series> chartSeries) {
+    private void fillTotalRanksSeries(List<com.sap.sse.common.Util.Triple<String, List<CompetitorWithBoatDTO>, List<Double>>> result, List<Series> chartSeries) {
         Set<Series> unusedSeries = new HashSet<Series>(competitorSeries.values());
         for (Series series : competitorSeries.values()) {
             for (Point p : new ArrayList<Point>(Arrays.asList(series.getPoints()))) {
@@ -280,14 +280,14 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
         }
         int raceColumnNumber = 0;
         int maxCompetitorCount = 0;
-        for (com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
+        for (com.sap.sse.common.Util.Triple<String, List<CompetitorWithBoatDTO>, List<Double>> entry : result) {
             List<Double> dataValues = entry.getC();
             raceColumnNames.add(entry.getA());
             if(hasValidValues(dataValues)) {
                 raceColumnNamesWithData.add(entry.getA());
                 int index = 0;
                 maxCompetitorCount = Math.max(maxCompetitorCount, entry.getB().size());
-                for (CompetitorDTO competitor : entry.getB()) {
+                for (CompetitorWithBoatDTO competitor : entry.getB()) {
                     if (isCompetitorVisible(competitor)) {
                         Series series = getOrCreateSeries(competitor);
                         Double dataValue = dataValues.get(index);
@@ -314,7 +314,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
     }
 
     private void fillTotalPointsSeries(
-            List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result,
+            List<com.sap.sse.common.Util.Triple<String, List<CompetitorWithBoatDTO>, List<Double>>> result,
             List<Series> chartSeries) {
         Double maxTotalPoints = 0.0;
         Set<Series> unusedSeries = new HashSet<Series>(competitorSeries.values());
@@ -325,14 +325,14 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
         }
         int raceColumnNumber = 0;
         int maxCompetitorCount = 0;
-        for (com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
+        for (com.sap.sse.common.Util.Triple<String, List<CompetitorWithBoatDTO>, List<Double>> entry : result) {
             List<Double> dataValues = entry.getC();
             raceColumnNames.add(entry.getA());
             if (hasValidValues(dataValues)) {
                 raceColumnNamesWithData.add(entry.getA());
                 int index = 0;
                 maxCompetitorCount = Math.max(maxCompetitorCount, entry.getB().size());
-                for (CompetitorDTO competitor : entry.getB()) {
+                for (CompetitorWithBoatDTO competitor : entry.getB()) {
                     if (isCompetitorVisible(competitor)) {
                         Series series = getOrCreateSeries(competitor);
                         Double dataValue = dataValues.get(index);
@@ -374,17 +374,17 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
     }
 
     @Override
-    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+    public void competitorsListChanged(Iterable<CompetitorWithBoatDTO> competitors) {
         timeChanged(timer.getTime(), null);
     }
 
     @Override
-    public void addedToSelection(CompetitorDTO competitor) {
+    public void addedToSelection(CompetitorWithBoatDTO competitor) {
         timeChanged(timer.getTime(), null);
     }
 
     @Override
-    public void removedFromSelection(CompetitorDTO competitor) {
+    public void removedFromSelection(CompetitorWithBoatDTO competitor) {
         timeChanged(timer.getTime(), null);
     }
 
@@ -393,11 +393,11 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
     }
 
     @Override
-    public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
+    public void filteredCompetitorsListChanged(Iterable<CompetitorWithBoatDTO> filteredCompetitors) {
     }
 
     @Override
-    public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
-            FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
+    public void filterChanged(FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> oldFilterSet,
+            FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> newFilterSet) {
     }
 }

@@ -5,12 +5,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
@@ -43,10 +44,13 @@ public class EventSeriesAnalyticsDataManager {
     private final ErrorReporter errorReporter;
     private final SailingServiceAsync sailingService;
     private final Timer timer;
-    private final int MAX_COMPETITORS_IN_CHART = 30; 
+    private final int MAX_COMPETITORS_IN_CHART = 30;
+    private final FlagImageResolver flagImageResolver; 
 
     public EventSeriesAnalyticsDataManager(final SailingServiceAsync sailingService,
-            AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter) {
+            AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter,
+            FlagImageResolver flagImageResolver) {
+        this.flagImageResolver = flagImageResolver;
         this.competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */true);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -55,11 +59,15 @@ public class EventSeriesAnalyticsDataManager {
         this.overallLeaderboardPanel = null;
         this.multiCompetitorChart = null;
     }
+    
+    public SailingServiceAsync getSailingService() {
+        return sailingService;
+    }
 
     public MultiRaceLeaderboardPanel createMultiRaceOverallLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             final MultiRaceLeaderboardSettings leaderboardSettings,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
-            boolean autoExpandLastRaceColumn) {
+            boolean autoExpandLastRaceColumn, Iterable<DetailType> availableDetailTypes) {
         if(overallLeaderboardPanel == null) {
             overallLeaderboardPanel = new MultiRaceLeaderboardPanel(parent, context, sailingService, asyncActionsExecutor,
                     leaderboardSettings, true, 
@@ -67,7 +75,8 @@ public class EventSeriesAnalyticsDataManager {
                     StringMessages.INSTANCE, showRaceDetails, /* competitorSearchTextBox */ null,
                     /* showSelectionCheckbox */ true,
                     /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
-                    /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle());
+                    /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle(),
+                    flagImageResolver, availableDetailTypes);
         }
         return overallLeaderboardPanel;
     }
@@ -88,12 +97,12 @@ public class EventSeriesAnalyticsDataManager {
     public MultiLeaderboardProxyPanel createMultiLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             MultiRaceLeaderboardSettings leaderboardSettings,
             String preselectedLeaderboardName,  String leaderboardGroupName,
-            String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
+            String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn, Iterable<DetailType> availableDetailTypes) {
         if(multiLeaderboardPanel == null) {
             multiLeaderboardPanel = new MultiLeaderboardProxyPanel(parent, context, sailingService, metaLeaderboardName,
                     asyncActionsExecutor, timer, true /* isEmbedded */,
                     preselectedLeaderboardName, errorReporter, StringMessages.INSTANCE,
-                    showRaceDetails, autoExpandLastRaceColumn, leaderboardSettings);
+                    showRaceDetails, autoExpandLastRaceColumn, leaderboardSettings, flagImageResolver, availableDetailTypes);
         }
         return multiLeaderboardPanel;
     }
@@ -116,8 +125,8 @@ public class EventSeriesAnalyticsDataManager {
         int selectedCompetitorsCount = Util.size(competitorSelectionProvider.getSelectedCompetitors());
         
         if(selectedCompetitorsCount == 0 && competitorsCount > MAX_COMPETITORS_IN_CHART) {
-            List<CompetitorDTO> selectedCompetitors = new ArrayList<CompetitorDTO>();
-            Iterator<CompetitorDTO> allCompetitorsIt = competitorSelectionProvider.getAllCompetitors().iterator();
+            List<CompetitorWithBoatDTO> selectedCompetitors = new ArrayList<CompetitorWithBoatDTO>();
+            Iterator<CompetitorWithBoatDTO> allCompetitorsIt = competitorSelectionProvider.getAllCompetitors().iterator();
             int counter = 0;
             while(counter < MAX_COMPETITORS_IN_CHART) {
                 selectedCompetitors.add(allCompetitorsIt.next());

@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import org.junit.After;
@@ -80,7 +81,6 @@ public class RaceTrackerTest {
         RaceDefinition race = raceHandle.getRace(); // wait for RaceDefinition to be completely wired in Regatta
         logger.info("Obtained race: "+race);
         assertNotNull(race);
-        // TODO the following assertion fails; this suggests that the race obtained above hasn't properly been entered into the regatta. Why???
         assertTrue(!Util.isEmpty(raceHandle.getRegatta().getAllRaces()));
     }
     
@@ -103,7 +103,7 @@ public class RaceTrackerTest {
             @Override
             public void raceRemoved(TrackedRace trackedRace) {
             }
-        });
+        }, Optional.empty());
         synchronized (trackedRaces) {
             if (trackedRaces[0] == null) {
                 trackedRaces.wait();

@@ -10,15 +10,10 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.dto.BoatClassDTO;
-import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
-import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.CountryCode;
@@ -31,80 +26,80 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
  * The competitors produced by this dialog will have a <code>null</code>
- * {@link CompetitorDTO#getTwoLetterIsoCountryCode() twoLetterIsoCountryCode} and a <code>null</code>
- * {@link CompetitorDTO#getCountryName() countryName} because all of these can be derived from a valid
- * {@link CompetitorDTO#getThreeLetterIocCountryCode() threeLetterIocCountryCode}.
+ * {@link CompetitorWithBoatDTO#getTwoLetterIsoCountryCode() twoLetterIsoCountryCode} and a <code>null</code>
+ * {@link CompetitorWithBoatDTO#getCountryName() countryName} because all of these can be derived from a valid
+ * {@link CompetitorWithBoatDTO#getThreeLetterIocCountryCode() threeLetterIocCountryCode}.
  * 
  * @author Axel Uhl (d043530)
  * 
  */
-public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
-    private final CompetitorDTO competitorToEdit;
+public class CompetitorEditDialog extends DataEntryDialog<CompetitorWithBoatDTO> {
+    private final CompetitorWithBoatDTO competitorToEdit;
     private final TextBox name;
-    private final SuggestBox boatClassName;
+    private final TextBox shortName;
     private final TextBox displayColorTextBox;
     private final ListBox threeLetterIocCountryCode;
-    private final TextBox sailId;
     private final TextBox email;
     private final TextBox searchTag;
     private final StringMessages stringMessages;
+
     private final URLFieldWithFileUpload flagImageURL;
     private final URLFieldWithFileUpload imageUrlAndUploadComposite;
     private final DoubleBox timeOnTimeFactor;
     private final DoubleBox timeOnDistanceAllowanceInSecondsPerNauticalMile;
     
+    protected static class CompetitorWithoutBoatValidator implements Validator<CompetitorWithBoatDTO> {
+        protected final StringMessages stringMessages;
+
+        public CompetitorWithoutBoatValidator(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
+        }
+        
+        @Override
+        public String getErrorMessage(CompetitorWithBoatDTO valueToValidate) {
+            String result = null;
+            if (valueToValidate.getName() == null || valueToValidate.getName().isEmpty()) {
+                result = stringMessages.pleaseEnterAName();
+            } else if (valueToValidate.getColor() != null) {
+                Color displayColor = valueToValidate.getColor();
+                if (displayColor instanceof CompetitorEditDialog.InvalidColor) {
+                    result = displayColor.getAsHtml();
+                }
+            }
+            return result;
+        }
+    }
+
+    public static CompetitorEditDialog create(StringMessages stringMessages, CompetitorWithBoatDTO competitorToEdit,
+            DialogCallback<CompetitorWithBoatDTO> callback) {
+        return new CompetitorEditDialog(stringMessages.editCompetitor(), stringMessages, competitorToEdit,
+                new CompetitorEditDialog.CompetitorWithoutBoatValidator(stringMessages), callback);
+    }
+    
     /**
-     * The class creates the UI-dialog to type in the Data about a competitor.
+     * The class creates the UI-dialog to type in the data of a competitor.
      * 
      * @param competitorToEdit
      *            The 'competitorToEdit' parameter contains the competitor which should be changed or initialized.
-     * @param boatClass
-     *            The boat class is the default shown boat class for new competitors. Set <code>null</code> if your competitor is
-     *            already initialized or you don�t want a default boat class.
      */
-    public CompetitorEditDialog(final StringMessages stringMessages, CompetitorDTO competitorToEdit,
-            DialogCallback<CompetitorDTO> callback, String boatClass) {
-        super(stringMessages.editCompetitor(), null, stringMessages.ok(), stringMessages
-                .cancel(), new Validator<CompetitorDTO>() {
-                    @Override
-                    public String getErrorMessage(CompetitorDTO valueToValidate) {
-                        String result = null;
-                        if (valueToValidate.getName() == null || valueToValidate.getName().isEmpty()) {
-                            result = stringMessages.pleaseEnterAName();
-                        } else if (valueToValidate.getSailID() == null || valueToValidate.getSailID().isEmpty()) {
-                            result = stringMessages.pleaseEnterASailNumber();
-                        } else if (valueToValidate.getColor() != null) {
-                            Color displayColor = valueToValidate.getColor();
-                            if (displayColor instanceof InvalidColor) {
-                                result = displayColor.getAsHtml();
-                            }
-                        } else if (valueToValidate.getBoatClass().getName() == null || valueToValidate.getBoatClass().getName().isEmpty()) {
-                            result = stringMessages.pleaseEnterABoatClass();
-                        }
-                        return result;
-                    }
-                }, /* animationEnabled */true, callback);
+    protected CompetitorEditDialog(String dialogTitle, StringMessages stringMessages, CompetitorWithBoatDTO competitorToEdit,
+            Validator<CompetitorWithBoatDTO> validator,  DialogCallback<CompetitorWithBoatDTO> callback) {
+        super(dialogTitle, null, stringMessages.ok(), stringMessages.cancel(),
+                validator, /* animationEnabled */true, callback);
         this.ensureDebugId("CompetitorEditDialog");
         this.stringMessages = stringMessages;
         this.competitorToEdit = competitorToEdit;
-                
-        this.boatClassName = createSuggestBox(new BoatClassMasterdataSuggestOracle());
-        boatClassName.ensureDebugId("BoatClassNameSuggestBox");
-        int i=0;
-        if (competitorToEdit.getBoatClass() != null) {
-            boatClassName.setValue(competitorToEdit.getBoatClass().getName());
-            boatClassName.setEnabled(false);
-        } else {
-            boatClassName.setValue(boatClass); // widgets have to accept null values here
-        }
+                        
         this.name = createTextBox(competitorToEdit.getName());
         name.ensureDebugId("NameTextBox");
+        this.shortName = createTextBox(competitorToEdit.getShortName());
+        shortName.ensureDebugId("ShortNameTextBox");
         this.email = createTextBox(competitorToEdit.getEmail());
         this.searchTag = createTextBox(competitorToEdit.getSearchTag());
         this.displayColorTextBox = createTextBox(competitorToEdit.getColor() == null ? "" : competitorToEdit.getColor().getAsHtml()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         CountryCodeFactory ccf = CountryCodeFactory.INSTANCE;
-        i=0;
+        int i=0;
         List<CountryCode> ccs = new ArrayList<CountryCode>();
         Util.addAll(ccf.getAll(), ccs);
         ccs.add(null); // representing no nationality (NONE / white flag)
@@ -129,8 +124,6 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 i++;
             }
         }
-        this.sailId = createTextBox(competitorToEdit.getSailID());
-        sailId.ensureDebugId("SailIdTextBox");
         this.flagImageURL = new URLFieldWithFileUpload(stringMessages);
         this.flagImageURL.setURL(competitorToEdit.getFlagImageURL());
         this.imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
@@ -151,7 +144,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
      * @author Axel Uhl (D043530)
      *
      */
-    private class InvalidColor implements Color {
+    protected class InvalidColor implements Color {
         private static final long serialVersionUID = 4012986110898149543L;
         private final Exception exception;
         
@@ -173,7 +166,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         public String getAsHtml() {
             return stringMessages.invalidColor(exception.getMessage());
         }
-
+        
         @Override
         public Color invert() {
             return null;
@@ -181,7 +174,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     }
 
     @Override
-    protected CompetitorDTO getResult() {
+    protected CompetitorWithBoatDTO getResult() {
         Color color;
         if (displayColorTextBox.getText() == null || displayColorTextBox.getText().isEmpty()) {
             color = null;
@@ -192,26 +185,26 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 color = new InvalidColor(iae);
             }
         }
-        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), Distance.NULL, Distance.NULL);
-        BoatDTO boat = new BoatDTO(name.getText(), sailId.getText());
-        CompetitorDTO result = new CompetitorDTOImpl(name.getText(), color, email.getText(),
+        CompetitorWithBoatDTO result = new CompetitorWithBoatDTOImpl(name.getText(),
+                shortName.getText().trim().isEmpty() ? null : shortName.getText(), color,
+                email.getText().trim().isEmpty() ? null : email.getText(),
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
                 /* countryName */ null, competitorToEdit.getIdAsString(),
-                imageUrlAndUploadComposite.getURL(), flagImageURL.getURL(), boat, boatClass,
+                imageUrlAndUploadComposite.getURL(), flagImageURL.getURL(),
                 timeOnTimeFactor.getValue(),
                 timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue() == null ? null :
-                        new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue()*1000)), searchTag.getValue());
+                        new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue()*1000)), searchTag.getValue(), null);
         return result;
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(11, 2);
+        Grid result = new Grid(10, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, name);
-        result.setWidget(1, 0, new Label(stringMessages.sailNumber()));
-        result.setWidget(1, 1, sailId);
+        result.setWidget(1, 0, new Label(stringMessages.shortName()));
+        result.setWidget(1, 1, shortName);
         result.setWidget(2, 0, new Label(stringMessages.nationality()));
         result.setWidget(2, 1, threeLetterIocCountryCode);
         result.setWidget(3, 0, new Label(stringMessages.color()));
@@ -220,17 +213,23 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         result.setWidget(4, 1, email);
         result.setWidget(5, 0, new Label(stringMessages.searchTag()));
         result.setWidget(5, 1, searchTag);
-        result.setWidget(6, 0, new Label(stringMessages.boatClass()));
-        result.setWidget(6, 1, boatClassName);
-        result.setWidget(7, 0, new Label(stringMessages.flagImageURL()));
-        result.setWidget(7, 1, flagImageURL);
-        result.setWidget(8, 0, new Label(stringMessages.imageURL()));
-        result.setWidget(8, 1, imageUrlAndUploadComposite);
-        result.setWidget(9, 0, new Label(stringMessages.timeOnTimeFactor()));
-        result.setWidget(9, 1, timeOnTimeFactor);
-        result.setWidget(10, 0, new Label(stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile()));
-        result.setWidget(10, 1, timeOnDistanceAllowanceInSecondsPerNauticalMile);
+        result.setWidget(6, 0, new Label(stringMessages.flagImageURL()));
+        result.setWidget(6, 1, flagImageURL);
+        result.setWidget(7, 0, new Label(stringMessages.imageURL()));
+        result.setWidget(7, 1, imageUrlAndUploadComposite);
+        result.setWidget(8, 0, new Label(stringMessages.timeOnTimeFactor()));
+        result.setWidget(8, 1, timeOnTimeFactor);
+        result.setWidget(9, 0, new Label(stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile()));
+        result.setWidget(9, 1, timeOnDistanceAllowanceInSecondsPerNauticalMile);
         return result;
+    }
+
+    protected CompetitorWithBoatDTO getCompetitorToEdit() {
+        return competitorToEdit;
+    }
+
+    protected StringMessages getStringMessages() {
+        return stringMessages;
     }
 
 }

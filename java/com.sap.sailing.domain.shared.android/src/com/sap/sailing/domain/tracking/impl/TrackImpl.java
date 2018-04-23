@@ -11,6 +11,7 @@ import com.sap.sailing.domain.tracking.Track;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Function;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.scalablevalue.ScalableValue;
@@ -458,6 +459,64 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
             unlockAfterRead();
         }
     }
+    
+    @Override
+    public <T> T getValueSum(TimePoint from, TimePoint to, T nullElement, Adder<T> adder, TimeRangeCache<T> cache, TimeRangeValueCalculator<T> valueCalculator) {
+        return getValueSumRecursively(from, to, /* recursionLevel */ 0, nullElement, adder, cache, valueCalculator);
+    }
+    
+    private <T> T getValueSumRecursively(TimePoint from, TimePoint to, int recursionDepth, T nullElement,
+            Adder<T> adder, TimeRangeCache<T> cache, TimeRangeValueCalculator<T> valueCalculator) {
+        T result;
+        if (!from.before(to)) {
+            result = nullElement;
+        } else {
+            boolean perfectCacheHit = false;
+            lockForRead();
+            try {
+                Util.Pair<TimePoint, Util.Pair<TimePoint, T>> bestCacheEntry = cache.getEarliestFromAndResultAtOrAfterFrom(from, to);
+                if (bestCacheEntry != null) {
+                    perfectCacheHit = true; // potentially a cache hit; but if it doesn't span the full interval, it's not perfect; see below
+                    // compute the missing stretches between best cache entry's "from" and our "from" and the cache
+                    // entry's "to" and our "to"
+                    T valueFromFromToBeginningOfCacheEntry = nullElement;
+                    T valueFromEndOfCacheEntryToTo = nullElement;
+                    if (!bestCacheEntry.getB().getA().equals(from)) {
+                        assert bestCacheEntry.getB().getA().after(from);
+                        perfectCacheHit = false;
+                        valueFromFromToBeginningOfCacheEntry = getValueSumRecursively(from, bestCacheEntry
+                                .getB().getA(), recursionDepth + 1, nullElement, adder, cache, valueCalculator);
+                    }
+                    if (!bestCacheEntry.getA().equals(to)) {
+                        assert bestCacheEntry.getA().before(to);
+                        perfectCacheHit = false;
+                        valueFromEndOfCacheEntryToTo = getValueSumRecursively(bestCacheEntry.getA(), to,
+                                recursionDepth + 1, nullElement, adder, cache, valueCalculator);
+                    }
+                    if (valueFromEndOfCacheEntryToTo == null || bestCacheEntry.getB().getB() == null) {
+                        result = null;
+                    } else {
+                        result = adder.add(adder.add(valueFromFromToBeginningOfCacheEntry, bestCacheEntry.getB().getB()), 
+                                valueFromEndOfCacheEntryToTo);
+                    }
+                } else {
+                    if (from.compareTo(to) < 0) {
+                        result = valueCalculator.calculate(from, to);
+                    } else {
+                        result = nullElement;
+                    }
+                }
+            } finally {
+                unlockAfterRead();
+            }
+            if (!perfectCacheHit && recursionDepth == 0) {
+                cache.cache(from, to, result);
+            }
+        }
+        return result;
+    }
+
+
     
     @Override
     public int size() {

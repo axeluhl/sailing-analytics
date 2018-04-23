@@ -2,10 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: www
 Bundle-SymbolicName: com.sap.sailing.www
+Automatic-Module-Name: com.sap.sailing.www
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Web-ContextPath: /
-Import-Package: javax.servlet;version="2.6.0",
- javax.servlet.http;version="2.6.0"
-Bundle-ClassPath: WEB-INF/classes/
+Import-Package: javax.servlet;version="3.1.0",
+ javax.servlet.http;version="3.1.0"
+Bundle-ClassPath: .
+Bundle-ActivationPolicy: lazy

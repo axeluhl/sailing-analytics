@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.core.client.Scheduler;
@@ -8,14 +9,16 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
+import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
@@ -38,7 +41,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
     private Timer selectionTimer;
     private SingleRaceLeaderboardPanel leaderboardPanel;
     private int selected = -1;
-    ArrayList<CompetitorDTO> compList = new ArrayList<>();
+    ArrayList<CompetitorWithBoatDTO> compList = new ArrayList<>();
     private com.sap.sse.gwt.client.player.Timer timer;
 
     public LiveRaceWithRacemapAndLeaderBoardPresenterImpl(LiveRaceWithRacemapAndLeaderBoardPlace place,
@@ -71,7 +74,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
             if (selected > compList.size() - 1) {
                 selected = 0;
             }
-            CompetitorDTO marked = compList.get(selected);
+            CompetitorWithBoatDTO marked = compList.get(selected);
             getPlace().getRaceMapSelectionProvider().setSelected(marked, true);
             onSelect(marked);
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
@@ -127,7 +130,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
         }
     }
 
-    private void onSelect(CompetitorDTO marked) {
+    private void onSelect(CompetitorWithBoatDTO marked) {
         view.onCompetitorSelect(marked);
     }
 
@@ -139,28 +142,32 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
         }
         SailingServiceAsync sailingService = getClientFactory().getSailingService();
         ErrorReporter errorReporter = getClientFactory().getErrorReporter();
-        RegattaAndRaceIdentifier lifeRace = getSlideCtx().getLiveRace();
+        RegattaAndRaceIdentifier liveRace = getSlideCtx().getLiveRace();
         ArrayList<String> racesToShow = null;
-        if (lifeRace != null) {
+        if (liveRace != null) {
             racesToShow = new ArrayList<>();
-            racesToShow.add(lifeRace.getRaceName());
+            racesToShow.add(liveRace.getRaceName());
         } else {
             view.showErrorNoLive(this, panel, new IllegalStateException("No race is live"));
             return;
         }
-        final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(null, null, null, null, null,
-                false, false, true, false, false, true);
+        final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
+                /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, /* raceDetailsToShow */ null,
+                /* overallDetailsToShow */ null, /* delayBetweenAutoAdvancesInMilliseconds */ null,
+                /* showAddedScores */ false, /* showCompetitorShortNameColumn */ true,
+                /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ false,
+                /* showCompetitorBoatInfoColumn */ false, /* showRaceRankColumn */ true);
         timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
-        leaderboardPanel = new SingleRaceLeaderboardPanel(null,null,sailingService, new AsyncActionsExecutor(), leaderboardSettings,
-                true, lifeRace, getPlace().getRaceMapSelectionProvider(), timer, null,
+        leaderboardPanel = new SingleRaceLeaderboardPanel(null, null, sailingService, new AsyncActionsExecutor(),
+                leaderboardSettings, true, liveRace, getPlace().getRaceMapSelectionProvider(), timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
-                false, null, false, null, false, true, false, false, false,new SixtyInchLeaderBoardStyle(true));
-        
-        getPlace().getRaceMap().setQuickRanksDTOProvider(new QuickRanksDTOFromLeaderboardDTOProvider(new RaceCompetitorSet(getPlace().getRaceMapSelectionProvider()), lifeRace));
-        
+                false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(true),
+                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
+        getPlace().getRaceMap().setQuickRanksDTOProvider(new QuickRanksDTOFromLeaderboardDTOProvider(
+                new RaceCompetitorSet(getPlace().getRaceMapSelectionProvider()), liveRace));
         view.startingWith(this, panel, getPlace().getRaceMap(), leaderboardPanel);
         selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
     }

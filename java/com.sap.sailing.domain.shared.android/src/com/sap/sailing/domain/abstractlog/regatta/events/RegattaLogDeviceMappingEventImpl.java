@@ -5,13 +5,19 @@ import java.io.Serializable;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
 
 public abstract class RegattaLogDeviceMappingEventImpl<ItemType extends WithID> extends AbstractLogEventImpl<RegattaLogEventVisitor> implements
 RegattaLogDeviceMappingEvent<ItemType> {
     private static final long serialVersionUID = -8439653251231710356L;
+
+    public interface Factory<ItemType extends WithID, T extends RegattaLogDeviceMappingEvent<ItemType>> {
+        T create(TimePoint createdAt, TimePoint logicalTimePoint,
+                AbstractLogEventAuthor author, Serializable pId, ItemType mappedTo, DeviceIdentifier device,
+                TimePoint from, TimePoint to);
+    }
 
     private final ItemType mappedTo;
     private final DeviceIdentifier device;

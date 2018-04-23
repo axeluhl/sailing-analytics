@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Shared GWT Code
 Bundle-SymbolicName: com.sap.sse.gwt
+Automatic-Module-Name: com.sap.sse.gwt
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -28,9 +29,11 @@ Export-Package: com.google.gwt.user.client.rpc.core.java.util,
  com.sap.sse.gwt.client.controls,
  com.sap.sse.gwt.client.controls.busyindicator,
  com.sap.sse.gwt.client.controls.carousel,
+ com.sap.sse.gwt.client.controls.datetime,
  com.sap.sse.gwt.client.controls.filestorage,
  com.sap.sse.gwt.client.controls.languageselect,
  com.sap.sse.gwt.client.controls.listedit,
+ com.sap.sse.gwt.client.controls.progressbar,
  com.sap.sse.gwt.client.controls.slider,
  com.sap.sse.gwt.client.dialog,
  com.sap.sse.gwt.client.event,

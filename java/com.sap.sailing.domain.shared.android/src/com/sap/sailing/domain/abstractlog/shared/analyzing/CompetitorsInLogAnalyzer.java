@@ -35,7 +35,7 @@ public class CompetitorsInLogAnalyzer<LogT extends AbstractLog<EventT, VisitorT>
 
     @Override
     protected Set<Competitor> performAnalysis() {
-        Set<Competitor> result = new HashSet<Competitor>();
+        Set<Competitor> result = new HashSet<>();
 
         for (EventT event : getLog().getUnrevokedEvents()) {
             if (event instanceof RegisterCompetitorEvent) {

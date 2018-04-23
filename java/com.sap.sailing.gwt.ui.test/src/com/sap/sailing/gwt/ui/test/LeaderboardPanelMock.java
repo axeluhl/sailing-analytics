@@ -1,10 +1,14 @@
 package com.sap.sailing.gwt.ui.test;
 
+import java.util.Arrays;
+
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
@@ -22,7 +26,8 @@ public class LeaderboardPanelMock extends MultiRaceLeaderboardPanel {
         super(null, null, sailingService, new AsyncActionsExecutor(), new MultiRaceLeaderboardSettings(),
                 new CompetitorSelectionModel(
                         /* hasMultiSelection */true),
-                leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true,new ClassicLeaderboardStyle());
+                leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true, new ClassicLeaderboardStyle(),
+                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
     }
 
     @Override

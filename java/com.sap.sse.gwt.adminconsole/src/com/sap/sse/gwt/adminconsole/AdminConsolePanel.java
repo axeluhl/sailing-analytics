@@ -160,7 +160,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         this.panelsByWidget = new HashMap<>();
         getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
-            public void onUserStatusChange(UserDTO user) {
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
                 updateTabDisplayForCurrentUser(user);
             }
         });

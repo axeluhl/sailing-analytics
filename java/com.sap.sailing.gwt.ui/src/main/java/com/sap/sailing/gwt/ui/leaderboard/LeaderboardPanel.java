@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -12,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.cell.client.Cell;
@@ -57,6 +57,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.InvertibleComparator;
@@ -68,7 +69,8 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -97,7 +99,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.DataExtractor;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -185,17 +187,17 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
-    interface LeaderBoardStyle{
+    public interface LeaderBoardStyle {
         void renderNationalityFlag(ImageResource nationalityFlagImageResource, SafeHtmlBuilder sb);
 
-        void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb,CompetitorDTO competitor);
-        
+        void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb, CompetitorWithBoatDTO competitor);
+
         public LeaderboardResources getResources();
-        
+
         public ComponentResources getComponentresources();
-        
+
         public LeaderboardTableResources getTableresources();
-        
+
         public void processStyleForTotalNetPointsColumn(String textColor, SafeStylesBuilder ssb);
 
         void processStyleForRaceColumnWithoutReasonForMaxPoints(boolean isDiscarded, SafeStylesBuilder ssb);
@@ -210,7 +212,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
         boolean hasRaceColumns();
     }
-    
+
     /**
      * The leaderboard name is used to
      * {@link SailingServiceAsync#getLeaderboardByName(String, java.util.Date, String[], boolean, String, com.google.gwt.user.client.rpc.AsyncCallback)
@@ -232,6 +234,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     protected LeaderboardDTO leaderboard;
 
     private final TotalRankColumn totalRankColumn;
+    
+    protected Iterable<DetailType> availableDetailTypes;
 
     private final SelectionCheckboxColumn<LeaderboardRowDTO> selectionCheckboxColumn;
 
@@ -271,7 +275,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     protected final String LEG_COLUMN_STYLE;
 
     protected final String TOTAL_COLUMN_STYLE;
-    
+
     protected final Timer timer;
 
     /**
@@ -292,14 +296,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     private boolean showAddedScores;
 
-    private boolean showCompetitorSailId;
+    private boolean showCompetitorShortName;
     private boolean showCompetitorFullName;
-
-    /**
-     * When <code>true</code> then an additional column just before the overall points is displayed that sums up the
-     * number of races sailed per competitor.
-     */
-    private boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
+    private boolean showCompetitorBoatInfo;
 
     /**
      * Remembers whether the auto-expand of the pre-selected race (see {@link #autoExpandPreSelectedRace}) or last
@@ -403,20 +402,23 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private FlowPanel informationPanel;
 
+    private FlagImageResolver flagImageResolver;
+
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LS settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
-            ErrorReporter errorReporter, final StringMessages stringMessages, boolean showRaceDetails,LeaderBoardStyle style) {
-        this(parent, context, sailingService, asyncActionsExecutor, settings, false, 
-                competitorSelectionProvider, null, leaderboardName, errorReporter, stringMessages, showRaceDetails,style);
+            ErrorReporter errorReporter, final StringMessages stringMessages, boolean showRaceDetails,
+            LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
+        this(parent, context, sailingService, asyncActionsExecutor, settings, false, competitorSelectionProvider, null,
+                leaderboardName, errorReporter, stringMessages, showRaceDetails, style, flagImageResolver, availableDetailTypes);
     }
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
-            AsyncActionsExecutor asyncActionsExecutor, LS settings, boolean isEmbedded, CompetitorSelectionProvider competitorSelectionProvider,
-            String leaderboardGroupName, String leaderboardName, ErrorReporter errorReporter,
-            final StringMessages stringMessages, boolean showRaceDetails,LeaderBoardStyle style) {
-        this(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, 
-                competitorSelectionProvider,
+            AsyncActionsExecutor asyncActionsExecutor, LS settings, boolean isEmbedded,
+            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
+            String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
+            boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
+        this(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
                 new Timer(
                         // perform the first request as "live" but don't by default auto-play
                         PlayModes.Live, PlayStates.Paused,
@@ -425,16 +427,17 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
                 /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false,
                 /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
-                /* enableSyncScroller */ false,style);
+                /* enableSyncScroller */ false, style, flagImageResolver, availableDetailTypes);
     }
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
-            AsyncActionsExecutor asyncActionsExecutor, LS settings, boolean isEmbedded, CompetitorSelectionProvider competitorSelectionProvider,
-            Timer timer, String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
-            boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
-            boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter,
-            boolean showCompetitorFilterStatus, boolean enableSyncScroller,LeaderBoardStyle style) {
+            AsyncActionsExecutor asyncActionsExecutor, LS settings, boolean isEmbedded,
+            CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
+            String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
+            boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
+            RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
+            boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
+            boolean enableSyncScroller, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
         super(parent, context);
         this.style = style;
         this.showSelectionCheckbox = showSelectionCheckbox;
@@ -453,14 +456,16 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         this.showCompetitorFilterStatus = showCompetitorFilterStatus;
         this.enableSyncedScroller = enableSyncScroller;
         this.autoExpandLastRaceColumn = autoExpandLastRaceColumn;
-        this.timer = timer;RACE_COLUMN_HEADER_STYLE = style.getTableresources().cellTableStyle().cellTableRaceColumnHeader();
+        this.flagImageResolver = flagImageResolver;
+        this.timer = timer;
+        RACE_COLUMN_HEADER_STYLE = style.getTableresources().cellTableStyle().cellTableRaceColumnHeader();
         LEG_COLUMN_HEADER_STYLE = style.getTableresources().cellTableStyle().cellTableLegColumnHeader();
         LEG_DETAIL_COLUMN_HEADER_STYLE = style.getTableresources().cellTableStyle().cellTableLegDetailColumnHeader();
         RACE_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableRaceColumn();
         LEG_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegColumn();
         LEG_DETAIL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegDetailColumn();
         TOTAL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableTotalColumn();
-        
+
         overallDetailColumnMap = createOverallDetailColumnMap();
 
         if (settings.getLegDetailsToShow() != null) {
@@ -500,7 +505,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         selectionChangeHandler = new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                List<CompetitorDTO> selection = new ArrayList<CompetitorDTO>();
+                List<CompetitorWithBoatDTO> selection = new ArrayList<CompetitorWithBoatDTO>();
                 for (LeaderboardRowDTO row : getSelectedRows()) {
                     selection.add(row.competitor);
                 }
@@ -552,18 +557,19 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         initWidget(mainPanel);
         mainPanel.setWidget(contentPanel);
         this.setTitle(stringMessages.leaderboard());
+        this.availableDetailTypes = availableDetailTypes;
     }
-    
+
     protected abstract void openSettingsDialog();
 
-    protected void initialize(LS settings){
+    protected void initialize(LS settings) {
         setDefaultRaceColumnSelection(settings);
 
         if (timer.isInitialized()) {
             loadCompleteLeaderboard(/* showProgress */ false);
         }
         updateSettings(settings);
-        style.afterConstructorHook(contentPanel,this);
+        style.afterConstructorHook(contentPanel, this);
     }
 
     public void scrollRowIntoView(int selected) {
@@ -672,17 +678,15 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         this.currentSettings = newSettings;
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
 
-
         if (newSettings.getOverallDetailsToShow() != null) {
-            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), getAvailableOverallDetailColumnTypes(),
+            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), DetailType.getAvailableOverallDetailColumnTypes(),
                     selectedOverallDetailColumns);
         }
         setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
         setShowAddedScores(newSettings.isShowAddedScores());
-        setShowCompetitorSailId(newSettings.isShowCompetitorSailIdColumn());
+        setShowCompetitorShortName(newSettings.isShowCompetitorShortNameColumn());
         setShowCompetitorFullName(newSettings.isShowCompetitorFullNameColumn());
-        setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(
-                newSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
+        setShowCompetitorBoatInfo(newSettings.isShowCompetitorBoatInfoColumn());
         final List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
@@ -697,17 +701,14 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 }
             }
         }
-        
-        oldShallAddOverallDetails = applyDetailSettings(newSettings);
-
+        applyDetailSettings(newSettings);
         addBusyTask();
         Runnable doWhenNecessaryDetailHasBeenLoaded = new Runnable() {
             @Override
             public void run() {
                 try {
                     // avoid expansion during updateLeaderboard(...); will expand
-                    // later
-                    // if it was expanded before
+                    // later if it was expanded before
                     applyRaceSelection(newSettings);
                     updateLeaderboard(leaderboard);
                     postApplySettings(newSettings, columnsToExpandAgain);
@@ -716,16 +717,16 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 }
             }
 
-            
         };
-        if (oldShallAddOverallDetails == shallAddOverallDetails() || oldShallAddOverallDetails
+        boolean newShallAddOverallDetails = shallAddOverallDetails();
+        if (oldShallAddOverallDetails == newShallAddOverallDetails || oldShallAddOverallDetails
                 || getLeaderboard().hasOverallDetails()) {
             doWhenNecessaryDetailHasBeenLoaded.run();
         } else { // meaning that now the details need to be loaded from the server
             updateLeaderboardAndRun(doWhenNecessaryDetailHasBeenLoaded);
         }
     }
-    
+
     protected void postApplySettings(final LeaderboardSettings newSettings,
             final List<ExpandableSortableColumn<?>> columnsToExpandAgain) {
         if (newSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
@@ -738,45 +739,42 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     protected abstract void applyRaceSelection(final LeaderboardSettings newSettings);
 
-    private boolean applyDetailSettings(final LeaderboardSettings newSettings) {
-        boolean oldShallAddOverallDetails = shallAddOverallDetails();
+    private void applyDetailSettings(final LeaderboardSettings newSettings) {
         if (newSettings.getOverallDetailsToShow() != null) {
-            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), getAvailableOverallDetailColumnTypes(),
-                    selectedOverallDetailColumns);
+            setValuesWithReferenceOrder(Util.retainCopy(newSettings.getOverallDetailsToShow(), availableDetailTypes),
+                    DetailType.getAvailableOverallDetailColumnTypes(), selectedOverallDetailColumns);
         }
 
         setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
         setShowAddedScores(newSettings.isShowAddedScores());
-        setShowCompetitorSailId(newSettings.isShowCompetitorSailIdColumn());
+        setShowCompetitorShortName(newSettings.isShowCompetitorShortNameColumn());
         setShowCompetitorFullName(newSettings.isShowCompetitorFullNameColumn());
-        setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(
-                newSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
+        setShowCompetitorBoatInfo(newSettings.isShowCompetitorBoatInfoColumn());
 
         if (newSettings.getManeuverDetailsToShow() != null) {
-            setValuesWithReferenceOrder(newSettings.getManeuverDetailsToShow(),
+            setValuesWithReferenceOrder(Util.retainCopy(newSettings.getManeuverDetailsToShow(), availableDetailTypes),
                     ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes(), selectedManeuverDetails);
         }
         if (newSettings.getLegDetailsToShow() != null) {
-            setValuesWithReferenceOrder(newSettings.getLegDetailsToShow(), LegColumn.getAvailableLegDetailColumnTypes(),
-                    selectedLegDetails);
+            setValuesWithReferenceOrder(Util.retainCopy(newSettings.getLegDetailsToShow(), availableDetailTypes),
+                    DetailType.getAllLegDetailColumnTypes(), selectedLegDetails);
         }
         if (newSettings.getRaceDetailsToShow() != null) {
             List<DetailType> allRaceDetailsTypes = new ArrayList<>();
-            allRaceDetailsTypes.addAll(Arrays.asList(getAvailableRaceDetailColumnTypes()));
-            allRaceDetailsTypes.addAll(Arrays.asList(getAvailableRaceStartAnalysisColumnTypes()));
-            setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(), allRaceDetailsTypes.toArray(new DetailType[allRaceDetailsTypes.size()]),
-                    selectedRaceDetails);
+            allRaceDetailsTypes.addAll(DetailType.getAllRaceDetailTypes());
+            allRaceDetailsTypes.addAll(DetailType.getRaceStartAnalysisColumnTypes());
+            setValuesWithReferenceOrder(Util.retainCopy(newSettings.getRaceDetailsToShow(), availableDetailTypes),
+                    allRaceDetailsTypes, selectedRaceDetails);
         }
-        return oldShallAddOverallDetails;
     }
 
     protected abstract void setDefaultRaceColumnSelection(LS settings);
 
-    private void setValuesWithReferenceOrder(Collection<DetailType> valuesToSet,
-            DetailType[] referenceOrder, List<DetailType> collectionToSetValuesTo) {
+    private void setValuesWithReferenceOrder(Iterable<DetailType> valuesToSet, List<DetailType> referenceOrder,
+            List<DetailType> collectionToSetValuesTo) {
         collectionToSetValuesTo.clear();
-        collectionToSetValuesTo.addAll(Arrays.asList(referenceOrder));
-        collectionToSetValuesTo.retainAll(valuesToSet);
+        collectionToSetValuesTo.addAll(referenceOrder);
+        collectionToSetValuesTo.retainAll(Util.asList(valuesToSet));
     }
 
     /**
@@ -856,15 +854,13 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     /**
-     * Shows the country flag and sail ID, if present
-     * 
+     * Shows the country flag and a competitor short info (short name or sailId), if present
      * @author Axel Uhl (d043530)
-     * 
      */
-    private class SailIDColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
+    private class CompetitorInfoWithFlagColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
         private final CompetitorFetcher<T> competitorFetcher;
 
-        protected SailIDColumn(CompetitorFetcher<T> competitorFetcher,LeaderBoardStyle style) {
+        protected CompetitorInfoWithFlagColumn(CompetitorFetcher<T> competitorFetcher, LeaderBoardStyle style) {
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
             this.competitorFetcher = competitorFetcher;
             // This style is adding to avoid contained images CSS property "max-width: 100%", which could cause
@@ -877,11 +873,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             return new InvertibleComparatorAdapter<T>() {
                 @Override
                 public int compare(T o1, T o2) {
-                    return competitorFetcher.getCompetitor(o1).getSailID() == null
-                            ? competitorFetcher.getCompetitor(o2).getSailID() == null ? 0 : -1
-                            : competitorFetcher.getCompetitor(o2).getSailID() == null ? 1
-                                    : Collator.getInstance().compare(competitorFetcher.getCompetitor(o1).getSailID(),
-                                            competitorFetcher.getCompetitor(o2).getSailID());
+                    return competitorFetcher.getCompetitor(o1).getShortInfo() == null
+                            ? competitorFetcher.getCompetitor(o2).getShortInfo() == null ? 0 : -1
+                            : competitorFetcher.getCompetitor(o2).getShortInfo() == null ? 1
+                                    : Collator.getInstance().compare(competitorFetcher.getCompetitor(o1).getShortInfo(),
+                                            competitorFetcher.getCompetitor(o2).getShortInfo());
                 }
             };
         }
@@ -889,33 +885,33 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         @Override
         public SafeHtmlHeader getHeader() {
             return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.competitor()),
-                    stringMessages.sailIdColumnTooltip());
+                    stringMessages.shortName());
         }
 
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
-            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
+            CompetitorWithBoatDTO competitor = competitorFetcher.getCompetitor(object);
             final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
             final String flagImageURL = competitor.getFlagImageURL();
-            boolean boatColorShown = renderBoatColorIfNecessary(competitorFetcher.getCompetitor(object),sb);
-           
+            boolean boatColorShown = renderBoatColorIfNecessary(competitorFetcher.getCompetitor(object), sb);
+
             if (isShowCompetitorNationality || flagImageURL == null || flagImageURL.isEmpty()) {
                 final ImageResource nationalityFlagImageResource;
                 if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
-                    nationalityFlagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+                    nationalityFlagImageResource = flagImageResolver.getEmptyFlagImageResource();
                 } else {
-                    nationalityFlagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+                    nationalityFlagImageResource = flagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
                 }
                 if (nationalityFlagImageResource != null) {
-                    style.renderNationalityFlag(nationalityFlagImageResource,sb);
+                    style.renderNationalityFlag(nationalityFlagImageResource, sb);
                     sb.appendHtmlConstant("&nbsp;");
                 }
             }
             if (flagImageURL != null && !flagImageURL.isEmpty()) {
-                style.renderFlagImage(flagImageURL,sb,competitor);
+                style.renderFlagImage(flagImageURL, sb, competitor);
                 sb.appendHtmlConstant("&nbsp;");
             }
-            sb.appendEscaped(competitor.getSailID());
+            sb.appendEscaped(competitor.getShortInfo());
             if (boatColorShown) {
                 sb.appendHtmlConstant("</div>");
             }
@@ -923,15 +919,81 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
         @Override
         public String getValue(T object) {
-            return competitorFetcher.getCompetitor(object).getSailID();
+            return competitorFetcher.getCompetitor(object).getShortInfo();
         }
     }
 
+    /**
+     * A sortable leaderboard column showing boat information
+     * @author Frank Mittag
+     */
+    private class BoatInfoColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
+        private final BoatFetcher<T> boatFetcher;
+        private final CompetitorFetcher<T> competitorFetcher;
+
+        public BoatInfoColumn(CompetitorFetcher<T> competitorFetcher, BoatFetcher<T> boatFetcher, LeaderBoardStyle style) {            
+            super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
+            this.competitorFetcher = competitorFetcher;
+            this.boatFetcher = boatFetcher;
+            // This style is adding to avoid contained images CSS property "max-width: 100%", which could cause
+            // an overflow to the next column (see https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3537)
+            setCellStyleNames(style.getTableresources().cellTableStyle().cellTableSailIdColumn());
+        }
+
+        @Override
+        public SafeHtmlHeader getHeader() {
+            return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.boat()),
+                    stringMessages.boat());
+        }
+
+        @Override
+        public void render(Context context, T object, SafeHtmlBuilder sb) {
+            BoatDTO boat = boatFetcher.getBoat(object);
+            CompetitorWithBoatDTO competitor = competitorFetcher.getCompetitor(object);
+            boolean boatColorShown = renderBoatColorIfNecessary(competitor, sb);
+            sb.appendEscaped(getShortInfo(boat));
+            if (boatColorShown) {
+                sb.appendHtmlConstant("</div>");
+            }
+        }
+        
+        private String getShortInfo(BoatDTO boat) {
+            final String result;
+            if (boat.getSailId() != null) {
+                result = boat.getSailId();
+            } else if (boat.getName() != null) {
+                result = boat.getName();
+            } else {
+                result = null;
+            }
+            return result;
+        }
+        
+        @Override
+        public InvertibleComparator<T> getComparator() {
+            return new InvertibleComparatorAdapter<T>() {
+                @Override
+                public int compare(T o1, T o2) {
+                    return getShortInfo(boatFetcher.getBoat(o1)) == null
+                            ? getShortInfo(boatFetcher.getBoat(o2)) == null ? 0 : -1
+                            : getShortInfo(boatFetcher.getBoat(o2)) == null ? 1
+                                    : Collator.getInstance().compare(getShortInfo(boatFetcher.getBoat(o1)),
+                                            getShortInfo(boatFetcher.getBoat(o2)));
+                }
+            };
+        }
+
+        @Override
+        public String getValue(T object) {
+            BoatDTO boat = boatFetcher.getBoat(object);
+            return boat != null ? boat.getName() : null;
+        }        
+    }
+    
+    
     protected void processStyleForRaceColumnWithReasonForMaxPoints(boolean isDiscarded, SafeStylesBuilder ssb) {
         ssb.opacity(0.5d);
     }
-
-    
 
     /**
      * Displays net/total points and possible max-points reasons based on a {@link LeaderboardRowDTO} and a race name
@@ -1084,7 +1146,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                             result = intermediate_result > 0 ? -1 : intermediate_result < 0 ? 1 : 0;
                         }
                     } else {
-                        List<CompetitorDTO> competitorsFromBestToWorst = getLeaderboard()
+                        List<CompetitorWithBoatDTO> competitorsFromBestToWorst = getLeaderboard()
                                 .getCompetitorsFromBestToWorst(race);
                         int o1Rank = competitorsFromBestToWorst.indexOf(o1.competitor) + 1;
                         int o2Rank = competitorsFromBestToWorst.indexOf(o2.competitor) + 1;
@@ -1105,42 +1167,13 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         public SortableExpandableColumnHeader getHeader() {
             SortableExpandableColumnHeader header = new SortableExpandableColumnHeader(
                     /* title */race.getRaceColumnName(),
-                    /* iconURL */race.isMedalRace() ? "/gwt/images/medal_small.png" : null, LeaderboardPanel.this, this,
+                    /* iconURL */race.isMedalRace() ? style.getResources().medalSmall().getSafeUri() : null, LeaderboardPanel.this, this,
                     stringMessages);
             return header;
         }
     }
 
-    public static DetailType[] getAvailableRaceDetailColumnTypes() {
-        return new DetailType[] { DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
-                DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_DISTANCE_TRAVELED,
-                DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START, DetailType.RACE_TIME_TRAVELED,
-                DetailType.RACE_CALCULATED_TIME_TRAVELED,
-                DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
-                DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
-                DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, DetailType.NUMBER_OF_MANEUVERS,
-                DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
-                DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
-                DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
-                DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL };
-    }
-
-    public abstract boolean renderBoatColorIfNecessary(CompetitorDTO competitor, SafeHtmlBuilder sb);
-
-    public static DetailType[] getAvailableRaceStartAnalysisColumnTypes() {
-        return new DetailType[] { DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START,
-                DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START, DetailType.DISTANCE_TO_START_AT_RACE_START,
-                DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START, DetailType.SPEED_OVER_GROUND_AT_RACE_START,
-                DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
-                DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS, DetailType.START_TACK };
-    }
-
-    public static DetailType[] getAvailableOverallDetailColumnTypes() {
-        return new DetailType[] { DetailType.REGATTA_RANK, DetailType.TOTAL_DISTANCE_TRAVELED,
-                DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND, DetailType.TOTAL_TIME_SAILED_IN_SECONDS,
-                DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, DetailType.TIME_ON_TIME_FACTOR,
-                DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE };
-    }
+    public abstract boolean renderBoatColorIfNecessary(CompetitorWithBoatDTO competitor, SafeHtmlBuilder sb);
 
     private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
         /**
@@ -1164,8 +1197,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
         @Override
         protected void ensureExpansionDataIsLoaded(final Runnable callWhenExpansionDataIsLoaded) {
-            
-            if (getLegCount(getLeaderboard(),getRaceColumnName()) != -1) {
+
+            if (getLegCount(getLeaderboard(), getRaceColumnName()) != -1) {
                 callWhenExpansionDataIsLoaded.run();
             } else {
                 updateLeaderboardAndRun(callWhenExpansionDataIsLoaded);
@@ -1183,68 +1216,76 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                             new RaceRatioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_DISTANCE_TRAVELED,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED,
                             new RaceDistanceTraveledInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START,
                             new RaceDistanceTraveledIncludingGateStartInMeters(), LEG_COLUMN_HEADER_STYLE,
                             LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
                             new RaceAverageSpeedInKnots(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                             new RaceGapToLeaderInSeconds(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                             new RaceCurrentSpeedOverGroundInKnots(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
-            result.put(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
-                    new RideHeightColumn(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
+            result.put(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
+                    new RideHeightColumn(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
                             new RaceCurrentRideHeightInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
+            result.put(DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS,
+                            new RaceDistanceFoiledInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                            LeaderboardPanel.this));
+            result.put(DetailType.RACE_CURRENT_DURATION_FOILED_IN_SECONDS,
+                    new TotalTimeColumn(DetailType.RACE_CURRENT_DURATION_FOILED_IN_SECONDS,
+                            new RaceDurationFoiledInSeconds(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                            LeaderboardPanel.this));
             result.put(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS,
                             new RaceDistanceToCompetitorFarthestAheadInMeters(), LEG_COLUMN_HEADER_STYLE,
                             LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
                             new RaceAverageAbsoluteCrossTrackErrorInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
                             new RaceAverageSignedCrossTrackErrorInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START,
-                    new FormattedDoubleDetailTypeColumn(
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(
                             DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START,
                             new DistanceToStartFiveSecondsBeforeStartInMeters(), LEG_COLUMN_HEADER_STYLE,
                             LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START,
                             new SpeedFiveSecondsBeforeStartInKnots(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.DISTANCE_TO_START_AT_RACE_START,
-                    new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TO_START_AT_RACE_START,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.DISTANCE_TO_START_AT_RACE_START,
                             new DistanceToStartAtRaceStartInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START,
-                    new FormattedDoubleDetailTypeColumn(DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START,
                             new TimeBetweenRaceStartAndCompetitorStartInSeconds(), LEG_COLUMN_HEADER_STYLE,
                             LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.SPEED_OVER_GROUND_AT_RACE_START,
-                    new FormattedDoubleDetailTypeColumn(DetailType.SPEED_OVER_GROUND_AT_RACE_START,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.SPEED_OVER_GROUND_AT_RACE_START,
                             new SpeedOverGroundAtRaceStartInKnots(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
-                    new FormattedDoubleDetailTypeColumn(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
                             new SpeedOverGroundWhenPassingStartInKnots(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS,
-                    new FormattedDoubleDetailTypeColumn(
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(
                             DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS,
                             new DistanceToStarboardSideOfStartLineInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
@@ -1254,21 +1295,223 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     new ManeuverCountRaceColumn(getLeaderboardPanel(), this, stringMessages,
                             LeaderboardPanel.this.selectedManeuverDetails, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.CURRENT_LEG, new FormattedDoubleDetailTypeColumn(DetailType.CURRENT_LEG,
+            result.put(DetailType.RACE_CURRENT_LEG, new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CURRENT_LEG,
                     new CurrentLeg(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_TIME_TRAVELED,
                     new TimeTraveledRaceColumn(getLeaderboardPanel(), this, stringMessages, LEG_COLUMN_HEADER_STYLE,
                             LEG_COLUMN_STYLE, LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE));
             result.put(DetailType.RACE_CALCULATED_TIME_TRAVELED,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_CALCULATED_TIME_TRAVELED,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CALCULATED_TIME_TRAVELED,
                             new RaceCalculatedTimeTraveledInSeconds(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
-                    new FormattedDoubleDetailTypeColumn(
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(
                             DetailType.RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD,
                             new RaceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_AWA,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_AWA,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionAWA),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_AWS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_AWS,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionAWS),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TWA,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TWA,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTWA),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TWS,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TWS,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTWS),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TWD,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TWD,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTWD),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TARG_TWA,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TARG_TWA,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTargTWA),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_BOAT_SPEED,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_BOAT_SPEED,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionBoatSpeed),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TARG_BOAT_SPEED,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TARG_BOAT_SPEED,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTargBoatSpeed),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_SOG,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_SOG,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionSOG),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_COG,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_COG,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionCOG),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_FORESTAY_LOAD,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_FORESTAY_LOAD,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionForestayLoad),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_RAKE,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_RAKE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionRake),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_COURSE,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_COURSE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionCourseDetail),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_HEADING,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_HEADING,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionHeading),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_VMG,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_VMG,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionVMG),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_VMG_TARG_VMG_DELTA,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_VMG_TARG_VMG_DELTA,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionVMGTargVMGDelta),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_RATE_OF_TURN,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_RATE_OF_TURN,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionRateOfTurn),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_RUDDER_ANGLE,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_RUDDER_ANGLE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionRudderAngle),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_HEEL,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_HEEL,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionHeel),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TARGET_HEEL,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TARGET_HEEL,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTargetHeel),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_PORT_LAYLINE,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_PORT_LAYLINE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToPortLayline),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_STB_LAYLINE,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_STB_LAYLINE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToStbLayline),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_DIST_TO_PORT_LAYLINE,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_DIST_TO_PORT_LAYLINE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionDistToPortLayline),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_DIST_TO_STB_LAYLINE,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_DIST_TO_STB_LAYLINE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionDistToStbLayline),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_GUN,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_GUN,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToGun),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT,
+                            new DoubleTextRaceDetailTypeExtractor(
+                                    LeaderboardEntryDTO::getExpeditionTimeToCommitteeBoat),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_PIN,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_PIN,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToPin),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_LINE,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_LINE,
+                            new DoubleTextRaceDetailTypeExtractor(
+                                    LeaderboardEntryDTO::getExpeditionTimeToBurnToLine),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT,
+                            new DoubleTextRaceDetailTypeExtractor(
+                                    LeaderboardEntryDTO::getExpeditionTimeToBurnToCommitteeBoat),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_PIN,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TIME_TO_BURN_TO_PIN,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTimeToBurnToPin),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT,
+                            new DoubleTextRaceDetailTypeExtractor(
+                                    LeaderboardEntryDTO::getExpeditionDistanceToCommitteeBoat),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_DISTANCE_TO_PIN,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_DISTANCE_TO_PIN,
+                            new DoubleTextRaceDetailTypeExtractor(
+                                    LeaderboardEntryDTO::getExpeditionDistanceToPinDetail),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_DISTANCE_BELOW_LINE,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_DISTANCE_BELOW_LINE,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionDistanceBelowLine),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION,
+                            new DoubleTextRaceDetailTypeExtractor(
+                                    LeaderboardEntryDTO::getExpeditionLineSquareForWindDirection),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_BARO,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_BARO,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionBaro),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_LOAD_S,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_LOAD_S,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionLoadS),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_LOAD_P,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_LOAD_P,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionLoadP),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_JIB_CAR_PORT,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_JIB_CAR_PORT,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionJibCarPort),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_JIB_CAR_STBD,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_JIB_CAR_STBD,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionJibCarStbd),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.EXPEDITION_RACE_MAST_BUTT,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_MAST_BUTT,
+                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionJibCarStbd),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.BRAVO_RACE_HEEL_IN_DEGREES,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.BRAVO_RACE_HEEL_IN_DEGREES,
+                            new BearingAsDegreeDetailTypeExtractor(e -> e.heel), LEG_COLUMN_HEADER_STYLE,
+                            LEG_COLUMN_STYLE, LeaderboardPanel.this));
+            result.put(DetailType.BRAVO_RACE_PITCH_IN_DEGREES,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.BRAVO_RACE_PITCH_IN_DEGREES,
+                            new BearingAsDegreeDetailTypeExtractor(e -> e.pitch), LEG_COLUMN_HEADER_STYLE,
+                            LEG_COLUMN_STYLE, LeaderboardPanel.this));
             return result;
+        }
+        
+        private class BearingAsDegreeDetailTypeExtractor extends DoubleTextRaceDetailTypeExtractor {
+            public BearingAsDegreeDetailTypeExtractor(Function<LeaderboardEntryDTO, Bearing> valueExtractor) {
+                super(entry -> {
+                    Bearing bearing = valueExtractor.apply(entry);
+                    return bearing == null ? null : bearing.getDegrees();
+                });
+            }
+        }
+        
+        private class DoubleTextRaceDetailTypeExtractor implements DataExtractor<Double, LeaderboardRowDTO> {
+            
+            private final Function<LeaderboardEntryDTO, Double> valueExtractor;
+
+            public DoubleTextRaceDetailTypeExtractor(Function<LeaderboardEntryDTO, Double> valueExtractor) {
+                this.valueExtractor = valueExtractor;
+            }
+            
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = valueExtractor.apply(fieldsForRace);
+                }
+                return result;
+            }
         }
 
         @Override
@@ -1277,11 +1520,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : super.getDirectChildren()) {
                 result.add(column);
             }
-            if (isExpanded() && selectedRaceDetails.contains(DetailType.DISPLAY_LEGS)) {
+            if (isExpanded() && selectedRaceDetails.contains(DetailType.RACE_DISPLAY_LEGS)) {
                 // it is important to re-use existing LegColumn objects because
                 // removing the columns from the table
                 // is based on column identity
-                int maxLegCount = getLegCount(getLeaderboard(),getRaceColumnName());
+                int maxLegCount = getLegCount(getLeaderboard(), getRaceColumnName());
                 if (maxLegCount != -1) {
                     for (int i = 0; i < maxLegCount; i++) {
                         LegColumn legColumn = getLegColumn(i);
@@ -1325,7 +1568,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          *
          */
         private class RaceRatioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval
-                implements LegDetailField<Double> {
+                implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1344,10 +1587,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceAverageSpeedInKnots implements LegDetailField<Double> {
+        private class RaceAverageSpeedInKnots implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
-                final Distance distanceTraveledInMeters = row.getDistanceTraveledInMeters(getRaceColumnName());
+                final Distance distanceTraveledInMeters = row.getDistanceTraveled(getRaceColumnName());
                 final Duration time = row.getTimeSailed(getRaceColumnName());
                 final Double result;
                 if (distanceTraveledInMeters != null && time != null) {
@@ -1365,7 +1608,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceAverageAbsoluteCrossTrackErrorInMeters implements LegDetailField<Double> {
+        private class RaceAverageAbsoluteCrossTrackErrorInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1383,7 +1626,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceAverageSignedCrossTrackErrorInMeters implements LegDetailField<Double> {
+        private class RaceAverageSignedCrossTrackErrorInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1400,7 +1643,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class DistanceToStartAtRaceStartInMeters implements LegDetailField<Double> {
+        private class DistanceToStartAtRaceStartInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1418,7 +1661,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class TimeBetweenRaceStartAndCompetitorStartInSeconds implements LegDetailField<Double> {
+        private class TimeBetweenRaceStartAndCompetitorStartInSeconds implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1435,7 +1678,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class SpeedOverGroundAtRaceStartInKnots implements LegDetailField<Double> {
+        private class SpeedOverGroundAtRaceStartInKnots implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1450,7 +1693,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         /**
          * Fetches the competitor's distance to the start mark five seconds before the race started
          */
-        private class DistanceToStartFiveSecondsBeforeStartInMeters implements LegDetailField<Double> {
+        private class DistanceToStartFiveSecondsBeforeStartInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1465,7 +1708,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         /**
          * Fetches the competitor's speed over ground five seconds before the race started
          */
-        private class SpeedFiveSecondsBeforeStartInKnots implements LegDetailField<Double> {
+        private class SpeedFiveSecondsBeforeStartInKnots implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1482,7 +1725,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class SpeedOverGroundWhenPassingStartInKnots implements LegDetailField<Double> {
+        private class SpeedOverGroundWhenPassingStartInKnots implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1500,7 +1743,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class DistanceToStarboardSideOfStartLineInMeters implements LegDetailField<Double> {
+        private class DistanceToStarboardSideOfStartLineInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1517,7 +1760,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class TackWhenStarting implements LegDetailField<Tack> {
+        private class TackWhenStarting implements DataExtractor<Tack, LeaderboardRowDTO> {
             @Override
             public Tack get(LeaderboardRowDTO row) {
                 Tack result = null;
@@ -1534,15 +1777,41 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceDistanceTraveledInMeters implements LegDetailField<Double> {
+        private class RaceDistanceTraveledInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
-                Distance distanceForRaceColumn = row.getDistanceTraveledInMeters(getRaceColumnName());
+                Distance distanceForRaceColumn = row.getDistanceTraveled(getRaceColumnName());
                 return distanceForRaceColumn == null ? null : distanceForRaceColumn.getMeters();
             }
         }
 
-        private class RaceCalculatedTimeTraveledInSeconds implements LegDetailField<Double> {
+        /**
+         * Accumulates the distance foiled over all legs of a race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceDistanceFoiledInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Distance distanceForRaceColumn = row.getDistanceFoiled(getRaceColumnName());
+                return distanceForRaceColumn == null ? null : distanceForRaceColumn.getMeters();
+            }
+        }
+
+        /**
+         * Accumulates the duration foiled over all legs of a race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceDurationFoiledInSeconds implements DataExtractor<Double, LeaderboardRowDTO> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Duration durationForRaceColumn = row.getDurationFoiled(getRaceColumnName());
+                return durationForRaceColumn == null ? null : durationForRaceColumn.asSeconds();
+            }
+        }
+
+        private class RaceCalculatedTimeTraveledInSeconds implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1555,7 +1824,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         private class RaceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds
-                implements LegDetailField<Double> {
+                implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1576,7 +1845,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceDistanceTraveledIncludingGateStartInMeters implements LegDetailField<Double> {
+        private class RaceDistanceTraveledIncludingGateStartInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1597,7 +1866,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private class CurrentLeg implements LegDetailField<Double> {
+        private class CurrentLeg implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1615,7 +1884,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceGapToLeaderInSeconds implements LegDetailField<Double> {
+        private class RaceGapToLeaderInSeconds implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1634,7 +1903,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceDistanceToCompetitorFarthestAheadInMeters implements LegDetailField<Double> {
+        private class RaceDistanceToCompetitorFarthestAheadInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
@@ -1646,7 +1915,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
 
-        private abstract class AbstractLastLegDetailField<T extends Comparable<?>> implements LegDetailField<T> {
+        private abstract class AbstractLastLegDetailField<T extends Comparable<?>> implements DataExtractor<T, LeaderboardRowDTO> {
             @Override
             public final T get(LeaderboardRowDTO row) {
                 T result = null;
@@ -1703,80 +1972,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 }
                 return result;
             }
-        }
-    }
-
-    /**
-     * Column that display the number of races a competitor has finished. Currently taking into account
-     * {@link MaxPointsReason#DNS}, {@link MaxPointsReason#DNF} and {@link MaxPointsReason#DNC}. Configurable over
-     * {@link LeaderboardSettings#isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor()}.
-     * 
-     * @author Simon Marcel Pamies
-     */
-    private class TotalRacesCompletedColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
-        private final String columnStyle;
-        private final MaxPointsReason[] MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES = new MaxPointsReason[] {
-                MaxPointsReason.DNS, MaxPointsReason.DNF, MaxPointsReason.DNC };
-
-        protected TotalRacesCompletedColumn(String columnStyle) {
-            super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
-            this.columnStyle = columnStyle;
-            setHorizontalAlignment(ALIGN_CENTER);
-        }
-
-        private int computeNumberOfRacesCompleted(LeaderboardRowDTO object) {
-            int racesSailedInRow = 0;
-            for (RaceColumnDTO raceColumn : getLeaderboard().getRaceList()) {
-                LeaderboardEntryDTO entryBefore = object.fieldsByRaceColumnName.get(raceColumn.getName());
-                if (entryBefore.netPoints != null) {
-                    if (entryBefore.reasonForMaxPoints.equals(MaxPointsReason.NONE)
-                            || !Util.contains(Arrays.asList(MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES),
-                                    entryBefore.reasonForMaxPoints)) {
-                        racesSailedInRow++;
-                    }
-                }
-            }
-            return racesSailedInRow;
-        }
-
-        @Override
-        public String getValue(LeaderboardRowDTO object) {
-            return "" + computeNumberOfRacesCompleted(object);
-        }
-
-        @Override
-        public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
-            String textColor = getLeaderboard().hasLiveRace(timer.getLiveTimePointInMillis()) ? IS_LIVE_TEXT_COLOR
-                    : DEFAULT_TEXT_COLOR;
-
-            sb.appendHtmlConstant("<span style=\"font-weight: bold; color:" + textColor + "\">");
-            sb.appendEscaped(getValue(object));
-            sb.appendHtmlConstant("</span>");
-        }
-
-        @Override
-        public InvertibleComparator<LeaderboardRowDTO> getComparator() {
-            return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
-                @Override
-                public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
-                    double o1RacesSailed = computeNumberOfRacesCompleted(o1);
-                    double o2RacesSailed = computeNumberOfRacesCompleted(o2);
-                    double result = o1RacesSailed == 0. ? o2RacesSailed == 0. ? 0. : isAscending() ? 1. : -1.
-                            : o2RacesSailed == 0. ? isAscending() ? 1. : -1. : o2RacesSailed - o1RacesSailed;
-                    return result > 0 ? 1 : result < 0 ? -1 : 0;
-                }
-            };
-        }
-
-        @Override
-        public String getColumnStyle() {
-            return columnStyle;
-        }
-
-        @Override
-        public SafeHtmlHeader getHeader() {
-            return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.racesScored()),
-                    stringMessages.racesScoredTooltip());
         }
     }
 
@@ -1915,23 +2110,23 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         @Override
-        public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+        public void competitorsListChanged(Iterable<CompetitorWithBoatDTO> competitors) {
         }
 
         @Override
-        public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
-                FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
+        public void filterChanged(FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> oldFilterSet,
+                FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> newFilterSet) {
         }
 
         @Override
-        public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
+        public void filteredCompetitorsListChanged(Iterable<CompetitorWithBoatDTO> filteredCompetitors) {
         }
 
         /**
          * Ensure that the checkbox is redrawn when the competitor selection changes
          */
         @Override
-        public void addedToSelection(CompetitorDTO competitor) {
+        public void addedToSelection(CompetitorWithBoatDTO competitor) {
             final LeaderboardRowDTO row = getRow(competitor.getIdAsString());
             if (row != null) {
                 getSelectionModel().setSelected(row, true);
@@ -1942,7 +2137,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * Ensure that the checkbox is redrawn when the competitor selection changes
          */
         @Override
-        public void removedFromSelection(CompetitorDTO competitor) {
+        public void removedFromSelection(CompetitorWithBoatDTO competitor) {
             final LeaderboardRowDTO row = getRow(competitor.getIdAsString());
             if (row != null) {
                 getSelectionModel().setSelected(row, false);
@@ -1984,10 +2179,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.totalRegattaRank()),
                     stringMessages.rankColumnTooltip());
         }
+
     }
 
-    private class StartingTackColumn extends DetailTypeColumn<Tack, String> {
-        public StartingTackColumn(LegDetailField<Tack> field, String headerStyle, String columnStyle) {
+    private class StartingTackColumn extends DetailTypeColumn<Tack, String, LeaderboardRowDTO> {
+        public StartingTackColumn(DataExtractor<Tack, LeaderboardRowDTO> field, String headerStyle,
+                String columnStyle) {
             super(DetailType.START_TACK, field, new TextCell(), headerStyle, columnStyle, LeaderboardPanel.this);
         }
 
@@ -2025,10 +2222,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             boolean filtersActive = competitorSelectionProvider.hasActiveFilters();
             if (filtersActive) {
                 String labelText = "";
-                for (Filter<CompetitorDTO> filter : competitorSelectionProvider.getCompetitorsFilterSet()
+                for (Filter<CompetitorWithBoatDTO> filter : competitorSelectionProvider.getCompetitorsFilterSet()
                         .getFilters()) {
                     if (filter instanceof FilterWithUI<?>) {
-                        labelText += ((FilterWithUI<CompetitorDTO>) filter).getLocalizedDescription(stringMessages)
+                        labelText += ((FilterWithUI<CompetitorWithBoatDTO>) filter).getLocalizedDescription(stringMessages)
                                 + ", ";
                     } else {
                         labelText += filter.getName() + ", ";
@@ -2048,21 +2245,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
-    private static class TotalDistanceTraveledInMetersField implements LegDetailField<Double> {
-        @Override
-        public Double get(LeaderboardRowDTO row) {
-            return row.totalDistanceTraveledInMeters;
-        }
-    }
-
-    private static class TimeOnTimeFactorColumn implements LegDetailField<Double> {
-        @Override
-        public Double get(LeaderboardRowDTO row) {
-            return row.competitor.getTimeOnTimeFactor();
-        }
-    }
-
-    private static class TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn implements LegDetailField<Double> {
+    private static class TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             return row.competitor.getTimeOnDistanceAllowancePerNauticalMile() == null ? null
@@ -2070,7 +2253,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
-    private static class TotalAverageSpeedOverGroundField implements LegDetailField<Double> {
+    private static class TotalAverageSpeedOverGroundField implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             final Double result;
@@ -2087,22 +2270,29 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> createOverallDetailColumnMap() {
         Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
-        result.put(DetailType.TOTAL_DISTANCE_TRAVELED,
-                new FormattedDoubleDetailTypeColumn(DetailType.TOTAL_DISTANCE_TRAVELED,
-                        new TotalDistanceTraveledInMetersField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        result.put(DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
-                new FormattedDoubleDetailTypeColumn(DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
+        result.put(DetailType.OVERALL_TOTAL_DISTANCE_TRAVELED,
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TOTAL_DISTANCE_TRAVELED,
+                        e -> e.totalDistanceTraveledInMeters, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
+        result.put(DetailType.OVERALL_TOTAL_AVERAGE_SPEED_OVER_GROUND,
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TOTAL_AVERAGE_SPEED_OVER_GROUND,
                         new TotalAverageSpeedOverGroundField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        result.put(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS,
+        result.put(DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS,
                 new MaxSpeedOverallColumn(RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, createOverallTimeTraveledColumn());
-        result.put(DetailType.TIME_ON_TIME_FACTOR, new FormattedDoubleDetailTypeColumn(DetailType.TIME_ON_TIME_FACTOR,
-                new TimeOnTimeFactorColumn(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
-        result.put(DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
-                new FormattedDoubleDetailTypeColumn(DetailType.TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
+        result.put(DetailType.OVERALL_TOTAL_TIME_SAILED_IN_SECONDS, createOverallTimeTraveledColumn());
+        result.put(DetailType.OVERALL_TOTAL_DURATION_FOILED_IN_SECONDS,
+                new TotalTimeColumn(DetailType.OVERALL_TOTAL_DURATION_FOILED_IN_SECONDS,
+                        e -> e.totalDurationFoiledInSeconds, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
+        result.put(DetailType.OVERALL_TOTAL_DISTANCE_FOILED_IN_METERS,
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TOTAL_DISTANCE_FOILED_IN_METERS,
+                        e -> e.totalDistanceFoiledInMeters, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
+        result.put(DetailType.OVERALL_TIME_ON_TIME_FACTOR, new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TIME_ON_TIME_FACTOR,
+                e -> e.competitor.getTimeOnTimeFactor(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
+        result.put(DetailType.OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                         new TimeOnDistanceAllowanceInSecondsPerNauticalMileColumn(), RACE_COLUMN_HEADER_STYLE,
                         RACE_COLUMN_STYLE, this));
-
+        result.put(DetailType.OVERALL_TOTAL_SCORED_RACE_COUNT, new IntegerDetailTypeColumn(DetailType.OVERALL_TOTAL_SCORED_RACE_COUNT,
+                e -> e.totalScoredRaces, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         return result;
     }
 
@@ -2171,15 +2361,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         return autoExpandLastRaceColumn;
     }
 
-    protected boolean isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor() {
-        return showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
-    }
-
-    private void setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(
-            boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor) {
-        this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor = showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
-    }
-
     protected boolean isShowAddedScores() {
         return showAddedScores;
     }
@@ -2188,12 +2369,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         this.showAddedScores = showAddedScores;
     }
 
-    protected boolean isShowCompetitorSailId() {
-        return showCompetitorSailId;
+    protected boolean isShowCompetitorShortName() {
+        return showCompetitorShortName;
     }
 
-    private void setShowCompetitorSailId(boolean showCompetitorSailId) {
-        this.showCompetitorSailId = showCompetitorSailId;
+    private void setShowCompetitorShortName(boolean showCompetitorShortName) {
+        this.showCompetitorShortName = showCompetitorShortName;
     }
 
     protected boolean isShowCompetitorFullName() {
@@ -2202,6 +2383,16 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private void setShowCompetitorFullName(boolean showCompetitorFullName) {
         this.showCompetitorFullName = showCompetitorFullName;
+    }
+
+    protected boolean isShowCompetitorBoatInfo() {
+        return showCompetitorBoatInfo;
+    }
+
+    protected abstract boolean canShowCompetitorBoatInfo();
+    
+    private void setShowCompetitorBoatInfo(boolean showCompetitorBoatInfo) {
+        this.showCompetitorBoatInfo = showCompetitorBoatInfo;
     }
 
     /**
@@ -2301,11 +2492,15 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
                             try {
-                                final boolean wasEmptyRaceColumnSelection = Util.isEmpty(raceColumnSelection.getSelectedRaceColumns());
+                                final boolean wasEmptyRaceColumnSelection = Util
+                                        .isEmpty(raceColumnSelection.getSelectedRaceColumns());
                                 updateLeaderboard(result);
-                                LS potentiallyChangedSettings = overrideDefaultsForNamesOfRaceColumns(currentSettings, result);
-                                // reapply, when this is the first time we received the race columns or if columns have changed
-                                if (wasEmptyRaceColumnSelection || !potentiallyChangedSettings.equals(currentSettings)) {
+                                LS potentiallyChangedSettings = overrideDefaultsForNamesOfRaceColumns(currentSettings,
+                                        result);
+                                // reapply, when this is the first time we received the race columns or if columns have
+                                // changed
+                                if (wasEmptyRaceColumnSelection
+                                        || !potentiallyChangedSettings.equals(currentSettings)) {
                                     updateSettings(potentiallyChangedSettings);
                                 }
                             } finally {
@@ -2381,7 +2576,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
                 columnToCollapseAndExpandAgain.changeExpansionState(/* expand */ false);
             }
-            competitorSelectionProvider.setCompetitors(leaderboard.competitors, /* listenersNotToNotify */this);
+            updateCompetitors(leaderboard);
             if (!initialCompetitorFilterHasBeenApplied) {
                 applyTop30FilterIfCompetitorSizeGreaterEqual40(leaderboard);
                 initialCompetitorFilterHasBeenApplied = true;
@@ -2394,7 +2589,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 columnToCollapseAndExpandAgain.changeExpansionState(/* expand */ true);
             }
             adjustDelayToLive();
-            final Map<CompetitorDTO, LeaderboardRowDTO> rowsToDisplay = getRowsToDisplay();
+            final Map<CompetitorWithBoatDTO, LeaderboardRowDTO> rowsToDisplay = getRowsToDisplay();
             Set<LeaderboardRowDTO> rowsToAdd = new HashSet<>(rowsToDisplay.values());
             Map<Integer, LeaderboardRowDTO> rowsToUpdate = new HashMap<>();
             synchronized (getData().getList()) {
@@ -2433,7 +2628,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 AbstractSortableColumnWithMinMax<?, ?> c = (AbstractSortableColumnWithMinMax<?, ?>) getLeaderboardTable()
                         .getColumn(i);
                 c.updateMinMax();
-                processAutoExpands(c,lastRaceColumn);
+                processAutoExpands(c, lastRaceColumn);
             }
             if (leaderboardTable.getCurrentlySortedColumn() != null) {
                 leaderboardTable.sort();
@@ -2452,7 +2647,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     protected void updateToolbar(LeaderboardDTO leaderboard) {
         boolean doExecute = style.preUpdateToolbarHook(leaderboard);
-        if(doExecute){
+        if (doExecute) {
             scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
             if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
                 Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
@@ -2461,13 +2656,14 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             } else {
                 scoreCorrectionLastUpdateTimeLabel.setText("");
             }
-            
+
             boolean hasLiveRace = !leaderboard.getLiveRaces(timer.getLiveTimePointInMillis()).isEmpty();
             liveRaceLabel.setText(hasLiveRace ? getLiveRacesText() : "");
             scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
             liveRaceLabel.setVisible(hasLiveRace);
         }
     }
+
     protected abstract void processAutoExpands(AbstractSortableColumnWithMinMax<?, ?> c, RaceColumn<?> lastRaceColumn);
 
     protected abstract void applyTop30FilterIfCompetitorSizeGreaterEqual40(LeaderboardDTO leaderboard);
@@ -2506,6 +2702,13 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     /**
+     * Updates the competitors in the competitorSelectionProvider with the competitors received from the {@link LeaderboardDTO}
+     */
+    protected void updateCompetitors(LeaderboardDTO leaderboard) {
+        competitorSelectionProvider.setCompetitors(leaderboard.competitors, /* listenersNotToNotify */this);
+    }
+    
+    /**
      * Due to a course change, a race may change its number of legs. All expanded race columns that show leg columns and
      * whose leg count changed need to be collapsed before the leaderboard is replaced, and expanded afterwards again.
      * Race columns whose toggling is {@link ExpandableSortableColumn#isTogglingInProcess() currently in progress} are
@@ -2519,7 +2722,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private Collection<RaceColumn<?>> getExpandedRaceColumnsWhoseDisplayedLegCountChanged(
             LeaderboardDTO newLeaderboard) {
         Set<RaceColumn<?>> result = new HashSet<RaceColumn<?>>();
-        if (selectedRaceDetails.contains(DetailType.DISPLAY_LEGS)) {
+        if (selectedRaceDetails.contains(DetailType.RACE_DISPLAY_LEGS)) {
             for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
                 Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
                 if (c instanceof LeaderboardPanel.RaceColumn) {
@@ -2530,8 +2733,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     // longer
                     // know the correct leg count.
                     if (!rc.isTogglingInProcess() && rc.isExpanded()) {
-                        int oldLegCount = getLegCount(getLeaderboard(),rc.getRaceColumnName());
-                        int newLegCount = getLegCount(newLeaderboard,rc.getRaceColumnName());
+                        int oldLegCount = getLegCount(getLeaderboard(), rc.getRaceColumnName());
+                        int newLegCount = getLegCount(newLeaderboard, rc.getRaceColumnName());
                         if (oldLegCount != newLegCount) {
                             result.add(rc);
                         }
@@ -2561,7 +2764,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      * the race identified by {@link #preSelectedRace} otherwise.
      */
     @Override
-    public abstract Map<CompetitorDTO, LeaderboardRowDTO> getRowsToDisplay();
+    public abstract Map<CompetitorWithBoatDTO, LeaderboardRowDTO> getRowsToDisplay();
 
     /**
      * The {@link LeaderboardDTO} holds {@link LeaderboardDTO#getRaceList() races} as {@link RaceColumnDTO} objects.
@@ -2580,12 +2783,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      * @return all competitors for which the {@link #getLeaderboard() leaderboard} has an entry whose
      *         {@link LeaderboardEntryDTO#race} equals <code>race</code>
      */
-    public Iterable<CompetitorDTO> getCompetitors(RaceIdentifier race) {
-        Set<CompetitorDTO> result = new HashSet<CompetitorDTO>();
+    public Iterable<CompetitorWithBoatDTO> getCompetitors(RaceIdentifier race) {
+        Set<CompetitorWithBoatDTO> result = new HashSet<CompetitorWithBoatDTO>();
         if (getLeaderboard() != null) {
             for (RaceColumnDTO raceColumn : getLeaderboard().getRaceList()) {
                 if (raceColumn.hasTrackedRace(race)) {
-                    for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : getLeaderboard().rows.entrySet()) {
+                    for (Map.Entry<CompetitorWithBoatDTO, LeaderboardRowDTO> e : getLeaderboard().rows.entrySet()) {
                         LeaderboardEntryDTO entry = e.getValue().fieldsByRaceColumnName
                                 .get(raceColumn.getRaceColumnName());
                         if (entry != null && entry.race != null && entry.race.equals(race)) {
@@ -2627,21 +2830,20 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         columnIndex = ensureRaceRankColumn(columnIndex);
         columnIndex = ensureSelectionCheckboxColumn(columnIndex);
         columnIndex = ensureRankColumn(columnIndex);
-        columnIndex = ensureSailIDAndCompetitorColumn(columnIndex);
+        columnIndex = ensureCompetitorInfoWithFlagColumnAndCompetitorColumn(columnIndex);
         columnIndex = updateCarryColumn(leaderboard, columnIndex);
         adjustOverallDetailColumns(leaderboard, columnIndex);
         // first remove race columns no longer needed:
         removeUnusedRaceColumns(leaderboard);
         if (leaderboard != null) {
-            if(style.hasRaceColumns()){
+            if (style.hasRaceColumns()) {
                 createMissingAndAdjustExistingRaceColumns(leaderboard);
             }
             ensureTotalsColumn();
-            updateTotalRacesSailedColumn();
         }
     }
 
-    //Single leaderboard hook
+    // Single leaderboard hook
     protected int ensureRaceRankColumn(int columnIndex) {
         return 0;
     }
@@ -2658,7 +2860,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         List<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> overallDetailColumnsToShow = new ArrayList<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>>();
         // ensure the ordering in overallDetailColumnsToShow conforms to the ordering of
         // getAvailableOverallDetailColumnTypes()
-        for (DetailType overallDetailType : getAvailableOverallDetailColumnTypes()) {
+        for (DetailType overallDetailType : DetailType.getAvailableOverallDetailColumnTypes()) {
             if (selectedOverallDetailColumns.contains(overallDetailType)
                     && overallDetailColumnMap.containsKey(overallDetailType)) {
                 overallDetailColumnsToShow.add(overallDetailColumnMap.get(overallDetailType));
@@ -2882,8 +3084,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      * If the last column is the totals column, remove it. Add the race column as the last column.
      */
     private void addRaceColumn(RaceColumn<?> raceColumn) {
-        if (getLeaderboardTable()
-                .getColumn(getLeaderboardTable().getColumnCount() - 1) instanceof LeaderboardPanel.TotalNetPointssColumn) {
+        if (getLeaderboardTable().getColumn(
+                getLeaderboardTable().getColumnCount() - 1) instanceof LeaderboardPanel.TotalNetPointssColumn) {
             removeColumn(getLeaderboardTable().getColumnCount() - 1);
         }
         addColumn(raceColumn);
@@ -2954,30 +3156,26 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     /**
      * @return the 0-based index for the next column
      */
-    private int ensureSailIDAndCompetitorColumn(int columnIndexWhereToInsertTheNextColumn) {
-        if (isShowCompetitorSailId()) {
+    private int ensureCompetitorInfoWithFlagColumnAndCompetitorColumn(int columnIndexWhereToInsertTheNextColumn) {
+        if (isShowCompetitorShortName()) {
+            CompetitorInfoWithFlagColumn<LeaderboardRowDTO> competitorInfoWithFlagColumn;
+            CompetitorFetcher<LeaderboardRowDTO> competitorFetcher = (LeaderboardRowDTO row) -> row.competitor;
+                competitorInfoWithFlagColumn = new CompetitorInfoWithFlagColumn<LeaderboardRowDTO>(competitorFetcher, style);
             if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
-                    || !(getLeaderboardTable()
-                            .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn)) {
-                insertColumn(columnIndexWhereToInsertTheNextColumn,
-                        new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
-                            @Override
-                            public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
-                                return t.competitor;
-                            }
-                        },style));
+                    || !(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorInfoWithFlagColumn)) {
+                insertColumn(columnIndexWhereToInsertTheNextColumn, competitorInfoWithFlagColumn);
             }
             columnIndexWhereToInsertTheNextColumn++;
         } else {
             if (getLeaderboardTable().getColumnCount() > columnIndexWhereToInsertTheNextColumn && getLeaderboardTable()
-                    .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn) {
+                    .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorInfoWithFlagColumn) {
                 removeColumn(columnIndexWhereToInsertTheNextColumn);
             }
         }
         if (isShowCompetitorFullName()) {
             if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
-                    || !(getLeaderboardTable()
-                            .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof LeaderboardPanel.CompetitorColumn)) {
+                    || !(getLeaderboardTable().getColumn(
+                            columnIndexWhereToInsertTheNextColumn) instanceof LeaderboardPanel.CompetitorColumn)) {
                 insertColumn(columnIndexWhereToInsertTheNextColumn, createCompetitorColumn());
             }
             columnIndexWhereToInsertTheNextColumn++;
@@ -2987,6 +3185,23 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 removeColumn(columnIndexWhereToInsertTheNextColumn);
             }
         }
+        if (canShowCompetitorBoatInfo() && isShowCompetitorBoatInfo()) {
+            if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
+                    || !(getLeaderboardTable()
+                            .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof LeaderboardPanel.BoatInfoColumn)) {
+                CompetitorFetcher<LeaderboardRowDTO> competitorFetcher = (LeaderboardRowDTO row) -> row.competitor;
+                BoatFetcher<LeaderboardRowDTO> boatFetcher = (LeaderboardRowDTO row) -> row.boat;
+                BoatInfoColumn<LeaderboardRowDTO> boatInfoColumn = new BoatInfoColumn<LeaderboardRowDTO>(competitorFetcher, boatFetcher, style);                
+                insertColumn(columnIndexWhereToInsertTheNextColumn, boatInfoColumn);
+            }
+            columnIndexWhereToInsertTheNextColumn++;
+        } else {
+            if (getLeaderboardTable().getColumnCount() > columnIndexWhereToInsertTheNextColumn && getLeaderboardTable()
+                    .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof LeaderboardPanel.BoatInfoColumn) {
+                removeColumn(columnIndexWhereToInsertTheNextColumn);
+            }
+        }
+
         return columnIndexWhereToInsertTheNextColumn;
     }
 
@@ -2994,41 +3209,17 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         return new CompetitorColumn(new CompetitorColumnBase<LeaderboardRowDTO>(this, stringMessages,
                 new CompetitorFetcher<LeaderboardRowDTO>() {
                     @Override
-                    public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
+                    public CompetitorWithBoatDTO getCompetitor(LeaderboardRowDTO t) {
                         return t.competitor;
                     }
                 }));
     }
-
+    
     private void ensureTotalsColumn() {
         // add a totals column on the right
-        if (getLeaderboardTable().getColumnCount() == 0 || !(getLeaderboardTable()
-                .getColumn(getLeaderboardTable().getColumnCount() - 1) instanceof LeaderboardPanel.TotalNetPointssColumn)) {
+        if (getLeaderboardTable().getColumnCount() == 0 || !(getLeaderboardTable().getColumn(
+                getLeaderboardTable().getColumnCount() - 1) instanceof LeaderboardPanel.TotalNetPointssColumn)) {
             addColumn(new TotalNetPointssColumn(TOTAL_COLUMN_STYLE));
-        }
-    }
-
-    private void ensureTotalRacesSailedColumn() {
-        // add a totals column on the right
-        if (getLeaderboardTable().getColumnCount() == 0 || !(getLeaderboardTable()
-                .getColumn(getLeaderboardTable().getColumnCount() - 2) instanceof LeaderboardPanel.TotalRacesCompletedColumn)) {
-            insertColumn(getLeaderboardTable().getColumnCount() - 1, new TotalRacesCompletedColumn(TOTAL_COLUMN_STYLE));
-        }
-    }
-
-    private void ensureNoTotalRacesSailedColumn() {
-        if ((getLeaderboardTable()
-                .getColumn(getLeaderboardTable().getColumnCount() - 2) instanceof LeaderboardPanel.TotalRacesCompletedColumn)) {
-            removeColumn(getLeaderboardTable().getColumnCount() - 2);
-        }
-    }
-
-    protected void updateTotalRacesSailedColumn() {
-        final boolean showTotalRacesCompletedColumn = isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor();
-        if (showTotalRacesCompletedColumn) {
-            ensureTotalRacesSailedColumn();
-        } else {
-            ensureNoTotalRacesSailedColumn();
         }
     }
 
@@ -3054,15 +3245,15 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     private void ensureNoCarryColumn(int zeroBasedIndexOfCarryColumn) {
-        if (getLeaderboardTable().getColumnCount() > zeroBasedIndexOfCarryColumn
-                && getLeaderboardTable().getColumn(zeroBasedIndexOfCarryColumn) instanceof LeaderboardPanel.CarryColumn) {
+        if (getLeaderboardTable().getColumnCount() > zeroBasedIndexOfCarryColumn && getLeaderboardTable()
+                .getColumn(zeroBasedIndexOfCarryColumn) instanceof LeaderboardPanel.CarryColumn) {
             removeColumn(zeroBasedIndexOfCarryColumn);
         }
     }
 
     protected void ensureCarryColumn(int zeroBasedIndexOfCarryColumn) {
-        if (getLeaderboardTable().getColumnCount() <= zeroBasedIndexOfCarryColumn
-                || !(getLeaderboardTable().getColumn(zeroBasedIndexOfCarryColumn) instanceof LeaderboardPanel.CarryColumn)) {
+        if (getLeaderboardTable().getColumnCount() <= zeroBasedIndexOfCarryColumn || !(getLeaderboardTable()
+                .getColumn(zeroBasedIndexOfCarryColumn) instanceof LeaderboardPanel.CarryColumn)) {
             while (getLeaderboardTable().getColumnCount() > zeroBasedIndexOfCarryColumn) {
                 removeColumn(zeroBasedIndexOfCarryColumn);
             }
@@ -3161,7 +3352,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     @Override
-    public void addedToSelection(CompetitorDTO competitor) {
+    public void addedToSelection(CompetitorWithBoatDTO competitor) {
         LeaderboardRowDTO row = getRow(competitor.getIdAsString());
         if (row != null) {
             leaderboardSelectionModel.setSelected(row, true);
@@ -3169,7 +3360,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     @Override
-    public void removedFromSelection(CompetitorDTO competitor) {
+    public void removedFromSelection(CompetitorWithBoatDTO competitor) {
         LeaderboardRowDTO row = getRow(competitor.getIdAsString());
         if (row != null) {
             leaderboardSelectionModel.setSelected(row, false);
@@ -3181,7 +3372,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     @Override
-    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+    public void competitorsListChanged(Iterable<CompetitorWithBoatDTO> competitors) {
         setFilterControlStatus();
         if (timer.isInitialized()) {
             timeChanged(timer.getTime(), null);
@@ -3189,14 +3380,14 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     @Override
-    public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
+    public void filteredCompetitorsListChanged(Iterable<CompetitorWithBoatDTO> filteredCompetitors) {
         setFilterControlStatus();
         updateLeaderboard(getLeaderboard());
     }
 
     @Override
-    public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
-            FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
+    public void filterChanged(FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> oldFilterSet,
+            FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> newFilterSet) {
         // nothing to do; if the list of filtered competitors has changed, a separate call to
         // filteredCompetitorsListChanged will occur
         setFilterControlStatus();
@@ -3357,7 +3548,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     public String getId() {
         return LeaderboardPanelLifecycle.ID;
     }
-    
+
     protected class CompetitorColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, LeaderboardRowDTO> {
         private final CompetitorColumnBase<LeaderboardRowDTO> base;
 
@@ -3410,7 +3601,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
-    public abstract String getCompetitorColor(CompetitorDTO competitor);
-
+    public abstract String getCompetitorColor(CompetitorWithBoatDTO competitor);
 
 }

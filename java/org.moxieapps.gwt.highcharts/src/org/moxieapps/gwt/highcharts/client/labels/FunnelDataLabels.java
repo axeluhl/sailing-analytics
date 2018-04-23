@@ -24,13 +24,13 @@ package org.moxieapps.gwt.highcharts.client.labels;
  * Example usage:
  * <code><pre>
  * chart.setPiePlotOptions(
- * new PiePlotOptions()
- * .setPieDataLabels(
- * new PieDataLabels()
- * .setEnabled(true)
- * .setConnectorColor("#FF0000)
- * .setConnectorWidth(4.0)
- * )
+ *      new PiePlotOptions()
+ *          .setPieDataLabels(
+ *              new PieDataLabels()
+ *                  .setEnabled(true)
+ *                  .setConnectorColor("#FF0000)
+ *                  .setConnectorWidth(4.0)
+ *          )
  * );
  * </pre></code>
  *

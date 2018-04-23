@@ -4,6 +4,58 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
     <div class="innerContent">
+        <h5 class="articleSubheadline">April 2018</h5>
+        <ul class="bulletList">
+           <li>In the raceboard a new maneuver table has been added next to the wind and competitor charts.
+               It shows the detected maneuvers of selected competitors which can be filtered by type via the respective 
+               settings dialog. Also, the table entries can be sorted by clicking the column headers.
+               During replay of finished races, clicking a maneuver will skip to the beginning of the maneuver.
+               In case of a live race, the maneuver table will progressively fill with more data, as it becomes available.
+           </li>
+        </ul>
+
+        <h5 class="articleSubheadline">March 2018</h5>
+        <ul class="bulletList">
+           <li>The data source and key figure selection of the <tt>DataMining.html</tt> have been simplified into a single
+               input field widget.
+           </li>
+           <li>The key figure selection can now be searched and filtered with keywords by typing in the new selection widget.
+           <li>Zooming in on a competitor chart in the race viewer will now adjust the
+               time resolution to that selected in the settings if before zooming the
+               resolution had to be reduced to remain under the limit of data points that
+               can be requested from the server in one round trip.
+           </li>
+        </ul>
+        
+        <h5 class="articleSubheadline">January 2018</h5>
+        <ul class="bulletList">
+           <li>Coordinate display (lat/lng), e.g., in pop-ups for marks and wind sensors
+               now show the more common DD°MM.MMM' format.
+           </li>
+        </ul>
+        
+        <h5 class="articleSubheadline">November 2017</h5>
+        <ul class="bulletList">
+           <li>The language preference set in the user profile (if any), now also affects the website's language. Formerly,
+               this preference affected the language of notification mails only.
+               Be aware of the fact, that signing in will not force the page to be shown in the user's preferred language.
+               It will only take effect when refreshing the page manually or opening a new one, in order to prevent the
+               state of the currently opened page to get lost.
+               After a sign out (and another page reload) the language preference will stop to take effect.
+           </li>
+           <li>There are additional column types in the leaderboard that show per leg, per race and overall statistics
+               for distance foiled and duration foiled. This allows for quick competitor comparisons regarding these
+               figures which are so important for any foiling boat class. Note, that this feature is also available
+               on overall leaderboards, providing foiling stats across an entire season or event series.
+           </li>
+           <li>When a leaderboard belongs to a leaderboard group with an overall (series) leaderboard and the
+               leaderboard has no scores at all yet for a competitor, that competitor won't be assigned a score
+               in the overall (series) leaderboard either. This way, when an act or event has its leaderboard already
+               linked to the series leaderboard group, no scores will show in the series leaderboard before the
+               act/event starts producing scores for the competitors.
+           </li>
+        </ul>
+        
         <h5 class="articleSubheadline">October 2017</h5>
         <ul class="bulletList">
            <li>The <tt>DataMining.html</tt> module now offers an additional chart type with error bars. This currently

@@ -40,7 +40,7 @@
 		<td>POST</td>
 	</tr>
 	<tr>
-		<td>Example:</td>
+		<td>Example competitor:</td>
 		<td>POST <a href=http://sapsailing.com/api/v1/leaderboards/{name}/device_mappings/end>http://sapsailing.com/api/v1/leaderboards/{name}/device_mappings/end</a>
 			<pre><code>
 {
@@ -51,6 +51,30 @@
 			</code></pre>
 		</td>
 	</tr>
+    <tr>
+        <td>Example mark:</td>
+        <td>POST <a href=http://sapsailing.com/api/v1/leaderboards/{name}/device_mappings/end>http://sapsailing.com/api/v1/leaderboards/{name}/device_mappings/end</a>
+            <pre><code>
+{
+    "markId" : "af855a56-9726-4a9c-a77e-da955bd289bg",
+    "deviceUuid" : "af855a56-9726-4a9c-a77e-da955bd289bf",
+    "toMillis" : 1415624564719
+}
+            </code></pre>
+        </td>
+    </tr>
+        <tr>
+        <td>Example boat:</td>
+        <td>POST <a href=http://sapsailing.com/api/v1/leaderboards/{name}/device_mappings/end>http://sapsailing.com/api/v1/leaderboards/{name}/device_mappings/end</a>
+            <pre><code>
+{
+    "boatId" : "af855a56-9726-4a9c-a77e-da955bd289bg",
+    "deviceUuid" : "af855a56-9726-4a9c-a77e-da955bd289bf",
+    "toMillis" : 1415624564719
+}
+            </code></pre>
+        </td>
+    </tr>
 </table>
 <div style="height: 1em;"></div>
 <a href="index.html">Back to Web Service Overview</a> 

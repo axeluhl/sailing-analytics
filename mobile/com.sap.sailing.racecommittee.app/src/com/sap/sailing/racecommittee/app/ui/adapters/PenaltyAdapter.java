@@ -1,11 +1,16 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
@@ -15,7 +20,10 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -23,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHolder> {
@@ -30,16 +39,22 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
     private static final int SAILING_NUMBER_POSITION = 0;
     private static final int COMPETITOR_NAME_POSITION = 1;
 
-    private Context mContext;
+    private final Context mContext;
+    private final ItemListener mListener;
+    private final boolean mCanBoatsOfCompetitorsChangePerRace;
+
     private List<CompetitorResultEditableImpl> mCompetitor;
     private List<CompetitorResultEditableImpl> mFiltered;
-    private ItemListener mListener;
+    private Map<Serializable, Boat> mBoats;
     private OrderBy mOrderBy = OrderBy.SAILING_NUMBER;
     private String mFilter;
 
-    public PenaltyAdapter(Context context, @NonNull ItemListener listener) {
+    public PenaltyAdapter(Context context, @NonNull ItemListener listener, boolean canBoatsOfCompetitorsChangePerRace) {
         mContext = context;
         mListener = listener;
+        mCanBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
+
+        mBoats = new HashMap<>();
     }
 
     @Override
@@ -68,19 +83,41 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 item.setChecked(isChecked);
-                if (mListener != null) {
-                    mListener.onCheckedChanged(item, isChecked);
-                }
+                mListener.onCheckedChanged(item, isChecked);
             }
         });
         holder.mItemEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mListener != null) {
-                    mListener.onEditClicked(item);
-                }
+                mListener.onEditClicked(item);
             }
         });
+        holder.mItemVessel.setVisibility(View.GONE);
+        if (mCanBoatsOfCompetitorsChangePerRace) {
+            Boat boat = mBoats.get(item.getCompetitorId());
+            if (boat != null) {
+                holder.mItemVessel.setVisibility(View.VISIBLE);
+                holder.mItemVessel.setText(boat.getSailID());
+                if (boat.getColor() != null) {
+                    ViewHelper.setColors(holder.mItemVessel, boat.getColor().getAsHtml());
+                }
+            }
+        }
+        Drawable mergeIcon;
+        switch (item.getMergeState()) {
+            case WARNING:
+                mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
+                break;
+
+            case ERROR:
+                mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
+                break;
+
+            default:
+                mergeIcon = null;
+                break;
+        }
+        holder.mItemMergeState.setImageDrawable(mergeIcon);
     }
 
     @Override
@@ -88,7 +125,13 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
         return (mFiltered != null) ? mFiltered.size() : 0;
     }
 
-    public void setCompetitor(List<CompetitorResultEditableImpl> competitor) {
+    public void setCompetitor(List<CompetitorResultEditableImpl> competitor, @Nullable Map<Competitor, Boat> data) {
+        if (data != null) {
+            mBoats.clear();
+            for (Map.Entry<Competitor, Boat> entry : data.entrySet()) {
+                mBoats.put(entry.getKey().getId(), entry.getValue());
+            }
+        }
         mCompetitor = competitor;
         mFiltered = filterData();
         sortData();
@@ -171,8 +214,16 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
             String[] left = splitDisplayName(lhs.getCompetitorDisplayName());
             String[] right = splitDisplayName(rhs.getCompetitorDisplayName());
 
-            String leftItem = left[mPos];
-            String rightItem = right[mPos];
+            int leftPos = mPos;
+            int rightPos = mPos;
+            if (left.length == 1) {
+                leftPos = 0;
+            }
+            if (right.length == 1) {
+                rightPos = 0;
+            }
+            String leftItem = left[leftPos];
+            String rightItem = right[rightPos];
             if (mPos == SAILING_NUMBER_POSITION) {
                 for (String leftData : Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(leftItem)) {
                     leftItem = leftData;
@@ -192,17 +243,21 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         private CheckBox mItemCheck;
+        private TextView mItemVessel;
         private TextView mItemText;
         private TextView mItemPenalty;
         private View mItemEdit;
+        private ImageView mItemMergeState;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             mItemCheck = ViewHelper.get(itemView, R.id.item_check);
             mItemText = ViewHelper.get(itemView, R.id.item_text);
+            mItemVessel = ViewHelper.get(itemView, R.id.item_vessel);
             mItemPenalty = ViewHelper.get(itemView, R.id.item_penalty);
             mItemEdit = ViewHelper.get(itemView, R.id.item_edit);
+            mItemMergeState = ViewHelper.get(itemView, R.id.item_merge_state);
         }
     }
 }

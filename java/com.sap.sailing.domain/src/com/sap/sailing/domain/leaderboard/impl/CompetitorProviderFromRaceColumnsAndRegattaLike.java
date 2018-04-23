@@ -16,10 +16,12 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetito
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterBoatEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -85,11 +87,15 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
                 invalidateAllCompetitorsCaches();
             }
 
+            public void visit(RegattaLogRegisterBoatEvent event) {
+                invalidateAllCompetitorsCaches();
+            }
+            
             @Override
             public void visit(RegattaLogRevokeEvent event) {
                 try {
-                    if (RegattaLogRegisterCompetitorEvent.class.isAssignableFrom(Class.forName(event
-                            .getRevokedEventType()))) {
+                    if (RegattaLogRegisterCompetitorEvent.class.isAssignableFrom(Class.forName(event.getRevokedEventType())) ||
+                            RegattaLogRegisterBoatEvent.class.isAssignableFrom(Class.forName(event.getRevokedEventType()))) {
                         invalidateAllCompetitorsCaches();
                     }
                 } catch (ClassNotFoundException e) {
@@ -113,7 +119,6 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
             public void visit(RaceLogRevokeEvent event) {
                 try {
                     final Class<?> revokedEventClass = Class.forName(event.getRevokedEventType());
-                    // 
                     if (RaceLogRegisterCompetitorEvent.class.isAssignableFrom(revokedEventClass) ||
                             RaceLogUseCompetitorsFromRaceLogEvent.class.isAssignableFrom(revokedEventClass)) {
                         invalidateAllCompetitorsCaches();
@@ -169,7 +174,24 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
     public Iterable<Competitor> getAllCompetitors() {
         return getAllCompetitorsWithRaceDefinitionsConsidered().getB();
     }
-    
+
+    /**
+     * Returns a Collection of all {@link Boat boats} collected over {@link RegattaLog}, {@link RaceLog} as well as the
+     * {@link RaceDefinition RaceDefinitions} of all {@link TrackedRace TrackedRaces} attached. While subsequent calls
+     * may return different {@link Collection Collections} the contents of a {@link Collection} returned may never
+     * change.
+     */
+    public Iterable<Boat> getAllBoats() {
+        Set<Boat> result = new HashSet<>();
+        for (RaceColumn rc : provider.getRaceColumns()) {
+            result.addAll(rc.getAllCompetitorsAndTheirBoats().values());
+        }
+        for (Boat boat : provider.getBoatsRegisteredInRegattaLog()) {
+            result.add(boat);
+        }
+        return result; 
+    }
+
     /**
      * Returns a Collection of all {@link Competitor Competitors} collected over {@link RegattaLog}, {@link RaceLog} as
      * well as the {@link RaceDefinition RaceDefinitions} of all {@link TrackedRace TrackedRaces} attached. While
@@ -181,9 +203,7 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
         if (allCompetitorsCache == null) {
             final Set<Competitor> result = new HashSet<>();
             final Set<RaceDefinition> raceDefinitions = new HashSet<>();
-            boolean hasRaceColumns = false;
             for (RaceColumn rc : provider.getRaceColumns()) {
-                hasRaceColumns = true;
                 final Pair<Iterable<RaceDefinition>, Iterable<Competitor>> allCompetitorsInRaceColumnWithRaceDefinitionsConsidered = rc.getAllCompetitorsWithRaceDefinitionsConsidered();
                 Util.addAll(allCompetitorsInRaceColumnWithRaceDefinitionsConsidered.getB(), result);
                 Util.addAll(allCompetitorsInRaceColumnWithRaceDefinitionsConsidered.getA(), raceDefinitions);
@@ -192,12 +212,10 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
                 }
             }
             final RegattaLog regattaLog = provider.getRegattaLike().getRegattaLog();
-            if (!hasRaceColumns) {
-                // If no race exists, the regatta log-provided competitor registrations will not have
-                // been considered yet; add them:
-                final Set<Competitor> regattaLogProvidedCompetitors = new CompetitorsInLogAnalyzer<>(regattaLog).analyze();
-                result.addAll(regattaLogProvidedCompetitors);
-            }
+            // If no race exists, the regatta log-provided competitor registrations will not have
+            // been considered yet; add them:
+            final Set<Competitor> regattaLogProvidedCompetitors = new CompetitorsInLogAnalyzer<>(regattaLog).analyze();
+            result.addAll(regattaLogProvidedCompetitors);
             // else, don't add regatta log competitors because they have been added in each column already.
             // The competitors are collected from the races. Those, however, will be the regatta log
             // competitors if the race does not define its own.

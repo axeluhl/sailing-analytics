@@ -20,10 +20,13 @@ import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
  * into the {@link DoubleVectorFix}.
  */
 public enum BravoExtendedSensorDataMetadata implements ColumnMetadata {
+    // START ----- DONT CHANGE UNLESS BravoSensorDataMetadata CHANGES TOO ------
     RIDE_HEIGHT_PORT_HULL("RideHeightPort", /* expectedInLogfile */ true), //
     RIDE_HEIGHT_STBD_HULL("RideHeightStbd", /* expectedInLogfile */ true), //
     HEEL("Heel", /* expectedInLogfile */ true), //
     PITCH("PitchRate", /* expectedInLogfile */ true), //
+    // END   ----- DONT CHANGE UNLESS BravoSensorDataMetadata CHANGES TOO ------
+    
     DB_RAKE_PORT("DaggerBoardRakeAnglePort", /* expectedInLogfile */ true), //
     DB_RAKE_STBD("DaggerBoardRakeAngleStbd", /* expectedInLogfile */ true), //
     RUDDER_RAKE_PORT("RudderRakeAnglePort", /* expectedInLogfile */ true), //
@@ -35,12 +38,41 @@ public enum BravoExtendedSensorDataMetadata implements ColumnMetadata {
     DEPTH(null, /* expectedInLogfile */ false), //
     RUDDER(null, /* expectedInLogfile */ false), //
     FORESTAY_LOAD(null, /* expectedInLogfile */ false), //
+    FORESTAY_PRESSURE(null, /* expectedInLogfile */ false), //
     TACK_ANGLE(null, /* expectedInLogfile */ false), //
     RAKE_DEG(null, /* expectedInLogfile */ false), //
     DEFLECTOR_PERCENTAGE(null, /* expectedInLogfile */ false), //
     TARGET_HEEL(null, /* expectedInLogfile */ false), //
     DEFLECTOR_MILLIMETERS(null, /* expectedInLogfile */ false), //
     TARGET_BOATSPEED_P(null, /* expectedInLogfile */ false), //
+    LAT("Lat", /* expectedInLogfile */ true), //
+    LON("Lon", /* expectedInLogfile */ true), //
+    COG("COG", /* expectedInLogfile */ true), //
+    SOG("SOG", /* expectedInLogfile */ true), //
+    EXPEDITION_AWA(null, /* expectedInLogfile */ false), //
+    EXPEDITION_AWS(null, /* expectedInLogfile */ false), //
+    EXPEDITION_TWA(null, /* expectedInLogfile */ false), //
+    EXPEDITION_TWS(null, /* expectedInLogfile */ false), //
+    EXPEDITION_TWD(null, /* expectedInLogfile */ false), //
+    EXPEDITION_BSP(null, /* expectedInLogfile */ false), //
+    EXPEDITION_BSP_TR(null, /* expectedInLogfile */ false), //
+    EXPEDITION_SOG(null, /* expectedInLogfile */ false), //
+    EXPEDITION_COG(null, /* expectedInLogfile */ false), //
+    EXPEDITION_FORESTAY(null, /* expectedInLogfile */ false), //
+    EXPEDITION_RAKE(null, /* expectedInLogfile */ false), //
+    EXPEDITION_HDG(null, /* expectedInLogfile */ false), //
+    EXPEDITION_HEEL(null, /* expectedInLogfile */ false), //
+    EXPEDITION_TGHEEL(null, /* expectedInLogfile */ false), //
+    EXPEDITION_TMTOGUN(null, /* expectedInLogfile */ false), //
+    EXPEDITION_TMTOBURN(null, /* expectedInLogfile */ false),  //
+    EXPEDITION_BELOWLN(null, /* expectedInLogfile */ false), //
+    EXPEDITION_BARO(null, /* expectedInLogfile */ false), //
+    EXPEDITION_LOAD_P(null, /* expectedInLogfile */ false), //
+    EXPEDITION_LOAD_S(null, /* expectedInLogfile */ false), //
+    EXPEDITION_JIB_CAR_PORT(null, /* expectedInLogfile */ false), //
+    EXPEDITION_JIB_CAR_STBD(null, /* expectedInLogfile */ false), //
+    EXPEDITION_MAST_BUTT(null, /* expectedInLogfile */ false), //
+    EXPEDITION_RATE_OF_TURN(null, /* expectedInLogfile */ false), //
     ;
 
     private final String columnName;

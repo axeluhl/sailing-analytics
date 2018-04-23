@@ -25,7 +25,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.udpconnector,
  com.googlecode.mgwt;bundle-version="2.0.0";resolution:=optional,
  com.sap.sse.gwt.adminconsole,
- org.apache.commons.math;bundle-version="2.1.0"
+ org.apache.commons.math;bundle-version="2.1.0",
+ com.sap.sse.security.ui
 Bundle-ActivationPolicy: lazy
 Import-Package: com.sap.sse.util,
  javax.servlet;version="3.1.0",
@@ -38,3 +39,4 @@ Web-ContextPath: /dashboards
 Bundle-ClassPath: WEB-INF/classes/,
  WEB-INF/lib/gwt-maps-api-3.9.0-build-17.jar,
  WEB-INF/lib/gwt-ajaxloader.jar
+Automatic-Module-Name: com.sap.sailing.dashboards.gwt

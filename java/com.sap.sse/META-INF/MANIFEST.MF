@@ -10,6 +10,8 @@ Export-Package: com.sap.sse,
  com.sap.sse.i18n,
  com.sap.sse.i18n.impl,
  com.sap.sse.osgi,
+ com.sap.sse.pairinglist,
+ com.sap.sse.pairinglist.impl,
  com.sap.sse.qrcode,
  com.sap.sse.util,
  com.sap.sse.util.graph,
@@ -27,3 +29,4 @@ Import-Package: javax.servlet;version="3.1.0",
  javax.servlet.http;version="3.1.0",
  org.osgi.framework;version="1.8.0",
  org.osgi.util.tracker;version="1.5.1"
+Automatic-Module-Name: com.sap.sse

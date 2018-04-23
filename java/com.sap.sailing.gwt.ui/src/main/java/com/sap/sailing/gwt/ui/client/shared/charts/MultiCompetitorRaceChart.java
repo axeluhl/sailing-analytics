@@ -3,9 +3,10 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
@@ -38,14 +39,14 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     public MultiCompetitorRaceChart(Component<?> parent, ComponentContext<?> context,
             MultiCompetitorRaceChartLifecycle lifecycle,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
+            RaceCompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             final ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
             final String leaderboardGroupName, String leaderboardName) {
         super(parent, context, sailingService, asyncActionsExecutor, competitorSelectionProvider,
                 selectedRaceIdentifier, timer,
                 timeRangeWithZoomProvider, stringMessages, errorReporter,
-                /* show initially */DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
+                /* show initially */DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
                 allowTimeAdjust, leaderboardGroupName, leaderboardName);
         this.lifecycle = lifecycle;
     }
@@ -55,7 +56,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         Button settingsButton = SettingsDialog.createSettingsButton(this, stringMessages);
         return settingsButton;
     }
-
+    
     @Override
     public MultiCompetitorRaceChartSettings getSettings() {
         return new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedFirstDetailType(), getSelectedSecondDetailType());
@@ -79,16 +80,15 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         boolean settingsChanged = updateSettingsOnly(newSettings);
         DetailType firstType = newSettings.getFirstDetailType();
         DetailType secondType = newSettings.getSecondDetailType();
-        if(!lifecycle.getAllowedDetailTypes().contains(firstType)){
-            //if the first type is not allowed here, choose a different valid value
-            firstType = DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD;
+        if (!Util.contains(lifecycle.getAllowedDetailTypes(), firstType)) {
+            // if the first type is not allowed here, choose a different valid value
+            firstType = DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD;
         }
-        if(!lifecycle.getAllowedDetailTypes().contains(firstType)){
+        if (!Util.contains(lifecycle.getAllowedDetailTypes(), secondType)) {
             //if the second type is not allowed here, do not set it.
             secondType = null;
         }
-        boolean selectedDetailTypeChanged = setSelectedDetailTypes(firstType,
-                secondType);
+        boolean selectedDetailTypeChanged = setSelectedDetailTypes(firstType, secondType);
         if (selectedDetailTypeChanged || settingsChanged) {
             clearChart();
             timeChanged(timer.getTime(), null);
@@ -114,5 +114,4 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     public String getId() {
         return lifecycle.getComponentId();
     }
-
 }

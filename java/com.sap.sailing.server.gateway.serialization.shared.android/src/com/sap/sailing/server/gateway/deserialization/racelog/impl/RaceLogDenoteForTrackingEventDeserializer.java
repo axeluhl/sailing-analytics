@@ -11,6 +11,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTra
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDenoteForTrackingEventSerializer;
@@ -18,7 +19,7 @@ import com.sap.sse.common.TimePoint;
 
 public class RaceLogDenoteForTrackingEventDeserializer extends BaseRaceLogEventDeserializer {	
     private final SharedDomainFactory domainFactory;
-    public RaceLogDenoteForTrackingEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer,
+    public RaceLogDenoteForTrackingEventDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer,
             SharedDomainFactory factory) {
         super(competitorDeserializer);
         this.domainFactory = factory;

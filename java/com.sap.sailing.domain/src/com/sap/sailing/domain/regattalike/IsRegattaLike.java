@@ -26,6 +26,12 @@ public interface IsRegattaLike extends Serializable {
      */
     RegattaLog getRegattaLog();
     
+    /**
+     * Indicates whether the competitors use the same boat for the whole regatta or change the boat used during the competition
+     * @return true when the competitors change their boats, false otherwise
+     */
+    boolean canBoatsOfCompetitorsChangePerRace(); 
+
     RaceColumn getRaceColumnByName(String raceColumnName);
     
     RegattaLikeIdentifier getRegattaLikeIdentifier();
@@ -67,4 +73,6 @@ public interface IsRegattaLike extends Serializable {
      * @see #getTimeOnTimeFactor(Competitor)
      */
     Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor);
+    
+    void setFleetsCanRunInParallelToTrue();
 }

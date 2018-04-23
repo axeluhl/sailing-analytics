@@ -440,6 +440,12 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             public void onClick(DialogInterface dialog, int which) {
                 ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_YES, mSelectedRace.getId());
                 ExLog.w(RacingActivity.this, TAG, String.format("Race %s is selected for reset.", mSelectedRace.getId()));
+                Fragment fragment = getFragmentManager().findFragmentById(R.id.race_content);
+                if (fragment != null) {
+                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                    transaction.remove(fragment);
+                    transaction.commit();
+                }
                 mSelectedRace.getState().setAdvancePass(MillisecondsTimePoint.now());
             }
         });

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -12,7 +12,6 @@ import com.sap.sse.common.TimePoint;
  */
 public class RegattaLogDeviceCompetitorBravoMappingEventImpl extends AbstractRegattaLogDeviceCompetitorSensorDataMappingEventImpl {
     private static final long serialVersionUID = -1494030544804758753L;
-
 
     public RegattaLogDeviceCompetitorBravoMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable pId, Competitor mappedTo, DeviceIdentifier device,

@@ -9,12 +9,12 @@ import com.sap.sailing.gwt.home.desktop.places.contact.ContactActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
 import com.sap.sailing.gwt.home.desktop.places.error.ErrorActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.event.EventActivityProxy;
-import com.sap.sailing.gwt.home.desktop.places.events.EventsActivityProxy;
-import com.sap.sailing.gwt.home.desktop.places.morelogininformation.MoreLoginInformationActivity;
+import com.sap.sailing.gwt.home.desktop.places.events.EventsActivity;
+import com.sap.sailing.gwt.home.desktop.places.morelogininformation.MoreLoginInformationActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
-import com.sap.sailing.gwt.home.desktop.places.start.StartActivityProxy;
+import com.sap.sailing.gwt.home.desktop.places.start.StartActivity;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
@@ -68,11 +68,11 @@ public class DesktopActivityMapper implements ActivityMapper {
         } else if (place instanceof AbstractSeriesPlace) {
             return new com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesActivityProxy((AbstractSeriesPlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof EventsPlace) {
-            return new EventsActivityProxy((EventsPlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
+            return new EventsActivity((EventsPlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof AbstractUserProfilePlace) {
             return new UserProfileActivityProxy((AbstractUserProfilePlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof StartPlace) {
-            return new StartActivityProxy((StartPlace) place, clientFactory);
+            return new StartActivity((StartPlace) place, clientFactory);
         } else if (place instanceof SponsoringPlace) {
             return new SponsoringActivityProxy((SponsoringPlace) place, clientFactory);
         } else if (place instanceof SolutionsPlace) {
@@ -84,11 +84,11 @@ public class DesktopActivityMapper implements ActivityMapper {
         } else if (place instanceof ConfirmationPlace) {
             return new ConfirmationActivityProxy((ConfirmationPlace) place, clientFactory);
         } else if (place instanceof PasswordResetPlace) {
-            return new PasswordResetActivityProxy((PasswordResetPlace) place, clientFactory);            
+            return new PasswordResetActivityProxy((PasswordResetPlace) place, clientFactory);
         } else if (place instanceof ImprintPlace) {
             return new ImprintActivityProxy((ImprintPlace) place);
         } else if (place instanceof MoreLoginInformationPlace) {
-            return new MoreLoginInformationActivity(place, clientFactory);
+            return new MoreLoginInformationActivityProxy((MoreLoginInformationPlace) place, clientFactory);
         } else {
             return null;
         }

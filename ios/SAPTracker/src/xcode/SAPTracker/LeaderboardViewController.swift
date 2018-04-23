@@ -10,7 +10,7 @@ import Foundation
 
 class LeaderboardViewController: UIViewController {
     
-    var checkIn: CheckIn!
+    weak var checkIn: CheckIn!
     
     @IBOutlet weak var webView: UIWebView!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
@@ -24,11 +24,16 @@ class LeaderboardViewController: UIViewController {
     
     fileprivate func setup() {
         setupLocalization()
+        setupNavigationBar()
         setupWebView()
     }
     
     fileprivate func setupLocalization() {
         navigationItem.title = Translation.LeaderboardView.Title.String
+    }
+    
+    fileprivate func setupNavigationBar() {
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
     }
     
     fileprivate func setupWebView() {
@@ -38,7 +43,7 @@ class LeaderboardViewController: UIViewController {
     
     // MARK: - Actions
     
-    @IBAction func doneButtonTapped(_ sender: AnyObject) {
+    @IBAction func doneButtonTapped(_ sender: Any) {
         presentingViewController!.dismiss(animated: true, completion: nil)
     }
     
@@ -55,8 +60,8 @@ extension LeaderboardViewController: UIWebViewDelegate {
     func webView(_ webView: UIWebView, didFailLoadWithError error: Error) {
         activityIndicator.stopAnimating()
         let alertController = UIAlertController(title: error.localizedDescription, message: nil, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { (action) in
-            self.presentingViewController!.dismiss(animated: true, completion: nil)
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] action in
+            self?.presentingViewController!.dismiss(animated: true, completion: nil)
         }
         alertController.addAction(okAction)
         present(alertController, animated: true, completion: nil)

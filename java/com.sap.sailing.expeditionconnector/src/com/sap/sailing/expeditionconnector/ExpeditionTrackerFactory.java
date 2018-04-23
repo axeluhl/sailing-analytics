@@ -27,7 +27,6 @@ import com.sap.sailing.expeditionconnector.impl.Activator;
 import com.sap.sailing.expeditionconnector.persistence.DomainObjectFactory;
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifier;
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifierImpl;
-import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifierImpl;
 import com.sap.sailing.expeditionconnector.persistence.MongoObjectFactory;
 import com.sap.sailing.expeditionconnector.persistence.PersistenceFactory;

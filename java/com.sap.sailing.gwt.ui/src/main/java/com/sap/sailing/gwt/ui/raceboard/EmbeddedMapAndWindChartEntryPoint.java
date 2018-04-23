@@ -22,14 +22,15 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
-import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.TimePanel;
@@ -59,6 +60,7 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
+import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
 public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint {
     private static final String PARAM_REGATTA_LIKE_NAME = "regattaLikeName";
@@ -125,9 +127,9 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                 if (selectedRaceIdentifier == null) {
                     createErrorPage(getStringMessages().couldNotObtainRace(regattaLikeName, raceColumnName, fleetName, /* technicalErrorMessage */ ""));
                 } else {
-                    sailingService.getCompetitorBoats(selectedRaceIdentifier, new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
+                    sailingService.getCompetitorBoats(selectedRaceIdentifier, new AsyncCallback<Map<CompetitorWithBoatDTO, BoatDTO>>() {
                         @Override
-                        public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
+                        public void onSuccess(Map<CompetitorWithBoatDTO, BoatDTO> result) {
                             createEmbeddedMap(selectedRaceIdentifier, result, raceboardPerspectiveSettings, raceMapSettings, 
                                               showCompetitors, play);
                         }
@@ -149,14 +151,18 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
     
     private void createErrorPage(String message) {
         final DockLayoutPanel vp = new DockLayoutPanel(Unit.PX);
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages(), this, getUserService());
-        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+        final SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication();
+        new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
         RootLayoutPanel.get().add(vp);
-        vp.addNorth(logoAndTitlePanel, 100);
-        vp.add(new Label(message));
+        vp.addNorth(header, 100);
+        final Label infoText = new Label(message);
+        infoText.getElement().getStyle().setMargin(1, Unit.EM);
+        vp.add(infoText);
+        // TODO: Styling of error page slightly differs from the other usages of SAPSailingHeaderWithAuthentication
+        // because of the root font-size. Adjustments are postponed because they might affect the hole page content.
     }
 
-    private void createEmbeddedMap(final RegattaAndRaceIdentifier selectedRaceIdentifier, Map<CompetitorDTO, BoatDTO> competitorBoats,
+    private void createEmbeddedMap(final RegattaAndRaceIdentifier selectedRaceIdentifier, Map<CompetitorWithBoatDTO, BoatDTO> competitorsAndBoats,
             final RaceBoardPerspectiveOwnSettings raceboardPerspectiveSettings, final RaceMapSettings raceMapSettings, 
             final boolean showCompetitors, final boolean play) {
         final StringBuilder title = new StringBuilder(regattaLikeName);
@@ -175,7 +181,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         // let the time panel always return to "live" mode.
         final TimePanel<TimePanelSettings> timePanel = new TimePanel<TimePanelSettings>(null, null,
                 timer, timeRangeWithZoomProvider, getStringMessages(), /* canReplayWhileLive */ false,
-                /* isScreenLargeEnoughToOfferChartSupport set to true iff wind chart will be displayed */ raceboardPerspectiveSettings.isShowWindChart()) {
+                /* isScreenLargeEnoughToOfferChartSupport set to true iff wind chart will be displayed */ raceboardPerspectiveSettings.isShowWindChart(), getUserService()) {
             protected boolean isLiveModeToBeMadePossible() {
                 return true;
             }
@@ -193,12 +199,12 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         final Button backToLivePlayButton = timePanel.getBackToLiveButton();
         timePanel.updateSettings(new TimePanelSettings(refreshInterval));
         raceMapResources.raceMapStyle().ensureInjected();
-        final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorBoats);
-        final CompetitorSelectionProvider competitorSelection;
+        final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndBoats);
+        final RaceCompetitorSelectionProvider competitorSelection;
         if (showCompetitors) {
-            competitorSelection = new CompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
+            competitorSelection = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider, competitorsAndBoats);
         } else {
-            competitorSelection = createEmptyFilterCompetitorModel(colorProvider); // show no competitors
+            competitorSelection = createEmptyFilterCompetitorModel(colorProvider, competitorsAndBoats); // show no competitors
         }
         final RaceMap raceMap = new RaceMap(null, null, new RaceMapLifecycle(getStringMessages()), raceMapSettings,
                 sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
@@ -226,11 +232,11 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         timer.setTime(timer.getTime().getTime()-1000l);
     }  
 
-    private CompetitorSelectionProvider createEmptyFilterCompetitorModel(CompetitorColorProvider colorProvider) {
-        final CompetitorSelectionModel result = new CompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
-        final FilterSet<CompetitorDTO, Filter<CompetitorDTO>> filterSet = result.getOrCreateCompetitorsFilterSet("Empty");
-        filterSet.addFilter(new Filter<CompetitorDTO>() {
-            @Override public boolean matches(CompetitorDTO object) { return false; }
+    private RaceCompetitorSelectionProvider createEmptyFilterCompetitorModel(CompetitorColorProvider colorProvider, Map<CompetitorWithBoatDTO, BoatDTO> competitorsAndBoats) {
+        final RaceCompetitorSelectionModel result = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider, competitorsAndBoats);
+        final FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> filterSet = result.getOrCreateCompetitorsFilterSet("Empty");
+        filterSet.addFilter(new Filter<CompetitorWithBoatDTO>() {
+            @Override public boolean matches(CompetitorWithBoatDTO object) { return false; }
             @Override public String getName() { return "Never matching filter"; }
         });
         return result;

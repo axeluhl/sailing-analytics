@@ -15,3 +15,4 @@ Require-Bundle: com.sap.sse.replication,
  org.mockito.mockito-core;bundle-version="1.10.14",
  com.sun.mail.javax.mail;bundle-version="1.4.5"
 Export-Package: com.sap.sse.mail.replication.testsupport
+Automatic-Module-Name: com.sap.sse.mail.replication.testsupport

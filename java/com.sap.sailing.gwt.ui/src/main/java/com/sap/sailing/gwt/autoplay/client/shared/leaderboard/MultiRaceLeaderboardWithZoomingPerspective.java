@@ -9,12 +9,14 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.autoplay.client.shared.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.common.client.CSS3Util;
 import com.sap.sailing.gwt.common.client.FullscreenUtil;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -52,7 +54,7 @@ public class MultiRaceLeaderboardWithZoomingPerspective extends AbstractPerspect
             SailingServiceAsync sailingService, UserService userService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
-            boolean startInFullScreenMode) {
+            boolean startInFullScreenMode, Iterable<DetailType> availableDetailTypes) {
         super(parent, componentContext, lifecycle, settings);
         this.stringMessages = stringMessages;
         Window.addResizeHandler(new ResizeHandler() {
@@ -65,7 +67,7 @@ public class MultiRaceLeaderboardWithZoomingPerspective extends AbstractPerspect
         });
         
         leaderboardPanel = createLeaderboardPanel(lifecycle, settings, sailingService, asyncActionsExecutor,
-                competitorSelectionProvider, timer, leaderboardName, errorReporter, stringMessages);
+                competitorSelectionProvider, timer, leaderboardName, errorReporter, stringMessages, availableDetailTypes);
         leaderboardPanel.getContentWidget().getElement().getStyle().setFontWeight(FontWeight.BOLD);
         addChildComponent(leaderboardPanel);
         dockPanel = new DockLayoutPanel(Unit.PX);
@@ -182,7 +184,7 @@ public class MultiRaceLeaderboardWithZoomingPerspective extends AbstractPerspect
             PerspectiveCompositeSettings<LeaderboardWithZoomingPerspectiveSettings> settings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, 
-            String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages) {
+            String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
         MultiRaceLeaderboardPanelLifecycle leaderboardPanelLifecycle = getPerspectiveLifecycle().getLeaderboardPanelLifecycle();
         MultiRaceLeaderboardSettings leaderboardSettings = settings
                 .findSettingsByComponentId(leaderboardPanelLifecycle.getComponentId());
@@ -194,7 +196,8 @@ public class MultiRaceLeaderboardWithZoomingPerspective extends AbstractPerspect
                 leaderboardName, errorReporter, stringMessages,
                 /* showRaceDetails */false, /* competitorSearchTextBox */ null, /* showRegattaRank */
                 /* showSelectionCheckbox */false, /* raceTimesInfoProvider */null, false, /* autoExpandLastRaceColumn */
-                /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false,new ClassicLeaderboardStyle());
+                /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false,
+                new ClassicLeaderboardStyle(), FlagImageResolverImpl.get(), availableDetailTypes);
 
         return leaderboardPanel;
     }

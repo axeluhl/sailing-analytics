@@ -32,6 +32,7 @@ public class LeaderboardViewImpl extends ResizeComposite implements LeaderboardV
     @Override
     public void startingWith(Presenter p, AcceptsOneWidget panel,
             MultiRaceLeaderboardWithZoomingPerspective leaderboardWithHeaderPerspective) {
+        this.asWidget().ensureDebugId("LeaderboardView");
         holderUi.add(leaderboardWithHeaderPerspective);
         leaderboardWithHeaderPerspective.getElement().getStyle().setHeight(100, Unit.PCT);
         panel.setWidget(this);

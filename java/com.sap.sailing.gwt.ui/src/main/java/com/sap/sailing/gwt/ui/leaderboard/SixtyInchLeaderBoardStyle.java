@@ -7,11 +7,9 @@ import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeUri;
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.resources.LeaderboardTableResourcesSixty;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel.LeaderBoardStyle;
@@ -22,7 +20,13 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
     private static final ComponentResources componentResources = GWT.create(ComponentResources.class);
     private static final LeaderboardTableResourcesSixty tableResources = GWT
             .create(LeaderboardTableResourcesSixty.class);
-    private static final FlagRendererTemplate FLAG_RENDERER = GWT.create(FlagRendererTemplate.class);
+    private static final Template FLAG_RENDERER = GWT.create(Template.class);
+    
+    interface Template extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<div title='{3}' style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:{1}px;height:{2}px;background-image:url({0})'></div>")
+        SafeHtml imageWithTitle(String imageUri,int width, int height,String title);
+    }
+
     
     private LeaderboardDTO laterInit;
     private LeaderboardPanel<?> leaderBoardPanel;
@@ -35,17 +39,12 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
 
     @Override
     public void renderNationalityFlag(ImageResource nationalityFlagImageResource, SafeHtmlBuilder sb) {
-        sb.append(FLAG_RENDERER.flag(nationalityFlagImageResource.getSafeUri(), 60, 40, ""));
+        sb.append(FLAG_RENDERER.imageWithTitle(nationalityFlagImageResource.getSafeUri().asString(), 60, 40, ""));
     }
 
     @Override
-    public void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb, CompetitorDTO competitor) {
-        sb.append(FLAG_RENDERER.flag(UriUtils.fromString(flagImageURL), 60, 40, competitor.getName()));
-    }
-
-    interface FlagRendererTemplate extends SafeHtmlTemplates {
-        @SafeHtmlTemplates.Template("<img src='{0}' border='0' width='{1}' height='{2}' title='{3}'>")
-        SafeHtml flag(SafeUri imageUri, int width, int height, String title);
+    public void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb, CompetitorWithBoatDTO competitor) {
+        sb.append(FLAG_RENDERER.imageWithTitle(flagImageURL, 60, 40, competitor.getName()));
     }
 
     @Override

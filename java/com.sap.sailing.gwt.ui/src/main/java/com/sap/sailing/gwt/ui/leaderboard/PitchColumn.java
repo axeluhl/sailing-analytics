@@ -1,16 +1,17 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 
-public class PitchColumn extends FormattedDoubleDetailTypeColumn {
+public class PitchColumn extends FormattedDoubleLeaderboardRowDTODetailTypeColumn {
 
-    public PitchColumn(DetailType detailType, LegDetailField<Double> field, String headerStyle,
+    public PitchColumn(DetailType detailType, DataExtractor<Double, LeaderboardRowDTO> field, String headerStyle,
             String columnStyle, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
         super(detailType, field, headerStyle, columnStyle, displayedLeaderboardRowsProvider);
     }
 
     @Override
-    protected MinMaxRenderer createMinMaxRenderer() {
+    protected MinMaxRenderer<LeaderboardRowDTO> createMinMaxRenderer() {
         return new PitchBearingRender(this, getComparator());
     }
 }

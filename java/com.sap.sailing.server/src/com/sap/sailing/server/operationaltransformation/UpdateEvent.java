@@ -25,10 +25,11 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
     private final Map<Locale, URL> sailorsInfoWebsiteURLs;
     private final Iterable<ImageDescriptor> images;
     private final Iterable<VideoDescriptor> videos;
+    private final Iterable<String> windFinderReviewedSpotCollectionIds;
 
     public UpdateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
             String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL baseURL, 
-            Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
+            Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos, Iterable<String> windFinderReviewedSpotCollectionIds) {
         super(id);
         this.eventName = eventName;
         this.eventDescription = eventDescription;
@@ -42,6 +43,7 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
         this.sailorsInfoWebsiteURLs = sailorsInfoWebsiteURLs;
         this.images = images;
         this.videos = videos;
+        this.windFinderReviewedSpotCollectionIds = windFinderReviewedSpotCollectionIds;
     }
 
     @Override
@@ -59,7 +61,8 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
     @Override
     public Void internalApplyTo(RacingEventService toState) {
         toState.updateEvent(getId(), eventName, eventDescription, startDate, endDate, venueName, isPublic,
-                leaderboardGroupIds, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, images, videos);
+                leaderboardGroupIds, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, images, videos,
+                windFinderReviewedSpotCollectionIds);
         return null;
     }
 }

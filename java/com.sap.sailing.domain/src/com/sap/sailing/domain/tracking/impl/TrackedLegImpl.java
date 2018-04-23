@@ -44,7 +44,6 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
@@ -71,7 +70,7 @@ public class TrackedLegImpl implements TrackedLeg {
         this.trackedRace = trackedRace;
         trackedLegsOfCompetitors = new HashMap<Competitor, TrackedLegOfCompetitor>();
         for (Competitor competitor : competitors) {
-            trackedLegsOfCompetitors.put(competitor, new TrackedLegOfCompetitorImpl(this, competitor));
+            trackedLegsOfCompetitors.put(competitor, new TrackedLegOfCompetitorImpl(this, competitor, trackedRace.getBoatOfCompetitor(competitor)));
         }
         trackedRace.addListener(new CacheClearingRaceChangeListener());
         competitorTracksOrderedByRank = new ConcurrentHashMap<>();
@@ -98,7 +97,7 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public TrackedRace getTrackedRace() {
+    public TrackedRaceImpl getTrackedRace() {
         return trackedRace;
     }
 

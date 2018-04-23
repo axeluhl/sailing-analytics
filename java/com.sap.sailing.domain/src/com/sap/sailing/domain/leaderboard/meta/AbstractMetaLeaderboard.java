@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -142,6 +143,17 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
 
     @Override
+    public Iterable<Boat> getAllBoats() {
+        Set<Boat> boats = new HashSet<>();
+        for (Leaderboard leaderboard : getLeaderboards()) {
+            for (Boat boat: leaderboard.getAllBoats()) {
+                boats.add(boat);
+            }
+        }
+        return boats;
+    }
+
+    @Override
     public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
         Set<Competitor> competitors = new HashSet<Competitor>();
         Set<RaceDefinition> raceDefinitionsConsidered = new HashSet<>();
@@ -152,7 +164,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         }
         return new Pair<>(raceDefinitionsConsidered, competitors);
     }
-
+ 
     @Override
     public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {
         final Iterable<Competitor> result;
@@ -165,15 +177,27 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
 
     @Override
+    public Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet) {
+        return null;
+    }
+    
+    @Override
     public Fleet getFleet(String fleetName) {
         return fleetName.equals(metaFleet.getName()) ? metaFleet : null;
     }
 
     @Override
     public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
-        final List<Competitor> competitorsFromBestToWorst = ((MetaLeaderboardColumn) race).getLeaderboard().getCompetitorsFromBestToWorst(timePoint);
-        Util.removeAll(getSuppressedCompetitors(), competitorsFromBestToWorst);
-        return competitorsFromBestToWorst.indexOf(competitor)+1;
+        final Leaderboard leaderboard = ((MetaLeaderboardColumn) race).getLeaderboard();
+        final int result;
+        if (leaderboard.hasScores(competitor, timePoint)) {
+            final List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(timePoint);
+            Util.removeAll(getSuppressedCompetitors(), competitorsFromBestToWorst);
+            result = competitorsFromBestToWorst.indexOf(competitor)+1;
+        } else {
+            result = 0;
+        }
+        return result;
     }
 
     @Override

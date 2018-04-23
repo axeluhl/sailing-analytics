@@ -5,11 +5,14 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -23,6 +26,8 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
@@ -46,10 +51,10 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets12Or8AndLastBre
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets12Or8AndLastBreaksTie2017;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets1LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
+import com.sap.sailing.domain.leaderboard.impl.HighPointMatchRacing;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEight;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEightAndInterpolation;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFive;
-import com.sap.sailing.domain.leaderboard.impl.HighPointMatchRacing;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPointForLeagueOverallLeaderboard;
@@ -66,6 +71,7 @@ import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
@@ -73,13 +79,13 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     private static Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
     
     /**
-     * Uses a transient competitor store
+     * Uses a transient competitor and boat store
      */
     public DomainFactoryImpl(RaceLogResolver raceLogResolver) {
-        super(new TransientCompetitorStoreImpl(), raceLogResolver);
+        super(new TransientCompetitorAndBoatStoreImpl(), raceLogResolver);
     }
     
-    public DomainFactoryImpl(CompetitorStore competitorStore, RaceLogResolver raceLogResolver) {
+    public DomainFactoryImpl(CompetitorAndBoatStore competitorStore, RaceLogResolver raceLogResolver) {
         super(competitorStore, raceLogResolver);
     }
 
@@ -141,8 +147,28 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public CompetitorDTO convertToCompetitorDTO(Competitor c) {
-        return competitorStore.convertToCompetitorDTO(c);
+    public CompetitorWithBoatDTO convertToCompetitorDTO(Competitor competitor, Boat boat) {
+        return competitorAndBoatStore.convertToCompetitorWithBoatDTO(competitor, boat);
+    }
+
+    @Override
+    public CompetitorWithBoatDTO convertToCompetitorWithOptionalBoatDTO(Competitor competitor) {
+        return competitorAndBoatStore.convertToCompetitorWithOptionalBoatDTO(competitor);
+    }
+
+    @Override
+    public CompetitorDTO convertToCompetitorDTO(Competitor competitor) {
+        return competitorAndBoatStore.convertToCompetitorDTO(competitor);
+    }
+
+    @Override
+    public Map<CompetitorWithBoatDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, ? extends Boat> competitorsAndBoats) {
+        return competitorAndBoatStore.convertToCompetitorAndBoatDTOs(competitorsAndBoats);
+    }
+
+    @Override
+    public BoatDTO convertToBoatDTO(Boat boat) {
+        return competitorAndBoatStore.convertToBoatDTO(boat);
     }
 
     @Override
@@ -192,6 +218,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         // GPS data
         statisticsDTO.hasGPSData = trackedRace.hasGPSData();
         Competitor leaderOrWinner = null;
+        Boat leaderOrWinnerBoat = null;
         TimePoint now = MillisecondsTimePoint.now();
         try {
             if (trackedRace.isLive(now)) {
@@ -201,13 +228,14 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
                     Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
                     if (fleetOfCompetitor != null && fleetOfCompetitor.equals(fleet)) {
                         leaderOrWinner = competitor;
+                        leaderOrWinnerBoat = trackedRace.getBoatOfCompetitor(leaderOrWinner);
                         break;
                     }
                 }
             }
             if (leaderOrWinner != null) {
                 statisticsDTO.hasLeaderOrWinnerData = true;
-                statisticsDTO.leaderOrWinner = convertToCompetitorDTO(leaderOrWinner);
+                statisticsDTO.leaderOrWinner = convertToCompetitorDTO(leaderOrWinner, leaderOrWinnerBoat);
                 GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(leaderOrWinner);
                 if (track != null) {
                     statisticsDTO.averageGPSDataSampleInterval = track.getAverageIntervalBetweenRawFixes();
@@ -231,23 +259,25 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         // media data
         if (mediaTracks != null) {
             for (MediaTrack track : mediaTracks) {
-                switch (track.mimeType.mediaType) {
-                case audio:
-                    statisticsDTO.hasAudioData = true;
-                    statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1
-                            : statisticsDTO.audioTracksCount++;
-                    break;
-                case video:
-                    statisticsDTO.hasVideoData = true;
-                    statisticsDTO.videoTracksCount = statisticsDTO.videoTracksCount == null ? 1
-                            : statisticsDTO.videoTracksCount++;
-                    break;
-                case image: // TODO should this add to an image count?
-                    break;
-                case unknown: // TODO should this add to an "unknown media" count? Probably not
-                    break;
-                default:
-                    break;
+                if (track.mimeType != null) {
+                    switch (track.mimeType.mediaType) {
+                    case audio:
+                        statisticsDTO.hasAudioData = true;
+                        statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1
+                                : statisticsDTO.audioTracksCount++;
+                        break;
+                    case video:
+                        statisticsDTO.hasVideoData = true;
+                        statisticsDTO.videoTracksCount = statisticsDTO.videoTracksCount == null ? 1
+                                : statisticsDTO.videoTracksCount++;
+                        break;
+                    case image: // TODO should this add to an image count?
+                        break;
+                    case unknown: // TODO should this add to an "unknown media" count? Probably not
+                        break;
+                    default:
+                        break;
+                    }
                 }
             }
         }
@@ -341,12 +371,28 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public List<CompetitorDTO> getCompetitorDTOList(Iterable<Competitor> competitors) {
-        List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
-        for (Competitor competitor : competitors) {
-            result.add(convertToCompetitorDTO(competitor));
+    public List<CompetitorWithBoatDTO> getCompetitorDTOList(Map<Competitor, Boat> competitors) {
+        List<CompetitorWithBoatDTO> result = new ArrayList<CompetitorWithBoatDTO>();
+        for (Entry<Competitor, Boat> competitorAndBoatEntry : competitors.entrySet()) {
+            result.add(convertToCompetitorDTO(competitorAndBoatEntry.getKey(), competitorAndBoatEntry.getValue()));
         }
         return result;
     }
 
+    @Override
+    public List<CompetitorWithBoatDTO> getCompetitorDTOList(Iterable<Competitor> competitors) {
+        List<CompetitorWithBoatDTO> result = new ArrayList<CompetitorWithBoatDTO>();
+        for (Competitor competitor : competitors) {
+            result.add(convertToCompetitorWithOptionalBoatDTO(competitor));
+        }
+        return result;
+    }
+    
+    public List<CompetitorWithBoatDTO> getCompetitorDTOList(List<Pair<Competitor, Boat>> competitors) {
+        List<CompetitorWithBoatDTO> result = new ArrayList<CompetitorWithBoatDTO>();
+        for (Pair<Competitor, Boat> competitorAndBoat : competitors) {
+            result.add(convertToCompetitorDTO(competitorAndBoat.getA(), competitorAndBoat.getB()));
+        }
+        return result;
+    }
 }

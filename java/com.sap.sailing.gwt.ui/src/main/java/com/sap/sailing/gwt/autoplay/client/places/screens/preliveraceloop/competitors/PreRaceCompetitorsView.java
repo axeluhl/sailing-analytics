@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.compe
 import java.util.List;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 
 public interface PreRaceCompetitorsView {
     void startingWith(PreRaceCompetitorsPresenter p, AcceptsOneWidget panel);
@@ -13,5 +13,5 @@ public interface PreRaceCompetitorsView {
 
     void move();
 
-    void setCompetitors(List<CompetitorDTO> data);
+    void setCompetitors(List<CompetitorWithBoatDTO> data);
 }

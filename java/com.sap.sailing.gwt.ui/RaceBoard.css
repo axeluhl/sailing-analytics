@@ -17,7 +17,7 @@
 
 
  * {
-  font-family: 'Open Sans', sans-serif !important;
+  font-family: 'Open Sans', sans-serif;
   font-size: 12px;
 }
 
@@ -571,6 +571,24 @@ img.openColumn {
 	background-color: white;
 	background-image:
 		url(images/viewicons/@1x/img/SAP_RV_CompetitorCharts_GHOSTED.png),
+		url(images/arrows_bottom_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-table {
+	background-color: white;
+	background-image:
+		url(images/viewicons/@1x/img/SAP_RV_Table_INACTIVE.png),
+		url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-table {
+	background-color: white;
+	background-image:
+		url(images/viewicons/@1x/img/SAP_RV_Table_GHOSTED.png),
 		url(images/arrows_bottom_black_small.png);
 	background-repeat: no-repeat, no-repeat;
 	background-position: 5% 50%, 95% 50%
