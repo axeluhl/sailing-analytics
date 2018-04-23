@@ -135,6 +135,8 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -143,6 +145,7 @@ import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -2177,7 +2180,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverType(),
                 ManeuverTypeFormatter.format(maneuver.type, stringMessages)));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.time(),
-                DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(maneuver.timepoint)));
+                DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(maneuver.timePoint)));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.directionChange(),
                 ((int) Math.round(maneuver.directionChangeInDegrees)) + " " + stringMessages.degreesShort() + " ("
                         + ((int) Math.round(before.bearingInDegrees)) + " " + stringMessages.degreesShort() + " -> "
@@ -2284,11 +2287,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (raceIdentifier != null) {
             RegattaAndRaceIdentifier race = raceIdentifier;
             if (race != null) {
-                Map<CompetitorWithBoatDTO, Date> from = new HashMap<CompetitorWithBoatDTO, Date>();
-                from.put(competitorDTO, fixesAndTails.getFixes(competitorDTO).get(fixesAndTails.getFirstShownFix(competitorDTO)).timepoint);
-                Map<CompetitorWithBoatDTO, Date> to = new HashMap<CompetitorWithBoatDTO, Date>();
-                to.put(competitorDTO, getBoatFix(competitorDTO, timer.getTime()).timepoint);
-                sailingService.getDouglasPoints(race, from, to, 3,
+                final Map<CompetitorWithBoatDTO, TimeRange> timeRange = new HashMap<>();
+                final TimePoint from = new MillisecondsTimePoint(fixesAndTails.getFixes(competitorDTO)
+                        .get(fixesAndTails.getFirstShownFix(competitorDTO)).timepoint);
+                final TimePoint to = new MillisecondsTimePoint(getBoatFix(competitorDTO, timer.getTime()).timepoint);
+                timeRange.put(competitorDTO, new TimeRangeImpl(from, to, true));
+                sailingService.getDouglasPoints(race, timeRange, 3,
                         new AsyncCallback<Map<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -2308,7 +2312,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 }
                             }
                         });
-                sailingService.getManeuvers(race, from, to,
+                sailingService.getManeuvers(race, timeRange,
                         new AsyncCallback<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>>() {
                             @Override
                             public void onFailure(Throwable caught) {

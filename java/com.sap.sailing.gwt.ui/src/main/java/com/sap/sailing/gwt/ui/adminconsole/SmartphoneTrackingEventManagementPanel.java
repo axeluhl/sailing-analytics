@@ -285,10 +285,9 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         return race.getA().getRaceLogTrackingInfo(race.getB()).courseExists;
     }
 
-    private boolean doCompetitorResgistrationsExist(RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
+    private boolean doCompetitorRegistrationsExist(RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
         return race.getA().getRaceLogTrackingInfo(race.getB()).competitorRegistrationsExists;
     }
-    
     
     @Override
     protected void addColumnsToRacesTable(CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesTable) {
@@ -795,7 +794,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         String namesOfRacesMissingRegistrations = "";
         if (!regattaHasCompetitors) {
             for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : races) {
-                if (!doCompetitorResgistrationsExist(race)) {
+                if (!doCompetitorRegistrationsExist(race)) {
                     namesOfRacesMissingRegistrations += race.getA().getName() + "/" + race.getB().getName() + " ";
                 }
             }

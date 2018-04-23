@@ -127,7 +127,7 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
         TextColumn<CompetitorWithBoatDTO> isBoatLinkedColumn = new TextColumn<CompetitorWithBoatDTO>() {
             @Override
             public String getValue(CompetitorWithBoatDTO competitor) {
-                boolean hasBoat = competitor.getBoat() != null;
+                boolean hasBoat = competitor.hasBoat();
                 return hasBoat ? stringMessages.yes() : stringMessages.no();
             }
         };

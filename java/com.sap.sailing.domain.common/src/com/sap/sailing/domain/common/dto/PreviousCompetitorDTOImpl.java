@@ -170,4 +170,10 @@ public class PreviousCompetitorDTOImpl implements CompetitorWithBoatDTO {
     public CompetitorWithBoatDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion) {
         return previousVersion.competitors.get(indexInPreviousCompetitorList);
     }
+
+    @Override
+    public boolean hasBoat() {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
+    }
 }
