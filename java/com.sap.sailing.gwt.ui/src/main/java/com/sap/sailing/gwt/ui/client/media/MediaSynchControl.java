@@ -146,7 +146,6 @@ public class MediaSynchControl implements EditFlag {
         fineTuningPanel.add(fastForwardButton);
         mainPanel.add(titleEdit);
         editPanel.add(previewButton);
-        
         mainPanel.add(editPanel);
         mainPanel.add(fineTuningPanel);
         commitPanel.add(saveButton);
