@@ -4,10 +4,12 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
@@ -22,6 +24,8 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends Abst
     public static final String BOAT_CLASS = "boatClass";
     public static final String COMPETITOR_NAME = "competitorName";
     public static final String AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS = "avgIntervalBetweenFixesInSeconds";
+    public static final String DISTANCE_TRAVELLED_IN_METERS = "distanceTravelledInMeters";
+    public static final String DURATION_IN_SECONDS = "durationInSeconds";
 
     private final BoatClassJsonSerializer boatClassJsonSerializer;
     private final CompleteManeuverCurveWithEstimationDataJsonSerializer maneuverWithEstimationDataJsonSerializer;
@@ -53,6 +57,17 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends Abst
             Duration averageIntervalBetweenFixes = trackedRace.getTrack(competitor).getAverageIntervalBetweenFixes();
             forCompetitorJson.put(AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS,
                     averageIntervalBetweenFixes == null ? 0 : averageIntervalBetweenFixes.asSeconds());
+            GPSFixTrack<Competitor,GPSFixMoving> track = trackedRace.getTrack(competitor);
+            Double distanceTravelledInMeters = null;
+            Double durationInSeconds = null;
+            GPSFixMoving firstRawFix = track.getFirstRawFix();
+            GPSFixMoving lastRawFix = track.getLastRawFix();
+            if(firstRawFix != null && lastRawFix != null) {
+                durationInSeconds = firstRawFix.getTimePoint().until(lastRawFix.getTimePoint()).asSeconds();
+                distanceTravelledInMeters = track.getDistanceTraveled(firstRawFix.getTimePoint(), lastRawFix.getTimePoint()).getMeters();
+            }
+            forCompetitorJson.put(DISTANCE_TRAVELLED_IN_METERS, distanceTravelledInMeters);
+            forCompetitorJson.put(DURATION_IN_SECONDS, durationInSeconds);
         }
         return result;
     }
