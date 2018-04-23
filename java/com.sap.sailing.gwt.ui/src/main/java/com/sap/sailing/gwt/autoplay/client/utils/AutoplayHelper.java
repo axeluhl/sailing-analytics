@@ -63,7 +63,7 @@ public class AutoplayHelper {
     }
 
     public static void getLiveRace(SailingServiceAsync sailingService, ErrorReporter errorReporter, EventDTO event,
-            String leaderBoardName, SailingDispatchSystem dispatch, long waitTimeAfterRaceEndInMillis, long switchBeforeRaceStartInMillies,
+            String leaderBoardName, SailingDispatchSystem dispatch, long waitTimeAfterRaceEndInMillis, long switchBeforeRaceStartInMillis,
             AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>> callback) {
         if (fastCurrentTimeProvider.getRefreshInterval() != 1000) {
             fastCurrentTimeProvider.setRefreshInterval(1000);
@@ -95,7 +95,7 @@ public class AutoplayHelper {
                 fastCurrentTimeProvider.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest,
                         clientTimeWhenResponseWasReceived);
                 Pair<Long, RegattaAndRaceIdentifier> timeToStartAndRaceIdentifier = checkForLiveRace(
-                        selectedLeaderboard, serverTimeDuringRequest, raceTimesInfoProvider, waitTimeAfterRaceEndInMillis, switchBeforeRaceStartInMillies);
+                        selectedLeaderboard, serverTimeDuringRequest, raceTimesInfoProvider, waitTimeAfterRaceEndInMillis, switchBeforeRaceStartInMillis);
                 callback.onSuccess(timeToStartAndRaceIdentifier);
                 // kill old provider!
                 raceTimesInfoProvider.terminate();
@@ -120,11 +120,9 @@ public class AutoplayHelper {
 
     /**
      * Side effect free method to get a LifeRace from a timesProvider and a leaderboard
-     * @param waitTimeAfterRaceEndInMillis 
-     * @param switchBeforeRaceStartInMillies 
      */
     public static Pair<Long, RegattaAndRaceIdentifier> checkForLiveRace(AbstractLeaderboardDTO currentLeaderboard,
-            Date serverTimeDuringRequest, RaceTimesInfoProvider raceTimesInfoProvider, long waitTimeAfterRaceEndInMillis, long switchBeforeRaceStartInMillies) {
+            Date serverTimeDuringRequest, RaceTimesInfoProvider raceTimesInfoProvider, long waitTimeAfterRaceEndInMillis, long switchBeforeRaceStartInMillis) {
         Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
         for (RaceColumnDTO race : currentLeaderboard.getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
@@ -142,7 +140,7 @@ public class AutoplayHelper {
                     if (notNullInRequiredValues && raceHasNotEndedOrOnlyRecentlyEnded) {
                         long startTimeInMs = raceTimes.getStartOfRace().getTime();
                         long startIn = startTimeInMs - serverTimeDuringRequest.getTime() - raceTimes.delayToLiveInMs;
-                        if (startIn <= switchBeforeRaceStartInMillies && startIn > NEGATIVE_SANITY_CHECK) {
+                        if (startIn <= switchBeforeRaceStartInMillis && startIn > NEGATIVE_SANITY_CHECK) {
                             startOfLifeRace = raceTimes.getStartOfRace();
                             return new Pair<Long, RegattaAndRaceIdentifier>(startIn, raceIdentifier);
                         }

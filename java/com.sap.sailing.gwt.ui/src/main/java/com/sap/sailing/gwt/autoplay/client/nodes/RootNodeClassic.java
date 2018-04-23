@@ -55,7 +55,7 @@ public class RootNodeClassic extends RootNodeBase {
     }
 
     @Override
-    protected long getSwitchBeforeRaceStartInMillies() {
+    protected long getSwitchBeforeRaceStartInMillis() {
         AutoplayPerspectiveOwnSettings ownSettings = getClientFactory().getAutoPlayCtx().getAutoplaySettings().getPerspectiveOwnSettings();
         return ownSettings.getTimeToSwitchBeforeRaceStart() * 1000;
     }

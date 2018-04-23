@@ -84,7 +84,7 @@ public class RootNodeSixtyInch extends RootNodeBase {
     }
 
     @Override
-    protected long getSwitchBeforeRaceStartInMillies() {
+    protected long getSwitchBeforeRaceStartInMillis() {
         return 3*60*1000;
     }
 
