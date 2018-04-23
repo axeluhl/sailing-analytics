@@ -50,7 +50,7 @@
 		<dependency>
 			<groupId>org.moxieapps.gwt</groupId>
 			<artifactId>org.moxieapps.gwt.highcharts</artifactId>
-			<version>${project.version}</version>
+			<version>1.6.0-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 		<dependency>
