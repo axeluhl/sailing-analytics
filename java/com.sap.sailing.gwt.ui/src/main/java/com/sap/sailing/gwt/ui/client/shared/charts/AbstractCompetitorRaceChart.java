@@ -429,6 +429,12 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                     newRaceDataPoints = new Point[currentPointIndex];
                     System.arraycopy(raceDataPointsToAdd, 0, newRaceDataPoints, 0, currentPointIndex);
                 }
+                if (DetailType.isDegreeTypeWithRecalculation(retrievedDataType)) {
+                    for (int i = 1; i < newRaceDataPoints.length; i++) {
+                        newRaceDataPoints[i] = ChartPointRecalculator
+                                .stayClosestToPreviousPoint(newRaceDataPoints[i - 1], newRaceDataPoints[i]);
+                    }
+                }
                 setSeriesPoints(competitorDataSeries, newRaceDataPoints, /* manageZoom */ append);
                 // Adding the series if chart doesn't contain it
                 List<Series> chartSeries = Arrays.asList(chart.getSeries());

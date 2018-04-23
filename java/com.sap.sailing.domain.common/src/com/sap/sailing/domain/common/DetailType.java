@@ -493,4 +493,12 @@ public enum DetailType implements Serializable {
         }
         return false;
     }
+
+    public static boolean isDegreeTypeWithRecalculation(DetailType toTest) {
+        boolean result = false;
+        if (toTest == DetailType.CHART_COURSE_OVER_GROUND_TRUE_DEGREES) {
+            result = true;
+        }
+        return result;
+    }
 }
