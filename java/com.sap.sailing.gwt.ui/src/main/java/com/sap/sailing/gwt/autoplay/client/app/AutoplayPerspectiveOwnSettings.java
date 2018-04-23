@@ -15,12 +15,13 @@ public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableS
     public AutoplayPerspectiveOwnSettings() {
     }
 
-    public AutoplayPerspectiveOwnSettings(boolean fullscreen, boolean switchToLive, int timeToSwitchBeforeRaceStart, int waitTimeAfterRaceEndInMillis) {
+    public AutoplayPerspectiveOwnSettings(boolean fullscreen, boolean switchToLive,
+            int timeToSwitchBeforeRaceStartInSeconds, int waitTimeAfterRaceEndInSeconds) {
         super();
         this.fullscreen.setValue(fullscreen);
         this.switchToLive.setValue(switchToLive);
-        this.timeToSwitchBeforeRaceStart.setValue(timeToSwitchBeforeRaceStart);
-        this.waitTimeAfterRaceEndInMillis.setValue(waitTimeAfterRaceEndInMillis);
+        this.timeToSwitchBeforeRaceStart.setValue(timeToSwitchBeforeRaceStartInSeconds);
+        this.waitTimeAfterRaceEndInMillis.setValue(waitTimeAfterRaceEndInSeconds);
     }
 
     @Override
@@ -28,7 +29,7 @@ public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableS
         fullscreen = new BooleanSetting("fullscreen", this, true);
         switchToLive = new BooleanSetting("switchToLive", this, true);
         timeToSwitchBeforeRaceStart = new IntegerSetting("timeToSwitchBeforeRaceStart", this, 180);
-        waitTimeAfterRaceEndInMillis = new IntegerSetting("waitTimeAfterRaceEndInMillis", this, 60);
+        waitTimeAfterRaceEndInMillis = new IntegerSetting("waitTimeAfterRaceEnd", this, 60);
 
     }
 
@@ -40,11 +41,11 @@ public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableS
         return switchToLive.getValue();
     }
 
-    public int getTimeToSwitchBeforeRaceStart() {
+    public int getTimeToSwitchBeforeRaceStartInSeconds() {
         return timeToSwitchBeforeRaceStart.getValue();
     }
 
-    public int getWaitTimeAfterRaceEndInMillis() {
+    public int getWaitTimeAfterRaceEndInSeconds() {
         return waitTimeAfterRaceEndInMillis.getValue();
     }
 }

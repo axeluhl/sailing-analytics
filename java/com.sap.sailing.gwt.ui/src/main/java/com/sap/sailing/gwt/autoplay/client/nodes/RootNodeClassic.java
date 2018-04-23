@@ -57,13 +57,13 @@ public class RootNodeClassic extends RootNodeBase {
     @Override
     protected long getSwitchBeforeRaceStartInMillis() {
         AutoplayPerspectiveOwnSettings ownSettings = getClientFactory().getAutoPlayCtx().getAutoplaySettings().getPerspectiveOwnSettings();
-        return ownSettings.getTimeToSwitchBeforeRaceStart() * 1000;
+        return ownSettings.getTimeToSwitchBeforeRaceStartInSeconds() * 1000;
     }
 
     @Override
     protected long getWaitTimeAfterRaceEndInMillis() {
         AutoplayPerspectiveOwnSettings ownSettings = getClientFactory().getAutoPlayCtx().getAutoplaySettings().getPerspectiveOwnSettings();
-        return ownSettings.getWaitTimeAfterRaceEndInMillis() * 1000;
+        return ownSettings.getWaitTimeAfterRaceEndInSeconds() * 1000;
     }
 
 }

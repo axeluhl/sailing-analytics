@@ -39,13 +39,13 @@ public class AutoplaySettingsDialogComponent implements SettingsDialogComponent<
         Label timeBeforeRaceStartDescription = new Label(stringMessages.timeBeforeRaceStart());
         vp.add(timeBeforeRaceStartDescription);
         
-        timeBeforeRaceStartInput = dialog.createIntegerBox(initialSettings.getTimeToSwitchBeforeRaceStart(), 5);
+        timeBeforeRaceStartInput = dialog.createIntegerBox(initialSettings.getTimeToSwitchBeforeRaceStartInSeconds(), 5);
         vp.add(timeBeforeRaceStartInput);
         
         Label timeAfterRaceEndDescription = new Label(stringMessages.timeAfterRaceEnd());
         vp.add(timeAfterRaceEndDescription);
         
-        waitTimeAfterRaceEndInput = dialog.createIntegerBox(initialSettings.getWaitTimeAfterRaceEndInMillis(), 5);
+        waitTimeAfterRaceEndInput = dialog.createIntegerBox(initialSettings.getWaitTimeAfterRaceEndInSeconds(), 5);
         vp.add(waitTimeAfterRaceEndInput);
 
         return vp;
