@@ -1,13 +1,13 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 /**
  * A factory for FilterWithUI<Competitor> instances  
  * @author Frank
  */
 public class CompetitorFilterWithUIFactory {
-    public static FilterWithUI<CompetitorWithBoatDTO> createFilter(String filterName) {
+    public static FilterWithUI<CompetitorDTO> createFilter(String filterName) {
         if(CompetitorRaceRankFilter.FILTER_NAME.equals(filterName)) {
             return new CompetitorRaceRankFilter();
         } else if(CompetitorTotalRankFilter.FILTER_NAME.equals(filterName)) {

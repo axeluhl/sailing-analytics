@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLiveRaceLeaderBoardWithImageViewImpl.ImageProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
@@ -75,19 +75,19 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
     }
 
     @Override
-    public void setFirst(CompetitorWithBoatDTO c) {
+    public void setFirst(CompetitorDTO c) {
         subline1.setText("1. " + c.getName());
         setImage(image1, provider.getImageUrl(c), true);
     }
 
     @Override
-    public void setSecond(CompetitorWithBoatDTO c) {
+    public void setSecond(CompetitorDTO c) {
         subline2.setText("2. " + c.getName());
         setImage(image2, provider.getImageUrl(c), false);
     }
 
     @Override
-    public void setThird(CompetitorWithBoatDTO c) {
+    public void setThird(CompetitorDTO c) {
         subline3.setText("3. " + c.getName());
         setImage(image3, provider.getImageUrl(c), false);
     }

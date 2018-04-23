@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.filter.AbstractTextFilter;
@@ -9,20 +10,21 @@ import com.sap.sse.common.filter.AbstractTextFilter;
  * @author Frank
  *
  */
-public class CompetitorSailNumbersFilter extends AbstractTextFilter<CompetitorWithBoatDTO> implements FilterWithUI<CompetitorWithBoatDTO> {
+public class CompetitorSailNumbersFilter extends AbstractTextFilter<CompetitorDTO> implements FilterWithUI<CompetitorDTO> {
     public static final String FILTER_NAME = "CompetitorSailNumbersFilter";
 
     public CompetitorSailNumbersFilter() {
     }
 
     @Override
-    public boolean matches(CompetitorWithBoatDTO competitor) {
+    public boolean matches(CompetitorDTO competitor) {
         boolean result = false;
-        if(value != null && operator != null && competitor.getSailID() != null) {
+        final String sailId;
+        if (value != null && operator != null && competitor.hasBoat() && (sailId=((CompetitorWithBoatDTO) competitor).getSailID()) != null) {
             switch (operator.getOperator()) {
             case Contains:
             case NotContains:
-                result = operator.matchValues(competitor.getSailID(), value);
+                result = operator.matchValues(sailId, value);
                 break;
             case Equals:
             case NotEqualTo:
@@ -67,7 +69,7 @@ public class CompetitorSailNumbersFilter extends AbstractTextFilter<CompetitorWi
     }
 
     @Override
-    public FilterUIFactory<CompetitorWithBoatDTO> createUIFactory() {
+    public FilterUIFactory<CompetitorDTO> createUIFactory() {
         return new CompetitorSailNumbersFilterUIFactory(this);
     }
 }

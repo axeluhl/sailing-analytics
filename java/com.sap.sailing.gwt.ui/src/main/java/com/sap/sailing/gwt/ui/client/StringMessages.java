@@ -2159,4 +2159,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String selectAtLeastOneCompetitorManeuver();
     String noDataManeuverTable();
     String errorTryingToDetermineBoatLinkedToCompetitor(String raceColumnName, String leaderboardName, String message);
+    String managePlaybackMedia();
 }

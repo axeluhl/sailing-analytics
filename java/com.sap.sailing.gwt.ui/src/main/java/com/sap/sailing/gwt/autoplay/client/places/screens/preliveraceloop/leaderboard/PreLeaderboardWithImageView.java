@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leade
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 
 public interface PreLeaderboardWithImageView {
@@ -12,7 +12,7 @@ public interface PreLeaderboardWithImageView {
 
     void setLeaderBoard(SingleRaceLeaderboardPanel leaderboardPanel);
 
-    void onCompetitorSelect(CompetitorWithBoatDTO marked);
+    void onCompetitorSelect(CompetitorDTO marked);
 
     void scrollLeaderBoardToTop();
 
