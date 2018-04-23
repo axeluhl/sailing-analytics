@@ -28,9 +28,9 @@ public class Util {
     
         private transient int hashCode;
     
-        @SuppressWarnings("unused")
         // required for some serialization frameworks such as GWT RPC
-        private Pair() {
+        @Deprecated
+        protected Pair() {
         }
 
         public Pair(A a, B b) {
@@ -490,6 +490,15 @@ public class Util {
     }
 
     public static String join(String separator, String... strings) {
+        return joinStrings(separator, Arrays.asList(strings));
+    }
+
+    public static String join(String separator, Object... objects) {
+        final String[] strings = new String[objects.length];
+        int i=0;
+        for (Object o : objects) {
+            strings[i++] = o.toString();
+        }
         return joinStrings(separator, Arrays.asList(strings));
     }
 

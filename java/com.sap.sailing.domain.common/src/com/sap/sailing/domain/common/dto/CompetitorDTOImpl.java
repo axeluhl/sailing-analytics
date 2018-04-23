@@ -201,4 +201,9 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     public Duration getTimeOnDistanceAllowancePerNauticalMile() {
         return timeOnDistanceAllowancePerNauticalMile;
     }
+
+    @Override
+    public boolean hasBoat() {
+        return false;
+    }
 }

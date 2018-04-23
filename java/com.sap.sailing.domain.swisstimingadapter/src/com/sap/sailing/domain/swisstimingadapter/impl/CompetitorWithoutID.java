@@ -10,7 +10,7 @@ public class CompetitorWithoutID extends AbstractCompetitor {
     }
 
     @Override
-    public String getID() {
+    public String getIdAsString() {
         return null;
     }
 

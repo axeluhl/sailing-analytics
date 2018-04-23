@@ -186,7 +186,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     private MediaTrack getDefaultAudio() {
         // TODO: implement a better heuristic than just taking the first to come
         for (MediaTrack mediaTrack : assignedMediaTracks) {
-            if (MediaType.audio.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
+            if (mediaTrack.mimeType != null && MediaType.audio.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
                 return mediaTrack;
             }
         }
@@ -343,7 +343,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                 for (MediaTrack mediaTrack : MediaPlayerManagerComponent.this.overlappingMediaTracks) {
                     setStatus(mediaTrack);
                 }
-
                 notifyStateChange();
             }
 
@@ -719,7 +718,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     private void removeMediaTracksWhichAreInAssignedMediaTracks() {
         Collection<MediaTrack> temp = new HashSet<MediaTrack>(overlappingMediaTracks);
         for (MediaTrack mediaTrack : temp) {
-            if(assignedMediaTracks.contains(mediaTrack)){
+            if (assignedMediaTracks.contains(mediaTrack)) {
                 overlappingMediaTracks.remove(mediaTrack);
             }
         }
@@ -729,7 +728,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     public List<MediaTrack> getVideoTracks() {
         List<MediaTrack> result = new ArrayList<MediaTrack>();
         for (MediaTrack mediaTrack : assignedMediaTracks) {
-            if (mediaTrack.mimeType.mediaType == MediaType.video) {
+            if (mediaTrack.mimeType != null && mediaTrack.mimeType.mediaType == MediaType.video) {
                 result.add(mediaTrack);
             }
         }
@@ -785,7 +784,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     public List<MediaTrack> getAudioTracks() {
         List<MediaTrack> result = new ArrayList<MediaTrack>();
         for (MediaTrack mediaTrack : assignedMediaTracks) {
-            if (mediaTrack.mimeType.mediaType == MediaType.audio) {
+            if (mediaTrack.mimeType != null && mediaTrack.mimeType.mediaType == MediaType.audio) {
                 result.add(mediaTrack);
             }
         }

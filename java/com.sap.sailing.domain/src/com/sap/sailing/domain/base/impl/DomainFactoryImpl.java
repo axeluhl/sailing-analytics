@@ -259,23 +259,25 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         // media data
         if (mediaTracks != null) {
             for (MediaTrack track : mediaTracks) {
-                switch (track.mimeType.mediaType) {
-                case audio:
-                    statisticsDTO.hasAudioData = true;
-                    statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1
-                            : statisticsDTO.audioTracksCount++;
-                    break;
-                case video:
-                    statisticsDTO.hasVideoData = true;
-                    statisticsDTO.videoTracksCount = statisticsDTO.videoTracksCount == null ? 1
-                            : statisticsDTO.videoTracksCount++;
-                    break;
-                case image: // TODO should this add to an image count?
-                    break;
-                case unknown: // TODO should this add to an "unknown media" count? Probably not
-                    break;
-                default:
-                    break;
+                if (track.mimeType != null) {
+                    switch (track.mimeType.mediaType) {
+                    case audio:
+                        statisticsDTO.hasAudioData = true;
+                        statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1
+                                : statisticsDTO.audioTracksCount++;
+                        break;
+                    case video:
+                        statisticsDTO.hasVideoData = true;
+                        statisticsDTO.videoTracksCount = statisticsDTO.videoTracksCount == null ? 1
+                                : statisticsDTO.videoTracksCount++;
+                        break;
+                    case image: // TODO should this add to an image count?
+                        break;
+                    case unknown: // TODO should this add to an "unknown media" count? Probably not
+                        break;
+                    default:
+                        break;
+                    }
                 }
             }
         }

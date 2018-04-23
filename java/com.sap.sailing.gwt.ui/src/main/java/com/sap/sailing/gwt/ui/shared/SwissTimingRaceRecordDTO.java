@@ -38,6 +38,7 @@ public class SwissTimingRaceRecordDTO extends AbstractRaceRecordDTO {
     public String toString() {
         return "SwissTimingRaceRecordDTO [raceId=" + raceId + ", raceName=" + getName() + ", raceStartTime="
                 + raceStartTime + ", regattaName=" + regattaName + ", seriesName=" + seriesName + ", fleetName="
-                + fleetName + ", raceStatus=" + raceStatus + ", boatClass=" + boatClass + ", gender=" + gender + "]";
+                + fleetName + ", raceStatus=" + raceStatus + ", boatClass=" + boatClass + ", gender=" + gender +
+                ", xrrEntriesUrl=" + xrrEntriesUrl + "]";
     }
 }

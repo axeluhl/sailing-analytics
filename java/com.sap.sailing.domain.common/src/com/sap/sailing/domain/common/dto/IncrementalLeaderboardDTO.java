@@ -483,7 +483,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                                 }
                             }
                         }
-                        }
+                    }
                 }
             }
         }

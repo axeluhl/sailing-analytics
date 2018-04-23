@@ -16,6 +16,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.util.impl.UUIDHelper;
 
 public class BoatJsonDeserializer implements JsonDeserializer<DynamicBoat> {
     private static final Logger logger = Logger.getLogger(BoatJsonDeserializer.class.getName());
@@ -63,7 +64,7 @@ public class BoatJsonDeserializer implements JsonDeserializer<DynamicBoat> {
                     Constructor<?> constructorFromString = idClass.getConstructor(String.class);
                     boatId = (Serializable) constructorFromString.newInstance(boatIdFromJson.toString());
                 } else if (UUID.class.isAssignableFrom(idClass)) {
-                    boatId = Helpers.tryUuidConversion(boatIdFromJson);
+                    boatId = UUIDHelper.tryUuidConversion(boatIdFromJson);
                 } else {
                     boatId = boatIdFromJson;
                 }

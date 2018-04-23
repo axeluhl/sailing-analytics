@@ -50,8 +50,12 @@ class ImportResultDTO {
         private final String filename;
         private final String requestedImporter;
 
-        ErrorImportDTO(String name, String message) {
-            this(null, name, message, null, null);
+        ErrorImportDTO(String message) {
+            this(null, null, message, null, null);
+        }
+        
+        ErrorImportDTO(String classname, String message) {
+            this(null, classname, message, null, null);
         }
 
         ErrorImportDTO(String exUUID, String name, String message, String filename, String requestedImporter) {
