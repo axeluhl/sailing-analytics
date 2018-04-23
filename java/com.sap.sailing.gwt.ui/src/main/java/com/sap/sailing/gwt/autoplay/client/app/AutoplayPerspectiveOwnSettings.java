@@ -9,8 +9,8 @@ public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableS
 
     BooleanSetting fullscreen;
     BooleanSetting switchToLive;
-    IntegerSetting timeToSwitchBeforeRaceStart;
-    IntegerSetting waitTimeAfterRaceEndInMillis;
+    IntegerSetting timeToSwitchBeforeRaceStartInSeconds;
+    IntegerSetting waitTimeAfterRaceEndInSeconds;
 
     public AutoplayPerspectiveOwnSettings() {
     }
@@ -20,16 +20,16 @@ public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableS
         super();
         this.fullscreen.setValue(fullscreen);
         this.switchToLive.setValue(switchToLive);
-        this.timeToSwitchBeforeRaceStart.setValue(timeToSwitchBeforeRaceStartInSeconds);
-        this.waitTimeAfterRaceEndInMillis.setValue(waitTimeAfterRaceEndInSeconds);
+        this.timeToSwitchBeforeRaceStartInSeconds.setValue(timeToSwitchBeforeRaceStartInSeconds);
+        this.waitTimeAfterRaceEndInSeconds.setValue(waitTimeAfterRaceEndInSeconds);
     }
 
     @Override
     protected void addChildSettings() {
         fullscreen = new BooleanSetting("fullscreen", this, true);
         switchToLive = new BooleanSetting("switchToLive", this, true);
-        timeToSwitchBeforeRaceStart = new IntegerSetting("timeToSwitchBeforeRaceStart", this, 180);
-        waitTimeAfterRaceEndInMillis = new IntegerSetting("waitTimeAfterRaceEnd", this, 60);
+        timeToSwitchBeforeRaceStartInSeconds = new IntegerSetting("timeToSwitchBeforeRaceStart", this, 180);
+        waitTimeAfterRaceEndInSeconds = new IntegerSetting("waitTimeAfterRaceEnd", this, 60);
 
     }
 
@@ -42,10 +42,10 @@ public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableS
     }
 
     public int getTimeToSwitchBeforeRaceStartInSeconds() {
-        return timeToSwitchBeforeRaceStart.getValue();
+        return timeToSwitchBeforeRaceStartInSeconds.getValue();
     }
 
     public int getWaitTimeAfterRaceEndInSeconds() {
-        return waitTimeAfterRaceEndInMillis.getValue();
+        return waitTimeAfterRaceEndInSeconds.getValue();
     }
 }

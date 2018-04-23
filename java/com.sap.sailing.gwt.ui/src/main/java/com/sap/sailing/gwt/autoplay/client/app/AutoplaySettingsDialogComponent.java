@@ -62,7 +62,7 @@ public class AutoplaySettingsDialogComponent implements SettingsDialogComponent<
         return new Validator<AutoplayPerspectiveOwnSettings>() {
             @Override
             public String getErrorMessage(AutoplayPerspectiveOwnSettings valueToValidate) {
-                if (valueToValidate.timeToSwitchBeforeRaceStart.getValue() < 0) {
+                if (valueToValidate.timeToSwitchBeforeRaceStartInSeconds.getValue() < 0) {
                     // TODO i18n
                     return "negative delay";
                 } else {
