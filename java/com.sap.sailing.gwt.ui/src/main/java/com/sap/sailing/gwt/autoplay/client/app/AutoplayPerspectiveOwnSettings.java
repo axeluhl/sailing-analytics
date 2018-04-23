@@ -7,10 +7,10 @@ import com.sap.sse.common.settings.generic.IntegerSetting;
 public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -9013901094746556797L;
 
-    BooleanSetting fullscreen;
-    BooleanSetting switchToLive;
-    IntegerSetting timeToSwitchBeforeRaceStartInSeconds;
-    IntegerSetting waitTimeAfterRaceEndInSeconds;
+    private BooleanSetting fullscreen;
+    private BooleanSetting switchToLive;
+    private IntegerSetting timeToSwitchBeforeRaceStartInSeconds;
+    private IntegerSetting waitTimeAfterRaceEndInSeconds;
 
     public AutoplayPerspectiveOwnSettings() {
     }
