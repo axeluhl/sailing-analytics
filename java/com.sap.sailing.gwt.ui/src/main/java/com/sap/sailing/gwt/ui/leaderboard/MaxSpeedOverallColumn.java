@@ -11,9 +11,9 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
  * @author Axel Uhl (d043530)
  *
  */
-public class MaxSpeedOverallColumn extends FormattedDoubleDetailTypeColumn {
+public class MaxSpeedOverallColumn extends FormattedDoubleLeaderboardRowDTODetailTypeColumn {
     
-    private static class MaxSpeedOverallField implements LegDetailField<Double> {
+    private static class MaxSpeedOverallField implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             return row.maximumSpeedOverGroundInKnots;

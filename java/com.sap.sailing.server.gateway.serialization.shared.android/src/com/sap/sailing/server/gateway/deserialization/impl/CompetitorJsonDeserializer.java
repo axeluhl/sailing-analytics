@@ -21,6 +21,7 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerialize
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.util.impl.UUIDHelper;
 
 public class CompetitorJsonDeserializer implements JsonDeserializer<DynamicCompetitor> {
     private final CompetitorFactory competitorWithBoatFactory;
@@ -52,7 +53,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<DynamicCompe
                 Constructor<?> constructorFromString = idClass.getConstructor(String.class);
                 competitorId = (Serializable) constructorFromString.newInstance(competitorId.toString());
             } else if (UUID.class.isAssignableFrom(idClass)) {
-                competitorId = Helpers.tryUuidConversion(competitorId);
+                competitorId = UUIDHelper.tryUuidConversion(competitorId);
             }
             String name = (String) object.get(CompetitorJsonConstants.FIELD_NAME);
             String shortName = (String) object.get(CompetitorJsonConstants.FIELD_SHORT_NAME);

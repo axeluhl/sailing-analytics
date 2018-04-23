@@ -127,6 +127,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
             public List<String> getSearchableStrings(MediaTrack t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.title);
+                strings.add(t.url);
                 if (t.startTime == null) {
                     GWT.log("startTime of media track "+t.title+" undefined");
                 } else {
@@ -438,6 +439,19 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         });
         mediaTracksTable.addColumn(durationColumn, stringMessages.duration());
         mediaTracksTable.setColumnWidth(durationColumn, 100, Unit.PCT);
+        // media type
+        Column<MediaTrack, String> mimeTypeColumn = new Column<MediaTrack, String>(new TextCell()) {
+            @Override
+            public String getValue(MediaTrack mediaTrack) {
+                return mediaTrack.mimeType == null ? "" : mediaTrack.mimeType.toString();
+            }
+        };
+        mimeTypeColumn.setSortable(true);
+        mediaTracksTable.addColumn(mimeTypeColumn, stringMessages.mimeType());
+        mediaTracksTable.setColumnWidth(mimeTypeColumn, 100, Unit.PCT);
+        sortHandler.setComparator(mimeTypeColumn, (mt1, mt2)->
+            (mt1.mimeType == null ? "" : mt1.mimeType.toString()).compareTo(
+                    mt2.mimeType == null ? "" : mt2.mimeType.toString()));
 
         // delete action
         ImagesBarColumn<MediaTrack, MediaActionBarCell> mediaActionColumn = new ImagesBarColumn<MediaTrack, MediaActionBarCell>(

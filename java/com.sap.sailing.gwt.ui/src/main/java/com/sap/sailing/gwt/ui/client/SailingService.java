@@ -111,6 +111,7 @@ import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -286,11 +287,12 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     String[] getCountryCodes();
     
-    Map<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getDouglasPoints(RegattaAndRaceIdentifier raceIdentifier,
-            Map<CompetitorWithBoatDTO, Date> from, Map<CompetitorWithBoatDTO, Date> to, double meters) throws NoWindException;
+    Map<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getDouglasPoints(
+            RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorWithBoatDTO, TimeRange> competitorTimeRanges, double meters)
+            throws NoWindException;
 
     Map<CompetitorWithBoatDTO, List<ManeuverDTO>> getManeuvers(RegattaAndRaceIdentifier raceIdentifier,
-            Map<CompetitorWithBoatDTO, Date> from, Map<CompetitorWithBoatDTO, Date> to) throws NoWindException;
+            Map<CompetitorWithBoatDTO, TimeRange> competitorTimeRanges) throws NoWindException;
 
     List<StrippedLeaderboardDTO> getLeaderboardsByRaceAndRegatta(String raceName, RegattaIdentifier regattaIdentifier);
     
