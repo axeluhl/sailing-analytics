@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
