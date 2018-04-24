@@ -43,6 +43,7 @@ public class RaceBoardPage extends HostPageWithAuthentication {
         super(driver);
     }
     public MapSettingsPO openMapSettings() {
+        new WebDriverWait(driver, 20000).until(p -> raceMapSettingsButton.getRect().y > 100);
         raceMapSettingsButton.click();
         waitUntil(new BooleanSupplier() {
 
