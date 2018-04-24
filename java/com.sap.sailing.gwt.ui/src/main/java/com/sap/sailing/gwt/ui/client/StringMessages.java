@@ -2127,7 +2127,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String expeditionVmgTargVmgDelta();
     String expeditionRateOfTurn();
     String expeditionRudderAngle();
-    String expeditionHeel();
     String expeditionTargetHeel();
     String expeditionTimeToPortLayline();
     String expeditionTimeToStbLayline();
