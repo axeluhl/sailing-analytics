@@ -13,10 +13,10 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -88,11 +88,10 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
             @Override
             public SafeHtml getValue(CompetitorWithBoatDTO competitor) {
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
-                ImageResourceRenderer renderer = new ImageResourceRenderer();
                 final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
                 final String flagImageURL = competitor.getFlagImageURL();
                 if (flagImageURL != null && !flagImageURL.isEmpty()) {
-                    sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
+                    sb.append(FlagImageResolver.FLAG_RENDERER_TEMPLATE.imageWithTitle(flagImageURL, competitor.getName()));
                     sb.appendHtmlConstant("&nbsp;");
                 } else {
                     final ImageResource flagImageResource;
@@ -102,7 +101,7 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
                         flagImageResource = FlagImageResolverImpl.get().getFlagImageResource(twoLetterIsoCountryCode);
                     }
                     if (flagImageResource != null) {
-                        sb.append(renderer.render(flagImageResource));
+                        sb.append(FlagImageResolver.FLAG_RENDERER_TEMPLATE.image(flagImageResource.getSafeUri().asString()));
                         sb.appendHtmlConstant("&nbsp;");
                     }
                 }
