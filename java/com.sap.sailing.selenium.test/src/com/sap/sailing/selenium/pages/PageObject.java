@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
@@ -584,5 +585,14 @@ public class PageObject {
             }
         }
         throw new NoAlertPresentException();
+    }
+    
+    protected void scrollToView(WebElement webElement) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(false);", webElement);
+    }
+    
+    protected void scrollToViewAndClick(WebElement webElement) {
+        scrollToView(webElement);
+        webElement.click();
     }
 }

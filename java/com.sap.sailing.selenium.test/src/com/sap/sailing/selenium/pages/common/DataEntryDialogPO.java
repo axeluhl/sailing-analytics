@@ -57,7 +57,7 @@ public abstract class DataEntryDialogPO extends PageArea {
     }
     
     public void pressOk(boolean accept) {
-        this.okButton.click();
+        scrollToViewAndClick(this.okButton);
         
         ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
         Alert alert = condition.apply(this.driver);

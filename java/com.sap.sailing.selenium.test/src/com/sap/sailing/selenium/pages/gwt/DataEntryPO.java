@@ -119,17 +119,34 @@ public class DataEntryPO extends CellTableRowPO {
     
     protected Action getModifiedSelectAction() {
         Actions actions = new Actions(this.driver);
+        final WebElement elementToSelect;
+        final boolean controlClick;
         if (table.getColumnHeaders().get(0).equals("\u2713")) {
             // it's a checkbox column
-            actions.moveToElement(this.columns.isEmpty() ? getWebElement() : this.columns.get(0));
-            actions.click();
+            elementToSelect = this.columns.isEmpty() ? getWebElement() : this.columns.get(0);
+            controlClick = false;
         } else {
+            elementToSelect = getElementForSelect();
+            controlClick = true;
+        }
+        if (controlClick) {
             actions.keyDown(Keys.CONTROL);
-            moveToUpperLeftCorner(actions, getElementForSelect());
-            actions.click();
+        }
+        moveToUpperLeftCorner(actions, elementToSelect);
+        actions.moveToElement(elementToSelect, 1, 1);
+        actions.click();
+        if (controlClick) {
             actions.keyUp(Keys.CONTROL);
         }
-        return actions.build();
+        final CompositeAction compositeAction = new CompositeAction();
+        compositeAction.addAction(new Action() {
+            @Override
+            public void perform() {
+                scrollToView(elementToSelect);
+            }
+        });
+        compositeAction.addAction(actions.build());
+        return compositeAction;
     }
     
     protected CompositeAction getModifiedCompositeActionAction() {
