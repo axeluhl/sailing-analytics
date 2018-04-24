@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
@@ -38,7 +39,7 @@ import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAut
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
-public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
+public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
     private RaceWithCompetitorsAndBoatsDTO selectedRace;
 
     /**
@@ -48,6 +49,8 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
 
     private RaceboardContextDefinition raceboardContextDefinition;
 
+    private String leaderBoardName;
+    
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
@@ -69,6 +72,9 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
             createErrorPage(getStringMessages().requiresRegattaRaceAndLeaderboard());
             return;
         }
+        
+        leaderBoardName = raceboardContextDefinition.getLeaderboardName();
+        
         AsyncCallback<RaceboardDataDTO> asyncCallback = new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO raceboardData) {
@@ -200,4 +206,9 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
         return raceBoardPerspective;
     }  
+    
+    @Override
+    public String getLeaderboardname() {
+        return leaderBoardName;
+    }
 }
