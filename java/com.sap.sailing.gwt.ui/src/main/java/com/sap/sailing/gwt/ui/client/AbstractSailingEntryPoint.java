@@ -20,7 +20,7 @@ public abstract class AbstractSailingEntryPoint extends AbstractSecureEntryPoint
      */
     protected SailingServiceAsync getSailingService() {
         if (sailingService == null) {
-            if (this.getClass().isAssignableFrom(ServiceRoutingProvider.class)) {
+            if (this instanceof ServiceRoutingProvider) {
                 sailingService = SailingServiceHelper.createSailingServiceInstance((ServiceRoutingProvider)this);
             } else {
                 sailingService = SailingServiceHelper.createSailingServiceInstance();

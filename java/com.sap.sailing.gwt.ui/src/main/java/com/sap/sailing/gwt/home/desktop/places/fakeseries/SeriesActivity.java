@@ -59,7 +59,7 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
 
         if (this.ctx.getAnalyticsManager() == null) {
             ctx.withAnalyticsManager(new EventSeriesAnalyticsDataManager( //
-                    clientFactory.getSailingService(), //
+                    clientFactory, //
                     asyncActionsExecutor, //
                     new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds), //
                     clientFactory.getErrorReporter(), flagImageResolver));

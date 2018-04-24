@@ -2498,6 +2498,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return results;
     }
+    
+    private void checkLeaderboardRouting(String leaderboardName) {
+        final String currentRequestUrl = getThreadLocalRequest().getRequestURL().toString();
+        if (!currentRequestUrl.contains("/leaderboard/")) {
+            logger.log(Level.WARNING, "Leaderboard routing stacktrace", new RuntimeException("Request without leaderboard routing information"));
+        } else {
+          if (currentRequestUrl.contains(leaderboardName)) {
+              logger.info("leaderboard access matches leaderboard url");
+          } else {
+              logger.info("leaderboard access to " + leaderboardName + " does not match request url " + currentRequestUrl);
+              logger.log(Level.SEVERE, "Leaderboard routing stacktrace", new RuntimeException("Request without leaderboard routing information"));
+          }
+        }
+    }
 
     /**
      * Creates a {@link LeaderboardDTO} for <code>leaderboard</code> and fills in the name, race master data
@@ -2508,6 +2522,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * If <code>withGeoLocationData</code> is <code>true</code> the geographical location of all races will be determined.
      */
     private StrippedLeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard, boolean withGeoLocationData, boolean withStatisticalData) {
+        checkLeaderboardRouting(leaderboard.getName());
+        
         StrippedLeaderboardDTO leaderboardDTO = new StrippedLeaderboardDTO();
         TimePoint startOfLatestRace = null;
         Long delayToLiveInMillisForLatestRace = null;

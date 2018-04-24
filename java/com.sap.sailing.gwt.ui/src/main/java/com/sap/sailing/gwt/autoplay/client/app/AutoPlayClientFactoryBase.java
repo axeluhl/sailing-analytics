@@ -6,11 +6,12 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.places.autoplaystart.AutoPlayStartPlace;
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
@@ -24,7 +25,7 @@ public abstract class AutoPlayClientFactoryBase
             AutoPlayPlaceNavigator navigator) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
-        sailingService = GWT.create(SailingService.class);
+        sailingService = SailingServiceHelper.createSailingServiceInstance();
         mediaService = GWT.create(MediaService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService,
                 RemoteServiceMappingConstants.sailingServiceRemotePath);
@@ -40,6 +41,16 @@ public abstract class AutoPlayClientFactoryBase
     @Override
     public SailingServiceAsync getSailingService() {
         return sailingService;
+    }
+    
+    @Override
+    public SailingServiceAsync getSailingService(ProvidesLeaderboardRouting routingProvider) {
+        // TODO: cache created services?
+        if (routingProvider == null) {
+            return sailingService;
+        } else {            
+            return SailingServiceHelper.createSailingServiceInstance(routingProvider);
+        }
     }
 
     @Override

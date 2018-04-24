@@ -50,7 +50,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
         currentView = new TabletAndDesktopRegattaEventView(flagImageResolver);
         if (this.ctx.getRegattaAnalyticsManager() == null) {
             ctx.withRegattaAnalyticsManager(new RegattaAnalyticsDataManager(
-                    clientFactory.getSailingService(),
+                    clientFactory,
                     asyncActionsExecutor,
                     new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds),
                     clientFactory.getErrorReporter(), flagImageResolver));

@@ -25,7 +25,6 @@ import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
-import com.sap.sailing.gwt.home.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -33,7 +32,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
-public class PairingListEntryPoint extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
+public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 
     private PairingListContextDefinition pairingListContextDefinition;
 
@@ -226,11 +225,6 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint implements 
         return pairingListPanel;
     }
     
-    @Override
-    public String getLeaderboardname() {
-        return leaderboardName;
-    }
-
     private native void printPairingListGrid(String pageHTMLContent) /*-{
 		var frameID = '__gwt_historyFrame';
 		var frame = $doc.getElementById(frameID);

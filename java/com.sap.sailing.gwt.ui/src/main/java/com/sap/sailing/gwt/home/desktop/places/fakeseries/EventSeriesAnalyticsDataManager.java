@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
@@ -42,17 +43,17 @@ public class EventSeriesAnalyticsDataManager {
     private final CompetitorSelectionModel competitorSelectionProvider;
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final ErrorReporter errorReporter;
-    private final SailingServiceAsync sailingService;
+    private final SailingClientFactory sailingCF;
     private final Timer timer;
     private final int MAX_COMPETITORS_IN_CHART = 30;
     private final FlagImageResolver flagImageResolver; 
 
-    public EventSeriesAnalyticsDataManager(final SailingServiceAsync sailingService,
+    public EventSeriesAnalyticsDataManager(final SailingClientFactory sailingCF,
             AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter,
             FlagImageResolver flagImageResolver) {
         this.flagImageResolver = flagImageResolver;
         this.competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */true);
-        this.sailingService = sailingService;
+        this.sailingCF = sailingCF;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.timer = timer;
         this.errorReporter = errorReporter;
@@ -64,7 +65,10 @@ public class EventSeriesAnalyticsDataManager {
             final MultiRaceLeaderboardSettings leaderboardSettings,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
+        
+        
         if(overallLeaderboardPanel == null) {
+            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> {return leaderboardName;});
             overallLeaderboardPanel = new MultiRaceLeaderboardPanel(parent, context, sailingService, asyncActionsExecutor,
                     leaderboardSettings, true, 
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
@@ -80,7 +84,10 @@ public class EventSeriesAnalyticsDataManager {
     public MultiCompetitorLeaderboardChart createMultiCompetitorChart(Component<?> parent,
             ComponentContext<?> context, String leaderboardName,
             DetailType chartDetailType) {
+        
         if(multiCompetitorChart == null) {
+            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> {return leaderboardName;});
+
             multiCompetitorChart = new MultiCompetitorLeaderboardChart(parent, context, sailingService,
                     asyncActionsExecutor,
                     leaderboardName, chartDetailType,
@@ -95,6 +102,7 @@ public class EventSeriesAnalyticsDataManager {
             String preselectedLeaderboardName,  String leaderboardGroupName,
             String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
         if(multiLeaderboardPanel == null) {
+            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> {return metaLeaderboardName;});
             multiLeaderboardPanel = new MultiLeaderboardProxyPanel(parent, context, sailingService, metaLeaderboardName,
                     asyncActionsExecutor, timer, true /* isEmbedded */,
                     preselectedLeaderboardName, errorReporter, StringMessages.INSTANCE,

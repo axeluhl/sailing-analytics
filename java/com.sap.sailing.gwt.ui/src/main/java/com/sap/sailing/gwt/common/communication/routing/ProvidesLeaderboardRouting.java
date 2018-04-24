@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.communication.routing;
+package com.sap.sailing.gwt.common.communication.routing;
 
 import com.google.gwt.http.client.URL;
 import com.sap.sse.gwt.client.ServiceRoutingProvider;
