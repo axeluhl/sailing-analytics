@@ -1379,10 +1379,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_RUDDER_ANGLE,
                             new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionRudderAngle),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_HEEL,
-                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_HEEL,
-                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionHeel),
-                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.EXPEDITION_RACE_TARGET_HEEL,
                     new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TARGET_HEEL,
                             new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionTargetHeel),

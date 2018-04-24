@@ -3203,10 +3203,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 result = getBravoDoubleValue(BravoFixTrack::getExpeditionHeadingIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
-            case EXPEDITION_RACE_HEEL: {
-                result = getBravoDoubleValue(BravoFixTrack::getExpeditionHeelIfAvailable, trackedRace, competitor, timePoint);
-                break;
-            }
             case EXPEDITION_RACE_JIB_CAR_PORT: {
                 result = getBravoDoubleValue(BravoFixTrack::getExpeditionJibCarPortIfAvailable, trackedRace, competitor, timePoint);
                 break;

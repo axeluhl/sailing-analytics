@@ -1062,7 +1062,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             result.setExpeditionVMGTargVMGDelta(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionVMGTargVMGDelta, TrackedLegOfCompetitor::getAverageExpeditionVMGTargVMGDelta));
             result.setExpeditionRateOfTurn(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionRateOfTurn, TrackedLegOfCompetitor::getAverageExpeditionRateOfTurn));
             result.setExpeditionRudderAngle(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionRudderAngle, TrackedLegOfCompetitor::getAverageExpeditionRudderAngle));
-            result.setExpeditionHeel(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionHeel, TrackedLegOfCompetitor::getAverageExpeditionHeel));
             result.setExpeditionTargetHeel(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTargetHeel, TrackedLegOfCompetitor::getAverageExpeditionTargetHeel));
             result.setExpeditionTimeToPortLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToPortLayline, TrackedLegOfCompetitor::getAverageExpeditionTimeToPortLayline));
             result.setExpeditionTimeToStbLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToStbLayline, TrackedLegOfCompetitor::getAverageExpeditionTimeToStbLayline));
