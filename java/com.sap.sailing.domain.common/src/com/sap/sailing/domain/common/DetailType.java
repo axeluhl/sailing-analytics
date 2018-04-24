@@ -221,6 +221,31 @@ public enum DetailType implements Serializable {
     }
 
     /**
+     * Determines whether or not this {@link DetailType} represents an expedition data type.
+     * 
+     * @return <code>true</code> if this {@link DetailType} is an expedition data type, <code>false</code> otherwise
+     * 
+     * @see #getLegExpeditionDetailColumnTypes()
+     * @see #getRaceExpeditionDetailTypes()
+     */
+    public boolean isExpeditionType() {
+        return getLegExpeditionDetailColumnTypes().contains(this) || getRaceExpeditionDetailTypes().contains(this);
+    }
+
+    /**
+     * Determines whether or not this {@link DetailType} represents a degree detail which needs to be recalculated, e.g.
+     * to ensure continuous linear rendering in chart avoiding leaps from 360 to 0 degrees and vice verse.
+     * 
+     * @return <code>true</code> if this {@link DetailType} is a degree detail type which needs to be recalculated,
+     *         <code>false</code> otherwise
+     * 
+     * @see #CHART_COURSE_OVER_GROUND_TRUE_DEGREES
+     */
+    public boolean isDegreeTypeWithRecalculation() {
+        return this == CHART_COURSE_OVER_GROUND_TRUE_DEGREES;
+    }
+
+    /**
      * Special List of DetailTypes, that allows operators to select for example the RideHeight, that is usually only
      * selectable, if it already has data.
      */
@@ -484,21 +509,4 @@ public enum DetailType implements Serializable {
         throw new IllegalArgumentException("Could not restore " + value + " to an DetailType enum");
     }
 
-    public static boolean isExpeditionType(DetailType toTest) {
-        if(getLegExpeditionDetailColumnTypes().contains(toTest)) {
-            return true;
-        }
-        if(getRaceExpeditionDetailTypes().contains(toTest)) {
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isDegreeTypeWithRecalculation(DetailType toTest) {
-        boolean result = false;
-        if (toTest == DetailType.CHART_COURSE_OVER_GROUND_TRUE_DEGREES) {
-            result = true;
-        }
-        return result;
-    }
 }
