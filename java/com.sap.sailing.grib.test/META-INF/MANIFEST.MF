@@ -8,3 +8,4 @@ Fragment-Host: com.sap.sailing.grib
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit;bundle-version="4.8.2",
  com.sap.sailing.domain.common
+Automatic-Module-Name: com.sap.sailing.grib.test

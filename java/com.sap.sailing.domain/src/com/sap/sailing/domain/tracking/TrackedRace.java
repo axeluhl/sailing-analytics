@@ -13,6 +13,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProce
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
@@ -746,6 +747,10 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     
     Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
+    Boat getBoatOfCompetitor(Competitor competitor);
+    
+    Competitor getCompetitorOfBoat(Boat boat);
+    
     /**
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose
      * {@link #getRank(Competitor)} is 0 will be sorted "worst".

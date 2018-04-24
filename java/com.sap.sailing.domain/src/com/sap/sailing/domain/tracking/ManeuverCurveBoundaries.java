@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -48,6 +49,13 @@ public interface ManeuverCurveBoundaries {
      * @return The total course change in degrees
      */
     double getDirectionChangeInDegrees();
+
+    /**
+     * Gets the duration of the curve.
+     */
+    default Duration getDuration(){
+        return getTimePointBefore().until(getTimePointAfter());
+    }
 
     /**
      * Gets the lowest speed sailed within the maneuver curve.

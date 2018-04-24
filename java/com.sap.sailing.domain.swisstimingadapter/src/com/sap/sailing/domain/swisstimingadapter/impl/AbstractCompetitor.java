@@ -29,7 +29,7 @@ public abstract class AbstractCompetitor implements Competitor {
         return name;
     }
 
-    public String getID() {
+    public String getIdAsString() {
         return null;
     }
 

@@ -17,8 +17,8 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     
     private final boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard;
 
-    public SingleRaceLeaderboardPanelLifecycle(StringMessages stringMessages) {
-        super(stringMessages);
+    public SingleRaceLeaderboardPanelLifecycle(StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
+        super(stringMessages, availableDetailTypes);
         this.isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
     }
     
@@ -29,17 +29,20 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
         raceDetails.add(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         raceDetails.add(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS);
         raceDetails.add(DetailType.NUMBER_OF_MANEUVERS);
-        raceDetails.add(DetailType.DISPLAY_LEGS);
+        raceDetails.add(DetailType.RACE_DISPLAY_LEGS);
         List<DetailType> overallDetails = new ArrayList<>();
         SingleRaceLeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings();
+
         SingleRaceLeaderboardSettings settings = new SingleRaceLeaderboardSettings(
                 defaultSettings.getManeuverDetailsToShow(), defaultSettings.getLegDetailsToShow(),
                 defaultSettings.getRaceDetailsToShow(), overallDetails, DEFAULT_REFRESH_INTERVAL,
-                defaultSettings.isShowAddedScores(), /* showCompetitorSailIdColumn */ true,
+                defaultSettings.isShowAddedScores(),
+                /* showCompetitorShortNameColumn */ true,
                 /*
                  * don't showCompetitorFullNameColumn in case screen is so small that we don't even display the
                  * leaderboard initially
-                 */ isScreenLargeEnoughToInitiallyDisplayLeaderboard, false, false);
+                 */ isScreenLargeEnoughToInitiallyDisplayLeaderboard, 
+                 /* showCompetitorBoatInfoColumn */ true, false, false);
         SettingsUtil.copyDefaultsFromValues(settings, settings);
         
         return settings;
@@ -57,8 +60,9 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
                 currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 currentLeaderboardSettings.isShowAddedScores(),
-                currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
+                currentLeaderboardSettings.isShowCompetitorShortNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
+                currentLeaderboardSettings.isShowCompetitorBoatInfoColumn(),
                 currentLeaderboardSettings.isShowRaceRankColumn(),
                 currentLeaderboardSettings.isShowCompetitorNationality());
         return SettingsUtil.copyValues(contextSpecificLeaderboardSettings, defaultLeaderboardSettings);
@@ -72,15 +76,16 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
                 currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 currentLeaderboardSettings.isShowAddedScores(),
-                currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
+                currentLeaderboardSettings.isShowCompetitorShortNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
+                currentLeaderboardSettings.isShowCompetitorBoatInfoColumn(),
                 currentLeaderboardSettings.isShowCompetitorNationality(),currentLeaderboardSettings.isShowRaceRankColumn());
         return SettingsUtil.copyValues(globalLeaderboardSettings, defaultLeaderboardSettings);
     }
 
     @Override
     public SingleRaceLeaderboardSettingsDialogComponent getSettingsDialogComponent(SingleRaceLeaderboardSettings settings) {
-        return new SingleRaceLeaderboardSettingsDialogComponent(settings, stringMessages);
+        return new SingleRaceLeaderboardSettingsDialogComponent(settings, stringMessages, availableDetailTypes);
     }
 
 }

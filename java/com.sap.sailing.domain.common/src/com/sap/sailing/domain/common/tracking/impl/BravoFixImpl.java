@@ -58,7 +58,8 @@ public class BravoFixImpl extends SensorFixImpl implements BravoFix {
     
     @Override
     public boolean isFoiling(Distance minimumRideHeight) {
-        return getRideHeight().compareTo(minimumRideHeight) >= 0;
+        final Distance rideHeight = getRideHeight();
+        return rideHeight != null && rideHeight.compareTo(minimumRideHeight) >= 0;
     }
 
     @Override

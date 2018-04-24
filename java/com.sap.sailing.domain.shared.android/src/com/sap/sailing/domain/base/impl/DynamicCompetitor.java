@@ -8,13 +8,13 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Renamable;
 
 public interface DynamicCompetitor extends Competitor, Renamable {
-    DynamicBoat getBoat();
-
     DynamicTeam getTeam();
 
     void setColor(Color displayColor);
 
     void setEmail(String email);
+
+    void setShortName(String shortName);
 
     void setSearchTag(String searchTag);
 

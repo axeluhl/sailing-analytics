@@ -3,15 +3,15 @@ package com.sap.sailing.android.tracking.app.utils;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-
 import com.sap.sailing.android.shared.util.BaseAppPreferences;
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+
+import android.content.Context;
+import android.content.SharedPreferences;
 
 public class AppPreferences extends BaseAppPreferences {
 
@@ -69,8 +69,13 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public String getServerMarkPath(String leaderboardName, String markId) {
-        String path = context.getString(R.string.preferece_server_mark_path);
-        return path.replace("{leaderboardName}", leaderboardName).replace("{markId}", markId);
+        String path = context.getString(R.string.preference_server_mark_path);
+        return path.replace("{leaderboardName}", leaderboardName).replace("{mark_id}", markId);
+    }
+
+    public String getServerBoatPath(String boatId) {
+        String path = context.getString(R.string.preference_server_boat_path);
+        return path.replace("{boat_id}", boatId);
     }
 
     public int getGPSFixInterval() {

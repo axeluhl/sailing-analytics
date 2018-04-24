@@ -14,6 +14,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -23,6 +24,8 @@ import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
@@ -129,12 +132,24 @@ public interface DomainObjectFactory {
     RaceLog loadRaceLog(RaceLogIdentifier identifier);
 
     RegattaLog loadRegattaLog(RegattaLikeIdentifier identifier);
-    
+
     /**
-     * Loads all competitors, and resolves them via the domain factory.
-     * @return
+     * Migrates the old COMPETITORS collection and the new BOATS collection.
+     * The old COLLECTION is will be renamed to COMPETITORS_BAK for deveopment and test purposes
+     * @return a collection of the old type where all competitors contain their boats or null if migration was not required.
      */
-    Collection<Competitor> loadAllCompetitors();
+    Iterable<CompetitorWithBoat> migrateLegacyCompetitorsIfRequired();
+
+    /**
+     * Loads all competitors (with and without embedded boats) and resolves them via the domain factory.
+     * Returns a collection of {@link Competitor} or {@link CompetitorWithBoat} objects. 
+     */
+    Collection<DynamicCompetitor> loadAllCompetitors();
+
+    /**
+     * Loads all boats and resolves them via the domain factory.
+     */
+    Collection<DynamicBoat> loadAllBoats();
 
     DomainFactory getBaseDomainFactory();
 

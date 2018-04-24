@@ -25,6 +25,7 @@ import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.gwt.client.event.LocaleChangeEventHandler;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.ui.client.UserService;
 
 public class AutoPlayStartPresenterImpl extends AbstractActivity implements AutoPlayStartView.Presenter {
     public static final String LOAD_EVENTS_DATA_CATEGORY = "loadEventsData";
@@ -54,7 +55,7 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
                     StrippedLeaderboardDTO leaderBoard = AutoplayHelper.getSelectedLeaderboard(event,
                             apcd.getLeaderboardName());
 
-                    apcd.getType().getConfig().loadSettingsDefault(event, leaderBoard, new OnSettingsCallback() {
+                    apcd.getType().getConfig().loadSettingsDefault(event, leaderBoard, clientFactory.getUserService(), new OnSettingsCallback() {
 
                         @Override
                         public void newSettings(PerspectiveCompositeSettings<?> newSettings) {
@@ -117,5 +118,10 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
     public void startRootNode(AutoPlayContextDefinition ctxDef, PerspectiveCompositeSettings<?> settings) {
         AutoPlayConfiguration autoPlayConfiguration = ctxDef.getType().getConfig();
         autoPlayConfiguration.startRootNode(clientFactory, ctxDef, settings);
+    }
+
+    @Override
+    public UserService getUserService() {
+        return clientFactory.getUserService();
     }
 }

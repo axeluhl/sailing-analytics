@@ -72,9 +72,8 @@ public class ManeuverAnalysisQingdao2014Test extends AbstractManeuverDetectionTe
                 new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
         maneuversInvalid = new ArrayList<Maneuver>();
         Util.addAll(maneuvers, maneuversInvalid);
-
         assertManeuver(maneuvers, ManeuverType.JIBE, new MillisecondsTimePoint(dateFormat.parse("05/01/2014-09:08:15")), 5000);
-        assertManeuver(maneuvers, ManeuverType.TACK, new MillisecondsTimePoint(dateFormat.parse("05/01/2014-09:08:51")), 5000);
+        assertManeuver(maneuvers, ManeuverType.TACK, new MillisecondsTimePoint(dateFormat.parse("05/01/2014-09:08:56")), 5000);
         for (Maneuver maneuver : maneuvers) {
             // make sure there is no penalty detected in the time frame considered
             assertNotSame("Found an unexpected penalty "+maneuver, ManeuverType.PENALTY_CIRCLE, maneuver.getType());

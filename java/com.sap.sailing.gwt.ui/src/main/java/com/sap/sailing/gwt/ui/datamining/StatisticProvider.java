@@ -1,18 +1,9 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import com.sap.sse.common.settings.SerializableSettings;
-import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
-import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
-import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 
-public interface StatisticProvider extends DataMiningComponentProvider<SerializableSettings>, DataRetrieverChainDefinitionChangedListener {
-
-    public FunctionDTO getStatisticToCalculate();
-
-    public AggregationProcessorDefinitionDTO getAggregatorDefinition();
-
-    public void addStatisticChangedListener(StatisticChangedListener listener);
+public interface StatisticProvider extends DataRetrieverChainDefinitionProvider, ExtractionFunctionProvider<CompositeSettings>, AggregatorDefinitionProvider<CompositeSettings> {
     
-    public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition);
+    public void addStatisticChangedListener(StatisticChangedListener listener);
 
 }

@@ -36,8 +36,8 @@ public abstract class RaceLogEventImpl extends AbstractLogEventImpl<RaceLogEvent
     }
     
     @Override
-    public List<Competitor> getInvolvedBoats() {
-        return raceLogEventData.getInvolvedBoats();
+    public <T extends Competitor> List<T> getInvolvedCompetitors() {
+        return raceLogEventData.getInvolvedCompetitors();
     }
     
     @Override

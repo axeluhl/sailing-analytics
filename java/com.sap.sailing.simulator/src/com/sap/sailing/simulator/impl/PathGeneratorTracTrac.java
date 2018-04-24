@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -255,8 +257,8 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         this.intializeRaceHandle();
         List<String> result = new ArrayList<String>();
         RaceDefinition race = this.raceHandle.getRace();
-        for (Competitor competitor : race.getCompetitors()) {
-            result.add(competitor.getName() + ", " + competitor.getBoat().getName());
+        for (Entry<Competitor, Boat> competitorAndBoatEntry: race.getCompetitorsAndTheirBoats().entrySet()) {
+            result.add(competitorAndBoatEntry.getKey().getName() + ", " + competitorAndBoatEntry.getValue().getName());
         }
         return result;
     }

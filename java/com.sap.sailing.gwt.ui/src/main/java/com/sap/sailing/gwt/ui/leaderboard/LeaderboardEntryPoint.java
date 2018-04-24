@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
@@ -41,6 +43,8 @@ import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
     public static final long DEFAULT_REFRESH_INTERVAL_MILLIS = 3000l;
+
+    private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());
 
     private StringMessages stringmessages = StringMessages.INSTANCE;
     private UUID eventId;
@@ -89,11 +93,10 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
     
     private void checkLeaderboardNameAndCreateUI() {
         if(leaderboardDTO == null) {
-            getSailingService().getLeaderboard(leaderboardName, new MarkedAsyncCallback<StrippedLeaderboardDTO>(
-                        new AsyncCallback<StrippedLeaderboardDTO>() {
+            getSailingService().getLeaderboard(leaderboardName, 
+                       new MarkedAsyncCallback<StrippedLeaderboardDTO>(new AsyncCallback<StrippedLeaderboardDTO>() {
                             @Override
-                            public void onSuccess(
-                                    StrippedLeaderboardDTO leaderboardDTO) {
+                            public void onSuccess(StrippedLeaderboardDTO leaderboardDTO) {
                                 if (leaderboardDTO != null) {
                                     LeaderboardEntryPoint.this.leaderboardDTO = leaderboardDTO;
                                     Window.setTitle(leaderboardName);
@@ -105,8 +108,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
 
                             @Override
                             public void onFailure(Throwable t) {
-                                reportError("Error trying to obtain list of leaderboard names: "
-                                        + t.getMessage());
+                                reportError("Error trying to obtain list of leaderboard names: " + t.getMessage());
                             }
                         }));
         } else {
@@ -120,69 +122,104 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
         
         // make a single live request as the default but don't continue to play by default
 
-        final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForLeaderboard(leaderboardContextDefinition);
-        if (leaderboardDTO.type.isMetaLeaderboard()) {
-            // overall
+        final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
+                .createStoredSettingsLocatorForLeaderboard(leaderboardContextDefinition);        
+        getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
+                new AsyncCallback<Iterable<DetailType>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        logger.log(Level.SEVERE, "Could not load detailtypes", caught);
+                    }
 
-            MetaLeaderboardPerspectiveLifecycle rootComponentLifeCycle = new MetaLeaderboardPerspectiveLifecycle(
-                    stringmessages, leaderboardDTO);
-            ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
-                    rootComponentLifeCycle, getUserService(), storageDefinition);
-            context.getInitialSettings(
-                    new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
-                        @Override
-                        public void onSuccess(
-                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
-                            configureWithSettings(defaultSettings, timer);
-                            
-                            final MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(null, context,
-                                    rootComponentLifeCycle, defaultSettings, getSailingService(), new AsyncActionsExecutor(),
-                                    timer, null, leaderboardGroupName, leaderboardName,
-                                    LeaderboardEntryPoint.this, getStringMessages(),
-                                    getActualChartDetailType(defaultSettings));
-                            createUi(leaderboardViewer, defaultSettings, timer, leaderboardContextDefinition);
-                        }
+                    @Override
+                    public void onSuccess(Iterable<DetailType> result) {
+                        if (leaderboardDTO.type.isMetaLeaderboard()) {
+                            // overall
+                            MetaLeaderboardPerspectiveLifecycle rootComponentLifeCycle = new MetaLeaderboardPerspectiveLifecycle(
+                                    stringmessages, leaderboardDTO, result);
+                            ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
+                                    rootComponentLifeCycle, getUserService(), storageDefinition);
+                            context.getInitialSettings(
+                                    new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
+                                        @Override
+                                        public void onSuccess(
+                                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
+                                            configureWithSettings(defaultSettings, timer);
 
-                        @Override
-                        public void onError(Throwable caught,
-                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> fallbackDefaultSettings) {
-                            // TODO
-                            onSuccess(fallbackDefaultSettings);
-                        }
-                    });
-        } else {
+                                            final MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(
+                                                    null, context, rootComponentLifeCycle, defaultSettings,
+                                                    getSailingService(), new AsyncActionsExecutor(), timer, null,
+                                                    leaderboardGroupName, leaderboardName, LeaderboardEntryPoint.this,
+                                                    getStringMessages(), getActualChartDetailType(defaultSettings),
+                                                    result);
+                                            createUi(leaderboardViewer, defaultSettings, timer,
+                                                    leaderboardContextDefinition);
+                                        }
 
-            LeaderboardPerspectiveLifecycle rootComponentLifeCycle = new LeaderboardPerspectiveLifecycle(
-                    StringMessages.INSTANCE, leaderboardDTO);
-            ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
-                    rootComponentLifeCycle, getUserService(), storageDefinition);
-            context.getInitialSettings(
-                    new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
-                        @Override
-                        public void onSuccess(
-                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
-                            configureWithSettings(defaultSettings, timer);
-                            
-                            final MultiRaceLeaderboardViewer leaderboardViewer = new MultiRaceLeaderboardViewer(null, context,
-                                    rootComponentLifeCycle, defaultSettings, getSailingService(), new AsyncActionsExecutor(),
-                                    timer, leaderboardGroupName, leaderboardName,
-                                    LeaderboardEntryPoint.this, getStringMessages(), getActualChartDetailType(defaultSettings));
-                            createUi(leaderboardViewer, defaultSettings, timer, leaderboardContextDefinition);
-                        }
+                                        @Override
+                                        public void onError(Throwable caught,
+                                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> fallbackDefaultSettings) {
+                                            logger.log(Level.WARNING,
+                                                    "Could not load initialsettings, useing default settings as fallback",
+                                                    caught);
+                                            onSuccess(fallbackDefaultSettings);
+                                        }
+                                    });
+                        } else {
+                            LeaderboardPerspectiveLifecycle rootComponentLifeCycle = new LeaderboardPerspectiveLifecycle(
+                                    StringMessages.INSTANCE, leaderboardDTO, result);
+                            ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
+                                    rootComponentLifeCycle, getUserService(), storageDefinition);
+                            context.getInitialSettings(
+                                    new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
+                                        @Override
+                                        public void onSuccess(
+                                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
+                                            getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
+                                                    new AsyncCallback<Iterable<DetailType>>() {
 
-                        @Override
-                        public void onError(Throwable caught,
-                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> fallbackDefaultSettings) {
-                            // TODO
-                            onSuccess(fallbackDefaultSettings);
+                                                        @Override
+                                                        public void onFailure(Throwable caught) {
+                                                            logger.log(Level.SEVERE,
+                                                                    "Could not load available detail types",
+                                                                    caught);
+                                                        }
+
+                                                        @Override
+                                                        public void onSuccess(Iterable<DetailType> result) {
+                                                            configureWithSettings(defaultSettings, timer);
+                                                            final MultiRaceLeaderboardViewer leaderboardViewer = new MultiRaceLeaderboardViewer(
+                                                                    null, context, rootComponentLifeCycle,
+                                                                    defaultSettings, getSailingService(),
+                                                                    new AsyncActionsExecutor(), timer,
+                                                                    leaderboardGroupName, leaderboardName,
+                                                                    LeaderboardEntryPoint.this, getStringMessages(),
+                                                                    getActualChartDetailType(defaultSettings), result);
+                                                            createUi(leaderboardViewer, defaultSettings, timer,
+                                                                    leaderboardContextDefinition);
+                                                        }
+                                                    });
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable caught,
+                                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> fallbackDefaultSettings) {
+                                            logger.log(Level.WARNING,
+                                                    "Could not load initialsettings, useing default settings as fallback",
+                                                    caught);
+                                            onSuccess(fallbackDefaultSettings);
+                                        }
+                                    });
                         }
-                    });
-        }
+                    }
+                });
         
     }
     
-    private DetailType getActualChartDetailType(PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings) {
-        MultiCompetitorLeaderboardChartSettings chartSettings = settings.findSettingsByComponentId(MultiCompetitorLeaderboardChartLifecycle.ID);
+    private DetailType getActualChartDetailType(
+            PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings) {
+        MultiCompetitorLeaderboardChartSettings chartSettings = settings
+                .findSettingsByComponentId(MultiCompetitorLeaderboardChartLifecycle.ID);
         DetailType chartDetailType = chartSettings == null ? null : chartSettings.getDetailType();
         
         if (chartDetailType == DetailType.REGATTA_NET_POINTS_SUM) {
@@ -191,7 +228,9 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
         return MultiCompetitorLeaderboardChartSettings.getDefaultDetailType(leaderboardDTO.type.isMetaLeaderboard());
     }
     
-    private void createUi(Widget leaderboardViewer, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings, Timer timer, LeaderboardContextDefinition leaderboardContextSettings) {
+    private void createUi(Widget leaderboardViewer,
+            PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings, Timer timer,
+            LeaderboardContextDefinition leaderboardContextSettings) {
         LeaderboardPerspectiveOwnSettings ownSettings = settings.getPerspectiveOwnSettings();
         
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
@@ -210,8 +249,8 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
         mainPanel.add(new ScrollPanel(leaderboardViewer));
     }
 
-    protected void configureWithSettings(
-            PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings, Timer timer) {
+    protected void configureWithSettings(PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
+            Timer timer) {
         LeaderboardPerspectiveOwnSettings perspectiveOwnSettings = settings.getPerspectiveOwnSettings();
         final String zoomTo = perspectiveOwnSettings.getZoomTo();
         if (zoomTo != null) {

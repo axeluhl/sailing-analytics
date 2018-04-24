@@ -15,6 +15,7 @@ import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisRankingTableEntryDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.WindAndAdvantagesInfoForStartLineDTO;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegType;
@@ -59,7 +60,8 @@ public final class StartAnalysisDTOFactory extends AbstractStartAnalysisCreation
             competitors.add(createStartAnalysisCompetitorDTO(dashboardDispatchContext, trackedRace, rankOfCompetitorWhilePassingSecondWaypoint, competitor));
         }
         if (competitor != null) {
-            startAnalysisDTO.competitor = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorStore().convertToCompetitorDTO(competitor);
+            Boat boatOfCompetitor = trackedRace.getBoatOfCompetitor(competitor);
+            startAnalysisDTO.competitor = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorAndBoatStore().convertToCompetitorWithBoatDTO(competitor, boatOfCompetitor);
             logger.log(Level.INFO, "Created startanalysis for competitor"+competitor);
         }
         startAnalysisDTO.startAnalysisCompetitorDTOs = competitors;
@@ -191,8 +193,9 @@ public final class StartAnalysisDTOFactory extends AbstractStartAnalysisCreation
 
     private static StartAnalysisCompetitorDTO createStartAnalysisCompetitorDTO(DashboardDispatchContext dashboardDispatchContext, TrackedRace trackedRace, int rank, Competitor competitor) {
         StartAnalysisCompetitorDTO startAnalysisCompetitorDTOsForRace = new StartAnalysisCompetitorDTO();
-        startAnalysisCompetitorDTOsForRace.competitorDTO = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorStore()
-                .convertToCompetitorDTO(competitor);
+        Boat boatOfCompetitor = trackedRace.getBoatOfCompetitor(competitor);
+        startAnalysisCompetitorDTOsForRace.competitorDTO = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorAndBoatStore()
+                .convertToCompetitorWithBoatDTO(competitor, boatOfCompetitor);
         startAnalysisCompetitorDTOsForRace.rankingTableEntryDTO = createRankTableEntry(trackedRace, rank, competitor);
         return startAnalysisCompetitorDTOsForRace;
     }

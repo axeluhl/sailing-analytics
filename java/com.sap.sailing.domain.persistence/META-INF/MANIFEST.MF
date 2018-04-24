@@ -36,3 +36,4 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.json.simple,
  org.json.simple.parser,
  org.osgi.framework;version="1.6.0"
+Automatic-Module-Name: com.sap.sailing.domain.persistence

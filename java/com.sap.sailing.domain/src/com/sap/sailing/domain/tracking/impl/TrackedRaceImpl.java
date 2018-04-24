@@ -53,6 +53,7 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
@@ -548,7 +549,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     markPassingCalculator.stop();
                 }
                 }
-            });
+            }, /* Not relevant For replication */ Optional.empty());
         } else {
             markPassingCalculator = null;
         }
@@ -1458,6 +1459,24 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
         }
         return result;
+    }
+
+    @Override
+    public Boat getBoatOfCompetitor(Competitor competitor) {
+        return getRace().getBoatOfCompetitor(competitor);
+    }
+    
+    @Override
+    public Competitor getCompetitorOfBoat(Boat boat) {
+        if (boat == null) {
+            return null;
+        }
+        for (Map.Entry<Competitor, Boat> competitorWithBoat : getRace().getCompetitorsAndTheirBoats().entrySet()) {
+            if (boat.equals(competitorWithBoat.getValue())) {
+                return competitorWithBoat.getKey();
+            }
+        }
+        return null;
     }
 
     @Override

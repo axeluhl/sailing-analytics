@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import java.util.Map;
 
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
@@ -51,7 +51,7 @@ public interface QuickRanksDTOProvider {
     void quickRanksReceivedFromServer(Map<String, QuickRankDTO> quickRanksFromServer);
     
     /**
-     * @return keys are the {@link CompetitorDTO#getIdAsString() competitor IDs are string}, values are the quick ranks
+     * @return keys are the {@link CompetitorWithBoatDTO#getIdAsString() competitor IDs are string}, values are the quick ranks
      *         pertaining to the competitors whose IDs are provided as keys
      */
     Map<String, QuickRankDTO> getQuickRanks();

@@ -10,3 +10,4 @@ Bundle-ActivationPolicy: lazy
 Fragment-Host: com.sap.sailing.sailwave.resultimport
 Require-Bundle: org.junit;bundle-version="4.8.2",
  com.sap.sse.common
+Automatic-Module-Name: com.sap.sailing.sailwave.resultimport.test

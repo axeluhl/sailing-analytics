@@ -7,9 +7,12 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -86,9 +89,10 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         contentArea.setWidget(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         String regattaId = currentPresenter.getRegattaId();
         if (regattaId != null && !regattaId.isEmpty()) {
-            String leaderboardName = regattaId;
-            RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
-            MultiRaceLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel();
+            final RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx()
+                    .getRegattaAnalyticsManager();
+            final String leaderboardName = regattaId;
+            final MultiRaceLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel();
             final Consumer<MultiRaceLeaderboardPanel> leaderboardConsumer = new Consumer<MultiRaceLeaderboardPanel>() {
                 @Override
                 public void consume(MultiRaceLeaderboardPanel leaderboardPanel) {
@@ -112,37 +116,60 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
                     }
                     regattaAnalyticsManager.hideCompetitorChart();
                     contentArea.setWidget(RegattaLeaderboardTabView.this);
-                    if(leaderboardPanel.getLeaderboard() != null) {
+                    if (leaderboardPanel.getLeaderboard() != null) {
                         leaderboard.updatedLeaderboard(leaderboardPanel.getLeaderboard());
                     }
                 }
             };
-            if(leaderboardPanel == null) {
+            if (leaderboardPanel == null) {
+                loadAvailableDetailTypes(leaderboardName, contentArea, result -> 
                 createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager,
-                        currentPresenter.getUserService(), /* FIXME placeToken */ null, leaderboardConsumer);
-            } else if( /*FIXME placeToken not empty */ false) {
-                createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(),
-                        /* FIXME placeToken */ null)
-                                .getInitialSettings(new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
-                                    @Override
-                                    public void onSuccess(MultiRaceLeaderboardSettings settings) {
-                                        leaderboardPanel.updateSettings(settings);
-                                        leaderboardConsumer.consume(leaderboardPanel);
-                                    }
-                                });
+                        currentPresenter.getUserService(), /* FIXME placeToken */ null, leaderboardConsumer, result));
+            } else if ( /* FIXME placeToken not empty */ false) {
+                loadAvailableDetailTypes(leaderboardName, contentArea,
+                        result -> createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(),
+                                /* FIXME placeToken */ null, result).getInitialSettings(
+                                        new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
+                                            @Override
+                                            public void onSuccess(MultiRaceLeaderboardSettings settings) {
+                                                leaderboardPanel.updateSettings(settings);
+                                                leaderboardConsumer.consume(leaderboardPanel);
+                                            }
+                                        }));
             } else {
                 leaderboardPanel.loadCompleteLeaderboard(false);
                 leaderboardConsumer.consume(leaderboardPanel);
             }
         } else {
-            contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));
-            new com.google.gwt.user.client.Timer() {
-                @Override
-                public void run() {
-                    currentPresenter.getHomeNavigation().goToPlace();
-                }
-            }.schedule(3000);
+            showMessageLabelAndGoToHome("No leaderboard specified, cannot proceed to leaderboardpage", contentArea);
         }
+    }
+    
+    private void loadAvailableDetailTypes(final String leaderboardName, final AcceptsOneWidget contentArea,
+            final Consumer<Iterable<DetailType>> callback) {
+        currentPresenter.getAvailableDetailTypesForLeaderboard(leaderboardName,
+                new AsyncCallback<Iterable<DetailType>>() {
+
+                    @Override
+                    public void onSuccess(Iterable<DetailType> result) {
+                        callback.consume(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        showMessageLabelAndGoToHome("Could not load detaillist", contentArea);
+                    }
+                });
+    }
+    
+    private void showMessageLabelAndGoToHome(final String message, final AcceptsOneWidget contentArea) {
+        contentArea.setWidget(new Label(message));
+        new Timer() {
+            @Override
+            public void run() {
+                currentPresenter.getHomeNavigation().goToPlace();
+            }
+        }.schedule(3000);
     }
 
     @Override

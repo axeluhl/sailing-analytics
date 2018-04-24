@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -10,12 +12,14 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.settings.client.leaderboardedit.LeaderboardEditContextDefinition;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
@@ -26,6 +30,8 @@ import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDe
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
 public class LeaderboardEditPage extends AbstractSailingEntryPoint {
+    private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());
+    
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
@@ -38,25 +44,35 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
                         .deserializeFromCurrentLocation(new LeaderboardEditContextDefinition());
                 final String leaderboardName = settings.getLeaderboardName();
                 if (leaderboardNames.contains(leaderboardName)) {
-                    
-                    SAPHeaderWithAuthentication header = initHeader();
-                    GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
-                    AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
-                    authorizedContentDecorator.setPermissionToCheck(Permission.MANAGE_LEADERBOARD_RESULTS, SailingPermissionsForRoleProvider.INSTANCE);
-                    authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
+                    getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<Iterable<DetailType>>() {
+
                         @Override
-                        public Widget get() {
-                            EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(getSailingService(), new AsyncActionsExecutor(), leaderboardName, null,
-                                    LeaderboardEditPage.this, getStringMessages(), userAgent);
-                            leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
-                            return leaderboardPanel;
+                        public void onFailure(Throwable caught) {
+                            logger.log(Level.SEVERE, "Could not load detailtypes", caught);
+                        }
+
+                        @Override
+                        public void onSuccess(Iterable<DetailType> result) {
+                            SAPHeaderWithAuthentication header = initHeader();
+                            GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+                            AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
+                            authorizedContentDecorator.setPermissionToCheck(Permission.MANAGE_LEADERBOARD_RESULTS, SailingPermissionsForRoleProvider.INSTANCE);
+                            authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
+                                @Override
+                                public Widget get() {
+                                    EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(getSailingService(), new AsyncActionsExecutor(), leaderboardName, null,
+                                            LeaderboardEditPage.this, getStringMessages(), userAgent, result);
+                                    leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
+                                    return leaderboardPanel;
+                                }
+                            });
+                            
+                            DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
+                            RootLayoutPanel.get().add(mainPanel);
+                            mainPanel.addNorth(header, 75);
+                            mainPanel.add(new ScrollPanel(authorizedContentDecorator));
                         }
                     });
-                    
-                    DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
-                    RootLayoutPanel.get().add(mainPanel);
-                    mainPanel.addNorth(header, 75);
-                    mainPanel.add(new ScrollPanel(authorizedContentDecorator));
                 } else {
                     RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
                 }

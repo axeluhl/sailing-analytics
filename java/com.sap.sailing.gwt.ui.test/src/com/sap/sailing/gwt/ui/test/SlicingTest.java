@@ -23,7 +23,7 @@ import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLogImpl;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -55,9 +55,10 @@ public class SlicingTest {
     private final String fleetName = "default";
     private final String columnNameOriginalRace = "original";
     private final String columnNameSlicedRace = "sliced";
-    private final CompetitorDescriptor competitor = new CompetitorDescriptor(null, regattaName, boatClassName,
-            columnNameOriginalRace, fleetName, "test1", "test", "test", "test",
-            CountryCodeFactoryImpl.INSTANCE.getFromTwoLetterISOName("de"), null, 1.0, null);
+    
+    private final CompetitorDescriptor competitor = new CompetitorDescriptor(null, regattaName, columnNameOriginalRace, fleetName, null, 
+            "test1", "test", "test", null, CountryCodeFactoryImpl.INSTANCE.getFromTwoLetterISOName("de"), 
+            1.0, null, null, "B1", boatClassName, "GER 123");
 
     private SailingServiceImplMock sailingService;
     
@@ -94,15 +95,15 @@ public class SlicingTest {
                 new SeriesCreationParametersDTO(fleets, false, false, true, false, new int[0], false, 0));
         final RegattaCreationParametersDTO regattaCreationParameters = new RegattaCreationParametersDTO(
                 seriesCreationParameters);
-        final RegattaDTO regatta = sailingService.createRegatta(regattaName, boatClassName, null, null,
+        final RegattaDTO regatta = sailingService.createRegatta(regattaName, boatClassName, false, null, null,
                 regattaCreationParameters, false, ScoringSchemeType.HIGH_POINT, null, 3.0, false, false,
                 RankingMetrics.ONE_DESIGN);
         final List<Pair<String, Integer>> columnNames = new ArrayList<>();
         columnNames.add(new Pair<>(columnNameOriginalRace, 0));
         sailingService.addRaceColumnsToSeries(regatta.getRegattaIdentifier(), seriesName, columnNames);
         sailingService.createRegattaLeaderboard(regatta.getRegattaIdentifier(), regattaName, new int[0]);
-        final List<CompetitorDTO> competitors = sailingService.addCompetitors(Arrays.asList(competitor), null);
-        final CompetitorDTO competitorDTO = competitors.iterator().next();
+        final List<CompetitorWithBoatDTO> competitors = sailingService.addCompetitors(Arrays.asList(competitor), null);
+        final CompetitorWithBoatDTO competitorDTO = competitors.iterator().next();
         sailingService.setCompetitorRegistrationsInRegattaLog(regattaName, new HashSet<>(competitors));
         DeviceIdentifierDTO deviceId = new DeviceIdentifierDTO("FILE", UUID.randomUUID().toString());
         final DeviceMappingDTO deviceMapping = new DeviceMappingDTO(deviceId, startOriginalRace.asDate(), endOriginalRace.asDate(), competitorDTO, null);

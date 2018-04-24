@@ -6,6 +6,9 @@ import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 
+/**
+ * Equality and hash code are based on the {@link #getIdAsString() ID} and all contained attributes like name, shortName, email, etc.
+ */
 public interface CompetitorDTO extends Serializable, MappableToDevice {
     
     String getTwoLetterIsoCountryCode();
@@ -16,33 +19,22 @@ public interface CompetitorDTO extends Serializable, MappableToDevice {
 
     String getIdAsString();
 
-    String getSailID();
-
     String getSearchTag();
 
     /**
-     * If the {@code searchTag} is not {@link String#contains(CharSequence) contained} in {@link #getSearchTag()},
-     * appends it to the search tag, separated by a space character
+     * If the {@code searchTag} is not contained in {@link #getSearchTag()}, appends it to the search tag, separated by a space character 
      */
     void addToSearchTag(String searchTag);
     
-    BoatDTO getBoat();
-
-    BoatClassDTO getBoatClass();
-    
     String getName();
-    
+
+    String getShortName();
+
     Color getColor();
     
     String getEmail();
     
     boolean hasEmail();
-
-    /**
-     * A regular instance will simply return this object. A compacted version may compute the result by looking it up
-     * from the previous version of the enclosing leaderboard.
-     */
-    CompetitorDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion);
 
     String getFlagImageURL();
 
@@ -51,5 +43,7 @@ public interface CompetitorDTO extends Serializable, MappableToDevice {
     Double getTimeOnTimeFactor();
     
     Duration getTimeOnDistanceAllowancePerNauticalMile();
+    
+    boolean hasBoat();
 
 }

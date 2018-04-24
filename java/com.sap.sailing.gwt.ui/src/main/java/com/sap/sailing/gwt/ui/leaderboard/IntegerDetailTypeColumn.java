@@ -9,9 +9,9 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 /**
  * Displays an {@code Integer} value as plain {@link String#valueOf(Object) string}.
  */
-public class IntegerDetailTypeColumn extends DetailTypeColumn<Integer, String> {
+public class IntegerDetailTypeColumn extends DetailTypeColumn<Integer, String, LeaderboardRowDTO> {
 
-    protected IntegerDetailTypeColumn(DetailType detailType, LegDetailField<Integer> field, String headerStyle,
+    protected IntegerDetailTypeColumn(DetailType detailType, DataExtractor<Integer, LeaderboardRowDTO> field, String headerStyle,
             String columnStyle, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
         super(detailType, field, new TextCell(), headerStyle, columnStyle, displayedLeaderboardRowsProvider);
     }

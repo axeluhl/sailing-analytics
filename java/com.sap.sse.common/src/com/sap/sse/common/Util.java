@@ -28,9 +28,9 @@ public class Util {
     
         private transient int hashCode;
     
-        @SuppressWarnings("unused")
         // required for some serialization frameworks such as GWT RPC
-        private Pair() {
+        @Deprecated
+        protected Pair() {
         }
 
         public Pair(A a, B b) {
@@ -493,6 +493,15 @@ public class Util {
         return joinStrings(separator, Arrays.asList(strings));
     }
 
+    public static String join(String separator, Object... objects) {
+        final String[] strings = new String[objects.length];
+        int i=0;
+        for (Object o : objects) {
+            strings[i++] = o.toString();
+        }
+        return joinStrings(separator, Arrays.asList(strings));
+    }
+
     public static String joinStrings(String separator, Iterable<String> strings) {
         StringBuilder result = new StringBuilder();
         boolean first = true;
@@ -816,5 +825,15 @@ public class Util {
             remainder = remainder % pow;
         }
         return sb.toString();
+    }
+
+    /**
+     * Retains a copy of only the elements in {@link Iterable toFilter} that are contained in the specified
+     * {@link Iterable toRetain}. In other words, removes all elements of toFilter that are not contained in toRetain.
+     */
+    public static <T> Iterable<T> retainCopy(Iterable<T> toFilter, Iterable<T> toRetain) {
+        final List<T> returnValue = Util.asList(toFilter);
+        returnValue.retainAll(Util.asList(toRetain));
+        return returnValue;
     }
 }

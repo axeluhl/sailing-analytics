@@ -13,3 +13,4 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain,
  com.sap.sailing.resultimport,
  com.sap.sse.common
+Automatic-Module-Name: com.sap.sailing.sailwave.resultimport

@@ -75,7 +75,7 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
     
     private DeviceIdentifier storeAndLoad(DeviceIdentifier device, TypeBasedServiceFinderFactory forStoring, TypeBasedServiceFinderFactory forLoading) {
         createFactories(forStoring);
-        Competitor c = DomainFactory.INSTANCE.getOrCreateCompetitor("a", "a", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Competitor c = DomainFactory.INSTANCE.getOrCreateCompetitor("a", "a", "a", null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(now(), now(), author, 0,
                 c, device, now(), now()));
         createFactories(forLoading);

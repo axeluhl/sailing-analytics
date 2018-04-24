@@ -15,8 +15,10 @@ public class ManeuverJsonSerializer implements JsonSerializer<Maneuver> {
     public static final String DIRECTION_CHANGE_IN_DEGREES = "directionChangeInDegrees";
     public static final String MANEUVER_LOSS = "maneuverLoss";
     public static final String POSITION_AND_TIME = "positionAndTime";
-    public static final String MAX_ANGULAR_VELOCITY_IN_DEGREES_PER_SECOND = "maxAngularVelocityInDegreesPerSecond";
+    public static final String MAX_TURNING_RATE_IN_DEGREES_PER_SECOND = "maxTurningRateInDegreesPerSecond";
+    public static final String AVG_TURNING_RATE_IN_DEGREES_PER_SECOND = "avgTurningRateInDegreesPerSecond";
     public static final String LOWEST_SPEED_IN_KNOTS = "lowestSpeedInKnots";
+    public static final String MARK_PASSING = "markPassing";
 
     private final GPSFixJsonSerializer gpsFixSerializer;
     private final DistanceJsonSerializer distanceSerializer;
@@ -44,8 +46,10 @@ public class ManeuverJsonSerializer implements JsonSerializer<Maneuver> {
         result.put(MANEUVER_LOSS,
                 maneuver.getManeuverLoss() == null ? null : distanceSerializer.serialize(maneuver.getManeuverLoss()));
         result.put(POSITION_AND_TIME, gpsFixSerializer.serialize(maneuver));
-        result.put(MAX_ANGULAR_VELOCITY_IN_DEGREES_PER_SECOND, maneuver.getMaxAngularVelocityInDegreesPerSecond());
+        result.put(MAX_TURNING_RATE_IN_DEGREES_PER_SECOND, maneuver.getMaxTurningRateInDegreesPerSecond());
+        result.put(AVG_TURNING_RATE_IN_DEGREES_PER_SECOND, maneuver.getAvgTurningRateInDegreesPerSecond());
         result.put(LOWEST_SPEED_IN_KNOTS, maneuver.getLowestSpeed().getKnots());
+        result.put(MARK_PASSING, maneuver.isMarkPassing());
         return result;
     }
 }

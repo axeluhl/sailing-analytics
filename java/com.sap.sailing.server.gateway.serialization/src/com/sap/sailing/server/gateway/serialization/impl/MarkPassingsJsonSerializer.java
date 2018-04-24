@@ -1,16 +1,19 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
 import java.text.SimpleDateFormat;
+import java.util.Map.Entry;
 import java.util.NavigableSet;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Util.Pair;
 
 public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSerializer {
     public static final String ZERO_BASED_WAYPOINT_INDEX = "zeroBasedWaypointIndex";
@@ -23,13 +26,16 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
     public JSONObject serialize(TrackedRace trackedRace) {
         final Course course = trackedRace.getRace().getCourse();
         JSONObject result = new JSONObject();
-        CompetitorJsonSerializer competitorSerializer = new CompetitorJsonSerializer(null, BoatJsonSerializer.create());
+        CompetitorAndBoatJsonSerializer competitorWithBoatSerializer = CompetitorAndBoatJsonSerializer.create();
+        CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
         JSONArray byCompetitorJson = new JSONArray();
         result.put(BYCOMPETITOR, byCompetitorJson);
-        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+        for (Entry<Competitor, Boat> competitorAndBoatEntry : trackedRace.getRace().getCompetitorsAndTheirBoats().entrySet()) {
+            Competitor competitor = competitorAndBoatEntry.getKey();
+            Boat boat = competitorAndBoatEntry.getValue();
             JSONObject forCompetitorJson = new JSONObject();
             byCompetitorJson.add(forCompetitorJson);
-            forCompetitorJson.put(COMPETITOR, competitorSerializer.serialize(competitor));
+            forCompetitorJson.put(COMPETITOR, competitorWithBoatSerializer.serialize(new Pair<>(competitor, boat)));
             final NavigableSet<MarkPassing> markPassingsForCompetitor = trackedRace.getMarkPassings(competitor);
             JSONArray markPassingsForCompetitorJson = new JSONArray();
             forCompetitorJson.put(MARKPASSINGS, markPassingsForCompetitorJson);

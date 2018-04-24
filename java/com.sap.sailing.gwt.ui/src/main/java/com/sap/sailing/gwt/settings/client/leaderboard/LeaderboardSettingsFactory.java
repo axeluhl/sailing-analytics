@@ -37,8 +37,9 @@ public class LeaderboardSettingsFactory {
                 defaultSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 RaceColumnSelectionStrategies.LAST_N,
                 defaultSettings.isShowAddedScores(),
-                defaultSettings.isShowCompetitorSailIdColumn(),
+                defaultSettings.isShowCompetitorShortNameColumn(),
                 defaultSettings.isShowCompetitorFullNameColumn(),
+                defaultSettings.isShowCompetitorBoatInfoColumn(),
                 defaultSettings.isShowCompetitorNationality());
     }
  
@@ -50,8 +51,9 @@ public class LeaderboardSettingsFactory {
                 raceDetailsToShow, defaultSettings.getOverallDetailsToShow(),
                 defaultSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 defaultSettings.isShowAddedScores(),
-                defaultSettings.isShowCompetitorSailIdColumn(),
+                defaultSettings.isShowCompetitorShortNameColumn(),
                 defaultSettings.isShowCompetitorFullNameColumn(),
+                defaultSettings.isShowCompetitorBoatInfoColumn(),
                 defaultSettings.isShowRaceRankColumn(),
                 defaultSettings.isShowCompetitorNationality());
     }
@@ -71,13 +73,14 @@ public class LeaderboardSettingsFactory {
         RaceColumnSelectionStrategies strategy = settingsWithRaceSelection.getActiveRaceColumnSelectionStrategy();
         List<String> namesOfRaceColumnsToShow = settingsWithRaceSelection.getNamesOfRaceColumnsToShow();
         Integer numberOfLastRacesToShow = settingsWithRaceSelection.getNumberOfLastRacesToShow();
-        boolean showCompetitorSailIdColumn = settingsWithRaceSelection.isShowCompetitorSailIdColumn();
-        boolean showCompetitorFullNameColumns = settingsWithRaceSelection.isShowCompetitorFullNameColumn();
+        boolean showCompetitorShortNameColumn = settingsWithRaceSelection.isShowCompetitorShortNameColumn();
+        boolean showCompetitorFullNameColumn = settingsWithRaceSelection.isShowCompetitorFullNameColumn();
+        boolean showCompetitorBoatInfoColumn = settingsWithRaceSelection.isShowCompetitorBoatInfoColumn();
 
         return new MultiRaceLeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
                 namesOfRaceColumnsToShow, numberOfLastRacesToShow, refreshIntervalInMs,
                 strategy, /*showAddedScores*/ false,
-                showCompetitorSailIdColumn, showCompetitorFullNameColumns,
+                showCompetitorShortNameColumn, showCompetitorFullNameColumn, showCompetitorBoatInfoColumn,
                 settingsWithRaceSelection.isShowCompetitorNationality());
     }
     

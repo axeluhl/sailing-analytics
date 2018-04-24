@@ -15,7 +15,8 @@ import com.sap.sse.common.Duration;
  */
 public class LeaderboardRowDTO implements Serializable {
     private static final long serialVersionUID = -5421934148931661900L;
-    public CompetitorDTO competitor;
+    public CompetitorWithBoatDTO competitor;
+    public BoatDTO boat;
     public Map<String, LeaderboardEntryDTO> fieldsByRaceColumnName;
     public Double carriedPoints;
     public Double netPoints;
@@ -36,6 +37,7 @@ public class LeaderboardRowDTO implements Serializable {
         int result = 1;
         result = prime * result + ((carriedPoints == null) ? 0 : carriedPoints.hashCode());
         result = prime * result + ((competitor == null) ? 0 : competitor.hashCode());
+        result = prime * result + ((boat == null) ? 0 : boat.hashCode());
         result = prime * result + ((fieldsByRaceColumnName == null) ? 0 : fieldsByRaceColumnName.hashCode());
         result = prime * result
                 + ((maximumSpeedOverGroundInKnots == null) ? 0 : maximumSpeedOverGroundInKnots.hashCode());
@@ -78,6 +80,11 @@ public class LeaderboardRowDTO implements Serializable {
             if (other.competitor != null)
                 return false;
         } else if (!competitor.equals(other.competitor))
+            return false;
+        if (boat == null) {
+            if (other.boat != null)
+                return false;
+        } else if (!boat.equals(other.boat))
             return false;
         if (fieldsByRaceColumnName == null) {
             if (other.fieldsByRaceColumnName != null)

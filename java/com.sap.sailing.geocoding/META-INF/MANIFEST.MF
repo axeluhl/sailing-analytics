@@ -10,3 +10,4 @@ Export-Package: com.sap.sailing.geocoding
 Require-Bundle: org.json.simple;bundle-version="1.1.0",
  com.sap.sailing.domain.common,
  com.sap.sse.common
+Automatic-Module-Name: com.sap.sailing.geocoding

@@ -70,7 +70,7 @@ public class TrackedLegImpl implements TrackedLeg {
         this.trackedRace = trackedRace;
         trackedLegsOfCompetitors = new HashMap<Competitor, TrackedLegOfCompetitor>();
         for (Competitor competitor : competitors) {
-            trackedLegsOfCompetitors.put(competitor, new TrackedLegOfCompetitorImpl(this, competitor));
+            trackedLegsOfCompetitors.put(competitor, new TrackedLegOfCompetitorImpl(this, competitor, trackedRace.getBoatOfCompetitor(competitor)));
         }
         trackedRace.addListener(new CacheClearingRaceChangeListener());
         competitorTracksOrderedByRank = new ConcurrentHashMap<>();

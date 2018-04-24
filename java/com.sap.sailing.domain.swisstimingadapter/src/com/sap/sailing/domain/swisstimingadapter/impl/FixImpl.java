@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
@@ -8,7 +10,7 @@ import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.TrackerType;
 
 public class FixImpl implements Fix {
-    private final String boatID;
+    private final Serializable trackedObjectId;
     private final TrackerType trackerType;
     private final Long ageOfDataInMilliseconds;
     private final Position position;
@@ -25,11 +27,11 @@ public class FixImpl implements Fix {
      */
     private final String boatIRM;
     
-    public FixImpl(String boatID, TrackerType trackerType, Long ageOfDataInMilliseconds, Position position,
+    public FixImpl(Serializable trackedObjectId, TrackerType trackerType, Long ageOfDataInMilliseconds, Position position,
             SpeedWithBearing speed, Integer nextMarkIndex, Integer rank, Speed averageSpeedOverGroundPerLeg,
             Speed velocityMadeGood, Distance distanceToLeader, Distance distanceToNextMark, String boatIRM) {
         super();
-        this.boatID = boatID;
+        this.trackedObjectId = trackedObjectId;
         this.trackerType = trackerType;
         this.ageOfDataInMilliseconds = ageOfDataInMilliseconds;
         this.position = position;
@@ -49,8 +51,8 @@ public class FixImpl implements Fix {
     }
 
     @Override
-    public String getBoatID() {
-        return boatID;
+    public Serializable getTrackedObjectId() {
+        return trackedObjectId;
     }
 
     @Override
