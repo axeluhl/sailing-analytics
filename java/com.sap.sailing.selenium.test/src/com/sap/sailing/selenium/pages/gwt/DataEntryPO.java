@@ -95,7 +95,7 @@ public class DataEntryPO extends CellTableRowPO {
     private void moveToUpperLeftCorner(Actions actions, WebElement webElement) {
         actions.moveToElement(webElement);
         final Dimension size = webElement.getSize();
-        actions.moveByOffset(-size.width / 2 - 1, -size.height / 2 - 1);
+        actions.moveByOffset(-size.width / 2 + 1, -size.height / 2 + 1);
     }
     
     /**
