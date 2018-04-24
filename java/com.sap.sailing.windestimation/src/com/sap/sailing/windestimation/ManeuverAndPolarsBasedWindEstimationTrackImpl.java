@@ -34,36 +34,16 @@ public class ManeuverAndPolarsBasedWindEstimationTrackImpl extends WindTrackImpl
     }
 
     public void analyzeRace() {
-//        Map<Maneuver, ManeuverWithEstimationData> maneuverWithEstimationDataMapping = new HashMap<>();
 //        Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
-//        CompetitorManeuverGraphBasedWindDirectionEstimator competitorManeuverBasedWindEstimator = new CompetitorManeuverGraphBasedWindDirectionEstimator(
-//                polarService, new IManeuverSpeedRetriever() {
-//
-//                    @Override
-//                    public SpeedWithBearing getLowestSpeedWithinManeuverMainCurve(Maneuver maneuver) {
-//                        return maneuverWithEstimationDataMapping.get(maneuver).getLowestSpeedWithinMainCurve();
-//                    }
-//
-//                    @Override
-//                    public SpeedWithBearing getHighestSpeedWithinManeuverMainCurve(Maneuver maneuver) {
-//                        return maneuverWithEstimationDataMapping.get(maneuver).getHighestSpeedWithinMainCurve();
-//                    }
-//                });
-//        Map<Competitor, Iterable<WindTrackCandidate>> windTrackCandidatesPerCompetitor = new HashMap<>();
-//        ManeuverWithEstimationDataCalculator maneuverWithEstimationDataCalculator = new ManeuverWithEstimationDataCalculatorImpl();
+//        ManeuverDetector maneuverDetector = new ManeuverDetectorImpl();
 //        for (Competitor competitor : competitors) {
 //            Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, false);
-//            Iterable<ManeuverWithEstimationData> maneuversWithEstimationData = maneuverWithEstimationDataCalculator
-//                    .computeEstimationDataForManeuvers(trackedRace, competitor, maneuvers, false);
-//            for(ManeuverWithEstimationData maneuverWithEstimationData : maneuversWithEstimationData) {
-//                maneuverWithEstimationDataMapping.put(maneuverWithEstimationData.getManeuver(), maneuverWithEstimationData);
-//            }
-//            Iterable<WindTrackCandidate> windTrackCandidates = competitorManeuverBasedWindEstimator
-//                    .computeWindTrackCandidates(competitor.getBoat().getBoatClass(), maneuvers);
-//            if(windTrackCandidates.iterator().hasNext()) {
-//                windTrackCandidatesPerCompetitor.put(competitor,
-//                        windTrackCandidates);
-//            }
+//            //TODO make iterative
+//            List<CompleteManeuverCurve> completeManeuverCurves = maneuverDetector.getCompleteManeuverCurves(maneuvers);
+//            List<CompleteManeuverCurveWithEstimationData> completeManeuverCurvesWithEstimationData = maneuverDetector.getCompleteManeuverCurvesWithEstimationData(completeManeuverCurves);
+//            
+//            trackedRace.getTrack(competitor).getDistanceTraveled(from, to)
+//            
 //        }
 //        
 //        List<WindTrackCandidate> bestWindTrackCandidates = new ArrayList<>();

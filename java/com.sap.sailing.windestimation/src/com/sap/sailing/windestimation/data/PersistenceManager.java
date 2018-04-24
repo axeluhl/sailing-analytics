@@ -18,6 +18,8 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.util.JSON;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CompleteManeuverCurveWithEstimationDataJsonDeserializer;
@@ -26,6 +28,8 @@ import com.sap.sailing.server.gateway.deserialization.impl.ManeuverCurveWithUnst
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverMainCurveWithEstimationDataJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
  * 
@@ -44,6 +48,8 @@ public class PersistenceManager {
     private static final String FIELD_COMPETITOR_TRACKS = "competitorTracks";
     private static final String FIELD_TRACKED_RACE_NAME = "trackedRaceName";
     private static final String FIELD_REGATTA_NAME = "regattaName";
+    private static final String FIELD_DISTANCE_TRAVELLED_IN_METERS = "distanceTravelledInMeters";
+    private static final String FIELD_DURATION_IN_SECONDS = "durationInSeconds";
     private static final String COLLECTION_RACES = "races";
     private final DB db;
     private final CompleteManeuverCurveWithEstimationDataJsonDeserializer completeManeuverCurveDeserializer = new CompleteManeuverCurveWithEstimationDataJsonDeserializer(
@@ -91,6 +97,8 @@ public class PersistenceManager {
                         .get(FIELD_AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS);
                 Object boatClassObj = competitorTrack.get(FIELD_BOAT_CLASS);
                 BoatClass boatClass = boatClassDeserializer.deserialize(getJSONObject(boatClassObj.toString()));
+                Double distanceTravelledInMeters = (Double) competitorTrack.get(FIELD_DISTANCE_TRAVELLED_IN_METERS);
+                Double durationInSeconds = (Double) competitorTrack.get(FIELD_DURATION_IN_SECONDS);
                 BasicDBList maneuverCurves = (BasicDBList) competitorTrack.get(FIELD_MANEUVER_CURVES);
                 List<CompleteManeuverCurveWithEstimationData> completeManeuverCurves = new ArrayList<>(
                         maneuverCurves.size());
@@ -100,7 +108,11 @@ public class PersistenceManager {
                     completeManeuverCurves.add(completeManeuverCurve);
                 }
                 CompetitorTrackWithEstimationData competitorTrackWithEstimationData = new CompetitorTrackWithEstimationData(
-                        competitorName, boatClass, completeManeuverCurves, avgIntervalBetweenFixesInSeconds);
+                        competitorName, boatClass, completeManeuverCurves, avgIntervalBetweenFixesInSeconds,
+                        distanceTravelledInMeters == null ? Distance.NULL
+                                : new MeterDistance(distanceTravelledInMeters),
+                        durationInSeconds == null ? Duration.NULL
+                                : new MillisecondsDurationImpl((long) (durationInSeconds * 1000)));
                 competitorTracksWithEstimationData.add(competitorTrackWithEstimationData);
             }
             RaceWithEstimationData raceWithEstimationData = new RaceWithEstimationData(regattaName, raceName,

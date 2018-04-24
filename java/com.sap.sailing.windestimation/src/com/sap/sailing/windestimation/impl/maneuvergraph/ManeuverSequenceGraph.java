@@ -53,10 +53,8 @@ public class ManeuverSequenceGraph {
 
     public Iterable<WindTrackCandidate> computeWindDirectionCandidates() {
         List<WindTrackCandidate> possibleWindTracks = new ArrayList<>();
-        if (this.lastGraphLevel != null) {
-            ManeuverNodesLevel lastGraphLevel = new ManeuverNodesLevel(null, null, null);
-            lastGraphLevel.setPreviousLevel(this.lastGraphLevel);
-            lastGraphLevel.computeDistances();
+        ManeuverNodesLevel lastGraphLevel = this.lastGraphLevel;
+        if (lastGraphLevel != null) {
             double bestDistance = Double.MAX_VALUE;
             for (int i = 0; i < lastGraphLevel.getBestDistancesFromStart().length; i++) {
                 double distance = lastGraphLevel.getBestDistancesFromStart()[i];
@@ -64,6 +62,7 @@ public class ManeuverSequenceGraph {
                     bestDistance = distance;
                 }
             }
+            //TODO rethink confidence computation
             for (FineGrainedPointOfSail pointOfSail : FineGrainedPointOfSail.values()) {
                 double distance = lastGraphLevel.getDistanceToNodeFromStart(pointOfSail);
                 double confidence = 1 - ((bestDistance - distance) / bestDistance);

@@ -3,77 +3,29 @@ package com.sap.sailing.windestimation.impl.maneuvergraph;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 
-/**
- * 
- * @author Vladislav Chumak (D069712)
- *
- */
-public class ManeuverNodesLevel {
+public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<SingleTrackManeuverNodesLevel> {
 
-    private ManeuverNodesLevel previousLevel = null;
-    private ManeuverNodesLevel nextLevel = null;
-
-    private final CompleteManeuverCurveWithEstimationData maneuver;
     private final SingleManeuverClassificationResult maneuverClassificationResult;
 
-    private final double[] bestDistancesFromStart = new double[FineGrainedPointOfSail.values().length];
-    private final FineGrainedPointOfSail[] bestPrecedingNodesForThisNodes = new FineGrainedPointOfSail[bestDistancesFromStart.length];
-
-    public ManeuverNodesLevel(CompleteManeuverCurveWithEstimationData maneuver,
-            SingleManeuverClassifier singleManeuverClassifier, ManeuverNodesLevel previousLevel) {
-        this.maneuver = maneuver;
-        if (previousLevel != null) {
-            this.previousLevel = previousLevel;
-            previousLevel.setNextLevel(this);
-        }
+    public SingleTrackManeuverNodesLevel(CompleteManeuverCurveWithEstimationData maneuver,
+            SingleManeuverClassifier singleManeuverClassifier) {
+        super(maneuver);
         maneuverClassificationResult = singleManeuverClassifier.classifyManeuver(maneuver);
     }
 
-    void setNextLevel(ManeuverNodesLevel nextLevel) {
-        this.nextLevel = nextLevel;
-    }
-
-    public ManeuverNodesLevel getNextLevel() {
-        return nextLevel;
-    }
-
-    void setPreviousLevel(ManeuverNodesLevel previousLevel) {
-        this.previousLevel = previousLevel;
-    }
-
-    public ManeuverNodesLevel getPreviousLevel() {
-        return previousLevel;
-    }
-
-    public CompleteManeuverCurveWithEstimationData getManeuver() {
-        return maneuver;
-    }
-
-    public SingleManeuverClassificationResult getManeuverClassificationResult() {
-        return maneuverClassificationResult;
-    }
-
-    public double getDistanceToNodeFromStart(FineGrainedPointOfSail node) {
-        return bestDistancesFromStart[node.ordinal()];
-    }
-
-    public FineGrainedPointOfSail getBestPrecedingNode(FineGrainedPointOfSail node) {
-        return bestPrecedingNodesForThisNodes[node.ordinal()];
-    }
-
+    @Override
     public void computeDistances() {
         for (FineGrainedPointOfSail pointOfSailAfterManeuver : FineGrainedPointOfSail.values()) {
-            double likelihoodForPointOfSailBeforeManeuver = 
-                    maneuverClassificationResult.getLikelihoodForPointOfSailBeforeManeuver(
-                            pointOfSailAfterManeuver.getCoarseGrainedPointOfSail());
-            if (this.previousLevel == null) {
-                this.bestDistancesFromStart[pointOfSailAfterManeuver.ordinal()] = convertLikelihoodToDistance(
+            double likelihoodForPointOfSailBeforeManeuver = maneuverClassificationResult
+                    .getLikelihoodForPointOfSailBeforeManeuver(pointOfSailAfterManeuver.getCoarseGrainedPointOfSail());
+            if (getPreviousLevel() == null) {
+                this.getBestDistancesFromStart()[pointOfSailAfterManeuver.ordinal()] = convertLikelihoodToDistance(
                         likelihoodForPointOfSailBeforeManeuver);
             } else {
-                double courseChangeDegFromPreviousPointOfSailBefore = this.previousLevel.getManeuver()
-                        .getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getBearing()
-                        .getDifferenceTo(
-                                maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getBearing())
+                double courseChangeDegFromPreviousPointOfSailBefore = getPreviousLevel().getManeuver()
+                        .getCurveWithUnstableCourseAndSpeed()
+                        .getSpeedWithBearingBefore().getBearing().getDifferenceTo(getManeuver()
+                                .getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getBearing())
                         .getDegrees();
                 double bestDistanceThroughPreviousLevel = Double.MAX_VALUE;
                 FineGrainedPointOfSail bestPreviousLevelPointOfSailBeforeManeuver = null;
@@ -81,15 +33,16 @@ public class ManeuverNodesLevel {
                     double likelihoodForPointOfSailTransition = getLikelihoodForPointOfSailTransition(
                             previousLevelPointOfSailBeforeManeuver, pointOfSailAfterManeuver,
                             courseChangeDegFromPreviousPointOfSailBefore, likelihoodForPointOfSailBeforeManeuver);
-                    double distanceThroughPreviousLevelPointOfSailBeforeManeuver = this.previousLevel.bestDistancesFromStart[previousLevelPointOfSailBeforeManeuver
-                            .ordinal()] + convertLikelihoodToDistance(likelihoodForPointOfSailTransition);
+                    double distanceThroughPreviousLevelPointOfSailBeforeManeuver = getPreviousLevel()
+                            .getBestDistancesFromStart()[previousLevelPointOfSailBeforeManeuver.ordinal()]
+                            + convertLikelihoodToDistance(likelihoodForPointOfSailTransition);
                     if (bestDistanceThroughPreviousLevel > distanceThroughPreviousLevelPointOfSailBeforeManeuver) {
                         bestDistanceThroughPreviousLevel = distanceThroughPreviousLevelPointOfSailBeforeManeuver;
                         bestPreviousLevelPointOfSailBeforeManeuver = previousLevelPointOfSailBeforeManeuver;
                     }
                 }
-                this.bestDistancesFromStart[pointOfSailAfterManeuver.ordinal()] = bestDistanceThroughPreviousLevel;
-                this.bestPrecedingNodesForThisNodes[pointOfSailAfterManeuver
+                this.getBestDistancesFromStart()[pointOfSailAfterManeuver.ordinal()] = bestDistanceThroughPreviousLevel;
+                this.getBestPreviousNodesForThisNodes()[pointOfSailAfterManeuver
                         .ordinal()] = bestPreviousLevelPointOfSailBeforeManeuver;
             }
         }
@@ -143,14 +96,6 @@ public class ManeuverNodesLevel {
 
     private double convertLikelihoodToDistance(double likelihoodForPointOfSailBeforeManeuver) {
         return 1 / (likelihoodForPointOfSailBeforeManeuver * likelihoodForPointOfSailBeforeManeuver);
-    }
-
-    public FineGrainedPointOfSail[] getBestPrecedingNodesForThisNodes() {
-        return bestPrecedingNodesForThisNodes;
-    }
-
-    public double[] getBestDistancesFromStart() {
-        return bestDistancesFromStart;
     }
 
 }
