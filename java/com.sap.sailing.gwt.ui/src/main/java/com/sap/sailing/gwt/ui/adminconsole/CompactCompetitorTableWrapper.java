@@ -72,7 +72,6 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
                 return o1.getName().compareTo(o2.getName());
             }
         });
-
         TextColumn<CompetitorDTO> competitorShortNameColumn = new TextColumn<CompetitorDTO>() {
             @Override
             public String getValue(CompetitorDTO competitor) {
@@ -87,7 +86,6 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
                 return comparator.compare(o1.getShortName(), o2.getShortName());
             }
         });
-
         Column<CompetitorDTO, SafeHtml> flagImageColumn = new Column<CompetitorDTO, SafeHtml>(new SafeHtmlCell()) {
             @Override
             public SafeHtml getValue(CompetitorDTO competitor) {
@@ -113,7 +111,6 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
                 return sb.toSafeHtml();
             }
         };
-
         TextColumn<CompetitorDTO> competitorSearchTagColumn = new TextColumn<CompetitorDTO>() {
             @Override
             public String getValue(CompetitorDTO competitor) {

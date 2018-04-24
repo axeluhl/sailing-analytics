@@ -458,7 +458,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                                 errorReporter.reportError("Could not read the competitor/boat assignments: " + caught.getMessage());
                             }
                         });
-                        
                     } else {
                         sailingService.setCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName,
                             fleetName, registeredCompetitors, new AsyncCallback<Void>() {

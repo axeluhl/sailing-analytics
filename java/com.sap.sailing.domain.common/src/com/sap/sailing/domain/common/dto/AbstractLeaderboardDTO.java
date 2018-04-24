@@ -40,7 +40,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     private BoatClassDTO boatClass;
     
     @Deprecated
-    AbstractLeaderboardDTO() {} // for GWT serialization only
+    protected AbstractLeaderboardDTO() {} // for GWT serialization only
 
     public AbstractLeaderboardDTO(BoatClassDTO boatClass) {
         races = new ArrayList<RaceColumnDTO>();

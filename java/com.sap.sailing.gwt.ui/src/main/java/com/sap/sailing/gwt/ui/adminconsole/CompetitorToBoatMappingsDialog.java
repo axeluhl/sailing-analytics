@@ -69,10 +69,8 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
         super(stringMessages.actionEditCompetitorToBoatAssignments(), null, stringMessages.ok(), stringMessages.cancel(), new CompetitorToBoatMappingValidator(), callback);
         this.stringMessages = stringMessages;
         this.competitorToBoatMappings = new HashMap<>(competitorsAndBoats);
-
         this.competitorTable = new CompactCompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
         this.boatTable = new CompactBoatTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
-
         ImagesBarColumn<CompetitorDTO, CompactCompetitorConfigImagesBarCell> competitorActionColumn = new ImagesBarColumn<>(new CompactCompetitorConfigImagesBarCell(stringMessages));
         competitorActionColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
             @Override
@@ -84,10 +82,8 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
             }
         });
         competitorTable.getTable().addColumn(competitorActionColumn, stringMessages.actions());
-        
         refreshableBoatSelectionModel = boatTable.getSelectionModel();
         refreshableCompetitorSelectionModel = competitorTable.getSelectionModel();
-
         boatListHandler = new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) { 
@@ -232,27 +228,21 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
     @Override
     protected Widget getAdditionalWidget() {
         VerticalPanel mainPanel = new VerticalPanel();
-        
         CaptionPanel competitorsPanel = new CaptionPanel(stringMessages.competitors());
         competitorsPanel.ensureDebugId("CompetitorsSection");
         competitorsPanel.setContentWidget(this.competitorTable.asWidget());
-
         CaptionPanel boatsPanel = new CaptionPanel(stringMessages.boats());
         boatsPanel.ensureDebugId("BoatsSection");
         boatsPanel.setContentWidget(this.boatTable.asWidget());
-        
         HorizontalPanel buttonPanel = new HorizontalPanel();
         buttonPanel.setSpacing(5);
-        
         mainPanel.add(buttonPanel);
-        
         Grid grid = new Grid(1,2);
         grid.setWidget(0, 0, competitorsPanel);
         grid.setWidget(0, 1, boatsPanel);
         grid.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
         grid.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
         mainPanel.add(grid);
-        
         return mainPanel;
     }
         
