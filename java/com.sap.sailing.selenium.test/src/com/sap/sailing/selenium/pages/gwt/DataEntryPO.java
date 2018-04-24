@@ -79,10 +79,19 @@ public class DataEntryPO extends CellTableRowPO {
     
     protected Action getSelectAction() {
         final Actions actions = new Actions(this.driver);
-        moveToUpperLeftCorner(actions, getElementForSelect());
+        final WebElement elementForSelect = getElementForSelect();
+        moveToUpperLeftCorner(actions, elementForSelect);
         actions.click();
         
-        return actions.build();
+        final CompositeAction compositeAction = new CompositeAction();
+        compositeAction.addAction(new Action() {
+            @Override
+            public void perform() {
+                scrollToView(elementForSelect);
+            }
+        });
+        compositeAction.addAction(actions.build());
+        return compositeAction;
     }
     
     /**
