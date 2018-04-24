@@ -1,11 +1,11 @@
 package com.sap.sailing.selenium.pages;
 
 import java.text.MessageFormat;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -179,8 +179,8 @@ public class PageObject {
     public static <T> FluentWait<T> createFluentWait(T input, int timeout, int polling,
             Collection<Class<? extends Throwable>> exceptions) {
         FluentWait<T> wait = new FluentWait<>(input);
-        wait.withTimeout(timeout, TimeUnit.SECONDS);
-        wait.pollingEvery(polling, TimeUnit.SECONDS);
+        wait.withTimeout(Duration.ofSeconds(timeout));
+        wait.pollingEvery(Duration.ofSeconds(polling));
         wait.ignoreAll(exceptions);
         
         return wait;
