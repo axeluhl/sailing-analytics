@@ -5,6 +5,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
@@ -78,15 +79,10 @@ public abstract class DataEntryDialogPO extends PageArea {
     public void pressMakeDefault() {
         WebElement element = findElementBySeleniumId(ID_MAKE_DEFAULT_BUTTON);
         element.click();
-        ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
-        Alert alert = condition.apply(this.driver);
+        final ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
+        final Alert alert = new WebDriverWait(driver, 10).until(condition::apply);
         
-        if(alert != null) {
-            alert.accept();
-        } else {
-            waitForAjaxRequests();
-        }
-        
+        alert.accept();
     }
     
     public boolean isMakeDefaultButtonVisible() {
