@@ -3,13 +3,17 @@ package com.sap.sailing.windestimation.impl.maneuvergraph;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class SingleManeuverClassifier {
 
     private final BoatClass boatClass;
@@ -184,10 +188,7 @@ public class SingleManeuverClassifier {
             // => course at lowest speed refers upwind
             presumedManeuverTypeLikelihoodsByAngleAnalysis[PresumedManeuverType._360.ordinal()] = 1.0;
         }
-        Bearing middleManeuverCourse = maneuverCurve.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore()
-                .getBearing()
-                .middle(maneuverCurve.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing());
-        return new SingleManeuverClassificationResult(middleManeuverCourse, lowestSpeedWithBeginningSpeedRatio,
+        return new SingleManeuverClassificationResult(maneuverCurve, lowestSpeedWithBeginningSpeedRatio,
                 courseChangeDegUntilLowestSpeed, highestSpeedWithBeginningSpeedRatio, enteringExitingSpeedRatio,
                 courseChangeDeg, presumedManeuverTypeLikelihoodsByAngleAnalysis,
                 presumedManeuverTypeLikelihoodsBySpeedAnalysis, speedWithTwaIfTack, speedWithTwaIfJibe);

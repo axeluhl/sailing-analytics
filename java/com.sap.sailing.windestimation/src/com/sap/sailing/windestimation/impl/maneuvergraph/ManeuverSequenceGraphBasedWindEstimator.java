@@ -15,8 +15,6 @@ import com.sap.sse.common.TimePoint;
  *
  */
 public class ManeuverSequenceGraphBasedWindEstimator extends ManeuverAndPolarsBasedWindEstimatorBaseImpl {
-    
-    private List<ManeuverSequenceGraph> competitorManeuverGraphs = new ArrayList<>();
 
     public ManeuverSequenceGraphBasedWindEstimator(PolarDataService polarService) {
         super(polarService);
@@ -25,11 +23,16 @@ public class ManeuverSequenceGraphBasedWindEstimator extends ManeuverAndPolarsBa
     @Override
     protected List<WindWithConfidence<TimePoint>> estimateWindByFilteredCompetitorTracks(
             List<CompetitorTrackWithEstimationData> filteredCompetitorTracks) {
+        List<SingleTrackManeuverSequenceGraph> singleTrackGraphs = new ArrayList<>();
         for (CompetitorTrackWithEstimationData track : filteredCompetitorTracks) {
-            ManeuverSequenceGraph graph = new ManeuverSequenceGraph(track.getBoatClass(), getPolarService(), track.getManeuverCurves());
+            SingleTrackManeuverSequenceGraph graph = new SingleTrackManeuverSequenceGraph(track.getBoatClass(),
+                    getPolarService(), track.getManeuverCurves());
             graph.computePossiblePathsWithDistances();
+            singleTrackGraphs.add(graph);
         }
-        
+        CrossTrackManeuverSequenceGraph globalGraph = new CrossTrackManeuverSequenceGraph(singleTrackGraphs);
+        globalGraph.computePossiblePathsWithDistances();
+        // TODO get best possible path, convert to wind track with confidence
         return null;
     }
 

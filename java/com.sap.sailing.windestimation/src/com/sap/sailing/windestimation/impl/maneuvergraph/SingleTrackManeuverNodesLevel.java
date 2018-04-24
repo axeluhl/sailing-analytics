@@ -1,16 +1,19 @@
 package com.sap.sailing.windestimation.impl.maneuvergraph;
 
 import com.sap.sailing.domain.common.NauticalSide;
-import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<SingleTrackManeuverNodesLevel> {
 
     private final SingleManeuverClassificationResult maneuverClassificationResult;
 
-    public SingleTrackManeuverNodesLevel(CompleteManeuverCurveWithEstimationData maneuver,
-            SingleManeuverClassifier singleManeuverClassifier) {
-        super(maneuver);
-        maneuverClassificationResult = singleManeuverClassifier.classifyManeuver(maneuver);
+    public SingleTrackManeuverNodesLevel(SingleManeuverClassificationResult singleManeuverClassificationResult) {
+        super(singleManeuverClassificationResult.getManeuver());
+        maneuverClassificationResult = singleManeuverClassificationResult;
     }
 
     @Override
@@ -96,6 +99,17 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
 
     private double convertLikelihoodToDistance(double likelihoodForPointOfSailBeforeManeuver) {
         return 1 / (likelihoodForPointOfSailBeforeManeuver * likelihoodForPointOfSailBeforeManeuver);
+    }
+
+    public static ManeuverNodesLevelFactory<SingleTrackManeuverNodesLevel, SingleManeuverClassificationResult> getFactory() {
+        return new ManeuverNodesLevelFactory<SingleTrackManeuverNodesLevel, SingleManeuverClassificationResult>() {
+
+            @Override
+            public SingleTrackManeuverNodesLevel createNewManeuverNodesLevel(
+                    SingleManeuverClassificationResult singleManeuverClassificationResult) {
+                return new SingleTrackManeuverNodesLevel(singleManeuverClassificationResult);
+            }
+        };
     }
 
 }

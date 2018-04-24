@@ -1,117 +1,119 @@
 package com.sap.sailing.windestimation.impl.maneuvergraph;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
-import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.WindImpl;
-import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
-import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
-import com.sap.sailing.windestimation.impl.WindTrackCandidate;
-import com.sap.sse.common.TimePoint;
-
 /**
  * 
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverSequenceGraph {
+public class ManeuverSequenceGraph<T extends ManeuverNodesLevel<T>, R> {
 
-    private final SingleManeuverClassifier singleManeuverClassifier;
+    private T firstGraphLevel = null;
+    private T lastGraphLevel = null;
+    private final ManeuverNodesLevelFactory<T, R> maneuverNodesLevelFactory;
 
-    private ManeuverNodesLevel firstGraphLevel = null;
-    private ManeuverNodesLevel lastGraphLevel = null;
-
-    public ManeuverSequenceGraph(BoatClass boatClass, PolarDataService polarService,
-            Iterable<CompleteManeuverCurveWithEstimationData> maneuverSequence) {
-        singleManeuverClassifier = new SingleManeuverClassifier(boatClass, polarService);
-        for (CompleteManeuverCurveWithEstimationData maneuver : maneuverSequence) {
+    public ManeuverSequenceGraph(Iterable<R> maneuverSequence,
+            ManeuverNodesLevelFactory<T, R> maneuverNodesLevelFactory) {
+        this.maneuverNodesLevelFactory = maneuverNodesLevelFactory;
+        for (R maneuver : maneuverSequence) {
             appendManeuverAsGraphLevel(maneuver);
         }
     }
 
-    private void appendManeuverAsGraphLevel(CompleteManeuverCurveWithEstimationData maneuver) {
-        lastGraphLevel = new ManeuverNodesLevel(maneuver, singleManeuverClassifier, lastGraphLevel);
+    public ManeuverSequenceGraph(ManeuverNodesLevelFactory<T, R> maneuverNodesLevelFactory) {
+        this.maneuverNodesLevelFactory = maneuverNodesLevelFactory;
+    }
+
+    protected void appendManeuverAsGraphLevel(R nodeLevelReference) {
+        T newManeuverNodesLevel = maneuverNodesLevelFactory.createNewManeuverNodesLevel(nodeLevelReference);
         if (firstGraphLevel == null) {
-            firstGraphLevel = lastGraphLevel;
+            // TODO introduce first node as dummy with nodes representing course before the provided maneuver, or
+            // introduce this logic in ManeuverNodesLevel
+            firstGraphLevel = newManeuverNodesLevel;
+            lastGraphLevel = newManeuverNodesLevel;
+        } else {
+            lastGraphLevel.appendNextManeuverNodesLevel(newManeuverNodesLevel);
+            lastGraphLevel = newManeuverNodesLevel;
         }
     }
 
     public void computePossiblePathsWithDistances() {
-        ManeuverNodesLevel currentLevel = firstGraphLevel;
+        T currentLevel = firstGraphLevel;
         while (currentLevel != null) {
             currentLevel.computeDistances();
             currentLevel = currentLevel.getNextLevel();
         }
     }
 
-    public Iterable<WindTrackCandidate> computeWindDirectionCandidates() {
-        List<WindTrackCandidate> possibleWindTracks = new ArrayList<>();
-        ManeuverNodesLevel lastGraphLevel = this.lastGraphLevel;
-        if (lastGraphLevel != null) {
-            double bestDistance = Double.MAX_VALUE;
-            for (int i = 0; i < lastGraphLevel.getBestDistancesFromStart().length; i++) {
-                double distance = lastGraphLevel.getBestDistancesFromStart()[i];
-                if (distance < bestDistance) {
-                    bestDistance = distance;
-                }
-            }
-            //TODO rethink confidence computation
-            for (FineGrainedPointOfSail pointOfSail : FineGrainedPointOfSail.values()) {
-                double distance = lastGraphLevel.getDistanceToNodeFromStart(pointOfSail);
-                double confidence = 1 - ((bestDistance - distance) / bestDistance);
-                Iterable<WindWithConfidence<TimePoint>> windTrack = getWindTrackWithLastNode(pointOfSail);
-                WindTrackCandidate windTrackCandidate = new WindTrackCandidate(confidence, windTrack);
-                possibleWindTracks.add(windTrackCandidate);
-            }
-        }
-        return possibleWindTracks;
-    }
+    // public Iterable<WindTrackCandidate> computeWindDirectionCandidates() {
+    // List<WindTrackCandidate> possibleWindTracks = new ArrayList<>();
+    // T lastGraphLevel = this.lastGraphLevel;
+    // if (lastGraphLevel != null) {
+    // double bestDistance = Double.MAX_VALUE;
+    // for (int i = 0; i < lastGraphLevel.getBestDistancesFromStart().length; i++) {
+    // double distance = lastGraphLevel.getBestDistancesFromStart()[i];
+    // if (distance < bestDistance) {
+    // bestDistance = distance;
+    // }
+    // }
+    // // TODO rethink confidence computation
+    // for (FineGrainedPointOfSail pointOfSail : FineGrainedPointOfSail.values()) {
+    // double distance = lastGraphLevel.getDistanceToNodeFromStart(pointOfSail);
+    // double confidence = 1 - ((bestDistance - distance) / bestDistance);
+    // Iterable<WindWithConfidence<TimePoint>> windTrack = getWindTrackWithLastNode(pointOfSail);
+    // WindTrackCandidate windTrackCandidate = new WindTrackCandidate(confidence, windTrack);
+    // possibleWindTracks.add(windTrackCandidate);
+    // }
+    // }
+    // return possibleWindTracks;
+    // }
 
-    private Iterable<WindWithConfidence<TimePoint>> getWindTrackWithLastNode(FineGrainedPointOfSail lastNode) {
-        FineGrainedPointOfSail currentNode = lastNode;
-        ManeuverNodesLevel currentLevel = lastGraphLevel;
-        List<WindWithConfidence<TimePoint>> windTrack = new ArrayList<>();
-        while (currentNode != null) {
-            FineGrainedPointOfSail previousNode = currentLevel.getBestPrecedingNode(currentNode);
-            ManeuverNodesLevel previousLevel = currentLevel.getPreviousLevel();
-            if (previousNode.getCoarseGrainedPointOfSail().getLegType() == currentNode.getCoarseGrainedPointOfSail()
-                    .getLegType() && previousNode.getTack() != currentNode.getTack()
-                    && Math.abs(previousLevel.getManeuver().getMainCurve().getDirectionChangeInDegrees()) < 110) {
-                if (previousNode.getCoarseGrainedPointOfSail().getLegType() == LegType.UPWIND) {
-                    SpeedWithBearingWithConfidence<Void> speedWithTwaIfTack = previousLevel
-                            .getManeuverClassificationResult().getSpeedWithTwaIfTack();
-                    SpeedWithBearing windSpeedWithBearing = new KnotSpeedWithBearingImpl(
-                            speedWithTwaIfTack.getObject().getKnots(),
-                            previousLevel.getManeuverClassificationResult().getMiddleManeuverCourse().reverse());
-                    WindImpl wind = new WindImpl(previousLevel.getManeuver().getPosition(),
-                            previousLevel.getManeuver().getTimePoint(), windSpeedWithBearing);
-                    WindWithConfidenceImpl<TimePoint> windWithConfidence = new WindWithConfidenceImpl<TimePoint>(wind,
-                            speedWithTwaIfTack.getConfidence(), previousLevel.getManeuver().getTimePoint(), true);
-                    windTrack.add(windWithConfidence);
-                } else if (previousNode.getCoarseGrainedPointOfSail().getLegType() == LegType.DOWNWIND) {
-                    SpeedWithBearingWithConfidence<Void> speedWithTwaIfJibe = previousLevel
-                            .getManeuverClassificationResult().getSpeedWithTwaIfJibe();
-                    SpeedWithBearing windSpeedWithBearing = new KnotSpeedWithBearingImpl(
-                            speedWithTwaIfJibe.getObject().getKnots(),
-                            previousLevel.getManeuverClassificationResult().getMiddleManeuverCourse());
-                    WindImpl wind = new WindImpl(previousLevel.getManeuver().getPosition(),
-                            previousLevel.getManeuver().getTimePoint(), windSpeedWithBearing);
-                    WindWithConfidenceImpl<TimePoint> windWithConfidence = new WindWithConfidenceImpl<TimePoint>(wind,
-                            speedWithTwaIfJibe.getConfidence(), previousLevel.getManeuver().getTimePoint(), true);
-                    windTrack.add(windWithConfidence);
-                }
-            }
-            currentLevel = previousLevel;
-            currentNode = previousNode;
-        }
-        return windTrack;
+    // private Iterable<WindWithConfidence<TimePoint>> getWindTrackWithLastNode(FineGrainedPointOfSail lastNode) {
+    // FineGrainedPointOfSail currentNode = lastNode;
+    // T currentLevel = lastGraphLevel;
+    // List<WindWithConfidence<TimePoint>> windTrack = new ArrayList<>();
+    // while (currentNode != null) {
+    // FineGrainedPointOfSail previousNode = currentLevel.getBestPreviousNode(currentNode);
+    // T previousLevel = currentLevel.getPreviousLevel();
+    // // TODO avoid previousLevel == null
+    // if (previousNode.getCoarseGrainedPointOfSail().getLegType() == currentNode.getCoarseGrainedPointOfSail()
+    // .getLegType() && previousNode.getTack() != currentNode.getTack()
+    // && Math.abs(previousLevel.getManeuver().getMainCurve().getDirectionChangeInDegrees()) < 110) {
+    // if (currentNode.getCoarseGrainedPointOfSail().getLegType() == LegType.UPWIND) {
+    // SpeedWithBearingWithConfidence<Void> speedWithTwaIfTack = currentNode
+    // .getManeuverClassificationResult().getSpeedWithTwaIfTack();
+    // SpeedWithBearing windSpeedWithBearing = new KnotSpeedWithBearingImpl(
+    // speedWithTwaIfTack.getObject().getKnots(), currentLevel.getManeuver()
+    // .getCurveWithUnstableCourseAndSpeed().getMiddleCourse().reverse());
+    // WindImpl wind = new WindImpl(currentLevel.getManeuver().getPosition(),
+    // currentLevel.getManeuver().getTimePoint(), windSpeedWithBearing);
+    // WindWithConfidenceImpl<TimePoint> windWithConfidence = new WindWithConfidenceImpl<TimePoint>(wind,
+    // speedWithTwaIfTack.getConfidence(), currentLevel.getManeuver().getTimePoint(), true);
+    // windTrack.add(windWithConfidence);
+    // } else if (currentNode.getCoarseGrainedPointOfSail().getLegType() == LegType.DOWNWIND) {
+    // SpeedWithBearingWithConfidence<Void> speedWithTwaIfJibe = currentLevel
+    // .getManeuverClassificationResult().getSpeedWithTwaIfJibe();
+    // SpeedWithBearing windSpeedWithBearing = new KnotSpeedWithBearingImpl(
+    // speedWithTwaIfJibe.getObject().getKnots(),
+    // currentLevel.getManeuver().getCurveWithUnstableCourseAndSpeed().getMiddleCourse());
+    // WindImpl wind = new WindImpl(currentLevel.getManeuver().getPosition(),
+    // currentLevel.getManeuver().getTimePoint(), windSpeedWithBearing);
+    // WindWithConfidenceImpl<TimePoint> windWithConfidence = new WindWithConfidenceImpl<TimePoint>(wind,
+    // speedWithTwaIfJibe.getConfidence(), currentLevel.getManeuver().getTimePoint(), true);
+    // windTrack.add(windWithConfidence);
+    // }
+    // }
+    // currentLevel = previousLevel;
+    // currentNode = previousNode;
+    // }
+    // return windTrack;
+    // }
+    
+    public T getFirstGraphLevel() {
+        return firstGraphLevel;
+    }
+    
+    public T getLastGraphLevel() {
+        return lastGraphLevel;
     }
 
 }

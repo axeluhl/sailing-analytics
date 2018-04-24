@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.tracking;
 
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
@@ -44,6 +46,15 @@ public interface ManeuverCurveBoundaries {
     SpeedWithBearing getSpeedWithBearingAfter();
 
     /**
+     * Gets the middle course between {@link #getSpeedWithBearingBefore()} and {@link #getSpeedWithBearingAfter()}.
+     */
+    default Bearing getMiddleCourse() {
+        double middleCourseDeg = (getSpeedWithBearingBefore().getBearing().getDegrees()
+                + getDirectionChangeInDegrees() / 2) % 360;
+        return new DegreeBearingImpl(middleCourseDeg);
+    }
+
+    /**
      * Gets the total course change performed within the curve in degrees. The port side course changes are negative.
      * 
      * @return The total course change in degrees
@@ -53,7 +64,7 @@ public interface ManeuverCurveBoundaries {
     /**
      * Gets the duration of the curve.
      */
-    default Duration getDuration(){
+    default Duration getDuration() {
         return getTimePointBefore().until(getTimePointAfter());
     }
 

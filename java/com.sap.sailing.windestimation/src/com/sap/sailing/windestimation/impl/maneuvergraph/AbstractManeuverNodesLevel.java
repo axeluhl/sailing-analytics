@@ -7,7 +7,7 @@ import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimat
  * @author Vladislav Chumak (D069712)
  *
  */
-public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuverNodesLevel<SelfType>> implements IManeuverNodesLevel<SelfType> {
+public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuverNodesLevel<SelfType>> implements ManeuverNodesLevel<SelfType> {
 
     private final CompleteManeuverCurveWithEstimationData maneuver;
     
@@ -28,11 +28,13 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
         return maneuver;
     }
 
+    @Override
     public double getDistanceToNodeFromStart(FineGrainedPointOfSail node) {
         return bestDistancesFromStartToTheseNodes[node.ordinal()];
     }
 
-    public FineGrainedPointOfSail getBestPrecedingNode(FineGrainedPointOfSail node) {
+    @Override
+    public FineGrainedPointOfSail getBestPreviousNode(FineGrainedPointOfSail node) {
         return bestPreviousNodesForTheseNodes[node.ordinal()];
     }
 
@@ -40,6 +42,7 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
         return bestPreviousNodesForTheseNodes;
     }
 
+    @Override
     public double[] getBestDistancesFromStart() {
         return bestDistancesFromStartToTheseNodes;
     }
