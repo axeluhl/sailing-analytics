@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.By.ByXPath;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Action;
@@ -77,11 +78,24 @@ public class DataEntryPO extends CellTableRowPO {
     }
     
     protected Action getSelectAction() {
-        Actions actions = new Actions(this.driver);
-        actions.moveToElement(getElementForSelect(), 1, 1);
+        final Actions actions = new Actions(this.driver);
+        moveToUpperLeftCorner(actions, getElementForSelect());
         actions.click();
         
         return actions.build();
+    }
+    
+    /**
+     * It seems that the JavaDoc of {@link Actions#moveToElement(WebElement, int, int)} is not consistent to the
+     * WebDriver specification. The specification says the int params are relative to the center of the element, while
+     * the JavaDoc says it's relative to the upper-left corner. GeckoDriver implements the specification. This method
+     * ensures consistent behavior no matter if the implementation is a legacy one or one that conforms to the
+     * specification.
+     */
+    private void moveToUpperLeftCorner(Actions actions, WebElement webElement) {
+        actions.moveToElement(webElement);
+        final Dimension size = webElement.getSize();
+        actions.moveByOffset(-size.width / 2 - 1, -size.height / 2 - 1);
     }
     
     /**
@@ -111,7 +125,7 @@ public class DataEntryPO extends CellTableRowPO {
             actions.click();
         } else {
             actions.keyDown(Keys.CONTROL);
-            actions.moveToElement(getElementForSelect(), 1, 1);
+            moveToUpperLeftCorner(actions, getElementForSelect());
             actions.click();
             actions.keyUp(Keys.CONTROL);
         }
