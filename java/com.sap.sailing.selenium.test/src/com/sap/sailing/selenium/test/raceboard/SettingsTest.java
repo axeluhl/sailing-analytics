@@ -687,7 +687,7 @@ public class SettingsTest extends AbstractSeleniumTest {
 
         // open settings dialog of configurated leaderboard with default values
         LeaderboardSettingsDialogPO leaderboardSettingsDialog = leaderboardPage.getLeaderboardSettings();
-        LeaderboardSettingsPanelPO leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings()
+        LeaderboardSettingsPanelPO leaderboardSettingsPanel = leaderboardSettingsDialog
                 .getLeaderboardSettingsPanelPO();
 
         // store default values for checks later
