@@ -23,6 +23,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.html5.WebStorage;
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -85,7 +86,13 @@ public abstract class AbstractSeleniumTest {
         }
         // clear local storage
         getWebDriver().get(contextRoot);
-        ((JavascriptExecutor)getWebDriver()).executeScript("window.localStorage.clear();");
+        // TODO get to know if all of our used drivers support WebStorage and if yes, remove the old JS solution
+        if (getWebDriver() instanceof WebStorage) {
+            final WebStorage webStorage = (WebStorage)getWebDriver();
+            webStorage.getLocalStorage().clear();
+        } else {
+            ((JavascriptExecutor)getWebDriver()).executeScript("window.localStorage.clear();");
+        }
     }
     
     protected void setUpAuthenticatedSession() {
