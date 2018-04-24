@@ -92,7 +92,8 @@ public abstract class AbstractSeleniumTest {
         logger.info("Authenticating session...");
         Cookie sessionCookie = authenticate(getContextRoot());
         getWebDriver().get(getContextRoot() + "index.html"); // initialize web driver so setting a cookie for the local domain is possible
-        getWebDriver().manage().addCookie(sessionCookie);
+        final Cookie cookieWithoutDomain = new Cookie(sessionCookie.getName(), sessionCookie.getValue(), null, sessionCookie.getPath(), sessionCookie.getExpiry(), sessionCookie.isSecure(), sessionCookie.isHttpOnly());
+        getWebDriver().manage().addCookie(cookieWithoutDomain);
         logger.info("...obtained session cookie "+sessionCookie);
     }
 
