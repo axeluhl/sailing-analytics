@@ -1,7 +1,12 @@
 package com.sap.sailing.selenium.pages.adminconsole.regatta;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
@@ -84,5 +89,18 @@ public class RegattaDetailsCompositePO extends PageArea {
     
     private CellTablePO<DataEntryPO> getSeriesTable() {
         return new GenericCellTablePO<>(this.driver, this.seriesTable, DataEntryPO.class);
+    }
+    
+    public List<String> getRaceNames(String seriesName) {
+        final DataEntryPO seriesEntry = findSeries(seriesName);
+        final String racesColumnContent = seriesEntry.getColumnContent("Races");
+        if (racesColumnContent != null && ! racesColumnContent.isEmpty()) {
+            return Arrays.asList(racesColumnContent.split(", "));
+        }
+        return Collections.emptyList();
+    }
+    
+    public void waitForRacesOfSeries(final String series, final List<String> races) {
+        new WebDriverWait(driver, 10).until(driver -> getRaceNames(series).equals(races));
     }
 }

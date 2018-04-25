@@ -134,11 +134,13 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
             seriesDialog.deleteRace("D3");
             seriesDialog.pressOk(true);
+            final List<String> expectedRaces = Arrays.asList("D1", "D2", "D4", "D5");
+            regattaDetails.waitForRacesOfSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME, expectedRaces);
             // Now we can check the result with our expectation
             leaderboardWindow.switchToWindow();
             leaderboard.refresh();
-            assertThat("Race names do not match after deletion of race 'D3'",
-                    table.getRaceNames(), equalTo(Arrays.asList("D1", "D2", "D4", "D5")));
+            assertThat("Race names do not match after deletion of race 'D3'", table.getRaceNames(),
+                    equalTo(expectedRaces));
         });
     }
     
