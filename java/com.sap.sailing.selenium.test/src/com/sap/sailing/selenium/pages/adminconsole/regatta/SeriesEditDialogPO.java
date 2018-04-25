@@ -127,7 +127,7 @@ public class SeriesEditDialogPO extends DataEntryDialogPO {
                 // A simple "removeButton.click();" does not work on GeckoDriver here.
                 // This only presses the button down but a click isn't detected.
                 // It seems that the mouseup event isn't correctly fired, why we use this workaround.
-                new Actions(driver).moveToElement(removeButton).clickAndHold().pause(100).release().perform();
+                new Actions(driver).sendKeys(removeButton, "\13").perform();
             }
         }
     }
