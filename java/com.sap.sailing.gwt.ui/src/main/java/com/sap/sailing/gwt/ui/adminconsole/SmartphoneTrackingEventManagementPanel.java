@@ -432,7 +432,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                                     }
                                 }
                                 new CompetitorToBoatMappingsDialog(sailingService, stringMessages,
-                                        errorReporter, newCompetitorToBoatMappings, new DialogCallback<Map<CompetitorDTO, BoatDTO>>() {
+                                        errorReporter, leaderboardName, newCompetitorToBoatMappings, new DialogCallback<Map<CompetitorDTO, BoatDTO>>() {
                                     @Override
                                     public void ok(final Map<CompetitorDTO, BoatDTO> competitorToBoatMappings) {
                                         sailingService.setCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName,

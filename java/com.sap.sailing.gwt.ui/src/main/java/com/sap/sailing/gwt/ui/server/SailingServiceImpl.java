@@ -6816,7 +6816,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Collection<BoatDTO> getBoatRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException, NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        if (! (leaderboard instanceof HasRegattaLike)) {
+        if (!(leaderboard instanceof HasRegattaLike)) {
             throw new DoesNotHaveRegattaLogException();
         }
         HasRegattaLike regattaLikeLeaderboard = ((HasRegattaLike) leaderboard);

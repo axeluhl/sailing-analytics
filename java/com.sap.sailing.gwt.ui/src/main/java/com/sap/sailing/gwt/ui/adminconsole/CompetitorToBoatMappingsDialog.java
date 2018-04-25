@@ -58,7 +58,7 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
     }
     
     public CompetitorToBoatMappingsDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages,
-            final ErrorReporter errorReporter, Map<CompetitorDTO, BoatDTO> competitorsAndBoats, DialogCallback<Map<CompetitorDTO, BoatDTO>> callback) {
+            final ErrorReporter errorReporter, String leaderboardName, Map<CompetitorDTO, BoatDTO> competitorsAndBoats, DialogCallback<Map<CompetitorDTO, BoatDTO>> callback) {
         super(stringMessages.actionEditCompetitorToBoatAssignments(), null, stringMessages.ok(), stringMessages.cancel(), new CompetitorToBoatMappingValidator(), callback);
         this.stringMessages = stringMessages;
         this.competitorToBoatMappings = new HashMap<>(competitorsAndBoats);
@@ -141,7 +141,7 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
             }
         });
         competitorTable.refreshCompetitorList(competitorToBoatMappings);
-        boatTable.refreshBoatList();
+        boatTable.refreshBoatList(leaderboardName);
     }
 
     private void linkBoatToSelectedCompetitor(CompetitorDTO selectedCompetitor, BoatDTO selectedBoat) {
