@@ -256,12 +256,12 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
         final TimePoint timePoint;
         final String date;
         final String dateFormatPattern;
-        if (columnsInFileFromHeader.containsKey(GPS_TIME_COLUMN)) {
+        if (columnsInFileFromHeader.containsKey(GPS_TIME_COLUMN) && !lineContentTokens[columnsInFileFromHeader.get(GPS_TIME_COLUMN)].trim().isEmpty()) {
             timePoint = getTimePoint(lineContentTokens[columnsInFileFromHeader.get(GPS_TIME_COLUMN)]);
-        } else if (columnsInFileFromHeader.containsKey(UTC_COLUMN)) {
+        } else if (columnsInFileFromHeader.containsKey(UTC_COLUMN) && !lineContentTokens[columnsInFileFromHeader.get(UTC_COLUMN)].trim().isEmpty()) {
             timePoint = getTimePoint(lineContentTokens[columnsInFileFromHeader.get(UTC_COLUMN)]);
-        } else if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1)
-                || columnsInFileFromHeader.containsKey(DATE_COLUMN_2)) {
+        } else if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1) && !lineContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_1)].trim().isEmpty()
+                || columnsInFileFromHeader.containsKey(DATE_COLUMN_2) && !lineContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_2)].trim().isEmpty()) {
             if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1)) {
                 date = lineContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_1)];
                 dateFormatPattern = DATE_COLUMN_1_PATTERN;
