@@ -1,5 +1,11 @@
 package com.sap.sailing.windestimation.impl.maneuvergraph;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sse.common.TimePoint;
+
 /**
  * 
  * @author Vladislav Chumak (D069712)
@@ -30,20 +36,30 @@ public class ManeuverSequenceGraph<T extends ManeuverNodesLevel<T>, R> {
             // introduce this logic in ManeuverNodesLevel
             firstGraphLevel = newManeuverNodesLevel;
             lastGraphLevel = newManeuverNodesLevel;
+            
         } else {
             lastGraphLevel.appendNextManeuverNodesLevel(newManeuverNodesLevel);
             lastGraphLevel = newManeuverNodesLevel;
         }
+        newManeuverNodesLevel.computeDistancesFromPreviousLevelToThisLevel();
+        newManeuverNodesLevel.computeBestPathsToThisLevel();
     }
 
-    public void computePossiblePathsWithDistances() {
+    public void recomputePossiblePathsWithDistances() {
         T currentLevel = firstGraphLevel;
         while (currentLevel != null) {
             currentLevel.computeDistancesFromPreviousLevelToThisLevel();
+            currentLevel.computeBestPathsToThisLevel();
             currentLevel = currentLevel.getNextLevel();
         }
     }
-
+    
+    public List<WindWithConfidence<TimePoint>> estimateWindTrack() {
+        List<WindWithConfidence<TimePoint>> windTrack = new ArrayList<>();
+        //TODO
+        return windTrack;
+    }
+    
     // public Iterable<WindTrackCandidate> computeWindDirectionCandidates() {
     // List<WindTrackCandidate> possibleWindTracks = new ArrayList<>();
     // T lastGraphLevel = this.lastGraphLevel;

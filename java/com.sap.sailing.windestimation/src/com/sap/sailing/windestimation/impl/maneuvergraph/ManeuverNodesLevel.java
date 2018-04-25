@@ -17,7 +17,7 @@ public interface ManeuverNodesLevel<SelfType extends ManeuverNodesLevel<SelfType
 
     void computeDistancesFromPreviousLevelToThisLevel();
     
-    void computeBestPathsToLastLevel();
+    void computeBestPathsToThisLevel();
     
     void appendNextManeuverNodesLevel(SelfType nextManeuverNodesLevel);
 

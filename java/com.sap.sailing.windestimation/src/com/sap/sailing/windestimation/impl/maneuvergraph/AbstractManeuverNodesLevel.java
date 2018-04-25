@@ -70,4 +70,32 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
         nextManeuverNodesLevel.setPreviousLevel((SelfType) this);
     }
 
+    @Override
+    public void computeBestPathsToThisLevel() {
+        SelfType previousLevel = getPreviousLevel();
+        if (previousLevel != null) {
+            for (FineGrainedPointOfSail previousNode : FineGrainedPointOfSail.values()) {
+                for (FineGrainedPointOfSail currentNode : FineGrainedPointOfSail.values()) {
+                    double distanceFromStart = previousLevel.getBestDistanceToNodeFromStart(previousNode)
+                            + this.getDistanceFromPreviousLevelNodeToThisLevelNode(previousNode, currentNode)
+                                    * getPenaltyFactorForTransitionConsideringWholeBestPath(previousNode, currentNode);
+                    double existingBestDistanceToNodeFromStart = this.getBestDistanceToNodeFromStart(currentNode);
+                    if (existingBestDistanceToNodeFromStart == 0
+                            || distanceFromStart < existingBestDistanceToNodeFromStart) {
+                        this.bestDistancesFromStartToTheseNodes[currentNode.ordinal()] = distanceFromStart;
+                        this.bestPreviousNodesForTheseNodes[currentNode.ordinal()] = previousNode;
+                    }
+                }
+            }
+        }
+    }
+
+    protected double getPenaltyFactorForTransitionConsideringWholeBestPath(FineGrainedPointOfSail previousNode,
+            FineGrainedPointOfSail currentNode) {
+        // TODO consider average speed/course as actual polars, comparing tacks vs. jibes regarding average
+        // lowest speed, max/avg turning rate, course change (if not mark passing), maneuver time loss (if
+        // not mark passing)
+        return 0;
+    }
+
 }

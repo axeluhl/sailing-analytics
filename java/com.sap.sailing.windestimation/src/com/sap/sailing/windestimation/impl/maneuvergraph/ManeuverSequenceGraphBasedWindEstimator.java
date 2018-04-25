@@ -27,13 +27,10 @@ public class ManeuverSequenceGraphBasedWindEstimator extends ManeuverAndPolarsBa
         for (CompetitorTrackWithEstimationData track : filteredCompetitorTracks) {
             SingleTrackManeuverSequenceGraph graph = new SingleTrackManeuverSequenceGraph(track.getBoatClass(),
                     getPolarService(), track.getManeuverCurves());
-            graph.computePossiblePathsWithDistances();
             singleTrackGraphs.add(graph);
         }
-        CrossTrackManeuverSequenceGraph globalGraph = new CrossTrackManeuverSequenceGraph(singleTrackGraphs);
-        globalGraph.computePossiblePathsWithDistances();
-        // TODO get best possible path, convert to wind track with confidence
-        return null;
+        CrossTrackManeuverSequenceGraph crossTrackGraph = new CrossTrackManeuverSequenceGraph(singleTrackGraphs);
+        return crossTrackGraph.estimateWindTrack();
     }
 
 }

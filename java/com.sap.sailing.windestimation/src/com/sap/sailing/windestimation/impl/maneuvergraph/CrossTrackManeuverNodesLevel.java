@@ -83,12 +83,4 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
         return singleTrackManeuverNodesLevel;
     }
 
-    @Override
-    public void computeBestPathsToLastLevel() {
-        // TODO consider average speed/course as actual polars, comparing tacks vs. jibes regarding average
-        // lowest speed, max/avg turning rate, course change (if not mark passing), maneuver time loss (if
-        // not mark passing)
-
-    }
-
 }

@@ -113,10 +113,4 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
         };
     }
 
-    @Override
-    public void computeBestPathsToLastLevel() {
-        // TODO Auto-generated method stub
-        
-    }
-
 }
