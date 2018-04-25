@@ -15,14 +15,17 @@ public interface ManeuverNodesLevel<SelfType extends ManeuverNodesLevel<SelfType
 
     CompleteManeuverCurveWithEstimationData getManeuver();
 
-    void computeDistances();
+    void computeDistancesFromPreviousLevelToThisLevel();
+    
+    void computeBestPathsToLastLevel();
     
     void appendNextManeuverNodesLevel(SelfType nextManeuverNodesLevel);
 
-    FineGrainedPointOfSail getBestPreviousNode(FineGrainedPointOfSail node);
+    FineGrainedPointOfSail getBestPreviousNode(FineGrainedPointOfSail toNode);
 
-    double[] getBestDistancesFromStart();
+    double getBestDistanceToNodeFromStart(FineGrainedPointOfSail toNode);
 
-    double getDistanceToNodeFromStart(FineGrainedPointOfSail node);
+    double getDistanceFromPreviousLevelNodeToThisLevelNode(FineGrainedPointOfSail previousLevelNode,
+            FineGrainedPointOfSail thisLevelNode);
 
 }

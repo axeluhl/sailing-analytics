@@ -39,7 +39,7 @@ public class ManeuverSequenceGraph<T extends ManeuverNodesLevel<T>, R> {
     public void computePossiblePathsWithDistances() {
         T currentLevel = firstGraphLevel;
         while (currentLevel != null) {
-            currentLevel.computeDistances();
+            currentLevel.computeDistancesFromPreviousLevelToThisLevel();
             currentLevel = currentLevel.getNextLevel();
         }
     }

@@ -16,7 +16,7 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
     }
 
     @Override
-    public void computeDistances() {
+    public void computeDistancesFromPreviousLevelToThisLevel() {
         for (FineGrainedPointOfSail previousNode : FineGrainedPointOfSail.values()) {
             CrossTrackManeuverNodesLevel previousLevel = getPreviousLevel();
             for (FineGrainedPointOfSail currentNode : FineGrainedPointOfSail.values()) {
@@ -26,28 +26,46 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
                     SingleTrackManeuverNodesLevel previousLevelNextSingleTrackLevel = previousLevel
                             .getSingleTrackManeuverNodesLevel().getNextLevel();
                     if (previousLevelNextSingleTrackLevel != null) {
-                        // TODO derive adequate previousLevelNode and thisLevelNode from assumed wind and represented
-                        // course
-                        // distanceSum +=
-                        // previousLevelNextSingleTrackLevel.getDistanceFromPreviousLevelNodeToThisLevelNode(previousLevelNode,
-                        // thisLevelNode)
+                        double courseDiffBetweenThisLevelAndPreviousLevelNextSingleTrackLevel = this.getManeuver()
+                                .getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing()
+                                .getDifferenceTo(previousLevelNextSingleTrackLevel.getManeuver()
+                                        .getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing())
+                                .getDegrees();
+                        FineGrainedPointOfSail nextSingleTrackNode = currentNode
+                                .getNextPointOfSail(courseDiffBetweenThisLevelAndPreviousLevelNextSingleTrackLevel);
+                        distanceSum += previousLevelNextSingleTrackLevel
+                                .getDistanceFromPreviousLevelNodeToThisLevelNode(previousNode, nextSingleTrackNode);
                         distanceCount++;
                     }
                 }
                 SingleTrackManeuverNodesLevel thisLevelCurrentSingleTrackLevel = this
                         .getSingleTrackManeuverNodesLevel();
-                if (thisLevelCurrentSingleTrackLevel.getPreviousLevel() != null) {
-                    // TODO derive adequate previousLevelNode and thisLevelNode from assumed wind and represented course
-                    // distanceSum +=
-                    // thisLevelCurrentSingleTrackLevel.getDistanceFromPreviousLevelNodeToThisLevelNode(previousLevelNode,
-                    // thisLevelNode);
+                SingleTrackManeuverNodesLevel thisLevelPreviousSingleTrackLevel = thisLevelCurrentSingleTrackLevel
+                        .getPreviousLevel();
+                if (thisLevelPreviousSingleTrackLevel != null) {
+                    double courseDiffBetweenThisLevelPreviousSingleTrackLevelAndPreviousLevel = thisLevelPreviousSingleTrackLevel
+                            .getManeuver().getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter()
+                            .getBearing().getDifferenceTo(previousLevel.getManeuver()
+                                    .getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing())
+                            .getDegrees();
+                    FineGrainedPointOfSail previousSingleTrackNode = previousNode
+                            .getNextPointOfSail(courseDiffBetweenThisLevelPreviousSingleTrackLevelAndPreviousLevel);
+                    distanceSum += thisLevelCurrentSingleTrackLevel
+                            .getDistanceFromPreviousLevelNodeToThisLevelNode(previousSingleTrackNode, currentNode);
                     distanceCount++;
                 }
-                // double distance *= distanceSum / distanceCount * getNodeTransitionPenaltyFactor(windBefore,
-                // windAfter);
-                // this.setDistanceFromPreviousLevelNodeToThisLevelNode(previousLevelNode, thisLevelNode)
+                double distance = distanceSum / distanceCount
+                        * getNodeTransitionPenaltyFactor(previousLevel, previousNode, this, currentNode);
+                this.distancesFromPreviousNodesToTheseNodes[previousNode.ordinal()][currentNode.ordinal()] = distance;
             }
         }
+    }
+
+    private double getNodeTransitionPenaltyFactor(CrossTrackManeuverNodesLevel previousLevel,
+            FineGrainedPointOfSail previousNode, CrossTrackManeuverNodesLevel crossTrackManeuverNodesLevel,
+            FineGrainedPointOfSail currentNode) {
+        // TODO compare assumed wind direction from previous level and this level
+        return 0;
     }
 
     public static ManeuverNodesLevelFactory<CrossTrackManeuverNodesLevel, SingleTrackManeuverNodesLevel> getFactory() {
@@ -63,6 +81,14 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
 
     public SingleTrackManeuverNodesLevel getSingleTrackManeuverNodesLevel() {
         return singleTrackManeuverNodesLevel;
+    }
+
+    @Override
+    public void computeBestPathsToLastLevel() {
+        // TODO consider average speed/course as actual polars, comparing tacks vs. jibes regarding average
+        // lowest speed, max/avg turning rate, course change (if not mark passing), maneuver time loss (if
+        // not mark passing)
+
     }
 
 }

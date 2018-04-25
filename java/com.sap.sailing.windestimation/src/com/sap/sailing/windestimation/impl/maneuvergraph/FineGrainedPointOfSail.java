@@ -36,6 +36,23 @@ public enum FineGrainedPointOfSail {
         }
         return FineGrainedPointOfSail.values()[nextOrdinal];
     }
+    
+    public FineGrainedPointOfSail getNextPointOfSail(double degreesToAdd) {
+        double newTwa = (this.getTwa() + degreesToAdd) % 360;
+        if(newTwa < 0) {
+            newTwa += 360;
+        }
+        double smallestAbsTwaDeviation = Double.POSITIVE_INFINITY;
+        FineGrainedPointOfSail bestPointOfSail = null;
+        for (FineGrainedPointOfSail pointOfSail : FineGrainedPointOfSail.values()) {
+            double absTwaDeviation = Math.abs(pointOfSail.getTwa() - newTwa);
+            if(absTwaDeviation < smallestAbsTwaDeviation) {
+                smallestAbsTwaDeviation = absTwaDeviation;
+                bestPointOfSail = pointOfSail;
+            }
+        }
+        return bestPointOfSail;
+    }
 
     public int getDifferenceInDegrees(FineGrainedPointOfSail otherPointOfSail) {
         int deviationDeg = this.getTwa() - otherPointOfSail.getTwa();

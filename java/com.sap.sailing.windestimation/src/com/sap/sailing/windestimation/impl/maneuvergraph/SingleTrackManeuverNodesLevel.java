@@ -17,13 +17,13 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
     }
 
     @Override
-    public void computeDistances() {
+    public void computeDistancesFromPreviousLevelToThisLevel() {
         for (FineGrainedPointOfSail pointOfSailAfterManeuver : FineGrainedPointOfSail.values()) {
             double likelihoodForPointOfSailBeforeManeuver = maneuverClassificationResult
                     .getLikelihoodForPointOfSailBeforeManeuver(pointOfSailAfterManeuver.getCoarseGrainedPointOfSail());
             if (getPreviousLevel() == null) {
-                this.getBestDistancesFromStart()[pointOfSailAfterManeuver.ordinal()] = convertLikelihoodToDistance(
-                        likelihoodForPointOfSailBeforeManeuver);
+                this.bestDistancesFromStartToTheseNodes[pointOfSailAfterManeuver
+                        .ordinal()] = convertLikelihoodToDistance(likelihoodForPointOfSailBeforeManeuver);
             } else {
                 double courseChangeDegFromPreviousPointOfSailBefore = getPreviousLevel().getManeuver()
                         .getCurveWithUnstableCourseAndSpeed()
@@ -37,15 +37,16 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
                             previousLevelPointOfSailBeforeManeuver, pointOfSailAfterManeuver,
                             courseChangeDegFromPreviousPointOfSailBefore, likelihoodForPointOfSailBeforeManeuver);
                     double distanceThroughPreviousLevelPointOfSailBeforeManeuver = getPreviousLevel()
-                            .getBestDistancesFromStart()[previousLevelPointOfSailBeforeManeuver.ordinal()]
+                            .getBestDistanceToNodeFromStart(previousLevelPointOfSailBeforeManeuver)
                             + convertLikelihoodToDistance(likelihoodForPointOfSailTransition);
                     if (bestDistanceThroughPreviousLevel > distanceThroughPreviousLevelPointOfSailBeforeManeuver) {
                         bestDistanceThroughPreviousLevel = distanceThroughPreviousLevelPointOfSailBeforeManeuver;
                         bestPreviousLevelPointOfSailBeforeManeuver = previousLevelPointOfSailBeforeManeuver;
                     }
                 }
-                this.getBestDistancesFromStart()[pointOfSailAfterManeuver.ordinal()] = bestDistanceThroughPreviousLevel;
-                this.getBestPreviousNodesForThisNodes()[pointOfSailAfterManeuver
+                this.bestDistancesFromStartToTheseNodes[pointOfSailAfterManeuver
+                        .ordinal()] = bestDistanceThroughPreviousLevel;
+                this.bestPreviousNodesForTheseNodes[pointOfSailAfterManeuver
                         .ordinal()] = bestPreviousLevelPointOfSailBeforeManeuver;
             }
         }
@@ -110,6 +111,12 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
                 return new SingleTrackManeuverNodesLevel(singleManeuverClassificationResult);
             }
         };
+    }
+
+    @Override
+    public void computeBestPathsToLastLevel() {
+        // TODO Auto-generated method stub
+        
     }
 
 }
