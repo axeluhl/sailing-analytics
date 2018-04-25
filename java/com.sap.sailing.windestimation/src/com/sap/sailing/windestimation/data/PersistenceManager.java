@@ -28,8 +28,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.ManeuverCurveWithUnst
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverMainCurveWithEstimationDataJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
-import com.sap.sse.common.Duration;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * 
@@ -49,7 +48,8 @@ public class PersistenceManager {
     private static final String FIELD_TRACKED_RACE_NAME = "trackedRaceName";
     private static final String FIELD_REGATTA_NAME = "regattaName";
     private static final String FIELD_DISTANCE_TRAVELLED_IN_METERS = "distanceTravelledInMeters";
-    private static final String FIELD_DURATION_IN_SECONDS = "durationInSeconds";
+    private static final String FIELD_START_TIME_POINT = "startUnixTime";
+    private static final String FIELD_END_TIME_POINT = "endUnixTime";
     private static final String COLLECTION_RACES = "races";
     private final DB db;
     private final CompleteManeuverCurveWithEstimationDataJsonDeserializer completeManeuverCurveDeserializer = new CompleteManeuverCurveWithEstimationDataJsonDeserializer(
@@ -98,7 +98,8 @@ public class PersistenceManager {
                 Object boatClassObj = competitorTrack.get(FIELD_BOAT_CLASS);
                 BoatClass boatClass = boatClassDeserializer.deserialize(getJSONObject(boatClassObj.toString()));
                 Double distanceTravelledInMeters = (Double) competitorTrack.get(FIELD_DISTANCE_TRAVELLED_IN_METERS);
-                Double durationInSeconds = (Double) competitorTrack.get(FIELD_DURATION_IN_SECONDS);
+                Long startUnixTime = (Long) competitorTrack.get(FIELD_START_TIME_POINT);
+                Long endUnixTime = (Long) competitorTrack.get(FIELD_END_TIME_POINT);
                 BasicDBList maneuverCurves = (BasicDBList) competitorTrack.get(FIELD_MANEUVER_CURVES);
                 List<CompleteManeuverCurveWithEstimationData> completeManeuverCurves = new ArrayList<>(
                         maneuverCurves.size());
@@ -111,8 +112,8 @@ public class PersistenceManager {
                         competitorName, boatClass, completeManeuverCurves, avgIntervalBetweenFixesInSeconds,
                         distanceTravelledInMeters == null ? Distance.NULL
                                 : new MeterDistance(distanceTravelledInMeters),
-                        durationInSeconds == null ? Duration.NULL
-                                : new MillisecondsDurationImpl((long) (durationInSeconds * 1000)));
+                        startUnixTime == null ? null : new MillisecondsTimePoint(startUnixTime),
+                        endUnixTime == null ? null : new MillisecondsTimePoint(endUnixTime));
                 competitorTracksWithEstimationData.add(competitorTrackWithEstimationData);
             }
             RaceWithEstimationData raceWithEstimationData = new RaceWithEstimationData(regattaName, raceName,

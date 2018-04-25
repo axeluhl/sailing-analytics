@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 
 /**
  * 
@@ -19,16 +20,19 @@ public class CompetitorTrackWithEstimationData {
     private final List<CompleteManeuverCurveWithEstimationData> maneuverCurves;
     private final double avgIntervalBetweenFixesInSeconds;
     private final Distance distanceTravelled;
-    private final Duration duration;
+    private final TimePoint trackStartTimePoint;
+    private final TimePoint trackEndTimePoint;
 
     public CompetitorTrackWithEstimationData(String competitorName, BoatClass boatClass,
-            List<CompleteManeuverCurveWithEstimationData> maneuverCurves, double avgIntervalBetweenFixesInSeconds, Distance distanceTravelled, Duration duration) {
+            List<CompleteManeuverCurveWithEstimationData> maneuverCurves, double avgIntervalBetweenFixesInSeconds,
+            Distance distanceTravelled, TimePoint trackStartTimePoint, TimePoint trackEndTimePoint) {
         this.competitorName = competitorName;
         this.boatClass = boatClass;
         this.maneuverCurves = maneuverCurves;
         this.avgIntervalBetweenFixesInSeconds = avgIntervalBetweenFixesInSeconds;
         this.distanceTravelled = distanceTravelled;
-        this.duration = duration;
+        this.trackStartTimePoint = trackStartTimePoint;
+        this.trackEndTimePoint = trackEndTimePoint;
     }
 
     public String getCompetitorName() {
@@ -46,13 +50,22 @@ public class CompetitorTrackWithEstimationData {
     public double getAvgIntervalBetweenFixesInSeconds() {
         return avgIntervalBetweenFixesInSeconds;
     }
-    
+
     public Distance getDistanceTravelled() {
         return distanceTravelled;
     }
-    
+
     public Duration getDuration() {
-        return duration;
+        return trackStartTimePoint == null || trackEndTimePoint == null ? Duration.NULL
+                : trackStartTimePoint.until(trackEndTimePoint);
+    }
+
+    public TimePoint getTrackStartTimePoint() {
+        return trackStartTimePoint;
+    }
+
+    public TimePoint getTrackEndTimePoint() {
+        return trackEndTimePoint;
     }
 
 }
