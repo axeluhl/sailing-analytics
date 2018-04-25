@@ -363,7 +363,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(),
                 this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
                         .getScoringScheme().isHigherBetter(), new UUIDGenerator(), addOverallDetails,
-                        boatClass==null?null:new BoatClassDTO(boatClass.getName(), boatClass.getHullLength(), boatClass.getHullBeam()));
+                        boatClass==null?null:new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength(), boatClass.getHullBeam()));
         result.type = getLeaderboardType();
         result.competitors = new ArrayList<>();
         result.name = this.getName();
