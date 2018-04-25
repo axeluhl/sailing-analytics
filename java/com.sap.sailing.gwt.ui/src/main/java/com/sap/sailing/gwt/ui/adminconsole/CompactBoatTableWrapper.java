@@ -42,7 +42,6 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
                     }
                 });
         ListHandler<BoatDTO> boatColumnListHandler = getColumnSortHandler();
-        
         // boats table
         TextColumn<BoatDTO> boatNameColumn = new TextColumn<BoatDTO>() {
             @Override
@@ -58,7 +57,6 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
                 return comparator.compare(o1.getName(), o2.getName());
             }
         });
-
         TextColumn<BoatDTO> boatClassColumn = new TextColumn<BoatDTO>() {
             @Override
             public String getValue(BoatDTO competitor) {
@@ -73,7 +71,6 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
                 return comparator.compare(o1.getBoatClass().getName(), o2.getBoatClass().getName());
             }
         });
-        
         Column<BoatDTO, SafeHtml> sailIdColumn = new Column<BoatDTO, SafeHtml>(new SafeHtmlCell()) {
             @Override
             public SafeHtml getValue(BoatDTO competitor) {
@@ -90,7 +87,6 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
                 return comparator.compare(o1.getSailId(), o2.getSailId());
             }
         });
-
         Column<BoatDTO, SafeHtml> boatColorColumn = new ColorColumn<>(new ColorRetriever<BoatDTO>() {
             @Override
             public Color getColor(BoatDTO t) {
@@ -112,7 +108,6 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
                 return o1.getColor().getAsHtml().compareTo(o2.getColor().getAsHtml());
             }
         });
-
         Column<BoatDTO, SafeHtml> boatIdColumn = new Column<BoatDTO, SafeHtml>(new SafeHtmlCell()) {
             @Override
             public SafeHtml getValue(BoatDTO competitor) {
@@ -129,7 +124,6 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
                 return comparator.compare(o1.getIdAsString(), o2.getIdAsString());
             }
         });
-
         filterField = new LabeledAbstractFilterablePanel<BoatDTO>(new Label(stringMessages.filterBoats()),
                 new ArrayList<BoatDTO>(), table, dataProvider) {
             @Override
@@ -143,7 +137,6 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
             }
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
-                
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(boatColumnListHandler);
         table.addColumn(boatNameColumn, stringMessages.name());

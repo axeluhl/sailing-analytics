@@ -36,20 +36,14 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<CompetitorDTO, BoatDTO>> {
     private final CompactCompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
     private final CompactBoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>> boatTable;
-    
     private final RefreshableSelectionModel<BoatDTO> refreshableBoatSelectionModel;
     private final RefreshableSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
-
     private final StringMessages stringMessages;
     private final SelectionChangeEvent.Handler boatListHandler;
     private HandlerRegistration boatListHandlerRegistration;
-
     private final Map<CompetitorDTO, BoatDTO> competitorToBoatMappings; 
     
     protected static class CompetitorToBoatMappingValidator implements Validator<Map<CompetitorDTO, BoatDTO>> {        
-        public CompetitorToBoatMappingValidator() {
-        }
-
         @Override
         public String getErrorMessage(Map<CompetitorDTO, BoatDTO> valueToValidate) {
             String errorMessage = null;
@@ -59,7 +53,6 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
                     break;
                 }
             }
-            
             return errorMessage;
         }
     }
@@ -153,6 +146,7 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
 
     private void linkBoatToSelectedCompetitor(CompetitorDTO selectedCompetitor, BoatDTO selectedBoat) {
         competitorToBoatMappings.put(selectedCompetitor, selectedBoat);
+        competitorTable.refreshCompetitorList(competitorToBoatMappings);
         competitorTable.getDataProvider().refresh();
         competitorTable.getTable().redraw();
     }
@@ -164,7 +158,6 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
         boatTable.getSelectionModel().clear();
         competitorTable.getDataProvider().refresh();
         competitorTable.getTable().redraw();
-        
     }
 
     private void competitorSelectionChanged() {
