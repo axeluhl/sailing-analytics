@@ -7,6 +7,9 @@ public class CompetitorAndBoatDTO implements Serializable {
     private CompetitorDTO competitor;
     private BoatDTO boat;
 
+    @Deprecated
+    CompetitorAndBoatDTO() {} // for GWT serialization only
+    
     public CompetitorAndBoatDTO(CompetitorDTO competitor, BoatDTO boat) {
         super();
         this.competitor = competitor;
