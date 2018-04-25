@@ -704,7 +704,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * in {@code competitors}.
      */
     void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            Set<? extends CompetitorDTO> competitors, AsyncCallback<Void> callback);
+            Set<CompetitorWithBoatDTO> competitors, AsyncCallback<Void> callback);
 
     /**
      * Set the competitor and boat registrations in the racelog. Unregisters formerly registered competitors that are not listed

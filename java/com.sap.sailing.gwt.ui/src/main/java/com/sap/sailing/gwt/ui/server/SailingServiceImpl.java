@@ -5814,6 +5814,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private Competitor getCompetitor(CompetitorDTO dto) {
         return getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(dto.getIdAsString());
     }
+    
+    private CompetitorWithBoat getCompetitor(CompetitorWithBoatDTO dto) {
+        return getService().getCompetitorAndBoatStore().getExistingCompetitorWithBoatByIdAsString(dto.getIdAsString());
+    }
 
     private Boat getBoat(BoatDTO dto) {
         return getService().getCompetitorAndBoatStore().getExistingBoatByIdAsString(dto.getIdAsString());
@@ -5823,44 +5827,39 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Map<? extends CompetitorDTO, BoatDTO> competitorAndBoatDTOs)
             throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
-        Set<Competitor> competitorsToRegister = new HashSet<>();
-        Map<Competitor, Boat> competitorToBoatMapping = new HashMap<>();
+        Map<Competitor, Boat> competitorToBoatMappingsToRegister = new HashMap<>();
         for (Entry<? extends CompetitorDTO, BoatDTO> competitorAndBoatEntry : competitorAndBoatDTOs.entrySet()) {
-            Competitor competitor = getCompetitor(competitorAndBoatEntry.getKey());
-            competitorsToRegister.add(competitor);
-            competitorToBoatMapping.put(competitor, getBoat(competitorAndBoatEntry.getValue()));
+            competitorToBoatMappingsToRegister.put(getCompetitor(competitorAndBoatEntry.getKey()), getBoat(competitorAndBoatEntry.getValue()));
         }
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-        Collection<Competitor> competitorsToRemove = raceColumn.getCompetitorsRegisteredInRacelog(fleet).keySet();
-        HashSet<Competitor> competitorSetToRemove = new HashSet<>();
-        Util.addAll(competitorsToRemove, competitorSetToRemove);
-        filterCompetitorDuplicates(competitorsToRegister, competitorSetToRemove);
-        raceColumn.deregisterCompetitors(competitorSetToRemove, fleet);
+        final Iterable<Competitor> competitorRegistrationsToRemove = filterCompetitorDuplicates(competitorToBoatMappingsToRegister, raceColumn.getCompetitorsRegisteredInRacelog(fleet));
+        raceColumn.deregisterCompetitors(competitorRegistrationsToRemove, fleet);
         // we assume that the competitors id of type Competitor here, so we need to find the corresponding boat
-        for (Competitor competitorToRegister: competitorsToRegister) {
-            raceColumn.registerCompetitor(competitorToRegister, competitorToBoatMapping.get(competitorToRegister), fleet);  
+        for (final Entry<Competitor, Boat> competitorAndBoatToRegister : competitorToBoatMappingsToRegister.entrySet()) {
+            raceColumn.registerCompetitor(competitorAndBoatToRegister.getKey(), competitorAndBoatToRegister.getValue(), fleet);  
         }
     }
     
     @Override
     public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            Set<? extends CompetitorDTO> competitorDTOs) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
-        Set<Competitor> competitorsToRegister = new HashSet<>();
-        for (CompetitorDTO dto : competitorDTOs) {
-            competitorsToRegister.add(getCompetitor(dto));
+            Set<CompetitorWithBoatDTO> competitorDTOs) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
+        Map<CompetitorWithBoat, Boat> competitorsToRegister = new HashMap<>();
+        for (CompetitorWithBoatDTO dto : competitorDTOs) {
+            competitorsToRegister.put(getCompetitor(dto), getBoat(dto.getBoat()));
         }
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-        Collection<Competitor> competitorsToRemove = raceColumn.getCompetitorsRegisteredInRacelog(fleet).keySet();
-        HashSet<Competitor> competitorSetToRemove = new HashSet<>();
-        Util.addAll(competitorsToRemove, competitorSetToRemove);
-        filterCompetitorDuplicates(competitorsToRegister, competitorSetToRemove);
+        Map<CompetitorWithBoat, Boat> competitorsRegisteredInRaceLog = new HashMap<>();
+        for (final Entry<Competitor, Boat> e : raceColumn.getCompetitorsRegisteredInRacelog(fleet).entrySet()) {
+            competitorsRegisteredInRaceLog.put((CompetitorWithBoat) e.getKey(), e.getValue());
+        }
+        final Iterable<CompetitorWithBoat> competitorSetToRemove = filterCompetitorDuplicates(competitorsToRegister, competitorsRegisteredInRaceLog);
         raceColumn.deregisterCompetitors(competitorSetToRemove, fleet);
         // we assume that the competitors id of type Competitor here, so we need to find the corresponding boat
-        for (Competitor competitorToRegister : competitorsToRegister) {
+        for (CompetitorWithBoat competitorToRegister : competitorsToRegister.keySet()) {
             if (competitorToRegister.hasBoat()) {
-                raceColumn.registerCompetitor((CompetitorWithBoat) competitorToRegister, fleet);  
+                raceColumn.registerCompetitor(competitorToRegister, fleet);  
             } else {
                 logger.warning("The competitor "+competitorToRegister.getName()+" does not have a boat associated but should have; "+
                         "competitor is not registered for race log of race "+raceColumnName+" in leaderboard "+leaderboardName+" for fleet "+fleetName);
@@ -5875,30 +5874,43 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (!(leaderboard instanceof HasRegattaLike)){
             throw new DoesNotHaveRegattaLogException();
         }
-        
-        Set<Competitor> competitorsToRegister = new HashSet<Competitor>();
+        Map<Competitor, Boat> competitorsToRegister = new HashMap<>();
         for (CompetitorDTO dto : competitorDTOs) {
-            competitorsToRegister.add(getCompetitor(dto));
+            competitorsToRegister.put(getCompetitor(dto), /* boat doesn't matter here */ null);
         }
-        
         HasRegattaLike hasRegattaLike = (HasRegattaLike) leaderboard;
-        Iterable<Competitor> competitorsToRemove = leaderboard.getAllCompetitors();
-        HashSet<Competitor> competitorSetToRemove = new HashSet<>();
-        Util.addAll(competitorsToRemove, competitorSetToRemove);
-        filterCompetitorDuplicates(competitorsToRegister, competitorSetToRemove);
-        
+        Map<Competitor, Boat> competitorsAlreadyRegistered = new HashMap<>();
+        for (final Competitor c : leaderboard.getAllCompetitors()) {
+            competitorsAlreadyRegistered.put(c,  /* boat doesn't matter here */ null);
+        }
+        final Iterable<Competitor> competitorSetToRemove = filterCompetitorDuplicates(competitorsToRegister, competitorsAlreadyRegistered);
         hasRegattaLike.deregisterCompetitors(competitorSetToRemove);
-        hasRegattaLike.registerCompetitors(competitorsToRegister);
+        hasRegattaLike.registerCompetitors(competitorsToRegister.keySet());
     }
 
-    private HashSet<Competitor> filterCompetitorDuplicates(Set<Competitor> competitorsToRegister, HashSet<Competitor> competitorSetToRemove) {
-        for (Iterator<Competitor> iterator = competitorSetToRemove.iterator(); iterator.hasNext();) {
-            Competitor competitor = iterator.next();
-            if (competitorsToRegister.remove(competitor)) {
-                iterator.remove();
+    /**
+     * Removes competitors already registered to the same boats (those in {@code competitorsRegistered}) from {@code competitorsToRegister} to avoid
+     * registering them again and then returns those competitors that need to be de-registered. Those to de-register includes those registered but
+     * to a different boat, and those will be left in the {@code competitorToBoatMappingsToRegister} map.
+     * 
+     * @param competitorToBoatMappingsToRegister will be modified by removing all competitors in {@code competitorsRegistered}
+     * @param competitorToBoatMappingsRegistered the competitors already registered; those will be removed from {@code competitorsToRegister}
+     * @return the competitors to de-register because they were in {@code competitorsRegistered} but are not in {@code competitorsToRegister}
+     */
+    private <CompetitorType extends Competitor> Iterable<CompetitorType> filterCompetitorDuplicates(
+            Map<CompetitorType, Boat> competitorToBoatMappingsToRegister,
+            Map<CompetitorType, Boat> competitorToBoatMappingsRegistered) {
+        final Set<CompetitorType> competitorsToUnregister = new HashSet<>();
+        Util.addAll(competitorToBoatMappingsRegistered.keySet(), competitorsToUnregister);
+        for (final Entry<CompetitorType, Boat> e : competitorToBoatMappingsRegistered.entrySet()) {
+            CompetitorType competitor = e.getKey();
+            if (competitorToBoatMappingsToRegister.get(competitor) == e.getValue()) {
+                // User wants to map competitor to boat, and that mapping already exists; neither add nor remove this registration but leave as is:
+                competitorToBoatMappingsToRegister.remove(competitor);
+                competitorsToUnregister.remove(competitor);
             }
         }
-        return competitorSetToRemove;
+        return competitorsToUnregister;
     }
 
     private HashSet<Boat> filterBoatDuplicates(Set<Boat> boatsToRegister, HashSet<Boat> boatSetToRemove) {

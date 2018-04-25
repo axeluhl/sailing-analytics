@@ -524,7 +524,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void startRaceLogTracking(List<Triple<String, String, String>> leaderboardRaceColumnFleetNames, boolean trackWind,
             boolean correctWindByDeclination) throws NotDenotedForRaceLogTrackingException, Exception;
 
-    void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName, Set<? extends CompetitorDTO> competitors) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException;
+    void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorWithBoatDTO> competitors) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException;
 
     void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName, Map<? extends CompetitorDTO, BoatDTO> competitorsAndBoats) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException;
 

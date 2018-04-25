@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +42,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -459,8 +461,12 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                             }
                         });
                     } else {
+                        final Set<CompetitorWithBoatDTO> registeredCompetitorsWithBoat = new HashSet<>();
+                        for (final CompetitorDTO competitor : registeredCompetitors) {
+                            registeredCompetitorsWithBoat.add((CompetitorWithBoatDTO) competitor);
+                        }
                         sailingService.setCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName,
-                            fleetName, registeredCompetitors, new AsyncCallback<Void>() {
+                            fleetName, registeredCompetitorsWithBoat, new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
                             }
