@@ -51,7 +51,7 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
         if (!hasRecall) {
             return false;
         } else if (startmodeFlagHasBeenSet()) {
-            return cachedStartmodeFlag != Flags.BLACK;
+            return cachedStartmodeFlag != Flags.BLACK && cachedStartmodeFlag != Flags.UNIFORM;
         } else {
             return hasRecall;
         }
