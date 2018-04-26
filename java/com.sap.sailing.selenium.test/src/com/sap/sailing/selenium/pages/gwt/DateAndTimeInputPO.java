@@ -44,17 +44,21 @@ public class DateAndTimeInputPO extends PageArea {
      */
     public void setValue(Date date, boolean enterSeconds) {
         // TODO implement variant for browsers using datetime-local instead of two fields
-        if ("time".equals(timeInput.getAttribute("type"))) {
-            this.setValueNative(timeInput, date, enterSeconds ? ISO_TIME_FORMAT_SECONDS : ISO_TIME_FORMAT_MINUTES);
-        } else {
-            this.setValue(timeInput, date, enterSeconds ? TIME_FORMAT_SECONDS : TIME_FORMAT_MINUTES);
-        }
-        
-        if ("date".equals(dateInput.getAttribute("type"))) {
+        if (isFieldOfType(dateInput, "date")) {
             this.setValueNative(dateInput, date, ISO_DATE_FORMAT);
         } else {
             this.setValue(dateInput, date, DATE_FORMAT);
         }
+        
+        if (isFieldOfType(timeInput, "time")) {
+            this.setValueNative(timeInput, date, enterSeconds ? ISO_TIME_FORMAT_SECONDS : ISO_TIME_FORMAT_MINUTES);
+        } else {
+            this.setValue(timeInput, date, enterSeconds ? TIME_FORMAT_SECONDS : TIME_FORMAT_MINUTES);
+        }
+    }
+    
+    private boolean isFieldOfType(WebElement inputToCheck, String type) {
+        return type.equals(inputToCheck.getAttribute("type"));
     }
 
     private void setValue(WebElement input, Date date, DateFormat format) {
