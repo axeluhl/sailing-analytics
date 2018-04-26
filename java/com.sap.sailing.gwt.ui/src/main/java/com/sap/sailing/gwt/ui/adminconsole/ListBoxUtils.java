@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.ListBox;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.SWCRacingProcedure;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -74,7 +75,7 @@ public final class ListBoxUtils {
     
     public static void setupSWCStartmodeFlagsListBox(ListBox box, List<Flags> selectedFlags) {
         // the SWC racing procedure restricts the possible start modes to BLACK and UNIFORM, eliminating INDIA / ZULU combinations as well as PAPA
-        setupFlagsListBox(box, selectedFlags, Flags.BLACK, Flags.UNIFORM);
+        setupFlagsListBox(box, selectedFlags, SWCRacingProcedure.DEFAULT_START_MODE_FLAGS.toArray(new Flags[0]));
     }
 
 }
