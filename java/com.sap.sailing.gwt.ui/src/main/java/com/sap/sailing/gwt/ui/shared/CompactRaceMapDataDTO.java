@@ -9,6 +9,7 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.common.Duration;
@@ -44,7 +45,7 @@ public class CompactRaceMapDataDTO implements IsSerializable {
     
     CompactRaceMapDataDTO() {}
 
-    public CompactRaceMapDataDTO(Map<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions, CoursePositionsDTO coursePositions,
+    public CompactRaceMapDataDTO(Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions, CoursePositionsDTO coursePositions,
            List<SidelineDTO> courseSidelines, QuickRanksDTO quickRanks, long simulationResultVersion, HashSet<String> raceCompetitorIdsAsStrings, Duration estimatedDuration) {
         this.estimatedDuration = estimatedDuration;
         this.boatPositionsByCompetitorIdAsString = new CompactBoatPositionsDTO(boatPositions);
@@ -63,11 +64,11 @@ public class CompactRaceMapDataDTO implements IsSerializable {
         this.simulationResultVersion = simulationResultVersion;
     }
     
-    public RaceMapDataDTO getRaceMapDataDTO(Map<String, CompetitorWithBoatDTO> competitorsByIdAsString) {
+    public RaceMapDataDTO getRaceMapDataDTO(Map<String, CompetitorDTO> competitorsByIdAsString) {
         RaceMapDataDTO result = new RaceMapDataDTO();
         result.quickRanks = new LinkedHashMap<String, QuickRankDTO>(this.quickRanks.size());
         for (CompactQuickRankDTO compactQuickRank : this.quickRanks) {
-            final CompetitorWithBoatDTO competitorDTO = competitorsByIdAsString.get(compactQuickRank.getCompetitorIdAsString());
+            final CompetitorDTO competitorDTO = competitorsByIdAsString.get(compactQuickRank.getCompetitorIdAsString());
             if (competitorDTO != null) {
                 result.quickRanks.put(compactQuickRank.getCompetitorIdAsString(), new QuickRankDTO(competitorDTO, compactQuickRank.getOneBasedRank(), compactQuickRank.getLegNumber()));
             }

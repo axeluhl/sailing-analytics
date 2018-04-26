@@ -30,6 +30,15 @@ public interface CompetitorDTO extends Serializable, MappableToDevice {
 
     String getShortName();
 
+    /**
+     * Returns a derived short information about a competitor depending on the information available. If we have a
+     * {@link #getShortName() short name} set on the competitor this name will be returned. If no short name exist but a
+     * {@link CompetitorWithBoatDTO#getBoat() boat} then either the sailId or the boat name will returned. If all these
+     * attributes have no value, a three-letter acronym is constructed from the name by using the first two and the last letter
+     * of the competitor's {@link #getName() name} unless it's empty in which case an empty string is returned.
+     */
+    String getShortInfo();
+
     Color getColor();
     
     String getEmail();
@@ -46,4 +55,10 @@ public interface CompetitorDTO extends Serializable, MappableToDevice {
     
     boolean hasBoat();
 
+
+    /**
+     * A regular instance will simply return this object. A compacted version may compute the result by looking it up
+     * from the previous version of the enclosing leaderboard.
+     */
+    CompetitorDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion);
 }

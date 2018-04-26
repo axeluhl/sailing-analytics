@@ -105,11 +105,10 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                     break;
                 case 1:
                     mediaSelectionButton.setVisible(true);
-                    if(mediaPlayerManagerComponent.isPlaying()){
+                    if (mediaPlayerManagerComponent.isPlaying()) {
                         caption = stringMessages.mediaHideVideoCaption();
                         tooltip = stringMessages.mediaHideVideoTooltip();
-                    }
-                    else{
+                    } else {
                         caption = stringMessages.mediaShowVideoCaption();
                         tooltip = stringMessages.mediaShowVideoTooltip(mediaPlayerManagerComponent.getAssignedMediaTracks().iterator().next().title);
                     }
@@ -227,7 +226,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         result.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                    multiSelectionControl.show();
+                multiSelectionControl.show();
             }
         });
         // hide button initially as we defer showing the button to the asynchronous

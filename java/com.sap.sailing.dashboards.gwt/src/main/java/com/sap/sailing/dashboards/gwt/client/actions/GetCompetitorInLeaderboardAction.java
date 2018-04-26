@@ -7,7 +7,7 @@ import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardAction;
 import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardDispatchContext;
 import com.sap.sailing.dashboards.gwt.shared.dto.LeaderboardCompetitorsDTO;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
@@ -34,7 +34,7 @@ public class GetCompetitorInLeaderboardAction implements DashboardAction<Leaderb
         LeaderboardCompetitorsDTO result = new LeaderboardCompetitorsDTO();
         Leaderboard lb = dashboardDispatchContext.getRacingEventService().getLeaderboardByName(this.leaderboarName);
         List<Competitor> competitorsFromBestToWorst = lb.getCompetitorsFromBestToWorst(MillisecondsTimePoint.now());
-        List<CompetitorWithBoatDTO> competitorDTOs = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorDTOList(competitorsFromBestToWorst);
+        List<CompetitorDTO> competitorDTOs = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorDTOList(competitorsFromBestToWorst);
         result.setCompetitors(competitorDTOs);
         return result;
     }
