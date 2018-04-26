@@ -10,3 +10,7 @@
 .tableStyle td {
     max-width: 800px;
 }
+
+.checkboxStyle {
+    display: block;
+}

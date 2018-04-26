@@ -14,6 +14,8 @@ import java.nio.channels.Channels;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -45,14 +47,14 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
 
-    // private static final Logger logger = Logger.getLogger(MediaServiceImpl.class.getName());
+    private static final Logger logger = Logger.getLogger(MediaServiceImpl.class.getName());
 
     private static final int METADATA_CONNECTION_TIMEOUT = 10000;
 
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
-    private static final int REQUIRED_SIZE = 1000000;
+    private static final int REQUIRED_SIZE = 10000000;
     private static final long serialVersionUID = -8917349579281305977L;
 
     public MediaServiceImpl() {
@@ -140,12 +142,13 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
             URL input = new URL(url);
             // check size and do rangerequests if possible
             long fileSize = determineFileSize(input);
-            if (fileSize > 0) {
+            if (fileSize > 2 * REQUIRED_SIZE) {
                 response = checkMetadataByPartialDownloads(input, fileSize);
             } else {
                 response = checkMetadataByFullFileDownload(input);
             }
         } catch (Exception e) {
+            logger.log(Level.WARNING, "Error in video analysis ", e);
             response = new VideoMetadataDTO(false, null, false, null, e.getMessage());
         }
         return response;
@@ -228,6 +231,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
                 duration = determineDuration(isof);
             }
         } catch (Exception e) {
+            logger.log(Level.WARNING, "Error in video analysis ", e);
             message = e.getMessage();
         } finally {
             if (tmp != null) {
@@ -304,5 +308,17 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
             }
         }
         return creationTime;
+    }
+
+    @Override
+    public MediaTrack getMediaTrackByUrl(String url) {
+        MediaTrack result = null;
+        for (MediaTrack mtrack : racingEventService().getAllMediaTracks()) {
+            if (url.equals(mtrack.url)) {
+                result = mtrack;
+                break;
+            }
+        }
+        return result;
     }
 }

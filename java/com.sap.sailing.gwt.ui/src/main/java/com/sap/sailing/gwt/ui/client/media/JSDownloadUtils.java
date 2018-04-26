@@ -6,7 +6,7 @@ import com.google.gwt.typedarrays.shared.Int8Array;
  * Helper class to obtain the last and the first REQUIRED_SIZE bytes of a resource defined by a given url. 
  */
 public class JSDownloadUtils {
-    private static final Double REQUIRED_SIZE = 1000000.0;
+    private static final Double REQUIRED_SIZE = 10000000.0;
     
     public interface JSDownloadCallback {
         void progress(Double current, Double total);
@@ -34,7 +34,7 @@ public class JSDownloadUtils {
             
             @Override
             public void size(Double total) {
-                if (total != 0 && total > 0) {
+                if (total != 0 && total > 2 * REQUIRED_SIZE) {
                     //used if range and accept headers are set correctly
                     getDataFast(url, callback, total, REQUIRED_SIZE);
                 } else {
