@@ -90,4 +90,9 @@ public class CompetitorWithBoatDTOImpl extends CompetitorDTOImpl implements Comp
     public BoatDTO getBoat() {
         return boat;
     }    
+
+    @Override
+    public boolean hasBoat() {
+        return getBoat() != null;
+    }
 }

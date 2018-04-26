@@ -43,5 +43,7 @@ public interface CompetitorDTO extends Serializable, MappableToDevice {
     Double getTimeOnTimeFactor();
     
     Duration getTimeOnDistanceAllowancePerNauticalMile();
+    
+    boolean hasBoat();
 
 }
