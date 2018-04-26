@@ -1082,7 +1082,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                                 result.setSelectedFlightNames(editedObject.getSelectedFlightNames());
                                 openPairingListCreationDialog(leaderboardDTO, result);
                             }
-
                         });
             }
 

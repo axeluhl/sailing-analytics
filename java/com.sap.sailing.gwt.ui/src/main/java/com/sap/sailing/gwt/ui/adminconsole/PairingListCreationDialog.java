@@ -228,10 +228,9 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                                             stringMessages, result, sailingService, errorReporter);
                                     dialog.show();
                                 }
-
                             });
                 } catch (Exception exception) {
-                    // TODO show error somehow
+                    errorReporter.reportError(exception.getMessage());
                 }
             }
         });

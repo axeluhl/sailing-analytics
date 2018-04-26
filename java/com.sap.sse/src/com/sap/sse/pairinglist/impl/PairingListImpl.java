@@ -3,6 +3,7 @@ package com.sap.sse.pairinglist.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.pairinglist.CompetitionFormat;
@@ -18,10 +19,11 @@ public class PairingListImpl<Flight, Group, Competitor,CompetitorAllocation> imp
      * @param pList: pairing list with specific information of flights, groups and competitors
      * @param standardDev: describes quality of our pList (the lower the standardDev, the better the pairing list)
      */
-    public PairingListImpl(PairingListTemplate template, CompetitionFormat<Flight, Group, Competitor, CompetitorAllocation> competitionFormat) {
+    public PairingListImpl(PairingListTemplate template, CompetitionFormat<Flight, Group, Competitor, CompetitorAllocation> competitionFormat)
+            throws PairingListCreationException {
         final int numberOfCompetitorAllocations = Util.size(competitionFormat.getCompetitorAllocation());
         if (numberOfCompetitorAllocations < competitionFormat.getMaxNumberOfCompetitorAllocationsNeeded()) {
-            throw new IllegalArgumentException("Too few competitor allocations ("+numberOfCompetitorAllocations+
+            throw new PairingListCreationException("Too few competitor allocations ("+numberOfCompetitorAllocations+
                     "). "+competitionFormat.getMaxNumberOfCompetitorAllocationsNeeded()+" are needed.");
         }
         this.pairingListTemplate = template;

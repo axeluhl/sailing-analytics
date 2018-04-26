@@ -524,6 +524,7 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
@@ -7270,7 +7271,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public PairingListDTO getPairingListFromTemplate(final String leaderboardName, final int flightMultiplier,
             final Iterable<String> selectedRaceColumnNames, PairingListTemplateDTO templateDTO) 
-            throws NotFoundException {
+            throws NotFoundException, PairingListCreationException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         List<RaceColumn> selectedRaces = new ArrayList<RaceColumn>();
         for (String raceColumnName : selectedRaceColumnNames) {

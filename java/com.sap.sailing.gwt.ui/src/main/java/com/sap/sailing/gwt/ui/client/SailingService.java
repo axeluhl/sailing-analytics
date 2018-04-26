@@ -111,6 +111,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
@@ -745,7 +746,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             throws NotFoundException, IllegalArgumentException;
 
     PairingListDTO getPairingListFromTemplate(String leaderboardName, int flightMultiplier,
-            Iterable<String> selectedFlightNames, PairingListTemplateDTO templateDTO) throws NotFoundException;
+            Iterable<String> selectedFlightNames, PairingListTemplateDTO templateDTO) throws NotFoundException, PairingListCreationException;
 
     PairingListDTO getPairingListFromRaceLogs(String leaderboardName) throws NotFoundException;
 
