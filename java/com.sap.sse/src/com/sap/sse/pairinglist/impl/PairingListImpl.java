@@ -36,11 +36,9 @@ public class PairingListImpl<Flight, Group, Competitor,CompetitorAllocation> imp
         final int groupIndex = Util.indexOf(competitionFormat.getGroups(flight), group);
         final int groupCount = Util.size(competitionFormat.getGroups(flight));
         final ArrayList<Integer> competitorIndicesInRace = new ArrayList<>();
-
         for (Integer integer : competitorIndices[flightIndex * groupCount + groupIndex]) {
             competitorIndicesInRace.add(integer);
         }
-        
         final List<Pair<Competitor, CompetitorAllocation>> result = new ArrayList<>();
         for (int slot = 0; slot < competitorIndicesInRace.size(); slot++) {
             final Integer index = competitorIndicesInRace.get(slot);
