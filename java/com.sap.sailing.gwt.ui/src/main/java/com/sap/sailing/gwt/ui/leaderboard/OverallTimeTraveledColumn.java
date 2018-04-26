@@ -13,20 +13,20 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.DataExtractor;
 import com.sap.sse.common.InvertibleComparator;
 import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
 
-public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue {
+public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue<LeaderboardRowDTO> {
     
-    private static final DetailType DETAIL_TYPE = DetailType.TOTAL_TIME_SAILED_IN_SECONDS;
+    private static final DetailType DETAIL_TYPE = DetailType.OVERALL_TOTAL_TIME_SAILED_IN_SECONDS;
 
     private StringMessages stringMessages;
 
     private String columnStyle;
     private String headerStyle;
-    private MinMaxRenderer minmaxRenderer;
+    private MinMaxRenderer<LeaderboardRowDTO> minmaxRenderer;
 
     public OverallTimeTraveledColumn(LeaderboardPanel<?> leaderboardPanel, StringMessages stringMessages, String headerStyle, String columnStyle, String detailHeaderStyle,
             String detailColumnStyle) {
@@ -37,7 +37,7 @@ public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> 
         this.stringMessages = stringMessages;
         this.columnStyle = columnStyle;
         this.headerStyle = headerStyle;
-        this.minmaxRenderer = new MinMaxRenderer(this, getComparator());
+        this.minmaxRenderer = new MinMaxRenderer<LeaderboardRowDTO>(this, getComparator());
     }
 
     @Override
@@ -64,21 +64,21 @@ public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> 
         return result;
     }
     
-    private static class TotalTimeSailedDownwindInSeconds implements LegDetailField<Double> {
+    private static class TotalTimeSailedDownwindInSeconds implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             return row.totalTimeSailedDownwindInSeconds;
         }
     }
     
-    private static class TotalTimeSailedReachingInSeconds implements LegDetailField<Double> {
+    private static class TotalTimeSailedReachingInSeconds implements DataExtractor<Double,LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             return row.totalTimeSailedReachingInSeconds;
         }
     }
 
-    private static class TotalTimeSailedUpwindInSeconds implements LegDetailField<Double> {
+    private static class TotalTimeSailedUpwindInSeconds implements DataExtractor<Double,LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             return row.totalTimeSailedUpwindInSeconds;
@@ -140,7 +140,7 @@ public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> 
 
     @Override
     public void updateMinMax() {
-        minmaxRenderer.updateMinMax(getDisplayedLeaderboardRowsProvider());
+        minmaxRenderer.updateMinMax(getDisplayedLeaderboardRowsProvider().getRowsToDisplay().values());
     }
 
     /**

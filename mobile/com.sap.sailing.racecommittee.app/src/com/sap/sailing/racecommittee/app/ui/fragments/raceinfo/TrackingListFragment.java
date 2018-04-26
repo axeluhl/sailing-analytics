@@ -467,7 +467,7 @@ public class TrackingListFragment extends BaseFragment
         ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
         SharedDomainFactory domainFactory = dataManager.getDataStore().getDomainFactory();
         for (Competitor competitor : getRace().getCompetitors()) {
-            domainFactory.getCompetitorStore().allowCompetitorResetToDefaults(competitor);
+            domainFactory.getCompetitorAndBoatStore().allowCompetitorResetToDefaults(competitor);
         }
 
         final Loader<?> competitorLoader = getLoaderManager()
@@ -575,7 +575,7 @@ public class TrackingListFragment extends BaseFragment
     }
 
     private CompetitorAndBoatStore getCompetitorStore() {
-        return DataManager.create(getActivity()).getDataStore().getDomainFactory().getCompetitorStore();
+        return DataManager.create(getActivity()).getDataStore().getDomainFactory().getCompetitorAndBoatStore();
     }
 
     private CompetitorResultsList<CompetitorResultWithIdImpl> initializeFinishList() {

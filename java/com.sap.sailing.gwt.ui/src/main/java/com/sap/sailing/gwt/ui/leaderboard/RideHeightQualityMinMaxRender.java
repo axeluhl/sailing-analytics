@@ -7,9 +7,9 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 
-public class RideHeightQualityMinMaxRender extends MinMaxRenderer {
+public class RideHeightQualityMinMaxRender extends MinMaxRenderer<LeaderboardRowDTO> {
 
-    public RideHeightQualityMinMaxRender(HasStringAndDoubleValue valueProvider, Comparator<LeaderboardRowDTO> comparator) {
+    public RideHeightQualityMinMaxRender(HasStringAndDoubleValue<LeaderboardRowDTO> valueProvider, Comparator<LeaderboardRowDTO> comparator) {
         super(valueProvider, comparator);
     }
     

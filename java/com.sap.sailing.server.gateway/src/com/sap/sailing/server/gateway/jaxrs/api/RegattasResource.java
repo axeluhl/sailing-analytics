@@ -82,13 +82,13 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurveWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurvesWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DefaultWindTrackJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DetailedBoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DistanceJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverMainCurveWithEstimationDataJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.ManeuverWindJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuversJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkPassingsJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
@@ -190,9 +190,8 @@ public class RegattasResource extends AbstractSailingServerResource {
         } else {
             SeriesJsonSerializer seriesJsonSerializer = new SeriesJsonSerializer(new FleetJsonSerializer(
                     new ColorJsonSerializer()));
-            JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, null);
+            JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, null, null);
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
-
             String json = serializedRegatta.toJSONString();
             response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
@@ -216,9 +215,10 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
             NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
+            BoatJsonSerializer boatJsonSerializer = new BoatJsonSerializer(new BoatClassJsonSerializer());
             CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
-                    new PersonJsonSerializer(nationalityJsonSerializer)), new BoatJsonSerializer(new BoatClassJsonSerializer()));
-            JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(null, competitorJsonSerializer);
+                    new PersonJsonSerializer(nationalityJsonSerializer)), boatJsonSerializer);
+            JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(null, competitorJsonSerializer, boatJsonSerializer);
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
             String json = serializedRegatta.toJSONString();
             response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
@@ -295,7 +295,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 competitorId = competitorIdAsString;
             }
 
-            final Competitor competitor = getService().getCompetitorStore().getExistingCompetitorById(competitorId);
+            final Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
             if (competitor == null) {
                 response = getBadCompetitorIdResponse(competitorId);
             } else {
@@ -328,7 +328,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             final Boat boat = new BoatImpl(UUID.randomUUID(), user.getName(),
                     getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true),
                     sailId);
-            final CompetitorWithBoat competitor = getService().getCompetitorStore().getOrCreateCompetitorWithBoat(UUID.randomUUID(),
+            final CompetitorWithBoat competitor = getService().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(UUID.randomUUID(),
                     user.getFullName() == null ? user.getName() : user.getFullName(), /* shortName */ null,
                     /* displayColor */ null, user.getEmail(), /* flagImageURI */ null,
                     new TeamImpl(user.getName(), Collections.singleton(new PersonImpl(user.getFullName() == null ? user.getName() : user.getFullName(),
@@ -363,7 +363,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 competitorId = competitorIdAsString;
             }
 
-            final Competitor competitor = getService().getCompetitorStore().getExistingCompetitorById(competitorId);
+            final Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
             if (competitor == null) {
                 response = getBadCompetitorIdResponse(competitorId);
             } else {
@@ -1043,11 +1043,11 @@ public class RegattasResource extends AbstractSailingServerResource {
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 CompleteManeuverCurvesWithEstimationDataJsonSerializer serializer = new CompleteManeuverCurvesWithEstimationDataJsonSerializer(
-                        new BoatClassJsonSerializer(),
+                        new DetailedBoatClassJsonSerializer(),
                         new CompleteManeuverCurveWithEstimationDataJsonSerializer(
                                 new ManeuverMainCurveWithEstimationDataJsonSerializer(),
                                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer(),
-                                new ManeuverWindJsonSerializer()));
+                                new WindJsonSerializer(new PositionJsonSerializer()), new PositionJsonSerializer()));
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
                 return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();

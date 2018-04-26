@@ -433,7 +433,7 @@ public class MasterDataImportTest {
 
         // Check for suppressed competitor
         Assert.assertTrue(leaderboardOnTarget.getSuppressedCompetitors().iterator().hasNext());
-        Competitor suppressedCompetitorOnTarget = domainFactory.getCompetitorStore().getExistingCompetitorById(
+        Competitor suppressedCompetitorOnTarget = domainFactory.getCompetitorAndBoatStore().getExistingCompetitorById(
                 competitorToSuppressUUID);
         Assert.assertEquals(suppressedCompetitorOnTarget, leaderboardOnTarget.getSuppressedCompetitors().iterator()
                 .next());
@@ -659,7 +659,7 @@ public class MasterDataImportTest {
 
         Assert.assertTrue(leaderboardOnTarget.getScoreCorrection().hasCorrectionFor(raceColumnOnTarget));
         Competitor competitorOnTarget = domainFactory.getExistingCompetitorById(competitorUUID);
-        Competitor competitorOnTarget2 = domainFactory.getCompetitorStore().getExistingCompetitorById(competitor2UUID);
+        Competitor competitorOnTarget2 = domainFactory.getCompetitorAndBoatStore().getExistingCompetitorById(competitor2UUID);
         Set<Competitor> competitorsCreatedOnTarget = new HashSet<Competitor>();
         competitorsCreatedOnTarget.add(competitorOnTarget);
 
@@ -911,7 +911,7 @@ public class MasterDataImportTest {
         sailors2.add(new PersonImpl("Test Mustermann", new NationalityImpl("GER"), new Date(645487200000L), "desc"));
         DynamicPerson coach2 = new PersonImpl("Max Test", new NationalityImpl("GER"), new Date(645487200000L), "desc");
         DynamicTeam team2 = new TeamImpl("Pros2", sailors2, coach2);
-        Competitor competitor2 = sourceDomainFactory.getCompetitorStore().getOrCreateCompetitor(competitor2UUID,
+        Competitor competitor2 = sourceDomainFactory.getCompetitorAndBoatStore().getOrCreateCompetitor(competitor2UUID,
                 "Froderik", "F", Color.RED, "noone@nowhere.de", null, team2, /* timeOnTimeFactor */null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */
                 null, null);
         competitors.add(competitor2);
@@ -987,7 +987,7 @@ public class MasterDataImportTest {
         Assert.assertNotNull(raceColumnOnTarget);
 
         Assert.assertTrue(leaderboardOnTarget.getScoreCorrection().hasCorrectionFor(raceColumnOnTarget));
-        Competitor competitorOnTarget = domainFactory.getCompetitorStore().getExistingCompetitorById(competitorUUID);
+        Competitor competitorOnTarget = domainFactory.getCompetitorAndBoatStore().getExistingCompetitorById(competitorUUID);
         Set<Competitor> competitorsCreatedOnTarget = new HashSet<Competitor>();
         competitorsCreatedOnTarget.add(competitorOnTarget);
 
@@ -2306,7 +2306,7 @@ public class MasterDataImportTest {
 
         // Check for suppressed competitor
         Assert.assertTrue(leaderboardOnTarget.getSuppressedCompetitors().iterator().hasNext());
-        Competitor suppressedCompetitorOnTarget = domainFactory.getCompetitorStore().getExistingCompetitorById(
+        Competitor suppressedCompetitorOnTarget = domainFactory.getCompetitorAndBoatStore().getExistingCompetitorById(
                 competitorToSuppressUUID);
         Assert.assertEquals(suppressedCompetitorOnTarget, leaderboardOnTarget.getSuppressedCompetitors().iterator()
                 .next());

@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaSingleSelectionControl;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel;
+import com.sap.sailing.gwt.ui.client.shared.racemap.maneuver.ManeuverTablePanel;
 import com.sap.sailing.gwt.ui.raceboard.TouchSplitLayoutPanel.Splitter;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
@@ -80,7 +81,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> rightComponentP,
             final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components,
             final StringMessages stringMessages, UserService userService, EditMarkPassingsPanel markPassingsPanel,
-            EditMarkPositionPanel markPositionPanel) {
+            EditMarkPositionPanel markPositionPanel, ManeuverTablePanel maneuverTablePanel) {
         this.mediaPlayerManagerComponent = mediaPlayerManagerComponent;
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
@@ -103,11 +104,10 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                     break;
                 case 1:
                     mediaSelectionButton.setVisible(true);
-                    if(mediaPlayerManagerComponent.isPlaying()){
+                    if (mediaPlayerManagerComponent.isPlaying()) {
                         caption = stringMessages.mediaHideVideoCaption();
                         tooltip = stringMessages.mediaHideVideoTooltip();
-                    }
-                    else{
+                    } else {
                         caption = stringMessages.mediaShowVideoCaption();
                         tooltip = stringMessages.mediaShowVideoTooltip(mediaPlayerManagerComponent.getAssignedMediaTracks().iterator().next().title);
                     }
@@ -225,7 +225,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         result.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                    multiSelectionControl.show();
+                multiSelectionControl.show();
             }
         });
         // hide button initially as we defer showing the button to the asynchronous

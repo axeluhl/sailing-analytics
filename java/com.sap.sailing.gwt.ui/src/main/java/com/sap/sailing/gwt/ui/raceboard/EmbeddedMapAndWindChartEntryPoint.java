@@ -22,7 +22,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
@@ -127,9 +127,9 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                 if (selectedRaceIdentifier == null) {
                     createErrorPage(getStringMessages().couldNotObtainRace(regattaLikeName, raceColumnName, fleetName, /* technicalErrorMessage */ ""));
                 } else {
-                    sailingService.getCompetitorBoats(selectedRaceIdentifier, new AsyncCallback<Map<CompetitorWithBoatDTO, BoatDTO>>() {
+                    sailingService.getCompetitorBoats(selectedRaceIdentifier, new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
                         @Override
-                        public void onSuccess(Map<CompetitorWithBoatDTO, BoatDTO> result) {
+                        public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
                             createEmbeddedMap(selectedRaceIdentifier, result, raceboardPerspectiveSettings, raceMapSettings, 
                                               showCompetitors, play);
                         }
@@ -162,7 +162,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         // because of the root font-size. Adjustments are postponed because they might affect the hole page content.
     }
 
-    private void createEmbeddedMap(final RegattaAndRaceIdentifier selectedRaceIdentifier, Map<CompetitorWithBoatDTO, BoatDTO> competitorsAndBoats,
+    private void createEmbeddedMap(final RegattaAndRaceIdentifier selectedRaceIdentifier, Map<CompetitorDTO, BoatDTO> competitorsAndBoats,
             final RaceBoardPerspectiveOwnSettings raceboardPerspectiveSettings, final RaceMapSettings raceMapSettings, 
             final boolean showCompetitors, final boolean play) {
         final StringBuilder title = new StringBuilder(regattaLikeName);
@@ -232,11 +232,11 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         timer.setTime(timer.getTime().getTime()-1000l);
     }  
 
-    private RaceCompetitorSelectionProvider createEmptyFilterCompetitorModel(CompetitorColorProvider colorProvider, Map<CompetitorWithBoatDTO, BoatDTO> competitorsAndBoats) {
+    private RaceCompetitorSelectionProvider createEmptyFilterCompetitorModel(CompetitorColorProvider colorProvider, Map<CompetitorDTO, BoatDTO> competitorsAndBoats) {
         final RaceCompetitorSelectionModel result = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider, competitorsAndBoats);
-        final FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> filterSet = result.getOrCreateCompetitorsFilterSet("Empty");
-        filterSet.addFilter(new Filter<CompetitorWithBoatDTO>() {
-            @Override public boolean matches(CompetitorWithBoatDTO object) { return false; }
+        final FilterSet<CompetitorDTO, Filter<CompetitorDTO>> filterSet = result.getOrCreateCompetitorsFilterSet("Empty");
+        filterSet.addFilter(new Filter<CompetitorDTO>() {
+            @Override public boolean matches(CompetitorDTO object) { return false; }
             @Override public String getName() { return "Never matching filter"; }
         });
         return result;

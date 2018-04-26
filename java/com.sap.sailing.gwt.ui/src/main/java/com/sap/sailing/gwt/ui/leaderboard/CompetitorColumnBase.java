@@ -1,15 +1,18 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.Comparator;
+
 import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.common.InvertibleComparator;
 import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 
@@ -47,9 +50,8 @@ public class CompetitorColumnBase<T> {
         return new InvertibleComparatorAdapter<T>() {
             @Override
             public int compare(T o1, T o2) {
-                return competitorFetcher.getCompetitor(o1).getSailID() == null ? competitorFetcher.getCompetitor(o2).getSailID() == null ? 0 : -1
-                        : competitorFetcher.getCompetitor(o2).getSailID() == null ? 1 : Collator.getInstance().compare(
-                                competitorFetcher.getCompetitor(o1).getSailID(), competitorFetcher.getCompetitor(o2).getSailID());
+                return Comparator.<CompetitorDTO>nullsLast((c1, c2)->new NaturalComparator(/* caseSensitive */ false).compare(c1.getShortName(), c2.getShortName())).compare(
+                        competitorFetcher.getCompetitor(o1), competitorFetcher.getCompetitor(o2));
             }
         };
     }

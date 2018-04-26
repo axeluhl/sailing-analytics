@@ -2,8 +2,11 @@ package com.sap.sailing.domain.maneuverdetection;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.Positioned;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 
@@ -15,7 +18,7 @@ import com.sap.sse.datamining.annotations.Dimension;
  * @see CompleteManeuverCurve
  *
  */
-public interface CompleteManeuverCurveWithEstimationData {
+public interface CompleteManeuverCurveWithEstimationData extends Timed, Positioned {
 
     @Dimension(messageKey = "ManeuverType")
     default ManeuverType getManeuverTypeForCompleteManeuverCurve() {
@@ -31,7 +34,12 @@ public interface CompleteManeuverCurveWithEstimationData {
         if (getWind() == null) {
             return ManeuverType.UNKNOWN;
         }
-        return isManeuverStartsByRunningAwayFromTheWind() ? ManeuverType.BEAR_AWAY : ManeuverType.HEAD_UP;
+        return isManeuverStartsByRunningAwayFromWind() ? ManeuverType.BEAR_AWAY : ManeuverType.HEAD_UP;
+    }
+    
+    @Override
+    default TimePoint getTimePoint() {
+        return getMainCurve().getTimePointOfMaxTurningRate();
     }
 
     /**
@@ -73,7 +81,7 @@ public interface CompleteManeuverCurveWithEstimationData {
      *         starts by getting the boat closer to the wind.
      */
     @Dimension(messageKey = "ManeuverStartsByRunningAwayFromTheWind")
-    boolean isManeuverStartsByRunningAwayFromTheWind();
+    boolean isManeuverStartsByRunningAwayFromWind();
 
     /**
      * Gets the relative bearing of the next mark to pass from the boat before the maneuver. The relative bearing is

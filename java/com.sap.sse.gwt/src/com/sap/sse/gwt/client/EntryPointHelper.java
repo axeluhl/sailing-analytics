@@ -2,7 +2,11 @@ package com.sap.sse.gwt.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.user.client.rpc.RpcRequestBuilder;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.sap.sse.gwt.shared.RpcConstants;
 
 public class EntryPointHelper {
     /**
@@ -18,6 +22,13 @@ public class EntryPointHelper {
         String moduleBaseURL = GWT.getModuleBaseURL();
         String baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
         serviceToRegister.setServiceEntryPoint(baseURL + servicePath);
+        serviceToRegister.setRpcRequestBuilder(new RpcRequestBuilder() {
+            @Override
+            protected void doFinish(RequestBuilder rb) {
+                super.doFinish(rb);
+                rb.setHeader(RpcConstants.HEADER_LOCALE, LocaleInfo.getCurrentLocale().getLocaleName());
+            }
+        });
     }
     
     /**

@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.client.celltable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,6 +12,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.view.client.ListDataProvider;
@@ -144,6 +146,13 @@ public class SortedCellTable<T> extends BaseCelltable<T> {
     }
 
     /**
+     * Easy helper to correctly add sortableColumns without that much parameters
+     */
+    public void addColumn(SortableColumn<T, ?> column) {
+        addColumn(column, column.getHeader(), column.getComparator(), column.getPreferredSortingOrder().isAscending());
+    }
+    
+    /**
      * Adds a column to the table and sets its sortable state
      * 
      * @param column
@@ -159,6 +168,14 @@ public class SortedCellTable<T> extends BaseCelltable<T> {
         }
     }
 
+    /**
+     * Allows simpler inserting of a SortableColumn 
+     */
+    public void insertColumn(int beforeIndex, SortableColumn<T, ?> column) {
+        insertColumn(beforeIndex, column, column.getHeader(), column.getComparator(),
+                column.getPreferredSortingOrder().isAscending());
+    }
+    
     public void insertColumn(int beforeIndex, Column<T, ?> column, Header<?> header, InvertibleComparator<T> comparator, boolean ascendingSorting) {
         insertColumn(beforeIndex, column, header);
         column.setSortable(comparator != null);
@@ -229,8 +246,33 @@ public class SortedCellTable<T> extends BaseCelltable<T> {
             currentlySortedColumn = initialSortColumn;
         }
     }
-
+    
+    @Override
+    /**
+     * DO NOT USE! use setList instead, as else the content will not be sorted correctly!
+     */
+    public void setRowData(int start, List<? extends T> values) {
+        super.setRowData(start, values);
+    }
+    
     public ListDataProvider<T> getDataProvider() {
         return dataProvider;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void restoreColumnSortInfos(Column<T, ?> defaultSortColumn) {
+        final ColumnSortList sortList = this.getColumnSortList();
+        final List<ColumnSortInfo> oldSortInfos;
+        if (sortList.size() == 0) {
+            boolean ascending = defaultSortOrderMap.get(defaultSortColumn);
+            comparators.get(defaultSortColumn).setAscending(ascending);
+            oldSortInfos = Collections.singletonList(new ColumnSortInfo(defaultSortColumn, ascending));
+        } else {
+            oldSortInfos = new ArrayList<ColumnSortInfo>(sortList.size());
+            for (int i = sortList.size() - 1; i >= 0; i--) {
+                oldSortInfos.add(sortList.get(i));
+            }
+        }
+        oldSortInfos.forEach(sortInfo -> this.sortColumn((Column<T, ?>) sortInfo.getColumn()));
     }
 }

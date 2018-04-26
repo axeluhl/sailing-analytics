@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sse.util.impl.UUIDHelper;
 
 public class CompetitorWithBoatRefJsonDeserializer extends CompetitorJsonDeserializer {
     private final BoatFactory boatFactory;
@@ -37,7 +38,7 @@ public class CompetitorWithBoatRefJsonDeserializer extends CompetitorJsonDeseria
      * up in the {@link #boatFactory} and the lookup result is returned; otherwise, {@code null} is returned.
      */
     @Override
-    protected DynamicBoat getBoat(JSONObject object) throws ClassNotFoundException, NoSuchMethodException,
+    protected DynamicBoat getBoat(JSONObject object, Serializable defaultId) throws ClassNotFoundException, NoSuchMethodException,
             InstantiationException, IllegalAccessException, InvocationTargetException {
         // if we find a boat identifier we try to find the boat with the boatfactory
         Serializable boatId = (Serializable) object.get(CompetitorJsonConstants.FIELD_BOAT_ID);
@@ -47,7 +48,7 @@ public class CompetitorWithBoatRefJsonDeserializer extends CompetitorJsonDeseria
                 Constructor<?> constructorFromString = boatIdClass.getConstructor(String.class);
                 boatId = (Serializable) constructorFromString.newInstance(boatId.toString());
             } else if (UUID.class.isAssignableFrom(boatIdClass)) {
-                boatId = Helpers.tryUuidConversion(boatId);
+                boatId = UUIDHelper.tryUuidConversion(boatId);
             }
         }
         final DynamicBoat existingBoat = (DynamicBoat) (boatId != null ? boatFactory.getExistingBoatById(boatId) : null);

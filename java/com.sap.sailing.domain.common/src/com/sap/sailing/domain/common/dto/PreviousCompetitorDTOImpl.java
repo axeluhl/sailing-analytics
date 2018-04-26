@@ -9,10 +9,11 @@ import com.sap.sse.common.Duration;
  * @author Axel Uhl (d043530)
  * 
  */
-public class PreviousCompetitorDTOImpl implements CompetitorWithBoatDTO {
+public class PreviousCompetitorDTOImpl implements CompetitorDTO {
     private static final long serialVersionUID = 8820028699103040805L;
     private int indexInPreviousCompetitorList;
 
+    @Deprecated
     PreviousCompetitorDTOImpl() {} // for serialization only
     
     public PreviousCompetitorDTOImpl(int indexInPreviousCompetitorList) {
@@ -47,6 +48,12 @@ public class PreviousCompetitorDTOImpl implements CompetitorWithBoatDTO {
     }
     
     @Override
+    public String getShortInfo() {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
+    }
+
+    @Override
     public String getTwoLetterIsoCountryCode() {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
@@ -71,30 +78,6 @@ public class PreviousCompetitorDTOImpl implements CompetitorWithBoatDTO {
     }
 
     @Override
-    public String getShortInfo() {
-        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
-                " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
-    }
-
-    @Override
-    public String getSailID() {
-        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
-                " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
-    }
-
-    @Override
-    public BoatDTO getBoat() {
-        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
-                " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
-    }
-
-    @Override
-    public void setBoat(BoatDTO boat) {
-        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
-                " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
-    }
-
-    @Override
     public Color getColor() {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
@@ -102,12 +85,6 @@ public class PreviousCompetitorDTOImpl implements CompetitorWithBoatDTO {
 
     @Override
     public String getIdAsString() {
-        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
-                " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
-    }
-
-    @Override
-    public BoatClassDTO getBoatClass() {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
     }
@@ -167,7 +144,13 @@ public class PreviousCompetitorDTOImpl implements CompetitorWithBoatDTO {
     }
 
     @Override
-    public CompetitorWithBoatDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion) {
+    public CompetitorDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion) {
         return previousVersion.competitors.get(indexInPreviousCompetitorList);
+    }
+
+    @Override
+    public boolean hasBoat() {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
     }
 }

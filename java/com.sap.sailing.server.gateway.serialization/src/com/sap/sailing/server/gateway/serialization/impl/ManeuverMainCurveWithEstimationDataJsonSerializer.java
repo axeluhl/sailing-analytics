@@ -10,8 +10,11 @@ import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverMainCurveWithEstimationDataJsonSerializer extends ManeuverCurveBoundariesWithDetailedManeuverLossJsonSerializer {
+public class ManeuverMainCurveWithEstimationDataJsonSerializer
+        extends ManeuverCurveBoundariesWithDetailedManeuverLossJsonSerializer {
 
+    public static final String AVG_TURNING_RATE_IN_DEGREES_PER_SECOND = "avgTurningRateInDegreesPerSecond";
+    public static final String MAX_TURNING_RATE_IN_DEGREES_PER_SECOND = "maxTurningRateInDegreesPerSecond";
     public static final String HIGHEST_SPEED_IN_KNOTS = "highestSpeedInKnots";
     public static final String COURSE_AT_LOWEST_SPEED = "courseAtLowestSpeed";
     public static final String COURSE_AT_HIGHEST_SPEED = "courseAtHighestSpeed";
@@ -26,6 +29,8 @@ public class ManeuverMainCurveWithEstimationDataJsonSerializer extends ManeuverC
         JSONObject result = super.serialize(maneuverBoundaries);
         if (maneuverBoundaries instanceof ManeuverMainCurveWithEstimationData) {
             ManeuverMainCurveWithEstimationData mainCurve = (ManeuverMainCurveWithEstimationData) maneuverBoundaries;
+            result.put(AVG_TURNING_RATE_IN_DEGREES_PER_SECOND, mainCurve.getAvgTurningRateInDegreesPerSecond());
+            result.put(MAX_TURNING_RATE_IN_DEGREES_PER_SECOND, mainCurve.getMaxTurningRateInDegreesPerSecond());
             result.put(HIGHEST_SPEED_IN_KNOTS, mainCurve.getHighestSpeed().getKnots());
             result.put(COURSE_AT_LOWEST_SPEED, mainCurve.getLowestSpeed().getBearing().getDegrees());
             result.put(COURSE_AT_HIGHEST_SPEED, mainCurve.getHighestSpeed().getBearing().getDegrees());

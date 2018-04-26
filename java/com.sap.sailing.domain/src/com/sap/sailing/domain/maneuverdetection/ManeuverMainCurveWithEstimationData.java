@@ -2,7 +2,6 @@ package com.sap.sailing.domain.maneuverdetection;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.annotations.Statistic;
 
@@ -13,7 +12,7 @@ import com.sap.sse.datamining.annotations.Statistic;
  * @author Vladislav Chumak (D069712)
  *
  */
-public interface ManeuverMainCurveWithEstimationData extends ManeuverCurveBoundaries, HasDetailedManeuverLoss {
+public interface ManeuverMainCurveWithEstimationData extends ManeuverCurveBoundariesWithDetailedManeuverLoss {
 
     /**
      * Gets the lowest speed measured within the main curve with corresponding course.

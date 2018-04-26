@@ -154,7 +154,7 @@ public interface MongoObjectFactory {
      * Like {@link #storeBoat(Boat)}, but for a collection of boats that are all
      * expected to be new, having a unique {@link Boat#getId() ID}.
      */
-    void storeBoats(Iterable<Boat> boats);
+    void storeBoats(Iterable<? extends Boat> boats);
 
     void removeAllBoats();
 

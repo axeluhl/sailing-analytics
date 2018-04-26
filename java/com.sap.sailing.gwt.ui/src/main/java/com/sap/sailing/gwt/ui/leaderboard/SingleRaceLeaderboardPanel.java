@@ -8,18 +8,19 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettingsDialogComponent;
-import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -66,11 +67,12 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
             CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
-            boolean enableSyncScroller,LeaderBoardStyle style, FlagImageResolver flagImageResolver) {
+            boolean enableSyncScroller,LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
                 timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails,
                 competitorSearchTextBox, showSelectionCheckbox, optionalRaceTimesInfoProvider, autoExpandLastRaceColumn,
-                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller,style, flagImageResolver);
+                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller, style,
+                flagImageResolver, availableDetailTypes);
         assert preSelectedRace != null;
         this.preSelectedRace = preSelectedRace;
         this.showRaceRankColumn = settings.isShowRaceRankColumn();
@@ -134,10 +136,9 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
             }
         }
         if (singleRaceColumn != null) {
-            for (CompetitorWithBoatDTO competitor: leaderboard.competitors) {
+            for (CompetitorDTO competitor : leaderboard.competitors) {
                 BoatDTO boatOfCompetitor = leaderboard.getBoatOfCompetitor(singleRaceColumn.getRaceColumnName(), competitor);
                 raceCompetitorSelection.setBoat(competitor, boatOfCompetitor);
-                
                 LeaderboardRowDTO leaderboardRowDTO = leaderboard.rows.get(competitor);
                 leaderboardRowDTO.boat = boatOfCompetitor; 
             }
@@ -163,12 +164,12 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     }
     
     @Override
-    public String getCompetitorColor(CompetitorWithBoatDTO competitor) {
+    public String getCompetitorColor(CompetitorDTO competitor) {
         return getRaceCompetitorSelection().getColor(competitor, preSelectedRace).getAsHtml();
     }
 
     @Override
-    public boolean renderBoatColorIfNecessary(CompetitorWithBoatDTO competitor, SafeHtmlBuilder sb) {
+    public boolean renderBoatColorIfNecessary(CompetitorDTO competitor, SafeHtmlBuilder sb) {
         boolean showBoatColor = !isShowCompetitorFullName() && isEmbedded;
         if (showBoatColor) {
             String competitorColor = getRaceCompetitorSelection().getColor(competitor, preSelectedRace).getAsHtml();
@@ -198,7 +199,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
             raceRankFilter.setQuickRankProvider(this.competitorFilterPanel.getQuickRankProvider());
             raceRankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
             raceRankFilter.setValue(maxRaceRank);
-            FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> activeFilterSet = competitorSelectionProvider
+            FilterSet<CompetitorDTO, Filter<CompetitorDTO>> activeFilterSet = competitorSelectionProvider
                     .getOrCreateCompetitorsFilterSet(stringMessages.topNCompetitorsByRaceRank(maxRaceRank));
             activeFilterSet.addFilter(raceRankFilter);
             competitorSelectionProvider.setCompetitorsFilterSet(activeFilterSet);
@@ -245,11 +246,11 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
      * the race identified by {@link #preSelectedRace} otherwise.
      */
     @Override
-    public Map<CompetitorWithBoatDTO, LeaderboardRowDTO> getRowsToDisplay() {
-        Map<CompetitorWithBoatDTO, LeaderboardRowDTO> result;
-        Iterable<CompetitorWithBoatDTO> allFilteredCompetitors = competitorSelectionProvider.getFilteredCompetitors();
-        result = new HashMap<CompetitorWithBoatDTO, LeaderboardRowDTO>();
-        for (CompetitorWithBoatDTO competitorInPreSelectedRace : getCompetitors(preSelectedRace)) {
+    public Map<CompetitorDTO, LeaderboardRowDTO> getRowsToDisplay() {
+        Map<CompetitorDTO, LeaderboardRowDTO> result;
+        Iterable<CompetitorDTO> allFilteredCompetitors = competitorSelectionProvider.getFilteredCompetitors();
+        result = new HashMap<>();
+        for (CompetitorDTO competitorInPreSelectedRace : getCompetitors(preSelectedRace)) {
             if (Util.contains(allFilteredCompetitors, competitorInPreSelectedRace)) {
                 result.put(competitorInPreSelectedRace, leaderboard.rows.get(competitorInPreSelectedRace));
             }
@@ -260,7 +261,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     @Override
     public SettingsDialogComponent<SingleRaceLeaderboardSettings> getSettingsDialogComponent(
             SingleRaceLeaderboardSettings useTheseSettings) {
-        return new SingleRaceLeaderboardSettingsDialogComponent(useTheseSettings, stringMessages);
+        return new SingleRaceLeaderboardSettingsDialogComponent(useTheseSettings, stringMessages, availableDetailTypes);
     }
 
     @Override
@@ -297,7 +298,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
             if(raceColumn.race == null){
                 return -1;
             }
-            List<CompetitorWithBoatDTO> competitorsSorted = getLeaderboard().getCompetitorsFromBestToWorst(raceColumn.race);
+            List<CompetitorDTO> competitorsSorted = getLeaderboard().getCompetitorsFromBestToWorst(raceColumn.race);
             int raceRank = -1;
             for (int i = 0; i < competitorsSorted.size(); i++) {
                 if (object.competitor.equals(competitorsSorted.get(i))) {
@@ -332,4 +333,5 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
         super.updateSettings(newSettings);
         showRaceRankColumn = newSettings.isShowRaceRankColumn();
     }
+
 }

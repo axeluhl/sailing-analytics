@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.pairinglist.CompetitionFormat;
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
@@ -100,7 +101,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
     @Override
     public <Flight, Group, Competitor, CompetitorAllocation> PairingList<Flight, Group, Competitor, CompetitorAllocation> createPairingList(
-            CompetitionFormat<Flight, Group, Competitor, CompetitorAllocation> competitionFormat) {
+            CompetitionFormat<Flight, Group, Competitor, CompetitorAllocation> competitionFormat) throws PairingListCreationException {
         return new PairingListImpl<>(this, competitionFormat);
     }
 

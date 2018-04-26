@@ -14,6 +14,7 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.SWCRacingProcedure;
 import com.sap.sailing.domain.base.configuration.procedures.SWCStartConfiguration;
+import com.sap.sailing.domain.common.SWCRacingProcedureConstants;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -51,7 +52,7 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
         if (!hasRecall) {
             return false;
         } else if (startmodeFlagHasBeenSet()) {
-            return cachedStartmodeFlag != Flags.BLACK;
+            return cachedStartmodeFlag != Flags.BLACK && cachedStartmodeFlag != Flags.UNIFORM;
         } else {
             return hasRecall;
         }
@@ -182,7 +183,7 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
 
     @Override
     public List<Flags> getDefaultStartModeFlags() {
-        return SWCRacingProcedure.DEFAULT_START_MODE_FLAGS;
+        return SWCRacingProcedureConstants.DEFAULT_START_MODE_FLAGS;
     }
 
     @Override

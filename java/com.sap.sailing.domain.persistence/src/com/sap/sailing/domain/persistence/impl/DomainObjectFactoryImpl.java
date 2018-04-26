@@ -158,6 +158,8 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -261,6 +263,7 @@ import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
 import com.sap.sse.util.ThreadPoolUtil;
+import com.sap.sse.util.impl.UUIDHelper;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -428,7 +431,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 () -> (RegattaLeaderboard) leaderboardRegistry.getLeaderboardByName(wrappedRegattaLeaderboardName),
                 leaderboardName);
         for (Object eliminatedCompetitorId : eliminatedCompetitorIds) {
-            Competitor eliminatedCompetitor = baseDomainFactory.getCompetitorStore()
+            Competitor eliminatedCompetitor = baseDomainFactory.getCompetitorAndBoatStore()
                     .getExistingCompetitorById((Serializable) eliminatedCompetitorId);
             if (eliminatedCompetitor == null) {
                 logger.warning("Couldn't find eliminated competitor with ID " + eliminatedCompetitorId);
@@ -1624,7 +1627,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogEvent loadRaceLogRevokeEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors,
             DBObject dbObject) {
-        Serializable revokedEventId = Helpers
+        Serializable revokedEventId = UUIDHelper
                 .tryUuidConversion((Serializable) dbObject.get(FieldNames.RACE_LOG_REVOKED_EVENT_ID.name()));
         String revokedEventType = (String) dbObject.get(FieldNames.RACE_LOG_REVOKED_EVENT_TYPE.name());
         String revokedEventShortInfo = (String) dbObject.get(FieldNames.RACE_LOG_REVOKED_EVENT_SHORT_INFO.name());
@@ -1633,25 +1636,29 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 revokedEventType, revokedEventShortInfo, reason);
     }
 
-    private int secondLeagueBoatCounter = 0;
     private Pair<RaceLogEvent, Optional<DBObject>> loadRaceLogRegisterCompetitorEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors,
             DBObject dbObject) {
         final RaceLogRegisterCompetitorEvent result;
         final Serializable competitorId = (Serializable) dbObject.get(FieldNames.RACE_LOG_COMPETITOR_ID.name());
         final Serializable boatId = (Serializable) dbObject.get(FieldNames.RACE_LOG_BOAT_ID.name());
+        final Boat boat = baseDomainFactory.getCompetitorAndBoatStore().getExistingBoatById(boatId);
         // legacy RaceLogRegisterCompetitorEvent's do not have a boatId, it's expected that the
         // corresponding competitors have the type CompetitorWithBoat
-        Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
+        Competitor competitor = baseDomainFactory.getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
         final Optional<DBObject> dbObjectForUpdate;
         if (competitor == null) {
             logger.severe("Competitor with ID "+competitorId+" not found; can't register with boat with ID "+boatId+" for race");
             result = null; // the competitor wasn't found
             dbObjectForUpdate = Optional.empty();
         } else if (boatId == null) {
-            final Boat boat;
-            if (competitor.hasBoat() && (boat=((CompetitorWithBoat) competitor).getBoat()) != null) {
-                result = new RaceLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, passId, competitor, boat);
+            if (competitor.hasBoat()) {
+                // bug4520: this is dangerous if the competitor is migrated later because a TracTrac event with
+                // dedicated boat mappings is found that includes this competitor. In this case, the Boat that is
+                // referenced here will be removed from the competitor *and* from the DB. An orphaned copy will
+                // remain in the RaceLogRegisterCompetitorEventImpl object created here, but when loading this object
+                // from the DB the next time the boat ID cannot be resolved anymore.
+                result = new RaceLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, passId, competitor, ((CompetitorWithBoat) competitor).getBoat());
             } else {
                 logger.warning("Bug2822: Competitor with ID "+competitorId+" already seems to have been migrated to one without boat."+
                         " But the RaceLogRegisterCompetitorEventImpl event loaded does not specify one either. We'll try to find a boat...");
@@ -1659,24 +1666,52 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 // which is the only case we know of where a few events had boat metadata provided by TracTrac, and other events
                 // were tracked using smartphones. We will simply look for the boats of that season that we know the IDs of
                 // and cycle through them, six by six, assuming that regatta loading does not happen in parallel
-                final String auxiliaryBoatId = "b2567e08-26d9-45c1-b5e0-8c410c8db18b#"+(secondLeagueBoatCounter++ % 6 + 1);
-                result = createRaceLogRegisterCompetitorEventImpl(createdAt, author, logicalTimePoint, id, passId, auxiliaryBoatId, competitor);
+                result = createBoatForSecondGermanLeague2017(createdAt, author, logicalTimePoint, id, passId, competitor);
             }
-            // now update the event in the DB:
-            dbObject.put(FieldNames.RACE_LOG_BOAT_ID.name(), result.getBoat().getId());
-            dbObjectForUpdate = Optional.of(dbObject);
+            dbObjectForUpdate = requestBoatIdUpdateInDB(dbObject, result);
+        } else if (boat == null) {
+            logger.warning("Bug2822: Competitor with ID "+competitorId+" references boat with ID "+boatId+
+                    " which wasn't found; assigning a boat from the 2nd German Sailing League 2017 season and updating this "+
+                    getClass().getName()+" event with ID "+id+" in the DB");
+            // the a boat was referenced by a non-null boatId, but the boat was not found; this would most likely mean
+            // that an earlier migration first loaded and migrated the RaceLogRegisterCompetitorEventImpl event, using the
+            // competitor's own boat with its ID, and later the competitor was migrated, clearing and removing its boat.
+            // The only case we know of is that of a smartphone-tracked league-style event where no boats were modeled for
+            // the smartphone-tracked event but for later events TracTrac tags provided boat data, leading to competitor migration.
+            // The only known leaderboards are the first two 2. Bundesliga events of 2017, so same as above: we map the competitors
+            // cyclically to the six boats used in that season.
+            result = createBoatForSecondGermanLeague2017(createdAt, author, logicalTimePoint, id, passId, competitor);
+            dbObjectForUpdate = requestBoatIdUpdateInDB(dbObject, result);
         } else {
-            result = createRaceLogRegisterCompetitorEventImpl(createdAt, author, logicalTimePoint, id, passId, boatId, competitor);
+            result = createRaceLogRegisterCompetitorEventImpl(createdAt, author, logicalTimePoint, id, passId, boat, competitor);
             dbObjectForUpdate = Optional.empty();
         }
         return new Pair<>(result, dbObjectForUpdate);
     }
 
+    private Optional<DBObject> requestBoatIdUpdateInDB(DBObject dbObject, final RaceLogRegisterCompetitorEvent result) {
+        final Optional<DBObject> dbObjectForUpdate;
+        // now update the event in the DB:
+        dbObject.put(FieldNames.RACE_LOG_BOAT_ID.name(), result.getBoat().getId());
+        dbObjectForUpdate = Optional.of(dbObject);
+        return dbObjectForUpdate;
+    }
+
+    private int secondLeagueBoatCounter = 0;
+    /**
+     * map the competitors cyclically to the six boats used in the 2017 season of the 2. Segelbundesliga
+     */
+    private RaceLogRegisterCompetitorEvent createBoatForSecondGermanLeague2017(TimePoint createdAt, AbstractLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, Integer passId, Competitor competitor) {
+        final String auxiliaryBoatId = "b2567e08-26d9-45c1-b5e0-8c410c8db18b#"+(secondLeagueBoatCounter++ % 6 + 1);
+        final Boat auxiliaryBoat = baseDomainFactory.getCompetitorAndBoatStore().getExistingBoatById(auxiliaryBoatId);
+        return createRaceLogRegisterCompetitorEventImpl(createdAt, author, logicalTimePoint, id, passId, auxiliaryBoat, competitor);
+    }
+    
     private RaceLogRegisterCompetitorEvent createRaceLogRegisterCompetitorEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, Integer passId, Serializable boatId, Competitor competitor) {
+            TimePoint logicalTimePoint, Serializable id, Integer passId, Boat boat, Competitor competitor) {
         final RaceLogRegisterCompetitorEvent result;
         // a boat was explicitly specified; use it
-        Boat boat = baseDomainFactory.getCompetitorStore().getExistingBoatById(boatId);
         if (boat != null) {
             result = new RaceLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, passId, competitor, boat);
         } else {
@@ -1851,7 +1886,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         List<Competitor> competitors = new ArrayList<Competitor>();
         for (Object object : dbCompetitorList) {
             Serializable competitorId = (Serializable) object;
-            Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
+            Competitor competitor = baseDomainFactory.getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
             competitors.add(competitor);
         }
         return competitors;
@@ -2011,13 +2046,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private Competitor getCompetitorByID(DBObject dbObject) {
         Serializable competitorId = (Serializable) dbObject.get(FieldNames.REGATTA_LOG_COMPETITOR_ID.name());
-        Competitor comp = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
+        Competitor comp = baseDomainFactory.getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
         return comp;
     }
 
     private Boat getBoatByID(DBObject dbObject) {
         Serializable boatId = (Serializable) dbObject.get(FieldNames.REGATTA_LOG_BOAT_ID.name());
-        Boat boat = baseDomainFactory.getCompetitorStore().getExistingBoatById(boatId);
+        Boat boat = baseDomainFactory.getCompetitorAndBoatStore().getExistingBoatById(boatId);
         return boat;
     }
 
@@ -2042,7 +2077,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private RegattaLogRevokeEvent loadRegattaLogRevokeEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
-        Serializable revokedEventId = Helpers
+        Serializable revokedEventId = UUIDHelper
                 .tryUuidConversion((Serializable) dbObject.get(FieldNames.REGATTA_LOG_REVOKED_EVENT_ID.name()));
         String revokedEventType = (String) dbObject.get(FieldNames.REGATTA_LOG_REVOKED_EVENT_TYPE.name());
         String revokedEventShortInfo = (String) dbObject.get(FieldNames.REGATTA_LOG_REVOKED_EVENT_SHORT_INFO.name());
@@ -2090,7 +2125,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RegattaLogCloseOpenEndedDeviceMappingEvent loadRegattaLogCloseOpenEndedDeviceMappingEvent(
             TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
             DBObject dbObject) {
-        Serializable deviceMappingEventId = Helpers
+        Serializable deviceMappingEventId = UUIDHelper
                 .tryUuidConversion((Serializable) dbObject.get(FieldNames.REGATTA_LOG_DEVICE_MAPPING_EVENT_ID.name()));
         TimePoint closingTimePointInclusive = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
         return new RegattaLogCloseOpenEndedDeviceMappingEventImpl(createdAt, author, logicalTimePoint, id,
@@ -2158,7 +2193,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject) {
         return this.loadRegattaLogDeviceMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
                 regattaLogIdentifier, outerDBObject,
-                () -> baseDomainFactory.getCompetitorStore()
+                () -> baseDomainFactory.getCompetitorAndBoatStore()
                         .getExistingBoatById((Serializable) dbObject.get(FieldNames.RACE_LOG_BOAT_ID.name())),
                 RegattaLogDeviceBoatMappingEventImpl::new,
                 result -> new MongoObjectFactoryImpl(database, serviceFinderFactory)
@@ -2393,13 +2428,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Collection<Competitor> loadAllCompetitors() {
-        Map<Serializable, Competitor> competitorsById = new HashMap<>();
+    public Collection<DynamicCompetitor> loadAllCompetitors() {
+        Map<Serializable, DynamicCompetitor> competitorsById = new HashMap<>();
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         try {
             for (DBObject o : collection.find()) {
                 JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
-                Competitor c = competitorWithBoatRefDeserializer.deserialize(json);
+                DynamicCompetitor c = competitorWithBoatRefDeserializer.deserialize(json);
                 // ensure that in case there should be multiple competitors with equal IDs in the DB
                 // only one will survive
                 if (competitorsById.containsKey(c.getId())) {
@@ -2455,13 +2490,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Collection<Boat> loadAllBoats() {
-        ArrayList<Boat> result = new ArrayList<Boat>();
+    public Collection<DynamicBoat> loadAllBoats() {
+        ArrayList<DynamicBoat> result = new ArrayList<>();
         DBCollection collection = database.getCollection(CollectionNames.BOATS.name());
         try {
             for (DBObject o : collection.find()) {
                 JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
-                Boat b = boatDeserializer.deserialize(json);
+                DynamicBoat b = boatDeserializer.deserialize(json);
                 result.add(b);
             }
         } catch (Exception e) {

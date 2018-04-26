@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.jaxrs.api.AbstractLeaderboardsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.EventsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardGroupsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
@@ -159,7 +160,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
     
     private Response getLeaderboard(String name) {
-        return leaderboardsResource.getLeaderboard(name, LeaderboardsResource.ResultStates.Final, null);
+        return leaderboardsResource.getLeaderboard(name, AbstractLeaderboardsResource.ResultStates.Final, null);
     }
     
     private boolean hasAtLeastOneCourseArea(JSONObject objEvent) {
