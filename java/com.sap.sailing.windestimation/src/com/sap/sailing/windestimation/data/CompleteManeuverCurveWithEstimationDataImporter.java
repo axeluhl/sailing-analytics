@@ -6,6 +6,10 @@ import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +29,7 @@ import org.json.simple.parser.ParseException;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class SapSailingDataImporter {
+public class CompleteManeuverCurveWithEstimationDataImporter {
 
     public static final String REST_API_BASE_URL = "http://127.0.0.1:8888/sailingserver/api/v1";
     public static final String REST_API_REGATTAS_PATH = "/regattas";
@@ -33,29 +37,52 @@ public class SapSailingDataImporter {
     public static final String REST_API_ESTIMATION_DATA_PATH = "/completeManeuverCurvesWithEstimationData";
     private final HttpClient client;
     private final PersistenceManager persistanceManager;
+    private final DateTimeFormatter logTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public SapSailingDataImporter() throws UnknownHostException {
+    public CompleteManeuverCurveWithEstimationDataImporter() throws UnknownHostException {
         this.client = new SystemDefaultHttpClient();
         this.persistanceManager = new PersistenceManager();
     }
 
     public static void main(String[] args) throws Exception {
-        SapSailingDataImporter importer = new SapSailingDataImporter();
+        CompleteManeuverCurveWithEstimationDataImporter importer = new CompleteManeuverCurveWithEstimationDataImporter();
         importer.importAllRegattas();
     }
 
     public void importAllRegattas()
             throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
+        logInfo("Importer for CompleteManeuverCurveWithEstimationData just started");
+        logInfo("Dropping old database");
         persistanceManager.dropDb();
+        logInfo("Fetching all existing regatta names");
+        ImportStatistics importStatistics = new ImportStatistics();
         HttpGet getAllRegattas = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH);
-        Object regattasJson = getJsonFromResponse(client.execute(getAllRegattas));
-        for (Object regattaJson : (JSONArray) regattasJson) {
+        JSONArray regattasJson = (JSONArray) getJsonFromResponse(client.execute(getAllRegattas));
+        logInfo(regattasJson.size() + " regatta names have been fetched");
+        int i = 0;
+        for (Object regattaJson : regattasJson) {
             String regattaName = (String) ((JSONObject) regattaJson).get("name");
-            importRegatta(regattaName);
+            logInfo("Processing regatta nr. " + ++i + ": \"" + regattaName + "\"");
+            importRegatta(regattaName, importStatistics);
         }
+        logInfo("Import finished");
+        importStatistics.regattasCount = regattasJson.size();
+        logImportStatistics(importStatistics);
     }
 
-    private void importRegatta(String regattaName)
+    private void logImportStatistics(ImportStatistics importStatistics) {
+        Duration duration = Duration.between(importStatistics.startTime, LocalDateTime.now());
+        logInfo("Import statistics: \n\t" + importStatistics.regattasCount + " Regattas\n\t"
+                + importStatistics.racesCount + " Races\n\t" + importStatistics.competitorTracksCount
+                + " Competitor tracks\n\t" + importStatistics.maneuversCount
+                + " complete maneuver curves with estimation data\n--------------------------------------------\nTime passed: " + duration.get(ChronoUnit.HOURS) + "h " + duration.get(ChronoUnit.MINUTES) + "m " + duration.get(ChronoUnit.SECONDS) + "s");
+    }
+
+    private void logInfo(String logMessage) {
+        System.out.println(logTimeFormatter.format(LocalDateTime.now()) + " " + logMessage);
+    }
+
+    private void importRegatta(String regattaName, ImportStatistics importStatistics)
             throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         String encodedRegattaName = encodeUrlPathPart(regattaName);
         HttpGet getRegatta = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH + "/" + encodedRegattaName);
@@ -64,14 +91,19 @@ public class SapSailingDataImporter {
             JSONObject trackedRaces = (JSONObject) ((JSONObject) seriesJson).get("trackedRaces");
             JSONArray fleets = (JSONArray) trackedRaces.get("fleets");
             for (Object fleetJson : fleets) {
-                for (Object raceJson : (JSONArray) ((JSONObject) fleetJson).get("races")) {
+                JSONArray racesJson = (JSONArray) ((JSONObject) fleetJson).get("races");
+                logInfo("Regatta contains " + racesJson.size() + " races");
+                for (Object raceJson : racesJson) {
                     JSONObject race = (JSONObject) raceJson;
+                    int i = 0;
                     if ((boolean) race.get("isTracked") && !(boolean) race.get("isLive")
                             && (boolean) race.get("hasGpsData") && (boolean) race.get("hasWindData")) {
                         String trackedRaceName = (String) race.get("trackedRaceName");
-                        importRace(regattaName, trackedRaceName);
+                        logInfo("Processing race nr. " + ++i + ": \"" + trackedRaceName + "\"");
+                        importRace(regattaName, trackedRaceName, importStatistics);
                     }
                 }
+                importStatistics.racesCount += racesJson.size();
             }
         }
     }
@@ -79,11 +111,11 @@ public class SapSailingDataImporter {
     private String encodeUrlPathPart(String urlPathPart) throws URISyntaxException {
         URI uri = new URI("http", "a.com", "/" + urlPathPart, null, null);
         String encodedUrlPath = uri.toString().substring("http://a.com/".length());
-        String encodedUrlPathPart = encodedUrlPath.replaceAll("\\/", "%2F");
+        String encodedUrlPathPart = encodedUrlPath.replaceAll("\\/", "__");
         return encodedUrlPathPart;
     }
 
-    private void importRace(String regattaName, String trackedRaceName)
+    private void importRace(String regattaName, String trackedRaceName, ImportStatistics importStatistics)
             throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         String encodedRegattaName = encodeUrlPathPart(regattaName);
         String encodedRaceName = encodeUrlPathPart(trackedRaceName);
@@ -91,14 +123,19 @@ public class SapSailingDataImporter {
                 + REST_API_RACES_PATH + "/" + encodedRaceName + REST_API_ESTIMATION_DATA_PATH);
         JSONObject resultJson = (JSONObject) getJsonFromResponse(client.execute(getEstimationData));
         List<JSONObject> competitorTracks = new ArrayList<>();
+        int maneuversCount = 0;
         for (Object competitorTrackJson : (JSONArray) resultJson.get("bycompetitor")) {
             JSONObject competitorTrack = (JSONObject) competitorTrackJson;
             JSONArray maneuverCurves = (JSONArray) competitorTrack.get("maneuverCurves");
             if (!maneuverCurves.isEmpty()) {
                 competitorTracks.add(competitorTrack);
+                maneuversCount += maneuverCurves.size();
             }
         }
         persistanceManager.addRace(regattaName, trackedRaceName, competitorTracks);
+        logInfo("Imported " + competitorTracks.size() + " competitor tracks with " + maneuversCount + " maneuvers");
+        importStatistics.competitorTracksCount += competitorTracks.size();
+        importStatistics.maneuversCount += maneuversCount;
     }
 
     // FIXME duplicated code taken from ConnectivityUtils
@@ -115,6 +152,14 @@ public class SapSailingDataImporter {
         Object json = jsonParser.parse(reader);
         reader.close();
         return json;
+    }
+
+    private static class ImportStatistics {
+        private LocalDateTime startTime = LocalDateTime.now();
+        private int regattasCount = 0;
+        private int racesCount = 0;
+        private int competitorTracksCount = 0;
+        private int maneuversCount = 0;
     }
 
 }
