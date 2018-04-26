@@ -14,7 +14,7 @@ public class DateInput extends AbstractInput {
      * Created a new {@link DateInput} instance.
      */
     public DateInput() {
-        super(DateTimeInputType.TIME.isSupported() ? NativeDateTimeInput.date() : new CustomDateBox());
+        super(DateTimeInputType.DATE.isSupported() ? NativeDateTimeInput.date() : new CustomDateBox());
     }
 
     private static class CustomDateBox extends DateBox {
