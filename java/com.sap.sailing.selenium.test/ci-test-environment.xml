@@ -44,12 +44,28 @@
         <name>webdriver.enable.native.events </name>
         <value>true</value>
      </system-property>
-  <!--
+     <!--
+        You need geckodriver to be able to run Selenium tests on Firefox.
+        This is the path to geckodriver, not FireFox.
+     -->
+     <!--
+     <system-property>
+        <name>webdriver.gecko.driver</name>
+        <value>/path/to/geckodriver</value>
+     </system-property>
+     -->
+     <!--
+        geckodriver automatically finds an installed version of Firefox.
+        If no Firefox is installed on the system or another version should be used,
+        the property "webdriver.firefox.bin" may be set to specify the path.
+        The default on Windows is "C:\Program Files\Mozilla Firefox\firefox.exe"
+      -->
+     <!--
      <system-property>
         <name>webdriver.firefox.bin</name>
-        <value>[path to]\firefox.exe</value>
+        <value>path/to/firefox</value> 
      </system-property>
-  -->
+      -->
   </system-properties>
   
   <!--
