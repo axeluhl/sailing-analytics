@@ -44,17 +44,13 @@ public class DateAndTimeInputPO extends PageArea {
      */
     public void setValue(Date date, boolean enterSeconds) {
         // TODO implement variant for browsers using datetime-local instead of two fields
-        JavascriptExecutor javascriptExecutor = ((JavascriptExecutor) driver);
-        
-        final String timeInputfieldType = (String) javascriptExecutor.executeScript("return arguments[0].type", timeInput);
-        if ("time".equals(timeInputfieldType)) {
+        if ("time".equals(timeInput.getAttribute("type"))) {
             this.setValueNative(timeInput, date, enterSeconds ? ISO_TIME_FORMAT_SECONDS : ISO_TIME_FORMAT_MINUTES);
         } else {
             this.setValue(timeInput, date, enterSeconds ? TIME_FORMAT_SECONDS : TIME_FORMAT_MINUTES);
         }
         
-        final String dateInputfieldType = (String) javascriptExecutor.executeScript("return arguments[0].type", dateInput);
-        if ("date".equals(dateInputfieldType)) {
+        if ("date".equals(dateInput.getAttribute("type"))) {
             this.setValueNative(dateInput, date, ISO_DATE_FORMAT);
         } else {
             this.setValue(dateInput, date, DATE_FORMAT);
@@ -71,11 +67,7 @@ public class DateAndTimeInputPO extends PageArea {
     private void setValueNative(WebElement input, Date date, DateFormat format) {
         final String value = format.format(date);
         final JavascriptExecutor javascriptExecutor = ((JavascriptExecutor) driver);
-        javascriptExecutor.executeScript("return arguments[0].value = arguments[1]", dateInput, value);
-//        String textValue = input.getText();
-//        input.clear();
-//        input.sendKeys(textValue);
-//        input.sendKeys("\t"); // ensure popup closing!
+        javascriptExecutor.executeScript("arguments[0].value = arguments[1];", input, value);
     }
 
     public static DateAndTimeInputPO create(WebDriver driver, WebElement element) {
