@@ -72,10 +72,12 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
 
     private void logImportStatistics(ImportStatistics importStatistics) {
         Duration duration = Duration.between(importStatistics.startTime, LocalDateTime.now());
-        logInfo("Import statistics: \n\t" + importStatistics.regattasCount + " Regattas\n\t"
-                + importStatistics.racesCount + " Races\n\t" + importStatistics.competitorTracksCount
-                + " Competitor tracks\n\t" + importStatistics.maneuversCount
-                + " complete maneuver curves with estimation data\n--------------------------------------------\nTime passed: " + duration.get(ChronoUnit.HOURS) + "h " + duration.get(ChronoUnit.MINUTES) + "m " + duration.get(ChronoUnit.SECONDS) + "s");
+        logInfo("Import statistics: \n\t" + importStatistics.regattasCount + " regattas\n\t"
+                + importStatistics.racesCount + " races\n\t" + importStatistics.competitorTracksCount
+                + " competitor tracks\n\t" + importStatistics.maneuversCount
+                + " complete maneuver curves with estimation data\n--------------------------------------------\nTime passed: "
+                + duration.toHours() + "h " + (duration.toMinutes() - duration.toHours() * 60) + "m "
+                + duration.get(ChronoUnit.SECONDS) + "s");
     }
 
     private void logInfo(String logMessage) {
