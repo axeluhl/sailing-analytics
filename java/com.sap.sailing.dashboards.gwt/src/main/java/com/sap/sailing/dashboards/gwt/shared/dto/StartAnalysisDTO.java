@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 public class StartAnalysisDTO implements Serializable, Comparable<StartAnalysisDTO> {
@@ -13,7 +13,7 @@ public class StartAnalysisDTO implements Serializable, Comparable<StartAnalysisD
     private static final long serialVersionUID = -1325150193180234561L;
 
     public String raceName;
-    public CompetitorWithBoatDTO competitor;
+    public CompetitorDTO competitor;
     public WindAndAdvantagesInfoForStartLineDTO startAnalysisWindLineInfoDTO;
     public List<StartAnalysisCompetitorDTO> startAnalysisCompetitorDTOs;
     public long timeOfStartInMilliSeconds;
@@ -29,8 +29,8 @@ public class StartAnalysisDTO implements Serializable, Comparable<StartAnalysisD
         return raceName.compareTo(o.raceName);
     }
 
-    public List<CompetitorWithBoatDTO> getCompetitorDTOsFromStartAnaylsisCompetitorDTOs() {
-        List<CompetitorWithBoatDTO> competitorDTOs = new ArrayList<CompetitorWithBoatDTO>();
+    public List<CompetitorDTO> getCompetitorDTOsFromStartAnaylsisCompetitorDTOs() {
+        List<CompetitorDTO> competitorDTOs = new ArrayList<>();
         for (StartAnalysisCompetitorDTO startAnalysisCompetitorDTO : startAnalysisCompetitorDTOs) {
             competitorDTOs.add(startAnalysisCompetitorDTO.competitorDTO);
         }

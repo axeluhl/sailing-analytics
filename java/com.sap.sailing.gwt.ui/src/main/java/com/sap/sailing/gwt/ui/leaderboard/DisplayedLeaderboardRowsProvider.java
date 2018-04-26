@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 
 /**
@@ -21,5 +21,5 @@ public interface DisplayedLeaderboardRowsProvider {
      * rows} in case {@link #preSelectedRace} is <code>null</code>, or only the rows of the competitors who scored in
      * the race identified by {@link #preSelectedRace} otherwise.
      */
-    public Map<CompetitorWithBoatDTO, LeaderboardRowDTO> getRowsToDisplay();
+    public Map<CompetitorDTO, LeaderboardRowDTO> getRowsToDisplay();
 }

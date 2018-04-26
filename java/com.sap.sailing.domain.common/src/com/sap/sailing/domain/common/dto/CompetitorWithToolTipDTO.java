@@ -4,18 +4,18 @@ import java.util.Objects;
 
 public class CompetitorWithToolTipDTO {
 
-    private CompetitorWithBoatDTO competitor;
+    private CompetitorDTO competitor;
     private String toolTipMessage;
 
     public CompetitorWithToolTipDTO() {
     }
 
-    public CompetitorWithToolTipDTO(CompetitorWithBoatDTO competitor, String toolTipMessage) {
+    public CompetitorWithToolTipDTO(CompetitorDTO competitor, String toolTipMessage) {
         this.competitor = competitor;
         this.toolTipMessage = toolTipMessage;
     }
 
-    public CompetitorWithBoatDTO getCompetitor() {
+    public CompetitorDTO getCompetitor() {
         return competitor;
     }
 

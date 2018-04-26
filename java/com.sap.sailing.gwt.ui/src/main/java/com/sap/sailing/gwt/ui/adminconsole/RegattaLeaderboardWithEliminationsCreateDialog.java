@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.function.Consumer;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -25,7 +25,7 @@ public class RegattaLeaderboardWithEliminationsCreateDialog extends RegattaLeade
     }
 
     @Override
-    protected Consumer<AsyncCallback<Collection<CompetitorWithBoatDTO>>> getEliminatedCompetitorsRetriever() {
+    protected Consumer<AsyncCallback<Collection<CompetitorDTO>>> getEliminatedCompetitorsRetriever() {
         eliminatedCompetitors = new HashSet<>();
         return callback->callback.onSuccess(eliminatedCompetitors);
     }

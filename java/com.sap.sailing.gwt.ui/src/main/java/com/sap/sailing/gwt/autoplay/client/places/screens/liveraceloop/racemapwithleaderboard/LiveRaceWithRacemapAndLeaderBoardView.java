@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapw
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 
@@ -15,7 +15,7 @@ public interface LiveRaceWithRacemapAndLeaderBoardView {
 
     void showErrorNoLive(LiveRaceWithRacemapAndLeaderBoardPresenterImpl slide7PresenterImpl, AcceptsOneWidget panel, Throwable error);
 
-    void onCompetitorSelect(CompetitorWithBoatDTO marked);
+    void onCompetitorSelect(CompetitorDTO marked);
 
     void scrollLeaderBoardToTop();
 

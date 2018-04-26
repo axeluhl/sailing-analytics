@@ -1,5 +1,7 @@
 package com.sap.sse.pairinglist;
 
+import com.sap.sse.common.PairingListCreationException;
+
 /**
  * Unfortunately there is no systematic way creating a pairing list, so our solution is based on the "trial and error"
  * principle. We generate about 100.000 pairing lists, comparing them to each other and returning the best.
@@ -13,7 +15,7 @@ package com.sap.sse.pairinglist;
 
 public interface PairingListTemplate {
     <Flight, Group, Competitor, CompetitorAllocation> PairingList<Flight, Group, Competitor, CompetitorAllocation> createPairingList(
-            CompetitionFormat<Flight, Group, Competitor, CompetitorAllocation> competitionFormat);
+            CompetitionFormat<Flight, Group, Competitor, CompetitorAllocation> competitionFormat) throws PairingListCreationException;
 
     /**
      * The value corresponds to the quality of a pairing list template. The quality is calculated by the standard

@@ -11,7 +11,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -20,7 +20,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
 public class ItemToMapToDeviceSelectionPanel implements IsWidget {
-    private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorWithBoatDTO>> competitorTable;
+    private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
     private final BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>> boatTable;
     private final MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>> markTable;
     private MappableToDevice selected;
@@ -28,7 +28,7 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
     private final ErrorReporter errorReporter;
     
     static interface SelectionChangedHandler {
-        void onSelectionChange(CompetitorWithBoatDTO competitor);
+        void onSelectionChange(CompetitorDTO competitor);
         void onSelectionChange(BoatDTO boat);
         void onSelectionChange(MarkDTO mark);
     }
@@ -46,8 +46,7 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 if (competitorTable.getSelectionModel().getSelectedSet().size() == 1) {
-                    CompetitorWithBoatDTO selectedCompetitor = competitorTable.getSelectionModel().getSelectedSet().iterator()
-                            .next();
+                    CompetitorDTO selectedCompetitor = competitorTable.getSelectionModel().getSelectedSet().iterator().next();
                     ItemToMapToDeviceSelectionPanel.this.selected = selectedCompetitor;
                     deselectAll(boatTable.getSelectionModel(), boatTable.getDataProvider().getList());
                     deselectAll(markTable.getSelectionModel(), markTable.getDataProvider().getList());
@@ -116,10 +115,10 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
         }
     }    
     
-    public AsyncCallback<Collection<CompetitorWithBoatDTO>> getSetCompetitorsCallback() {
-        return new AsyncCallback<Collection<CompetitorWithBoatDTO>>() {
+    public AsyncCallback<Collection<CompetitorDTO>> getSetCompetitorsCallback() {
+        return new AsyncCallback<Collection<CompetitorDTO>>() {
             @Override
-            public void onSuccess(Collection<CompetitorWithBoatDTO> result) {
+            public void onSuccess(Collection<CompetitorDTO> result) {
                 competitorTable.refreshCompetitorList(result);
                 select(result, competitorTable.getSelectionModel());
             }
