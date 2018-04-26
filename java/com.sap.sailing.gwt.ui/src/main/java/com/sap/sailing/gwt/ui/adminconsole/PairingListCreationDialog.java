@@ -62,12 +62,11 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         if (template.getCompetitorCount() != leaderboardDTO.competitorsCount) {
             this.disableApplyToRacelogsAndPrintPreview();
         }
-
         sailingService.getPairingListFromTemplate(this.leaderboardDTO.getName(), this.template.getFlightMultiplier(),
                 this.template.getSelectedFlightNames(), this.template, new AsyncCallback<PairingListDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        PairingListCreationDialog.this.errorReporter.reportError(stringMessages.errorCreatingPairingList(caught.getMessage()));
+                        PairingListCreationDialog.this.errorReporter.reportError(stringMessages.errorCreatingPairingList(caught.getMessage()), /* silent */ true);
                         pairingListDTO = null;
                         applyToRacelogButton.setEnabled(false);
                         printPreViewButton.setEnabled(false);
