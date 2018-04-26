@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.InvalidatesLeaderboardCache;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -47,7 +48,8 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.dto.BasicRaceDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
@@ -68,8 +70,8 @@ import com.sap.sailing.domain.leaderboard.meta.MetaLeaderboardColumn;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
-import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
+import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -355,16 +357,18 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
         final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
+        final BoatClass boatClass = getBoatClass();
         final LeaderboardDTO result = new LeaderboardDTO(timePoint.asDate(), this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
                 : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(), 
                 this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(),
                 this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
-                        .getScoringScheme().isHigherBetter(), new UUIDGenerator(), addOverallDetails);
+                        .getScoringScheme().isHigherBetter(), new UUIDGenerator(), addOverallDetails,
+                        boatClass==null?null:new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength(), boatClass.getHullBeam()));
         result.type = getLeaderboardType();
-        result.competitors = new ArrayList<CompetitorWithBoatDTO>();
+        result.competitors = new ArrayList<>();
         result.name = this.getName();
         result.displayName = this.getDisplayName();
-        result.competitorDisplayNames = new HashMap<CompetitorWithBoatDTO, String>();
+        result.competitorDisplayNames = new HashMap<>();
         boolean isLeaderboardThatHasRegattaLike = this instanceof LeaderboardThatHasRegattaLike;
         if (isLeaderboardThatHasRegattaLike) {
             LeaderboardThatHasRegattaLike regattaLikeLeaderboard = (LeaderboardThatHasRegattaLike) this;
@@ -372,13 +376,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         } else {
             result.canBoatsOfCompetitorsChangePerRace = false;
         }
-
         for (Competitor suppressedCompetitor : this.getSuppressedCompetitors()) {
-            result.setSuppressed(baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(suppressedCompetitor), true);
+            result.setSuppressed(baseDomainFactory.convertToCompetitorDTO(suppressedCompetitor), true);
         }
         // Now create the race columns and, as a future task, set their competitorsFromBestToWorst, then wait for all these
         // futures to finish:
-        Map<RaceColumn, Future<List<CompetitorWithBoatDTO>>> competitorsFromBestToWorstTasks = new HashMap<>();
+        Map<RaceColumn, Future<List<CompetitorDTO>>> competitorsFromBestToWorstTasks = new HashMap<>();
         for (final RaceColumn raceColumn : this.getRaceColumns()) {
             boolean isMetaLeaderboardColumn = raceColumn instanceof MetaLeaderboardColumn;
             RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
@@ -405,12 +408,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn);
             }
-            Future<List<CompetitorWithBoatDTO>> task = executor.submit(
+            Future<List<CompetitorDTO>> task = executor.submit(
                     () -> baseDomainFactory.getCompetitorDTOList(AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
             competitorsFromBestToWorstTasks.put(raceColumn, task);
         }
         // wait for the competitor orderings to have been computed for all race columns before continuing; subsequent tasks may depend on these data
-        for (Map.Entry<RaceColumn, Future<List<CompetitorWithBoatDTO>>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
+        for (Map.Entry<RaceColumn, Future<List<CompetitorDTO>>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
             try {
                 result.setCompetitorsFromBestToWorst(raceColumnAndTaskToJoin.getKey().getName(), raceColumnAndTaskToJoin.getValue().get());
             } catch (InterruptedException e) {
@@ -428,7 +431,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
         }
         result.setDelayToLiveInMillisForLatestRace(this.getDelayToLiveInMillis());
-        result.rows = new HashMap<CompetitorWithBoatDTO, LeaderboardRowDTO>();
+        result.rows = new HashMap<>();
         result.hasCarriedPoints = this.hasCarriedPoints();
         if (this.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
             result.discardThresholds = ((ThresholdBasedResultDiscardingRule) this.getResultDiscardingRule())
@@ -461,7 +464,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
         }
         for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint)) {
-            CompetitorWithBoatDTO competitorDTO = baseDomainFactory.convertToCompetitorWithOptionalBoatDTO(competitor);
+            CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
             LeaderboardRowDTO row = new LeaderboardRowDTO();
             row.competitor = competitorDTO;
             row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
@@ -1059,7 +1062,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             result.setExpeditionVMGTargVMGDelta(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionVMGTargVMGDelta, TrackedLegOfCompetitor::getAverageExpeditionVMGTargVMGDelta));
             result.setExpeditionRateOfTurn(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionRateOfTurn, TrackedLegOfCompetitor::getAverageExpeditionRateOfTurn));
             result.setExpeditionRudderAngle(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionRudderAngle, TrackedLegOfCompetitor::getAverageExpeditionRudderAngle));
-            result.setExpeditionHeel(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionHeel, TrackedLegOfCompetitor::getAverageExpeditionHeel));
             result.setExpeditionTargetHeel(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTargetHeel, TrackedLegOfCompetitor::getAverageExpeditionTargetHeel));
             result.setExpeditionTimeToPortLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToPortLayline, TrackedLegOfCompetitor::getAverageExpeditionTimeToPortLayline));
             result.setExpeditionTimeToStbLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToStbLayline, TrackedLegOfCompetitor::getAverageExpeditionTimeToStbLayline));

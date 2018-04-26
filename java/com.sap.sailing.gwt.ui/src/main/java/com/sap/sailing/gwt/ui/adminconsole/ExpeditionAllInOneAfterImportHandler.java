@@ -10,7 +10,7 @@ import java.util.UUID;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
@@ -120,14 +120,14 @@ public class ExpeditionAllInOneAfterImportHandler {
         }
     }
     
-    private static class ValidatorForCompetitorRegistrationDialog implements Validator<Set<CompetitorWithBoatDTO>> {
+    private static class ValidatorForCompetitorRegistrationDialog implements Validator<Set<CompetitorDTO>> {
         private CompetitorRegistrationsPanel competitorRegistrationsPanel;
         private StringMessages stringMessages;
         public ValidatorForCompetitorRegistrationDialog(StringMessages stringMessages) {
             this.stringMessages = stringMessages;
         }
         @Override
-        public String getErrorMessage(Set<CompetitorWithBoatDTO> valueToValidate) {
+        public String getErrorMessage(Set<CompetitorDTO> valueToValidate) {
             if (competitorRegistrationsPanel == null || competitorRegistrationsPanel.getSelectedRegisteredCompetitors().size() != 1) {
                 return stringMessages.selectOneCompetitorToMapTheImportedData();
             }
@@ -138,11 +138,11 @@ public class ExpeditionAllInOneAfterImportHandler {
         }
     }
     
-    private class CallbackForCompetitorRegistrationDialog extends CancelImportDialogCallback<Set<CompetitorWithBoatDTO>> {
+    private class CallbackForCompetitorRegistrationDialog extends CancelImportDialogCallback<Set<CompetitorDTO>> {
         private CompetitorRegistrationsPanel competitorRegistrationsPanel;
         
         @Override
-        public void ok(Set<CompetitorWithBoatDTO> competitors) {
+        public void ok(Set<CompetitorDTO> competitors) {
             if (competitors.isEmpty()) {
                 Window.alert(stringMessages.importCanceledNoCompetitorAdded());
             } else {
@@ -172,11 +172,11 @@ public class ExpeditionAllInOneAfterImportHandler {
                 leaderboard.canBoatsOfCompetitorsChangePerRace).show();
     }
     
-    private void mapCompetitorsToGPSFixDeviceIds(final Set<CompetitorWithBoatDTO> mappedCompetitors) {
+    private void mapCompetitorsToGPSFixDeviceIds(final Set<CompetitorDTO> mappedCompetitors) {
         if (gpsFixesDeviceIDs.size() == 1 && mappedCompetitors.size() == 1) {
             // If there is exactly one device and one Competitor, the mapping is automatically added without user interaction
             final TrackFileImportDeviceIdentifierDTO deviceIdentifierDTO = gpsFixesDeviceIDs.iterator().next();
-            final CompetitorWithBoatDTO competitor = mappedCompetitors.iterator().next();
+            final CompetitorDTO competitor = mappedCompetitors.iterator().next();
             saveCompetitorGPSMapping(mappedCompetitors, Collections.singleton(new DeviceMappingDTO(deviceIdentifierDTO, deviceIdentifierDTO.from, deviceIdentifierDTO.to, competitor, null)));
         } else {
             new RegattaLogFixesAddMappingsDialog(sailingService, errorReporter, stringMessages,
@@ -191,17 +191,17 @@ public class ExpeditionAllInOneAfterImportHandler {
         }
     }
 
-    private void saveCompetitorGPSMapping(final Set<CompetitorWithBoatDTO> mappedCompetitors, final Collection<DeviceMappingDTO> mappings) {
+    private void saveCompetitorGPSMapping(final Set<CompetitorDTO> mappedCompetitors, final Collection<DeviceMappingDTO> mappings) {
         new AddDeviceMappingsToRegattaLog(leaderboard.getName(), mappings, () -> {
             mapCompetitorsToSensorFixDeviceIds(mappedCompetitors);
         });
     }
 
-    private final void mapCompetitorsToSensorFixDeviceIds(final Set<CompetitorWithBoatDTO> mappedCompetitors) {
+    private final void mapCompetitorsToSensorFixDeviceIds(final Set<CompetitorDTO> mappedCompetitors) {
         if (sensorFixesDeviceIDs.size() == 1 && mappedCompetitors.size() == 1) {
             // If there is exactly one device and one Competitor, the mapping is automatically added without user interaction
             final TrackFileImportDeviceIdentifierDTO deviceIdentifierDTO = sensorFixesDeviceIDs.iterator().next();
-            final CompetitorWithBoatDTO competitor = mappedCompetitors.iterator().next();
+            final CompetitorDTO competitor = mappedCompetitors.iterator().next();
             saveCompetitorSensorFixMapping(Collections.singleton(new TypedDeviceMappingDTO(deviceIdentifierDTO, deviceIdentifierDTO.from, deviceIdentifierDTO.to, competitor, null, sensorImporterType)));
         } else if (sensorFixesDeviceIDs.size() > 0) {
             new RegattaLogSensorDataAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboard.getName(),

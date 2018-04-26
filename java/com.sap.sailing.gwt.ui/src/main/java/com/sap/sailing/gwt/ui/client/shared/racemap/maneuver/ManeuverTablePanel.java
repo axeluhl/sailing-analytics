@@ -34,7 +34,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
@@ -88,7 +88,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private final Label importantMessageLabel = new Label();
     private final SortedCellTableWithStylableHeaders<ManeuverTableData> maneuverCellTable;
     private final SortableColumn<ManeuverTableData, ?> competitorColumn, timeColumn;
-    private final CachedRaceDataProvider<CompetitorWithBoatDTO, ManeuverDTO> competitorDataProvider;
+    private final CachedRaceDataProvider<CompetitorDTO, ManeuverDTO> competitorDataProvider;
 
     private ManeuverTableSettings settings;
     private boolean hasCanReplayDuringLiveRacesPermission;
@@ -381,7 +381,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
     private void updateManeuverTableData() {
         final ArrayList<ManeuverTableData> data = new ArrayList<>();
-        for (final Entry<CompetitorWithBoatDTO, List<ManeuverDTO>> entry : competitorDataProvider.getCachedData().entrySet()) {
+        final Map<CompetitorDTO, Iterable<ManeuverDTO>> cachedData = competitorDataProvider.getCachedData();
+        for (final Entry<CompetitorDTO, Iterable<ManeuverDTO>> entry : cachedData.entrySet()) {
             for (ManeuverDTO maneuver : entry.getValue()) {
                 if (settings.getSelectedManeuverTypes().contains(maneuver.type)) {
                     data.add(new ManeuverTableData(entry.getKey(), maneuver));
@@ -413,7 +414,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     }
 
     @Override
-    public void addedToSelection(CompetitorWithBoatDTO competitor) {
+    public void addedToSelection(CompetitorDTO competitor) {
         if (isVisible()) {
             this.competitorDataProvider.ensureEntry(competitor);
             this.rerender();
@@ -421,7 +422,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     }
 
     @Override
-    public void removedFromSelection(CompetitorWithBoatDTO competitor) {
+    public void removedFromSelection(CompetitorDTO competitor) {
         if (isVisible()) {
             this.competitorDataProvider.removeEntry(competitor);
             this.rerender();
@@ -449,16 +450,16 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     }
 
     @Override
-    public void filterChanged(FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> oldFilterSet,
-            FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> newFilterSet) {
+    public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
+            FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
     }
 
     @Override
-    public void competitorsListChanged(Iterable<CompetitorWithBoatDTO> competitors) {
+    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
     }
 
     @Override
-    public void filteredCompetitorsListChanged(Iterable<CompetitorWithBoatDTO> filteredCompetitors) {
+    public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
     }
 
     @Override
@@ -490,7 +491,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         }
     }
 
-    private class CachedManeuverTableDataProvider extends CachedRaceDataProvider<CompetitorWithBoatDTO, ManeuverDTO> {
+    private class CachedManeuverTableDataProvider extends CachedRaceDataProvider<CompetitorDTO, ManeuverDTO> {
         private final AsyncActionsExecutor asyncActionsExecutor;
         private final RegattaAndRaceIdentifier raceIdentifier;
         private final SailingServiceAsync sailingService;
@@ -505,9 +506,9 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         }
 
         @Override
-        protected void loadData(final Map<CompetitorWithBoatDTO, TimeRange> competitorTimeRanges,
+        protected void loadData(final Map<CompetitorDTO, TimeRange> competitorTimeRanges,
                 final boolean incremental,
-                final AsyncCallback<Map<CompetitorWithBoatDTO, List<ManeuverDTO>>> callback) {
+                final AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>> callback) {
             if (incremental) {
                 asyncActionsExecutor.execute(
                         new GetManeuversForCompetitorsAction(sailingService, raceIdentifier, competitorTimeRanges),
@@ -520,7 +521,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         }
 
         @Override
-        protected void onEntriesDataChange(final Iterable<CompetitorWithBoatDTO> updatedCompetitors) {
+        protected void onEntriesDataChange(final Iterable<CompetitorDTO> updatedCompetitors) {
             ManeuverTablePanel.this.rerender();
         }
     }

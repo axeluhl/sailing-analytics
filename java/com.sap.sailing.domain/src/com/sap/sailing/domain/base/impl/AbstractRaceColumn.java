@@ -380,12 +380,12 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     }
     
     @Override
-    public void deregisterCompetitors(Iterable<Competitor> competitors, Fleet fleet)
+    public void deregisterCompetitors(Iterable<? extends Competitor> competitors, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
         if (!isCompetitorRegistrationInRacelogEnabled(fleet)) {
             throw new CompetitorRegistrationOnRaceLogDisabledException("Competitor registration not allowed for fleet "+fleet+" in column "+this);
         }
-        HashSet<Competitor> competitorSet = new HashSet<Competitor>();
+        Set<Competitor> competitorSet = new HashSet<Competitor>();
         Util.addAll(competitors, competitorSet);
         RaceLog raceLog = getRaceLog(fleet);
         for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {

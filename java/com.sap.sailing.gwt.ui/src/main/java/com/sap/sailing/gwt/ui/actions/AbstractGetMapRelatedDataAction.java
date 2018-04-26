@@ -4,20 +4,20 @@ import java.util.Date;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.gwt.client.async.AsyncAction;
 
 public abstract class AbstractGetMapRelatedDataAction<T> implements AsyncAction<T> {
     private final SailingServiceAsync sailingService;
     private final RegattaAndRaceIdentifier raceIdentifier;
-    private final Map<CompetitorWithBoatDTO, Date> from;
-    private final Map<CompetitorWithBoatDTO, Date> to;
+    private final Map<CompetitorDTO, Date> from;
+    private final Map<CompetitorDTO, Date> to;
     private final boolean extrapolate;
     
     public AbstractGetMapRelatedDataAction(SailingServiceAsync sailingService,
-            RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorWithBoatDTO, Date> from,
-            Map<CompetitorWithBoatDTO, Date> to, boolean extrapolate) {
+            RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from,
+            Map<CompetitorDTO, Date> to, boolean extrapolate) {
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.from = from;
@@ -33,11 +33,11 @@ public abstract class AbstractGetMapRelatedDataAction<T> implements AsyncAction<
         return raceIdentifier;
     }
 
-    protected Map<CompetitorWithBoatDTO, Date> getFrom() {
+    protected Map<CompetitorDTO, Date> getFrom() {
         return from;
     }
 
-    protected Map<CompetitorWithBoatDTO, Date> getTo() {
+    protected Map<CompetitorDTO, Date> getTo() {
         return to;
     }
 

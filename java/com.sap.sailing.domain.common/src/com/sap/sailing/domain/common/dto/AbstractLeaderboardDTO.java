@@ -3,12 +3,9 @@ package com.sap.sailing.domain.common.dto;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.LeaderboardType;
@@ -23,8 +20,8 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public String name;
 
     private List<RaceColumnDTO> races;
-    public Map<CompetitorWithBoatDTO, String> competitorDisplayNames;
-    public Map<CompetitorWithBoatDTO, LeaderboardRowDTO> rows;
+    public Map<CompetitorDTO, String> competitorDisplayNames;
+    public Map<CompetitorDTO, LeaderboardRowDTO> rows;
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
     
@@ -40,36 +37,29 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public boolean canBoatsOfCompetitorsChangePerRace;
 
     private Long delayToLiveInMillisForLatestRace;
+    private BoatClassDTO boatClass;
+    
+    @Deprecated
+    protected AbstractLeaderboardDTO() {} // for GWT serialization only
 
-    public AbstractLeaderboardDTO() {
+    public AbstractLeaderboardDTO(BoatClassDTO boatClass) {
+        this.boatClass = boatClass;
         races = new ArrayList<RaceColumnDTO>();
     }
     
-    public Set<BoatClassDTO> getBoatClasses() {
-        Set<BoatClassDTO> result = new HashSet<>();
-        collectBoatClasses(result);
-        return result;
+    public BoatClassDTO getBoatClass() {
+        return boatClass;
     }
     
-    private void collectBoatClasses(Collection<BoatClassDTO> boatClasses) {
-        if (rows != null) {
-            for (CompetitorWithBoatDTO competitor : rows.keySet()) {
-                boatClasses.add(competitor.getBoatClass());
-            }
-        }
+    protected void setBoatClass(BoatClassDTO boatClass) {
+        this.boatClass = boatClass;
     }
     
-    public BoatClassDTO getDominantBoatClass() {
-        List<BoatClassDTO> result = new ArrayList<>();
-        collectBoatClasses(result);
-        return Util.getDominantObject(result);
-    }
-
     public String getDisplayName() {
         return displayName;
     }
 
-    public String getDisplayName(CompetitorWithBoatDTO competitor) {
+    public String getDisplayName(CompetitorDTO competitor) {
         if (competitorDisplayNames == null || competitorDisplayNames.get(competitor) == null) {
             return competitor.getName();
         } else {
@@ -431,7 +421,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         return true;
     }
 
-    public boolean isDisplayNameSet(CompetitorWithBoatDTO competitor) {
+    public boolean isDisplayNameSet(CompetitorDTO competitor) {
         return competitorDisplayNames.get(competitor) != null;
     }
 

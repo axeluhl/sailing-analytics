@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.table.CompetitorTable;
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.table.CompetitorTableRowSelectionListener;
 import com.sap.sailing.dashboards.gwt.client.widgets.ActionPanel;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public class CompetitorSelectionPopup extends Composite implements HasWidgets, CompetitorTableRowSelectionListener {
 
@@ -38,7 +38,7 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
     @UiField(provided = true)
     ActionPanel okButton;
 
-    private CompetitorWithBoatDTO currentCompetitorSelected;
+    private CompetitorDTO currentCompetitorSelected;
     private boolean isVisible;
     private CompetitorSelectionPopupResources competitorSelectionPopupResources = CompetitorSelectionPopupResources.INSTANCE;
 
@@ -63,7 +63,7 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
         okButton.getElement().setInnerText("OK");
     }
 
-    public void show(List<CompetitorWithBoatDTO> competitorList) {
+    public void show(List<CompetitorDTO> competitorList) {
         competitortable.setTableContent(competitorList);
         RootLayoutPanel.get().add(this);
         competitorselectionpopup.addStyleName(competitorSelectionPopupResources.gss().popupshow());
@@ -88,7 +88,7 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
         this.competitorSelectionPopupListener.remove(o);
     }
 
-    public void notifyListenerAboutOKButtonClickedWithSelectedCompetitorName(CompetitorWithBoatDTO competitor) {
+    public void notifyListenerAboutOKButtonClickedWithSelectedCompetitorName(CompetitorDTO competitor) {
         for (CompetitorSelectionListener newStartAnalysisListener : competitorSelectionPopupListener) {
             newStartAnalysisListener.didClickOKWithSelectedCompetitor(competitor);
         }
@@ -127,7 +127,7 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
     }
 
     @Override
-    public void didSelectedRowWithCompetitorName(CompetitorWithBoatDTO competitor) {
+    public void didSelectedRowWithCompetitorName(CompetitorDTO competitor) {
         currentCompetitorSelected = competitor;
     }
 
