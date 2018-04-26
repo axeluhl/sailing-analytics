@@ -3,38 +3,38 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
 public class CompetitorsFilterSets {
-    private List<FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>>> filterSets;
+    private List<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>> filterSets;
     
-    private FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> activeFilterSet;
+    private FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet;
 
     public CompetitorsFilterSets() {
-        filterSets = new ArrayList<FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>>>();
+        filterSets = new ArrayList<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>>();
         activeFilterSet = null;
     }
     
-    public FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> getActiveFilterSetWithGeneralizedType() {
-        FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> result = null;
+    public FilterSet<CompetitorDTO, Filter<CompetitorDTO>> getActiveFilterSetWithGeneralizedType() {
+        FilterSet<CompetitorDTO, Filter<CompetitorDTO>> result = null;
         if(activeFilterSet != null) {
-            result = new FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>>(activeFilterSet.getName());
-            for (Filter<CompetitorWithBoatDTO> filter : activeFilterSet.getFilters()) {
+            result = new FilterSet<CompetitorDTO, Filter<CompetitorDTO>>(activeFilterSet.getName());
+            for (Filter<CompetitorDTO> filter : activeFilterSet.getFilters()) {
                 result.addFilter(filter);
             }
         }
         return result;
     }
     
-    public FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> getActiveFilterSet() {
+    public FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> getActiveFilterSet() {
         return activeFilterSet;
     }
 
-    public FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> findFilterSetByName(String filterSetName) {
-        FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> result = null;
-        for (FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> filterSet : filterSets) {
+    public FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> findFilterSetByName(String filterSetName) {
+        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> result = null;
+        for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : filterSets) {
             if (filterSet.getName().equals(filterSetName)) {
                 result = filterSet;
                 break;
@@ -43,7 +43,7 @@ public class CompetitorsFilterSets {
         return result;
     }
     
-    public void setActiveFilterSet(FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> newActiveFilterSet) {
+    public void setActiveFilterSet(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> newActiveFilterSet) {
         if (newActiveFilterSet != null) {
             if (filterSets.contains(newActiveFilterSet)) {
                 this.activeFilterSet = newActiveFilterSet;
@@ -53,23 +53,22 @@ public class CompetitorsFilterSets {
         }
     }
 
-    public void addFilterSet(int position, FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> filterSet) {
+    public void addFilterSet(int position, FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet) {
         filterSets.add(position, filterSet);
     }
 
-    public boolean addFilterSet(FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> filterSet) {
+    public boolean addFilterSet(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet) {
         return filterSets.add(filterSet);
     }
 
-    public boolean removeFilterSet(FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> filterSet) {
+    public boolean removeFilterSet(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet) {
         if(filterSet == activeFilterSet) {
             activeFilterSet = null;
         }
-        
         return filterSets.remove(filterSet);
     }
     
-    public List<FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>>> getFilterSets() {
+    public List<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>> getFilterSets() {
         return filterSets;
     }
 }

@@ -6,23 +6,23 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public class CompactBoatPositionsDTO implements IsSerializable {
     private Map<String, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions;
 
     CompactBoatPositionsDTO() {} // for GWT serialization only
     
-    public CompactBoatPositionsDTO(Map<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions) {
+    public CompactBoatPositionsDTO(Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions) {
         super();
         this.boatPositions = new HashMap<>();
-        for (final Entry<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> e : boatPositions.entrySet()) {
+        for (final Entry<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> e : boatPositions.entrySet()) {
             this.boatPositions.put(e.getKey().getIdAsString(), e.getValue());
         }
     }
 
-    public Map<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getBoatPositionsForCompetitors(Map<String, CompetitorWithBoatDTO> competitorsByIdsAsStrings) {
-        final Map<CompetitorWithBoatDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<>();
+    public Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getBoatPositionsForCompetitors(Map<String, CompetitorDTO> competitorsByIdsAsStrings) {
+        final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<>();
         for (final Entry<String, List<GPSFixDTOWithSpeedWindTackAndLegType>> e : boatPositions.entrySet()) {
             result.put(competitorsByIdsAsStrings.get(e.getKey()), e.getValue());
         }

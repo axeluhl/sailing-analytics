@@ -41,7 +41,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
 
-    private final Set<BoatClassDTO> boatClasses;
+    private final BoatClassDTO boatClass;
     
     public ResultSelectionAndApplyDialog(EditableLeaderboardPanel leaderboardPanel, Iterable<String> scoreCorrectionProviderNames, 
             SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter) {
@@ -50,9 +50,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-
-        boatClasses = leaderboardPanel.getLeaderboard().getBoatClasses();
-
+        boatClass = leaderboardPanel.getLeaderboard().getBoatClass();
         this.scoreCorrections = new LinkedHashMap<String, Util.Pair<String, Util.Pair<String, Date>>>();
 
         scoreCorrectionProviderListBox = createListBox(/* isMultipleSelect */ false);
@@ -137,9 +135,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
 
     private void sortOfficialResultsByRelevance(List<Util.Pair<String, Util.Pair<String, Date>>> eventNameBoatClassNameCapturedWhen) {
         final Set<String> lowercaseBoatClassNames = new HashSet<String>();
-        for (BoatClassDTO boatClass : boatClasses) {
-            lowercaseBoatClassNames.add(boatClass.getName().toLowerCase());
-        }
+        lowercaseBoatClassNames.add(boatClass.getName().toLowerCase());
         Collections.sort(eventNameBoatClassNameCapturedWhen,
                 new Comparator<Util.Pair<String, Util.Pair<String, Date>>>() {
                     @Override

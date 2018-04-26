@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -15,6 +17,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -43,25 +46,25 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
  * A text box that belongs to a {@link ClassicLeaderboardPanel} and allows the user to search for competitors by sail number
- * and competitor name. When the user provides a non-empty search string, a new {@link Filter} for type {@link CompetitorWithBoatDTO}
- * will be added that accepts competitors whose {@link CompetitorWithBoatDTO#getSailID() sail number} or {@link CompetitorWithBoatDTO#getName() name}
+ * and competitor name. When the user provides a non-empty search string, a new {@link Filter} for type {@link CompetitorDTO}
+ * will be added that accepts competitors whose {@link CompetitorDTO#getSailID() sail number} or {@link CompetitorDTO#getName() name}
  * matches the user input. When the text box is emptied, 
  * 
  * @author Axel Uhl (D043530)
  * 
  */
-public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, FilterWithUI<CompetitorWithBoatDTO>, CompetitorSelectionChangeListener {
+public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, FilterWithUI<CompetitorDTO>, CompetitorSelectionChangeListener {
     private final static String LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.competitorsFilterSets";
     private final static CompetitorFilterCss css = CompetitorFilterResources.INSTANCE.css();
     private final TextBox searchTextBox;
     private final Button clearTextBoxButton;
     private final Button advancedSettingsButton;
     private final StringMessages stringMessages;
-    private final AbstractListFilter<CompetitorWithBoatDTO> filter;
+    private final AbstractListFilter<CompetitorDTO> filter;
     private final CompetitorSelectionProvider competitorSelectionProvider;
     private String lastFilterSetNameWithoutThis;
     private final CompetitorsFilterSets competitorsFilterSets;
-    private FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> lastActiveCompetitorFilterSet;
+    private FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> lastActiveCompetitorFilterSet;
     private final LeaderboardFetcher leaderboardFetcher;
     private final RaceMap raceMap;
     private final RaceIdentifier selectedRaceIdentifier;
@@ -86,11 +89,14 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
             competitorsFilterSets = createAndAddDefaultCompetitorsFilter();
             storeCompetitorsFilterSets(competitorsFilterSets);
         }
-        
-        filter = new AbstractListFilter<CompetitorWithBoatDTO>() {
+        filter = new AbstractListFilter<CompetitorDTO>() {
             @Override
-            public Iterable<String> getStrings(CompetitorWithBoatDTO competitor) {
-                return Arrays.asList(competitor.getName().toLowerCase(), competitor.getSailID().toLowerCase());
+            public Iterable<String> getStrings(CompetitorDTO competitor) {
+                final List<String> result = new ArrayList<>(Arrays.asList(competitor.getName().toLowerCase(), competitor.getShortName()));
+                if (competitor.hasBoat()) {
+                    result.add(((CompetitorWithBoatDTO) competitor).getSailID().toLowerCase());
+                }
+                return result;
             }
         };
         settingsButton = new Button();
@@ -163,10 +169,9 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
 
     private void ensureSearchFilterIsSet() {
         if (competitorSelectionProvider.getCompetitorsFilterSet() == null || !Util.contains(competitorSelectionProvider.getCompetitorsFilterSet().getFilters(), this)) {
-            FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> newFilterSetWithThis = new FilterSet<>(getName());
+            FilterSet<CompetitorDTO, Filter<CompetitorDTO>> newFilterSetWithThis = new FilterSet<>(getName());
             if (competitorSelectionProvider.getCompetitorsFilterSet() != null) {
-                for (Filter<CompetitorWithBoatDTO> oldFilter : competitorSelectionProvider.getCompetitorsFilterSet()
-                        .getFilters()) {
+                for (Filter<CompetitorDTO> oldFilter : competitorSelectionProvider.getCompetitorsFilterSet().getFilters()) {
                     newFilterSetWithThis.addFilter(oldFilter);
                 }
             }
@@ -178,8 +183,8 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
     private void removeSearchFilter() {
         if (competitorSelectionProvider.getCompetitorsFilterSet() != null
                 && Util.contains(competitorSelectionProvider.getCompetitorsFilterSet().getFilters(), this)) {
-            FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> newFilterSetWithThis = new FilterSet<>(lastFilterSetNameWithoutThis);
-            for (Filter<CompetitorWithBoatDTO> oldFilter : competitorSelectionProvider.getCompetitorsFilterSet().getFilters()) {
+            FilterSet<CompetitorDTO, Filter<CompetitorDTO>> newFilterSetWithThis = new FilterSet<>(lastFilterSetNameWithoutThis);
+            for (Filter<CompetitorDTO> oldFilter : competitorSelectionProvider.getCompetitorsFilterSet().getFilters()) {
                 if (oldFilter != this) {
                     newFilterSetWithThis.addFilter(oldFilter);
                 }
@@ -195,7 +200,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
     }
 
     @Override
-    public boolean matches(CompetitorWithBoatDTO competitor) {
+    public boolean matches(CompetitorDTO competitor) {
         final Iterable<String> lowercaseKeywords = Util
                 .splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchTextBox.getText().toLowerCase());
         return !Util.isEmpty(filter.applyFilter(lowercaseKeywords, Collections.singleton(competitor)));
@@ -236,19 +241,18 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
 
     private void insertSelectedCompetitorsFilter(CompetitorsFilterSets filterSet) {
         // selected competitors filter
-        FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> selectedCompetitorsFilterSet = 
-                new FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>>(stringMessages.selectedCompetitors());
+        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> selectedCompetitorsFilterSet = 
+                new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.selectedCompetitors());
         selectedCompetitorsFilterSet.setEditable(false);
         SelectedCompetitorsFilter selectedCompetitorsFilter = new SelectedCompetitorsFilter();
         selectedCompetitorsFilter.setCompetitorSelectionProvider(competitorSelectionProvider);
         selectedCompetitorsFilterSet.addFilter(selectedCompetitorsFilter);
-        
         filterSet.addFilterSet(0, selectedCompetitorsFilterSet);
     }
     
     private void updateCompetitorsFilterContexts(CompetitorsFilterSets filterSets) {
-        for (FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> filterSet : filterSets.getFilterSets()) {
-            for (Filter<CompetitorWithBoatDTO> filter : filterSet.getFilters()) {
+        for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : filterSets.getFilterSets()) {
+            for (Filter<CompetitorDTO> filter : filterSet.getFilters()) {
                 if (leaderboardFetcher != null && filter instanceof LeaderboardFilterContext) {
                     ((LeaderboardFilterContext) filter).setLeaderboardFetcher(leaderboardFetcher);
                 }
@@ -274,7 +278,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
      */
     private void updateCompetitorsFilterControlState(CompetitorsFilterSets filterSets) {
         String competitorsFilterTitle = stringMessages.competitorsFilter();
-        FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> activeFilterSet = filterSets.getActiveFilterSet();
+        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = filterSets.getActiveFilterSet();
         if (activeFilterSet != null) {
             if (lastActiveCompetitorFilterSet == null) {
                 advancedSettingsButton.removeStyleName(css.filterInactiveButtonBackgroundImage());
@@ -330,14 +334,12 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
     
     private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {
         CompetitorsFilterSets filterSets = new CompetitorsFilterSets();
-        
         // 1. selected competitors filter
         insertSelectedCompetitorsFilter(filterSets);
-        
         // 2. Top 30 competitors by race rank
         int maxRaceRank = 30;
-        FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> topNRaceRankCompetitorsFilterSet = 
-                new FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>>(stringMessages.topNCompetitorsByRaceRank(maxRaceRank));
+        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNRaceRankCompetitorsFilterSet = 
+                new FilterSet<>(stringMessages.topNCompetitorsByRaceRank(maxRaceRank));
         CompetitorRaceRankFilter raceRankFilter = new CompetitorRaceRankFilter();
         raceRankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
         raceRankFilter.setValue(maxRaceRank);
@@ -346,8 +348,8 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
 
         // 3. Top 30 competitors by total rank
         int maxTotalRank = 30;
-        FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> topNTotalRankCompetitorsFilterSet =
-                new FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>>(stringMessages.topNCompetitorsByTotalRank(maxTotalRank));
+        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNTotalRankCompetitorsFilterSet =
+                new FilterSet<>(stringMessages.topNCompetitorsByTotalRank(maxTotalRank));
         CompetitorTotalRankFilter totalRankFilter = new CompetitorTotalRankFilter();
         totalRankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
         totalRankFilter.setValue(50);
@@ -373,8 +375,8 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
     }
 
     @Override
-    public void filterChanged(FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> oldFilterSet,
-            FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> newFilterSet) {
+    public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
+            FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
         if (newFilterSet != null && !Util.contains(newFilterSet.getFilters(), this)) {
             lastFilterSetNameWithoutThis = newFilterSet.getName();
         }
@@ -384,10 +386,10 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         // has added itself as a filter
     }
 
-    @Override public void competitorsListChanged(Iterable<CompetitorWithBoatDTO> competitors) {}
-    @Override public void filteredCompetitorsListChanged(Iterable<CompetitorWithBoatDTO> filteredCompetitors) {}
-    @Override public void addedToSelection(CompetitorWithBoatDTO competitor) {}
-    @Override public void removedFromSelection(CompetitorWithBoatDTO competitor) {}
+    @Override public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {}
+    @Override public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {}
+    @Override public void addedToSelection(CompetitorDTO competitor) {}
+    @Override public void removedFromSelection(CompetitorDTO competitor) {}
 
     @Override
     public String validate(StringMessages stringMessages) {
@@ -405,12 +407,12 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
     }
 
     @Override
-    public FilterWithUI<CompetitorWithBoatDTO> copy() {
+    public FilterWithUI<CompetitorDTO> copy() {
         return null;
     }
 
     @Override
-    public FilterUIFactory<CompetitorWithBoatDTO> createUIFactory() {
+    public FilterUIFactory<CompetitorDTO> createUIFactory() {
         return null;
     }
 
