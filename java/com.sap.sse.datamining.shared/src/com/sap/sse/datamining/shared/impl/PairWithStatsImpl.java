@@ -1,25 +1,29 @@
 package com.sap.sse.datamining.shared.impl;
 
-import com.sap.sse.common.Util.Pair;
-import com.sap.sse.datamining.shared.data.AveragePairWithStats;
+import java.util.HashSet;
 
-public class AveragePairWithStatsImpl<T> implements AveragePairWithStats<T> {
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.datamining.shared.data.PairWithStats;
+
+public class PairWithStatsImpl<T> implements PairWithStats<T> {
     private static final long serialVersionUID = -2643300186690471524L;
     private final Pair<T, T> average;
     private final Pair<T, T> min;
     private final Pair<T, T> max;
     private final Pair<T, T> median;
     private final Pair<T, T> standardDeviation;
+    private final HashSet<Pair<T,T>> individualPairs;
     private final long count;
     private final String resultType;
 
-    public AveragePairWithStatsImpl(Pair<T, T> average, Pair<T, T> min, Pair<T, T> max, Pair<T, T> median, Pair<T, T> standardDeviation, long count, String resultType) {
+    public PairWithStatsImpl(Pair<T, T> average, Pair<T, T> min, Pair<T, T> max, Pair<T, T> median, Pair<T, T> standardDeviation, HashSet<Pair<T,T>> individualPairs, long count, String resultType) {
         super();
         this.average = average;
         this.min = min;
         this.max = max;
         this.median = median;
         this.standardDeviation = standardDeviation;
+        this.individualPairs = individualPairs;
         this.count = count;
         this.resultType = resultType;
     }
@@ -58,11 +62,16 @@ public class AveragePairWithStatsImpl<T> implements AveragePairWithStats<T> {
     public String getResultType() {
         return resultType;
     }
+    
+    @Override
+    public HashSet<Pair<T, T>> getIndividualPairs() {
+        return individualPairs;
+    }
 
     @Override
     public String toString() {
-        return "AveragePairWithStatsImpl [average=" + average + ", min=" + min + ", max=" + max + ", median=" + median
-                + ", standardDeviation=" + standardDeviation + ", count=" + count + ", resultType=" + resultType + "]";
+        return "PairWithStatsImpl [average=" + average + ", min=" + min + ", max=" + max + ", median=" + median
+                + ", standardDeviation=" + standardDeviation + ", individualPairs=" + individualPairs + ", count=" + count + ", resultType=" + resultType + "]";
     }
 
     @Override
@@ -76,6 +85,7 @@ public class AveragePairWithStatsImpl<T> implements AveragePairWithStats<T> {
         result = prime * result + ((min == null) ? 0 : min.hashCode());
         result = prime * result + ((resultType == null) ? 0 : resultType.hashCode());
         result = prime * result + ((standardDeviation == null) ? 0 : standardDeviation.hashCode());
+        result = prime * result + ((individualPairs == null) ? 0 : individualPairs.hashCode());
         return result;
     }
 
@@ -87,7 +97,7 @@ public class AveragePairWithStatsImpl<T> implements AveragePairWithStats<T> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        AveragePairWithStatsImpl<?> other = (AveragePairWithStatsImpl<?>) obj;
+        PairWithStatsImpl<?> other = (PairWithStatsImpl<?>) obj;
         if (average == null) {
             if (other.average != null)
                 return false;
@@ -119,6 +129,11 @@ public class AveragePairWithStatsImpl<T> implements AveragePairWithStats<T> {
             if (other.standardDeviation != null)
                 return false;
         } else if (!standardDeviation.equals(other.standardDeviation))
+            return false;
+        if (individualPairs == null) {
+            if (other.individualPairs != null)
+                return false;
+        } else if (!individualPairs.equals(other.individualPairs))
             return false;
         return true;
     }

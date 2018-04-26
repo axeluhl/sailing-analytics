@@ -22,9 +22,10 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.data.AveragePairWithStats;
+import com.sap.sse.datamining.shared.data.PairWithStats;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
@@ -87,16 +88,28 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
     protected void internalShowResults(QueryResultDTO<?> res) {
         result = res;
         createAndAddSeriesToChart();
-
+        
         for (Entry<GroupKey, ?> resultEntry : result.getResults().entrySet()) {
             @SuppressWarnings("unchecked")
-            AveragePairWithStats<Number> value = (AveragePairWithStats<Number>) resultEntry.getValue();
-            Point point = new Point(value.getAverage().getA(), value.getAverage().getB());
-            point.setName(resultEntry.getKey().asString());
-            seriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
-            .addPoint(point, false, false, false);   
+            PairWithStats<Number> value = (PairWithStats<Number>) resultEntry.getValue();
+            
+            if(value.getIndividualPairs() != null) {
+                for(Pair<Number, Number> pair : value.getIndividualPairs()) { 
+                    createAndAddPoint(resultEntry.getKey(), pair.getA(), pair.getB());
+                }
+            }
+            else {
+                createAndAddPoint(resultEntry.getKey(), value.getAverage().getA(), value.getAverage().getB());
+            }
+
         }
         chart.getXAxis().setAxisTitleText(result.getResultSignifier());
+    }
+    
+    private void createAndAddPoint(GroupKey key, Number x, Number y) {
+        Point point = new Point(x, y);
+        point.setName(key.asString());
+        seriesMappedByGroupKey.get(groupKeyToSeriesKey(key)).addPoint(point, false, false, false);     
     }
     
     private void createAndAddSeriesToChart() {
@@ -115,7 +128,7 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
             List<? extends GroupKey> subKeys = GroupKey.Util.getSubKeys(groupKey);
             return subKeys.size() == 1 ? subKeys.get(0) : new CompoundGroupKey(subKeys);
         } else {
-            return new GenericGroupKey<>(stringMessages.results());
+            return groupKey;
         }
     }
 
