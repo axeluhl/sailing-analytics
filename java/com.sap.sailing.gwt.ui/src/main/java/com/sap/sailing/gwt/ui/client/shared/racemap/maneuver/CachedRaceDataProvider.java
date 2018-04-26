@@ -1,17 +1,20 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap.maneuver;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,7 +46,7 @@ public abstract class CachedRaceDataProvider<K, D> {
 
     private final Supplier<TimePoint> startOfTrackingProvider, endOfTrackingProvider, liveTimePointProvider;
     private final Supplier<Boolean> isReplayingProvider;
-    private final Function<D, TimePoint> dataTimePointWithOffsetProvider;
+    private final Function<D, TimePoint> dataTimePointProvider, dataTimePointWithOffsetProvider;
     private final Map<K, EntryDataCache> cache = new HashMap<>();
     private final boolean triggerFullUpdateOnNewData;
 
@@ -71,8 +74,9 @@ public abstract class CachedRaceDataProvider<K, D> {
         this.endOfTrackingProvider = converter.apply(timeRangeProvider::getToTime);
         this.liveTimePointProvider = timer::getLiveTimePoint;
         this.isReplayingProvider = () -> timer.getPlayMode() == PlayModes.Replay;
-        this.dataTimePointWithOffsetProvider = data -> new MillisecondsTimePoint(
-                dataTimePointProvider.apply(data).getTime() + dataOffsetProvider.get());
+        this.dataTimePointProvider = dataTimePointProvider.andThen(MillisecondsTimePoint::new);
+        final UnaryOperator<TimePoint> addOffsetProvider = timePoint -> timePoint.plus(dataOffsetProvider.get());
+        this.dataTimePointWithOffsetProvider = this.dataTimePointProvider.andThen(addOffsetProvider);
         this.triggerFullUpdateOnNewData = triggerFullUpdateOnNewData;
     }
 
@@ -170,8 +174,8 @@ public abstract class CachedRaceDataProvider<K, D> {
      * 
      * @return {@link Map} of entries and their associated cached data sequences
      */
-    public final Map<K, List<D>> getCachedData() {
-        final Map<K, List<D>> result = new HashMap<>(cache.size());
+    public final Map<K, Iterable<D>> getCachedData() {
+        final Map<K, Iterable<D>> result = new HashMap<>(cache.size());
         for (Entry<K, EntryDataCache> entry : cache.entrySet()) {
             result.put(entry.getKey(), entry.getValue().getCachedRecords());
         }
@@ -192,11 +196,15 @@ public abstract class CachedRaceDataProvider<K, D> {
                         if (!loadedRecords.isEmpty()) {
                             final EntryDataCache data = cache.get(key);
                             if (data != null) {
-                                if (incremental && triggerFullUpdateOnNewData && !data.hasCachedRecords()) {
+                                if (incremental && triggerFullUpdateOnNewData && data.hasCachedRecords()) {
                                     entriesToTriggerFullUpdateFor.add(key);
                                 }
                                 entriesWithChangedData.add(key);
-                                data.updateCachedRecords(loadedRecords, incremental);
+                                if (incremental) {
+                                    data.updateCachedRecords(entriesToLoadDataFor.get(key), loadedRecords);
+                                } else {
+                                    data.updateCachedRecords(loadedRecords);
+                                }
                             }
                         }
                     }
@@ -227,8 +235,16 @@ public abstract class CachedRaceDataProvider<K, D> {
 
     private class EntryDataCache {
 
-        private final List<D> records = new ArrayList<>();
+        private final TreeSet<D> records = new TreeSet<>(Comparator.comparing(dataTimePointProvider));
 
+        /**
+         * Determines the {@link TimeRange} for which the data should be updated, if an update is required.
+         * 
+         * @param incremental
+         *            flag to specify whether the update would be incremental or not
+         * @return an {@link Optional} contained the {@link TimeRange} for the required update or an
+         *         {@link Optional#empty() empty Optional} if no update is required
+         */
         private final Optional<TimeRange> getUpdateTimeRange(final boolean incremental) {
             final Optional<TimeRange> result;
             if (records.isEmpty() || !incremental) {
@@ -237,8 +253,7 @@ public abstract class CachedRaceDataProvider<K, D> {
                 if (isReplayingProvider.get()) {
                     result = Optional.empty();
                 } else {
-                    final D latestRecord = records.get(records.size() - 1);
-                    final TimePoint lastDataTimePointWithOffset = dataTimePointWithOffsetProvider.apply(latestRecord);
+                    final TimePoint lastDataTimePointWithOffset = dataTimePointWithOffsetProvider.apply(records.last());
                     final TimePoint endTimePoint = getEndTimePoint();
                     if (!endTimePoint.after(lastDataTimePointWithOffset)) {
                         result = Optional.empty();
@@ -255,19 +270,41 @@ public abstract class CachedRaceDataProvider<K, D> {
             return end == null ? live : new MillisecondsTimePoint(Math.min(end.asMillis(), live.asMillis()));
         }
 
-        private final void updateCachedRecords(final List<D> records, final boolean append) {
-            if (!append) {
-                this.records.clear();
+        /**
+         * Updates the cache in the given {@link TimeRange time range} by removing all existing data which is included
+         * and adding the provided data.
+         * 
+         * @param timeRange
+         *            {@link TimeRange} for which included data has to be removed
+         * @param loadedRecords
+         *            data sequence to add to the cache
+         */
+        private final void updateCachedRecords(final TimeRange timeRange, final List<D> loadedRecords) {
+            for (Iterator<D> iterator = records.iterator(); iterator.hasNext();) {
+                if (timeRange.includes(dataTimePointProvider.apply(iterator.next()))) {
+                    iterator.remove();
+                }
             }
-            this.records.addAll(records);
+            this.records.addAll(loadedRecords);
         }
 
-        private final List<D> getCachedRecords() {
+        /**
+         * Fully updates the cache by clearing existing and adding the provided data.
+         * 
+         * @param loadedRecords
+         *            data sequence to add to the cache
+         */
+        private final void updateCachedRecords(final List<D> loadedRecords) {
+            this.records.clear();
+            this.records.addAll(loadedRecords);
+        }
+
+        private final Iterable<D> getCachedRecords() {
             return records;
         }
 
         private final boolean hasCachedRecords() {
-            return !getCachedRecords().isEmpty();
+            return !records.isEmpty();
         }
     }
 

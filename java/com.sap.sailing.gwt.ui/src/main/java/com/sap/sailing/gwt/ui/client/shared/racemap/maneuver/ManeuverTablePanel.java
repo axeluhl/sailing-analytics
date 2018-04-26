@@ -381,7 +381,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
     private void updateManeuverTableData() {
         final ArrayList<ManeuverTableData> data = new ArrayList<>();
-        for (final Entry<CompetitorWithBoatDTO, List<ManeuverDTO>> entry : competitorDataProvider.getCachedData().entrySet()) {
+        final Map<CompetitorWithBoatDTO, Iterable<ManeuverDTO>> cachedData = competitorDataProvider.getCachedData();
+        for (final Entry<CompetitorWithBoatDTO, Iterable<ManeuverDTO>> entry : cachedData.entrySet()) {
             for (ManeuverDTO maneuver : entry.getValue()) {
                 if (settings.getSelectedManeuverTypes().contains(maneuver.type)) {
                     data.add(new ManeuverTableData(entry.getKey(), maneuver));
