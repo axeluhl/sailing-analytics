@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Selenium
 Bundle-SymbolicName: org.openqa.selenium.osgi
-Bundle-Version: 3.6.0
+Bundle-Version: 3.11.0
 Bundle-ClassPath: lib/json-20080701.jar,
  client-combined-3.11.0.jar,
  lib/commons-codec-1.10.jar,
