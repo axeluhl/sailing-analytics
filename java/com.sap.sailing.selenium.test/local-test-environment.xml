@@ -36,14 +36,26 @@
         <name>webdriver.chrome.driver</name>
         <value>C:\apps\ChromeSeleniumDriver\chromedriver.exe</value>
      </system-property>
+     <!--
+        You need geckodriver to be able to run Selenium tests on FireFox.
+        This is the path to geckodriver, not FireFox.
+     -->
      <system-property>
         <name>webdriver.gecko.driver</name>
-        <!-- Default binary location on Windows: -->
-        <value>c:\path\to\geckodriver.exe</value>
-        <!--  -->
-        <!-- Default binary location on Linux: -->
-        <!-- <value>/usr/bin/firefox</value> --> 
+        <value>/path/to/geckodriver.exe</value>
      </system-property>
+     <!--
+        geckodriver automatically finds an installed version of FireFox.
+        If no fireFox is installed on the system or another version should be used,
+        the property "webdriver.firefox.bin" may be set to specify the path.
+        The default on Windows is "C:\Program Files\Mozilla Firefox\firefox.exe"
+      -->
+     <!--
+     <system-property>
+        <name>webdriver.firefox.bin</name>
+        <value>/path/to/firefox.exe</value> 
+     </system-property>
+     -->
   </system-properties>
   
   
