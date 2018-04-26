@@ -62,11 +62,13 @@ public class CompetitorWithBoatDTOImpl extends CompetitorDTOImpl implements Comp
 
     @Override
     public String getShortInfo() {
-        String result = null;
+        final String result;
         if (getShortName() != null && !getShortName().trim().isEmpty()) {
             result = getShortName(); 
         } else if (getBoat() != null) {
             result = getBoat().getSailId() != null ? getBoat().getSailId() : getBoat().getName();
+        } else {
+            result = super.getShortName();
         }
         return result;
     }
@@ -90,4 +92,9 @@ public class CompetitorWithBoatDTOImpl extends CompetitorDTOImpl implements Comp
     public BoatDTO getBoat() {
         return boat;
     }    
+
+    @Override
+    public boolean hasBoat() {
+        return getBoat() != null;
+    }
 }

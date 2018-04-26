@@ -129,6 +129,11 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     }
 
     @Override
+    public CompetitorDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion) {
+        return this;
+    }
+
+    @Override
     public String getTwoLetterIsoCountryCode() {
         return twoLetterIsoCountryCode;
     }
@@ -146,6 +151,25 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     @Override
     public String getShortName() {
         return shortName;
+    }
+
+    @Override
+    public String getShortInfo() {
+        final String result;
+        if (getShortName() != null && !getShortName().trim().isEmpty()) {
+            result = getShortName(); 
+        } else {
+            final String trimmedName = getName().trim();
+            if (trimmedName.isEmpty()) {
+                result = null;
+            } else {
+                result = (trimmedName.length()>0?""+trimmedName.charAt(0):"")
+                    + (trimmedName.length()>1?trimmedName.charAt(1):"")
+                    + (trimmedName.length()>0?trimmedName.charAt(trimmedName.length()-1):"");
+                        
+            }
+        }
+        return result;
     }
 
     @Override
@@ -200,5 +224,10 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     @Override
     public Duration getTimeOnDistanceAllowancePerNauticalMile() {
         return timeOnDistanceAllowancePerNauticalMile;
+    }
+
+    @Override
+    public boolean hasBoat() {
+        return false;
     }
 }

@@ -40,16 +40,14 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
     public MediaManagementControl(MediaPlayerManager mediaPlayerManager, UIObject popupLocation, StringMessages stringMessages) {
         super(mediaPlayerManager, stringMessages);
         this.popupLocation = popupLocation;
-
         this.dialogControl = new DialogBox(true, false);
-        this.dialogControl.setText("Manage Playback Media");
+        this.dialogControl.setText(stringMessages.managePlaybackMedia());
         this.dialogControl.addCloseHandler(this);
-
     }
 
     public void show() {
-        Collection<MediaTrack> reachableVideoTracks = new ArrayList<MediaTrack>();
-        Collection<MediaTrack> reachableAudioTracks = new ArrayList<MediaTrack>();
+        Collection<MediaTrack> reachableVideoTracks = new ArrayList<>();
+        Collection<MediaTrack> reachableAudioTracks = new ArrayList<>();
         addAssignedMediaTracksTo(reachableVideoTracks, reachableAudioTracks);
         addOverlappingMediaTracksTo(reachableVideoTracks, reachableAudioTracks);
         Panel grid = new VerticalPanel();
@@ -64,8 +62,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
         HorizontalPanel controlButtons = new HorizontalPanel();
         controlButtons.setWidth("100%");
         if (mediaPlayerManager.allowsEditing()) {
-            Button addButton = new Button("Add", new ClickHandler() {
-
+            Button addButton = new Button(stringMessages.add(), new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     hide();
@@ -74,9 +71,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
             });
             controlButtons.add(addButton);
         }
-
-        Button closeButton = new Button("Close", new ClickHandler() {
-
+        Button closeButton = new Button(stringMessages.close(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 hide();
@@ -84,7 +79,6 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
         });
         controlButtons.add(closeButton);
         controlButtons.setCellHorizontalAlignment(closeButton, HasHorizontalAlignment.ALIGN_RIGHT);
-        
         grid.add(controlButtons);
     }
 
@@ -110,7 +104,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
     private void addOverlappingMediaTracksTo(Collection<MediaTrack> reachableVideoTracks,
             Collection<MediaTrack> reachableAudioTracks) {
         for (MediaTrack mediaTrack : mediaPlayerManager.getOverlappingMediaTracks()) {
-            if (isPotentiallyPlayable(mediaTrack)) {
+            if (isPotentiallyPlayable(mediaTrack) && mediaTrack.mimeType != null) {
                 switch (mediaTrack.mimeType.mediaType) {
                 case video:
                     reachableVideoTracks.add(mediaTrack);

@@ -82,4 +82,14 @@ public class RootNodeSixtyInch extends RootNodeBase {
         }
         transitionTo(idleLoop);
     }
+
+    @Override
+    protected long getSwitchBeforeRaceStartInMillis() {
+        return 3*60*1000;
+    }
+
+    @Override
+    protected long getWaitTimeAfterRaceEndInMillis() {
+        return 60*1000;
+    }
 }

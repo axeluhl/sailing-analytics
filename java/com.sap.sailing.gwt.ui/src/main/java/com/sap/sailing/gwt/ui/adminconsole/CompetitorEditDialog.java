@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -33,8 +34,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * @author Axel Uhl (d043530)
  * 
  */
-public class CompetitorEditDialog extends DataEntryDialog<CompetitorWithBoatDTO> {
-    private final CompetitorWithBoatDTO competitorToEdit;
+public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO> extends DataEntryDialog<CompetitorType> {
+    private final CompetitorType competitorToEdit;
     private final TextBox name;
     private final TextBox shortName;
     private final TextBox displayColorTextBox;
@@ -48,7 +49,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorWithBoatDTO>
     private final DoubleBox timeOnTimeFactor;
     private final DoubleBox timeOnDistanceAllowanceInSecondsPerNauticalMile;
     
-    protected static class CompetitorWithoutBoatValidator implements Validator<CompetitorWithBoatDTO> {
+    protected static class CompetitorWithoutBoatValidator<CompetitorType extends CompetitorDTO> implements Validator<CompetitorType> {
         protected final StringMessages stringMessages;
 
         public CompetitorWithoutBoatValidator(StringMessages stringMessages) {
@@ -56,7 +57,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorWithBoatDTO>
         }
         
         @Override
-        public String getErrorMessage(CompetitorWithBoatDTO valueToValidate) {
+        public String getErrorMessage(CompetitorType valueToValidate) {
             String result = null;
             if (valueToValidate.getName() == null || valueToValidate.getName().isEmpty()) {
                 result = stringMessages.pleaseEnterAName();
@@ -70,10 +71,19 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorWithBoatDTO>
         }
     }
 
-    public static CompetitorEditDialog create(StringMessages stringMessages, CompetitorWithBoatDTO competitorToEdit,
-            DialogCallback<CompetitorWithBoatDTO> callback) {
-        return new CompetitorEditDialog(stringMessages.editCompetitor(), stringMessages, competitorToEdit,
-                new CompetitorEditDialog.CompetitorWithoutBoatValidator(stringMessages), callback);
+    /**
+     * Creates an edit dialog for competitors that may be competitors without a boat assigned (not instance of
+     * type {@link CompetitorWithBoatDTO}.
+     */
+    public static CompetitorEditDialog<CompetitorDTO> create(StringMessages stringMessages, CompetitorDTO competitorToEdit,
+            DialogCallback<CompetitorDTO> callback) {
+        return new CompetitorEditDialog<CompetitorDTO>(stringMessages.editCompetitor(), stringMessages, competitorToEdit,
+                new CompetitorEditDialog.CompetitorWithoutBoatValidator<CompetitorDTO>(stringMessages), callback) {
+                    @Override
+                    protected CompetitorDTO getResult() {
+                        return getBaseResult();
+                    }
+        };
     }
     
     /**
@@ -82,8 +92,8 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorWithBoatDTO>
      * @param competitorToEdit
      *            The 'competitorToEdit' parameter contains the competitor which should be changed or initialized.
      */
-    protected CompetitorEditDialog(String dialogTitle, StringMessages stringMessages, CompetitorWithBoatDTO competitorToEdit,
-            Validator<CompetitorWithBoatDTO> validator,  DialogCallback<CompetitorWithBoatDTO> callback) {
+    protected CompetitorEditDialog(String dialogTitle, StringMessages stringMessages, CompetitorType competitorToEdit,
+            Validator<CompetitorType> validator,  DialogCallback<CompetitorType> callback) {
         super(dialogTitle, null, stringMessages.ok(), stringMessages.cancel(),
                 validator, /* animationEnabled */true, callback);
         this.ensureDebugId("CompetitorEditDialog");
@@ -144,12 +154,12 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorWithBoatDTO>
      * @author Axel Uhl (D043530)
      *
      */
-    protected class InvalidColor implements Color {
+    protected static class InvalidColor implements Color {
         private static final long serialVersionUID = 4012986110898149543L;
-        private final Exception exception;
+        private final String exceptionMessage;
         
-        protected InvalidColor(Exception exception) {
-            this.exception = exception;
+        protected InvalidColor(Exception exception, StringMessages stringMessages) {
+            this.exceptionMessage = stringMessages.invalidColor(exception.getMessage());
         }
 
         @Override
@@ -164,7 +174,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorWithBoatDTO>
 
         @Override
         public String getAsHtml() {
-            return stringMessages.invalidColor(exception.getMessage());
+            return exceptionMessage;
         }
         
         @Override
@@ -173,8 +183,13 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorWithBoatDTO>
         }
     }
 
-    @Override
-    protected CompetitorWithBoatDTO getResult() {
+    /**
+     * Concrete sub-types need to tell which type of {@link CompetitorDTO} object they create; the {@link #getBaseResult} method
+     * can be used by sub-types to obtain a {@link CompetitorWithDTO} object that has all values managed by this implementation.
+     */
+    protected abstract CompetitorType getResult();
+    
+    protected CompetitorDTO getBaseResult() { 
         Color color;
         if (displayColorTextBox.getText() == null || displayColorTextBox.getText().isEmpty()) {
             color = null;
@@ -182,7 +197,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorWithBoatDTO>
             try {
                 color = new RGBColor(displayColorTextBox.getText());
             } catch (IllegalArgumentException iae) {
-                color = new InvalidColor(iae);
+                color = new InvalidColor(iae, stringMessages);
             }
         }
         CompetitorWithBoatDTO result = new CompetitorWithBoatDTOImpl(name.getText(),
@@ -224,7 +239,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorWithBoatDTO>
         return result;
     }
 
-    protected CompetitorWithBoatDTO getCompetitorToEdit() {
+    protected CompetitorType getCompetitorToEdit() {
         return competitorToEdit;
     }
 
