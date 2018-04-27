@@ -21,7 +21,7 @@ public class TabbedSailingResultsPresenter extends AbstractTabbedResultsPresente
     }
 
     @Override
-    public void showResult(QueryResultDTO<?> result) { // TODO make abstract
+    public void showResult(QueryResultDTO<?> result) {
         if (result != null) {
             if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarAggregation")) {
                 CloseableTabHeader oldHeader = getSelectedHeader();
