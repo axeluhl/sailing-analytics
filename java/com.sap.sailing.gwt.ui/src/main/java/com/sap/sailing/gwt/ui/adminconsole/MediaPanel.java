@@ -116,11 +116,17 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         });
         buttonAndFilterPanel.add(addUrlButton);
         
-        Button multiVideo = new Button("18todo multi video");
+        Button multiVideo = new Button(stringMessages.multiVideoLinking());
         multiVideo.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new MultiVideoDialog(sailingService, mediaService, stringMessages).center();
+                new MultiVideoDialog(sailingService, mediaService, stringMessages, errorReporter, new Runnable() {
+                    
+                    @Override
+                    public void run() {
+                        loadMediaTracks();
+                    }
+                }).center();
             }
         });
         buttonAndFilterPanel.add(multiVideo);

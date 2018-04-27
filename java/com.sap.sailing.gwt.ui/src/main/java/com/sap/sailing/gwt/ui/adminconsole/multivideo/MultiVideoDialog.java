@@ -50,8 +50,20 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 
 public class MultiVideoDialog extends DialogBox {
+    private static final String EMPTY_TEXT = "";
+    private static final int DELETE_COLUMN = 0;
+    private static final int URL_COLUMN = 1;
+    private static final int STATUS_COLUMN = 2;
+    private static final int DURATION_COLUMN = 3;
+    private static final int STARTTIME_COLUMN = 4;
+    private static final int MIMETYPE_COLUMN = 5;
+    private static final int RACES_COLUMN = 6;
+    
     private static final StyleHolder style = GWT.create(StyleHolder.class);
     private StringMessages stringMessages;
     private List<RemoteFileInfo> remoteFiles = new ArrayList<>();
@@ -62,12 +74,16 @@ public class MultiVideoDialog extends DialogBox {
     private SailingServiceAsync sailingService;
     private boolean isWorking;
     private Button doSaveButton;
+    private Runnable afterLinking;
+    private ErrorReporter errorReporter;
 
     public MultiVideoDialog(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
-            StringMessages stringMessages) {
+            StringMessages stringMessages, ErrorReporter errorReporter, Runnable afterLinking) {
         this.stringMessages = stringMessages;
         this.mediaService = mediaService;
         this.sailingService = sailingService;
+        this.errorReporter = errorReporter;
+        this.afterLinking = afterLinking;
         setGlassEnabled(true);
 
         FlowPanel mainContent = new FlowPanel();
@@ -88,7 +104,7 @@ public class MultiVideoDialog extends DialogBox {
             }
         });
 
-        statusLabel = new Label("i18n idle");
+        statusLabel = new Label(stringMessages.multiVideoIdle());
         mainContent.add(statusLabel);
 
         FlowPanel buttonPanel = new FlowPanel();
@@ -113,7 +129,7 @@ public class MultiVideoDialog extends DialogBox {
             }
         });
 
-        doSaveButton = new Button("i18n save");
+        doSaveButton = new Button(stringMessages.addMediaTrack());
         buttonPanel.add(doSaveButton);
         doSaveButton.addClickHandler(new ClickHandler() {
 
@@ -137,22 +153,35 @@ public class MultiVideoDialog extends DialogBox {
 
     protected void updateUI() {
         int y = 0;
+        dataTable.removeAllRows();
         dataTable.clear();
-        dataTable.setWidget(y, 0, new Label("i18n url"));
-        dataTable.setWidget(y, 1, new Label("i18n status"));
-        dataTable.setWidget(y, 2, new Label(stringMessages.duration()));
-        dataTable.setWidget(y, 3, new Label(stringMessages.startTime()));
-        dataTable.setWidget(y, 4, new Label(stringMessages.mimeType()));
-        dataTable.setWidget(y, 5, new Label(stringMessages.linkedRaces()));
+        dataTable.setWidget(y, DELETE_COLUMN, new Label(stringMessages.delete()));
+        dataTable.setWidget(y, URL_COLUMN, new Label(stringMessages.url()));
+        dataTable.setWidget(y, STATUS_COLUMN, new Label(stringMessages.status()));
+        dataTable.setWidget(y, DURATION_COLUMN, new Label(stringMessages.duration()));
+        dataTable.setWidget(y, STARTTIME_COLUMN, new Label(stringMessages.startTime()));
+        dataTable.setWidget(y, MIMETYPE_COLUMN, new Label(stringMessages.mimeType()));
+        dataTable.setWidget(y, RACES_COLUMN, new Label(stringMessages.linkedRaces()));
         y++;
         for (RemoteFileInfo remoteFile : remoteFiles) {
             Anchor link = new Anchor(remoteFile.url);
             link.setHref(remoteFile.url);
             link.setTarget("_blank");
-            dataTable.setWidget(y, 0, link);
-            dataTable.setWidget(y, 1, new Label(asString(remoteFile.status)));
+            dataTable.setWidget(y, URL_COLUMN, link);
+            dataTable.setWidget(y, STATUS_COLUMN, new Label(asString(remoteFile.status)));
+            
+            Button removeVideo = new Button(stringMessages.remove());
+            removeVideo.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    remoteFiles.remove(remoteFile);
+                    updateUI();
+                }
+            });
+            dataTable.setWidget(y, DELETE_COLUMN, removeVideo);
+            
             if (remoteFile.duration == null) {
-                dataTable.setWidget(y, 2, new Label("-"));
+                dataTable.setWidget(y, DURATION_COLUMN, new Label(EMPTY_TEXT));
             } else {
                 TextBox durationInput = new TextBox();
                 durationInput.setText(TimeFormatUtil.durationToHrsMinSec(remoteFile.duration));
@@ -164,19 +193,28 @@ public class MultiVideoDialog extends DialogBox {
                         updateUI();
                     }
                 });
-                dataTable.setWidget(y, 2, durationInput);
+                dataTable.setWidget(y, DURATION_COLUMN, durationInput);
             }
             if (remoteFile.startTime == null) {
-                dataTable.setWidget(y, 3, new Label("-"));
+                dataTable.setWidget(y, STARTTIME_COLUMN, new Label(EMPTY_TEXT));
             } else {
-                dataTable.setWidget(y, 3,
-                        new Label(TimeFormatUtil.DATETIME_FORMAT.format(remoteFile.startTime.asDate())));
+                DateAndTimeInput startTimeInput = new DateAndTimeInput(Accuracy.SECONDS);
+                startTimeInput.setValue(remoteFile.startTime.asDate());
+                startTimeInput.addValueChangeHandler(new ValueChangeHandler<Date>() {
+
+                    @Override
+                    public void onValueChange(ValueChangeEvent<Date> event) {
+                        remoteFile.startTime = new MillisecondsTimePoint(event.getValue());
+                        updateUI();
+                    }
+                });
+                dataTable.setWidget(y, STARTTIME_COLUMN, startTimeInput);
             }
             if (remoteFile.mime == null) {
                 if (remoteFile.message == null) {
-                    dataTable.setWidget(y, 4, new Label("-"));
+                    dataTable.setWidget(y, MIMETYPE_COLUMN, new Label(EMPTY_TEXT));
                 } else {
-                    dataTable.setWidget(y, 4, new Label(remoteFile.message));
+                    dataTable.setWidget(y, MIMETYPE_COLUMN, new Label(remoteFile.message));
                 }
             } else {
                 ListBox mimeTypeBox = new ListBox();
@@ -192,17 +230,17 @@ public class MultiVideoDialog extends DialogBox {
                     }
                 });
                 mimeTypeBox.setSelectedIndex(MimeType.mp4 == remoteFile.mime ? 0 : 1);
-                dataTable.setWidget(y, 4, mimeTypeBox);
+                dataTable.setWidget(y, MIMETYPE_COLUMN, mimeTypeBox);
             }
             if (remoteFile.candidates == null) {
-                dataTable.setWidget(y, 5, new Label("-"));
+                dataTable.setWidget(y, RACES_COLUMN, new Label(EMPTY_TEXT));
             } else {
                 if (remoteFile.candidates.isEmpty()) {
-                    dataTable.setWidget(y, 5, new Label(stringMessages.empty()));
+                    dataTable.setWidget(y, RACES_COLUMN, new Label(stringMessages.empty()));
                 } else {
 
                     FlowPanel ft = new FlowPanel();
-                    dataTable.setWidget(y, 5, ft);
+                    dataTable.setWidget(y, RACES_COLUMN, ft);
                     for (RegattaAndRaceIdentifier candidate : remoteFile.candidates) {
                         CheckBox cb = new CheckBox(candidate.getRegattaName() + " " + candidate.getRaceName());
                         cb.setValue(true, false);
@@ -227,13 +265,12 @@ public class MultiVideoDialog extends DialogBox {
 
         doScanButton.setEnabled(!isWorking);
         if (!isWorking) {
-            statusLabel.setText("i18n idle");
+            statusLabel.setText(stringMessages.multiVideoIdle());
         }
         center();
     }
 
     private void startNextLinkingRemoteTask() {
-        int done = 0;
         for (RemoteFileInfo remoteFile : remoteFiles) {
             if (remoteFile.status == EStatus.WAIT_FOR_SAVE) {
                 MediaTrack mediaTrack = new MediaTrack(remoteFile.url, remoteFile.url, remoteFile.startTime,
@@ -254,14 +291,10 @@ public class MultiVideoDialog extends DialogBox {
                         startNextLinkingRemoteTask();
                     }
                 });
-                if (remoteFile.status == EStatus.DONE) {
-                    done++;
-                }
                 return;
             }
         }
-        setWorking(false);
-        Window.alert("i18n " + " linked " + done);
+        afterLinking.run();
     }
 
     private void startNextInitializingRemoteTask() {
@@ -340,6 +373,7 @@ public class MultiVideoDialog extends DialogBox {
 
                     @Override
                     public void onFailure(Throwable caught) {
+                        errorReporter.reportError(caught.getMessage());
                         remoteFile.status = EStatus.ERROR_LINKING;
                         updateUI();
                     }
@@ -361,8 +395,6 @@ public class MultiVideoDialog extends DialogBox {
                             if (raceColumn.isTrackedRace(fleet)) {
                                 RaceDTO race = raceColumn.getRace(fleet);
                                 if (race.trackedRace != null) {
-                                    GWT.log(race.getRaceIdentifier() + " " + remoteFile.startTime + " "
-                                            + race.endOfRace);
                                     if (race.endOfRace == null || race.endOfRace.after(remoteFile.startTime.asDate())) {
                                         if (race.startOfRace == null || race.startOfRace.before(new Date(
                                                 remoteFile.startTime.asMillis() + remoteFile.duration.asMillis()))) {
@@ -419,7 +451,7 @@ public class MultiVideoDialog extends DialogBox {
                     @Override
                     public void error(Object msg) {
                         asyncCallback.onSuccess(
-                                new VideoMetadataDTO(false, null, false, null, msg == null ? "" : msg.toString()));
+                                new VideoMetadataDTO(false, null, false, null, msg == null ? EMPTY_TEXT : msg.toString()));
                     }
 
                     @Override
@@ -444,9 +476,29 @@ public class MultiVideoDialog extends DialogBox {
     private String asString(EStatus status) {
         switch (status) {
         case NOT_ANALYSED:
-            return "18n not analysied";
+            return stringMessages.multiVideoNotAnalyzed();
+        case ALREADY_ADDED:
+            return stringMessages.multiVideoAlreadyKnown();
+        case CLIENT_ANALYZE:
+            return stringMessages.multiVideoClientIsUploading();
+        case DONE:
+            return stringMessages.multiVideoFinishedLinking();
+        case ERROR_ANALYZE:
+            return stringMessages.multiVideoErrorInAnalyzingFile();
+        case ERROR_DOWNLOAD:
+            return stringMessages.couldNotDownload(EMPTY_TEXT);
+        case ERROR_LINKING:
+            return stringMessages.error();
+        case GETTING_MEDIATRACK:
+            return stringMessages.multiVideoObtainingMediaTrack();
+        case SERVER_ANALYSE:
+            return stringMessages.multiVideoServerIsAnalyzing();
+        case WAITING_FOR_LINK:
+            return stringMessages.multiVideoWaitingForLinkPhase();
+        case WAIT_FOR_SAVE:
+            return stringMessages.multiVideoWaitingForSave();
         default:
-            return status.name();
+            return stringMessages.unknown();
         }
     }
 
@@ -512,11 +564,11 @@ public class MultiVideoDialog extends DialogBox {
         ERROR_ANALYZE,
         CLIENT_ANALYZE,
         ERROR_DOWNLOAD,
-        ERROR_LINKING,
         WAIT_FOR_SAVE,
         DONE,
         ALREADY_ADDED,
-        GETTING_MEDIATRACK;
+        GETTING_MEDIATRACK,
+        ERROR_LINKING;
     }
 
     static class RemoteFileInfo {

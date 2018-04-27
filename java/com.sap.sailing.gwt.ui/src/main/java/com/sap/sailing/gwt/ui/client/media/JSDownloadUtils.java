@@ -174,30 +174,35 @@ public class JSDownloadUtils {
     }
     
     private native static void getFileListNative(String url, JSHrefCallback callback)/*-{
-        var xmlHttp = null;
-        var allLinks = []; //set of all internal and external links
-        xmlHttp = new XMLHttpRequest();
-        xmlHttp.open( "GET", url, true );
-        xmlHttp.send( null );
-        xmlHttp.onreadystatechange = function () {
-            if ( xmlHttp.readyState == 4) {
-                 if (xmlHttp.status == 200){
-                    var container = document.createElement("p");
-                    container.innerHTML = xmlHttp.responseText;
-                    var anchors = container.getElementsByTagName("a");
-                    for (var i = 0; i < anchors.length; i++) {
-                        try {
-                            var href = anchors[i].getAttribute("href");
-                            callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::newHref(Ljava/lang/String;)(href);
-                        } catch (error) {
-                            console.log(error);
+        try{
+            var xmlHttp = null;
+            var allLinks = []; //set of all internal and external links
+            xmlHttp = new XMLHttpRequest();
+            xmlHttp.open( "GET", url, true );
+            xmlHttp.send( null );
+            xmlHttp.onreadystatechange = function () {
+                if ( xmlHttp.readyState == 4) {
+                     if (xmlHttp.status == 200){
+                        var container = document.createElement("p");
+                        container.innerHTML = xmlHttp.responseText;
+                        var anchors = container.getElementsByTagName("a");
+                        for (var i = 0; i < anchors.length; i++) {
+                            try {
+                                var href = anchors[i].getAttribute("href");
+                                callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::newHref(Ljava/lang/String;)(href);
+                            } catch (error) {
+                                console.log(error);
+                            }
                         }
+                        callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::complete()();
+                    } else {
+                        callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::noResult()();
                     }
-                    callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::complete()();
-                } else {
-                    callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::noResult()();
-                }
-            } 
-        };
+                } 
+            };
+        } catch (error) {
+            callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::noResult()();
+        }
+
     }-*/;
 }

@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
@@ -14,6 +15,7 @@ import java.nio.channels.Channels;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +26,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.shiro.SecurityUtils;
 import org.mp4parser.IsoFile;
 import org.mp4parser.boxes.UserBox;
+import org.mp4parser.boxes.iso14496.part12.MediaDataBox;
 import org.mp4parser.boxes.iso14496.part12.MovieBox;
 import org.mp4parser.boxes.iso14496.part12.MovieHeaderBox;
 import org.mp4parser.tools.Path;
@@ -211,6 +214,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
             Date recordStartedTimer = determineRecordingStart(isof);
             Duration duration = determineDuration(isof);
             boolean spherical = determine360(isof);
+            removeTempFiles(isof);
             return new VideoMetadataDTO(canDownload, duration, spherical, recordStartedTimer, "");
         }
     }
@@ -229,6 +233,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
                 recordStartedTimer = determineRecordingStart(isof);
                 spherical = determine360(isof);
                 duration = determineDuration(isof);
+                removeTempFiles(isof);
             }
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error in video analysis ", e);
@@ -239,6 +244,23 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
             }
         }
         return new VideoMetadataDTO(true, duration, spherical, recordStartedTimer, message);
+    }
+
+    /**
+     * Some boxes (we don't actually need to read) create internal tempfiles, we delete them here, as the VM could run quite long
+     */
+    private void removeTempFiles(IsoFile isof) {
+        List<MediaDataBox> boxesWithTempFiles = isof.getBoxes(MediaDataBox.class, true);
+        for(MediaDataBox box:boxesWithTempFiles) {
+            try {
+                Field field = box.getClass().getDeclaredField("dataFile");
+                field.setAccessible(true);
+                File data = (File) field.get(box);
+                data.delete();
+            } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+                logger.log(Level.WARNING, "Could not delete mp4 temp files", e);
+            }
+        }
     }
 
     /**
