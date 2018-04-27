@@ -842,11 +842,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Double getExpeditionHeel(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionHeelIfAvailable);
-    }
-
-    @Override
     public Double getExpeditionTargetHeel(TimePoint at) {
         return getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTargetHeelIfAvailable);
     }
@@ -1039,11 +1034,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Double getAverageExpeditionRudderAngle(TimePoint at) {
         return getAverageExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getAverageExpeditionRudderAngleIfAvailable);
-    }
-    
-    @Override
-    public Double getAverageExpeditionHeel(TimePoint at) {
-        return getAverageExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getAverageExpeditionHeelIfAvailable);
     }
     
     @Override

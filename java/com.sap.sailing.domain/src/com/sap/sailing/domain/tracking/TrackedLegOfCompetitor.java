@@ -323,7 +323,6 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Double getExpeditionVMGTargVMGDelta(TimePoint at);
     Double getExpeditionRateOfTurn(TimePoint at);
     Double getExpeditionRudderAngle(TimePoint at);
-    Double getExpeditionHeel(TimePoint at);
     Double getExpeditionTargetHeel(TimePoint at);
     Double getExpeditionTimeToPortLayline(TimePoint at);
     Double getExpeditionTimeToStbLayline(TimePoint at);
@@ -363,7 +362,6 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Double getAverageExpeditionVMGTargVMGDelta(TimePoint at);
     Double getAverageExpeditionRateOfTurn(TimePoint at);
     Double getAverageExpeditionRudderAngle(TimePoint at);
-    Double getAverageExpeditionHeel(TimePoint at);
     Double getAverageExpeditionTargetHeel(TimePoint at);
     Double getAverageExpeditionTimeToPortLayline(TimePoint at);
     Double getAverageExpeditionTimeToStbLayline(TimePoint at);

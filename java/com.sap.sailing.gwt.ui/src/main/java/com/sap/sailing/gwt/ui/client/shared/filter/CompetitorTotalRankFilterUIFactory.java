@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -55,7 +55,7 @@ public class CompetitorTotalRankFilterUIFactory extends AbstractCompetitorNumber
     }
 
     @Override
-    public FilterWithUI<CompetitorWithBoatDTO> createFilterFromUI() {
+    public FilterWithUI<CompetitorDTO> createFilterFromUI() {
         CompetitorTotalRankFilter result = null;
         if(valueIntegerBox != null && operatorSelectionListBox != null) {
             result = new CompetitorTotalRankFilter();

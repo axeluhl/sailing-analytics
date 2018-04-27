@@ -42,7 +42,7 @@ public class CompetitorWithBoatEditDialog extends AbstractCompetitorWithBoatDial
             try {
                 boatColor = new RGBColor(boatDisplayColorTextBox.getValue());
             } catch (IllegalArgumentException iae) {
-                boatColor = new InvalidColor(iae);
+                boatColor = new InvalidColor(iae, getStringMessages());
             }
         }
 

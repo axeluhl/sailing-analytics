@@ -2835,6 +2835,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     protected void setDelayToLiveInMillis(long delayToLiveInMillis) {
+        logger.info("Setting live delay for race "+getRace().getName()+" to "+delayToLiveInMillis+"ms");
         this.delayToLiveInMillis = delayToLiveInMillis;
     }
 

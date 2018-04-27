@@ -116,7 +116,6 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
     Double getExpeditionVMGIfAvailable(TimePoint at);
     Double getExpeditionVMGTargVMGDeltaIfAvailable(TimePoint at);
     Double getExpeditionRateOfTurnIfAvailable(TimePoint at);
-    Double getExpeditionHeelIfAvailable(TimePoint at);
     Double getExpeditionTargetHeelIfAvailable(TimePoint at);
     Double getExpeditionTimeToPortLaylineIfAvailable(TimePoint at);
     Double getExpeditionTimeToStbLaylineIfAvailable(TimePoint at);
@@ -156,7 +155,6 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
     Double getAverageExpeditionVMGTargVMGDeltaIfAvailable(TimePoint start, TimePoint endTimePoint);
     Double getAverageExpeditionRateOfTurnIfAvailable(TimePoint start, TimePoint endTimePoint);
     Double getAverageExpeditionRudderAngleIfAvailable(TimePoint start, TimePoint endTimePoint);
-    Double getAverageExpeditionHeelIfAvailable(TimePoint start, TimePoint endTimePoint);
     Double getAverageExpeditionTargetHeelIfAvailable(TimePoint start, TimePoint endTimePoint);
     Double getAverageExpeditionTimeToPortLaylineIfAvailable(TimePoint start, TimePoint endTimePoint);
     Double getAverageExpeditionTimeToStbLaylineIfAvailable(TimePoint start, TimePoint endTimePoint);

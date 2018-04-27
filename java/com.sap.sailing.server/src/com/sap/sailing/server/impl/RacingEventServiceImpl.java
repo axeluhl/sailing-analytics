@@ -261,6 +261,7 @@ import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.Renamable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -4266,7 +4267,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     @Override
     public PairingList<RaceColumn, Fleet, Competitor,Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate,
-            final String leaderboardName, final Iterable<RaceColumn> selectedRaceColumn) {
+            final String leaderboardName, final Iterable<RaceColumn> selectedRaceColumn) throws PairingListCreationException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         List<Competitor> competitors = Util.createList(leaderboard.getAllCompetitors());
         Collections.shuffle(competitors);

@@ -374,13 +374,6 @@ public class LegEntryDTO implements Serializable {
         }
     }
 
-    public void setExpeditionHeel(Double expeditionHeel) {
-        if (expeditionHeel != null) {
-            ensureExpeditionHolder();
-            expeditionHolder.expeditionHeel = expeditionHeel;
-        }
-    }
-
     public void setExpeditionTargetHeel(Double expeditionTargetHeel) {
         if (expeditionTargetHeel != null) {
             ensureExpeditionHolder();
@@ -648,10 +641,6 @@ public class LegEntryDTO implements Serializable {
         return expeditionHolder == null ? null : expeditionHolder.expeditionForestayLoad;
     }
 
-    public Double getExpeditionHeel() {
-        return expeditionHolder == null ? null : expeditionHolder.expeditionHeel;
-    }
-
     public Double getExpeditionCourseDetail() {
         return expeditionHolder == null ? null : expeditionHolder.expeditionCourseDetail;
     }
@@ -727,7 +716,6 @@ public class LegEntryDTO implements Serializable {
         public Double expeditionLineSquareForWindDirection;
         public Double expeditionHeading;
         public Double expeditionForestayLoad;
-        public Double expeditionHeel;
         public Double expeditionCourseDetail;
         public Double expeditionDistanceToPinDetail;
         public Double expeditionVMGTargVMGDelta;
@@ -754,7 +742,6 @@ public class LegEntryDTO implements Serializable {
                     + ((expeditionDistanceToPinDetail == null) ? 0 : expeditionDistanceToPinDetail.hashCode());
             result = prime * result + ((expeditionForestayLoad == null) ? 0 : expeditionForestayLoad.hashCode());
             result = prime * result + ((expeditionHeading == null) ? 0 : expeditionHeading.hashCode());
-            result = prime * result + ((expeditionHeel == null) ? 0 : expeditionHeel.hashCode());
             result = prime * result + ((expeditionJibCarPort == null) ? 0 : expeditionJibCarPort.hashCode());
             result = prime * result + ((expeditionJibCarStbd == null) ? 0 : expeditionJibCarStbd.hashCode());
             result = prime * result + ((expeditionLineSquareForWindDirection == null) ? 0
@@ -863,11 +850,6 @@ public class LegEntryDTO implements Serializable {
                 if (other.expeditionHeading != null)
                     return false;
             } else if (!expeditionHeading.equals(other.expeditionHeading))
-                return false;
-            if (expeditionHeel == null) {
-                if (other.expeditionHeel != null)
-                    return false;
-            } else if (!expeditionHeel.equals(other.expeditionHeel))
                 return false;
             if (expeditionJibCarPort == null) {
                 if (other.expeditionJibCarPort != null)

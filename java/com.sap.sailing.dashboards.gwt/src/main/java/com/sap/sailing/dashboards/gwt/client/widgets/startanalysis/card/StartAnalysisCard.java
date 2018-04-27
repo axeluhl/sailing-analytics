@@ -85,8 +85,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
         this.sailingServiceAsync = sailingServiceAsync;
         this.raceMapResources = raceMapResources;
         competitorSelectionModel = new RaceCompetitorSelectionModel(/* hasMultiSelection */true);
-        competitorSelectionModel.setCompetitors(startAnalysisDTO.getCompetitorDTOsFromStartAnaylsisCompetitorDTOs(),
-                raceMap);
+        competitorSelectionModel.setCompetitors(startAnalysisDTO.getCompetitorDTOsFromStartAnaylsisCompetitorDTOs(), raceMap);
         initWidget(uiBinder.createAndBindUi(this));
         startanalysis_card.getElement().getStyle().setLeft(leftCSSProperty, Unit.PCT);
         this.startAnalysisDTO = startAnalysisDTO;

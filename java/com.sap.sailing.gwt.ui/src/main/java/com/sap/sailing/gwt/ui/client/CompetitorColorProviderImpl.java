@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import com.sap.sailing.domain.common.ColorMap;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
@@ -18,22 +19,22 @@ public class CompetitorColorProviderImpl implements CompetitorColorProvider {
      * Uses the {@link CompetitorWithBoatDTO#getIdAsString()} as the ID for the color map
      */
     private final ColorMap<String> competitorsColorMap;
-    private final Map<RegattaAndRaceIdentifier, Map<CompetitorWithBoatDTO, Color>> competitorsBoatColorsPerRace;
+    private final Map<RegattaAndRaceIdentifier, Map<CompetitorDTO, Color>> competitorsBoatColorsPerRace;
     
     public CompetitorColorProviderImpl() {
-        this(null, Collections.<CompetitorWithBoatDTO, BoatDTO> emptyMap());
+        this(null, Collections.<CompetitorDTO, BoatDTO> emptyMap());
     }
 
     public CompetitorColorProviderImpl(RegattaAndRaceIdentifier raceIdentifier,
-            Map<CompetitorWithBoatDTO, BoatDTO> competitorsAndTheirBoats) {
+            Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
         this.competitorsColorMap = new ColorMapImpl<>(RaceMap.WATER_COLOR);
-        this.competitorsBoatColorsPerRace = new HashMap<RegattaAndRaceIdentifier, Map<CompetitorWithBoatDTO, Color>>();
+        this.competitorsBoatColorsPerRace = new HashMap<RegattaAndRaceIdentifier, Map<CompetitorDTO, Color>>();
         if (raceIdentifier != null) {
-            for (Entry<CompetitorWithBoatDTO, BoatDTO> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {
+            for (Entry<CompetitorDTO, BoatDTO> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {
                 if (competitorAndBoat.getValue() != null) {
-                    Map<CompetitorWithBoatDTO, Color> raceColors = competitorsBoatColorsPerRace.get(raceIdentifier);
+                    Map<CompetitorDTO, Color> raceColors = competitorsBoatColorsPerRace.get(raceIdentifier);
                     if (raceColors == null) {
-                        raceColors = new HashMap<CompetitorWithBoatDTO, Color>();
+                        raceColors = new HashMap<>();
                         competitorsBoatColorsPerRace.put(raceIdentifier, raceColors);
                     }
                     Color boatColor = competitorAndBoat.getValue().getColor();
@@ -47,15 +48,15 @@ public class CompetitorColorProviderImpl implements CompetitorColorProvider {
     }
 
     @Override
-    public Color getColor(CompetitorWithBoatDTO competitor) {
+    public Color getColor(CompetitorDTO competitor) {
         return getColor(competitor, null);
     }
 
     @Override
-    public Color getColor(CompetitorWithBoatDTO competitor, RegattaAndRaceIdentifier raceIdentfier) {
+    public Color getColor(CompetitorDTO competitor, RegattaAndRaceIdentifier raceIdentfier) {
         Color result = null;
         if (raceIdentfier != null) {
-            Map<CompetitorWithBoatDTO, Color> raceColors = competitorsBoatColorsPerRace.get(raceIdentfier);
+            Map<CompetitorDTO, Color> raceColors = competitorsBoatColorsPerRace.get(raceIdentfier);
             if (raceColors != null) {
                 result = raceColors.get(competitor);
             }

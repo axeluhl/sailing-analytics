@@ -91,6 +91,7 @@ import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.simulation.SimulationService;
+import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
@@ -824,12 +825,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Matches the competitors of a leaderboard to the {@link PairingList}
      * 
-     * @param pairingListTemplate the returned {@link PairingList} is based upon it 
-     * @param leaderboardName name of the leaderboard
+     * @param pairingListTemplate
+     *            the returned {@link PairingList} is based upon it
+     * @param leaderboardName
+     *            name of the leaderboard
      * @return {@link PairingList} that contains competitor objects matched to {@link RaceColumn}s and {@link Fleet}s
+     * @throws PairingListCreationException
+     *             for example if the number of boats available for the leaderboard is too small to create the pairing
+     *             list
      */
     PairingList<RaceColumn, Fleet, Competitor,Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate, 
-            final String leaderboardName, final Iterable<RaceColumn> selectedFlights);
+            final String leaderboardName, final Iterable<RaceColumn> selectedFlights) throws PairingListCreationException;
 
     /**
      * From a {@link CompetitorDescriptor} looks up or creates a {@link CompetitorWithBoat} object which is then guaranteed
