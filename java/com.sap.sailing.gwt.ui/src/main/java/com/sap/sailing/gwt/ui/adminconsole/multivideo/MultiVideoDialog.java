@@ -171,6 +171,7 @@ public class MultiVideoDialog extends DialogBox {
             dataTable.setWidget(y, STATUS_COLUMN, new Label(asString(remoteFile.status)));
             
             Button removeVideo = new Button(stringMessages.remove());
+            removeVideo.setEnabled(!isWorking);
             removeVideo.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -238,7 +239,6 @@ public class MultiVideoDialog extends DialogBox {
                 if (remoteFile.candidates.isEmpty()) {
                     dataTable.setWidget(y, RACES_COLUMN, new Label(stringMessages.empty()));
                 } else {
-
                     FlowPanel ft = new FlowPanel();
                     dataTable.setWidget(y, RACES_COLUMN, ft);
                     for (RegattaAndRaceIdentifier candidate : remoteFile.candidates) {
@@ -295,6 +295,7 @@ public class MultiVideoDialog extends DialogBox {
             }
         }
         afterLinking.run();
+        hide();
     }
 
     private void startNextInitializingRemoteTask() {
