@@ -22,16 +22,19 @@ import org.xml.sax.SAXException;
 
 public class MediaFileParser {
     public static void main(String[] args) throws MalformedURLException, ParserConfigurationException, SAXException, IOException {
-        new MediaFileParser().checkMetadataByFullFileDownload(new File(args[0]));
+        new MediaFileParser().checkMetadata(new File(args[0]));
     }
     
-    private void checkMetadataByFullFileDownload(File input)
-            throws ParserConfigurationException, SAXException, IOException {
-        IsoFile isof = new IsoFile(input);
-        Date recordStartedTimer = determineRecordingStart(isof);
-        long durationInMillis = determineDurationInMillis(isof);
-        boolean spherical = determine360(isof);
-        System.out.println("Start: "+recordStartedTimer.toString()+", duration: "+durationInMillis+"ms; spherical: "+spherical);
+    public void checkMetadata(File file) throws IOException, ParserConfigurationException, SAXException {
+        boolean spherical = false;
+        long durationInMillis = -1;
+        Date recordStartedTimer = null;
+        try (IsoFile isof = new IsoFile(file)) {
+            recordStartedTimer = determineRecordingStart(isof);
+            spherical = determine360(isof);
+            durationInMillis = determineDurationInMillis(isof);
+            System.out.println("Start: "+recordStartedTimer.toString()+", duration: "+durationInMillis+"ms; spherical: "+spherical);
+        }
     }
 
     private boolean determine360(IsoFile isof) throws ParserConfigurationException, SAXException, IOException {
