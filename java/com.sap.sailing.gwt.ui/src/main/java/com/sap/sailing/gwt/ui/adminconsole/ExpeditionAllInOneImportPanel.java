@@ -151,7 +151,6 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
             if (response == null) {
                 Window.alert(StringMessages.INSTANCE.unexpectedErrorDuringFileImport());
             } else if (response.hasEventId()) {
-                
                 new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
                         response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getRaceEntries(), response.getGpsDeviceIds(),
                         response.getSensorDeviceIds(), response.getSensorFixImporterType(), sailingService,

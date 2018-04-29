@@ -63,7 +63,6 @@ public class ExpeditionAllInOneAfterImportHandler {
         this.stringMessages = stringMessages;
         this.raceEntries = raceEntries;
         this.regattaName = regattaName;
-                
         sailingService.getEventById(eventId, false, new DataLoadingCallback<EventDTO>() {
             @Override
             public void onSuccess(EventDTO result) {
