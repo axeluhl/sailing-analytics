@@ -188,7 +188,8 @@ public class ExpeditionAllInOneImporter {
     }
 
     public ImporterResult importFiles(final String filenameWithSuffix, final FileItem fileItem,
-            final String boatClassName, ImportMode importMode, String existingRegattaName) throws AllinOneImportException, IOException, FormatNotSupportedException {
+            final String boatClassName, ImportMode importMode, String existingRegattaName, boolean importStartLinePings)
+                    throws AllinOneImportException, IOException, FormatNotSupportedException {
         final List<ErrorImportDTO> errors = new ArrayList<>();
         final String importTimeString = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC));
         final String filename = ExpeditionImportFilenameUtils.truncateFilenameExtentions(filenameWithSuffix);
@@ -248,7 +249,9 @@ public class ExpeditionAllInOneImporter {
         final List<DynamicTrackedRace> trackedRaces = new ArrayList<>();
         final ExpeditionStartData startData = new ExpeditionCourseInferrer().getStartData(fileItem.getInputStream(), filename);
         // TODO from the start times, suggest the user to split the session into one session per start, with start tracking at n minutes before start
-        // TODO optionally populate the session(s) with a start line if none is defined yet and if desired (flag!) add the pings
+        if (importStartLinePings) {
+            // TODO optionally populate the session(s) with a start line if none is defined yet and if desired (flag!) add the pings
+        }
         if (importMode == ImportMode.NEW_EVENT) {
             leaderboardGroupName = filenameWithDateTimeSuffix;
             regattaNameAndleaderboardName = filenameWithDateTimeSuffix;

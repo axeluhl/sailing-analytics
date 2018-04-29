@@ -10,6 +10,7 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -99,7 +100,10 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
             regattaNamePanel.setVisible(true);
             boatClassPanel.setVisible(false);
         });
-
+        final CheckBox importStartLinePings = new CheckBox(stringMessages.importStartLinePings());
+        importStartLinePings.setValue(true);
+        importStartLinePings.setName(ExpeditionAllInOneConstants.REQUEST_PARAMETER_IMPORT_START_LINE_PINGS);
+        importModePanel.add(importStartLinePings);
         regattaNamePanel.setSpacing(5);
         final Label regattaNameLabel = new Label(stringMessages.regattaName() + ":");
         regattaNamePanel.add(regattaNameLabel);

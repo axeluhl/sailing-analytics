@@ -65,6 +65,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
             String regattaName = null;
             String importModeName = null;
             String localeName = null;
+            boolean importStartLinePings = false;
             for (FileItem fi : fileItems) {
                 if (!fi.isFormField()) {
                     fileName = fi.getName();
@@ -81,6 +82,9 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
                     }
                     if (ExpeditionAllInOneConstants.REQUEST_PARAMETER_LOCALE.equals(fi.getFieldName())) {
                         localeName = fi.getString();
+                    }
+                    if (ExpeditionAllInOneConstants.REQUEST_PARAMETER_IMPORT_START_LINE_PINGS.equals(fi.getFieldName())) {
+                        importStartLinePings = Boolean.valueOf(fi.getString().equalsIgnoreCase("on"));
                     }
                 }
             }
@@ -118,7 +122,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
             }
             importerResult = new ExpeditionAllInOneImporter(serverStringMessages, uiLocale, getService(),
                     raceLogTrackingAdapterTracker.getService().getAdapter(getService().getBaseDomainFactory()),
-                    getServiceFinderFactory(), getContext()).importFiles(fileName, fileItem, boatClassName, importMode, regattaName);
+                    getServiceFinderFactory(), getContext()).importFiles(fileName, fileItem, boatClassName, importMode, regattaName, importStartLinePings);
         } catch (AllinOneImportException e) {
             importerResult = new ImporterResult(e, e.additionalErrors);
             logger.log(Level.SEVERE, e.getMessage());
