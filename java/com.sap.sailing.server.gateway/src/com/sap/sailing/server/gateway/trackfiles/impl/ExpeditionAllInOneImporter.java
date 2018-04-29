@@ -21,6 +21,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 import org.apache.commons.fileupload.FileItem;
 import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
@@ -247,7 +249,7 @@ public class ExpeditionAllInOneImporter {
         final String regattaNameAndleaderboardName;
         final List<Triple<String, String, String>> raceNameRaceColumnNameFleetnameList = new ArrayList<>();
         final List<DynamicTrackedRace> trackedRaces = new ArrayList<>();
-        final ExpeditionStartData startData = new ExpeditionCourseInferrer().getStartData(fileItem.getInputStream(), filename);
+        final ExpeditionStartData startData = new ExpeditionCourseInferrer().getStartData(fileItem.getInputStream(), filenameWithSuffix);
         // TODO from the start times, suggest the user to split the session into one session per start, with start tracking at n minutes before start
         if (importStartLinePings) {
             // TODO optionally populate the session(s) with a start line if none is defined yet and if desired (flag!) add the pings
