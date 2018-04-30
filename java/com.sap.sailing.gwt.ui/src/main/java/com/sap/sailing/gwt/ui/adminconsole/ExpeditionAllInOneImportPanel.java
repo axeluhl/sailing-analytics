@@ -100,10 +100,10 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
             regattaNamePanel.setVisible(true);
             boatClassPanel.setVisible(false);
         });
-        final CheckBox importStartLinePings = new CheckBox(stringMessages.importStartLinePings());
-        importStartLinePings.setValue(true);
-        importStartLinePings.setName(ExpeditionAllInOneConstants.REQUEST_PARAMETER_IMPORT_START_LINE_PINGS);
-        importModePanel.add(importStartLinePings);
+        final CheckBox importStartData = new CheckBox(stringMessages.importStartData());
+        importStartData.setValue(true);
+        importStartData.setName(ExpeditionAllInOneConstants.REQUEST_PARAMETER_IMPORT_START_DATA);
+        importModePanel.add(importStartData);
         regattaNamePanel.setSpacing(5);
         final Label regattaNameLabel = new Label(stringMessages.regattaName() + ":");
         regattaNamePanel.add(regattaNameLabel);

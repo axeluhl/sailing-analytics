@@ -12,6 +12,8 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.gateway.trackfiles.impl.ExpeditionCourseInferrer;
 import com.sap.sailing.server.gateway.trackfiles.impl.ExpeditionStartData;
@@ -25,7 +27,9 @@ public class ExpeditionStartDataTest {
     @Test
     public void readFile() throws IOException, FormatNotSupportedException, ParseException {
         final String filename = "2018Apr28_05.csv.gz";
-        final ExpeditionStartData result = new ExpeditionCourseInferrer().getStartData(getClass().getResourceAsStream(filename), filename);
+        final ExpeditionStartData result = new ExpeditionCourseInferrer(
+                RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(DomainFactory.INSTANCE)).getStartData(
+                        getClass().getResourceAsStream(filename), filename);
         assertNotNull(result);
         final Set<TimePoint> startTimes = new HashSet<>();
         Util.addAll(result.getStartTimes(), startTimes);

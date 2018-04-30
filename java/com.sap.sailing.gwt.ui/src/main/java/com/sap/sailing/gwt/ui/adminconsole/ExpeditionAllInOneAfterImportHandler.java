@@ -66,6 +66,7 @@ public class ExpeditionAllInOneAfterImportHandler {
         this.raceEntries = raceEntries;
         this.regattaName = regattaName;
         this.startTimes = startTimes;
+        // TODO from the start times, suggest the user to split the session into one session per start, with start tracking at n minutes before start
         sailingService.getEventById(eventId, false, new DataLoadingCallback<EventDTO>() {
             @Override
             public void onSuccess(EventDTO result) {

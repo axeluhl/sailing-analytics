@@ -5,20 +5,38 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
+import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.sensordata.ExpeditionExtendedSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.trackfiles.impl.CompressedStreamsUtil;
 import com.sap.sailing.server.trackfiles.impl.ExpeditionExtendedDataImporterImpl;
 import com.sap.sailing.server.trackfiles.impl.ExpeditionImportFileHandler;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import difflib.PatchFailedException;
 
 /**
  * From an Expedition log file extracts a {@link ExpeditionStartData} object that has all mark "ping" positions for the
@@ -34,7 +52,16 @@ public class ExpeditionCourseInferrer {
     private static final String START_LINE_PORT_END_LON = "Port lon";
     private static final String START_LINE_STARBOARD_END_LAT = "Stbd lat";
     private static final String START_LINE_STARBOARD_END_LON = "Stbd lon";
+    private static final String START_LINE_PORT_END_MARK_NAME = "Start P";
+    private static final String START_LINE_STARBOARD_END_MARK_NAME = "Start S";
     
+    private final RaceLogTrackingAdapter raceLogTrackingAdapter;
+    
+    public ExpeditionCourseInferrer(RaceLogTrackingAdapter raceLogTrackingAdapter) {
+        super();
+        this.raceLogTrackingAdapter = raceLogTrackingAdapter;
+    }
+
     public ExpeditionStartData getStartData(InputStream inputStream, String filenameWithSuffix)
             throws IOException, FormatNotSupportedException {
         final List<TimePoint> startTimeCandidates = new ArrayList<>();
@@ -98,5 +125,82 @@ public class ExpeditionCourseInferrer {
             columnIndex >= lineContentTokens.length ? null
                 : lineContentTokens[columnIndex].trim().isEmpty() ? null
                         : Double.parseDouble(lineContentTokens[columnIndex]);
+    }
+
+    /**
+     * For the tracked races provided constructs a start line based on the {@code startData} and its
+     * {@link ExpeditionStartData#getStartLinePortFixes() port} and
+     * {@link ExpeditionStartData#getStartLineStarboardFixes() starboard} fixes. Course marks named
+     * {@link #START_LINE_PORT_END_MARK_NAME} and {@link #START_LINE_STARBOARD_END_MARK_NAME} are looked
+     * up in the tracked races. If not found, such marks are defined through the regatta log.
+     */
+    public void setStartLine(ExpeditionStartData startData, Iterable<DynamicTrackedRace> trackedRaces, RacingEventService racingEventService) {
+        for (final DynamicTrackedRace trackedRace : trackedRaces) {
+            setStartLine(startData, trackedRace, racingEventService);
+        }
+    }
+
+    private void setStartLine(ExpeditionStartData startData, DynamicTrackedRace trackedRace, RacingEventService racingEventService) {
+        final Mark portMark = getOrCreateMarkPings(trackedRace, START_LINE_PORT_END_MARK_NAME, startData.getStartLinePortFixes(), racingEventService);
+        final Mark starboardMark = getOrCreateMarkPings(trackedRace, START_LINE_STARBOARD_END_MARK_NAME, startData.getStartLineStarboardFixes(), racingEventService);
+        final ControlPoint startLine = racingEventService.getBaseDomainFactory().getOrCreateControlPointWithTwoMarks(
+                UUID.randomUUID(), "Start", portMark, starboardMark);
+        try {
+            trackedRace.getRace().getCourse().update(Collections.singleton(new Pair<>(startLine, PassingInstruction.Line)),
+                racingEventService.getBaseDomainFactory());
+        } catch (PatchFailedException e) {
+            logger.log(Level.WARNING, "Internal error while setting a course with a start line for race "+trackedRace.getRace().getName(), e);
+        }
+    }
+
+    private Mark getOrCreateMarkPings(DynamicTrackedRace trackedRace, String markName, Iterable<GPSFix> markFixes, RacingEventService racingEventService) {
+        final Mark mark = getOrCreateMark(trackedRace, markName, racingEventService);
+        for (final GPSFix fix : markFixes) {
+            recordFix(mark, fix, trackedRace, racingEventService);
+        }
+        return mark;
+    }
+
+    /**
+     * Creates a "ping" device mapping for the {@code mark} in the regatta log that is retrieved from the tracked race's
+     * regatta.
+     */
+    private void recordFix(Mark mark, GPSFix fix, DynamicTrackedRace trackedRace, RacingEventService racingEventService) {
+        raceLogTrackingAdapter.pingMark(trackedRace.getAttachedRegattaLogs().iterator().next(), mark, fix, racingEventService);
+    }
+
+    /**
+     * @param racingEventService
+     *            used to determine the server author based on the user currently logged on, furthermore to get access
+     *            to the {@link SharedDomainFactory} used to create a new mark in case a mark by the desired name is not
+     *            found in the race or regatta.
+     * @return the mark found or created
+     */
+    private Mark getOrCreateMark(DynamicTrackedRace trackedRace, String markName, RacingEventService racingEventService) {
+        Mark mark = null;
+        final Regatta regatta = trackedRace.getTrackedRegatta().getRegatta();
+        outer: for (final RaceColumn raceColumn : regatta.getRaceColumns()) {
+            for (final Fleet fleet : raceColumn.getFleets()) {
+                final TrackedRace trackedRaceForFleet = raceColumn.getTrackedRace(fleet);
+                if (trackedRaceForFleet == trackedRace) {
+                    // found it; grab marks:
+                    for (final Mark availableMark : raceColumn.getAvailableMarks(fleet)) {
+                        if (availableMark.getName().equals(markName)) {
+                            mark = availableMark;
+                            break outer; // found the mark with the correct name; done
+                        }
+                    }
+                    if (mark == null) {
+                        mark = racingEventService.getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), markName);
+                        final TimePoint now = MillisecondsTimePoint.now();
+                        RegattaLogDefineMarkEventImpl defineMarkEvent = new RegattaLogDefineMarkEventImpl(now,
+                                racingEventService.getServerAuthor(), now, UUID.randomUUID(), mark);
+                        regatta.getRegattaLog().add(defineMarkEvent);
+                    }
+                    break outer; // tracked race found, mark found or created at this point; no need to scan more columns
+                }
+            }
+        }
+        return mark;
     }
 }
