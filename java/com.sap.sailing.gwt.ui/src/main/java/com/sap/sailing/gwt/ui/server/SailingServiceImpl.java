@@ -6001,7 +6001,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        
         RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(),
                 getService().getServerAuthor(), raceLog.getCurrentPassId(), course, CourseDesignerMode.ADMIN_CONSOLE);
         raceLog.add(event);

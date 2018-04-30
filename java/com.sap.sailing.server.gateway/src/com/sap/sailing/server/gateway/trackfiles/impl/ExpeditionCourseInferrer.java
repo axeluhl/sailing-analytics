@@ -5,21 +5,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.impl.CourseDataImpl;
+import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -37,10 +42,7 @@ import com.sap.sailing.server.trackfiles.impl.ExpeditionExtendedDataImporterImpl
 import com.sap.sailing.server.trackfiles.impl.ExpeditionImportFileHandler;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import difflib.PatchFailedException;
 
 /**
  * From an Expedition log file extracts a {@link ExpeditionStartData} object that has all mark "ping" positions for the
@@ -163,12 +165,12 @@ public class ExpeditionCourseInferrer {
         logger.info("Creating start line in tracked race "+trackedRace.getRace().getName());
         final ControlPoint startLine = racingEventService.getBaseDomainFactory().getOrCreateControlPointWithTwoMarks(
                 UUID.randomUUID(), START_LINE_CONTROL_POINT_NAME, portMark, starboardMark);
-        try {
-            trackedRace.getRace().getCourse().update(Collections.singleton(new Pair<>(startLine, PassingInstruction.Line)),
-                racingEventService.getBaseDomainFactory());
-        } catch (PatchFailedException e) {
-            logger.log(Level.WARNING, "Internal error while setting a course with a start line for race "+trackedRace.getRace().getName(), e);
-        }
+        final CourseBase course = new CourseDataImpl("Auto-Course "+trackedRace.getRace().getName());
+        course.addWaypoint(0, new WaypointImpl(startLine, PassingInstruction.Line));
+        final RaceLog raceLog = trackedRace.getAttachedRaceLogs().iterator().next();
+        RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(),
+                racingEventService.getServerAuthor(), raceLog.getCurrentPassId(), course, CourseDesignerMode.ADMIN_CONSOLE);
+        raceLog.add(event);
     }
 
     private Mark getOrCreateMarkAndAddPings(DynamicTrackedRace trackedRace, String markName, Iterable<GPSFix> markFixes, RacingEventService racingEventService) {
