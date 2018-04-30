@@ -9,7 +9,6 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.MediaElement;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -40,6 +39,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
@@ -81,6 +81,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     private boolean remoteMp4WasFinished;
 
     private Button defaultTimeButton;
+
+    private SimpleBusyIndicator busyIndicator;
 
     public NewMediaDialog(MediaServiceAsync mediaService, TimePoint defaultStartTime, StringMessages stringMessages,
             RegattaAndRaceIdentifier raceIdentifier, DialogCallback<MediaTrack> dialogCallback) {
@@ -163,7 +165,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     @Override
     protected Widget getAdditionalWidget() {
         VerticalPanel mainPanel = new VerticalPanel();
-        Grid formGrid = new Grid(5, 2);
+        Grid formGrid = new Grid(6, 2);
         formGrid.setCellSpacing(3);
         formGrid.setWidget(0, 0, new Label(stringMessages.url() + ":"));
         urlBox = createUrlBox();
@@ -193,15 +195,15 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         formGrid.setWidget(4, 0, new Label(stringMessages.duration() + ":"));
         durationBox = createTextBox(null);
         formGrid.setWidget(4, 1, durationBox);
+        busyIndicator = new SimpleBusyIndicator();
+        formGrid.setWidget(5, 0, busyIndicator);
         mainPanel.add(formGrid);
-
         return mainPanel;
     }
 
     private TextBox createUrlBox() {
         TextBox result = createTextBox(null);
         result.addChangeHandler(new ChangeHandler() {
-
             @Override
             public void onChange(ChangeEvent event) {
                 Scheduler.get().scheduleDeferred(new ScheduledCommand() {
@@ -242,7 +244,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         remoteMp4WasStarted = false;
         remoteMp4WasFinished = false;
         refreshUI();
-        if (MimeType.mp4.equals(mediaTrack.mimeType)) {
+        if (!remoteMp4WasStarted && MimeType.mp4.equals(mediaTrack.mimeType)) {
             processMp4(mediaTrack);
         } else {
             loadMediaDuration();
@@ -255,18 +257,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
             return lastPathSegment.substring(0, paramSegment);
         }
         return lastPathSegment;
-    }
-
-    protected void setUiEnabled(boolean isEnabled) {
-        urlBox.setEnabled(isEnabled);
-        defaultTimeButton.setEnabled(isEnabled);
-        startTimeBox.setEnabled(isEnabled);
-        getOkButton().setEnabled(isEnabled);
-        if (isEnabled) {
-            setCursor(Style.Cursor.AUTO);
-        } else {
-            setCursor(Style.Cursor.WAIT);
-        }
     }
 
     private native void registerNativeMethods() /*-{
@@ -301,12 +291,16 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                     document.body.removeChild(window.youtubeMetadataCallbackScript);
                     delete window.youtubeMetadataCallbackScript;
                 }
-                that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setUiEnabled(Z)(true);
+                that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setBusy(Z)(false);
             }, 2000);
     }-*/;
+    
+    public void setBusy(boolean busy) {
+        busyIndicator.setBusy(busy);
+    }
 
     public void youtubeMetadataCallback(String title, String durationInSeconds, String description) {
-        setUiEnabled(true);
+        busyIndicator.setBusy(false);
         mediaTrack.title = title;
         try {
             long duration = (long) Math.round(1000 * Double
@@ -355,22 +349,21 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     }
 
     private void processMp4(MediaTrack mediaTrack) {
-        this.setUiEnabled(false);
+        this.busyIndicator.setBusy(true);
         remoteMp4WasStarted = true;
         remoteMp4WasFinished = false;
         infoLabel.setWidget(new Label(stringMessages.processingMP4()));
         mediaService.checkMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
-
             @Override
             public void onSuccess(VideoMetadataDTO result) {
-                setUiEnabled(true);
+                busyIndicator.setBusy(false);
                 remoteMp4WasFinished = true;
                 mp4MetadataResult(result);
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                setUiEnabled(true);
+                busyIndicator.setBusy(false);
                 remoteMp4WasFinished = true;
                 manualMimeTypeSelection(caught.getMessage(), mediaTrack);
                 loadMediaDuration();
@@ -392,7 +385,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
             public void onSuccess(VideoMetadataDTO result) {
                 remoteMp4WasFinished = true;
                 if (result.isDownloadable()) {
-                    setUiEnabled(true);
+                    busyIndicator.setBusy(false);
                     mp4MetadataResult(result);
                 } else {
                     checkMetadataOnClient(url, lbl, asyncCallback);
@@ -448,7 +441,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         } else {
             mediaTrack.duration = result.getDuration();
             mediaTrack.mimeType = result.isSpherical() ? MimeType.mp4panorama : MimeType.mp4;
-            if(result.getRecordStartedTime() != null){
+            if (result.getRecordStartedTime() != null){
                 mediaTrack.startTime = new MillisecondsTimePoint(result.getRecordStartedTime());
             }
             refreshUI();
@@ -460,12 +453,10 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         if (message != null) {
             fp.add(new Label(message));
         }
-
         ListBox mimeTypeListBox = createListBox(false);
         mimeTypeListBox.addItem(MimeType.mp4.name());
         mimeTypeListBox.addItem(MimeType.mp4panorama.name());
         mimeTypeListBox.addChangeHandler(new ChangeHandler() {
-
             @Override
             public void onChange(ChangeEvent event) {
                 mediaTrack.mimeType = MimeType.valueOf(mimeTypeListBox.getSelectedValue());

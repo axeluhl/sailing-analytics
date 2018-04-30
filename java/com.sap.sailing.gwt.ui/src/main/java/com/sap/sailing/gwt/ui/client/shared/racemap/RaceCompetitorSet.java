@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.RaceCompetitorIdsAsStringWithMD5Hash;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -43,7 +44,7 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
      * 
      * When {@link #idsAsStringOfCompetitorsParticipatingInRace} is <code>null</code> then so is this field, and vice versa.
      */
-    private Iterable<CompetitorWithBoatDTO> competitorsParticipatingInRace;
+    private Iterable<CompetitorDTO> competitorsParticipatingInRace;
 
     private Set<CompetitorsForRaceDefinedListener> competitorsForRaceDefinedListeners;
     
@@ -51,7 +52,7 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
      * Such listeners are notified whenever the response to {@link #getCompetitorsParticipatingInRace()} changes.
      */
     public static interface CompetitorsForRaceDefinedListener {
-        void competitorsForRaceDefined(Iterable<CompetitorWithBoatDTO> competitors);
+        void competitorsForRaceDefined(Iterable<CompetitorDTO> competitors);
     }
     
     RaceCompetitorSet() {} // for GWT serialization only
@@ -69,29 +70,29 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
         this.competitorsParticipatingInRace = competitorSelection.getAllCompetitors();
         competitorSelection.addCompetitorSelectionChangeListener(new CompetitorSelectionChangeListener() {
             @Override
-            public void removedFromSelection(CompetitorWithBoatDTO competitor) {
+            public void removedFromSelection(CompetitorDTO competitor) {
                 // we don't care about selection
             }
             
             @Override
-            public void filteredCompetitorsListChanged(Iterable<CompetitorWithBoatDTO> filteredCompetitors) {
+            public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
                 // filtering doesn't affect who we think participates in the race
             }
             
             @Override
-            public void filterChanged(FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> oldFilterSet,
-                    FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> newFilterSet) {
+            public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
+                    FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
                 // filtering doesn't affect who we think participates in the race
             }
             
             @Override
-            public void competitorsListChanged(final Iterable<CompetitorWithBoatDTO> competitors) {
+            public void competitorsListChanged(final Iterable<CompetitorDTO> competitors) {
                 competitorsParticipatingInRace = computeCompetitorsFromIDs(competitors);
                 notifyListeners();
             }
             
             @Override
-            public void addedToSelection(CompetitorWithBoatDTO competitor) {
+            public void addedToSelection(CompetitorDTO competitor) {
                 // we don't care about selection
             }
         });
@@ -118,7 +119,7 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
         }
     }
 
-    public Iterable<CompetitorWithBoatDTO> getCompetitorsParticipatingInRace() {
+    public Iterable<CompetitorDTO> getCompetitorsParticipatingInRace() {
         return competitorsParticipatingInRace;
     }
 
@@ -129,18 +130,18 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
      * as entries in the race but cannot be resolved in the leaderboard's competitors which does not contain
      * those being suppressed.
      */
-    private Set<CompetitorWithBoatDTO> computeCompetitorsFromIDs(Iterable<CompetitorWithBoatDTO> competitors) {
-        Set<CompetitorWithBoatDTO> result;
+    private Set<CompetitorDTO> computeCompetitorsFromIDs(Iterable<CompetitorDTO> competitors) {
+        Set<CompetitorDTO> result;
         if (getIdsOfCompetitorsParticipatingInRaceAsStrings() == null) {
             result = null;
         } else {
-            final Map<String, CompetitorWithBoatDTO> competitorsByIdAsString = new HashMap<>();
-            for (CompetitorWithBoatDTO c : competitors) {
+            final Map<String, CompetitorDTO> competitorsByIdAsString = new HashMap<>();
+            for (CompetitorDTO c : competitors) {
                 competitorsByIdAsString.put(c.getIdAsString(), c);
             }
             result = new HashSet<>();
             for (String id : getIdsOfCompetitorsParticipatingInRaceAsStrings()) {
-                CompetitorWithBoatDTO c = competitorsByIdAsString.get(id);
+                CompetitorDTO c = competitorsByIdAsString.get(id);
                 if (c != null) {
                     result.add(c);
                 }

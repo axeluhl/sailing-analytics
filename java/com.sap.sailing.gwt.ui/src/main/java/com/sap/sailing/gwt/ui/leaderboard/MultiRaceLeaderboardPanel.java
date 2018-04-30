@@ -9,7 +9,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -113,13 +113,13 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     }
 
     @Override
-    public String getCompetitorColor(CompetitorWithBoatDTO competitor) {
+    public String getCompetitorColor(CompetitorDTO competitor) {
         // not used for multi
         return null;
     }
 
     @Override
-    public boolean renderBoatColorIfNecessary(CompetitorWithBoatDTO competitor, SafeHtmlBuilder sb) {
+    public boolean renderBoatColorIfNecessary(CompetitorDTO competitor, SafeHtmlBuilder sb) {
         return false;
     }
 
@@ -143,7 +143,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             raceRankFilter.setQuickRankProvider(this.competitorFilterPanel.getQuickRankProvider());
             raceRankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
             raceRankFilter.setValue(maxRaceRank);
-            FilterSet<CompetitorWithBoatDTO, Filter<CompetitorWithBoatDTO>> activeFilterSet = competitorSelectionProvider
+            FilterSet<CompetitorDTO, Filter<CompetitorDTO>> activeFilterSet = competitorSelectionProvider
                     .getOrCreateCompetitorsFilterSet(stringMessages.topNCompetitorsByRaceRank(maxRaceRank));
             activeFilterSet.addFilter(raceRankFilter);
             competitorSelectionProvider.setCompetitorsFilterSet(activeFilterSet);
@@ -156,11 +156,10 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
      * the race identified by {@link #preSelectedRace} otherwise.
      */
     @Override
-    public Map<CompetitorWithBoatDTO, LeaderboardRowDTO> getRowsToDisplay() {
-        Map<CompetitorWithBoatDTO, LeaderboardRowDTO> result;
-        Iterable<CompetitorWithBoatDTO> allFilteredCompetitors = competitorSelectionProvider.getFilteredCompetitors();
-        result = new HashMap<CompetitorWithBoatDTO, LeaderboardRowDTO>();
-        for (CompetitorWithBoatDTO competitor : leaderboard.rows.keySet()) {
+    public Map<CompetitorDTO, LeaderboardRowDTO> getRowsToDisplay() {
+        final Map<CompetitorDTO, LeaderboardRowDTO> result = new HashMap<>();
+        Iterable<CompetitorDTO> allFilteredCompetitors = competitorSelectionProvider.getFilteredCompetitors();
+        for (CompetitorDTO competitor : leaderboard.rows.keySet()) {
             if (Util.contains(allFilteredCompetitors, competitor)) {
                 result.put(competitor, leaderboard.rows.get(competitor));
             }

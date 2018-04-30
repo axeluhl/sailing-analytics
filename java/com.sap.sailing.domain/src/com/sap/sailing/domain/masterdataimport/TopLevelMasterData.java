@@ -78,8 +78,7 @@ public class TopLevelMasterData implements Serializable {
 
     private Map<DeviceIdentifier, Set<Timed>> getAllRelevantRaceLogTrackingFixes(SensorFixStore sensorFixStore) {
         Map<DeviceIdentifier, Set<Timed>> relevantFixes = new HashMap<>();
-        
-        //Add fixes for regatta log mappings
+        // Add fixes for regatta log mappings
         for (Regatta regatta : getAllRegattas()) {
             RegattaLog regattaLog = regatta.getRegattaLog();
             try {
@@ -91,7 +90,7 @@ public class TopLevelMasterData implements Serializable {
                 regattaLog.unlockAfterRead();
             }
         }
-        //Add fixes for race log mapping
+        // Add fixes for race log mapping
         for (LeaderboardGroup group : leaderboardGroups) {
             for (Leaderboard leaderboard : group.getLeaderboards()) {
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {

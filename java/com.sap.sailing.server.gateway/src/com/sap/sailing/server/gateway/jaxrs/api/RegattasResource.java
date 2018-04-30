@@ -184,7 +184,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}")
     public Response getRegatta(@PathParam("regattaname") String regattaName) {
         Response response;
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -210,7 +210,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/entries")
     public Response getEntries(@PathParam("regattaname") String regattaName) {
         Response response;
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1372,7 +1372,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response avgSpeedPerCompetitorAndLegType(@PathParam("regattaname") String regattaName) {
         Response response;
         
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1387,7 +1387,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response avgSpeedPerCompetitorAndLegType(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1407,7 +1407,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response sumDistancePerCompetitorAndLegType(@PathParam("regattaname") String regattaName) {
         Response response;
         
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1422,7 +1422,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response sumDistancePerCompetitorAndLegType(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1442,7 +1442,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response sumManeuversPerCompetitor(@PathParam("regattaname") String regattaName) {
         Response response;
         
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1457,7 +1457,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response sumManeuversPerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1477,7 +1477,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response avgSpeedPerCompetitor(@PathParam("regattaname") String regattaName) {
         Response response;
         
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1491,7 +1491,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR)
     public Response avgSpeedPerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1510,7 +1510,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/datamining/"+ SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR)
     public Response sumDistancePerCompetitor(@PathParam("regattaname") String regattaName) {
         Response response;
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1524,7 +1524,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR)
     public Response sumDistancePerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1545,7 +1545,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             @QueryParam("numberofraces") Integer numberOfRaces, @QueryParam("prefix") String prefix,
             @QueryParam("toseries") String toSeries) {
         final Response response;
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1578,7 +1578,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             @QueryParam("racecolumn") String raceColumnName) {
         SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
         final Response response;
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
