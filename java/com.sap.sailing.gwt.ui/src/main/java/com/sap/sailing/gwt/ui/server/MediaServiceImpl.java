@@ -145,7 +145,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
             URL input = new URL(url);
             // check size and do rangerequests if possible
             long fileSize = determineFileSize(input);
-            if (fileSize > 2 * REQUIRED_SIZE) {
+            if (fileSize > 2 * REQUIRED_SIZE_IN_BYTES) {
                 response = checkMetadataByPartialDownloads(input, fileSize);
             } else {
                 response = checkMetadataByFullFileDownload(input);
