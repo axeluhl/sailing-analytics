@@ -1,0 +1,16 @@
+.tableStyle {
+    border-collapse: collapse;
+}
+
+.tableStyle, .tableStyle td {
+    border: thin groove;
+    padding: 5px;
+}
+
+.tableStyle td {
+    max-width: 800px;
+}
+
+.checkboxStyle {
+    display: block;
+}

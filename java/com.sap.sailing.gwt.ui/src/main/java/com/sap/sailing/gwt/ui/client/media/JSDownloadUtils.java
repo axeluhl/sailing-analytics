@@ -6,14 +6,20 @@ import com.google.gwt.typedarrays.shared.Int8Array;
  * Helper class to obtain the last and the first REQUIRED_SIZE bytes of a resource defined by a given url. 
  */
 public class JSDownloadUtils {
-    private static final Double REQUIRED_SIZE = 1000000.0;
+    private static final Double REQUIRED_SIZE = 10000000.0;
     
-    interface JSDownloadCallback {
+    public interface JSDownloadCallback {
         void progress(Double current, Double total);
 
         void error(Object msg);
 
         void complete(Int8Array start, Int8Array end, Double skipped);
+    }
+    
+    public interface JSHrefCallback {
+        void newHref(String foundLink);
+        void noResult();
+        void complete();
     }
     
     interface JSSizeCallback {
@@ -28,7 +34,7 @@ public class JSDownloadUtils {
             
             @Override
             public void size(Double total) {
-                if (total != 0 && total > 0) {
+                if (total != 0 && total > 2 * REQUIRED_SIZE) {
                     //used if range and accept headers are set correctly
                     getDataFast(url, callback, total, REQUIRED_SIZE);
                 } else {
@@ -163,4 +169,40 @@ public class JSDownloadUtils {
         }
     }-*/;
 
+    public static void getFileList(String url, JSHrefCallback callback) {
+        getFileListNative(url, callback);
+    }
+    
+    private native static void getFileListNative(String url, JSHrefCallback callback)/*-{
+        try{
+            var xmlHttp = null;
+            var allLinks = []; //set of all internal and external links
+            xmlHttp = new XMLHttpRequest();
+            xmlHttp.open( "GET", url, true );
+            xmlHttp.send( null );
+            xmlHttp.onreadystatechange = function () {
+                if ( xmlHttp.readyState == 4) {
+                     if (xmlHttp.status == 200){
+                        var container = document.createElement("p");
+                        container.innerHTML = xmlHttp.responseText;
+                        var anchors = container.getElementsByTagName("a");
+                        for (var i = 0; i < anchors.length; i++) {
+                            try {
+                                var href = anchors[i].getAttribute("href");
+                                callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::newHref(Ljava/lang/String;)(href);
+                            } catch (error) {
+                                console.log(error);
+                            }
+                        }
+                        callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::complete()();
+                    } else {
+                        callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::noResult()();
+                    }
+                } 
+            };
+        } catch (error) {
+            callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::noResult()();
+        }
+
+    }-*/;
 }

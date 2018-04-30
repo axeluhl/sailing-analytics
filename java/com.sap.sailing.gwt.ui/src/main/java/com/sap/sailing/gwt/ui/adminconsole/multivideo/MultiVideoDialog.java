@@ -1,0 +1,590 @@
+package com.sap.sailing.gwt.ui.adminconsole.multivideo;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.typedarrays.shared.Int8Array;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.TextBox;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
+import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.media.JSDownloadUtils;
+import com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback;
+import com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback;
+import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.MimeType;
+import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
+
+public class MultiVideoDialog extends DialogBox {
+    private static final String EMPTY_TEXT = "";
+    private static final int DELETE_COLUMN = 0;
+    private static final int URL_COLUMN = 1;
+    private static final int STATUS_COLUMN = 2;
+    private static final int DURATION_COLUMN = 3;
+    private static final int STARTTIME_COLUMN = 4;
+    private static final int MIMETYPE_COLUMN = 5;
+    private static final int RACES_COLUMN = 6;
+    
+    private static final StyleHolder style = GWT.create(StyleHolder.class);
+    private StringMessages stringMessages;
+    private List<RemoteFileInfo> remoteFiles = new ArrayList<>();
+    private FlexTable dataTable;
+    private MediaServiceAsync mediaService;
+    private Button doScanButton;
+    private Label statusLabel;
+    private SailingServiceAsync sailingService;
+    private boolean isWorking;
+    private Button doSaveButton;
+    private Runnable afterLinking;
+    private ErrorReporter errorReporter;
+
+    public MultiVideoDialog(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
+            StringMessages stringMessages, ErrorReporter errorReporter, Runnable afterLinking) {
+        this.stringMessages = stringMessages;
+        this.mediaService = mediaService;
+        this.sailingService = sailingService;
+        this.errorReporter = errorReporter;
+        this.afterLinking = afterLinking;
+        setGlassEnabled(true);
+
+        FlowPanel mainContent = new FlowPanel();
+
+        Label indexUrl = new Label(stringMessages.multiVideoURLOfIndex());
+        mainContent.add(indexUrl);
+        ;
+        TextBox urlInput = new TextBox();
+        mainContent.add(urlInput);
+        doScanButton = new Button(stringMessages.multiVideoScan());
+        mainContent.add(doScanButton);
+        doScanButton.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                setWorking(true);
+                retrieveRemoteFileList(urlInput.getText());
+            }
+        });
+
+        statusLabel = new Label(stringMessages.multiVideoIdle());
+        mainContent.add(statusLabel);
+
+        FlowPanel buttonPanel = new FlowPanel();
+
+        DockPanel dockPanel = new DockPanel();
+        add(dockPanel);
+        dockPanel.add(new ScrollPanel(mainContent), DockPanel.CENTER);
+
+        dataTable = new FlexTable();
+        style.style().ensureInjected();
+        dataTable.addStyleName(style.style().tableStyle());
+        mainContent.add(dataTable);
+
+        Button cancelButton = new Button(stringMessages.close());
+        cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
+        cancelButton.ensureDebugId("CancelButton");
+        buttonPanel.add(cancelButton);
+        cancelButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                MultiVideoDialog.this.hide();
+            }
+        });
+
+        doSaveButton = new Button(stringMessages.addMediaTrack());
+        buttonPanel.add(doSaveButton);
+        doSaveButton.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                setWorking(true);
+                startNextLinkingRemoteTask();
+            }
+        });
+        doSaveButton.setEnabled(false);
+
+        dockPanel.add(buttonPanel, DockPanel.SOUTH);
+
+        updateUI();
+    }
+
+    public void setWorking(boolean working) {
+        this.isWorking = working;
+        updateUI();
+    }
+
+    protected void updateUI() {
+        int y = 0;
+        dataTable.removeAllRows();
+        dataTable.clear();
+        dataTable.setWidget(y, DELETE_COLUMN, new Label(stringMessages.delete()));
+        dataTable.setWidget(y, URL_COLUMN, new Label(stringMessages.url()));
+        dataTable.setWidget(y, STATUS_COLUMN, new Label(stringMessages.status()));
+        dataTable.setWidget(y, DURATION_COLUMN, new Label(stringMessages.duration()));
+        dataTable.setWidget(y, STARTTIME_COLUMN, new Label(stringMessages.startTime()));
+        dataTable.setWidget(y, MIMETYPE_COLUMN, new Label(stringMessages.mimeType()));
+        dataTable.setWidget(y, RACES_COLUMN, new Label(stringMessages.linkedRaces()));
+        y++;
+        for (RemoteFileInfo remoteFile : remoteFiles) {
+            Anchor link = new Anchor(remoteFile.url);
+            link.setHref(remoteFile.url);
+            link.setTarget("_blank");
+            dataTable.setWidget(y, URL_COLUMN, link);
+            dataTable.setWidget(y, STATUS_COLUMN, new Label(asString(remoteFile.status)));
+            
+            Button removeVideo = new Button(stringMessages.remove());
+            removeVideo.setEnabled(!isWorking);
+            removeVideo.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    remoteFiles.remove(remoteFile);
+                    updateUI();
+                }
+            });
+            dataTable.setWidget(y, DELETE_COLUMN, removeVideo);
+            
+            if (remoteFile.duration == null) {
+                dataTable.setWidget(y, DURATION_COLUMN, new Label(EMPTY_TEXT));
+            } else {
+                TextBox durationInput = new TextBox();
+                durationInput.setText(TimeFormatUtil.durationToHrsMinSec(remoteFile.duration));
+                durationInput.addValueChangeHandler(new ValueChangeHandler<String>() {
+
+                    @Override
+                    public void onValueChange(ValueChangeEvent<String> event) {
+                        remoteFile.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(event.getValue());
+                        updateUI();
+                    }
+                });
+                dataTable.setWidget(y, DURATION_COLUMN, durationInput);
+            }
+            if (remoteFile.startTime == null) {
+                dataTable.setWidget(y, STARTTIME_COLUMN, new Label(EMPTY_TEXT));
+            } else {
+                DateAndTimeInput startTimeInput = new DateAndTimeInput(Accuracy.SECONDS);
+                startTimeInput.setValue(remoteFile.startTime.asDate());
+                startTimeInput.addValueChangeHandler(new ValueChangeHandler<Date>() {
+
+                    @Override
+                    public void onValueChange(ValueChangeEvent<Date> event) {
+                        remoteFile.startTime = new MillisecondsTimePoint(event.getValue());
+                        updateUI();
+                    }
+                });
+                dataTable.setWidget(y, STARTTIME_COLUMN, startTimeInput);
+            }
+            if (remoteFile.mime == null) {
+                if (remoteFile.message == null) {
+                    dataTable.setWidget(y, MIMETYPE_COLUMN, new Label(EMPTY_TEXT));
+                } else {
+                    dataTable.setWidget(y, MIMETYPE_COLUMN, new Label(remoteFile.message));
+                }
+            } else {
+                ListBox mimeTypeBox = new ListBox();
+                mimeTypeBox.setMultipleSelect(false);
+                mimeTypeBox.addItem(MimeType.mp4.name());
+                mimeTypeBox.addItem(MimeType.mp4panorama.name());
+                mimeTypeBox.addChangeHandler(new ChangeHandler() {
+
+                    @Override
+                    public void onChange(ChangeEvent event) {
+                        remoteFile.mime = MimeType.valueOf(mimeTypeBox.getSelectedValue());
+                        updateUI();
+                    }
+                });
+                mimeTypeBox.setSelectedIndex(MimeType.mp4 == remoteFile.mime ? 0 : 1);
+                dataTable.setWidget(y, MIMETYPE_COLUMN, mimeTypeBox);
+            }
+            if (remoteFile.candidates == null) {
+                dataTable.setWidget(y, RACES_COLUMN, new Label(EMPTY_TEXT));
+            } else {
+                if (remoteFile.candidates.isEmpty()) {
+                    dataTable.setWidget(y, RACES_COLUMN, new Label(stringMessages.empty()));
+                } else {
+                    FlowPanel ft = new FlowPanel();
+                    dataTable.setWidget(y, RACES_COLUMN, ft);
+                    for (RegattaAndRaceIdentifier candidate : remoteFile.candidates) {
+                        CheckBox cb = new CheckBox(candidate.getRegattaName() + " " + candidate.getRaceName());
+                        cb.setValue(true, false);
+                        cb.setEnabled(!isWorking);
+                        cb.addStyleName(style.style().checkboxStyle());
+                        ft.add(cb);
+                        cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+                            @Override
+                            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                                if (Boolean.FALSE.equals(event.getValue())) {
+                                    remoteFile.candidates.remove(candidate);
+                                } else {
+                                    remoteFile.candidates.add(candidate);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+            y++;
+        }
+
+        doScanButton.setEnabled(!isWorking);
+        if (!isWorking) {
+            statusLabel.setText(stringMessages.multiVideoIdle());
+        }
+        center();
+    }
+
+    private void startNextLinkingRemoteTask() {
+        for (RemoteFileInfo remoteFile : remoteFiles) {
+            if (remoteFile.status == EStatus.WAIT_FOR_SAVE) {
+                MediaTrack mediaTrack = new MediaTrack(remoteFile.url, remoteFile.url, remoteFile.startTime,
+                        remoteFile.duration, remoteFile.mime, remoteFile.candidates);
+                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
+
+                    @Override
+                    public void onSuccess(String result) {
+                        remoteFile.status = EStatus.DONE;
+                        updateUI();
+                        startNextLinkingRemoteTask();
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        remoteFile.status = EStatus.DONE;
+                        updateUI();
+                        startNextLinkingRemoteTask();
+                    }
+                });
+                return;
+            }
+        }
+        afterLinking.run();
+        hide();
+    }
+
+    private void startNextInitializingRemoteTask() {
+        doSaveButton.setEnabled(false);
+        for (RemoteFileInfo remoteFile : remoteFiles) {
+            statusLabel.setText(stringMessages.analyze() + ": " + remoteFile.url);
+            if (remoteFile.status == EStatus.NOT_ANALYSED) {
+                checkMetadata(remoteFile, new AsyncCallback<VideoMetadataDTO>() {
+                    @Override
+                    public void onSuccess(VideoMetadataDTO result) {
+                        if (result.isDownloadable()) {
+                            remoteFile.message = result.getMessage();
+                            if (result.getDuration() == null) {
+                                remoteFile.status = EStatus.ERROR_ANALYZE;
+                            } else {
+                                remoteFile.duration = result.getDuration();
+                                if (result.getRecordStartedTime() != null) {
+                                    remoteFile.startTime = new MillisecondsTimePoint(result.getRecordStartedTime());
+                                }
+                                remoteFile.mime = result.isSpherical() ? MimeType.mp4panorama : MimeType.mp4;
+                                remoteFile.status = EStatus.GETTING_MEDIATRACK;
+                                updateUI();
+                                mediaService.getMediaTrackByUrl(remoteFile.url, new AsyncCallback<MediaTrack>() {
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        remoteFile.status = EStatus.ERROR_ANALYZE;
+                                        updateUI();
+                                        startNextInitializingRemoteTask();
+                                    }
+
+                                    @Override
+                                    public void onSuccess(MediaTrack result) {
+                                        if (result == null) {
+                                            remoteFile.status = EStatus.WAITING_FOR_LINK;
+                                        } else {
+                                            remoteFile.status = EStatus.ALREADY_ADDED;
+                                            remoteFile.knownMediaTrack = result;
+                                        }
+                                        updateUI();
+                                        startNextInitializingRemoteTask();
+                                    }
+                                });
+                            }
+
+                        } else {
+                            remoteFile.status = EStatus.ERROR_DOWNLOAD;
+                            updateUI();
+                            startNextInitializingRemoteTask();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        remoteFile.status = EStatus.ERROR_DOWNLOAD;
+                        updateUI();
+                    }
+                });
+                return;
+            }
+        }
+        for (RemoteFileInfo remoteFile : remoteFiles) {
+            statusLabel.setText(remoteFile.url);
+            if (remoteFile.status == EStatus.WAITING_FOR_LINK) {
+                sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+
+                    @Override
+                    public void onSuccess(List<EventDTO> result) {
+                        Set<RegattaAndRaceIdentifier> candidates = new HashSet<>();
+                        collectAllOverlappingRaces(remoteFile, result, candidates);
+                        remoteFile.status = EStatus.WAIT_FOR_SAVE;
+                        remoteFile.candidates = candidates;
+                        updateUI();
+                        startNextInitializingRemoteTask();
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(caught.getMessage());
+                        remoteFile.status = EStatus.ERROR_LINKING;
+                        updateUI();
+                    }
+                });
+                return;
+            }
+        }
+        doSaveButton.setEnabled(true);
+        setWorking(false);
+    }
+
+    private void collectAllOverlappingRaces(RemoteFileInfo remoteFile, List<EventDTO> result,
+            Set<RegattaAndRaceIdentifier> candidates) {
+        for (EventDTO event : result) {
+            for (LeaderboardGroupDTO groups : event.getLeaderboardGroups()) {
+                for (StrippedLeaderboardDTO leaderboard : groups.getLeaderboards()) {
+                    for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
+                        for (FleetDTO fleet : raceColumn.getFleets()) {
+                            if (raceColumn.isTrackedRace(fleet)) {
+                                RaceDTO race = raceColumn.getRace(fleet);
+                                if (race.trackedRace != null) {
+                                    if (race.endOfRace == null || race.endOfRace.after(remoteFile.startTime.asDate())) {
+                                        if (race.startOfRace == null || race.startOfRace.before(new Date(
+                                                remoteFile.startTime.asMillis() + remoteFile.duration.asMillis()))) {
+                                            candidates.add(race.getRaceIdentifier());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * For a given url that points to an mp4 video, attempts are made to parse the header, to determine the actual
+     * starttime of the video and to check for a 360° flag. The video will be analyzed by the backendserver, either via
+     * direct download, or proxied by the client, if a video is only available locally. If the video header cannot be
+     * read, default values are used instead.
+     */
+    private void checkMetadata(RemoteFileInfo file, AsyncCallback<VideoMetadataDTO> asyncCallback) {
+        file.status = EStatus.SERVER_ANALYSE;
+        updateUI();
+        // check on server first
+        mediaService.checkMetadata(file.url, new AsyncCallback<VideoMetadataDTO>() {
+
+            @Override
+            public void onSuccess(VideoMetadataDTO result) {
+                if (result.isDownloadable()) {
+                    asyncCallback.onSuccess(result);
+                } else {
+                    file.status = EStatus.CLIENT_ANALYZE;
+                    updateUI();
+                    checkMetadataOnClient(file, asyncCallback);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                // try on client instead
+                checkMetadataOnClient(file, asyncCallback);
+            }
+
+            private void checkMetadataOnClient(RemoteFileInfo file, AsyncCallback<VideoMetadataDTO> asyncCallback) {
+                JSDownloadUtils.getData(file.url, new JSDownloadCallback() {
+
+                    @Override
+                    public void progress(Double current, Double total) {
+                        statusLabel.setText(stringMessages.transferStarted() + " " + Math.round(current / 1024 / 1024)
+                                + "/" + Math.round(total / 1024 / 1024) + " MB");
+                    }
+
+                    @Override
+                    public void error(Object msg) {
+                        asyncCallback.onSuccess(
+                                new VideoMetadataDTO(false, null, false, null, msg == null ? EMPTY_TEXT : msg.toString()));
+                    }
+
+                    @Override
+                    public void complete(Int8Array start, Int8Array end, Double skipped) {
+                        statusLabel.setText(stringMessages.analyze());
+                        byte[] jStart = new byte[start.byteLength()];
+                        for (int i = 0; i < start.byteLength(); i++) {
+                            jStart[i] = start.get(i);
+                        }
+                        byte[] jEnd = new byte[end.byteLength()];
+                        for (int i = 0; i < end.byteLength(); i++) {
+                            jEnd[i] = end.get(i);
+                        }
+                        // Due to js represeting everything as 64double, the max safe file is around 4 petabytes
+                        mediaService.checkMetadata(jStart, jEnd, skipped.longValue(), asyncCallback);
+                    }
+                });
+            }
+        });
+    }
+
+    private String asString(EStatus status) {
+        switch (status) {
+        case NOT_ANALYSED:
+            return stringMessages.multiVideoNotAnalyzed();
+        case ALREADY_ADDED:
+            return stringMessages.multiVideoAlreadyKnown();
+        case CLIENT_ANALYZE:
+            return stringMessages.multiVideoClientIsUploading();
+        case DONE:
+            return stringMessages.multiVideoFinishedLinking();
+        case ERROR_ANALYZE:
+            return stringMessages.multiVideoErrorInAnalyzingFile();
+        case ERROR_DOWNLOAD:
+            return stringMessages.couldNotDownload(EMPTY_TEXT);
+        case ERROR_LINKING:
+            return stringMessages.error();
+        case GETTING_MEDIATRACK:
+            return stringMessages.multiVideoObtainingMediaTrack();
+        case SERVER_ANALYSE:
+            return stringMessages.multiVideoServerIsAnalyzing();
+        case WAITING_FOR_LINK:
+            return stringMessages.multiVideoWaitingForLinkPhase();
+        case WAIT_FOR_SAVE:
+            return stringMessages.multiVideoWaitingForSave();
+        default:
+            return stringMessages.unknown();
+        }
+    }
+
+    protected void retrieveRemoteFileList(String url) {
+        remoteFiles.clear();
+        dataTable.clear();
+        updateUI();
+
+        JSDownloadUtils.getFileList(url, new JSHrefCallback() {
+            @Override
+            public void newHref(String foundLink) {
+                if (foundLink.equalsIgnoreCase(url)) {
+                    return;
+                }
+                // nginx dummy file in video folder
+                if (foundLink.equalsIgnoreCase(
+                        "If%20you%20only%20see%20this%20file%2C%20you%20need%20to%20copy%20your%20files%20to%20place_videos_here%20folder")) {
+                    return;
+                }
+                if (foundLink.startsWith("..")) {
+                    return;
+                }
+                if (foundLink.startsWith("./")) {
+                    foundLink = foundLink.substring(2);
+                }
+                if (!foundLink.startsWith("http://") || foundLink.startsWith("https://")) {
+                    if (!url.endsWith("/")) {
+                        foundLink = "/" + foundLink;
+                    }
+                    foundLink = url + foundLink;
+                }
+                remoteFiles.add(new RemoteFileInfo(foundLink));
+            }
+
+            @Override
+            public void noResult() {
+                Window.alert(stringMessages.serverURLInvalid());
+            }
+
+            @Override
+            public void complete() {
+                updateUI();
+                startNextInitializingRemoteTask();
+            }
+        });
+    }
+
+    static interface StyleHolder extends ClientBundle {
+        @Source("MultiVideoDialog.css")
+        Style style();
+    }
+
+    static interface Style extends CssResource {
+        String tableStyle();
+
+        String checkboxStyle();
+    }
+
+    enum EStatus {
+        NOT_ANALYSED,
+        WAITING_FOR_LINK,
+        SERVER_ANALYSE,
+        ERROR_ANALYZE,
+        CLIENT_ANALYZE,
+        ERROR_DOWNLOAD,
+        WAIT_FOR_SAVE,
+        DONE,
+        ALREADY_ADDED,
+        GETTING_MEDIATRACK,
+        ERROR_LINKING;
+    }
+
+    static class RemoteFileInfo {
+        protected MediaTrack knownMediaTrack;
+        protected Set<RegattaAndRaceIdentifier> candidates;
+        protected MimeType mime;
+        protected String message;
+        protected TimePoint startTime;
+        protected Duration duration;
+        protected EStatus status = EStatus.NOT_ANALYSED;;
+        final String url;
+
+        public RemoteFileInfo(String foundLink) {
+            this.url = foundLink;
+        }
+
+    }
+}
