@@ -31,7 +31,8 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
@@ -42,7 +43,6 @@ import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @Path("/v2/leaderboards")
 public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
@@ -56,8 +56,6 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             @QueryParam("time") String time, @QueryParam("timeasmillis") Long timeasmillis,
             @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount) {
         Response response;
-
-        TimePoint requestTimePoint = MillisecondsTimePoint.now();     
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
             response = Response.status(Status.NOT_FOUND)
@@ -76,13 +74,10 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 if (timePoint != null || resultState == ResultStates.Live) {
                     jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount, raceColumnNames, raceDetails);
                 } else {
-                    jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint,
-                            maxCompetitorsCount);
+                    jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount);
                 }
-
                 StringWriter sw = new StringWriter();
                 jsonLeaderboard.writeJSONString(sw);
-
                 String json = sw.getBuffer().toString();
                 response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
@@ -90,11 +85,11 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                         .type(MediaType.TEXT_PLAIN).build();
             }
         }
-
         return response;
     }
 
-    private JSONObject getLeaderboardJson(Leaderboard leaderboard,
+    @Override
+    protected JSONObject getLeaderboardJson(Leaderboard leaderboard,
             TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount,
             List<String> raceColumnNames, List<String> raceDetailNames)
             throws NoWindException, InterruptedException, ExecutionException {
@@ -105,17 +100,17 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 false, getService(), getService().getBaseDomainFactory(),
                 /* fillTotalPointsUncorrected */false);
         JSONObject jsonLeaderboard = new JSONObject();
-        writeCommonLeaderboardData(jsonLeaderboard, leaderboardDTO, resultState, maxCompetitorsCount);
-        Map<String, Map<String, Map<CompetitorWithBoatDTO, Integer>>> competitorRanksPerRaceColumnsAndFleets = new HashMap<>();
+        writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, leaderboardDTO.getTimePoint(), maxCompetitorsCount);
+        Map<String, Map<String, Map<CompetitorDTO, Integer>>> competitorRanksPerRaceColumnsAndFleets = new HashMap<>();
         for (String raceColumnName : raceColumnsToShow) {
-            List<CompetitorWithBoatDTO> competitorsFromBestToWorst = leaderboardDTO.getCompetitorsFromBestToWorst(raceColumnName);
-            Map<String, Map<CompetitorWithBoatDTO, Integer>> competitorsOrderedByFleets = new HashMap<>();
-            for (CompetitorWithBoatDTO competitor: competitorsFromBestToWorst) {
+            List<CompetitorDTO> competitorsFromBestToWorst = leaderboardDTO.getCompetitorsFromBestToWorst(raceColumnName);
+            Map<String, Map<CompetitorDTO, Integer>> competitorsOrderedByFleets = new HashMap<>();
+            for (CompetitorDTO competitor: competitorsFromBestToWorst) {
                 LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
                 LeaderboardEntryDTO leaderboardEntry = row.fieldsByRaceColumnName.get(raceColumnName);                
                 FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
                 if (fleetOfCompetitor != null && fleetOfCompetitor.getName() != null) {
-                    Map<CompetitorWithBoatDTO, Integer> competitorsOfFleet = competitorsOrderedByFleets.get(fleetOfCompetitor.getName());
+                    Map<CompetitorDTO, Integer> competitorsOfFleet = competitorsOrderedByFleets.get(fleetOfCompetitor.getName());
                     if (competitorsOfFleet == null) {
                         competitorsOfFleet = new HashMap<>();
                         competitorsOrderedByFleets.put(fleetOfCompetitor.getName(), competitorsOfFleet);
@@ -129,13 +124,19 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
         int competitorCounter = 1;
         // Remark: leaderboardDTO.competitors are ordered by total rank
-        for (CompetitorWithBoatDTO competitor : leaderboardDTO.competitors) {
+        for (CompetitorDTO competitor : leaderboardDTO.competitors) {
             LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);
             if (maxCompetitorsCount != null && competitorCounter > maxCompetitorsCount) {
                 break;
             }
             JSONObject jsonCompetitor = new JSONObject();
             writeCompetitorBaseData(jsonCompetitor, competitor, leaderboardDTO);
+            BoatDTO rowBoatDTO = leaderboardRowDTO.boat;
+            if (rowBoatDTO != null) {
+                JSONObject jsonBoat = new JSONObject();
+                writeBoatData(jsonBoat, rowBoatDTO);
+                jsonCompetitor.put("boat", jsonBoat);
+            }
             jsonCompetitor.put("rank", competitorCounter);
             jsonCompetitor.put("carriedPoints", leaderboardRowDTO.carriedPoints);
             jsonCompetitor.put("netPoints", leaderboardRowDTO.netPoints);
@@ -147,6 +148,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 JSONObject jsonEntry = new JSONObject();
                 jsonRaceColumns.put(raceColumnName, jsonEntry);
                 LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
+                BoatDTO entryBoatDTO = leaderboardEntry.boat;
+                if (entryBoatDTO != null) {
+                    JSONObject jsonBoat = new JSONObject();
+                    writeBoatData(jsonBoat, entryBoatDTO);
+                    jsonEntry.put("boat", jsonBoat);
+                }
                 final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
                 jsonEntry.put("fleet", fleetOfCompetitor == null ? "" : fleetOfCompetitor.getName());
                 jsonEntry.put("totalPoints", leaderboardEntry.totalPoints);
@@ -159,9 +166,9 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 // if we have no fleet information there is no way to know in which fleet the competitor was racing
                 Integer rank = null;
                 if (fleetOfCompetitor != null && fleetOfCompetitor.getName() != null) {
-                    Map<String, Map<CompetitorWithBoatDTO, Integer>> rcMap = competitorRanksPerRaceColumnsAndFleets.get(raceColumnName);
+                    Map<String, Map<CompetitorDTO, Integer>> rcMap = competitorRanksPerRaceColumnsAndFleets.get(raceColumnName);
                     if (rcMap != null && !rcMap.isEmpty()) {
-                        Map<CompetitorWithBoatDTO, Integer> rankMap = rcMap.get(fleetOfCompetitor.getName());
+                        Map<CompetitorDTO, Integer> rankMap = rcMap.get(fleetOfCompetitor.getName());
                         if (rankMap != null && !rankMap.isEmpty()) {
                             rank = rankMap.get(competitor);
                         }

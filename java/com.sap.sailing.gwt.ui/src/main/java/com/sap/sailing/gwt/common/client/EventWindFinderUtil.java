@@ -36,7 +36,12 @@ public class EventWindFinderUtil {
         }
         for (final String spotIdFromTrackedRace : event.getAllFinderSpotIdsUsedByTrackedRacesInEvent()) {
             try {
-                windFinderSpots.add(new SpotDTO(windFinderTrackerFactory.getSpotById(spotIdFromTrackedRace, /* cached */ true)));
+                Spot spotById = windFinderTrackerFactory.getSpotById(spotIdFromTrackedRace, /* cached */ true);
+                if (spotById != null) {
+                    windFinderSpots.add(new SpotDTO(spotById));
+                } else {
+                    logger.warning("Couldn't find WindFinder spot with ID "+spotIdFromTrackedRace);
+                }
             } catch (IOException | ParseException | InterruptedException | ExecutionException e) {
                 logger.warning("Unable to determine WindFinder spot with ID "+spotIdFromTrackedRace);
             }

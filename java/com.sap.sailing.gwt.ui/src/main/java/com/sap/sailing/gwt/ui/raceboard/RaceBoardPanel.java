@@ -35,7 +35,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -77,6 +77,9 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sailing.gwt.ui.client.shared.racemap.maneuver.ManeuverTableLifecycle;
+import com.sap.sailing.gwt.ui.client.shared.racemap.maneuver.ManeuverTablePanel;
+import com.sap.sailing.gwt.ui.client.shared.racemap.maneuver.ManeuverTableSettings;
 import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
@@ -161,6 +164,7 @@ public class RaceBoardPanel
     private final RaceBoardResources raceBoardResources = RaceBoardResources.INSTANCE; 
     private final RaceBoardMainCss mainCss = raceBoardResources.mainCss();
     private final QuickRanksDTOFromLeaderboardDTOProvider quickRanksDTOProvider;
+    private ManeuverTablePanel maneuverTablePanel;
 
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     
@@ -186,7 +190,7 @@ public class RaceBoardPanel
             RaceBoardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings,
             SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserService userService,
-            AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorWithBoatDTO, BoatDTO> competitorsAndTheirBoats,
+            AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
             String leaderboardGroupName, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
@@ -309,8 +313,7 @@ public class RaceBoardPanel
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
         // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
         if (getPerspectiveSettings().getActiveCompetitorsFilterSetName() != null) {
-            for (FilterSet<CompetitorWithBoatDTO, FilterWithUI<CompetitorWithBoatDTO>> filterSet : competitorSearchTextBox.getCompetitorsFilterSets()
-                    .getFilterSets()) {
+            for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : competitorSearchTextBox.getCompetitorsFilterSets().getFilterSets()) {
                 if (filterSet.getName().equals(getPerspectiveSettings().getActiveCompetitorsFilterSetName())) {
                     competitorSearchTextBox.getCompetitorsFilterSets().setActiveFilterSet(filterSet);
                     break;
@@ -356,6 +359,8 @@ public class RaceBoardPanel
                 .findSettingsByComponentId(mediaPlayerLifecycle.getComponentId());
         WindChartLifecycle windChartLifecycle = getPerspectiveLifecycle().getWindChartLifecycle();
         WindChartSettings windChartSettings = settings.findSettingsByComponentId(windChartLifecycle.getComponentId());
+        ManeuverTableLifecycle maneuverTableLifecycle = getPerspectiveLifecycle().getManeuverTable();
+        ManeuverTableSettings maneuverTableSettings = settings.findSettingsByComponentId(maneuverTableLifecycle.getComponentId());
         MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle = getPerspectiveLifecycle().getMultiCompetitorRaceChartLifecycle();
         MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = settings
                 .findSettingsByComponentId(multiCompetitorRaceChartLifecycle.getComponentId());
@@ -383,7 +388,13 @@ public class RaceBoardPanel
             windChart.setVisible(false);
             windChart.getEntryWidget().setTitle(stringMessages.windChart());
             componentsForSideBySideViewer.add(windChart);
+            
         }
+        maneuverTablePanel = new ManeuverTablePanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
+                selectedRaceIdentifier, stringMessages, competitorSelectionProvider, errorReporter, timer,
+                maneuverTableSettings, timeRangeWithZoomModel, new ClassicLeaderboardStyle(), userService);
+        maneuverTablePanel.getEntryWidget().setTitle(stringMessages.maneuverTable());
+        componentsForSideBySideViewer.add(maneuverTablePanel);
         editMarkPassingPanel = new EditMarkPassingsPanel(this, getComponentContext(), sailingService,
                 selectedRaceIdentifier,
                 stringMessages,
@@ -401,13 +412,12 @@ public class RaceBoardPanel
             editMarkPositionPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
             componentsForSideBySideViewer.add(editMarkPositionPanel);
         }
-        
         mediaPlayerManagerComponent = new MediaPlayerManagerComponent(this, getComponentContext(), mediaPlayerLifecycle,
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
                 errorReporter, userAgent, this, mediaPlayerSettings);
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent,
-                componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel);
-        for(Component<? extends Settings> component : componentsForSideBySideViewer) {
+                componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel, maneuverTablePanel);
+        for (Component<? extends Settings> component : componentsForSideBySideViewer) {
             addChildComponent(component);
         }
         this.setupUserManagementControlPanel(userService);

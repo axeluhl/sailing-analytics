@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
+import com.sap.sailing.gwt.ui.client.shared.racemap.maneuver.ManeuverTableLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 import com.sap.sse.security.ui.client.UserService;
@@ -23,6 +24,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     private final MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle;
     private final MediaPlayerLifecycle mediaPlayerLifecycle;
     private final RaceTimePanelLifecycle raceTimePanelLifecycle;
+    private final ManeuverTableLifecycle maneuverTableLifecycle;
     
     public static final String ID = "rb";
     
@@ -39,6 +41,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         this.stringMessages = stringMessages;
         raceMapLifecycle = new RaceMapLifecycle(stringMessages);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
+        maneuverTableLifecycle = new ManeuverTableLifecycle(stringMessages);
         leaderboardPanelLifecycle = new SingleRaceLeaderboardPanelLifecycle(stringMessages, availableDetailTypes);
         multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, competitorChartAllowedDetailTypes);
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
@@ -50,6 +53,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         addLifeCycle(multiCompetitorRaceChartLifecycle);
         addLifeCycle(mediaPlayerLifecycle);
         addLifeCycle(raceTimePanelLifecycle);
+        addLifeCycle(maneuverTableLifecycle);
     }
 
     @Override
@@ -70,6 +74,10 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     @Override
     public boolean hasSettings() {
         return true;
+    }
+    
+    public ManeuverTableLifecycle getManeuverTable() {
+        return maneuverTableLifecycle;
     }
     
     public RaceMapLifecycle getRaceMapLifecycle() {

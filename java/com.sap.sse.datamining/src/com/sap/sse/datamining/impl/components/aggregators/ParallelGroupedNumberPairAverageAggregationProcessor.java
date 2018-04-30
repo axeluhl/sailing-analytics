@@ -13,21 +13,21 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.data.AveragePairWithStats;
-import com.sap.sse.datamining.shared.impl.AveragePairWithStatsImpl;
+import com.sap.sse.datamining.shared.data.PairWithStats;
+import com.sap.sse.datamining.shared.impl.PairWithStatsImpl;
 
 @SuppressWarnings("rawtypes")
-public class ParallelGroupedNumberPairDataAverageAggregationProcessor
-            extends AbstractParallelGroupedDataStoringAggregationProcessor<Pair, AveragePairWithStats<Number>> {
-    private static final Class<?> _c = AveragePairWithStats.class;
+public class ParallelGroupedNumberPairAverageAggregationProcessor
+            extends AbstractParallelGroupedDataStoringAggregationProcessor<Pair, PairWithStats<Number>> {
+    private static final Class<?> _c = PairWithStats.class;
     @SuppressWarnings("unchecked")
-    private static final Class<AveragePairWithStats<Number>> _cc = (Class<AveragePairWithStats<Number>>) _c;
+    private static final Class<PairWithStats<Number>> _cc = (Class<PairWithStats<Number>>) _c;
     
-    private static final AggregationProcessorDefinition<Pair, AveragePairWithStats<Number>> DEFINITION =
+    private static final AggregationProcessorDefinition<Pair, PairWithStats<Number>> DEFINITION =
             new SimpleAggregationProcessorDefinition<>(Pair.class,
-                    _cc, "PairAverage", ParallelGroupedNumberPairDataAverageAggregationProcessor.class);
+                    _cc, "PairAverage", ParallelGroupedNumberPairAverageAggregationProcessor.class);
     
-    public static AggregationProcessorDefinition<Pair, AveragePairWithStats<Number>> getDefinition() {
+    public static AggregationProcessorDefinition<Pair, PairWithStats<Number>> getDefinition() {
         return DEFINITION;
     }
 
@@ -36,8 +36,8 @@ public class ParallelGroupedNumberPairDataAverageAggregationProcessor
     private final Map<GroupKey, Pair<Number, Number>> maxPerKey;
     private final Map<GroupKey, AtomicLong> elementAmountPerKey;
 
-    public ParallelGroupedNumberPairDataAverageAggregationProcessor(ExecutorService executor,
-            Collection<Processor<Map<GroupKey, AveragePairWithStats<Number>>, ?>> resultReceivers) {
+    public ParallelGroupedNumberPairAverageAggregationProcessor(ExecutorService executor,
+            Collection<Processor<Map<GroupKey, PairWithStats<Number>>, ?>> resultReceivers) {
         super(executor, resultReceivers, "PairAverage");
         elementAmountPerKey = new HashMap<>();
         sumPerKey = new HashMap<>();
@@ -87,14 +87,15 @@ public class ParallelGroupedNumberPairDataAverageAggregationProcessor
     }
 
     @Override
-    protected Map<GroupKey, AveragePairWithStats<Number>> aggregateResult() {
-        Map<GroupKey, AveragePairWithStats<Number>> result = new HashMap<>();
+    protected Map<GroupKey, PairWithStats<Number>> aggregateResult() {
+        Map<GroupKey, PairWithStats<Number>> result = new HashMap<>();
         for (Entry<GroupKey, Pair<Number, Number>> sumAggregationEntry : sumPerKey.entrySet()) {
             GroupKey key = sumAggregationEntry.getKey();
-            result.put(key, new AveragePairWithStatsImpl<Number>(new Pair<>(sumAggregationEntry.getValue().getA() != null ? sumAggregationEntry.getValue().getA().doubleValue() / elementAmountPerKey.get(key).get() : null, sumAggregationEntry.getValue().getB() != null ? sumAggregationEntry.getValue().getB().doubleValue() / elementAmountPerKey.get(key).get() : null) ,
+            result.put(key, new PairWithStatsImpl<Number>(new Pair<>(sumAggregationEntry.getValue().getA() != null ? sumAggregationEntry.getValue().getA().doubleValue() / elementAmountPerKey.get(key).get() : null, sumAggregationEntry.getValue().getB() != null ? sumAggregationEntry.getValue().getB().doubleValue() / elementAmountPerKey.get(key).get() : null) ,
                     minPerKey.get(key), maxPerKey.get(key),
                     /* median */ null,
                     /* standardDeviation */ null,
+                    /* individualPairs */ null,
                     /* count */ elementAmountPerKey.get(key).get(),
                     Pair.class.getName()));
         }

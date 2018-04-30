@@ -6,7 +6,7 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sse.gwt.client.async.AsyncAction;
@@ -14,7 +14,7 @@ import com.sap.sse.gwt.client.async.AsyncAction;
 public class GetCompetitorsRaceDataAction implements AsyncAction<CompetitorsRaceDataDTO> {
     private final SailingServiceAsync sailingService;
     private final RegattaAndRaceIdentifier raceIdentifier;
-    private final List<CompetitorWithBoatDTO> competitors;
+    private final List<CompetitorDTO> competitors;
     private final Date fromDate;
     private final Date toDate;
     private final long stepSizeInMs;
@@ -23,7 +23,7 @@ public class GetCompetitorsRaceDataAction implements AsyncAction<CompetitorsRace
     private final String leaderboardName;
     
     public GetCompetitorsRaceDataAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier,
-            List<CompetitorWithBoatDTO> competitors, Date fromDate, Date toDate, long stepSizeInMs, DetailType detailType,
+            List<CompetitorDTO> competitors, Date fromDate, Date toDate, long stepSizeInMs, DetailType detailType,
             String leaderboardGroupName, String leaderboardName) {
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;

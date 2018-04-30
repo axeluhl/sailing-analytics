@@ -240,8 +240,6 @@ public class DetailTypeFormatter {
             return stringMessages.expeditionRateOfTurn();
         case EXPEDITION_RACE_RUDDER_ANGLE:
             return stringMessages.expeditionRudderAngle();
-        case EXPEDITION_RACE_HEEL:
-            return stringMessages.expeditionHeel();
         case EXPEDITION_RACE_TARGET_HEEL:
             return stringMessages.expeditionTargetHeel();
         case EXPEDITION_RACE_TIME_TO_PORT_LAYLINE:
@@ -308,8 +306,6 @@ public class DetailTypeFormatter {
             return AVERAGE_SYMBOL + stringMessages.expeditionForestayLoad();
         case EXPEDITION_LEG_HEADING:
             return AVERAGE_SYMBOL + stringMessages.expeditionHeading();
-        case EXPEDITION_LEG_HEEL:
-            return AVERAGE_SYMBOL + stringMessages.expeditionTargetHeel();
         case EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION:
             return AVERAGE_SYMBOL + stringMessages.expeditionLineSquareForWindDirection();
         case EXPEDITION_LEG_RAKE:
@@ -530,7 +526,6 @@ public class DetailTypeFormatter {
         case EXPEDITION_RACE_VMG_TARG_VMG_DELTA:
         case EXPEDITION_RACE_RATE_OF_TURN:
         case EXPEDITION_RACE_RUDDER_ANGLE:
-        case EXPEDITION_RACE_HEEL:
         case EXPEDITION_RACE_TARGET_HEEL:
         case EXPEDITION_RACE_TIME_TO_PORT_LAYLINE:
         case EXPEDITION_RACE_TIME_TO_STB_LAYLINE:
@@ -564,7 +559,6 @@ public class DetailTypeFormatter {
         case EXPEDITION_LEG_VMG_TARG_VMG_DELTA:
         case EXPEDITION_LEG_RATE_OF_TURN:
         case EXPEDITION_LEG_RUDDER_ANGLE:
-        case EXPEDITION_LEG_HEEL:
         case EXPEDITION_LEG_TARGET_HEEL:
         case EXPEDITION_LEG_TIME_TO_PORT_LAYLINE:
         case EXPEDITION_LEG_TIME_TO_STB_LAYLINE:
@@ -807,7 +801,6 @@ public class DetailTypeFormatter {
         case EXPEDITION_RACE_DIST_TO_STB_LAYLINE:
         case EXPEDITION_RACE_FORESTAY_LOAD:
         case EXPEDITION_RACE_HEADING:
-        case EXPEDITION_RACE_HEEL:
         case EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION:
         case EXPEDITION_RACE_RAKE:
         case EXPEDITION_RACE_RATE_OF_TURN:

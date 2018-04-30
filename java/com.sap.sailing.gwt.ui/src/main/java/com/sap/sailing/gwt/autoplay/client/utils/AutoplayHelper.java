@@ -12,7 +12,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
@@ -44,9 +44,6 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 public class AutoplayHelper {
-    private static final long PRE_RACE_DELAY = 180000;
-    private static final long WAIT_TIME_AFTER_END_OF_RACE_MIILIS = 60 * 1000; // 1 min
-
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     private static Timer fastCurrentTimeProvider = new Timer(PlayModes.Live,
             /* delayBetweenAutoAdvancesInMilliseconds */1000l);
@@ -66,8 +63,8 @@ public class AutoplayHelper {
     }
 
     public static void getLiveRace(SailingServiceAsync sailingService, ErrorReporter errorReporter, EventDTO event,
-            String leaderBoardName, SailingDispatchSystem dispatch,
-            AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>> callback) {
+            String leaderBoardName, SailingDispatchSystem dispatch, long waitTimeAfterRaceEndInMillis,
+            long switchBeforeRaceStartInMillis, AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>> callback) {
         if (fastCurrentTimeProvider.getRefreshInterval() != 1000) {
             fastCurrentTimeProvider.setRefreshInterval(1000);
         }
@@ -98,7 +95,8 @@ public class AutoplayHelper {
                 fastCurrentTimeProvider.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest,
                         clientTimeWhenResponseWasReceived);
                 Pair<Long, RegattaAndRaceIdentifier> timeToStartAndRaceIdentifier = checkForLiveRace(
-                        selectedLeaderboard, serverTimeDuringRequest, raceTimesInfoProvider);
+                        selectedLeaderboard, serverTimeDuringRequest, raceTimesInfoProvider,
+                        waitTimeAfterRaceEndInMillis, switchBeforeRaceStartInMillis);
                 callback.onSuccess(timeToStartAndRaceIdentifier);
                 // kill old provider!
                 raceTimesInfoProvider.terminate();
@@ -125,7 +123,8 @@ public class AutoplayHelper {
      * Side effect free method to get a LifeRace from a timesProvider and a leaderboard
      */
     public static Pair<Long, RegattaAndRaceIdentifier> checkForLiveRace(AbstractLeaderboardDTO currentLeaderboard,
-            Date serverTimeDuringRequest, RaceTimesInfoProvider raceTimesInfoProvider) {
+            Date serverTimeDuringRequest, RaceTimesInfoProvider raceTimesInfoProvider,
+            long waitTimeAfterRaceEndInMillis, long switchBeforeRaceStartInMillis) {
         Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
         for (RaceColumnDTO race : currentLeaderboard.getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
@@ -134,15 +133,16 @@ public class AutoplayHelper {
                     RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
                     boolean notNullInRequiredValues = raceTimes != null && raceTimes.startOfTracking != null
                             && raceTimes.getStartOfRace() != null;
+                    
                     boolean raceHasNotEndedOrOnlyRecentlyEnded = raceTimes.endOfRace == null
                             || serverTimeDuringRequest.getTime()
                                     - raceTimes.delayToLiveInMs < raceTimes.endOfRace.getTime()
-                                            + WAIT_TIME_AFTER_END_OF_RACE_MIILIS;
+                                            + waitTimeAfterRaceEndInMillis;
 
                     if (notNullInRequiredValues && raceHasNotEndedOrOnlyRecentlyEnded) {
                         long startTimeInMs = raceTimes.getStartOfRace().getTime();
                         long startIn = startTimeInMs - serverTimeDuringRequest.getTime() - raceTimes.delayToLiveInMs;
-                        if (startIn <= PRE_RACE_DELAY && startIn > NEGATIVE_SANITY_CHECK) {
+                        if (startIn <= switchBeforeRaceStartInMillis && startIn > NEGATIVE_SANITY_CHECK) {
                             startOfLifeRace = raceTimes.getStartOfRace();
                             return new Pair<Long, RegattaAndRaceIdentifier>(startIn, raceIdentifier);
                         }
@@ -184,10 +184,9 @@ public class AutoplayHelper {
 
         StrippedLeaderboardDTO selectedLeaderboard = AutoplayHelper.getSelectedLeaderboard(event, leaderBoardName);
 
-        sailingService.getCompetitorsOfLeaderboard(leaderBoardName, new AsyncCallback<Iterable<CompetitorWithBoatDTO>>() {
-
+        sailingService.getCompetitorsOfLeaderboard(leaderBoardName, new AsyncCallback<Iterable<CompetitorDTO>>() {
             @Override
-            public void onSuccess(Iterable<CompetitorWithBoatDTO> competitors) {
+            public void onSuccess(Iterable<CompetitorDTO> competitors) {
                 RaceTimesInfoProvider creationTimeProvider = new RaceTimesInfoProvider(sailingService,
                         asyncActionsExecutor, errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 1000l);
 
@@ -208,11 +207,11 @@ public class AutoplayHelper {
                             if (!mapAlreadyCreated) {
                                 mapAlreadyCreated = true;
                                 sailingService.getCompetitorBoats(regattaAndRaceIdentifier,
-                                        new AsyncCallback<Map<CompetitorWithBoatDTO, BoatDTO>>() {
+                                        new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
                                     @Override
-                                    public void onSuccess(Map<CompetitorWithBoatDTO, BoatDTO> result) {
+                                    public void onSuccess(Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
                                         createRaceMapIfNotExist(regattaAndRaceIdentifier, selectedLeaderboard,
-                                                result, competitors, sailingService,
+                                                competitorsAndTheirBoats, competitors, sailingService,
                                                 AutoplayHelper.asyncActionsExecutor, errorReporter, creationTimer,
                                                 callback, clientTimeWhenResponseWasReceived,
                                                 serverTimeDuringRequest, clientTimeWhenRequestWasSent,
@@ -267,8 +266,8 @@ public class AutoplayHelper {
     }
 
     private static void createRaceMapIfNotExist(RegattaAndRaceIdentifier currentLiveRace,
-            StrippedLeaderboardDTO selectedLeaderboard, Map<CompetitorWithBoatDTO, BoatDTO> result,
-            Iterable<CompetitorWithBoatDTO> competitors, SailingServiceAsync sailingService,
+            StrippedLeaderboardDTO selectedLeaderboard, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
+            Iterable<CompetitorDTO> competitors, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer raceboardTimer,
             AsyncCallback<RVWrapper> callback, long clientTimeWhenResponseWasReceived, Date serverTimeDuringRequest,
             long clientTimeWhenRequestWasSent, Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos,
@@ -283,10 +282,10 @@ public class AutoplayHelper {
                 100000l, false, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS, false, true, false, false, false, false,
                 RaceMapSettings.getDefaultManeuvers(), false, false);
         RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE);
-        final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace, result);
+        final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace, competitorsAndTheirBoats);
         RaceCompetitorSelectionModel competitorSelectionProvider = new RaceCompetitorSelectionModel(
-                /* hasMultiSelection */ true, colorProvider, result);
-        for (Entry<CompetitorWithBoatDTO, BoatDTO> entry : result.entrySet()) {
+                /* hasMultiSelection */ true, colorProvider, competitorsAndTheirBoats);
+        for (Entry<CompetitorDTO, BoatDTO> entry : competitorsAndTheirBoats.entrySet()) {
             competitorSelectionProvider.setBoat(entry.getKey(), entry.getValue());
         }
         competitorSelectionProvider.setCompetitors(competitors);

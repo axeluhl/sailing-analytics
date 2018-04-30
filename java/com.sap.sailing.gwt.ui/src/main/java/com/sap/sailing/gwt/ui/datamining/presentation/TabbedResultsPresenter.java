@@ -90,7 +90,7 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
                 removeTab(oldHeader);
             } 
             else if (result.getResultType()
-                    .equals("com.sap.sse.datamining.shared.data.AveragePairWithStats")) {
+                    .equals("com.sap.sse.datamining.shared.data.PairWithStats")) {
                 CloseableTabHeader oldHeader = getSelectedHeader();
                 addTabAndFocus(new NumberPairResultsPresenter(TabbedResultsPresenter.this,
                         getComponentContext(), stringMessages));

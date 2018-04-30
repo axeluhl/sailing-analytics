@@ -49,7 +49,7 @@ public interface ManeuverCurveBoundaries {
      * @return The total course change in degrees
      */
     double getDirectionChangeInDegrees();
-    
+
     /**
      * Gets the duration of the curve.
      */
