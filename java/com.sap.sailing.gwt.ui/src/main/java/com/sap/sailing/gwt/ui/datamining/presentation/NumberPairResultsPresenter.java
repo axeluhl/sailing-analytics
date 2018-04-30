@@ -27,6 +27,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.PairWithStats;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -37,6 +38,7 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
     private final SimpleLayoutPanel chartPanel;
     private final Chart chart;
     private final Map<GroupKey, Series> seriesMappedByGroupKey;
+    private final GroupKey simpleResultSeriesKey;
 
     public NumberPairResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context, stringMessages);
@@ -48,6 +50,7 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
                 chart.redraw();
             }
         };
+        simpleResultSeriesKey = new GenericGroupKey<>(stringMessages.results());
         chart = createChart();
         chartPanel.setWidget(chart);
     }
@@ -119,7 +122,6 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
                 chart.addSeries(seriesMappedByGroupKey.get(seriesKey), false, false);
             }
         }
-
     }
     
     private GroupKey groupKeyToSeriesKey(GroupKey groupKey) {
@@ -127,7 +129,7 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
             List<? extends GroupKey> subKeys = GroupKey.Util.getSubKeys(groupKey);
             return subKeys.size() == 1 ? subKeys.get(0) : new CompoundGroupKey(subKeys);
         } else {
-            return groupKey;
+            return simpleResultSeriesKey;
         }
     }
 
