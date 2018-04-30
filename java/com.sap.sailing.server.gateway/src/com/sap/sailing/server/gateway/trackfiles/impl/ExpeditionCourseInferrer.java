@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.sensordata.ExpeditionExtendedSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -29,6 +30,7 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.trackfiles.impl.CompressedStreamsUtil;
 import com.sap.sailing.server.trackfiles.impl.ExpeditionExtendedDataImporterImpl;
@@ -136,7 +138,13 @@ public class ExpeditionCourseInferrer {
      */
     public void setStartLine(ExpeditionStartData startData, Iterable<DynamicTrackedRace> trackedRaces, RacingEventService racingEventService) {
         for (final DynamicTrackedRace trackedRace : trackedRaces) {
+            trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0.5));
+        }
+        for (final DynamicTrackedRace trackedRace : trackedRaces) {
             setStartLine(startData, trackedRace, racingEventService);
+        }
+        for (final DynamicTrackedRace trackedRace : trackedRaces) {
+            trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1.0));
         }
     }
 

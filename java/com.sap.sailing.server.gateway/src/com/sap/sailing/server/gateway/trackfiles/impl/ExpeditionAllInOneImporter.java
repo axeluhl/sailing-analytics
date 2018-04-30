@@ -397,7 +397,7 @@ public class ExpeditionAllInOneImporter {
 
     private int getNextAvailableStartBasedSessionCount(Regatta regatta) {
         int maxNumberFound = 0;
-        final Pattern pattern = Pattern.compile(START_PER_SESSION_RACE_COLUMN_NAME_PREFIX+"\\([0-9]+\\)");
+        final Pattern pattern = Pattern.compile(START_PER_SESSION_RACE_COLUMN_NAME_PREFIX+"([0-9]+)");
         for (final RaceColumn raceColumn : regatta.getRaceColumns()) {
             Matcher matcher = pattern.matcher(raceColumn.getName());
             if (matcher.matches()) {
