@@ -91,6 +91,37 @@ public class Chart extends BaseChart<Chart> {
 
     }
 
+    /**
+     * An enumeration of the known supported keys which are passed to the {@link Chart#setPanKey(PanKey)}used as
+     * a "panKey" which, when down, switches from zooming to panning.
+     */
+    public enum PanKey {
+        /**
+         * Pan the chart while holding "alt"
+         */
+        ALT("alt"),
+
+        /**
+         * Pan the chart while holding "ctrl"
+         */
+        CTRL("ctrl"),
+
+        /**
+         *  Pan the chart while holding "shift"
+         */
+        SHIFT("shift");
+
+        private PanKey(String optionValue) {
+            this.optionValue = optionValue;
+        }
+
+        private final String optionValue;
+
+        public String toString() {
+            return optionValue;
+        }
+    }
+
 
     /**
      * Create a new Highcharts chart instance as a GWT Widget that can then be added to
@@ -111,6 +142,35 @@ public class Chart extends BaseChart<Chart> {
     }
 
     /**
+     * Convenience method for setting the 'drilldown' options for the chart which represents a collection of options
+     * that apply to standard charts.
+     * @param drilldown The drilldown options to apply to the chart.
+     * @return A reference to this {@link Chart} instance for convenient method chaining.
+     */
+    public Chart setDrilldown(Drilldown drilldown) {
+        return this.setOption("/drilldown", drilldown != null ? drilldown.getOptions() : null);
+    }
+
+    /**
+     * Convenience method for setting the 'noData' option of the chart.
+     * @param noData The noData options to apply to the chart.
+     * @return A reference to this {@link Chart} instance for convenient method chaining.
+     */
+    public Chart setNoData(NoData noData) {
+        return this.setOption("/noData", noData != null ? noData.getOptions() : null);
+    }
+
+    /**
+     * Convenience method for setting the 'options3d' options for the chart, which represents a collection of options
+     * that apply only to standard charts.
+     * @param options3d The 3D options to apply to the chart.
+     * @return A reference to this {@link Chart} instance for convenient method chaining.
+     */
+    public Chart setOptions3D(Options3D options3d) {
+        return this.setOption("/chart/options3d", options3d != null ? options3d.getOptions() : null);
+    }
+
+    /**
      * Convenience method for setting the 'pane' options of the chart, which represents
      * a collection of options that apply only to polar charts and angular gauges.
      * <p/>
@@ -126,7 +186,33 @@ public class Chart extends BaseChart<Chart> {
         return this.setOption("/pane", pane != null ? pane.getOptions() : null);
     }
 
+    /**
+     * Convenience method for setting the 'panKey' option of the chart.  Equivalent to:
+     * <pre><code>
+     *     chart.setOption("panKey", "shift");
+     * </code></pre>
+     * Allows setting a key to switch between zooming and panning.
+     * @param panKey the key used to switch zooming to panning.
+     * @return A reference to this {@link Chart} instance for convenient method chaining.
+     * @since 1.7.0
+     */
+    public Chart setPanKey(PanKey panKey) {
+        return this.setOption("pankey", panKey != null ? panKey.toString() : null);
+    }
 
+    /**
+     * Convenience method for setting the 'panning' option of the chart.  Equivalent to:
+     * <pre><code>
+     *     chart.setOption("panning", true);
+     * </code></pre>
+     * Allow panning in a chart. Best used with panKey to combine zooming and panning. Defaults to false.
+     * @param panning the value to set as the 'panning' option on the chart.
+     * @return A reference to this {@link Chart} instance for convenient method chaining.
+     * @since 1.7.0
+     */
+    public Chart setPanning(Boolean panning) {
+        return this.setOption("panning", panning);
+    }
 
     /**
      * Convenience method for setting the 'polar' option of the chart.  Equivalent to:

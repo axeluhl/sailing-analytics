@@ -48,27 +48,27 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<IRaceCompetit
 
     @Override
     protected void handleEvent(Triple<IRaceCompetitor, IPosition, Void> event) {
-    	if (!event.getA().getCompetitor().isNonCompeting()) {
-	        if (received++ % 1000 == 0) {
-	            System.out.print("P");
-	            if ((received / 1000 + 1) % 80 == 0) {
-	                System.out.println();
-	            }
-	        }
-	        IRace race = event.getA().getRace();
-	        DynamicTrackedRace trackedRace = getTrackedRace(race);
-	        if (trackedRace != null) {
-	            final GPSFixMoving fix = getDomainFactory().createGPSFixMoving(event.getB());
-	            Competitor competitor = getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor());
-	            if (getSimulator() != null) {
-	                getSimulator().scheduleCompetitorPosition(competitor, fix);
-	            } else {
-	                trackedRace.recordFix(competitor, fix);
-	            }
-	        } else {
-	            logger.warning("Couldn't find tracked race for race " + race.getName()
-	                    + ". Dropping raw position event " + event);
-	        }
-    	}
+        if (!event.getA().getCompetitor().isNonCompeting()) {
+            if (received++ % 1000 == 0) {
+                System.out.print("P");
+                if ((received / 1000 + 1) % 80 == 0) {
+                    System.out.println();
+                }
+            }
+            IRace race = event.getA().getRace();
+            DynamicTrackedRace trackedRace = getTrackedRace(race);
+            if (trackedRace != null) {
+                final GPSFixMoving fix = getDomainFactory().createGPSFixMoving(event.getB());
+                Competitor competitor = getDomainFactory().resolveCompetitor(event.getA().getCompetitor());
+                if (getSimulator() != null) {
+                    getSimulator().scheduleCompetitorPosition(competitor, fix);
+                } else {
+                    trackedRace.recordFix(competitor, fix);
+                }
+            } else {
+                logger.warning("Couldn't find tracked race for race " + race.getName()
+                        + ". Dropping raw position event " + event);
+            }
+        }
     }
 }

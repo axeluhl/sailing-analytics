@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
@@ -42,9 +43,7 @@ public class PreLiveRaceLeaderBoardWithImageViewImpl extends ResizeComposite imp
     private ImageProvider provider;
 
     public interface ImageProvider {
-
         String getImageUrl(CompetitorDTO marked);
-
     }
 
     public PreLiveRaceLeaderBoardWithImageViewImpl(ImageProvider provider) {
@@ -65,12 +64,12 @@ public class PreLiveRaceLeaderBoardWithImageViewImpl extends ResizeComposite imp
     @Override
     public void onCompetitorSelect(CompetitorDTO selected) {
         image.setUrl(provider.getImageUrl(selected));
-        if (selected.getBoat() != null && selected.getBoat().getName() != null) {
-            subline1.setText(selected.getBoat().getName());
+        final String boatName;
+        if (selected.hasBoat() && (boatName = ((CompetitorWithBoatDTO) selected).getBoat().getName()) != null) {
+            subline1.setText(boatName);
         } else {
             subline1.setText("");
         }
-
         if (selected.getName() != null) {
             subline2.setText(selected.getName());
         } else {

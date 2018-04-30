@@ -75,7 +75,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
     private final List<String> raceColumnNamesWithData;
     protected final String leaderboardName;
     protected final StringMessages stringMessages;
-    
+
     public AbstractCompetitorLeaderboardChart(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, String leaderboardName,
@@ -90,8 +90,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
         this.timer = timer;
         this.leaderboardName = leaderboardName;
         this.selectedDetailType = detailType;
-
-        competitorSeries = new HashMap<CompetitorDTO, Series>();
+        competitorSeries = new HashMap<>();
         raceColumnNames = new ArrayList<String>();
         raceColumnNamesWithData = new ArrayList<String>();
     }
@@ -240,7 +239,6 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
                         chart.hideLoading();
                         setWidget(chart);
                         raceColumnNames.clear();
-                        
                         switch (selectedDetailType) {
                         case OVERALL_RANK:
                         case REGATTA_RANK:
@@ -252,7 +250,6 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
                         default:
                             break;
                         }
-        
                         // TODO will removing the following line do harm on any usage of this abstract base class?
                         // chart.setSizeToMatchContainer();
                         
@@ -272,7 +269,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
     }
 
     private void fillTotalRanksSeries(List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result, List<Series> chartSeries) {
-        Set<Series> unusedSeries = new HashSet<Series>(competitorSeries.values());
+        Set<Series> unusedSeries = new HashSet<>(competitorSeries.values());
         for (Series series : competitorSeries.values()) {
             for (Point p : new ArrayList<Point>(Arrays.asList(series.getPoints()))) {
                 series.removePoint(p, /* redraw */false, /* animation */false);

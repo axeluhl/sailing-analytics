@@ -23,7 +23,7 @@ public class GetRaceMapDataAction extends AbstractGetMapRelatedDataAction<RaceMa
     public GetRaceMapDataAction(SailingServiceAsync sailingService, Map<String, CompetitorDTO> competitorsByIdAsString,
             RegattaAndRaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from,
             Map<CompetitorDTO, Date> to, boolean extrapolate, LegIdentifier simulationLegIdentifier,
-            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,Date timeForEstimation, boolean targetEstimationRequired) {
+            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, Date timeForEstimation, boolean targetEstimationRequired) {
         super(sailingService, raceIdentifier, from, to, extrapolate);
         this.competitorsByIdAsString = competitorsByIdAsString;
         this.timeForEstimation = timeForEstimation;

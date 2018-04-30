@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -205,8 +206,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         getFullLeaderboard().registerCompetitor(competitor);
     }
 
-    public void registerCompetitors(Iterable<Competitor> competitor) {
-        getFullLeaderboard().registerCompetitors(competitor);
+    public void registerCompetitors(Iterable<Competitor> competitors) {
+        getFullLeaderboard().registerCompetitors(competitors);
     }
 
     public void deregisterCompetitor(Competitor competitor) {
@@ -221,7 +222,6 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getAllCompetitors();
     }
 
-    @Override
     public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
         return getFullLeaderboard().getAllCompetitorsWithRaceDefinitionsConsidered();
     }
@@ -434,6 +434,11 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getBoatClass();
     }
 
+    @Override
+    public Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet) {
+        return getFullLeaderboard().getBoatOfCompetitor(competitor, raceColumn, fleet);
+    }
+
     private RegattaLeaderboard getFullLeaderboard() {
         if (fullLeaderboard == null) {
             if (fullLeaderboardSupplier == null) {
@@ -459,5 +464,35 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     private void writeObject(ObjectOutputStream oos) throws IOException {
         getFullLeaderboard();
         oos.defaultWriteObject();
+    }
+
+    @Override
+    public Iterable<Boat> getBoatsRegisteredInRegattaLog() {
+        return getFullLeaderboard().getBoatsRegisteredInRegattaLog();
+    }
+
+    @Override
+    public Iterable<Boat> getAllBoats() {
+        return getFullLeaderboard().getAllBoats();
+    }
+
+    @Override
+    public void registerBoat(Boat boat) {
+        getFullLeaderboard().registerBoat(boat);
+    }
+
+    @Override
+    public void registerBoats(Iterable<Boat> boats) {
+        getFullLeaderboard().registerBoats(boats);
+    }
+
+    @Override
+    public void deregisterBoat(Boat boat) {
+        getFullLeaderboard().deregisterBoat(boat);
+    }
+
+    @Override
+    public void deregisterBoats(Iterable<Boat> boats) {
+        getFullLeaderboard().deregisterBoats(boats);
     }
 }

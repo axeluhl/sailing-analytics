@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
@@ -26,13 +28,13 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
 public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
+    private static final Logger logger = Logger.getLogger(IdleOverallLeaderBoardNode.class.getName());
     private final AutoPlayClientFactory cf;
     private Timer timer;
 
     public IdleOverallLeaderBoardNode(AutoPlayClientFactory cf) {
         super(IdleOverallLeaderBoardNode.class.getName());
         this.cf = cf;
-
     }
 
     public void onStart() {
@@ -42,13 +44,14 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
 
         List<DetailType> raceDetails = new ArrayList<>();
         // raceDetails.add(DetailType.RACE_RANK);
+        final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(
+                /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, raceDetails, overallDetails,
+                /* namesOfRaceColumnsToShow */ null, /* numberOfLastRacesToShow */ null,
+                /* delayBetweenAutoAdvancesInMilliseconds */ null, RaceColumnSelectionStrategies.EXPLICIT,
+                /* showAddedScores */ true, /* showCompetitorShortNameColumn */ true,
+                /* showCompetitorFullNameColumn */ false, /* showCompetitorBoatInfoColumn */ false, /* isCompetitorNationalityColumnVisible */ true);
 
-        final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(null, null, raceDetails, overallDetails,
-                null, null, null, RaceColumnSelectionStrategies.EXPLICIT,true, false,
-                true,
-                false, true);
-
-        timer = new com.sap.sse.gwt.client.player.Timer(
+        timer = new Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
@@ -66,7 +69,7 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
                                     cf.getSailingService(), new AsyncActionsExecutor(), leaderboardSettings, false,
                                     provider, timer, null, overallLeaderboardName, cf.getErrorReporter(),
                                     StringMessages.INSTANCE, false, null, false, null, false, true, false, false, false,
-                                    new SixtyInchLeaderBoardStyle(true), FlagImageResolverImpl.get());
+                                    new SixtyInchLeaderBoardStyle(true), FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
 
                             IdleOverallLeaderBoardPlace place = new IdleOverallLeaderBoardPlace(leaderboardPanel);
 
@@ -75,15 +78,14 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
                             getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getEvent().getName(),
                                     cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName()));
                         } else {
-                            GWT.log("Not found any overleaderboardname");
+                            logger.warning("Not found any overleaderboardname");
                         }
                     }
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        // DO NOTHING
+                        logger.log(Level.SEVERE, "Remote call for Leaderboard loading failed", caught);
                     }
-
                 }));
     }
 

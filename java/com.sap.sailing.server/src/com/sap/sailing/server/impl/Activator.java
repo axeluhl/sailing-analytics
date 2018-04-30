@@ -22,6 +22,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
@@ -34,7 +35,6 @@ import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMong
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
-import com.sap.sailing.server.MasterDataImportClassLoaderService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
@@ -42,6 +42,7 @@ import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPrefe
 import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCacheImpl;
+import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
 import com.sap.sse.mail.MailService;
@@ -141,6 +142,7 @@ public class Activator implements BundleActivator {
         context.registerService(RaceLogResolver.class, racingEventService, null);
         context.registerService(ClearStateTestSupport.class, racingEventService, null);
         context.registerService(SensorFixStoreSupplier.class, racingEventService, null);
+        context.registerService(WindFinderReviewedSpotsCollectionIdProvider.class, racingEventService, null);
         Dictionary<String, String> properties = new Hashtable<String, String>();
         final GPSFixMongoHandlerImpl gpsFixMongoHandler = new GPSFixMongoHandlerImpl(
                 racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory());

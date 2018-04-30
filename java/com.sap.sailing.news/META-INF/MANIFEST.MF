@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Shared sailing news APIs
 Bundle-SymbolicName: com.sap.sailing.news
+Automatic-Module-Name: com.sap.sailing.news
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.news.Activator
 Bundle-Vendor: SAP

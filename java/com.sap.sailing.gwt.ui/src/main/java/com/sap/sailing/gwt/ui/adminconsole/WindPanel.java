@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,7 +45,6 @@ import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -55,10 +55,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
 import com.sap.sailing.gwt.ui.adminconsole.WindImportResult.RaceEntry;
-import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResponse;
-import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResultsDialog;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -70,12 +67,11 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
-import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
-import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -87,13 +83,10 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  *
  */
 public class WindPanel extends FormPanel implements RegattasDisplayer, WindShower {
-
     private static final String WIND_IMPORT_PARAMETER_RACES = "races";
 
     private static final String EXPEDITON_IMPORT_PARAMETER_BOAT_ID = "boatId";
-    private static final String EXPEDITON_IMPORT_PARAMETER_BOAT_CLASS = "boatClass";
-
-    private static final String URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT = "/../../sailingserver/expedition/import";
+    
     private static final String URL_SAILINGSERVER_EXPEDITION_IMPORT = "/../../sailingserver/expedition-import";
     private static final String URL_SAILINGSERVER_GRIB_IMPORT = "/../../sailingserver/grib-wind-import";
     private static final String URL_SAILINGSERVER_NMEA_IMPORT = "/../../sailingserver/nmea-wind-import";
@@ -117,23 +110,28 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     private final ListDataProvider<WindDTO> rawWindFixesDataProvider;
     private final CellTable<WindDTO> rawWindFixesTable;
     private final VerticalPanel windFixPanel;
-
+    
+    /**
+     * Composite pattern over the {@link RegattasDisplayer} interface. Calls to {@link #fillRegattas(Iterable)}
+     * will be forwarded to those objects contained in this collection.
+     */
+    private final Set<RegattasDisplayer> containedRegattaDisplayers;
+    
     public WindPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
         ensureDebugId("WindPanel");
-        
         this.sailingService = sailingService;
+        this.containedRegattaDisplayers = new HashSet<>();
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         windSourcesToExcludeSelectorPanel = new WindSourcesToExcludeSelectorPanel(sailingService, stringMessages, errorReporter);
-
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSize("100%", "100%");
         this.setWidget(mainPanel);
-
         trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, errorReporter,
                 regattaRefresher,
                 stringMessages, /*multiselection*/true, /* actionButtonsEnabled */ false);
+        containedRegattaDisplayers.add(trackedRacesListComposite);
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
         mainPanel.add(trackedRacesListComposite);
         refreshableRaceSelectionModel = (RefreshableMultiSelectionModel<RaceDTO>) trackedRacesListComposite.getSelectionModel();
@@ -143,16 +141,13 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
                 updateWindDisplay();
             }
         });
-
         windCaptionPanel = new CaptionPanel(stringMessages.wind());
         windCaptionPanel.setVisible(false);
         mainPanel.add(windCaptionPanel);
-
         TabPanel tabPanel = new TabPanel();
         tabPanel.setAnimationEnabled(true);
         windCaptionPanel.add(tabPanel);
         tabPanel.setSize("95%", "95%");
-
         windFixesDisplayPanel = new VerticalPanel();
         Button addWindFixButton = new Button(stringMessages.actionAddWindData() + "...");
         addWindFixButton.addClickHandler(new ClickHandler() {
@@ -176,16 +171,13 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             }
         });
         windFixesDisplayPanel.add(addWindFixButton);
-
         final VerticalPanel windSourcesPanel = new VerticalPanel();
         windSourcesPanel.setSpacing(10);
         tabPanel.add(windSourcesPanel, stringMessages.windSourcesUsed());
         tabPanel.add(windFixesDisplayPanel, stringMessages.windFixes());
         tabPanel.selectTab(0);
-
         raceIsKnownToStartUpwindBox = new CheckBox(stringMessages.raceIsKnownToStartUpwind());
         windSourcesPanel.add(raceIsKnownToStartUpwindBox);
-
         windSourcesPanel.add(windSourcesToExcludeSelectorPanel);
         raceIsKnownToStartUpwindBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -193,13 +185,10 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
                 setRaceIsKnownToStartUpwind();
             }
         });
-
         windFixPanel = new VerticalPanel();
         windSourcesPanel.add(windFixPanel);
-
         windSourceLabel = new Label();
         windFixesDisplayPanel.add(windSourceLabel);
-
         // table for the raw wind fixes
         removeColumn = new IdentityColumn<WindDTO>(new ActionCell<WindDTO>(stringMessages.remove(), new Delegate<WindDTO>() {
             @Override
@@ -252,7 +241,6 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         timeColumn.setSortable(true);
         speedInKnotsColumn.setSortable(true);
         windDirectionInDegColumn.setSortable(true);
-
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         rawWindFixesTable = new BaseCelltable<WindDTO>(/* pageSize */10000, tableRes);
         rawWindFixesTable.addColumn(timeColumn, stringMessages.time());
@@ -266,13 +254,14 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         rawWindFixesTable.addColumnSortHandler(columnSortHandler);
         rawWindFixesTable.getColumnSortList().push(timeColumn);
         windFixesDisplayPanel.add(rawWindFixesTable);
-
         mainPanel.add(createExpeditionWindImportPanel());
         mainPanel.add(createGribWindImportPanel());
         mainPanel.add(createNmeaWindImportPanel());
         mainPanel.add(createBravoWindImportPanel());
         mainPanel.add(createIgtimiWindImportPanel(mainPanel));
-        mainPanel.add(createExpeditionAllInOneImportPanel());
+        final Pair<CaptionPanel, ExpeditionAllInOneImportPanel> expeditionAllInOneRootAndImportPanel = createExpeditionAllInOneImportPanel(regattaRefresher);
+        mainPanel.add(expeditionAllInOneRootAndImportPanel.getA());
+        containedRegattaDisplayers.add(expeditionAllInOneRootAndImportPanel.getB());
     }
 
     private CaptionPanel createIgtimiWindImportPanel(VerticalPanel mainPanel) {
@@ -448,66 +437,11 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         return new WindImportFileUploadForm(form, formContentPanel, fileUpload, submitButton);
     }
 
-    private CaptionPanel createExpeditionAllInOneImportPanel() {
+    private Pair<CaptionPanel, ExpeditionAllInOneImportPanel> createExpeditionAllInOneImportPanel(RegattaRefresher regattaRefresher) {
         final CaptionPanel rootPanel = new CaptionPanel(stringMessages.importFullExpeditionData());
-        final FormPanel formPanel = new FormPanel();
-        final BusyIndicator busyIndicator = new SimpleBusyIndicator();
-        final Button uploadButton = new Button(stringMessages.upload());
-        uploadButton.addClickHandler(event -> {
-            uploadButton.setEnabled(false);
-            busyIndicator.setBusy(true);
-            formPanel.submit();
-        });
-        formPanel.setMethod(FormPanel.METHOD_POST);
-        formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
-        formPanel.setAction(GWT.getHostPageBaseURL() + URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT);
-        formPanel.addSubmitCompleteHandler(event -> {
-            uploadButton.setEnabled(true);
-            busyIndicator.setBusy(false);
-            final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(event.getResults());
-            if (response.hasEventId()) {
-                new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
-                        response.getLeaderboardGroupName(), response.getLeaderboardName(), response.getRaceName(),
-                        response.getRaceColumnName(), response.getFleetName(), response.getGpsDeviceIds(),
-                        response.getSensorDeviceIds(), response.getSensorFixImporterType(), sailingService,
-                        errorReporter, stringMessages);
-            } else {
-                ExpeditionDataImportResultsDialog.showResults(response);
-            }
-        });
-        rootPanel.add(formPanel);
-        final VerticalPanel contentPanel = new VerticalPanel();
-        formPanel.add(contentPanel);
-        final FileUpload fileUpload = new FileUpload();
-        fileUpload.setName("upload");
-        contentPanel.add(fileUpload);
-        final HorizontalPanel boatClassPanel = new HorizontalPanel();
-        boatClassPanel.setSpacing(5);
-        contentPanel.add(boatClassPanel);
-        final Label boatClassLabel = new Label(stringMessages.boatClass() + ":");
-        boatClassPanel.add(boatClassLabel);
-        boatClassPanel.setCellVerticalAlignment(boatClassLabel, HasVerticalAlignment.ALIGN_MIDDLE);
-        final SuggestBox boatClassInput = new SuggestBox(new BoatClassMasterdataSuggestOracle());
-        boatClassInput.getValueBox().setName(EXPEDITON_IMPORT_PARAMETER_BOAT_CLASS);
-        boatClassPanel.add(boatClassInput);
-        boatClassPanel.setCellVerticalAlignment(boatClassInput, HasVerticalAlignment.ALIGN_MIDDLE);
-        final HorizontalPanel controlPanel = new HorizontalPanel();
-        controlPanel.setSpacing(5);
-        controlPanel.add(uploadButton);
-        controlPanel.add(busyIndicator);
-        contentPanel.add(controlPanel);
-        final Runnable validation = () -> {
-            final String filename = fileUpload.getFilename(), boatClass = boatClassInput.getValue();
-            final boolean fileValid = filename != null && !filename.trim().isEmpty();
-            final boolean boatClassValid = boatClass != null && !boatClass.trim().isEmpty();
-            uploadButton.setEnabled(fileValid && boatClassValid);
-        };
-        
-        fileUpload.addChangeHandler(event -> validation.run());
-        boatClassInput.addSelectionHandler(event -> validation.run());
-        boatClassInput.addKeyUpHandler(event -> validation.run());
-        validation.run();
-        return rootPanel;
+        final ExpeditionAllInOneImportPanel expeditionAllInOneImportPanel = new ExpeditionAllInOneImportPanel(stringMessages, sailingService, errorReporter, regattaRefresher);
+        rootPanel.add(expeditionAllInOneImportPanel);
+        return new Pair<>(rootPanel, expeditionAllInOneImportPanel);
     }
 
     private CaptionPanel createExpeditionWindImportPanel() {
@@ -625,7 +559,9 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
 
     @Override
     public void fillRegattas(Iterable<RegattaDTO> result) {
-        trackedRacesListComposite.fillRegattas(result);
+        for (final RegattasDisplayer containedRegattaDisplayer : containedRegattaDisplayers) {
+            containedRegattaDisplayer.fillRegattas(result);
+        }
     }
 
     @Override

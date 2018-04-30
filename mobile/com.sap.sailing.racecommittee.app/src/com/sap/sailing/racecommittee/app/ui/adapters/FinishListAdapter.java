@@ -14,22 +14,26 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapter.ViewHolder> {
 
-    private Context mContext;
-    private CompetitorResultsList<CompetitorResultWithIdImpl> mCompetitor;
+    private final Context mContext;
+    private final CompetitorResultsList<CompetitorResultWithIdImpl> mCompetitor;
+    private final boolean mCanBoatsOfCompetitorsChangePerRace;
     private FinishEvents mListener;
 
-    public FinishListAdapter(Context context, CompetitorResultsList<CompetitorResultWithIdImpl> competitor) {
+    public FinishListAdapter(Context context, CompetitorResultsList<CompetitorResultWithIdImpl> competitor, boolean canBoatsOfCompetitorsChangePerRace) {
         setHasStableIds(true);
         mContext = context;
         mCompetitor = competitor;
+        mCanBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
     }
 
     public void setListener(FinishEvents listener) {
@@ -50,6 +54,14 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         } else {
             holder.position.setText(null);
         }
+        holder.vesselId.setVisibility(View.GONE);
+        if (mCanBoatsOfCompetitorsChangePerRace && item.getBoat() != null) {
+            holder.vesselId.setVisibility(View.VISIBLE);
+            holder.vesselId.setText(item.getBoat().getSailID());
+            if (item.getBoat().getColor() != null) {
+                ViewHelper.setColors(holder.vesselId, item.getBoat().getColor().getAsHtml());
+            }
+        }
         holder.competitor.setText(item.getCompetitorDisplayName());
         int dragState = holder.getDragStateFlags();
         if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_UPDATED) != 0) {
@@ -61,6 +73,21 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
             }
             holder.container.setBackgroundColor(bgColor);
         }
+        Drawable warning;
+        switch (item.getMergeState()) {
+            case ERROR:
+                warning = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
+                break;
+
+            case WARNING:
+                warning = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
+                break;
+
+            default:
+                warning = null;
+                break;
+        }
+        holder.warning.setImageDrawable(warning);
         holder.penalty.setText(item.getMaxPointsReason().name());
         holder.penalty.setVisibility(item.getMaxPointsReason().equals(MaxPointsReason.NONE) ? View.GONE : View.VISIBLE);
         int bgId = R.attr.sap_gray_black_30;
@@ -172,6 +199,10 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         }
     }
 
+    public int getFirstRankZeroPosition() {
+        return mCompetitor.getFirstRankZeroPosition();
+    }
+
     public interface FinishEvents {
         void onItemMove(int fromPosition, int toPosition);
 
@@ -189,6 +220,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         TextView position;
         TextView vesselId;
         TextView competitor;
+        ImageView warning;
         TextView penalty;
 
         public ViewHolder(View itemView) {
@@ -210,6 +242,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
             }
             vesselId = ViewHelper.get(itemView, R.id.vessel_id);
             competitor = ViewHelper.get(itemView, R.id.competitor);
+            warning = ViewHelper.get(itemView, R.id.warning_sign);
             penalty = ViewHelper.get(itemView, R.id.item_penalty);
             position = ViewHelper.get(itemView, R.id.position);
             if (position != null) {
@@ -229,9 +262,5 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
             }
             return false;
         }
-    }
-
-    public int getFirstRankZeroPosition() {
-        return mCompetitor.getFirstRankZeroPosition();
     }
 }

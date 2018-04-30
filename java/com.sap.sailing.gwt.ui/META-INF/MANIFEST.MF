@@ -56,7 +56,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.competitorimport,
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.expeditionconnector.common,
- org.mp4parser.isoparser;bundle-version="1.9.31"
+ org.mp4parser.isoparser;bundle-version="1.9.31",
+ com.sap.sailing.domain.windfinderadapter
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.servlet;version="3.1.0",
@@ -85,3 +86,4 @@ Export-Package: com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.commo
  com.sap.sailing.gwt.ui.server,
  com.sap.sailing.gwt.ui.shared,
  com.sap.sailing.gwt.ui.shared.racemap
+Automatic-Module-Name: com.sap.sailing.gwt.ui

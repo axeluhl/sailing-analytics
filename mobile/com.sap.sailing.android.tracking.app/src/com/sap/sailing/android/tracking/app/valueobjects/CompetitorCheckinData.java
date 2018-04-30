@@ -4,7 +4,6 @@ import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 
 public class CompetitorCheckinData extends CheckinData {
 
-
     public String competitorName;
     public String competitorId;
     public String competitorUrl;

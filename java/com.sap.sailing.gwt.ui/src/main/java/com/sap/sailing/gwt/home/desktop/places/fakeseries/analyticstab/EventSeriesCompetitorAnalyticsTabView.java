@@ -7,6 +7,8 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -18,14 +20,12 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorCharts;
 import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorChartsDelegateFullscreenViewer;
-import com.sap.sailing.gwt.home.desktop.places.Consumer;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SharedLeaderboardEventSeriesTabView;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
-import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.common.Util;
 
 /**
@@ -77,25 +77,37 @@ public class EventSeriesCompetitorAnalyticsTabView extends SharedLeaderboardEven
                     contentArea.setWidget(EventSeriesCompetitorAnalyticsTabView.this);
                 }
             };
-            if(eventSeriesAnalyticsManager.getLeaderboardPanel() == null) {
-                createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager, currentPresenter.getUserService(), null, new Consumer<MultiRaceLeaderboardPanel>() {
-                    @Override
-                    public void consume(MultiRaceLeaderboardPanel object) {
-                        callback.run();
-                    }
-                });
+            if (eventSeriesAnalyticsManager.getLeaderboardPanel() == null) {
+                eventSeriesAnalyticsManager.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
+                        new AsyncCallback<Iterable<DetailType>>() {
+
+                            @Override
+                            public void onSuccess(Iterable<DetailType> result) {
+                                createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager,
+                                        currentPresenter.getUserService(), null, panel -> callback.run(), result);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                showMessageLabelAndGoToHome("Could not load detailType list", contentArea);
+                            }
+                        });
             } else {
                 callback.run();
             }
         } else {
-            contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));
-            new com.google.gwt.user.client.Timer() {
-                @Override
-                public void run() {
-                    currentPresenter.getHomeNavigation().goToPlace();
-                }
-            }.schedule(3000);
+            showMessageLabelAndGoToHome("No leaderboard specified, cannot proceed to leaderboardpage", contentArea);
         }
+    }
+    
+    private void showMessageLabelAndGoToHome(final String message, final AcceptsOneWidget contentArea) {
+        contentArea.setWidget(new Label(message));
+        new Timer() {
+            @Override
+            public void run() {
+                currentPresenter.getHomeNavigation().goToPlace();
+            }
+        }.schedule(3000);
     }
 
     private List<DetailType> getAvailableDetailsTypes() {
@@ -134,7 +146,7 @@ public class EventSeriesCompetitorAnalyticsTabView extends SharedLeaderboardEven
         int selectedCompetitorsCount = Util.size(competitorSelectionProvider.getSelectedCompetitors());
         
         if(selectedCompetitorsCount == 0 && competitorsCount > MAX_COMPETITORS_IN_CHART) {
-            List<CompetitorDTO> selectedCompetitors = new ArrayList<CompetitorDTO>();
+            List<CompetitorDTO> selectedCompetitors = new ArrayList<>();
             Iterator<CompetitorDTO> allCompetitorsIt = competitorSelectionProvider.getAllCompetitors().iterator();
             int counter = 0;
             while(counter < MAX_COMPETITORS_IN_CHART) {

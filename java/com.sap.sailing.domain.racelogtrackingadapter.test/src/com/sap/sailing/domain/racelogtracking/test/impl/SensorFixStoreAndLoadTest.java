@@ -12,8 +12,10 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CyclicBarrier;
 
@@ -42,6 +44,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMa
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -120,15 +123,17 @@ public class SensorFixStoreAndLoadTest {
     protected RaceLog raceLog;
     protected RegattaLog regattaLog;
     protected SensorFixStore store;
-    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null,
-            null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
-    protected final Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null,
-            null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
-    private final Competitor compNotPartOfRace = DomainFactory.INSTANCE.getOrCreateCompetitor("comp3", "comp3", null, null, null,
-            null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null,
+            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+    protected final Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null,
+            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+    private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
+    protected final Boat boat1 = DomainFactory.INSTANCE.getOrCreateBoat("Boat1", "Boat1", boatClass, "GER 1", null);
+    protected final Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat("Boat2", "Boat2", boatClass, "GER 2", null);
+    private final Competitor compNotPartOfRace = DomainFactory.INSTANCE.getOrCreateCompetitor("comp3", "comp3", null, null, null, null,
+            null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
     protected final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
-    private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
 
     protected final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
     private DynamicTrackedRace trackedRace;
@@ -156,10 +161,13 @@ public class SensorFixStoreAndLoadTest {
                 new MillisecondsTimePoint(1), 0, mark2));
         Course course = new CourseImpl("course",
                 Arrays.asList(new Waypoint[] { new WaypointImpl(mark), new WaypointImpl(mark2) }));
-        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(comp, comp2));
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(comp, boat1);
+        competitorsAndBoats.put(comp2, boat2);
+        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
         DynamicTrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
-                /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */ null, /* endDate */null, null, null, "a", null));
         trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
                 mock(RaceLogResolver.class));
@@ -412,7 +420,7 @@ public class SensorFixStoreAndLoadTest {
         store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(FIX_TIMESTAMP2, FIX_RIDE_HEIGHT2.getMeters()));
         store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(FIX_TIMESTAMP3, FIX_RIDE_HEIGHT3.getMeters()));
     }
-    
+
     private void addMoreBravoFixes() {
         store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(FIX_TIMESTAMP + 1, FIX_RIDE_HEIGHT.getMeters()));
         store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(FIX_TIMESTAMP2 + 1, FIX_RIDE_HEIGHT2.getMeters()));
@@ -428,10 +436,10 @@ public class SensorFixStoreAndLoadTest {
             @Override
             public <FixT extends Timed, TrackT extends DynamicTrack<FixT>> SensorFixMapper<FixT, TrackT, Competitor> createCompetitorMapper(
                     Class<? extends RegattaLogDeviceMappingEvent<?>> eventType) {
-                if (bravoDataFixMapper.isResponsibleFor(eventType)) {
+                if(bravoDataFixMapper.isResponsibleFor(eventType)) {
                     return (SensorFixMapper) bravoDataFixMapper;
                 }
-                if (testDataFixMapper.isResponsibleFor(eventType)) {
+                if(testDataFixMapper.isResponsibleFor(eventType)) {
                     return (SensorFixMapper) testDataFixMapper;
                 }
                 throw new IllegalArgumentException("Unknown event type");
@@ -442,7 +450,7 @@ public class SensorFixStoreAndLoadTest {
     protected void testNumberOfRawFixes(Track<?> track, long expected) {
         if (expected == 0) {
             if (track != null) {
-                track.lockForRead();
+        track.lockForRead();
                 try {
                     assertTrue(size(track.getRawFixes()) == 0);
                 } finally {
@@ -452,10 +460,10 @@ public class SensorFixStoreAndLoadTest {
         } else {
             track.lockForRead();
             try {
-                assertEquals(expected, size(track.getRawFixes()));
+        assertEquals(expected, size(track.getRawFixes()));
             } finally {
-                track.unlockAfterRead();
-            }
+        track.unlockAfterRead();
+    }
         }
     }
 
@@ -503,6 +511,11 @@ public class SensorFixStoreAndLoadTest {
 
         public double getTestValue() {
             return fix.get(TEST_COLUMN_INDEX);
+        }
+
+        @Override
+        public Double[] get() {
+            return Arrays.copyOf(fix.get(), fix.get().length);
         }
 
     }
@@ -557,6 +570,7 @@ public class SensorFixStoreAndLoadTest {
     public class RegattaLogDeviceCompetitorTestMappingEventImpl extends RegattaLogDeviceMappingEventImpl<Competitor>
         implements RegattaLogDeviceCompetitorSensorDataMappingEvent {
         private static final long serialVersionUID = -14940305448048753L;
+        
         
         public RegattaLogDeviceCompetitorTestMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
                 AbstractLogEventAuthor author, Serializable pId, Competitor mappedTo, DeviceIdentifier device,
@@ -613,7 +627,7 @@ public class SensorFixStoreAndLoadTest {
         assertNull(trackedRace.getSensorTrack(compNotPartOfRace, BravoFixTrack.TRACK_NAME));
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
-    
+
     @Test
     /** Test for changes of bug 4044 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4044 */
     public void testThatNoSensorFixesAreLoadedAsLongAsStartOfTrackingIsNull() throws InterruptedException {
@@ -632,7 +646,7 @@ public class SensorFixStoreAndLoadTest {
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
-    
+
     @Test
     /** Test for changes of bug 4044 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4044 */
     public void testThatNoSensorFixesAreRecordedAsWhenStartOfTrackingIsNull() throws InterruptedException {
@@ -789,7 +803,7 @@ public class SensorFixStoreAndLoadTest {
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
         statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
-    
+
     @Test
     /** Test for bug 4125 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4125 */
     public void testThatLoadingStateIsTriggeredWhenAddingMapping() throws InterruptedException {
@@ -805,7 +819,7 @@ public class SensorFixStoreAndLoadTest {
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
         statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
-    
+
     @Test
     /** Test for bug 4125 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4125 */
     public void testThatLoadingStateIsTriggeredWhenStartOfTrackingIsSet() throws InterruptedException {

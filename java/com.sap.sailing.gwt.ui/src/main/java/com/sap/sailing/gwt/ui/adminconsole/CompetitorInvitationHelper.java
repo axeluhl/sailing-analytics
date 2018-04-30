@@ -30,7 +30,6 @@ public class CompetitorInvitationHelper {
             Window.alert(stringMessages.selectAtLeastOneCompetitorForInvitation());
         } else {
             boolean emailProvidedForAll = isEmailProvidedForAll(competitors);
-
             if (emailProvidedForAll) {
                 openChooseEventDialogAndSendMails(competitors, leaderboardName);
             } else {

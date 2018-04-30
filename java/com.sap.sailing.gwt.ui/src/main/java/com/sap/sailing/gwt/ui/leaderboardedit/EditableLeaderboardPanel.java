@@ -20,6 +20,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -38,11 +39,11 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.SortingOrder;
@@ -82,6 +83,13 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
     private static EditableLeaderboardResources resources = GWT.create(EditableLeaderboardResources.class);
 
+    private static final Template TEMPLATE = GWT.create(Template.class);
+    
+    interface Template extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<div style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:{1}px;height:{2}px;background-image:url({0})'></div>")
+        SafeHtml image(String imageUri,int width, int height);
+    }
+    
     final DateBox lastScoreCorrectionTimeBox;
     final TextBox lastScoreCorrectionCommentBox;
 
@@ -126,8 +134,8 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
      * @author Axel Uhl (d043530)
      * 
      */
-    private class SuppressedSailIDColumn extends LeaderboardSortableColumnWithMinMax<CompetitorDTO, String> {
-        protected SuppressedSailIDColumn() {
+    private class SuppressedShortInfoColumn extends LeaderboardSortableColumnWithMinMax<CompetitorDTO, String> {
+        protected SuppressedShortInfoColumn() {
             super(new TextCell(), SortingOrder.ASCENDING, EditableLeaderboardPanel.this);
         }
 
@@ -136,7 +144,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             return new InvertibleComparatorAdapter<CompetitorDTO>() {
                 @Override
                 public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                    return Collator.getInstance().compare(o1.getSailID(), o2.getSailID());
+                    return Collator.getInstance().compare(o1.getShortInfo(), o2.getShortInfo());
                 }
             };
         }
@@ -148,7 +156,6 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
 
         @Override
         public void render(Context context, CompetitorDTO object, SafeHtmlBuilder sb) {
-            ImageResourceRenderer renderer = new ImageResourceRenderer();
             final String twoLetterIsoCountryCode = object.getTwoLetterIsoCountryCode();
             final ImageResource flagImageResource;
             if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
@@ -157,15 +164,15 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 flagImageResource = FlagImageResolverImpl.get().getFlagImageResource(twoLetterIsoCountryCode);
             }
             if (flagImageResource != null) {
-                sb.append(renderer.render(flagImageResource));
+                sb.append(TEMPLATE.image(flagImageResource.getSafeUri().asString(), 18, 12));
                 sb.appendHtmlConstant("&nbsp;");
             }
-            sb.appendEscaped(object.getSailID());
+            sb.appendEscaped(object.getShortInfo());
         }
 
         @Override
         public String getValue(CompetitorDTO object) {
-            return object.getSailID();
+            return object.getShortInfo();
         }
     }
 
@@ -216,7 +223,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                     @Override
                     public void onSuccess(Void v) {
                         if (getLeaderboard().competitorDisplayNames == null) {
-                            getLeaderboard().competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+                            getLeaderboard().competitorDisplayNames = new HashMap<>();
                         }
                         getLeaderboard().competitorDisplayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
                         cell.setViewData(row, null); // ensure that getValue() is called again
@@ -577,12 +584,12 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
 
     public EditableLeaderboardPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, UserAgentDetails userAgent) {
+            final StringMessages stringMessages, UserAgentDetails userAgent, Iterable<DetailType> availableDetailTypes) {
         super(null, null, sailingService, asyncActionsExecutor, new MultiRaceLeaderboardSettings(),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true, new ClassicLeaderboardStyle(),
-                FlagImageResolverImpl.get());
-        suppressedCompetitorsShown = new ListDataProvider<CompetitorDTO>(new ArrayList<CompetitorDTO>());
+                FlagImageResolverImpl.get(), availableDetailTypes);
+        suppressedCompetitorsShown = new ListDataProvider<>(new ArrayList<>());
         suppressedCompetitorsTable = createSuppressedCompetitorsTable();
         ImageResource importIcon = resources.importIcon();
         Anchor importAnchor = new Anchor(AbstractImagePrototype.create(importIcon).getSafeHtml());
@@ -677,9 +684,9 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
 
     private CellTable<CompetitorDTO> createSuppressedCompetitorsTable() {
         final Resources tableResources = GWT.create(AdminConsoleTableResources.class);
-        CellTable<CompetitorDTO> result = new BaseCelltable<CompetitorDTO>(10000, tableResources);
+        CellTable<CompetitorDTO> result = new BaseCelltable<>(10000, tableResources);
         suppressedCompetitorsShown.addDataDisplay(result);
-        final SuppressedSailIDColumn suppressedSailIDColumn = new SuppressedSailIDColumn();
+        final SuppressedShortInfoColumn suppressedSailIDColumn = new SuppressedShortInfoColumn();
         suppressedSailIDColumn.setSortable(true);
         result.addColumn(suppressedSailIDColumn, suppressedSailIDColumn.getHeader());
         final SuppressedCompetitorColumn suppressedCompetitorColumn = new SuppressedCompetitorColumn(
@@ -716,7 +723,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             }
         });
         result.addColumn(unsuppressButtonColumn);
-        final ListHandler<CompetitorDTO> sortHandler = new ListHandler<CompetitorDTO>(suppressedCompetitorsShown.getList());
+        final ListHandler<CompetitorDTO> sortHandler = new ListHandler<>(suppressedCompetitorsShown.getList());
         sortHandler.setComparator(suppressedSailIDColumn, suppressedSailIDColumn.getComparator());
         sortHandler.setComparator(suppressedCompetitorColumn, suppressedCompetitorColumn.getComparator());
         result.addColumnSortHandler(sortHandler);
@@ -878,7 +885,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                                     @Override
                                     public void onSuccess(Void v) {
                                         if (getLeaderboard().competitorDisplayNames == null) {
-                                            getLeaderboard().competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+                                            getLeaderboard().competitorDisplayNames = new HashMap<>();
                                         }
                                         getLeaderboard().competitorDisplayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
                                         cellForCompetitorName.setViewData(row, null); // ensure that getValue() is called again

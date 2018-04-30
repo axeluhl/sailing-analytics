@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import org.junit.After;
@@ -102,7 +103,7 @@ public class RaceTrackerTest {
             @Override
             public void raceRemoved(TrackedRace trackedRace) {
             }
-        });
+        }, Optional.empty());
         synchronized (trackedRaces) {
             if (trackedRaces[0] == null) {
                 trackedRaces.wait();

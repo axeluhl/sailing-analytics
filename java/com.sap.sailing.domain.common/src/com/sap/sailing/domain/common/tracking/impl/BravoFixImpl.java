@@ -27,15 +27,15 @@ public class BravoFixImpl extends SensorFixImpl implements BravoFix {
 
     @Override
     public Distance getRideHeight() {
-        Double rideHeightPortHullasDouble = fix.get(BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL.getColumnIndex());
+        Double rideHeightPortHullAsDouble = fix.get(BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL.getColumnIndex());
         Double rideHeightStarboardHullAsDouble = fix
                 .get(BravoSensorDataMetadata.RIDE_HEIGHT_STBD_HULL.getColumnIndex());
-        return rideHeightPortHullasDouble == null ?
+        return rideHeightPortHullAsDouble == null ?
                 rideHeightStarboardHullAsDouble == null ? null :
                     new MeterDistance(rideHeightStarboardHullAsDouble) :
                 rideHeightStarboardHullAsDouble == null ?
-                        new MeterDistance(rideHeightPortHullasDouble) :
-                            new MeterDistance(Math.min(rideHeightPortHullasDouble, rideHeightStarboardHullAsDouble));
+                        new MeterDistance(rideHeightPortHullAsDouble) :
+                            new MeterDistance(Math.min(rideHeightPortHullAsDouble, rideHeightStarboardHullAsDouble));
     }
 
     @Override
@@ -58,7 +58,8 @@ public class BravoFixImpl extends SensorFixImpl implements BravoFix {
     
     @Override
     public boolean isFoiling(Distance minimumRideHeight) {
-        return getRideHeight().compareTo(minimumRideHeight) >= 0;
+        final Distance rideHeight = getRideHeight();
+        return rideHeight != null && rideHeight.compareTo(minimumRideHeight) >= 0;
     }
 
     @Override

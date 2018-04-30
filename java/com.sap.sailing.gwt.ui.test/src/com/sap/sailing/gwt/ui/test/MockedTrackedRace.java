@@ -7,11 +7,14 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
@@ -22,6 +25,7 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -74,6 +78,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.util.ThreadLocalTransporter;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
     private static final long serialVersionUID = 5827912985564121181L;
@@ -293,15 +298,15 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public void addTrackedRace(TrackedRace trackedRace) {
+            public void addTrackedRace(TrackedRace trackedRace, Optional<ThreadLocalTransporter> threadLocalTransporter) {
             }
 
             @Override
-            public void removeTrackedRace(TrackedRace trackedRace) {
+            public void removeTrackedRace(TrackedRace trackedRace, Optional<ThreadLocalTransporter> threadLocalTransporter) {
             }
 
             @Override
-            public void addRaceListener(RaceListener listener) {
+            public void addRaceListener(RaceListener listener, Optional<ThreadLocalTransporter> threadLocalTransporter) {
             }
 
             @Override
@@ -320,14 +325,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public void removeTrackedRace(RaceDefinition raceDefinition) {
-            }
-
-            @Override
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
                     long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
                     long millisecondsOverWhichToAverageSpeed, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-                    boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver) {
+                    boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter) {
                 return null;
             }
 
@@ -348,7 +349,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public void removeRaceListener(RaceListener listener) {
+            public Future<Boolean> removeRaceListener(RaceListener listener) {
+                return null;
             }
         };
     }
@@ -380,6 +382,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
+        return null;
+    }
+    
+    @Override
+    public Iterable<Maneuver> getManeuvers(Competitor competitor, boolean waitForLatest) {
         return null;
     }
 
@@ -882,6 +889,15 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public Boat getBoatOfCompetitor(Competitor competitor) {
+        return null;
+    }
+    
+    @Override
+    public Competitor getCompetitorOfBoat(Boat boat) {
+        return null;
+    }
+
     public Distance getEstimatedDistanceToComplete(TimePoint now) {
         return null;
     }
@@ -894,6 +910,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Tack getTack(Position where, TimePoint timePoint, Bearing boatBearing) throws NoWindException {
         return null;
     }
 

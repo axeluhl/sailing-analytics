@@ -9,9 +9,10 @@
 import Foundation
 import CoreData
 
-open class CoreDataManager: NSObject {
+class CoreDataManager: NSObject {
     
     fileprivate enum Entities: String {
+        case BoatCheckIn
         case CheckIn
         case CompetitorCheckIn
         case Event
@@ -20,13 +21,20 @@ open class CoreDataManager: NSObject {
         case MarkCheckIn
     }
     
-    open class var sharedManager: CoreDataManager {
-        struct Singleton {
-            static let sharedManager = CoreDataManager()
-        }
-        return Singleton.sharedManager
-    }
+    let name: String
     
+    init(name: String) {
+        self.name = name
+        super.init()
+    }
+
+    class var shared: CoreDataManager {
+        struct Singleton {
+            static let shared = CoreDataManager(name: "CoreData")
+        }
+        return Singleton.shared
+    }
+
     // MARK: - Fetch
     
     func fetchCheckIns() -> [CheckIn]? {
@@ -44,6 +52,12 @@ open class CoreDataManager: NSObject {
     
     func fetchCheckIn(checkInData: CheckInData) -> CheckIn? {
         switch checkInData.type {
+        case .boat:
+            return fetchBoatCheckIn(
+                eventID: checkInData.eventID,
+                leaderboardName: checkInData.leaderboardName,
+                boatID: checkInData.boatID!
+            )
         case .competitor:
             return fetchCompetitorCheckIn(
                 eventID: checkInData.eventID,
@@ -59,6 +73,45 @@ open class CoreDataManager: NSObject {
         }
     }
 
+    func fetchBoatCheckIn(eventID: String, leaderboardName: String, boatID: String) -> BoatCheckIn? {
+        let fetchRequest = NSFetchRequest<BoatCheckIn>()
+        fetchRequest.entity = NSEntityDescription.entity(
+            forEntityName: Entities.BoatCheckIn.rawValue,
+            in: managedObjectContext
+        )
+        fetchRequest.predicate = NSPredicate(
+            format: "event.eventID = %@ AND leaderboard.name = %@ AND boatID = %@",
+            eventID,
+            leaderboardName,
+            boatID
+        )
+        do {
+            let checkIns = try managedObjectContext.fetch(fetchRequest)
+            if checkIns.count == 0 {
+                return nil
+            } else {
+                return checkIns[0]
+            }
+        } catch {
+            logError(name: "\(#function)", error: error)
+        }
+        return nil
+    }
+
+    func fetchCompetitorCheckIn(serverURL: String, boatClassName: String) -> [CompetitorCheckIn]? {
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>()
+        fetchRequest.entity = NSEntityDescription.entity(forEntityName: Entities.CompetitorCheckIn.rawValue, in: managedObjectContext)
+        fetchRequest.includesSubentities = true
+        fetchRequest.predicate = NSPredicate(format: "serverURL = %@ AND boatClassName = %@", serverURL, boatClassName)
+        var checkIns: [AnyObject]?
+        do {
+            checkIns = try managedObjectContext.fetch(fetchRequest)
+        } catch {
+            logError(name: "\(#function)", error: error)
+        }
+        return checkIns as? [CompetitorCheckIn]
+    }
+    
     func fetchCompetitorCheckIn(eventID: String, leaderboardName: String, competitorID: String) -> CompetitorCheckIn? {
         let fetchRequest = NSFetchRequest<CompetitorCheckIn>()
         fetchRequest.entity = NSEntityDescription.entity(
@@ -117,16 +170,25 @@ open class CoreDataManager: NSObject {
     }
     
     // MARK: - Insert
-    
+
+    func newBoatCheckIn() -> BoatCheckIn {
+        let checkIn = NSEntityDescription.insertNewObject(forEntityName: Entities.BoatCheckIn.rawValue, into: managedObjectContext) as! BoatCheckIn
+        checkIn.event = newEvent(checkIn: checkIn)
+        checkIn.leaderboard = newLeaderboard(checkIn: checkIn)
+        return checkIn
+    }
+
     func newCompetitorCheckIn() -> CompetitorCheckIn {
         let checkIn = NSEntityDescription.insertNewObject(forEntityName: Entities.CompetitorCheckIn.rawValue, into: managedObjectContext) as! CompetitorCheckIn
-        checkIn.initialize()
+        checkIn.event = newEvent(checkIn: checkIn)
+        checkIn.leaderboard = newLeaderboard(checkIn: checkIn)
         return checkIn
     }
 
     func newMarkCheckIn() -> MarkCheckIn {
         let checkIn = NSEntityDescription.insertNewObject(forEntityName: Entities.MarkCheckIn.rawValue, into: managedObjectContext) as! MarkCheckIn
-        checkIn.initialize()
+        checkIn.event = newEvent(checkIn: checkIn)
+        checkIn.leaderboard = newLeaderboard(checkIn: checkIn)
         return checkIn
     }
 
@@ -173,7 +235,7 @@ open class CoreDataManager: NSObject {
     
     lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
         let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
-        let url = self.applicationDocumentsDirectory.appendingPathComponent("CoreData.sqlite")
+        let url = self.applicationDocumentsDirectory.appendingPathComponent("\(self.name).sqlite")
         let options = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
         do {
             logInfo(name: "\(#function)", info: "Connecting to database...")

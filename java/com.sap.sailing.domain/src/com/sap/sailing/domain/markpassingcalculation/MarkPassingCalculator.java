@@ -470,7 +470,6 @@ public class MarkPassingCalculator {
     }
 
     void enqueueUpdate(StorePositionUpdateStrategy update) {
-        // TODO bug 3908: manage listener thread here; if this is the first update to enter an empty queue, launch the thread; the thread will terminate after picking the last update from the queue
         synchronized (this) {
             final boolean wasQueueEmpty = queue.isEmpty();
             queue.add(update);

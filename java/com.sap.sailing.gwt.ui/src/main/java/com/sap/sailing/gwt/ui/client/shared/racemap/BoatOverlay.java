@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
@@ -69,9 +69,9 @@ public class BoatOverlay extends CanvasOverlayV3 {
      */
     private Double boatDrawingAngle;
 
-    public BoatOverlay(final MapWidget map, int zIndex, final CompetitorDTO competitorDTO, Color color, CoordinateSystem coordinateSystem) {
+    public BoatOverlay(final MapWidget map, int zIndex, final BoatDTO boatDTO, Color color, CoordinateSystem coordinateSystem) {
         super(map, zIndex, coordinateSystem);
-        this.boatClass = competitorDTO.getBoatClass();
+        this.boatClass = boatDTO.getBoatClass();
         this.color = color;
         boatScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Size,Size>>();
         boatVectorGraphics = BoatClassVectorGraphicsResolver.resolveBoatClassVectorGraphics(boatClass.getName());

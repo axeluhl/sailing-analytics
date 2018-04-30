@@ -65,7 +65,7 @@
                     android:layout_alignRight="@id/panel_image"
                     android:visibility="gone"
                     tools:src="@drawable/ic_warning_yellow"
-                    tools:visibility="gone" />
+                    tools:visibility="visible" />
             </RelativeLayout>
 
             <TextView

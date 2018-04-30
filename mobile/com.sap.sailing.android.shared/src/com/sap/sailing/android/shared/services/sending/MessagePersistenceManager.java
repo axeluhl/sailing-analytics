@@ -22,7 +22,7 @@ import android.os.Bundle;
 
 public class MessagePersistenceManager {
 
-    private final static String TAG = MessagePersistenceManager.class.getName();
+    private final static String TAG = MessagePersistenceManager.class.getSimpleName();
 
     private final static String delayedMessagesFileName = "delayedMessages.txt";
 

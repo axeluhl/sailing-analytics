@@ -16,27 +16,24 @@ public class SingleRaceLeaderboardSettingsDialogComponent
     protected CheckBox showRaceRankColumn;
     
     public SingleRaceLeaderboardSettingsDialogComponent(SingleRaceLeaderboardSettings initialSettings,
-            StringMessages stringMessages) {
-        super(initialSettings, stringMessages);
-        
+            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
+        super(initialSettings, stringMessages, availableDetailTypes, true /*canBoatInfoBeShown*/);        
     }
 
     @Override
     public SingleRaceLeaderboardSettings getResult() {
-        List<DetailType> maneuverDetailsToShow = getSelected(maneuverDetailCheckboxes);
-        List<DetailType> overallDetailsToShow = getSelected(overallDetailCheckboxes);
-        List<DetailType> raceDetailsToShow = getSelected(raceDetailCheckboxes);
-        List<DetailType> legDetailsToShow = getSelected(legDetailCheckboxes);
+        List<DetailType> maneuverDetailsToShow = getSelected(maneuverDetailCheckboxes, initialSettings.getManeuverDetailsToShow());
+        List<DetailType> overallDetailsToShow = getSelected(overallDetailCheckboxes, initialSettings.getOverallDetailsToShow());
+        List<DetailType> raceDetailsToShow = getSelected(raceDetailCheckboxes, initialSettings.getRaceDetailsToShow());
+        List<DetailType> legDetailsToShow = getSelected(legDetailCheckboxes, initialSettings.getLegDetailsToShow());
                 
         Long delayBetweenAutoAdvancesValue = refreshIntervalInSecondsBox.getValue();
         final SingleRaceLeaderboardSettings newSettings = new SingleRaceLeaderboardSettings(maneuverDetailsToShow,
                 legDetailsToShow, raceDetailsToShow, overallDetailsToShow,
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()), 
                 /* showAddedScores */ showAddedScoresCheckBox.getValue().booleanValue(),
-                /* showOverallColumnWithNumberOfRacesSailedPerCompetitor */ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox
-                        .getValue().booleanValue(),
-                showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
-                isCompetitorNationalityColumnVisible.getValue(), showRaceRankColumn.getValue());
+                showCompetitorShortNameColumnCheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
+                showCompetitorBoatInfoColumnCheckBox.getValue(), isCompetitorNationalityColumnVisible.getValue(), showRaceRankColumn.getValue());
         return newSettings;
     }
     

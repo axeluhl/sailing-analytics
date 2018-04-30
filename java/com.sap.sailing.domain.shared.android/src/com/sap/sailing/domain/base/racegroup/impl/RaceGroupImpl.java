@@ -16,17 +16,19 @@ public class RaceGroupImpl extends NamedImpl implements RaceGroup {
     private final CourseArea courseArea;
     private final Iterable<SeriesWithRows> series;
     private final RegattaConfiguration regattaConfiguration;
+    private final boolean canBoatsOfCompetitorsChangePerRace;
 
     /**
      * @param series
      *            the series; for a regatta they are expected to be in the same order as {@code Regatta.getSeries()}
      *            would deliver them.
      */
-    public RaceGroupImpl(String name, String displayName, BoatClass boatClass, CourseArea courseArea,
+    public RaceGroupImpl(String name, String displayName, BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, CourseArea courseArea,
             Iterable<SeriesWithRows> series, RegattaConfiguration regattaConfiguration) {
         super(name);
         this.displayName = displayName;
         this.boatClass = boatClass;
+        this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
         this.courseArea = courseArea;
         this.series = series;
         this.regattaConfiguration = regattaConfiguration;
@@ -45,6 +47,11 @@ public class RaceGroupImpl extends NamedImpl implements RaceGroup {
     @Override
     public Iterable<SeriesWithRows> getSeries() {
         return series;
+    }
+
+    @Override
+    public boolean canBoatsOfCompetitorsChangePerRace() {
+        return canBoatsOfCompetitorsChangePerRace;
     }
 
     @Override

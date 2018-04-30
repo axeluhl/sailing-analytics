@@ -40,11 +40,11 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
             Timer timer, String preselectedLeaderboardName,
             String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
-            StringMessages stringMessages, DetailType chartDetailType) {
+            StringMessages stringMessages, DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         this(parent, componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
                 sailingService, asyncActionsExecutor, timer,
                 preselectedLeaderboardName, leaderboardGroupName, metaLeaderboardName,
-                errorReporter, stringMessages, chartDetailType);
+                errorReporter, stringMessages, chartDetailType, availableDetailTypes);
     }
     
     private MetaLeaderboardViewer(Component<?> parent,
@@ -55,7 +55,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
             AsyncActionsExecutor asyncActionsExecutor, Timer timer,
             String preselectedLeaderboardName, String leaderboardGroupName,
             String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
-            DetailType chartDetailType) {
+            DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
 
@@ -68,7 +68,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
                         settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
                         /* autoApplyTopNFilter */ false,
                         /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle(),
-                        FlagImageResolverImpl.get()));
+                        FlagImageResolverImpl.get(), availableDetailTypes));
         
         final LeaderboardPerspectiveOwnSettings perspectiveSettings = settings.getPerspectiveOwnSettings();
         final boolean showCharts = perspectiveSettings.isShowCharts();
@@ -95,7 +95,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
                 asyncActionsExecutor, timer, false /* isEmbedded */,
                 preselectedLeaderboardName,  errorReporter, stringMessages,
                 perspectiveSettings.isShowRaceDetails(), perspectiveSettings.isAutoExpandLastRaceColumn(),
-                leaderboardSettings, FlagImageResolverImpl.get());
+                leaderboardSettings, FlagImageResolverImpl.get(), availableDetailTypes);
         multiLeaderboardPanel.setVisible(perspectiveSettings.isShowSeriesLeaderboards());
         mainPanel.add(getLeaderboardPanel());
         mainPanel.add(multiCompetitorChart);

@@ -6,13 +6,13 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class SideToWhichMarkAtLegStartWasRoundedColumn extends DetailTypeColumn<NauticalSide, String> {
+public class SideToWhichMarkAtLegStartWasRoundedColumn extends DetailTypeColumn<NauticalSide, String, LeaderboardRowDTO> {
     private final StringMessages stringMessages;
     
-    public SideToWhichMarkAtLegStartWasRoundedColumn(String title, LegDetailField<NauticalSide> field,
+    public SideToWhichMarkAtLegStartWasRoundedColumn(String title, DataExtractor<NauticalSide, LeaderboardRowDTO> field,
             String headerStyle, String columnStyle, StringMessages stringMessages,
             DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
-        super(DetailType.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED, field, new TextCell(), headerStyle, columnStyle, displayedLeaderboardRowsProvider);
+        super(DetailType.LEG_SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED, field, new TextCell(), headerStyle, columnStyle, displayedLeaderboardRowsProvider);
         this.stringMessages = stringMessages;
     }
 

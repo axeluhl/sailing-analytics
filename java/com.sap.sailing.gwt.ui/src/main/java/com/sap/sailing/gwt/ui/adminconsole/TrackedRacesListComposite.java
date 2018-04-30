@@ -53,7 +53,6 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private void showSetDelayToLiveDialog() {
         TrackedRacesSettings settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS);
-        
         SettingsDialog<TrackedRacesSettings> settingsDialog = new SettingsDialog<TrackedRacesSettings>(this, stringMessages);
         settingsDialog.show();
     }
@@ -111,8 +110,6 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     @Override
     protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel) {
         if(actionButtonsEnabled) {
-            
-            
             btnUntrack = new Button(stringMessages.stopTracking());
             btnUntrack.ensureDebugId("StopTrackingButton");
             btnUntrack.addClickHandler(new ClickHandler() {

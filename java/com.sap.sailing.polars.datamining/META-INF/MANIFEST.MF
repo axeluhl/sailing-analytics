@@ -22,3 +22,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.polars.datamining.data,
  com.sap.sailing.polars.datamining.data.impl
+Automatic-Module-Name: com.sap.sailing.polars.datamining

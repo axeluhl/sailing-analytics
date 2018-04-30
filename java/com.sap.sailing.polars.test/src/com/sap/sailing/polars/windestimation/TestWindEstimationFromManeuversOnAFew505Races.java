@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Wind;
@@ -108,7 +108,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
             CreateModelException, NotEnoughDataHasBeenAddedException {
         setUp("event_20110609_KielerWoch-505_race_4");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(270, average.getFrom().getDegrees(), 5.0);
+        assertEquals(270, average.getFrom().getDegrees(), 9.0);
     }
     
     @Test
@@ -118,7 +118,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
         setUp("event_20110609_KielerWoch-505_Race_3");
         ManeuverBasedWindEstimationTrackImpl windTrack = new ManeuverBasedWindEstimationTrackImpl(new PolarDataServiceImpl(),
                 getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ true);
-        final Map<Maneuver, Competitor> maneuvers = windTrack.getAllManeuvers(/* waitForLatest */ true);
+        final Map<Maneuver, CompetitorAndBoat> maneuvers = windTrack.getAllManeuvers(/* waitForLatest */ true);
         final int numberOfClusters = 16;
         KMeansMappingClusterer<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> clusterer =
                 new KMeansMappingClusterer<>(numberOfClusters,

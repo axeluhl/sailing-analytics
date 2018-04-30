@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class PairingListCreationDialog extends DataEntryDialog<PairingListTemplateDTO> {
@@ -38,10 +39,13 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
     private final Button applyToRacelogButton, printPreViewButton, refreshButton;
     private final Anchor cSVExportAnchor;
+    private final ErrorReporter errorReporter;
 
     public PairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO, final StringMessages stringMessages,
-            PairingListTemplateDTO template, SailingServiceAsync sailingService) {
-        super(stringMessages.pairingList(), null, stringMessages.close(), null, null, null);
+            PairingListTemplateDTO template, SailingServiceAsync sailingService, ErrorReporter errorReporter) {
+        super(/* title */ stringMessages.pairingList(), /* message */ null, stringMessages.close(), /* cancel button name */ null,
+                /* validator */ null, /* callback */ null);
+        this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.template = template;
         this.sailingService = sailingService;
@@ -58,12 +62,14 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         if (template.getCompetitorCount() != leaderboardDTO.competitorsCount) {
             this.disableApplyToRacelogsAndPrintPreview();
         }
-
         sailingService.getPairingListFromTemplate(this.leaderboardDTO.getName(), this.template.getFlightMultiplier(),
                 this.template.getSelectedFlightNames(), this.template, new AsyncCallback<PairingListDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
+                        PairingListCreationDialog.this.errorReporter.reportError(stringMessages.errorCreatingPairingList(caught.getMessage()), /* silent */ true);
                         pairingListDTO = null;
+                        applyToRacelogButton.setEnabled(false);
+                        printPreViewButton.setEnabled(false);
                     }
 
                     @Override
@@ -170,12 +176,12 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                         new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
-                                /* TODO: log successfull */
+                                Window.alert(stringMessages.successfullyFilledRaceLogsFromPairingList());
                             }
 
                             @Override
                             public void onFailure(Throwable caught) {
-                                caught.printStackTrace();
+                                errorReporter.reportError(stringMessages.errorFillingRaceLogsFromPairingList(caught.getMessage()));
                             }
                         });
             }
@@ -187,23 +193,17 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                         Util.asList(template.getSelectedFlightNames()), new AsyncCallback<List<String>>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                try {
-                                    throw caught;
-                                } catch (Throwable e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
-                                }
+                                errorReporter.reportError(stringMessages.errorFetchingRaceDisplayNamedFromLeaderboard(caught.getMessage()));
                             }
 
-                            public void onSuccess(List<String> result) {
-                                PairingListPreviewDialog dialog = new PairingListPreviewDialog(pairingListDTO, result, stringMessages,leaderboardDTO.getName());
+                            public void onSuccess(List<String> raceDisplayNames) {
+                                PairingListPreviewDialog dialog = new PairingListPreviewDialog(pairingListDTO, raceDisplayNames, stringMessages, leaderboardDTO.getName());
                                 dialog.show();
                             };
                         });
             }
         });
         refreshButton.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 getDialogBox().hide();
@@ -225,13 +225,12 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                                     busyDialog.hide();
                                     result.setSelectedFlightNames(template.getSelectedFlightNames());
                                     PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO,
-                                            stringMessages, result, sailingService);
+                                            stringMessages, result, sailingService, errorReporter);
                                     dialog.show();
                                 }
-
                             });
                 } catch (Exception exception) {
-                    // TODO show error somehow
+                    errorReporter.reportError(exception.getMessage());
                 }
             }
         });

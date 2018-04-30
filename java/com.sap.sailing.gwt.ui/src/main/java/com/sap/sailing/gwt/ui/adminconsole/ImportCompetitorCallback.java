@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
@@ -19,11 +20,11 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
- * Callback is responsible for creation competitors for which no {@link CompetitorDTO} that represents an
+ * Callback is responsible for creation competitors for which no {@link CompetitorWithBoatDTO} that represents an
  * already existing competitor has been provided, and save those newly created competitors to
  * the competitor store using {@link SailingServiceAsync#addCompetitors(Iterable, AsyncCallback)}. The combined
- * set of competitors as represented by the {@link CompetitorDTO}s provided as values representing the existing
- * competitors to use, plus those {@link CompetitorDTO}s returned from the service representing the newly
+ * set of competitors as represented by the {@link CompetitorWithBoatDTO}s provided as values representing the existing
+ * competitors to use, plus those {@link CompetitorWithBoatDTO}s returned from the service representing the newly
  * created competitors (those actually "imported") are then passed to {@link #registerCompetitors(Set)} which
  * in this class does nothing but may be overridden by subclasses.
  * 
@@ -55,7 +56,7 @@ public class ImportCompetitorCallback implements DialogCallback<Pair<Map<Competi
                 existingCompetitorsSelected.add(existingCompetitor);
             }
         }
-        sailingService.addOrUpdateCompetitor(new ArrayList<>(existingCompetitorsSelected), new MarkedAsyncCallback<>(
+        sailingService.addOrUpdateCompetitors(new ArrayList<>(existingCompetitorsSelected), new MarkedAsyncCallback<>(
                 new AsyncCallback<List<CompetitorDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -71,21 +72,28 @@ public class ImportCompetitorCallback implements DialogCallback<Pair<Map<Competi
                 competitorsForRegisteringAndSearchTag.getA().values().stream().filter(e->e!=null).collect(Collectors.toList()), competitorsForRegisteringAndSearchTag.getB());
     }
 
+    /**
+     * @param competitorsForSaving
+     *            the descriptors of those competitors from the import source that the user selected and for which no
+     *            existing competitor was mapped
+     * @param competitorsForRegistration
+     *            the existing competitors to which competitors from the import were mapped; this collection is logically
+     *            disjoint from {@code competitorsForSaving} which only contains "net-new" competitors that will be
+     *            created with a new ID on the server
+     */
     private void registerCompetitorsAfterSaving(final List<CompetitorDescriptor> competitorsForSaving,
             final Iterable<CompetitorDTO> competitorsForRegistration, String searchTag) {
-        sailingService.addCompetitors(competitorsForSaving, searchTag, new AsyncCallback<List<CompetitorDTO>>() {
+        sailingService.addCompetitors(competitorsForSaving, searchTag, new AsyncCallback<List<CompetitorWithBoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
             }
 
             @Override
-            public void onSuccess(List<CompetitorDTO> result) {
+            public void onSuccess(List<CompetitorWithBoatDTO> result) {
                 final Set<CompetitorDTO> competitorsToAddWithNewOnesReplacedBySavedOnesWithId = new HashSet<>();
                 Util.addAll(competitorsForRegistration, competitorsToAddWithNewOnesReplacedBySavedOnesWithId);
-                // remove the locally constructed CompetitorDTOs that had null as their ID...
-                competitorsToAddWithNewOnesReplacedBySavedOnesWithId.removeAll(competitorsForSaving);
-                // ...and replace by those returned by the server after saving to the competitor store where they received an ID:
+                // add those competitors returned by the server after saving to the competitor store where they received an ID:
                 competitorsToAddWithNewOnesReplacedBySavedOnesWithId.addAll(result);
                 registerCompetitors(competitorsToAddWithNewOnesReplacedBySavedOnesWithId);
             }

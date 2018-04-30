@@ -143,6 +143,40 @@
                "pseudoLocFolderPath":"."
             }
          ]
+      },
+      {
+         "collectionName":"SailingServerGateway",
+         "folders":[  
+            {  
+               "startingFolderPath":"java/com.sap.sailing.server.gateway/resources/stringmessages",
+               "sourceFilters":[  
+                  "**/StringMessages*.properties"
+               ],
+               "excludedSourceFilters":[
+                "**/*_zh.properties"
+                ],
+               "xlfFolderPath":"./XLF",
+               "targetFolderPath":".",
+               "pseudoLocFolderPath":"."
+            }
+         ]
+      },
+      {
+         "collectionName":"SailingGwtUi",
+         "folders":[  
+            {
+               "startingFolderPath":"java/com.sap.sailing.gwt.ui/src/main/resources/stringmessages",
+               "sourceFilters":[  
+                  "**/StringMessages*.properties"
+               ],
+               "excludedSourceFilters":[
+                "**/*_zh.properties"
+                ],
+               "xlfFolderPath":"./XLF",
+               "targetFolderPath":".",
+               "pseudoLocFolderPath":"."
+            }
+         ]
       }
    ],
    "defaultConfiguration":{  

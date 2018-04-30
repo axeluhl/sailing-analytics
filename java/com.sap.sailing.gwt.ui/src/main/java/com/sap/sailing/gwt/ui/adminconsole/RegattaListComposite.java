@@ -163,6 +163,16 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         });
 
+        TextColumn<RegattaDTO> regattaCanBoatsOfCompetitorsChangePerRaceColumn = new TextColumn<RegattaDTO>() {
+            @Override
+            public String getValue(RegattaDTO regatta) {
+                return regatta.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no();
+            }
+        };
+        regattaCanBoatsOfCompetitorsChangePerRaceColumn.setSortable(true);
+        columnSortHandler.setComparator(regattaCanBoatsOfCompetitorsChangePerRaceColumn,
+                (r1, r2)->Boolean.valueOf(r1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(r2.canBoatsOfCompetitorsChangePerRace)));
+
         TextColumn<RegattaDTO> startEndDateColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
@@ -233,6 +243,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
+        table.addColumn(regattaCanBoatsOfCompetitorsChangePerRaceColumn, stringMessages.canBoatsChange());
         table.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
         table.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
         table.addColumn(rankingMetricColumn, stringMessages.rankingMetric());

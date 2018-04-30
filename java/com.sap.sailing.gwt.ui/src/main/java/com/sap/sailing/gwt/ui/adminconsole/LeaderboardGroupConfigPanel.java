@@ -721,8 +721,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                         new AsyncCallback<LeaderboardGroupDTO>() {
                             @Override
                             public void onFailure(Throwable t) {
-                                errorReporter.reportError("Error trying to create new leaderboard group" + newGroup.getName()
-                                        + ": " + t.getMessage());
+                                errorReporter.reportError(stringMessages.errorCreatingLeaderboardGroup(newGroup.getName())
+                                                + ": " + t.getMessage());
                             }
                             @Override
                             public void onSuccess(LeaderboardGroupDTO newGroup) {

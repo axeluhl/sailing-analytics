@@ -10,16 +10,17 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 
 /**
  * A compact representation of a {@link RaceMapDataDTO} that represents competitors by their ID only instead of a
- * complete {@link CompetitorDTO} object. This way, a caller of the
+ * complete {@link CompetitorWithBoatDTO} object. This way, a caller of the
  * {@link SailingServiceAsync#getRaceMapData(com.sap.sailing.domain.common.RegattaAndRaceIdentifier, java.util.Date, Map, Map, boolean, com.google.gwt.user.client.rpc.AsyncCallback)}
- * method that has to provide the IDs of all competitors already will already know all those {@link CompetitorDTO}
- * objects already. There is no need to serialize the {@link CompetitorDTO}s either way.
+ * method that has to provide the IDs of all competitors already will already know all those {@link CompetitorWithBoatDTO}
+ * objects already. There is no need to serialize the {@link CompetitorWithBoatDTO}s either way.
  * 
  * @author Axel Uhl (d043530)
  * 

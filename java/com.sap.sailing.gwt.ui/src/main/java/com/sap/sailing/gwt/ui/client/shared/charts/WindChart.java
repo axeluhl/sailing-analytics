@@ -84,6 +84,8 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
 
     private final ColorMapImpl<WindSource> colorMap;
 
+    private WindSource preselectFilter;
+
     /**
      * @param selectedRaceIdentifier
      *            if <code>null</code>, this chart won't update its contents automatically upon race selection change;
@@ -121,6 +123,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                 .setBackgroundColor(new Color("#FFFFFF"))
                 .setPlotBackgroundColor("#f8f8f8")
                 .setPlotBorderWidth(0)
+                .setAlignTicks(false)
                 .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()).setOption("floating",true))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
@@ -225,53 +228,89 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     private void updateVisibleSeries() {
         List<Series> currentSeries = Arrays.asList(chart.getSeries());
         Set<Series> visibleSeries = new HashSet<Series>(currentSeries);
-        
-        if (settings.isShowWindDirectionsSeries()) {
-            for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
-                Series series = e.getValue();
-                if (settings.getWindDirectionSourcesToDisplay().contains(e.getKey().getType())) {
-                    if (!visibleSeries.contains(series)) {
-                        chart.addSeries(series, false, false);
+
+        if (preselectFilter != null) {
+            forceSeriesSelection(visibleSeries, windSourceDirectionSeries);
+            forceSeriesSelection(visibleSeries, windSourceSpeedSeries);
+        } else {
+            if (settings.isShowWindDirectionsSeries()) {
+                for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
+                    Series series = e.getValue();
+                    if (settings.getWindDirectionSourcesToDisplay().contains(e.getKey().getType())) {
+                        if (!visibleSeries.contains(series)) {
+                            chart.addSeries(series, false, false);
+                        }
                         series.select(true); // ensures that the checkbox will be ticked
+                        series.setVisible(true); //and that it is actually being rendered
+                    } else {
+                        if (visibleSeries.contains(series)) {
+                            chart.removeSeries(series, false);
+                        }
                     }
-                } else {
+                }
+            } else {
+                for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
+                    Series series = e.getValue();
                     if (visibleSeries.contains(series)) {
                         chart.removeSeries(series, false);
                     }
                 }
             }
-        } else {
-            for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
-                Series series = e.getValue();
-                if (visibleSeries.contains(series)) {
-                    chart.removeSeries(series, false);
+
+            if (settings.isShowWindSpeedSeries()) {
+                for (Map.Entry<WindSource, Series> e : windSourceSpeedSeries.entrySet()) {
+                    Series series = e.getValue();
+                    if (settings.getWindSpeedSourcesToDisplay().contains(e.getKey().getType())) {
+                        if (!visibleSeries.contains(series)) {
+                            chart.addSeries(series, false, false);
+                        }
+                        series.select(true); // ensures that the checkbox will be ticked
+                        series.setVisible(true); //and that it is actually being rendered
+                    } else {
+                        if (visibleSeries.contains(series)) {
+                            chart.removeSeries(series, false);
+                        }
+                    }
+                }
+            } else {
+                for (Map.Entry<WindSource, Series> e : windSourceSpeedSeries.entrySet()) {
+                    Series series = e.getValue();
+                    if (visibleSeries.contains(series)) {
+                        chart.removeSeries(series, false);
+                    }
                 }
             }
         }
 
-        if (settings.isShowWindSpeedSeries()) {
-            for (Map.Entry<WindSource, Series> e : windSourceSpeedSeries.entrySet()) {
-                Series series = e.getValue();
-                if (settings.getWindSpeedSourcesToDisplay().contains(e.getKey().getType())) {
-                    if (!visibleSeries.contains(series)) {
-                        chart.addSeries(series, false, false);
-                        series.select(true); // ensures that the checkbox will be ticked
-                    }
-                } else {
-                    if (visibleSeries.contains(series)) {
-                        chart.removeSeries(series, false);
-                    }
+        onResize();
+    }
+
+    private boolean forceSeriesSelection(Set<Series> visibleSeries, Map<WindSource, Series> toProcess) {
+        boolean wasInResult = false;
+        for (Map.Entry<WindSource, Series> e : toProcess.entrySet()) {
+            Series series = e.getValue();
+            WindSource seriesSource = e.getKey();
+            // add all of type, remove non matching ones
+            if (seriesSource.getType().equals(preselectFilter.getType())) {
+                if (!visibleSeries.contains(series)) {
+                    chart.addSeries(series, true, false);
                 }
-            }
-        } else {
-            for (Map.Entry<WindSource, Series> e : windSourceSpeedSeries.entrySet()) {
-                Series series = e.getValue();
+                // preselet the matching one
+                if (preselectFilter.equals(e.getKey())) {
+                    wasInResult = true;
+                    series.select(true); // ensures that the checkbox will be ticked
+                    series.setVisible(true, true);
+                } else {
+                    series.select(false);
+                    series.setVisible(false, true);
+                }
+            } else {
                 if (visibleSeries.contains(series)) {
                     chart.removeSeries(series, false);
                 }
             }
         }
-        onResize();
+        return wasInResult;
     }
 
     /**
@@ -366,9 +405,9 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                 if (newMaxTimepoint == null || wind.requestTimepoint > newMaxTimepoint) {
                     newMaxTimepoint = wind.requestTimepoint;
                 }
-     
-                if ((timeOfEarliestRequestInMillis == null || wind.requestTimepoint < timeOfEarliestRequestInMillis) || 
-                    timeOfLatestRequestInMillis == null || wind.requestTimepoint > timeOfLatestRequestInMillis) {
+                //if we are in non appending mode, the data is the truth, use all of it without filtering
+                if (!append || ((timeOfEarliestRequestInMillis == null || wind.requestTimepoint < timeOfEarliestRequestInMillis) || 
+                    timeOfLatestRequestInMillis == null || wind.requestTimepoint > timeOfLatestRequestInMillis)) {
                     Point newDirectionPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindFromDeg);
                     if (wind.dampenedTrueWindSpeedInKnots != null) {
                         String name = numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+ stringMessages.knotsUnit();
@@ -409,10 +448,10 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                 newDirectionPoints = directionPoints;
                 newSpeedPoints = speedPoints;
             }
-            setSeriesPoints(directionSeries, newDirectionPoints);
+            setSeriesPoints(directionSeries, newDirectionPoints, /* manageZoom */ true);
             windSourceDirectionPoints.put(windSource, newDirectionPoints);
             if (windSource.getType().useSpeed()) {
-                setSeriesPoints(speedSeries, newSpeedPoints);
+                setSeriesPoints(speedSeries, newSpeedPoints, /* manageZoom */ true);
                 windSourceSpeedPoints.put(windSource, newSpeedPoints);
             }
             
@@ -441,6 +480,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
      */
     @Override
     public void updateSettings(WindChartSettings newSettings) {
+        preselectFilter = null;
         boolean clearCacheAndReload = false;
         final Set<String> oldWindSourceTypesToRequest = getNamesOfWindSourceTypesOfWhichToDisplaySpeedOrDirection();
         if (newSettings.getResolutionInMilliseconds() != settings.getResolutionInMilliseconds()) {
@@ -479,7 +519,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         if (isVisible()) {
             if (selectedRaceIdentifier == null) {
                 clearChart();
-            } else if (needsDataLoading() && from != null && to != null) {
+            } else if (from != null && to != null) {
                 setWidget(chart);
                 // if not playing or empty show loading message
                 if (shouldShowLoading(timeOfLatestRequestInMillis)) {
@@ -578,10 +618,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         chart.redraw();
     }
 
-    private boolean needsDataLoading() {
-        return isVisible();
-    }
-    
     /**
      * Prints basic data and points of a WindInfoForRaceDTO object to a formatted string.
      * Can be used for debugging
@@ -659,5 +695,20 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     @Override
     public String getId() {
         return windChartLifecycle.getComponentId();
+    }
+
+    /**
+     * Forces the display of a specific windProvider preselected, and all of same type unselected. Will be disabled by either updateSettings or once the provider was properly found and shown
+     */
+    public void showProvider(WindSource windprovider) {
+        WindSourceType type = windprovider.getType();
+        Set<WindSourceType> windSpeedSourcesToDisplay = new HashSet<>();
+        Set<WindSourceType> windDirectionSourcesToDisplay = new HashSet<>();
+        windSpeedSourcesToDisplay.add(type);
+        windDirectionSourcesToDisplay.add(type);
+        WindChartSettings patched = new WindChartSettings(true,windSpeedSourcesToDisplay,true,windDirectionSourcesToDisplay,settings.getResolutionInMilliseconds());
+        updateSettings(patched);
+        preselectFilter = windprovider;
+        updateVisibleSeries();
     }
 }

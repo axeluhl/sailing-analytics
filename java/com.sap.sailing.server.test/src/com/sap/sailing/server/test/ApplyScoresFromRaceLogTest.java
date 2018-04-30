@@ -28,8 +28,6 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
@@ -62,14 +60,13 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         competitors = new ArrayList<>();
         for (int i=0; i<numberOfCompetitors; i++) {
             final String competitorName = "C"+i;
-            competitors.add(service.getBaseDomainFactory().getCompetitorStore().getOrCreateCompetitor(UUID.randomUUID(),
-                    competitorName, /* displayColor */ Color.RED, /* email */ null, /* flagImageURI */ null,
+            competitors.add(service.getBaseDomainFactory().getCompetitorAndBoatStore().getOrCreateCompetitor(UUID.randomUUID(),
+                    competitorName, "c", /* displayColor */ Color.RED, /* email */ null, /* flagImageURI */ null,
                     new TeamImpl("STG", Collections.singleton(
                             new PersonImpl(competitorName, new NationalityImpl("GER"),
                             /* dateOfBirth */ null, "This is famous "+competitorName)),
                             new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                            /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                    new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null),
+                            /* dateOfBirth */null, "This is Rigo, the coach")),
                     /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
         }
         regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1,
@@ -112,7 +109,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         f1RaceState.setFinishPositioningListChanged(now, results);
         final List<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(competitors, rankedCompetitorsBeforeApplying); // no effects of preliminary results list yet
-        f1RaceState.setFinishPositioningConfirmed(now);
+        f1RaceState.setFinishPositioningConfirmed(now, results);
         final Function<Competitor, Double> expectedPoints =
                 (c)->scores.get(c)==null?(mprs.get(c) == null || mprs.get(c) == MaxPointsReason.NONE ?
                         competitors.indexOf(c)+1 : competitors.size()+1):scores.get(c);
@@ -159,7 +156,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         f1RaceState.setFinishPositioningListChanged(now, results);
         final List<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(competitors, rankedCompetitorsBeforeApplying); // no effects of preliminary results list yet
-        f1RaceState.setFinishPositioningConfirmed(now);
+        f1RaceState.setFinishPositioningConfirmed(now, results);
         
         assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.DNF,    0, /* score is corrected */ false, later);
         assertScoreCorrections(leaderboard, f1Column, competitors.get(1), MaxPointsReason.OCS,    0, /* score is corrected */ false, later);
@@ -201,7 +198,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         f1RaceState.setFinishPositioningListChanged(now, results);
         final List<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(competitors, rankedCompetitorsBeforeApplying); // no effects of preliminary results list yet
-        f1RaceState.setFinishPositioningConfirmed(now);
+        f1RaceState.setFinishPositioningConfirmed(now, results);
         // validate that it arrived in leaderboard
         assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.OCS, numberOfCompetitors+1, /* score is corrected */ false, later);
         assertScoreCorrections(leaderboard, f1Column, competitors.get(1), MaxPointsReason.OCS, numberOfCompetitors+1, /* score is corrected */ false, later);
@@ -210,14 +207,14 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         final CompetitorResults resultsWithOCSCleared = new CompetitorResultsImpl();
         setResultForCompetitor(competitors.get(1), /* one-based rank */ 0, resultsWithOCSCleared, MaxPointsReason.OCS, /* explicit score */ null);
         f1RaceState.setFinishPositioningListChanged(later, resultsWithOCSCleared);
-        f1RaceState.setFinishPositioningConfirmed(later);
+        f1RaceState.setFinishPositioningConfirmed(later, resultsWithOCSCleared);
         // validate that it did not get cleared in leaderboard (changed by bug 4167):
         assertScoreCorrections(leaderboard, f1Column, competitors.get(1), MaxPointsReason.OCS, numberOfCompetitors+1, /* score is corrected */ false, later);
         assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.OCS, numberOfCompetitors+1, /* score is corrected */ false, later); // ranking first, one point in low-point scheme
         // now explicitly overwrite with a 0/null/null result, validating that this will clear the corrections for competitor 0:
         setResultForCompetitor(competitors.get(0), /* one-based rank */ 0, resultsWithOCSCleared, /* maxPointsReason */ null, /* explicit score */ null);
         f1RaceState.setFinishPositioningListChanged(yetLater, resultsWithOCSCleared);
-        f1RaceState.setFinishPositioningConfirmed(yetLater);
+        f1RaceState.setFinishPositioningConfirmed(yetLater, resultsWithOCSCleared);
         assertScoreCorrections(leaderboard, f1Column, competitors.get(1), MaxPointsReason.OCS, numberOfCompetitors+1, /* score is corrected */ false, yetLater);
         assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.NONE, 1, /* score is corrected */ false, yetLater); // ranking first, one point in low-point scheme
     }
