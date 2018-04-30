@@ -64,7 +64,7 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     
     @Override
     public ClusterDTO getPercentageClusterForDistanceToStarboardSideAtStart() {
-        Double normalizedDistance = getNormalizedDistanceToStarboardSideAtStart();
+        Double normalizedDistance = getNormalizedDistanceToStarboardSideAtStartOfCompetitor();
         if (normalizedDistance == null) {
             return null;
         }
@@ -80,7 +80,7 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
-    public Double getNormalizedDistanceToStarboardSideAtStart() {
+    public Double getNormalizedDistanceToStarboardSideAtStartOfCompetitor() {
         TrackedRace trackedRace = getTrackedRace();
         TrackedLegOfCompetitor firstTrackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, trackedRace.getRace().getCourse().getFirstLeg());
         TimePoint competitorStartTime = firstTrackedLegOfCompetitor.getStartTime();
@@ -94,15 +94,16 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
-    public Pair<Double, Double> getNormalizedDistanceToStarboardSideAtStartVsRankAtFirstMark(){
-        return new Pair<Double, Double> (getNormalizedDistanceToStarboardSideAtStart(), getRankAtFirstMark());
+    public Pair<Double, Double> getNormalizedDistanceToStarboardSideAtStartOfCompetitorVsRankAtFirstMark(){
+        return new Pair<Double, Double> (getNormalizedDistanceToStarboardSideAtStartOfCompetitor(), getRankAtFirstMark());
     }
     
-    @Override
-    public Distance getWindwardDistanceToAdvantageousLineEndAtStart() {
+    public Distance getWindwardDistanceToAdvantageousLineEndAtStartOf(TimePoint timepoint) {
+        if(timepoint == null) {
+            return null;
+        }
         TrackedRace trackedRace = getTrackedRace();
-        TimePoint startOfRace = trackedRace.getStartOfRace();
-        LineDetails startLine = trackedRace.getStartLine(startOfRace);
+        LineDetails startLine = trackedRace.getStartLine(timepoint);
         Mark advantageousMark = null;
         switch (startLine.getAdvantageousSideWhileApproachingLine()) {
         case PORT:
@@ -117,17 +118,27 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         }
         
         GPSFixTrack<Mark, GPSFix> advantageousMarkTrack = trackedRace.getOrCreateTrack(advantageousMark);
-        Position advantageousMarkPosition = advantageousMarkTrack.getEstimatedPosition(startOfRace, false);
+        Position advantageousMarkPosition = advantageousMarkTrack.getEstimatedPosition(timepoint, false);
         GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(getCompetitor());
-        Position competitorPosition = competitorTrack.getEstimatedPosition(startOfRace, false);
+        Position competitorPosition = competitorTrack.getEstimatedPosition(timepoint, false);
 
         TrackedLeg trackedLeg = trackedRace.getTrackedLeg(trackedRace.getRace().getCourse().getFirstLeg());
-        Distance distance = trackedLeg.getWindwardDistance(competitorPosition, advantageousMarkPosition, startOfRace, WindPositionMode.LEG_MIDDLE);
+        Distance distance = trackedLeg.getWindwardDistance(competitorPosition, advantageousMarkPosition, timepoint, WindPositionMode.LEG_MIDDLE);
         return distance;
     }
     
     @Override
-    public Distance getAbsoluteWindwardDistanceToStarboardSideAtStart() {
+    public Distance getWindwardDistanceToAdvantageousLineEndAtStartofRace() {
+        return getWindwardDistanceToAdvantageousLineEndAtStartOf(getTrackedRace().getStartOfRace());
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToAdvantageousLineEndAtStartofCompetitor() {
+        return getWindwardDistanceToAdvantageousLineEndAtStartOf(getTrackedRace().getTrackedLeg(getCompetitor(), getTrackedRace().getRace().getCourse().getFirstLeg()).getStartTime());
+    }
+    
+    @Override
+    public Distance getAbsoluteWindwardDistanceToStarboardSideAtStartOfCompetitor() {
         TrackedLegOfCompetitor firstTrackedLegOfCompetitor = getTrackedRace().getTrackedLeg(competitor, getTrackedRace().getRace().getCourse().getFirstLeg());
         TimePoint competitorStartTime = firstTrackedLegOfCompetitor.getStartTime();
         if(competitorStartTime == null) {
@@ -176,7 +187,7 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
-    public Speed getSpeedTenSecondsAfterStart() {
+    public Speed getSpeedTenSecondsAfterStartOfRace() {
         TimePoint startOfRace = getTrackedRace().getStartOfRace();
         if (startOfRace == null) {
             return null;
@@ -185,7 +196,7 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
-    public Double getRankThirtySecondsAfterStart() {
+    public Double getRankThirtySecondsAfterStartOfRace() {
         TimePoint startOfRace = getTrackedRace().getStartOfRace();
         if (startOfRace == null) {
             return null;
@@ -288,17 +299,17 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
-    public Pair<Double, Double> getRelativeDistanceToStarboardSideAtStartVsFinalRank(){
-        return new Pair<>(getNormalizedDistanceToStarboardSideAtStart(), getTrackedRaceContext().getRankAtFinishForCompetitor(getCompetitor()));
+    public Pair<Double, Double> getRelativeDistanceToStarboardSideAtStartOfCompetitorVsFinalRank(){
+        return new Pair<>(getNormalizedDistanceToStarboardSideAtStartOfCompetitor(), getTrackedRaceContext().getRankAtFinishForCompetitor(getCompetitor()));
     }
     
     @Override
-    public Pair<Double, Double> getWindwardDistanceToAdvantageousEndOfLineVsRelativeDistanceToAdvantageousEndOfLine(){
-        return new Pair<>(getWindwardDistanceToAdvantageousLineEndAtStart().getMeters(), getRelativeDistanceToAdvantageousEndOfLine());
+    public Pair<Double, Double> getWindwardDistanceToAdvantageousEndOfLineAtStartOfRaceVsRelativeDistanceToAdvantageousEndOfLineAtStartOfRace(){
+        return new Pair<>(getWindwardDistanceToAdvantageousLineEndAtStartofRace().getMeters(), getRelativeDistanceToAdvantageousEndOfLineAtStartOfRace());
     }
     
     @Override
-    public Double getRelativeDistanceToAdvantageousEndOfLine() {
+    public Double getRelativeDistanceToAdvantageousEndOfLineAtStartOfRace() {
         TrackedRace trackedRace = getTrackedRace();
         TimePoint startOfRace = trackedRace.getStartOfRace();
         LineDetails startLine = trackedRace.getStartLine(startOfRace);

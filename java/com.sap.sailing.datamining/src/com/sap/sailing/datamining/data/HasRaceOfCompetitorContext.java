@@ -23,7 +23,7 @@ public interface HasRaceOfCompetitorContext {
     @Dimension(messageKey="TackAtStart", ordinal=12)
     public Tack getTackAtStart() throws NoWindException;
     
-    @Dimension(messageKey="DistanceToStarboardSideAtStart", ordinal=13)
+    @Dimension(messageKey="DistanceToStarboardSideAtStartOfCompetitor", ordinal=13)
     public ClusterDTO getPercentageClusterForDistanceToStarboardSideAtStart();
     
     @Dimension(messageKey="RelativeScoreInPercent", ordinal=14)
@@ -32,14 +32,17 @@ public interface HasRaceOfCompetitorContext {
     @Statistic(messageKey="DistanceAtStart", resultDecimals=2, ordinal=0)
     public Distance getDistanceToStartLineAtStart();
 
-    @Statistic(messageKey="DistanceToStarboardSideAtStart", resultDecimals=2, ordinal=1)
-    public Double getNormalizedDistanceToStarboardSideAtStart();
+    @Statistic(messageKey="DistanceToStarboardSideAtStartOfCompetitor", resultDecimals=2, ordinal=1)
+    public Double getNormalizedDistanceToStarboardSideAtStartOfCompetitor();
     
-    @Statistic(messageKey="DistanceToStarboardSideAtStartVsRankAtFirstMark", resultDecimals=2, ordinal=1)
-    public Pair<Double, Double> getNormalizedDistanceToStarboardSideAtStartVsRankAtFirstMark();
+    @Statistic(messageKey="DistanceToStarboardSideAtStartOfCompetitorVsRankAtFirstMark", resultDecimals=2, ordinal=1)
+    public Pair<Double, Double> getNormalizedDistanceToStarboardSideAtStartOfCompetitorVsRankAtFirstMark();
     
-    @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLine", resultDecimals=2, ordinal=2)
-    public Distance getWindwardDistanceToAdvantageousLineEndAtStart();
+    @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLineAtStartOfRace", resultDecimals=2, ordinal=2)
+    public Distance getWindwardDistanceToAdvantageousLineEndAtStartofRace();
+    
+    @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLineAtStartOfCompetitor", resultDecimals=2, ordinal=2)
+    public Distance getWindwardDistanceToAdvantageousLineEndAtStartofCompetitor();
     
     @Connector(messageKey="SpeedWhenStarting", ordinal=3)
     public Speed getSpeedWhenStarting();
@@ -48,10 +51,10 @@ public interface HasRaceOfCompetitorContext {
     public Speed getSpeedTenSecondsBeforeStart();
     
     @Connector(messageKey="SpeedTenSecondsAfterStart", ordinal=5)
-    public Speed getSpeedTenSecondsAfterStart();
+    public Speed getSpeedTenSecondsAfterStartOfRace();
     
     @Statistic(messageKey="RankThirtySecondsAfterStart", resultDecimals=2, ordinal=6)
-    public Double getRankThirtySecondsAfterStart();
+    public Double getRankThirtySecondsAfterStartOfRace();
     
     @Statistic(messageKey="RankAfterHalfOfTheFirstLeg", resultDecimals=2, ordinal=7)
     public Double getRankAfterHalfOfTheFirstLeg();
@@ -80,15 +83,15 @@ public interface HasRaceOfCompetitorContext {
     @Statistic(messageKey="LineLengthAtStart", resultDecimals=1)
     public Distance getLineLengthAtStart();
 
-    @Statistic(messageKey="AbsoluteWindwardDistanceToStarboardSideAtStart", resultDecimals=2)
-    Distance getAbsoluteWindwardDistanceToStarboardSideAtStart();
+    @Statistic(messageKey="AbsoluteWindwardDistanceToStarboardSideAtStartOfCompetitor", resultDecimals=2)
+    Distance getAbsoluteWindwardDistanceToStarboardSideAtStartOfCompetitor();
     
-    @Statistic(messageKey="DistanceToStarboadSideAtStartVsFinalRank", resultDecimals=2)
-    Pair<Double, Double> getRelativeDistanceToStarboardSideAtStartVsFinalRank();
+    @Statistic(messageKey="DistanceToStarboardSideAtStartOfCompetitorVsFinalRank", resultDecimals=2)
+    Pair<Double, Double> getRelativeDistanceToStarboardSideAtStartOfCompetitorVsFinalRank();
     
-    @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLineVsRelativeDistanceToAdvantageousEndOfLine", resultDecimals=2)
-    Pair<Double, Double> getWindwardDistanceToAdvantageousEndOfLineVsRelativeDistanceToAdvantageousEndOfLine();
+    @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLineAtStartOfRaceVsRelativeDistanceToAdvantageousEndOfLine", resultDecimals=2)
+    Pair<Double, Double> getWindwardDistanceToAdvantageousEndOfLineAtStartOfRaceVsRelativeDistanceToAdvantageousEndOfLineAtStartOfRace();
     
-    @Statistic(messageKey="RelativeDistanceToAdvantageousEndOfLine", resultDecimals=2)
-    Double getRelativeDistanceToAdvantageousEndOfLine();
+    @Statistic(messageKey="RelativeDistanceToAdvantageousEndOfLineAtStartOfRace", resultDecimals=2)
+    Double getRelativeDistanceToAdvantageousEndOfLineAtStartOfRace();
 }
