@@ -21,8 +21,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import org.apache.commons.fileupload.FileItem;
 import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
