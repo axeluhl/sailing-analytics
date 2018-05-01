@@ -251,11 +251,69 @@ User input flow example:
 
 <img style="float: right" src="https://photos-4.dropbox.com/t/2/AAA8lXNig-MSsQhRmhyIYOD1sgi59kfQr8NDqs5bPRenQA/12/379951689/png/32x32/1/_/1/2/image3.PNG/EJmPwIIDGL0ZIAcoBw/fF8VkVypSPKmR_NttUndnjGFJKkEk_ILuOF19hHAVbg?preserve_transparency=1&size=1600x1200&size_mode=3" />
 
-Translation comment (1): If the parameter for the region was not passed ($region_param is empty) then the user has to do the input by himself after being prompted. The default value equals to $default_region. The value is found inside the file ~/aws-automation/config and was sourced at the start of the script. The input is required because the variable NOT_OPTIONAL was passed. The input is shown ($SHOW_INPUT).
+Translation comment (1): 
 
-Translation comment (2): The user input is assigned to the global variable region.
+If the parameter for the region was not passed ($region_param is empty) then the user has to do the input by himself after being prompted. The default value equals to $default_region. The value is found inside the file ~/aws-automation/config and was sourced at the start of the script. The input is required because the variable NOT_OPTIONAL was passed. The input is shown ($SHOW_INPUT).
+
+Translation comment (2): 
+
+The user input is assigned to the global variable region.
+
+
+If the input variable is not a text but a type of resource from AWS (e.g. load balancer) the following mechanism will take effect:
 
 <img style="float: right" src="https://photos-6.dropbox.com/t/2/AADRrPHFrAKtSKzuWZTPrcZbfuW_vB0tUp8nan8iJ0Zzcg/12/379951689/png/32x32/1/_/1/2/image4.PNG/EJmPwIIDGL0ZIAcoBw/LMRyG1oabKBs0d_vv7rPwDpTEY4lzGIHqBfV2rNU5hY?preserve_transparency=1&size=1600x1200&size_mode=3" />
+
+Translation comment (1): 
+
+Fills the variable RESOURCE_MAP with all available resources of type of the parameter. Keys are the ids and values are the names of the resources. The name of a resources equals to the value of a tag with key "name". 
+
+Translation comment (2):
+
+Likewise.
+
+Translation comment (3):
+
+Displays all resources to the user. Assigns the selected resource id to the variable load balancer.
+
+
+### Error handling
+
+To inform the user about problems during script execution, return values of some commands (e.g. aws, curl or ssh) will be tested for validity. The logic is encapsulated in the wrapper functions (e.g. aws_wrapper, curl_wrapper or ssh_wrapper) inside the file functions_wrapper.sh.
+
+### Configuration management
+
+At the first start of the script, the following files are created: 
+
+- ~/aws-automation/config
+- ~/aws-automation/config-[region]
+
+The file ~/aws-automation/config contains all user variables that are region independent. 
+
+<pre>
+default_region=
+default_server_startup_notify=
+default_build_complete_notify=
+</pre>
+
+The file ~/aws-automation/config-[region] contains all user variables for that specific region.
+
+<pre>
+default_instance_type=
+default_ssh_user=
+default_key_name=
+default_key_fi le=
+default_mongodb_host=
+default_mongodb_port=
+default_new_admin_password=
+</pre>
+
+The user can assign values to that variable that are then used as default proposals.
+
+### Scenarios
+
+
+
 
 
 
