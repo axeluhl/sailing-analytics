@@ -128,6 +128,120 @@ Get value of specific attribute:
 aws ec2 describe-instances --instance-ids i-066952116fe71fa65 _--query ‘Reservations[*].Instances[*].
 PublicDnsName’_
 
+aws ec2 describe-vpcs _--query ‘Vpcs[?IsDefault==`true`].VpcId’_
+
+More syntax information can be found here http://jmespath.org/.
+
+##### Formatting
+Use text as output format:
+
+public_dns_name=$(aws ec2 describe-instances --instance-ids i-066952116fe71fa65 --query ‘Reservations[*].
+Instances[*].PublicDnsName’ _--output text_)
+
+## Script
+
+### Files
+
+aws-setup.sh: 
+
+- Parameter processing
+- Sourcing of utils.sh, ~/aws-automation/confi g, ~/aws-automation/confi g-[region].sh
+- Start of scenarios
+- Helper methods
+
+lib/build-config.sh:
+
+- GitHub script to write and read user configuration variables
+
+lib/functions_app.sh: 
+
+- Functions that relate to SAP instance configuration 
+
+lib/functions_ec2.sh:
+
+-  Functions that relate to EC2 instance configuration 
+
+lib/functions_elb.sh:
+
+-  Functions that relate to Elastic Load Balancing
+
+lib/functions_io.sh: 
+
+- Input processing (optional input, passwords, value proposals, default initialization)
+- Creation of user configuration files
+
+lib/functions_wrapper.sh:
+
+- Wrapper functions with error handling logic
+
+lib/require_variables.sh:
+
+- Declare input variable attributes (optional, required, password, default value, user question)
+
+lib/scenario_associate_alb.sh:
+
+- Associate instance with load balancer (target group, health check, rule, apache configuration)
+
+lib/scenario_instance.sh:
+
+- Create event
+- Change admin password
+- Associate with load balancer (target group, health check, rule, apache configuration)
+
+lib/scenario_master_instance.sh:
+
+- Create instance with correct user data to be used as master
+- Create launch template for replica with matching user data to master
+
+lib/scenario_replica_instance.sh:
+
+- Starting of a launch template
+
+lib/scenario_shared_instance.sh:
+
+- Creation of a SAP instance on an existing EC2 instance
+- Check preconditions
+- Associate SAP instance with load balancer
+
+lib/util_functions.sh:
+
+- Helper functions
+
+lib/utils.sh:
+
+- Sourcing logic
+
+lib/validation.sh:
+
+- Validation functions 
+
+lib/variables.sh:
+
+- Variables
+
+### Preconditions
+
+- AWS CLI (configured)
+- Cygwin with following packages: jq, openssh, wget, curl
+
+### User input 
+
+Every scenario requires user input for specific variables. For example the setup of a dedicated SAP instance on an EC2 instance requires the following variables:
+
+- Region
+- Load balancer
+- Instance type (e.g. t2.medium)
+- security group
+- image
+- instance name
+- instanz short name (e.g. for subdomains)
+- MongoDB host and port
+- alternative SSH user (default: root)
+- build version
+- keypair name
+- keypair path
+- event name (optional)
+- new admin password (optional)
 
 
 
