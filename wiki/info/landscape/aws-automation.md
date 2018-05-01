@@ -352,10 +352,31 @@ The user can assign values to that variable that are then used as default propos
 18. Append „Use Event-SSL [domain] [eventId] 127.0.0.1 8888“ or „Use Home-SSL [domain] 127.0.0.1 8888“ to etc/httpd/conf.d/001-events.conf
 19. Check apache configuration with "apachectl configtest" and reload with "sudo service httpd reload“
 
+#### SAP instance on a dedicated EC2 instance as a master
 
+1. Start EC2 instance 
+2. Query for its dns name for later ssh connection 
+3. WWait until ssh connection is established
+4. Create event and change admin password if necessary
+5. Create launch template for replica with user data variable "REPLICATION_CHANNEL" matching to its master
 
+#### SAP instance on a dedicated EC2 instance as a replica
 
+1. Start launch template 
+2. Check if ssh connection is working
 
+## Improvements
+
+- Extraction of AWS resources has to be improved 
+- Show user detailed usageof a variable within the execution process of a scenario
+- Execute dry-run of scenario to check if conditions are met and to avoid rollback. 
+
+## Extensions 
+
+- Preserve log files of instance before shutdonw ([bug4503](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4503) 
+- Automatic configuration of load balancer when using a replication scenario
+- Add and remove replicas dynamically ([bug4504](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4504)
+- Usage of auto scaling groups ([bug4506](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4506)
 
 
 
