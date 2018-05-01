@@ -834,7 +834,10 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
 
     @Override
     public Double getExpeditionTargetHeelIfAvailable(TimePoint at) {
-        return getExpeditionValueForDouble(at, bravoExtendedFix->bravoExtendedFix.getTargetHeel().getDegrees());
+        return getExpeditionValueForDouble(at, bravoExtendedFix->{
+            final Bearing targetHeel = bravoExtendedFix.getTargetHeel();
+            return targetHeel == null ? null : targetHeel.getDegrees();
+        });
     }
 
     @Override
