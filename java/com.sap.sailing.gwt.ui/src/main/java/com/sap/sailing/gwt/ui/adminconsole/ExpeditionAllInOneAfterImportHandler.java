@@ -51,6 +51,7 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final String sensorImporterType;
     private List<Triple<String, String, String>> raceEntries;
     private String regattaName;
+    @SuppressWarnings("unused") // the following could become useful in order to show the start times used for a split
     private Iterable<TimePoint> startTimes;
 
     public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName,

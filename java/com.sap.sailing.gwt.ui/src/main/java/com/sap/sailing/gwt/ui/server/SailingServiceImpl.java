@@ -3273,7 +3273,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             }
             case EXPEDITION_RACE_TIME_TO_GUN: {
-                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToGUNIfAvailable, trackedRace, competitor, timePoint);
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToGunIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
             case EXPEDITION_RACE_TIME_TO_PIN: {
