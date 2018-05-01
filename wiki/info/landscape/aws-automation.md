@@ -317,7 +317,7 @@ The user can assign values to that variable that are then used as default propos
 - SAP instance on a dedicated EC2 instance as a master
 - SAP instance on a dedicated EC2 instance as a replica
 
-#### SAP instance on a dedicated EC2 instance
+#### SAP instance on a dedicated EC2 instance 
 
 1. Start EC2 instance 
 2. Query for its dns name for later ssh connection 
@@ -329,6 +329,30 @@ The user can assign values to that variable that are then used as default propos
 8. Register instance within target group
 9. Create new rule within https listener that points to the correct target group
 10. Append „Use Event-SSL [domain] [eventId] 127.0.0.1 8888“ or „Use Home-SSL [domain] 127.0.0.1 8888“ to etc/httpd/conf.d/001-events.conf
+
+#### SAP instance on a shared EC2 instance
+
+1. Check if folder already 
+2. Check if ssh connection to super instance is working
+3. Create folder within /home/sailing/servers 
+4. Search for next free server port, telnet port and expedition port
+5. Copy /home/sailing/code/java/target/refreshInstance.sh to the new folder
+6. Execute refreshInstance.sh 
+7. Comment out and in specific lines of the env.sh file
+8. Append environment definition from releases.sapsailing.com/environments to env.sh 
+9. Append MEMORY variable to env.sh
+10. Append user data to env.sh
+11. Append informaton to README file (/home/sailing/servers)
+12. Start server 
+13. Create event and change admin password if necessary
+14. Query for https listener of the load balancer
+15. Create target group with name „S-hared-instanceshortname“
+16. Configuration of the target group health check with the server port of the sap instance
+17. Create new rule within https listener that points to the correct target group
+18. Append „Use Event-SSL [domain] [eventId] 127.0.0.1 8888“ or „Use Home-SSL [domain] 127.0.0.1 8888“ to etc/httpd/conf.d/001-events.conf
+19. Check apache configuration with "apachectl configtest" and reload with "sudo service httpd reload“
+
+
 
 
 
