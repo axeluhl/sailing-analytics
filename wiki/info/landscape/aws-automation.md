@@ -80,7 +80,58 @@ To reach the SAP instance by a specific URL (e.g. wcsantander2017.sapsailing.com
 
 [image2]
 
-### AWS Command Line Interface
+### AWS Command Line Interface (AWS CLI)
+
+Information about installation and configuration of the AWS CLI can be found here https://aws.amazon.com/de/cli/.
+
+Example command and response of the AWS CLI to get information about all existing EC2 instances of a region:
+
+Command: aws --region eu-west-2 ec2 describe-instances
+
+Response: 
+<pre>
+{
+“Reservations”: [
+ {
+“Instances”: [
+ {
+“Monitoring”: {
+“State”: “disabled”
+ },
+“PublicDnsName”: “ec2-35-178-117-16.eu-west-2.compute.amazonaws.com”,
+“State”: {
+“Code”: 16,
+“Name”: “running”
+ },
+“EbsOptimized”: false,
+“LaunchTime”: “2018-04-06T04:09:29.000Z”,
+“PublicIpAddress”: “35.178.117.16”,
+“PrivateIpAddress”: “172.31.38.162”,
+“ProductCodes”: [],
+“VpcId”: “vpc-e5ba568c”,
+“StateTransitionReason”: “”,
+“InstanceId”: “i-066952116fe71fa65”,
+“ImageId”: “ami-39f3e25d”,
+“PrivateDnsName”: “ip-172-31-38-162.eu-west-2.compute.internal”,
+“KeyName”: “leonradeck-keypair”,
+[...]
+</pre>
+
+##### Filtering 
+Limit instances that are returned by passing a parameter:
+
+aws ec2 describe-instances _--instance-ids i-066952116fe71fa65_
+
+##### Querying
+Get value of specific attribute:
+
+aws ec2 describe-instances --instance-ids i-066952116fe71fa65 _--query ‘Reservations[*].Instances[*].
+PublicDnsName’_
+
+
+
+
+
 
 
 
