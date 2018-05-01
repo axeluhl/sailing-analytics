@@ -45,7 +45,7 @@ SERVER_STARTUP_NOTIFY=leon.radeck@sap.com
 
 ### 2. SAP instance configuration
 
-[image1]
+<img style="float: right" src="https://photos-1.dropbox.com/t/2/AABX17gY1wPcAmgxTjIUQju9wMnxgRFUa4OgOfUcpQPvkA/12/379951689/png/32x32/1/_/1/2/image1.PNG/EJmPwIIDGL0ZIAcoBw/vkl8xdvmZzFhJzi9lV_d78jD6jKNURBkF7C-XX2xVUk?preserve_transparency=1&size=1600x1200&size_mode=3" />
 
 Necessary configuration steps:
 
@@ -78,7 +78,9 @@ To reach the SAP instance by a specific URL (e.g. wcsantander2017.sapsailing.com
 - Configure the health check of the target group
 - Register instance within the target group
 
-[image2]
+<img style="float: right" src="https://photos-4.dropbox.com/t/2/AAAYdNOq2vlgkb-kUcQjkKOAxeJI2HoYvvl1El8_gUwHbA/12/379951689/png/32x32/1/_/1/2/image2.PNG/EJmPwIIDGL0ZIAcoBw/qm7Nd0NMACr7EJ67c_7xK6seOn-4raimfvpE_07Pkys?preserve_transparency=1&size=1600x1200&size_mode=3" />
+
+Translation: Way of a HTTP/HTTPS request from the load balancer to the sap instance (simplified)
 
 ### AWS Command Line Interface (AWS CLI)
 
@@ -242,6 +244,19 @@ Every scenario requires user input for specific variables. For example the setup
 - keypair path
 - event name (optional)
 - new admin password (optional)
+
+The script is built for the processing of parameters but the functionality is currently not used.
+
+User input flow example: 
+
+<img style="float: right" src="https://photos-4.dropbox.com/t/2/AAA8lXNig-MSsQhRmhyIYOD1sgi59kfQr8NDqs5bPRenQA/12/379951689/png/32x32/1/_/1/2/image3.PNG/EJmPwIIDGL0ZIAcoBw/fF8VkVypSPKmR_NttUndnjGFJKkEk_ILuOF19hHAVbg?preserve_transparency=1&size=1600x1200&size_mode=3" />
+
+Translation comment: 
+
+<img style="float: right" src="https://photos-6.dropbox.com/t/2/AADRrPHFrAKtSKzuWZTPrcZbfuW_vB0tUp8nan8iJ0Zzcg/12/379951689/png/32x32/1/_/1/2/image4.PNG/EJmPwIIDGL0ZIAcoBw/LMRyG1oabKBs0d_vv7rPwDpTEY4lzGIHqBfV2rNU5hY?preserve_transparency=1&size=1600x1200&size_mode=3" />
+
+
+
 
 
 
