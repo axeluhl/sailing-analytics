@@ -45,7 +45,7 @@ SERVER_STARTUP_NOTIFY=leon.radeck@sap.com
 
 ### 2. SAP instance configuration
 
-[Image]
+[image1]
 
 Necessary configuration steps:
 
@@ -69,11 +69,22 @@ apachectl configtest
 sudo service httpd reload
 </pre>
 
-## 3. Load Balancer configuration
+### 3. Load Balancer configuration
 
 To reach the SAP instance by a specific URL (e.g. wcsantander2017.sapsailing.com), follow these steps:
 
-- Create target group with
+- Create target group with name "S-dedicated-wcsantander2017"
+- Create rule within HTTPS listener of load balancer. Enter "wcsantander2017.sapsailing.com" as a host name matching rule. Choose target group created in step one.
+- Configure the health check of the target group
+- Register instance within the target group
+
+[image2]
+
+### AWS Command Line Interface
+
+
+
+
 
 
 
