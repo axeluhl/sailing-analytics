@@ -627,12 +627,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 entryDTO.gapToLeaderInOwnTime = raceDetails.getGapToLeaderInOwnTime();
                 
                 try {
-                    BravoFixTrack<Competitor> sensorTrack = trackedRace.getSensorTrack(competitor,
-                            BravoFixTrack.TRACK_NAME);
+                    BravoFixTrack<Competitor> sensorTrack = trackedRace.getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                     if (sensorTrack != null) {
                         final BravoFix bravoFix = sensorTrack.getFirstFixAtOrAfter(timePoint);
-                        entryDTO.heel = bravoFix.getHeel();
-                        entryDTO.pitch = bravoFix.getPitch();
+                        entryDTO.heel = bravoFix == null ? null : bravoFix.getHeel();
+                        entryDTO.pitch = bravoFix == null ? null : bravoFix.getPitch();
                         if (sensorTrack.hasExtendedFixes() && bravoFix instanceof BravoExtendedFix) {
                             BravoExtendedFix fix = (BravoExtendedFix) bravoFix;
                             entryDTO.setExpeditionAWA(fix.getExpeditionAWA());
