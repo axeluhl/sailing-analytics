@@ -228,14 +228,14 @@ lib/variables.sh:
 
 Every scenario requires user input for specific variables. For example the setup of a dedicated SAP instance on an EC2 instance requires the following variables:
 
-- Region
-- Load balancer
-- Instance type (e.g. t2.medium)
+- region
+- load balancer
+- instance type (e.g. t2.medium)
 - security group
 - image
 - instance name
 - instanz short name (e.g. for subdomains)
-- MongoDB host and port
+- mongodb host and port
 - alternative SSH user (default: root)
 - build version
 - keypair name
