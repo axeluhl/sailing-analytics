@@ -69,7 +69,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     private transient TimeRangeCache<Pair<Double, Long>> expeditionRudderCache;
     private transient TimeRangeCache<Pair<Double, Long>> expeditionRateOfTurnCache;
     private transient TimeRangeCache<Pair<Double, Long>> expeditionTimeToBurnToLineCache;
-    private transient TimeRangeCache<Pair<Double, Long>> expeditionDistanceBelowLineCache;
+    private transient TimeRangeCache<Pair<Double, Long>> expeditionDistanceBelowLineInMetersCache;
     
     /**
      * If a GPS track was provided at construction time, remember it non-transiently. It is needed when restoring
@@ -147,7 +147,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         this.expeditionRudderCache = createTimeRangeCache(trackedItem, "expeditionRudderCache");
         this.expeditionRateOfTurnCache = createTimeRangeCache(trackedItem, "expeditionRateOfTurnCache");
         this.expeditionTimeToBurnToLineCache = createTimeRangeCache(trackedItem, "expeditionTimeToBurnToLineCache");
-        this.expeditionDistanceBelowLineCache = createTimeRangeCache(trackedItem, "expeditionDistanceBelowLineCache");
+        this.expeditionDistanceBelowLineInMetersCache = createTimeRangeCache(trackedItem, "expeditionDistanceBelowLineCache");
     }
 
     public GPSFixTrack<ItemType, GPSFixMoving> getGpsTrack() {
@@ -648,9 +648,9 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
 
     @Override
-    public Double getAverageExpeditionTimeToGUNIfAvailable(TimePoint start, TimePoint endTimePoint) {
+    public Double getAverageExpeditionTimeToGunInSecondsIfAvailable(TimePoint start, TimePoint endTimePoint) {
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint,
-                BravoExtendedFix::getExpeditionTmToGun, expeditionTimeToGunCache);
+                BravoExtendedFix::getExpeditionTmToGunInSeconds, expeditionTimeToGunCache);
     }
 
     @Override
@@ -666,9 +666,9 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
 
     @Override
-    public Double getAverageExpeditionTimeToBurnToLineIfAvailable(TimePoint start, TimePoint endTimePoint) {
+    public Double getAverageExpeditionTimeToBurnToLineInSecondsIfAvailable(TimePoint start, TimePoint endTimePoint) {
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint,
-                BravoExtendedFix::getExpeditionTmToBurn, expeditionTimeToBurnToLineCache);
+                BravoExtendedFix::getExpeditionTmToBurnInSeconds, expeditionTimeToBurnToLineCache);
     }
 
     @Override
@@ -696,9 +696,9 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
 
     @Override
-    public Double getAverageExpeditionDistanceBelowLineIfAvailable(TimePoint start, TimePoint endTimePoint) {
+    public Double getAverageExpeditionDistanceBelowLineInMetersIfAvailable(TimePoint start, TimePoint endTimePoint) {
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint,
-                BravoExtendedFix::getExpeditionBelowLn, expeditionDistanceBelowLineCache);
+                BravoExtendedFix::getExpeditionBelowLnInMeters, expeditionDistanceBelowLineInMetersCache);
     }
 
     @Override
@@ -862,8 +862,8 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
 
     @Override
-    public Double getExpeditionTimeToGunIfAvailable(TimePoint at) {
-        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTmToGun);
+    public Double getExpeditionTimeToGunInSecondsIfAvailable(TimePoint at) {
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTmToGunInSeconds);
     }
 
     @Override
@@ -879,8 +879,8 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
 
     @Override
-    public Double getExpeditionTimeToBurnToLineIfAvailable(TimePoint at) {
-        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTmToBurn);
+    public Double getExpeditionTimeToBurnToLineInSecondsIfAvailable(TimePoint at) {
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTmToBurnInSeconds);
     }
 
     @Override
@@ -908,8 +908,8 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
 
     @Override
-    public Double getExpeditionDistanceBelowLineIfAvailable(TimePoint at) {
-        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionBelowLn);
+    public Double getExpeditionDistanceBelowLineInMetersIfAvailable(TimePoint at) {
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionBelowLnInMeters);
     }
 
     @Override
