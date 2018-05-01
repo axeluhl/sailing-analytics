@@ -121,7 +121,7 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
     Double getExpeditionTimeToStbLaylineIfAvailable(TimePoint at);
     Double getExpeditionDistToPortLaylineIfAvailable(TimePoint at);
     Double getExpeditionDistToStbLaylineIfAvailable(TimePoint at);
-    Double getExpeditionTimeToGUNIfAvailable(TimePoint at);
+    Double getExpeditionTimeToGunIfAvailable(TimePoint at);
     Double getExpeditionTimeToCommitteeBoatIfAvailable(TimePoint at);
     Double getExpeditionTimeToPinIfAvailable(TimePoint at);
     Double getExpeditionTimeToBurnToLineIfAvailable(TimePoint at);
