@@ -1898,7 +1898,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     .formatElapsedTime(timeToStartInMs)) : stringMessages.start();
             if (countDownOverlay == null) {
                 countDownOverlay = new SmallTransparentInfoOverlay(map, RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX,
-                        countDownText, coordinateSystem);
+                        countDownText, coordinateSystem, getSettings().getStartCountDownFontSizeScaling());
                 countDownOverlay.addToMap();
             } else {
                 countDownOverlay.setInfoText(countDownText);
@@ -2688,6 +2688,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         if (!newSettings.isShowEstimatedDuration() && estimatedDurationOverlay != null){
             estimatedDurationOverlay.removeFromParent();
+        }
+        if (newSettings.getStartCountDownFontSizeScaling() != settings.getStartCountDownFontSizeScaling()) {
+            if (countDownOverlay != null) {
+                countDownOverlay.removeFromMap();
+                countDownOverlay = null;
+            }
+            requiresRedraw = true;
         }
         this.settings = newSettings;
         

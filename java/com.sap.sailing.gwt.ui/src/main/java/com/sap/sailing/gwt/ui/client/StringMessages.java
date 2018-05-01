@@ -2165,4 +2165,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String unableToObtainCompetitorsAndBoatsForRaceInFleetInLeaderboard(String raceColumnName, String fleetName, String leaderboardName, String message);
     String unableToObtainBoatsRegisteredWith(String leaderboardName, String message);
     String importStartData();
+    String startCountDownFontSizeScaling();
 }
