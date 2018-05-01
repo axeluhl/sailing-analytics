@@ -373,10 +373,10 @@ The user can assign values to that variable that are then used as default propos
 
 ## Extensions 
 
-- Preserve log files of instance before shutdonw ([bug4503](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4503) 
+- Preserve log files of instance before shutdown ([bug4503](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4503))
 - Automatic configuration of load balancer when using a replication scenario
-- Add and remove replicas dynamically ([bug4504](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4504)
-- Usage of auto scaling groups ([bug4506](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4506)
+- Add and remove replicas dynamically ([bug4504](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4504))
+- Usage of auto scaling groups ([bug4506](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4506))
 
 
 
