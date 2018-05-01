@@ -251,7 +251,9 @@ User input flow example:
 
 <img style="float: right" src="https://photos-4.dropbox.com/t/2/AAA8lXNig-MSsQhRmhyIYOD1sgi59kfQr8NDqs5bPRenQA/12/379951689/png/32x32/1/_/1/2/image3.PNG/EJmPwIIDGL0ZIAcoBw/fF8VkVypSPKmR_NttUndnjGFJKkEk_ILuOF19hHAVbg?preserve_transparency=1&size=1600x1200&size_mode=3" />
 
-Translation comment: 
+Translation comment (1): If the parameter for the region was not passed ($region_param is empty) then the user has to do the input by himself after being prompted. The default value equals to $default_region. The value is found inside the file ~/aws-automation/config and was sourced at the start of the script. The input is required because the variable NOT_OPTIONAL was passed. The input is shown ($SHOW_INPUT).
+
+Translation comment (2): The user input is assigned to the global variable region.
 
 <img style="float: right" src="https://photos-6.dropbox.com/t/2/AADRrPHFrAKtSKzuWZTPrcZbfuW_vB0tUp8nan8iJ0Zzcg/12/379951689/png/32x32/1/_/1/2/image4.PNG/EJmPwIIDGL0ZIAcoBw/LMRyG1oabKBs0d_vv7rPwDpTEY4lzGIHqBfV2rNU5hY?preserve_transparency=1&size=1600x1200&size_mode=3" />
 
