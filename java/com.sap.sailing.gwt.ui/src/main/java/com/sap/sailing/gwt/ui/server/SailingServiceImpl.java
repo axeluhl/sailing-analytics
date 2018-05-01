@@ -3185,7 +3185,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             }
             case EXPEDITION_RACE_DISTANCE_BELOW_LINE: {
-                result = getBravoDoubleValue(BravoFixTrack::getExpeditionDistanceBelowLineIfAvailable, trackedRace, competitor, timePoint);
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionDistanceBelowLineInMetersIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
             case EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT: {
@@ -3261,7 +3261,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             }
             case EXPEDITION_RACE_TIME_TO_BURN_TO_LINE: {
-                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToBurnToLineIfAvailable, trackedRace, competitor, timePoint);
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToBurnToLineInSecondsIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
             case EXPEDITION_RACE_TIME_TO_BURN_TO_PIN: {
@@ -3273,7 +3273,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             }
             case EXPEDITION_RACE_TIME_TO_GUN: {
-                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToGunIfAvailable, trackedRace, competitor, timePoint);
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToGunInSecondsIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
             case EXPEDITION_RACE_TIME_TO_PIN: {
