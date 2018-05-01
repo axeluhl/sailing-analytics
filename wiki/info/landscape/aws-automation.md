@@ -312,6 +312,24 @@ The user can assign values to that variable that are then used as default propos
 
 ### Scenarios
 
+- SAP instance on a dedicated EC2 instance
+- SAP instance on a shared EC2 instance
+- SAP instance on a dedicated EC2 instance as a master
+- SAP instance on a dedicated EC2 instance as a replica
+
+#### SAP instance on a dedicated EC2 instance
+
+1. Hochfahren einer Instanz, deren User Data die vom Nutzer eingegebenen Werte enthält
+2. Abfragen des DNS-Namen der Instanz für eine spätere SSH-Verbindung
+3. Warten bis SSH-Verbindung aufgebaut werden kann
+4. Erstellung eines Events und Änderung des Admin-Passworts falls notwendig
+5. Abfragen des HTTPS-Listeners des Load Balancers
+6. Erstellung einer Target Group mit dem Namen „S-dedicated-Instanzkurzname“
+7. Konfi guration des Target Group Healthchecks
+8. Einhängen der Instanz in die Target Group
+9. Erstellen einer neuen Regel im HTTPS-Listener, die auf die Target Group verweist
+10. Der Datei etc/httpd/conf.d/001-events.conf die Zeile „Use Event-SSL [domain] [eventId] 127.0.0.1 8888“ hinzufügen
+oder falls kein Event erstellt wurde die Zeile „Use Home-SSL [domain] 127.0.0.1 8888“
 
 
 
