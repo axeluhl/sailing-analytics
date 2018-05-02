@@ -58,7 +58,7 @@ public abstract class DispatchSystemDefaultImpl<CTX extends DispatchContext> imp
     
     private DispatchSystemAsync<CTX> createDispatchFor(String routing) {
         final StringBuilder destinationUrlBuilder = new StringBuilder(dispatchRPCPath);
-        if (routing != null && routing.isEmpty()) {
+        if (routing != null && !routing.isEmpty()) {
             if (!dispatchRPCPath.endsWith("/")) {
                 destinationUrlBuilder.append("/");
             }

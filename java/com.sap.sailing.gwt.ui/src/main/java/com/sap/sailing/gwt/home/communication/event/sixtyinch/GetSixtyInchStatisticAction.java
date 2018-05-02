@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sse.common.Duration;
@@ -30,7 +31,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
  * otherwise.
  * </p>
  */
-public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchStatisticDTO> {
+public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchStatisticDTO>, ProvidesLeaderboardRouting {
     // transfer as string, to avoid transfering incompatible types
     private String racename;
     private String regattaname;
@@ -95,5 +96,10 @@ public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchSt
             e.printStackTrace();
         }
         return duration;
+    }
+
+    @Override
+    public String getLeaderboardname() {
+        return regattaname;
     }
 }

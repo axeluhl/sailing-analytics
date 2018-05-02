@@ -38,7 +38,6 @@ public abstract class SailingServiceHelper {
     public static SailingServiceAsync createSailingServiceInstance(ServiceRoutingProvider routingProvider) {
         return createSailingServiceInstance(true, routingProvider);
     }
-    
 
     /**
      * Crates a new sailing service instance.
@@ -55,12 +54,13 @@ public abstract class SailingServiceHelper {
         if (!sameBundle) {
             baseURL.append(RemoteServiceMappingConstants.WEB_CONTEXT_PATH).append("/");
         }
+        
         baseURL.append(RemoteServiceMappingConstants.sailingServiceRemotePath);
+        
         if (routingProvider != null) {
             baseURL.append(routingProvider.routingSuffixPath()).append("/");
         }
         serviceToRegister.setServiceEntryPoint(baseURL.toString());
         return service;
     }
-
 }
