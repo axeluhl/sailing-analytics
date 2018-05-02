@@ -53,6 +53,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private DoubleBox buoyZoneRadiusInMetersBox;
     private CheckBox transparentHoverlines;
     private IntegerBox hoverlineStrokeWeight;
+    private DoubleBox startCountDownFontSizeScalingBox;
     
     private boolean isSimulationEnabled;
     
@@ -244,6 +245,12 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         hoverlineStrokeWeightPanel.add(hoverlineStrokeWeight);
         vp.add(hoverlineStrokeWeightPanel);
         
+        HorizontalPanel startCountDownFontSizeScalingPanel = new HorizontalPanel();
+        Label startCountDownFontSizeScalingLabel = new Label(stringMessages.startCountDownFontSizeScaling() + ":");
+        startCountDownFontSizeScalingPanel.add(startCountDownFontSizeScalingLabel);
+        startCountDownFontSizeScalingBox = dialog.createDoubleBox(initialSettings.getStartCountDownFontSizeScaling(), 3);
+        startCountDownFontSizeScalingPanel.add(startCountDownFontSizeScalingBox);
+        vp.add(startCountDownFontSizeScalingPanel);
         return vp;
     }
     
@@ -288,17 +295,16 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         if (helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
             tailLengthInMilliseconds = tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue() * 1000l;
         }
-        
         Distance buoyZoneRadius = initialSettings.getBuoyZoneRadius();
         if (helpLinesSettings.isVisible(HelpLineTypes.BUOYZONE) && buoyZoneRadiusInMetersBox.getValue() != null) {
             buoyZoneRadius = new MeterDistance(buoyZoneRadiusInMetersBox.getValue());
         }
-        
         return new RaceMapSettings(zoomSettings, helpLinesSettings,
                 transparentHoverlines.getValue(), hoverlineStrokeWeight.getValue(), tailLengthInMilliseconds, windUpCheckbox.getValue(),
                 buoyZoneRadius, showOnlySelectedCompetitorsCheckBox.getValue(), showSelectedCompetitorsInfoCheckBox.getValue(),
                 showWindStreamletColorsCheckbox.getValue(), showWindStreamletOverlayCheckbox.getValue(), showSimulationOverlay,
-                initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue(),estimatedDuration);
+                initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue(),estimatedDuration,
+                startCountDownFontSizeScalingBox.getValue());
     }
     
     private RaceMapZoomSettings getZoomSettings() {

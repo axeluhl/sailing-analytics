@@ -50,7 +50,6 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
         this.canBoatInfoBeShown = canBoatInfoBeShown;
-        
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
@@ -83,13 +82,10 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
                 (initialSettings.getDelayBetweenAutoAdvancesInMilliseconds()==null ?
                         LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS : initialSettings.getDelayBetweenAutoAdvancesInMilliseconds()) / 1000l, 4);
         refreshIntervalInSecondsBox.ensureDebugId("RefreshIntervalLongBox");
-        
         timingPanel.add(dialog.createHeadline(stringMessages.timing(), true));
         timingPanel.addStyleName("SettingsDialogComponent");
-
         FlowPanel timingContent = new FlowPanel();
         timingPanel.add(timingContent);
-        
         timingContent.addStyleName("dialogInnerContent");
         Label refreshIntervalLabel = new Label(stringMessages.refreshInterval() + ":");
         refreshIntervalLabel.getElement().getStyle().setPaddingRight(5, Unit.PX);
@@ -97,7 +93,6 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         refreshIntervalLabel.getElement().getStyle().setFloat(Float.LEFT);
         timingContent.add(refreshIntervalLabel);
         timingContent.add(refreshIntervalInSecondsBox);
-
         return timingPanel;
     }
 

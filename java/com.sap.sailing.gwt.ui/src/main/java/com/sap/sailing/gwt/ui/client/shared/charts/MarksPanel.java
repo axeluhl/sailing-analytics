@@ -15,6 +15,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel.NotificationType;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWithStylableHeaders;
@@ -34,13 +35,12 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
     private final ListDataProvider<MarkDTO> markDataProvider;    
     private final FlushableSortedCellTableWithStylableHeaders<MarkDTO> markTable;
     
-    public MarksPanel(final EditMarkPositionPanel parent, ComponentContext<?> context,
-            final ListDataProvider<MarkDTO> markDataProvider, final StringMessages stringMessages) {
+    public MarksPanel(final EditMarkPositionPanel parent, ComponentContext<?> context, final StringMessages stringMessages) {
         super(parent, context);
-        this.markDataProvider = markDataProvider;
         markTable = new FlushableSortedCellTableWithStylableHeaders<MarkDTO>(10000, tableResources);
+        markDataProvider = markTable.getDataProvider();
         markTable.setStyleName("EditMarkPositionMarkTable");
-        SortableColumn<MarkDTO, String> markNameColumn = new SortableColumn<MarkDTO, String>(new TextCell(), SortingOrder.NONE) {
+        SortableColumn<MarkDTO, String> markNameColumn = new SortableColumn<MarkDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
             @Override
             public String getValue(MarkDTO object) {
                 return object.getName();
@@ -48,15 +48,19 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
 
             @Override
             public InvertibleComparator<MarkDTO> getComparator() {
-                return null;
+                return new InvertibleComparatorAdapter<MarkDTO>() {
+                    public int compare(MarkDTO m1, MarkDTO m2) {
+                        return m1.getName().compareTo(m2.getName());
+                    }
+                };
             }
 
             @Override
             public Header<?> getHeader() {
-                return null;
+                return new TextHeader(stringMessages.marks());
             }
         };
-        markTable.addColumn(markNameColumn, new TextHeader(stringMessages.marks()));
+        markTable.addColumn(markNameColumn);
         SortableColumn<MarkDTO, String> addFixColumn = new SortableColumn<MarkDTO, String>(new ButtonCell(), SortingOrder.NONE) {
             @Override
             public String getValue(MarkDTO object) {
@@ -70,11 +74,9 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
 
             @Override
             public Header<?> getHeader() {
-                return null;
+                return new TextHeader("");
             }
         };
-       
-        
         addFixColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {
             @Override
             public void update(int index, final MarkDTO mark, String value) {
@@ -97,7 +99,7 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
                 }
             }
         });
-        markTable.addColumn(addFixColumn, new TextHeader(""));
+        markTable.addColumn(addFixColumn);
         SingleSelectionModel<MarkDTO> selectionModel = new RefreshableSingleSelectionModel<MarkDTO>(new EntityIdentityComparator<MarkDTO>() {
             @Override
             public boolean representSameEntity(MarkDTO dto1, MarkDTO dto2) {
@@ -107,15 +109,21 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
             public int hashCode(MarkDTO t) {
                 return t.getIdAsString().hashCode();
             }
-        },this.markDataProvider);
+        }, this.markDataProvider);
         markTable.setSelectionModel(selectionModel);
         markTable.getSelectionModel().addSelectionChangeHandler(parent);
-        markDataProvider.addDataDisplay(markTable);
         initWidget(markTable);
         setTitle(stringMessages.marks());
     }
 
-	@Override
+    void updateMarks(final Iterable<MarkDTO> marks) {
+        markTable.getDataProvider().getList().clear();
+        for (final MarkDTO mark : marks) {
+            markTable.getDataProvider().getList().add(mark);
+        }
+    }
+    
+    @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
     }
