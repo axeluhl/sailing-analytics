@@ -15,10 +15,8 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
     private SelfType previousLevel = null;
     private SelfType nextLevel = null;
 
-    protected final FineGrainedPointOfSail[] bestPreviousNodesForTheseNodes = new FineGrainedPointOfSail[FineGrainedPointOfSail
+    protected NodeTransitionProperties[] nodeTransitions = new NodeTransitionProperties[FineGrainedPointOfSail
             .values().length];
-    protected final double[][] distancesFromPreviousNodesToTheseNodes = new double[bestPreviousNodesForTheseNodes.length][bestPreviousNodesForTheseNodes.length];
-    protected final double[] bestDistancesFromStartToTheseNodes = new double[bestPreviousNodesForTheseNodes.length];
 
     public AbstractManeuverNodesLevel(CompleteManeuverCurveWithEstimationData maneuver) {
         this.maneuver = maneuver;
@@ -31,18 +29,18 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
 
     @Override
     public FineGrainedPointOfSail getBestPreviousNode(FineGrainedPointOfSail toNode) {
-        return bestPreviousNodesForTheseNodes[toNode.ordinal()];
+        return nodeTransitions[toNode.ordinal()].getBestPreviousNode();
     }
 
     @Override
     public double getBestDistanceToNodeFromStart(FineGrainedPointOfSail toNode) {
-        return bestDistancesFromStartToTheseNodes[toNode.ordinal()];
+        return nodeTransitions[toNode.ordinal()].getBestDistanceFromStart();
     }
 
     @Override
     public double getDistanceFromPreviousLevelNodeToThisLevelNode(FineGrainedPointOfSail previousLevelNode,
             FineGrainedPointOfSail thisLevelNode) {
-        return distancesFromPreviousNodesToTheseNodes[previousLevelNode.ordinal()][thisLevelNode.ordinal()];
+        return nodeTransitions[thisLevelNode.ordinal()].getDistancesFromPreviousNodesLevel(previousLevelNode);
     }
 
     protected void setNextLevel(SelfType nextLevel) {
@@ -82,8 +80,8 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
                     double existingBestDistanceToNodeFromStart = this.getBestDistanceToNodeFromStart(currentNode);
                     if (existingBestDistanceToNodeFromStart == 0
                             || distanceFromStart < existingBestDistanceToNodeFromStart) {
-                        this.bestDistancesFromStartToTheseNodes[currentNode.ordinal()] = distanceFromStart;
-                        this.bestPreviousNodesForTheseNodes[currentNode.ordinal()] = previousNode;
+                        this.nodeTransitions[currentNode.ordinal()].setBestPreviousNode(previousNode,
+                                distanceFromStart);
                     }
                 }
             }

@@ -56,7 +56,7 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
                 }
                 double distance = distanceSum / distanceCount
                         * getNodeTransitionPenaltyFactor(previousLevel, previousNode, this, currentNode);
-                this.distancesFromPreviousNodesToTheseNodes[previousNode.ordinal()][currentNode.ordinal()] = distance;
+                this.nodeTransitions[currentNode.ordinal()].setDistancesFromPreviousNodesLevel(previousNode, distance);
             }
         }
     }

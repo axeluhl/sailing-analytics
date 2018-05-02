@@ -22,8 +22,8 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
             double likelihoodForPointOfSailBeforeManeuver = maneuverClassificationResult
                     .getLikelihoodForPointOfSailBeforeManeuver(pointOfSailAfterManeuver.getCoarseGrainedPointOfSail());
             if (getPreviousLevel() == null) {
-                this.bestDistancesFromStartToTheseNodes[pointOfSailAfterManeuver
-                        .ordinal()] = convertLikelihoodToDistance(likelihoodForPointOfSailBeforeManeuver);
+                this.nodeTransitions[pointOfSailAfterManeuver.ordinal()].setBestPreviousNode(null,
+                        convertLikelihoodToDistance(likelihoodForPointOfSailBeforeManeuver));
             } else {
                 double courseChangeDegFromPreviousPointOfSailBefore = getPreviousLevel().getManeuver()
                         .getCurveWithUnstableCourseAndSpeed()
@@ -44,10 +44,8 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
                         bestPreviousLevelPointOfSailBeforeManeuver = previousLevelPointOfSailBeforeManeuver;
                     }
                 }
-                this.bestDistancesFromStartToTheseNodes[pointOfSailAfterManeuver
-                        .ordinal()] = bestDistanceThroughPreviousLevel;
-                this.bestPreviousNodesForTheseNodes[pointOfSailAfterManeuver
-                        .ordinal()] = bestPreviousLevelPointOfSailBeforeManeuver;
+                this.nodeTransitions[pointOfSailAfterManeuver.ordinal()].setBestPreviousNode(
+                        bestPreviousLevelPointOfSailBeforeManeuver, bestDistanceThroughPreviousLevel);
             }
         }
     }
