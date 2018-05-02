@@ -14,14 +14,13 @@ public interface FlagImageResolver {
     interface Template extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<div style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:18px;height:12px;background-image:url({0})'></div>")
         SafeHtml image(String imageUri);
+
         @SafeHtmlTemplates.Template("<div style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:{1}px;height:{2}px;background-image:url({0})'></div>")
         SafeHtml image(String imageUri, int width, int height);
-        @SafeHtmlTemplates.Template("<div title='{3}' style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:{1}px;height:{2}px;background-image:url({0})'></div>")
-        SafeHtml imageWithTitle(String imageUri, int width, int height, String title);
-        @SafeHtmlTemplates.Template("<div title='{3}' style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:18px;height:12spx;background-image:url({0})'></div>")
+
+        @SafeHtmlTemplates.Template("<div title='{1}' style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:18px;height:12px;background-image:url({0})'></div>")
         SafeHtml imageWithTitle(String imageUri, String title);
     }
-    
     
     public static void get(AsyncCallback<FlagImageResolver> callback) {
         GWT.runAsync(new RunAsyncCallback() {
