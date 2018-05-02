@@ -13,12 +13,10 @@ public class VideoMetadataDTO implements Serializable {
     private String message;
     private Duration duration;
 
-    public VideoMetadataDTO() {
+    @Deprecated
+    VideoMetadataDTO() {} // for GWT serialization only
 
-    }
-
-    public VideoMetadataDTO(boolean canDownload, Duration duration, boolean spherical, Date recordStartedTime,
-            String message) {
+    public VideoMetadataDTO(boolean canDownload, Duration duration, boolean spherical, Date recordStartedTime, String message) {
         this.canDownload = canDownload;
         this.duration = duration;
         this.spherical = spherical;

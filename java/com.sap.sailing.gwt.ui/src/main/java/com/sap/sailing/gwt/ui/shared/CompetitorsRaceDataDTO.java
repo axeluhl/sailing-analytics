@@ -7,12 +7,13 @@ import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 
 public class CompetitorsRaceDataDTO implements IsSerializable {
     
     private DetailType detailType;
-    private HashMap<CompetitorWithBoatDTO, CompetitorRaceDataDTO> competitorsData;
+    private HashMap<CompetitorDTO, CompetitorRaceDataDTO> competitorsData;
     private Date requestedFromTime;
     private Date requestedToTime;
     
@@ -22,19 +23,19 @@ public class CompetitorsRaceDataDTO implements IsSerializable {
         this.detailType = detailType;
         this.requestedFromTime = requestedFromTime;
         this.requestedToTime = requestedToTime;
-        this.competitorsData = new HashMap<CompetitorWithBoatDTO, CompetitorRaceDataDTO>();
+        this.competitorsData = new HashMap<>();
     }
     
-    public CompetitorsRaceDataDTO(DetailType detailType, HashMap<CompetitorWithBoatDTO, CompetitorRaceDataDTO> raceData) {
+    public CompetitorsRaceDataDTO(DetailType detailType, HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData) {
         this.detailType = detailType;
-        this.competitorsData = new HashMap<CompetitorWithBoatDTO, CompetitorRaceDataDTO>(raceData);
+        this.competitorsData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>(raceData);
     }
     
-    public Set<CompetitorWithBoatDTO> getCompetitors() {
+    public Set<CompetitorDTO> getCompetitors() {
         return competitorsData.keySet();
     }
     
-    public CompetitorRaceDataDTO getCompetitorData(CompetitorWithBoatDTO competitor) {
+    public CompetitorRaceDataDTO getCompetitorData(CompetitorDTO competitor) {
         return competitorsData.get(competitor);
     }
     
@@ -42,7 +43,7 @@ public class CompetitorsRaceDataDTO implements IsSerializable {
      * Sets the data for a competitor, if the <code>detailTypes</code> fit.<br />
      * If the competitor is already contained, the data will be overwritten.
      */
-    public void setCompetitorData(CompetitorWithBoatDTO competitor, CompetitorRaceDataDTO competitorData) {
+    public void setCompetitorData(CompetitorDTO competitor, CompetitorRaceDataDTO competitorData) {
         if (competitorData != null && detailType == competitorData.getDetailType()) {
             this.competitorsData.put(competitor, competitorData);
         }

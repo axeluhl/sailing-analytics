@@ -70,7 +70,7 @@ import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -190,7 +190,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     public interface LeaderBoardStyle {
         void renderNationalityFlag(ImageResource nationalityFlagImageResource, SafeHtmlBuilder sb);
 
-        void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb, CompetitorWithBoatDTO competitor);
+        void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb, CompetitorDTO competitor);
 
         public LeaderboardResources getResources();
 
@@ -505,7 +505,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         selectionChangeHandler = new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                List<CompetitorWithBoatDTO> selection = new ArrayList<CompetitorWithBoatDTO>();
+                List<CompetitorDTO> selection = new ArrayList<>();
                 for (LeaderboardRowDTO row : getSelectedRows()) {
                     selection.add(row.competitor);
                 }
@@ -890,11 +890,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
-            CompetitorWithBoatDTO competitor = competitorFetcher.getCompetitor(object);
+            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
             final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
             final String flagImageURL = competitor.getFlagImageURL();
             boolean boatColorShown = renderBoatColorIfNecessary(competitorFetcher.getCompetitor(object), sb);
-
             if (isShowCompetitorNationality || flagImageURL == null || flagImageURL.isEmpty()) {
                 final ImageResource nationalityFlagImageResource;
                 if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
@@ -949,7 +948,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
             BoatDTO boat = boatFetcher.getBoat(object);
-            CompetitorWithBoatDTO competitor = competitorFetcher.getCompetitor(object);
+            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
             boolean boatColorShown = renderBoatColorIfNecessary(competitor, sb);
             sb.appendEscaped(getShortInfo(boat));
             if (boatColorShown) {
@@ -1146,8 +1145,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                             result = intermediate_result > 0 ? -1 : intermediate_result < 0 ? 1 : 0;
                         }
                     } else {
-                        List<CompetitorWithBoatDTO> competitorsFromBestToWorst = getLeaderboard()
-                                .getCompetitorsFromBestToWorst(race);
+                        List<CompetitorDTO> competitorsFromBestToWorst = getLeaderboard().getCompetitorsFromBestToWorst(race);
                         int o1Rank = competitorsFromBestToWorst.indexOf(o1.competitor) + 1;
                         int o2Rank = competitorsFromBestToWorst.indexOf(o2.competitor) + 1;
                         result = o1Rank == 0 ? o2Rank == 0 ? 0 : isAscending() ? 1 : -1
@@ -1173,7 +1171,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
-    public abstract boolean renderBoatColorIfNecessary(CompetitorWithBoatDTO competitor, SafeHtmlBuilder sb);
+    public abstract boolean renderBoatColorIfNecessary(CompetitorDTO competitor, SafeHtmlBuilder sb);
 
     private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
         /**
@@ -1380,10 +1378,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             result.put(DetailType.EXPEDITION_RACE_RUDDER_ANGLE,
                     new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_RUDDER_ANGLE,
                             new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionRudderAngle),
-                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
-            result.put(DetailType.EXPEDITION_RACE_HEEL,
-                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_HEEL,
-                            new DoubleTextRaceDetailTypeExtractor(LeaderboardEntryDTO::getExpeditionHeel),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.EXPEDITION_RACE_TARGET_HEEL,
                     new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_RACE_TARGET_HEEL,
@@ -2110,23 +2104,23 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         @Override
-        public void competitorsListChanged(Iterable<CompetitorWithBoatDTO> competitors) {
+        public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
         }
 
         @Override
-        public void filterChanged(FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> oldFilterSet,
-                FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> newFilterSet) {
+        public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
+                FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
         }
 
         @Override
-        public void filteredCompetitorsListChanged(Iterable<CompetitorWithBoatDTO> filteredCompetitors) {
+        public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
         }
 
         /**
          * Ensure that the checkbox is redrawn when the competitor selection changes
          */
         @Override
-        public void addedToSelection(CompetitorWithBoatDTO competitor) {
+        public void addedToSelection(CompetitorDTO competitor) {
             final LeaderboardRowDTO row = getRow(competitor.getIdAsString());
             if (row != null) {
                 getSelectionModel().setSelected(row, true);
@@ -2137,7 +2131,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * Ensure that the checkbox is redrawn when the competitor selection changes
          */
         @Override
-        public void removedFromSelection(CompetitorWithBoatDTO competitor) {
+        public void removedFromSelection(CompetitorDTO competitor) {
             final LeaderboardRowDTO row = getRow(competitor.getIdAsString());
             if (row != null) {
                 getSelectionModel().setSelected(row, false);
@@ -2222,11 +2216,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             boolean filtersActive = competitorSelectionProvider.hasActiveFilters();
             if (filtersActive) {
                 String labelText = "";
-                for (Filter<CompetitorWithBoatDTO> filter : competitorSelectionProvider.getCompetitorsFilterSet()
-                        .getFilters()) {
+                for (Filter<CompetitorDTO> filter : competitorSelectionProvider.getCompetitorsFilterSet().getFilters()) {
                     if (filter instanceof FilterWithUI<?>) {
-                        labelText += ((FilterWithUI<CompetitorWithBoatDTO>) filter).getLocalizedDescription(stringMessages)
-                                + ", ";
+                        labelText += ((FilterWithUI<CompetitorDTO>) filter).getLocalizedDescription(stringMessages) + ", ";
                     } else {
                         labelText += filter.getName() + ", ";
                     }
@@ -2589,7 +2581,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 columnToCollapseAndExpandAgain.changeExpansionState(/* expand */ true);
             }
             adjustDelayToLive();
-            final Map<CompetitorWithBoatDTO, LeaderboardRowDTO> rowsToDisplay = getRowsToDisplay();
+            final Map<CompetitorDTO, LeaderboardRowDTO> rowsToDisplay = getRowsToDisplay();
             Set<LeaderboardRowDTO> rowsToAdd = new HashSet<>(rowsToDisplay.values());
             Map<Integer, LeaderboardRowDTO> rowsToUpdate = new HashMap<>();
             synchronized (getData().getList()) {
@@ -2764,7 +2756,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      * the race identified by {@link #preSelectedRace} otherwise.
      */
     @Override
-    public abstract Map<CompetitorWithBoatDTO, LeaderboardRowDTO> getRowsToDisplay();
+    public abstract Map<CompetitorDTO, LeaderboardRowDTO> getRowsToDisplay();
 
     /**
      * The {@link LeaderboardDTO} holds {@link LeaderboardDTO#getRaceList() races} as {@link RaceColumnDTO} objects.
@@ -2783,12 +2775,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      * @return all competitors for which the {@link #getLeaderboard() leaderboard} has an entry whose
      *         {@link LeaderboardEntryDTO#race} equals <code>race</code>
      */
-    public Iterable<CompetitorWithBoatDTO> getCompetitors(RaceIdentifier race) {
-        Set<CompetitorWithBoatDTO> result = new HashSet<CompetitorWithBoatDTO>();
+    public Iterable<CompetitorDTO> getCompetitors(RaceIdentifier race) {
+        Set<CompetitorDTO> result = new HashSet<>();
         if (getLeaderboard() != null) {
             for (RaceColumnDTO raceColumn : getLeaderboard().getRaceList()) {
                 if (raceColumn.hasTrackedRace(race)) {
-                    for (Map.Entry<CompetitorWithBoatDTO, LeaderboardRowDTO> e : getLeaderboard().rows.entrySet()) {
+                    for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : getLeaderboard().rows.entrySet()) {
                         LeaderboardEntryDTO entry = e.getValue().fieldsByRaceColumnName
                                 .get(raceColumn.getRaceColumnName());
                         if (entry != null && entry.race != null && entry.race.equals(race)) {
@@ -3209,7 +3201,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         return new CompetitorColumn(new CompetitorColumnBase<LeaderboardRowDTO>(this, stringMessages,
                 new CompetitorFetcher<LeaderboardRowDTO>() {
                     @Override
-                    public CompetitorWithBoatDTO getCompetitor(LeaderboardRowDTO t) {
+                    public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
                         return t.competitor;
                     }
                 }));
@@ -3352,7 +3344,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     @Override
-    public void addedToSelection(CompetitorWithBoatDTO competitor) {
+    public void addedToSelection(CompetitorDTO competitor) {
         LeaderboardRowDTO row = getRow(competitor.getIdAsString());
         if (row != null) {
             leaderboardSelectionModel.setSelected(row, true);
@@ -3360,7 +3352,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     @Override
-    public void removedFromSelection(CompetitorWithBoatDTO competitor) {
+    public void removedFromSelection(CompetitorDTO competitor) {
         LeaderboardRowDTO row = getRow(competitor.getIdAsString());
         if (row != null) {
             leaderboardSelectionModel.setSelected(row, false);
@@ -3372,7 +3364,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     @Override
-    public void competitorsListChanged(Iterable<CompetitorWithBoatDTO> competitors) {
+    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
         setFilterControlStatus();
         if (timer.isInitialized()) {
             timeChanged(timer.getTime(), null);
@@ -3380,14 +3372,14 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     @Override
-    public void filteredCompetitorsListChanged(Iterable<CompetitorWithBoatDTO> filteredCompetitors) {
+    public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
         setFilterControlStatus();
         updateLeaderboard(getLeaderboard());
     }
 
     @Override
-    public void filterChanged(FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> oldFilterSet,
-            FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> newFilterSet) {
+    public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
+            FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
         // nothing to do; if the list of filtered competitors has changed, a separate call to
         // filteredCompetitorsListChanged will occur
         setFilterControlStatus();
@@ -3601,6 +3593,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
-    public abstract String getCompetitorColor(CompetitorWithBoatDTO competitor);
+    public abstract String getCompetitorColor(CompetitorDTO competitor);
 
 }

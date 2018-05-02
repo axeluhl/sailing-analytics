@@ -6,14 +6,14 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 
 public class GetBoatPositionsAction extends AbstractGetMapRelatedDataAction<CompactBoatPositionsDTO> {
     public GetBoatPositionsAction(SailingServiceAsync sailingService,
-            RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorWithBoatDTO, Date> from,
-            Map<CompetitorWithBoatDTO, Date> to, boolean extrapolate) {
+            RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from,
+            Map<CompetitorDTO, Date> to, boolean extrapolate) {
         super(sailingService, raceIdentifier, from, to, extrapolate);
     }
     
@@ -21,11 +21,11 @@ public class GetBoatPositionsAction extends AbstractGetMapRelatedDataAction<Comp
     public void execute(final AsyncCallback<CompactBoatPositionsDTO> callback) {
         Map<String, Date> fromByCompetitorIdAsString = new HashMap<String, Date>();
         System.out.println(fromByCompetitorIdAsString);
-        for (Map.Entry<CompetitorWithBoatDTO, Date> fromEntry : getFrom().entrySet()) {
+        for (Map.Entry<CompetitorDTO, Date> fromEntry : getFrom().entrySet()) {
             fromByCompetitorIdAsString.put(fromEntry.getKey().getIdAsString(), fromEntry.getValue());
         }
         Map<String, Date> toByCompetitorIdAsString = new HashMap<String, Date>();
-        for (Map.Entry<CompetitorWithBoatDTO, Date> toEntry : getTo().entrySet()) {
+        for (Map.Entry<CompetitorDTO, Date> toEntry : getTo().entrySet()) {
             toByCompetitorIdAsString.put(toEntry.getKey().getIdAsString(), toEntry.getValue());
         }
         getSailingService().getBoatPositions(getRaceIdentifier(), fromByCompetitorIdAsString, toByCompetitorIdAsString,

@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -91,13 +92,13 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         return jsonLeaderboard;
     }
     
-    protected void writeCompetitorBaseData(JSONObject jsonCompetitor, CompetitorWithBoatDTO competitor, LeaderboardDTO leaderboard) {
+    protected void writeCompetitorBaseData(JSONObject jsonCompetitor, CompetitorDTO competitor, LeaderboardDTO leaderboard) {
         jsonCompetitor.put("name", competitor.getName());
         jsonCompetitor.put("shortName", competitor.getShortName());
         final String displayName = leaderboard.getDisplayName(competitor);
         jsonCompetitor.put("displayName", displayName == null ? competitor.getName() : displayName);
         jsonCompetitor.put("id", competitor.getIdAsString());
-        jsonCompetitor.put("sailID", competitor.getSailID());  // only for backward compatibility
+        jsonCompetitor.put("sailID", competitor.hasBoat() ? ((CompetitorWithBoatDTO) competitor).getSailID() : null);  // only for backward compatibility
         jsonCompetitor.put("nationality", competitor.getThreeLetterIocCountryCode());
         jsonCompetitor.put("countryCode", competitor.getTwoLetterIsoCountryCode());
     }

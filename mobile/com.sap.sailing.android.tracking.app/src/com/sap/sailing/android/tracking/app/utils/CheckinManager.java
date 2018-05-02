@@ -245,7 +245,13 @@ public class CheckinManager {
                     try {
                         data.competitorName = response.getString(CompetitorJsonConstants.FIELD_NAME);
                         data.competitorId = response.getString(CompetitorJsonConstants.FIELD_ID);
-                        data.competitorSailId = response.getString(CompetitorJsonConstants.FIELD_SAIL_ID);
+                        if (response.has(CompetitorJsonConstants.FIELD_SAIL_ID)) {
+                            data.competitorSailId = response.getString(CompetitorJsonConstants.FIELD_SAIL_ID);
+                        } else if (response.has(CompetitorJsonConstants.FIELD_SHORT_NAME)) {
+                            data.competitorSailId = response.getString(CompetitorJsonConstants.FIELD_SHORT_NAME);
+                        } else {
+                            data.competitorSailId = "n/a";
+                        }
                         // TODO read CompetitorJsonConstants.FIELD_SHORT_NAME and manage as an alternative to a non-existing sail ID
                         data.competitorNationality = response.getString(CompetitorJsonConstants.FIELD_NATIONALITY);
                         data.competitorCountryCode = response.getString(CompetitorJsonConstants.FIELD_COUNTRY_CODE);

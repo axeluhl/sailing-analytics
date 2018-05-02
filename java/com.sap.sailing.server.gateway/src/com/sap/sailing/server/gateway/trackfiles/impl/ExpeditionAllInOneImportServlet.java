@@ -19,6 +19,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.common.dto.ExpeditionAllInOneConstants;
 import com.sap.sailing.domain.common.dto.ExpeditionAllInOneConstants.ImportMode;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.server.gateway.impl.AbstractFileUploadServlet;
 import com.sap.sailing.server.gateway.trackfiles.impl.ExpeditionAllInOneImporter.ImporterResult;
@@ -65,6 +66,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
             String regattaName = null;
             String importModeName = null;
             String localeName = null;
+            boolean importStartData = false;
             for (FileItem fi : fileItems) {
                 if (!fi.isFormField()) {
                     fileName = fi.getName();
@@ -81,6 +83,9 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
                     }
                     if (ExpeditionAllInOneConstants.REQUEST_PARAMETER_LOCALE.equals(fi.getFieldName())) {
                         localeName = fi.getString();
+                    }
+                    if (ExpeditionAllInOneConstants.REQUEST_PARAMETER_IMPORT_START_DATA.equals(fi.getFieldName())) {
+                        importStartData = Boolean.valueOf(fi.getString().equalsIgnoreCase("on"));
                     }
                 }
             }
@@ -117,8 +122,8 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
                 }
             }
             importerResult = new ExpeditionAllInOneImporter(serverStringMessages, uiLocale, getService(),
-                    raceLogTrackingAdapterTracker.getService().getAdapter(getService().getBaseDomainFactory()),
-                    getServiceFinderFactory(), getContext()).importFiles(fileName, fileItem, boatClassName, importMode, regattaName);
+                    getRaceLogTrackingAdapter(), getServiceFinderFactory(), getContext()).importFiles(fileName,
+                            fileItem, boatClassName, importMode, regattaName, importStartData);
         } catch (AllinOneImportException e) {
             importerResult = new ImporterResult(e, e.additionalErrors);
             logger.log(Level.SEVERE, e.getMessage());
@@ -128,6 +133,10 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
         } finally {
             this.toJSON(importerResult).writeJSONString(resp.getWriter());
         }
+    }
+
+    private RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+        return raceLogTrackingAdapterTracker.getService().getAdapter(getService().getBaseDomainFactory());
     }
 
     private JSONObject toJSON(ImporterResult importerResult) {
@@ -141,6 +150,8 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
         json.put("gpsDeviceIds", ImportResultSerializer.serializeTrackList(importerResult.importGpsFixData));
         json.put("sensorDeviceIds", ImportResultSerializer.serializeTrackList(importerResult.importSensorFixData));
         json.put("sensorFixImporterType", importerResult.sensorFixImporterType);
+        json.put(ExpeditionAllInOneConstants.START_TIMES, ImportResultSerializer.serializeIterable(importerResult.startData.getStartTimes(),
+                startTime->startTime.asMillis()));
         return json;
     }
 }

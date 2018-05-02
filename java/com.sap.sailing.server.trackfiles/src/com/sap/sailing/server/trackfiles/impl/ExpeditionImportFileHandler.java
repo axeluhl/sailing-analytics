@@ -28,6 +28,7 @@ public abstract class ExpeditionImportFileHandler implements CompressedStreamsUt
         for (String extension : supportedExpeditionLogFileExtensions) {
             if (lowerCaseFileName.endsWith(extension)) {
                 extensionSupported = true;
+                break;
             }
         }
         if (extensionSupported) {

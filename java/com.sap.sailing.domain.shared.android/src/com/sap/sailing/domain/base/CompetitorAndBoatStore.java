@@ -102,13 +102,25 @@ public interface CompetitorAndBoatStore extends CompetitorFactory, BoatFactory {
 
     void addNewCompetitorsWithBoat(Iterable<DynamicCompetitorWithBoat> competitorsWithBoat);
 
+    /**
+     * @return an object of type {@link CompetitorDTO}, regardless of whether {@code competitor}
+     *         {@link Competitor#hasBoat() has a boat assigned}. See also
+     *         {@link #convertToCompetitorWithBoatDTO(CompetitorWithBoat)} and
+     *         {@link #convertToCompetitorWithOptionalBoatDTO(Competitor)
+     */
     CompetitorDTO convertToCompetitorDTO(Competitor competitor);
 
-    CompetitorWithBoatDTO convertToCompetitorWithBoatDTO(Competitor c, Boat b);
+    CompetitorWithBoatDTO convertToCompetitorWithBoatDTO(CompetitorWithBoat c);
 
-    CompetitorWithBoatDTO convertToCompetitorWithOptionalBoatDTO(Competitor c);
+    /**
+     * If the {@code competitor} is a {@link CompetitorWithBoat}, a {@link CompetitorWithBoatDTO} will result; if the
+     * type of {@code competitor} is already known at compile time, consider using
+     * {@link #convertToCompetitorWithBoatDTO(CompetitorWithBoat)} instead. If {@code competitor} is not a
+     * {@link CompetitorWithBoat}, a {@link CompetitorDTO} will result that is not a {@link CompetitorWithBoatDTO}.
+     */
+    CompetitorDTO convertToCompetitorWithOptionalBoatDTO(Competitor c);
 
-    Map<CompetitorWithBoatDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, ? extends Boat> competitorsAndBoats);
+    Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, ? extends Boat> competitorsAndBoats);
     
     /**
      * Listeners added here are notified whenever {@link #updateCompetitor(String, String, Color, String, Nationality)} is called

@@ -240,8 +240,6 @@ public class DetailTypeFormatter {
             return stringMessages.expeditionRateOfTurn();
         case EXPEDITION_RACE_RUDDER_ANGLE:
             return stringMessages.expeditionRudderAngle();
-        case EXPEDITION_RACE_HEEL:
-            return stringMessages.expeditionHeel();
         case EXPEDITION_RACE_TARGET_HEEL:
             return stringMessages.expeditionTargetHeel();
         case EXPEDITION_RACE_TIME_TO_PORT_LAYLINE:
@@ -308,8 +306,6 @@ public class DetailTypeFormatter {
             return AVERAGE_SYMBOL + stringMessages.expeditionForestayLoad();
         case EXPEDITION_LEG_HEADING:
             return AVERAGE_SYMBOL + stringMessages.expeditionHeading();
-        case EXPEDITION_LEG_HEEL:
-            return AVERAGE_SYMBOL + stringMessages.expeditionTargetHeel();
         case EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION:
             return AVERAGE_SYMBOL + stringMessages.expeditionLineSquareForWindDirection();
         case EXPEDITION_LEG_RAKE:
@@ -425,6 +421,8 @@ public class DetailTypeFormatter {
         case BRAVOEXTENDED_RACE_CURRENT_DEPTH_IN_METERS:
         case BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS:
         case OVERALL_TOTAL_DISTANCE_FOILED_IN_METERS:
+        case EXPEDITION_RACE_DISTANCE_BELOW_LINE:
+        case EXPEDITION_LEG_DISTANCE_BELOW_LINE:
             return stringMessages.metersUnit();
 
         case BRAVOEXTENDED_RACE_CURRENT_DEFLECTOR_IN_MILLIMETERS:
@@ -464,6 +462,10 @@ public class DetailTypeFormatter {
         case RACE_CALCULATED_TIME_TRAVELED:
         case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
         case RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
+        case EXPEDITION_RACE_TIME_TO_BURN_TO_LINE:
+        case EXPEDITION_LEG_TIME_TO_BURN_TO_LINE:
+        case EXPEDITION_RACE_TIME_TO_GUN:
+        case EXPEDITION_LEG_TIME_TO_GUN:
             return stringMessages.secondsUnit();
 
         case OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE:
@@ -530,21 +532,17 @@ public class DetailTypeFormatter {
         case EXPEDITION_RACE_VMG_TARG_VMG_DELTA:
         case EXPEDITION_RACE_RATE_OF_TURN:
         case EXPEDITION_RACE_RUDDER_ANGLE:
-        case EXPEDITION_RACE_HEEL:
         case EXPEDITION_RACE_TARGET_HEEL:
         case EXPEDITION_RACE_TIME_TO_PORT_LAYLINE:
         case EXPEDITION_RACE_TIME_TO_STB_LAYLINE:
         case EXPEDITION_RACE_DIST_TO_PORT_LAYLINE:
         case EXPEDITION_RACE_DIST_TO_STB_LAYLINE:
-        case EXPEDITION_RACE_TIME_TO_GUN:
         case EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT:
         case EXPEDITION_RACE_TIME_TO_PIN:
-        case EXPEDITION_RACE_TIME_TO_BURN_TO_LINE:
         case EXPEDITION_RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT:
         case EXPEDITION_RACE_TIME_TO_BURN_TO_PIN:
         case EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT:
         case EXPEDITION_RACE_DISTANCE_TO_PIN:
-        case EXPEDITION_RACE_DISTANCE_BELOW_LINE:
         case EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION:
         case EXPEDITION_LEG_AWA:
         case EXPEDITION_LEG_AWS:
@@ -564,21 +562,17 @@ public class DetailTypeFormatter {
         case EXPEDITION_LEG_VMG_TARG_VMG_DELTA:
         case EXPEDITION_LEG_RATE_OF_TURN:
         case EXPEDITION_LEG_RUDDER_ANGLE:
-        case EXPEDITION_LEG_HEEL:
         case EXPEDITION_LEG_TARGET_HEEL:
         case EXPEDITION_LEG_TIME_TO_PORT_LAYLINE:
         case EXPEDITION_LEG_TIME_TO_STB_LAYLINE:
         case EXPEDITION_LEG_DIST_TO_PORT_LAYLINE:
         case EXPEDITION_LEG_DIST_TO_STB_LAYLINE:
-        case EXPEDITION_LEG_TIME_TO_GUN:
         case EXPEDITION_LEG_TIME_TO_COMMITTEE_BOAT:
         case EXPEDITION_LEG_TIME_TO_PIN:
-        case EXPEDITION_LEG_TIME_TO_BURN_TO_LINE:
         case EXPEDITION_LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT:
         case EXPEDITION_LEG_TIME_TO_BURN_TO_PIN:
         case EXPEDITION_LEG_DISTANCE_TO_COMMITTEE_BOAT:
         case EXPEDITION_LEG_DISTANCE_TO_PIN:
-        case EXPEDITION_LEG_DISTANCE_BELOW_LINE:
         case EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION:
         case EXPEDITION_RACE_LOAD_S:
         case EXPEDITION_RACE_LOAD_P:
@@ -807,7 +801,6 @@ public class DetailTypeFormatter {
         case EXPEDITION_RACE_DIST_TO_STB_LAYLINE:
         case EXPEDITION_RACE_FORESTAY_LOAD:
         case EXPEDITION_RACE_HEADING:
-        case EXPEDITION_RACE_HEEL:
         case EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION:
         case EXPEDITION_RACE_RAKE:
         case EXPEDITION_RACE_RATE_OF_TURN:

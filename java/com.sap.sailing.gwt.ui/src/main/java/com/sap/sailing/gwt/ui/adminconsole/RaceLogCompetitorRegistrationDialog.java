@@ -11,13 +11,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorAndBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
@@ -32,14 +34,14 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
     private String fleetName;
     private String raceColumnName;
     private CheckBox competitorRegistrationInRaceLogCheckBox;
-    private final Map<String, Set<CompetitorWithBoatDTO>> fleetNameWithCompetitors;
+    private final Map<String, Set<CompetitorDTO>> fleetNameWithCompetitors;
     private final ErrorReporter errorReporter;
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     
-    private static class Validator implements com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator<Set<CompetitorWithBoatDTO>> {
+    private static class Validator implements com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator<Set<CompetitorDTO>> {
         private CheckBox competitorRegistrationInRaceLogCheckBox;
-        private Map<String, Set<CompetitorWithBoatDTO>> fleetsWithCompetitors;
+        private Map<String, Set<CompetitorDTO>> fleetsWithCompetitors;
         private final StringMessages stringMessages;
         
         public Validator(StringMessages stringMessages) {
@@ -47,13 +49,13 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
         }
 
         @Override
-        public String getErrorMessage(Set<CompetitorWithBoatDTO> valueToValidate) {
+        public String getErrorMessage(Set<CompetitorDTO> valueToValidate) {
             String result = null;
             if (getCompetitorRegistrationInRaceLogCheckBox() != null && !getCompetitorRegistrationInRaceLogCheckBox().getValue()) {
                 result = stringMessages.competitorRegistrationsOnRaceDisabled();
             } else {
-                Set<CompetitorWithBoatDTO> difference = new HashSet<>();
-                for (Set<CompetitorWithBoatDTO> competitors : fleetsWithCompetitors.values()) {
+                Set<CompetitorDTO> difference = new HashSet<>();
+                for (Set<CompetitorDTO> competitors : fleetsWithCompetitors.values()) {
                     difference.addAll(intersection(valueToValidate, competitors));
                 }
                 if (!difference.isEmpty()) {
@@ -63,10 +65,10 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
             return result;
         }
         
-        private String createLineOfCompetitors(Set<CompetitorWithBoatDTO> competitors) {
+        private String createLineOfCompetitors(Set<CompetitorDTO> competitors) {
             StringBuilder lineOfCompetitors = new StringBuilder();
             if (!competitors.isEmpty()) {
-                for (CompetitorWithBoatDTO competitor : competitors) {
+                for (CompetitorDTO competitor : competitors) {
                     lineOfCompetitors.append(competitor.getName()).append(", ");
                 }
                 lineOfCompetitors.delete(lineOfCompetitors.length() - 2, lineOfCompetitors.length() - 1);
@@ -74,8 +76,8 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
             return lineOfCompetitors.toString();
         }
         
-        private Set<CompetitorWithBoatDTO> intersection(Set<CompetitorWithBoatDTO> firstSet, Set<CompetitorWithBoatDTO> secondSet) {
-            Set<CompetitorWithBoatDTO> result = new LinkedHashSet<>(firstSet);
+        private Set<CompetitorDTO> intersection(Set<CompetitorDTO> firstSet, Set<CompetitorDTO> secondSet) {
+            Set<CompetitorDTO> result = new LinkedHashSet<>(firstSet);
             result.retainAll(secondSet);
             return result;
         }
@@ -88,7 +90,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
             this.competitorRegistrationInRaceLogCheckBox = competitorRegistrationInRaceLogCheckBox;
         }
 
-        public void setFleetWithCompetitors(Map<String, Set<CompetitorWithBoatDTO>> fleetNameWithCompetitors) {
+        public void setFleetWithCompetitors(Map<String, Set<CompetitorDTO>> fleetNameWithCompetitors) {
             this.fleetsWithCompetitors = fleetNameWithCompetitors;
         }
     }
@@ -96,14 +98,14 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
     public RaceLogCompetitorRegistrationDialog(String boatClass, SailingServiceAsync sailingService,
             StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace,
             String raceColumnName, String fleetName, List<FleetDTO> fleets,
-            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorWithBoatDTO>> callback) {
+            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback) {
         this(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, canBoatsOfCompetitorsChangePerRace, boatClass,
                 raceColumnName, fleetName, fleets, new Validator(stringMessages));
     }
     
     public RaceLogCompetitorRegistrationDialog(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean editable,
-            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorWithBoatDTO>> callback,
+            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback,
             String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, String raceColumnName, String fleetName, List<FleetDTO> fleets, Validator validator) {
         super(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, 
                 canBoatsOfCompetitorsChangePerRace, boatClass, 
@@ -132,7 +134,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
     }
 
     @Override
-    protected Consumer<AsyncCallback<Collection<CompetitorWithBoatDTO>>> getRegisteredCompetitorsRetriever() {
+    protected Consumer<AsyncCallback<Collection<CompetitorDTO>>> getRegisteredCompetitorsRetriever() {
         return (callback)->getRegisteredCompetitors(callback);
     }
 
@@ -140,16 +142,20 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
      * For all {@code fleets} passed and not equal to {@link #fleetName} retrieves the competitor-per-race registrations
      * for the {@link #raceColumnName}. 
      */
-    private Map<String, Set<CompetitorWithBoatDTO>> findCompetitorsFromTheSameRaceColumn(final List<FleetDTO> fleets) {
-        final Map<String, Set<CompetitorWithBoatDTO>> result = new HashMap<>();
-        final Map<String, ParallelExecutionCallback<Collection<CompetitorWithBoatDTO>>> callbacksForFleetNames = new HashMap<>();
+    private Map<String, Set<CompetitorDTO>> findCompetitorsFromTheSameRaceColumn(final List<FleetDTO> fleets) {
+        final Map<String, Set<CompetitorDTO>> result = new HashMap<>();
+        final Map<String, ParallelExecutionCallback<Collection<CompetitorAndBoatDTO>>> callbacksForFleetNames = new HashMap<>();
         for (FleetDTO fleetDTO : fleets) {
             final String curFleetName = fleetDTO.getName();
             if (!curFleetName.equals(fleetName)) {
-                callbacksForFleetNames.put(curFleetName, new ParallelExecutionCallback<Collection<CompetitorWithBoatDTO>>() {
+                callbacksForFleetNames.put(curFleetName, new ParallelExecutionCallback<Collection<CompetitorAndBoatDTO>>() {
                     @Override
-                    public void onSuccess(Collection<CompetitorWithBoatDTO> competitorRegistrationsForRace) {
-                        result.put(curFleetName, new HashSet<>(competitorRegistrationsForRace));
+                    public void onSuccess(Collection<CompetitorAndBoatDTO> competitorRegistrationsForRace) {
+                        final Set<CompetitorDTO> competitorsInRace = new HashSet<>();
+                        for (final CompetitorAndBoatDTO cAndB : competitorRegistrationsForRace) {
+                            competitorsInRace.add(cAndB.getCompetitor());
+                        }
+                        result.put(curFleetName, competitorsInRace);
                         super.onSuccess(competitorRegistrationsForRace);
                     }
                 });
@@ -168,7 +174,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                     errorReporter.reportError("Could not load already registered competitors: " + t.getMessage());
                 }
             };
-            for (final Entry<String, ParallelExecutionCallback<Collection<CompetitorWithBoatDTO>>> fleetNameAndCallback : callbacksForFleetNames
+            for (final Entry<String, ParallelExecutionCallback<Collection<CompetitorAndBoatDTO>>> fleetNameAndCallback : callbacksForFleetNames
                     .entrySet()) {
                 sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName,
                         fleetNameAndCallback.getKey(), fleetNameAndCallback.getValue());
@@ -182,9 +188,9 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
      */
     private void grayOutRows() {
         List<CompetitorWithToolTipDTO> competitors = new ArrayList<>();
-        for (Map.Entry<String, Set<CompetitorWithBoatDTO>> entry : fleetNameWithCompetitors.entrySet()) {
+        for (Map.Entry<String, Set<CompetitorDTO>> entry : fleetNameWithCompetitors.entrySet()) {
             if (!entry.getKey().equals(fleetName)) {
-                for (CompetitorWithBoatDTO competitor : entry.getValue()) {
+                for (CompetitorDTO competitor : entry.getValue()) {
                     competitors.add(new CompetitorWithToolTipDTO(competitor, stringMessages
                             .competitorToolTipMessage(competitor.getName(), fleetName, entry.getKey(), raceColumnName)));
                 }
@@ -194,12 +200,26 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
         competitorRegistrationsPanel.grayOutCompetitorsFromRegistered(competitors);
     }
 
-    private void getRegisteredCompetitors(AsyncCallback<Collection<CompetitorWithBoatDTO>> callback) {
+    private void getRegisteredCompetitors(AsyncCallback<Collection<CompetitorDTO>> callback) {
         if (competitorRegistrationsPanel.showOnlyCompetitorsOfLog()) {
-            sailingService.getCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName, callback);
+            sailingService.getCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName, extractCompetitorDTOFromCompetitorAndBoatDTO(callback));
         } else {
-            sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName, fleetName, callback);
+            sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName, fleetName, extractCompetitorDTOFromCompetitorAndBoatDTO(callback));
         }
+    }
+    
+    private AsyncCallback<Collection<CompetitorAndBoatDTO>> extractCompetitorDTOFromCompetitorAndBoatDTO(final AsyncCallback<Collection<CompetitorDTO>> callback) {
+        return new AsyncCallback<Collection<CompetitorAndBoatDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure(caught);
+            }
+
+            @Override
+            public void onSuccess(Collection<CompetitorAndBoatDTO> result) {
+                callback.onSuccess(result.stream().map(competitorAndBoat->competitorAndBoat.getCompetitor()).collect(Collectors.toSet()));
+            }
+        };
     }
     
     private void setupCompetitorRegistationsOnRaceCheckbox() {
@@ -291,7 +311,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
     }
 
     @Override
-    protected Set<CompetitorWithBoatDTO> getResult() {
+    protected Set<CompetitorDTO> getResult() {
         if (getOrCreateCompetitorRegistrationInRaceLogCheckBox(stringMessages).getValue()) {
             return super.getResult();
         } else {

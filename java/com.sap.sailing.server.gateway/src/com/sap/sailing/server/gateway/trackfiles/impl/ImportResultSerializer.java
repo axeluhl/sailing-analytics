@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.StreamSupport;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -22,22 +23,22 @@ class ImportResultSerializer {
         return json;
     }
 
-    static <R> JSONArray serializeList(List<? extends R> list, Function<? super R, ?> mapping) {
+    static <R> JSONArray serializeIterable(Iterable<? extends R> list, Function<? super R, ?> mapping) {
         final JSONArray json = new JSONArray();
-        list.stream().map(mapping).forEach(json::add);
+        StreamSupport.stream(list.spliterator(), /* parallel */ false).map(mapping).forEach(json::add);
         return json;
     }
 
     static JSONArray serializeTrackList(List<TrackImportDTO> trackList) {
-        return serializeList(trackList, track -> track.getDevice().toString());
+        return serializeIterable(trackList, track -> track.getDevice().toString());
     }
 
     static JSONArray serializeErrorList(List<ErrorImportDTO> errorList) {
-        return serializeList(errorList, ImportResultSerializer::serializeError);
+        return serializeIterable(errorList, ImportResultSerializer::serializeError);
     }
     
     public static JSONArray serializeRaceList(List<Triple<String, String, String>> raceNameRaceColumnNameFleetnameList) {
-        return serializeList(raceNameRaceColumnNameFleetnameList, ImportResultSerializer::serializeRaceEntry);
+        return serializeIterable(raceNameRaceColumnNameFleetnameList, ImportResultSerializer::serializeRaceEntry);
     }
 
     private static JSONObject serializeRaceEntry(Triple<String, String, String> entry) {

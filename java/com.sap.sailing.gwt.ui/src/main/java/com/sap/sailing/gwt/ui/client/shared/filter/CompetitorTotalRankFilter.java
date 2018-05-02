@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.filter.AbstractNumberFilter;
@@ -10,8 +10,8 @@ import com.sap.sse.common.filter.AbstractNumberFilter;
  * @author Frank
  *
  */
-public class CompetitorTotalRankFilter extends AbstractNumberFilter<CompetitorWithBoatDTO, Integer> implements
-        LeaderboardFilterContext, FilterWithUI<CompetitorWithBoatDTO> {
+public class CompetitorTotalRankFilter extends AbstractNumberFilter<CompetitorDTO, Integer> implements
+        LeaderboardFilterContext, FilterWithUI<CompetitorDTO> {
     public static final String FILTER_NAME = "CompetitorTotalRankFilter";
 
     private LeaderboardFetcher leaderboardFetcher;
@@ -24,14 +24,12 @@ public class CompetitorTotalRankFilter extends AbstractNumberFilter<CompetitorWi
     }
 
     @Override
-    public boolean matches(CompetitorWithBoatDTO competitorDTO) {
+    public boolean matches(CompetitorDTO competitorDTO) {
         boolean result = false;
-        
         if (value > 0 && operator != null && getLeaderboard() != null) {
             int totalRank = getLeaderboard().getTotalRank(competitorDTO);
             result = operator.matchValues(value, totalRank);
         }
-        
         return result;
     }
         
@@ -83,7 +81,7 @@ public class CompetitorTotalRankFilter extends AbstractNumberFilter<CompetitorWi
     }
 
     @Override
-    public FilterUIFactory<CompetitorWithBoatDTO> createUIFactory() {
+    public FilterUIFactory<CompetitorDTO> createUIFactory() {
         return new CompetitorTotalRankFilterUIFactory(this);
     }
 }
