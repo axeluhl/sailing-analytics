@@ -3114,6 +3114,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 trackedRegatta.unlockTrackedRacesAfterRead();
             }
         }
+        // The replication added new TrackedRegattas -> inform the respective listeners
+        regattaTrackingCache.values().forEach(trackedRegattaListener::regattaAdded);
         logger.info(logoutput.toString());
     }
 
