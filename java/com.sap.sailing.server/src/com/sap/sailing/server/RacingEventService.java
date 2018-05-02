@@ -146,6 +146,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     DynamicTrackedRace getTrackedRace(Regatta regatta, RaceDefinition race);
 
+    /**
+     * When the regatta, tracked regatta and race definition are found, this method waits for the
+     * tracked race to appear.
+     */
     DynamicTrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
     /**
@@ -267,6 +271,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void removeSeries(Series series) throws MalformedURLException, IOException, InterruptedException;
 
+    /**
+     * Returns {@code null} if the regatta or the race definition or the tracked regatta or the tracked race are not
+     * found.
+     */
     DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
     /**

@@ -74,7 +74,6 @@ import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.FixType;
 import com.sap.sailing.domain.common.Position;
@@ -125,7 +124,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     private Map<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>> marks;
     private MarkDTO selectedMark;
     private Map<MarkDTO, Polyline> polylines;
-    private final ListDataProvider<MarkDTO> markDataProvider;
     private SideBySideComponentViewer sideBySideComponentViewer;
     
     private FixPositionChooser currentFixPositionChooser;
@@ -146,8 +144,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         this.raceMap = raceMap;
         this.leaderboardPanel = leaderboardPanel;
         this.polylines = new HashMap<>();
-        this.markDataProvider = new ListDataProvider<>();
-        this.marksPanel = new MarksPanel(this, context, markDataProvider, stringMessages);
+        this.marksPanel = new MarksPanel(this, context, stringMessages);
         this.noMarkSelectedLabel = new Label(stringMessages.pleaseSelectAMark());
         this.noMarkSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         this.courseMarkClickHandlers = new ArrayList<>();
@@ -584,7 +581,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
                         @Override
                         public void onSuccess(Iterable<MarkDTO> marks) {
                             EditMarkPositionPanel.this.marks = new HashMap<>();
-                            List<MarkDTO> markList = new ArrayList<>();
                             for (MarkDTO mark : marks) {
                                 SortedMap<GPSFixDTO, FixOverlay> fixOverlayMap = new TreeMap<>(new Comparator<GPSFixDTO>() {
                                     @Override
@@ -593,9 +589,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
                                     }
                                 });
                                 EditMarkPositionPanel.this.marks.put(mark, fixOverlayMap);
-                                markList.add(mark);
                             }
-                            markDataProvider.setList(markList);
+                            marksPanel.updateMarks(marks);
                             onSelectionChange(null);
                             hideLoading();
                         }

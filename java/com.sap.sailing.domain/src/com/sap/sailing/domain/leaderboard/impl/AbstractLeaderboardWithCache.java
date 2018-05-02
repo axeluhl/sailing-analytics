@@ -627,12 +627,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 entryDTO.gapToLeaderInOwnTime = raceDetails.getGapToLeaderInOwnTime();
                 
                 try {
-                    BravoFixTrack<Competitor> sensorTrack = trackedRace.getSensorTrack(competitor,
-                            BravoFixTrack.TRACK_NAME);
+                    BravoFixTrack<Competitor> sensorTrack = trackedRace.getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                     if (sensorTrack != null) {
                         final BravoFix bravoFix = sensorTrack.getFirstFixAtOrAfter(timePoint);
-                        entryDTO.heel = bravoFix.getHeel();
-                        entryDTO.pitch = bravoFix.getPitch();
+                        entryDTO.heel = bravoFix == null ? null : bravoFix.getHeel();
+                        entryDTO.pitch = bravoFix == null ? null : bravoFix.getPitch();
                         if (sensorTrack.hasExtendedFixes() && bravoFix instanceof BravoExtendedFix) {
                             BravoExtendedFix fix = (BravoExtendedFix) bravoFix;
                             entryDTO.setExpeditionAWA(fix.getExpeditionAWA());
@@ -649,9 +648,9 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                             entryDTO.setExpeditionHeading(fix.getExpeditionHDG());
                             entryDTO.setExpeditionHeel(fix.getExpeditionHeel());
                             entryDTO.setExpeditionTargetHeel(fix.getExpeditionTG_Heell());
-                            entryDTO.setExpeditionTimeToGun(fix.getExpeditionTmToGun());
-                            entryDTO.setExpeditionTimeToBurnToLine(fix.getExpeditionTmToBurn());
-                            entryDTO.setExpeditionDistanceBelowLine(fix.getExpeditionBelowLn());
+                            entryDTO.setExpeditionTimeToGunInSeconds(fix.getExpeditionTmToGunInSeconds());
+                            entryDTO.setExpeditionTimeToBurnToLineInSeconds(fix.getExpeditionTmToBurnInSeconds());
+                            entryDTO.setExpeditionDistanceBelowLineInMeters(fix.getExpeditionBelowLnInMeters());
                             entryDTO.setExpeditionCourseDetail(fix.getExpeditionCourse());
                             entryDTO.setExpeditionBaro(fix.getExpeditionBARO());
                             entryDTO.setExpeditionLoadP(fix.getExpeditionLoadP());
@@ -1067,15 +1066,15 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             result.setExpeditionTimeToStbLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToStbLayline, TrackedLegOfCompetitor::getAverageExpeditionTimeToStbLayline));
             result.setExpeditionDistToPortLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistToPortLayline, TrackedLegOfCompetitor::getAverageExpeditionDistToPortLayline));
             result.setExpeditionDistToStbLayline(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistToStbLayline, TrackedLegOfCompetitor::getAverageExpeditionDistToStbLayline));
-            result.setExpeditionTimeToGUN(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToGUN, TrackedLegOfCompetitor::getAverageExpeditionTimeToGUN));
+            result.setExpeditionTimeToGunInSeconds(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToGunInSeconds, TrackedLegOfCompetitor::getAverageExpeditionTimeToGunInSeconds));
             result.setExpeditionTimeToCommitteeBoat(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToCommitteeBoat, TrackedLegOfCompetitor::getAverageExpeditionTimeToCommitteeBoat));
             result.setExpeditionTimeToPin(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToPin, TrackedLegOfCompetitor::getAverageExpeditionTimeToPin));
-            result.setExpeditionTimeToBurnToLine(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToLine, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToLine));
+            result.setExpeditionTimeToBurnToLineInSeconds(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToLineInSeconds, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToLineInSeconds));
             result.setExpeditionTimeToBurnToCommitteeBoat(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToCommitteeBoat, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToCommitteeBoat));
             result.setExpeditionTimeToBurnToPin(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionTimeToBurnToPin, TrackedLegOfCompetitor::getAverageExpeditionTimeToBurnToPin));
             result.setExpeditionDistanceToCommitteeBoat(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceToCommitteeBoat, TrackedLegOfCompetitor::getAverageExpeditionDistanceToCommitteeBoat));
             result.setExpeditionDistanceToPinDetail(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceToPinDetail, TrackedLegOfCompetitor::getAverageExpeditionDistanceToPinDetail));
-            result.setExpeditionDistanceBelowLine(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceBelowLine, TrackedLegOfCompetitor::getAverageExpeditionDistanceBelowLine));
+            result.setExpeditionDistanceBelowLineInMeters(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionDistanceBelowLineInMeters, TrackedLegOfCompetitor::getAverageExpeditionDistanceBelowLineInMeters));
             result.setExpeditionLineSquareForWindDirection(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionLineSquareForWindDirection, TrackedLegOfCompetitor::getAverageExpeditionLineSquareForWindDirection));
             result.setExpeditionBaroIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionBaroIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionBaroIfAvailable));
             result.setExpeditionLoadSIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionLoadSIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionLoadSIfAvailable));

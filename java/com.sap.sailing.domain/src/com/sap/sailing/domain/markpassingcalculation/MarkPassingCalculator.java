@@ -473,7 +473,7 @@ public class MarkPassingCalculator {
         synchronized (this) {
             final boolean wasQueueEmpty = queue.isEmpty();
             queue.add(update);
-            if (wasQueueEmpty && listenerThread == null) {
+            if (!suspended && wasQueueEmpty && listenerThread == null) {
                 listenerThread = createAndStartListenerThread();
             }
         }

@@ -36,7 +36,6 @@ public class ExpeditionGPSFixImporter implements GPSFixImporter {
         final AtomicBoolean importedFixes = new AtomicBoolean(false);
         CompressedStreamsUtil.handlePotentiallyCompressedFiles(sourceName, inputStream,
                 new ExpeditionImportFileHandler() {
-
                     @Override
                     protected void handleExpeditionFile(String fileName, InputStream stream) throws IOException {
                         final BufferedReader br = new BufferedReader(new InputStreamReader(stream));
