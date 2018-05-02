@@ -162,6 +162,8 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, RequiresDataInitialization, RequiresResize, QuickRankProvider {
+    private static final String ADVANTAGE_LINE_COLOR = "#ff9900"; // orange
+    private static final String FINISH_LINE_COLOR = "#000000";
     private static final Color LOWLIGHTED_TAIL_COLOR = new RGBColor(200, 200, 200);
     public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
@@ -1544,7 +1546,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             PolylineOptions options = PolylineOptions.newInstance();
                             options.setClickable(true);
                             options.setGeodesic(true);
-                            options.setStrokeColor("#000000");
+                            options.setStrokeColor(ADVANTAGE_LINE_COLOR);
                             options.setStrokeWeight(1);
                             options.setStrokeOpacity(0.5);
                             
@@ -1700,7 +1702,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 finishLineAdvantageText.delete(0, finishLineAdvantageText.length());
             }
             finishLine = showOrRemoveOrUpdateLine(finishLine, reallyShowFinishLine,
-                    finishLineLeftPosition, finishLineRightPosition, finishLineInfoProvider, "#000000");
+                    finishLineLeftPosition, finishLineRightPosition, finishLineInfoProvider, FINISH_LINE_COLOR);
             // the control point pairs for which we already decided whether or not
             // to show a course middle line for; values tell whether to show the line and for which zero-based
             // start waypoint index to do so; when for an equal control point pair multiple decisions with different
