@@ -8,6 +8,8 @@ package com.sap.sailing.windestimation.impl.maneuvergraph;
 public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<CrossTrackManeuverNodesLevel>
         implements ManeuverNodesLevel<CrossTrackManeuverNodesLevel> {
 
+    private static final double TRESHOLD_FOR_SMALL_PENALTY_WIND_COURSE_SHIFT_IN_DEGREES = 45;
+    private static final double TRESHOLD_FOR_PENALTY_FREE_WIND_COURSE_SHIFT_IN_DEGREES = 10;
     private final SingleTrackManeuverNodesLevel singleTrackManeuverNodesLevel;
 
     public CrossTrackManeuverNodesLevel(SingleTrackManeuverNodesLevel singleTrackManeuverNodesLevel) {
@@ -64,8 +66,26 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
     private double getNodeTransitionPenaltyFactor(CrossTrackManeuverNodesLevel previousLevel,
             FineGrainedPointOfSail previousNode, CrossTrackManeuverNodesLevel crossTrackManeuverNodesLevel,
             FineGrainedPointOfSail currentNode) {
-        // TODO compare assumed wind direction from previous level and this level
-        return 0;
+        double windCourseInDegreesOfPreviousNode = previousLevel.getWindCourseInDegrees(previousNode);
+        double windCourseInDegreesOfCurrentNode = crossTrackManeuverNodesLevel.getWindCourseInDegrees(currentNode);
+        double absWindCourseShift = Math.abs(windCourseInDegreesOfPreviousNode - windCourseInDegreesOfCurrentNode);
+        if (absWindCourseShift <= TRESHOLD_FOR_PENALTY_FREE_WIND_COURSE_SHIFT_IN_DEGREES) {
+            return 1;
+        }
+        if (absWindCourseShift <= TRESHOLD_FOR_SMALL_PENALTY_WIND_COURSE_SHIFT_IN_DEGREES) {
+            return 1 / (1 + (absWindCourseShift / TRESHOLD_FOR_SMALL_PENALTY_WIND_COURSE_SHIFT_IN_DEGREES));
+        }
+        return 1 / (4
+                + Math.pow((absWindCourseShift - TRESHOLD_FOR_SMALL_PENALTY_WIND_COURSE_SHIFT_IN_DEGREES) / 5, 2));
+    }
+
+    private double getWindCourseInDegrees(FineGrainedPointOfSail node) {
+        double windCourse = (getManeuver().getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing()
+                .getDegrees() - node.getTwa() + 180) % 360;
+        if (windCourse < 0) {
+            windCourse += 360;
+        }
+        return windCourse;
     }
 
     public static ManeuverNodesLevelFactory<CrossTrackManeuverNodesLevel, SingleTrackManeuverNodesLevel> getFactory() {
