@@ -37,7 +37,7 @@ public class JSDownloadUtils {
             
             @Override
             public void size(Double total) {
-                if (total != 0 && total > 2 * REQUIRED_SIZE) {
+                if (total != null && total != 0 && total > 2 * REQUIRED_SIZE) {
                     //used if range and accept headers are set correctly
                     getDataFast(url, callback, total, REQUIRED_SIZE);
                 } else {
