@@ -352,8 +352,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         this.busyIndicator.setBusy(true);
         remoteMp4WasStarted = true;
         remoteMp4WasFinished = false;
-        infoLabel.setWidget(new Label(stringMessages.processingMP4()));
-        mediaService.checkMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
+        Label infoLbl = new Label(stringMessages.processingMP4());
+        infoLabel.setWidget(infoLbl);
+        checkMetadata(mediaTrack.url, infoLbl, new AsyncCallback<VideoMetadataDTO>() {
             @Override
             public void onSuccess(VideoMetadataDTO result) {
                 busyIndicator.setBusy(false);
