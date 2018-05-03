@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
@@ -160,8 +160,8 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
         int selectedCompetitorsCount = Util.size(competitorSelectionProvider.getSelectedCompetitors());
         
         if(selectedCompetitorsCount == 0 && competitorsCount > MAX_COMPETITORS_IN_CHART) {
-            List<CompetitorWithBoatDTO> selectedCompetitors = new ArrayList<CompetitorWithBoatDTO>();
-            Iterator<CompetitorWithBoatDTO> allCompetitorsIt = competitorSelectionProvider.getAllCompetitors().iterator();
+            List<CompetitorDTO> selectedCompetitors = new ArrayList<>();
+            Iterator<CompetitorDTO> allCompetitorsIt = competitorSelectionProvider.getAllCompetitors().iterator();
             int counter = 0;
             while(counter < MAX_COMPETITORS_IN_CHART) {
                 selectedCompetitors.add(allCompetitorsIt.next());

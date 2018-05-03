@@ -185,7 +185,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         };
         linkColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(linkColumn, new Comparator<StrippedLeaderboardDTO>() {
-
             @Override
             public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
                 boolean ascending = isSortedAscending();
@@ -213,13 +212,11 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         };
         leaderboardDisplayNameColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(leaderboardDisplayNameColumn, new Comparator<StrippedLeaderboardDTO>() {
-
             @Override
             public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
                 return new NaturalComparator().compare(o1.getDisplayName(), o2.getDisplayName());
             }
         });
-
 
         TextColumn<StrippedLeaderboardDTO> leaderboardCanBoatsOfCompetitorsChangePerRaceColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
@@ -227,6 +224,9 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 return leaderboard.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no();
             }
         };
+        leaderboardCanBoatsOfCompetitorsChangePerRaceColumn.setSortable(true);
+        leaderboardColumnListHandler.setComparator(leaderboardCanBoatsOfCompetitorsChangePerRaceColumn, (l1, l2)->
+            Boolean.valueOf(l1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(l2.canBoatsOfCompetitorsChangePerRace)));
 
         TextColumn<StrippedLeaderboardDTO> discardingOptionsColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
@@ -1069,7 +1069,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 sailingService.calculatePairingListTemplate(editedObject.getFlightCount(), editedObject.getGroupCount(),
                         editedObject.getCompetitorCount(), editedObject.getFlightMultiplier(), 
                         new AsyncCallback<PairingListTemplateDTO>() {
-
                             @Override
                             public void onFailure(Throwable caught) {
                                 busyDialog.hide();
@@ -1082,13 +1081,11 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                                 result.setSelectedFlightNames(editedObject.getSelectedFlightNames());
                                 openPairingListCreationDialog(leaderboardDTO, result);
                             }
-
                         });
             }
 
             @Override
             public void cancel() {
-                
             }
         });
         dialog.show();

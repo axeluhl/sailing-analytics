@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.function.Consumer;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -47,20 +47,20 @@ public class RegattaLeaderboardWithEliminationsEditDialog extends RegattaLeaderb
     }
 
     @Override
-    protected Consumer<AsyncCallback<Collection<CompetitorWithBoatDTO>>> getEliminatedCompetitorsRetriever() {
+    protected Consumer<AsyncCallback<Collection<CompetitorDTO>>> getEliminatedCompetitorsRetriever() {
         eliminatedCompetitors = null;
         return callback->{
             if (eliminatedCompetitors != null) {
                 callback.onSuccess(eliminatedCompetitors);
             } else {
-                sailingService.getEliminatedCompetitors(nameTextBox.getValue(), new AsyncCallback<Collection<CompetitorWithBoatDTO>>() {
+                sailingService.getEliminatedCompetitors(nameTextBox.getValue(), new AsyncCallback<Collection<CompetitorDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
                     }
 
                     @Override
-                    public void onSuccess(Collection<CompetitorWithBoatDTO> result) {
+                    public void onSuccess(Collection<CompetitorDTO> result) {
                         eliminatedCompetitors = new HashSet<>(result);
                         callback.onSuccess(eliminatedCompetitors);
                     }

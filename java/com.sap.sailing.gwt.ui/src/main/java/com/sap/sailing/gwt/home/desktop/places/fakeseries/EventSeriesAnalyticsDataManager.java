@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
@@ -130,8 +130,8 @@ public class EventSeriesAnalyticsDataManager {
         int selectedCompetitorsCount = Util.size(competitorSelectionProvider.getSelectedCompetitors());
         
         if(selectedCompetitorsCount == 0 && competitorsCount > MAX_COMPETITORS_IN_CHART) {
-            List<CompetitorWithBoatDTO> selectedCompetitors = new ArrayList<CompetitorWithBoatDTO>();
-            Iterator<CompetitorWithBoatDTO> allCompetitorsIt = competitorSelectionProvider.getAllCompetitors().iterator();
+            List<CompetitorDTO> selectedCompetitors = new ArrayList<>();
+            Iterator<CompetitorDTO> allCompetitorsIt = competitorSelectionProvider.getAllCompetitors().iterator();
             int counter = 0;
             while(counter < MAX_COMPETITORS_IN_CHART) {
                 selectedCompetitors.add(allCompetitorsIt.next());

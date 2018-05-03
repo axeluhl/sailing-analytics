@@ -436,14 +436,20 @@ public class MarkPassingCalculator {
             }
         }
 
+        @Override
+        public String toString() {
+            return getClass().getName()+" for race "+raceName;
+        }
     }
 
     /**
      * Only suspends the actual calculation. Even when suspended all incoming fixes are added to the queue and sorted.
      */
     public void suspend() {
-        logger.finest("Suspended MarkPassingCalculator");
-        suspended = true;
+        synchronized(this) {
+            logger.finest("Suspended MarkPassingCalculator");
+            suspended = true;
+        }
     }
 
     /**
@@ -452,17 +458,19 @@ public class MarkPassingCalculator {
      */
     public void resume() {
         logger.finest("Resumed MarkPassingCalculator");
-        suspended = false;
-        enqueueUpdate(new StorePositionUpdateStrategy() {
-            @Override
-            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
-                    Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-                    IntHolder smallestChangedWaypointIndex,
-                    List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
-                    List<Pair<Competitor, Integer>> removedMarkPassings,
-                    List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder, CandidateChooser candidateChooser) {
-            }
-        });
+        synchronized (this) {
+            suspended = false;
+            enqueueUpdate(new StorePositionUpdateStrategy() {
+                @Override
+                public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
+                        Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
+                        IntHolder smallestChangedWaypointIndex,
+                        List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
+                        List<Pair<Competitor, Integer>> removedMarkPassings,
+                        List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder, CandidateChooser candidateChooser) {
+                }
+            });
+        }
     }
     
     private boolean isEndMarker(StorePositionUpdateStrategy endMarkerCandidate) {
@@ -473,7 +481,7 @@ public class MarkPassingCalculator {
         synchronized (this) {
             final boolean wasQueueEmpty = queue.isEmpty();
             queue.add(update);
-            if (wasQueueEmpty && listenerThread == null) {
+            if (!suspended && wasQueueEmpty && listenerThread == null) {
                 listenerThread = createAndStartListenerThread();
             }
         }
@@ -495,5 +503,10 @@ public class MarkPassingCalculator {
 
     public MarkPassingUpdateListener getListener() {
         return listener;
+    }
+    
+    @Override
+    public String toString() {
+        return getClass().getName()+" for "+race;
     }
 }

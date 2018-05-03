@@ -134,7 +134,6 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
                     });
                     buffer.close();
                 }
-                
             }
         });
         return importedFixes.get();
@@ -170,7 +169,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
      * key set are present in {@code colIndicesInFile}'s key set. If not, an
      * exception is thrown that reports the columns missing.
      */
-    private void validateHeader(Map<String, Integer> colIndicesInFile) throws FormatNotSupportedException {
+    public static void validateHeader(Map<String, Integer> colIndicesInFile) throws FormatNotSupportedException {
         final boolean dateTimeFormatOk;
         if (colIndicesInFile.containsKey(UTC_COLUMN)) {
             dateTimeFormatOk = true;
@@ -251,17 +250,17 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
      * </ol>
      * If none of the above is found, {@link null} is returned.
      */
-    protected static TimePoint getTimePointFromLine(Map<String, Integer> columnsInFileFromHeader,
+    public static TimePoint getTimePointFromLine(Map<String, Integer> columnsInFileFromHeader,
             String[] lineContentTokens) throws ParseException {
         final TimePoint timePoint;
         final String date;
         final String dateFormatPattern;
-        if (columnsInFileFromHeader.containsKey(GPS_TIME_COLUMN)) {
+        if (columnsInFileFromHeader.containsKey(GPS_TIME_COLUMN) && !lineContentTokens[columnsInFileFromHeader.get(GPS_TIME_COLUMN)].trim().isEmpty()) {
             timePoint = getTimePoint(lineContentTokens[columnsInFileFromHeader.get(GPS_TIME_COLUMN)]);
-        } else if (columnsInFileFromHeader.containsKey(UTC_COLUMN)) {
+        } else if (columnsInFileFromHeader.containsKey(UTC_COLUMN) && !lineContentTokens[columnsInFileFromHeader.get(UTC_COLUMN)].trim().isEmpty()) {
             timePoint = getTimePoint(lineContentTokens[columnsInFileFromHeader.get(UTC_COLUMN)]);
-        } else if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1)
-                || columnsInFileFromHeader.containsKey(DATE_COLUMN_2)) {
+        } else if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1) && !lineContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_1)].trim().isEmpty()
+                || columnsInFileFromHeader.containsKey(DATE_COLUMN_2) && !lineContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_2)].trim().isEmpty()) {
             if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1)) {
                 date = lineContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_1)];
                 dateFormatPattern = DATE_COLUMN_1_PATTERN;

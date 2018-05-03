@@ -196,6 +196,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         final int liveDelayInSeconds = tractracRace.getLiveDelay();
         long delayInMillis = liveDelayInSeconds * 1000;
         if (trackedRace != null) {
+            logger.info("Setting delay for race "+trackedRace.getRace().getName()+" to "+delayInMillis+"ms");
             trackedRace.setDelayToLiveInMillis(delayInMillis);
         }
         final TimePoint startTime;
