@@ -112,10 +112,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         this.userAgent = userAgent;
         this.popupPositionProvider = popupPositionProvider;
         this.settings = settings;
-
         Window.addCloseHandler(this);
         Window.addWindowClosingHandler(this);
-
     }
 
     private static boolean isPotentiallyPlayable(MediaTrack mediaTrack) {
@@ -291,9 +289,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
      * @return
      */
     private AsyncCallback<Iterable<MediaTrack>> getAssignedMediaCallback() {
-
         return new AsyncCallback<Iterable<MediaTrack>>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 notifyStateChange();
@@ -309,13 +305,11 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                 for (MediaTrack mediaTrack : MediaPlayerManagerComponent.this.assignedMediaTracks) {
                     setStatus(mediaTrack);
                 }
-
                 if (settings.isAutoSelectMedia()) {
                     playDefault();
                 }
                 notifyStateChange();
             }
-
         };
     }
 
@@ -326,9 +320,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
      * @return
      */
     private AsyncCallback<Iterable<MediaTrack>> getOverlappingMediaCallback() {
-
         return new AsyncCallback<Iterable<MediaTrack>>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 notifyStateChange();
@@ -345,7 +337,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                 }
                 notifyStateChange();
             }
-
         };
     }
 

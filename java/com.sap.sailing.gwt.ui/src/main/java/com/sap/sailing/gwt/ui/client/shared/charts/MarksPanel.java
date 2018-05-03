@@ -7,8 +7,12 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -39,7 +43,7 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
         super(parent, context);
         markTable = new FlushableSortedCellTableWithStylableHeaders<MarkDTO>(10000, tableResources);
         markDataProvider = markTable.getDataProvider();
-        markTable.setStyleName("EditMarkPositionMarkTable");
+        markTable.addStyleName("EditMarkPositionMarkTable");
         SortableColumn<MarkDTO, String> markNameColumn = new SortableColumn<MarkDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
             @Override
             public String getValue(MarkDTO object) {
@@ -100,7 +104,8 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
             }
         });
         markTable.addColumn(addFixColumn);
-        SingleSelectionModel<MarkDTO> selectionModel = new RefreshableSingleSelectionModel<MarkDTO>(new EntityIdentityComparator<MarkDTO>() {
+        final SingleSelectionModel<MarkDTO> selectionModel = new RefreshableSingleSelectionModel<MarkDTO>(
+                new EntityIdentityComparator<MarkDTO>() {
             @Override
             public boolean representSameEntity(MarkDTO dto1, MarkDTO dto2) {
                 return dto1.getIdAsString().equals(dto2.getIdAsString());
@@ -112,8 +117,25 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
         }, this.markDataProvider);
         markTable.setSelectionModel(selectionModel);
         markTable.getSelectionModel().addSelectionChangeHandler(parent);
-        initWidget(markTable);
+
+        final FlowPanel mainPanel = new FlowPanel();
+        final Widget clearSelection = createClearSelection(event -> selectionModel.clear(), stringMessages);
+        markTable.getSelectionModel().addSelectionChangeHandler(
+                event -> clearSelection.setVisible(!selectionModel.getSelectedSet().isEmpty()));
+        mainPanel.add(clearSelection);
+        mainPanel.add(markTable);
+        initWidget(mainPanel);
         setTitle(stringMessages.marks());
+    }
+
+    private Widget createClearSelection(final ClickHandler clearSelectionHandler, final StringMessages stringMessages) {
+        final FlowPanel clearSelectionPanel = new FlowPanel();
+        clearSelectionPanel.addStyleName("EditMarkPositionHintPanel");
+        clearSelectionPanel.add(new Label(stringMessages.pleaseClearSelectionToSeeFullCourse()));
+        clearSelectionPanel.add(new Button(stringMessages.clearSelection(), clearSelectionHandler));
+        clearSelectionPanel.add(new Label());
+        clearSelectionPanel.setVisible(false);
+        return clearSelectionPanel;
     }
 
     void updateMarks(final Iterable<MarkDTO> marks) {
@@ -163,7 +185,7 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
                	return mark;
             }
         }
-        return null;               
+        return null;
     }
     
     public void deselectMark() {
