@@ -91,6 +91,16 @@ class CheckInData: NSObject {
         super.init()
     }
 
+    convenience init(boatCheckIn: BoatCheckIn) {
+        self.init(
+            serverURL: boatCheckIn.serverURL,
+            eventID: boatCheckIn.event.eventID,
+            leaderboardName: boatCheckIn.leaderboard.name,
+            boatID: boatCheckIn.boatID,
+            isTraining: boatCheckIn.isTraining.boolValue
+        )
+    }
+
     convenience init(competitorCheckIn: CompetitorCheckIn) {
         self.init(
             serverURL: competitorCheckIn.serverURL,
@@ -163,7 +173,9 @@ class CheckInData: NSObject {
     }
 
     convenience init?(checkIn: CheckIn) {
-        if let competitorCheckIn = checkIn as? CompetitorCheckIn {
+        if let boatCheckIn = checkIn as? BoatCheckIn {
+            self.init(boatCheckIn: boatCheckIn)
+        } else if let competitorCheckIn = checkIn as? CompetitorCheckIn {
             self.init(competitorCheckIn: competitorCheckIn)
         } else if let markCheckIn = checkIn as? MarkCheckIn {
             self.init(markCheckIn: markCheckIn)

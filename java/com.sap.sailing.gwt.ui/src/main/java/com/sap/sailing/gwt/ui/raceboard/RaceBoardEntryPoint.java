@@ -187,7 +187,6 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this,
                 Collections.singletonList(selectedRace.getRaceIdentifier()), 5000l /* requestInterval*/);
-  
         RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(parent, context, raceLifeCycle, settings,
                 sailingService, mediaService, getUserService(), asyncActionsExecutor,
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(),
