@@ -3,6 +3,11 @@ package com.sap.sailing.windestimation;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class Activator implements BundleActivator {
 
 	private static BundleContext context;

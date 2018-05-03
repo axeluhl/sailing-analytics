@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.impl.maneuvergraph;
+package com.sap.sailing.windestimation.maneuvergraph;
 
 import java.util.ArrayList;
 import java.util.List;

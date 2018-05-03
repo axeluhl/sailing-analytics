@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.impl.maneuvergraph;
+package com.sap.sailing.windestimation.maneuvergraph;
 
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.LegType;
@@ -194,17 +194,17 @@ public class SingleManeuverClassificationResult {
         normalizeLikelihoodArray(likelihoodsForPointOfSailBeforeManeuvers);
     }
 
-    private void normalizeLikelihoodArray(double[] likelihoodForPointOfSailBeforeManeuver) {
+    private void normalizeLikelihoodArray(double[] likelihoodsForPointOfSailAfterManeuver) {
         double likelihoodSum = 0;
-        for (double likelihood : likelihoodForPointOfSailBeforeManeuver) {
+        for (double likelihood : likelihoodsForPointOfSailAfterManeuver) {
             likelihoodSum += likelihood;
         }
-        for (int i = 0; i < likelihoodForPointOfSailBeforeManeuver.length; i++) {
-            likelihoodForPointOfSailBeforeManeuver[i] = likelihoodForPointOfSailBeforeManeuver[i] / likelihoodSum;
+        for (int i = 0; i < likelihoodsForPointOfSailAfterManeuver.length; i++) {
+            likelihoodsForPointOfSailAfterManeuver[i] = likelihoodsForPointOfSailAfterManeuver[i] / likelihoodSum;
         }
     }
 
-    public double getLikelihoodForPointOfSailBeforeManeuver(CoarseGrainedPointOfSail pointOfSailBeforeManeuver) {
+    public double getLikelihoodForPointOfSailAfterManeuver(CoarseGrainedPointOfSail pointOfSailBeforeManeuver) {
         return likelihoodsForPointOfSailBeforeManeuvers[pointOfSailBeforeManeuver.ordinal()];
     }
 

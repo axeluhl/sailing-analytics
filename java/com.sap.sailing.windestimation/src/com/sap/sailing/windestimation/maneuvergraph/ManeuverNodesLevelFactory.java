@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.impl.maneuvergraph;
+package com.sap.sailing.windestimation.maneuvergraph;
 
 public interface ManeuverNodesLevelFactory<T extends ManeuverNodesLevel<T>, R> {
 

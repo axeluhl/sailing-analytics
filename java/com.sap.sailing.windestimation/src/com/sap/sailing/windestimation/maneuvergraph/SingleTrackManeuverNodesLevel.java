@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.impl.maneuvergraph;
+package com.sap.sailing.windestimation.maneuvergraph;
 
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -21,7 +21,7 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
     public void computeProbabilitiesFromPreviousLevelToThisLevel() {
         for (FineGrainedPointOfSail currentNode : FineGrainedPointOfSail.values()) {
             double likelihoodForCurrentNode = maneuverClassificationResult
-                    .getLikelihoodForPointOfSailBeforeManeuver(currentNode.getCoarseGrainedPointOfSail());
+                    .getLikelihoodForPointOfSailAfterManeuver(currentNode.getCoarseGrainedPointOfSail());
             if (getPreviousLevel() == null) {
                 this.nodeTransitions[currentNode.ordinal()].setBestPreviousNode(null, likelihoodForCurrentNode);
             } else {

@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.impl.maneuvergraph;
+package com.sap.sailing.windestimation.maneuvergraph;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
@@ -14,12 +14,12 @@ import com.sap.sse.common.Util.Pair;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class SingleManeuverClassifier {
+public class RulesBasedSingleManeuverClassifierImpl implements SingleManeuverClassifier {
 
     private final BoatClass boatClass;
     private final PolarDataService polarService;
 
-    public SingleManeuverClassifier(BoatClass boatClass, PolarDataService polarService) {
+    public RulesBasedSingleManeuverClassifierImpl(BoatClass boatClass, PolarDataService polarService) {
         this.boatClass = boatClass;
         this.polarService = polarService;
     }

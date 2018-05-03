@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.impl.maneuvergraph;
+package com.sap.sailing.windestimation.maneuvergraph;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,8 @@ public class SingleTrackManeuverSequenceGraph
 
     private static List<SingleManeuverClassificationResult> getClassificationResults(BoatClass boatClass,
             PolarDataService polarService, Iterable<CompleteManeuverCurveWithEstimationData> maneuverSequence) {
-        SingleManeuverClassifier singleManeuverClassifier = new SingleManeuverClassifier(boatClass, polarService);
+        SingleManeuverClassifier singleManeuverClassifier = new RulesBasedSingleManeuverClassifierImpl(boatClass,
+                polarService);
         List<SingleManeuverClassificationResult> result = new ArrayList<>();
         for (CompleteManeuverCurveWithEstimationData maneuver : maneuverSequence) {
             SingleManeuverClassificationResult classificationResult = singleManeuverClassifier
