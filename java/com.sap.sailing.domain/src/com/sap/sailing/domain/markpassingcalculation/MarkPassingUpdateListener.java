@@ -213,4 +213,9 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
             }
         });
     }
+    
+    @Override
+    public String toString() {
+        return getClass().getName()+" for "+markPassingCalculator;
+    }
 }
