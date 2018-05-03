@@ -505,6 +505,8 @@ public class MultiVideoDialog extends DialogBox {
             return stringMessages.multiVideoWaitingForLinkPhase();
         case WAIT_FOR_SAVE:
             return stringMessages.multiVideoWaitingForSave();
+        case DO_NOT_PROCESS:
+            return stringMessages.multiVideoDoNoAdd();
         default:
             return stringMessages.unknown();
         }
