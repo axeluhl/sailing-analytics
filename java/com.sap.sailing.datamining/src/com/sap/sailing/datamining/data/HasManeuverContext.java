@@ -4,6 +4,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
@@ -26,6 +27,9 @@ public interface HasManeuverContext extends HasManeuver, HasTrackedLegOfCompetit
 
     @Statistic(messageKey = "ManeuverLoss", resultDecimals = 0, ordinal = 4)
     Distance getManeuverLoss();
+    
+    @Statistic(messageKey = "ManeuverLossVsWindSpeed", resultDecimals = 2, ordinal = 4)
+    Pair<Double, Double> getManeuverLossVsWindSpeed();
 
     @Statistic(messageKey = "AbsTWAAtManeuverClimax", ordinal = 7)
     Double getAbsTWAAtManeuverClimax();

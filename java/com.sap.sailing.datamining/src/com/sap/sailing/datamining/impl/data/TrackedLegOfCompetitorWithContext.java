@@ -126,7 +126,6 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
                 return null;
             } else {
                 final Leg lastLeg = legs.get(legs.size() - 1);
-                GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
                 TimePoint finished = getTrackedRace().getTrackedLeg(getCompetitor(), lastLeg).getFinishTime();
                 return getTrackedRace().getAverageSpeedOverGround(getCompetitor(), finished).getKnots();
             }
