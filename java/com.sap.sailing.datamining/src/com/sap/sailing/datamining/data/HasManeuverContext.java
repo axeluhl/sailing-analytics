@@ -28,8 +28,8 @@ public interface HasManeuverContext extends HasManeuver, HasTrackedLegOfCompetit
     @Statistic(messageKey = "ManeuverLoss", resultDecimals = 0, ordinal = 4)
     Distance getManeuverLoss();
     
-    @Statistic(messageKey = "ManeuverLossVsWindSpeed", resultDecimals = 2, ordinal = 4)
-    Pair<Double, Double> getManeuverLossVsWindSpeed();
+    @Statistic(messageKey = "WindSpeedVsManeuverLoss", resultDecimals = 2, ordinal = 4)
+    Pair<Double, Double> getWindSpeedVsManeuverLoss();
 
     @Statistic(messageKey = "AbsTWAAtManeuverClimax", ordinal = 7)
     Double getAbsTWAAtManeuverClimax();
