@@ -54,7 +54,7 @@ public class RegattaAnalyticsDataManager {
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn, Iterable<DetailType> availableDetailTypes) {
         if (leaderboardPanel == null) {
-            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> {return leaderboardName;});
+            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> leaderboardName);
             leaderboardPanel = new MultiRaceLeaderboardPanel(parent, context, sailingService,
                     asyncActionsExecutor,
                     leaderboardSettings,
@@ -70,7 +70,7 @@ public class RegattaAnalyticsDataManager {
 
     public MultiCompetitorLeaderboardChart createMultiCompetitorChart(String leaderboardName, DetailType chartDetailType) {
         if(multiCompetitorChart == null) {
-            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> {return leaderboardName;});
+            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> leaderboardName);
             multiCompetitorChart = new MultiCompetitorLeaderboardChart(null, null, sailingService, asyncActionsExecutor,
                     leaderboardName, chartDetailType,
                     competitorSelectionProvider, timer, StringMessages.INSTANCE, false, errorReporter);

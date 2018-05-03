@@ -69,7 +69,7 @@ public class EventSeriesAnalyticsDataManager {
         
         
         if(overallLeaderboardPanel == null) {
-            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> {return leaderboardName;});
+            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> leaderboardName);
             overallLeaderboardPanel = new MultiRaceLeaderboardPanel(parent, context, sailingService, asyncActionsExecutor,
                     leaderboardSettings, true, 
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
@@ -87,7 +87,7 @@ public class EventSeriesAnalyticsDataManager {
             DetailType chartDetailType) {
         
         if(multiCompetitorChart == null) {
-            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> {return leaderboardName;});
+            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> leaderboardName);
 
             multiCompetitorChart = new MultiCompetitorLeaderboardChart(parent, context, sailingService,
                     asyncActionsExecutor,
@@ -103,7 +103,7 @@ public class EventSeriesAnalyticsDataManager {
             String preselectedLeaderboardName,  String leaderboardGroupName,
             String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn, Iterable<DetailType> availableDetailTypes) {
         if(multiLeaderboardPanel == null) {
-            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> {return metaLeaderboardName;});
+            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> metaLeaderboardName);
             multiLeaderboardPanel = new MultiLeaderboardProxyPanel(parent, context, sailingService, metaLeaderboardName,
                     asyncActionsExecutor, timer, true /* isEmbedded */,
                     preselectedLeaderboardName, errorReporter, StringMessages.INSTANCE,
@@ -187,9 +187,7 @@ public class EventSeriesAnalyticsDataManager {
 
     public void getAvailableDetailTypesForLeaderboard(String leaderboardName,
             AsyncCallback<Iterable<DetailType>> asyncCallback) {
-       
-        SailingServiceAsync sailingService = sailingCF.getSailingService(()-> {return leaderboardName;});
+        SailingServiceAsync sailingService = sailingCF.getSailingService(()-> leaderboardName);
         sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName, asyncCallback);
-       
     }
 }

@@ -164,6 +164,6 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     @Override
     public void getAvailableDetailTypesForLeaderboard(String leaderboardName,
             AsyncCallback<Iterable<DetailType>> asyncCallback) {
-        clientFactory.getSailingService(()->{return leaderboardName;}).getAvailableDetailTypesForLeaderboard(leaderboardName, asyncCallback);        
+        clientFactory.getSailingService(()-> leaderboardName).getAvailableDetailTypesForLeaderboard(leaderboardName, asyncCallback);
     }
 }
