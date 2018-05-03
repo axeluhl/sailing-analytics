@@ -1,5 +1,6 @@
 package com.sap.sailing.windestimation.impl.maneuvergraph;
 
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NauticalSide;
 
 /**
@@ -17,87 +18,45 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
     }
 
     @Override
-    public void computeDistancesFromPreviousLevelToThisLevel() {
-        for (FineGrainedPointOfSail pointOfSailAfterManeuver : FineGrainedPointOfSail.values()) {
-            double likelihoodForPointOfSailBeforeManeuver = maneuverClassificationResult
-                    .getLikelihoodForPointOfSailBeforeManeuver(pointOfSailAfterManeuver.getCoarseGrainedPointOfSail());
+    public void computeProbabilitiesFromPreviousLevelToThisLevel() {
+        for (FineGrainedPointOfSail currentNode : FineGrainedPointOfSail.values()) {
+            double likelihoodForCurrentNode = maneuverClassificationResult
+                    .getLikelihoodForPointOfSailBeforeManeuver(currentNode.getCoarseGrainedPointOfSail());
             if (getPreviousLevel() == null) {
-                this.nodeTransitions[pointOfSailAfterManeuver.ordinal()].setBestPreviousNode(null,
-                        convertLikelihoodToDistance(likelihoodForPointOfSailBeforeManeuver));
+                this.nodeTransitions[currentNode.ordinal()].setBestPreviousNode(null, likelihoodForCurrentNode);
             } else {
-                double courseChangeDegFromPreviousPointOfSailBefore = getPreviousLevel().getManeuver()
-                        .getCurveWithUnstableCourseAndSpeed()
-                        .getSpeedWithBearingBefore().getBearing().getDifferenceTo(getManeuver()
-                                .getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getBearing())
-                        .getDegrees();
-                double bestDistanceThroughPreviousLevel = Double.MAX_VALUE;
-                FineGrainedPointOfSail bestPreviousLevelPointOfSailBeforeManeuver = null;
-                for (FineGrainedPointOfSail previousLevelPointOfSailBeforeManeuver : FineGrainedPointOfSail.values()) {
-                    double likelihoodForPointOfSailTransition = getLikelihoodForPointOfSailTransition(
-                            previousLevelPointOfSailBeforeManeuver, pointOfSailAfterManeuver,
-                            courseChangeDegFromPreviousPointOfSailBefore, likelihoodForPointOfSailBeforeManeuver);
-                    double distanceThroughPreviousLevelPointOfSailBeforeManeuver = getPreviousLevel()
-                            .getBestDistanceToNodeFromStart(previousLevelPointOfSailBeforeManeuver)
-                            + convertLikelihoodToDistance(likelihoodForPointOfSailTransition);
-                    if (bestDistanceThroughPreviousLevel > distanceThroughPreviousLevelPointOfSailBeforeManeuver) {
-                        bestDistanceThroughPreviousLevel = distanceThroughPreviousLevelPointOfSailBeforeManeuver;
-                        bestPreviousLevelPointOfSailBeforeManeuver = previousLevelPointOfSailBeforeManeuver;
-                    }
+                for (FineGrainedPointOfSail previousNode : FineGrainedPointOfSail.values()) {
+                    double likelihoodForTransitionFromPreviousNodeToCurrentNode = likelihoodForCurrentNode
+                            * getNodeTransitionPenaltyFactor(getPreviousLevel(), previousNode, this, currentNode);
+                    nodeTransitions[currentNode.ordinal()].setProbabilitiesFromPreviousNodesLevel(previousNode,
+                            likelihoodForTransitionFromPreviousNodeToCurrentNode);
                 }
-                this.nodeTransitions[pointOfSailAfterManeuver.ordinal()].setBestPreviousNode(
-                        bestPreviousLevelPointOfSailBeforeManeuver, bestDistanceThroughPreviousLevel);
             }
         }
+        normalizeNodeTransitions();
     }
 
-    private double getLikelihoodForPointOfSailTransition(FineGrainedPointOfSail previousLevelPointOfSailBeforeManeuver,
-            FineGrainedPointOfSail pointOfSailBeforeManeuver, double courseChangeDegFromPreviousPointOfSailBefore,
-            double likelihoodForPointOfSailBeforeManeuver) {
-        FineGrainedPointOfSail previousIteratedPointOfSail;
-        FineGrainedPointOfSail currentIteratedPointOfSail = previousLevelPointOfSailBeforeManeuver;
-        FineGrainedPointOfSail nextIteratedPointOfSail;
-        double courseChangeDegLeft = courseChangeDegFromPreviousPointOfSailBefore;
-        NauticalSide maneuverDirection;
-        int courseChangeSignum;
-        if (courseChangeDegFromPreviousPointOfSailBefore < 0) {
-            previousIteratedPointOfSail = currentIteratedPointOfSail.getNextPointOfSail(NauticalSide.STARBOARD);
-            maneuverDirection = NauticalSide.PORT;
-            courseChangeSignum = -1;
-        } else {
-            previousIteratedPointOfSail = currentIteratedPointOfSail.getNextPointOfSail(NauticalSide.PORT);
-            maneuverDirection = NauticalSide.STARBOARD;
-            courseChangeSignum = 1;
+    private double getNodeTransitionPenaltyFactor(SingleTrackManeuverNodesLevel previousLevel,
+            FineGrainedPointOfSail previousNode, SingleTrackManeuverNodesLevel singleTrackManeuverNodesLevel,
+            FineGrainedPointOfSail currentNode) {
+        double courseDifference = previousLevel.getCourse().getDifferenceTo(singleTrackManeuverNodesLevel.getCourse())
+                .getDegrees();
+        FineGrainedPointOfSail targetPointOfSail = previousNode.getNextPointOfSail(courseDifference);
+        if (targetPointOfSail == currentNode) {
+            return 1;
         }
-        nextIteratedPointOfSail = currentIteratedPointOfSail.getNextPointOfSail(maneuverDirection);
-        do {
-            courseChangeDegLeft += currentIteratedPointOfSail.getDifferenceInDegrees(nextIteratedPointOfSail)
-                    * courseChangeSignum;
-            if (courseChangeDegLeft * courseChangeSignum > 0) {
-                previousIteratedPointOfSail = currentIteratedPointOfSail;
-                currentIteratedPointOfSail = nextIteratedPointOfSail;
-                nextIteratedPointOfSail = nextIteratedPointOfSail.getNextPointOfSail(maneuverDirection);
-            } else {
-                break;
-            }
-        } while (true);
-        if (pointOfSailBeforeManeuver == nextIteratedPointOfSail
-                || pointOfSailBeforeManeuver == currentIteratedPointOfSail) {
-            return likelihoodForPointOfSailBeforeManeuver + 0.001;
+        if (targetPointOfSail.getCoarseGrainedPointOfSail() == currentNode.getCoarseGrainedPointOfSail()) {
+            return 1 / (1 + Math.abs(courseDifference / 45));
         }
-        if (pointOfSailBeforeManeuver == previousIteratedPointOfSail && Math.abs(courseChangeDegLeft) <= 10) {
-            return 0.6 * likelihoodForPointOfSailBeforeManeuver + 0.001;
+        if (targetPointOfSail.getTack() == currentNode.getTack() && (targetPointOfSail.getLegType() == LegType.REACHING
+                || currentNode.getLegType() == LegType.REACHING)) {
+            return 1 / (1 + Math.abs(courseDifference / 30));
         }
-        double targetCourseChangeDeviation = currentIteratedPointOfSail.getTwa() - pointOfSailBeforeManeuver.getTwa();
-        if (targetCourseChangeDeviation <= -180) {
-            targetCourseChangeDeviation += 180;
-        } else if (targetCourseChangeDeviation > 180) {
-            targetCourseChangeDeviation -= 180;
+        if (targetPointOfSail.getNextPointOfSail(NauticalSide.STARBOARD) == currentNode
+                || targetPointOfSail.getNextPointOfSail(NauticalSide.PORT) == currentNode) {
+            return 1 / (1 + Math.abs((courseDifference) / 15));
         }
-        return 1 / (1 + (targetCourseChangeDeviation / 5)) * likelihoodForPointOfSailBeforeManeuver + 0.001;
-    }
-
-    private double convertLikelihoodToDistance(double likelihoodForPointOfSailBeforeManeuver) {
-        return 1 / (likelihoodForPointOfSailBeforeManeuver * likelihoodForPointOfSailBeforeManeuver);
+        return 1 / (1 + Math.pow((courseDifference) / 15, 2));
     }
 
     public static ManeuverNodesLevelFactory<SingleTrackManeuverNodesLevel, SingleManeuverClassificationResult> getFactory() {

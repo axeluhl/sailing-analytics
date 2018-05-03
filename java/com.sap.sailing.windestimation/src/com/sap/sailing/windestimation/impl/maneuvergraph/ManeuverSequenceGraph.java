@@ -41,14 +41,14 @@ public class ManeuverSequenceGraph<T extends ManeuverNodesLevel<T>, R> {
             lastGraphLevel.appendNextManeuverNodesLevel(newManeuverNodesLevel);
             lastGraphLevel = newManeuverNodesLevel;
         }
-        newManeuverNodesLevel.computeDistancesFromPreviousLevelToThisLevel();
+        newManeuverNodesLevel.computeProbabilitiesFromPreviousLevelToThisLevel();
         newManeuverNodesLevel.computeBestPathsToThisLevel();
     }
 
     public void recomputePossiblePathsWithDistances() {
         T currentLevel = firstGraphLevel;
         while (currentLevel != null) {
-            currentLevel.computeDistancesFromPreviousLevelToThisLevel();
+            currentLevel.computeProbabilitiesFromPreviousLevelToThisLevel();
             currentLevel.computeBestPathsToThisLevel();
             currentLevel = currentLevel.getNextLevel();
         }

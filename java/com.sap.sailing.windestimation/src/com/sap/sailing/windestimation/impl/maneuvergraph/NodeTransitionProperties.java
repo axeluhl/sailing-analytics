@@ -8,28 +8,30 @@ package com.sap.sailing.windestimation.impl.maneuvergraph;
 public class NodeTransitionProperties {
 
     private FineGrainedPointOfSail bestPreviousNode;
-    private double bestDistanceFromStart;
-    private double[] distancesFromPreviousNodesLevel = new double[FineGrainedPointOfSail.values().length];
+    private double probabilityOfBestPathToNodeFromStart;
+    private double[] probabilitiesFromPreviousNodesLevel = new double[FineGrainedPointOfSail.values().length];
 
     public FineGrainedPointOfSail getBestPreviousNode() {
         return bestPreviousNode;
     }
 
-    public void setBestPreviousNode(FineGrainedPointOfSail bestPreviousNode, double bestDistanceFromStart) {
+    public void setBestPreviousNode(FineGrainedPointOfSail bestPreviousNode,
+            double probabilityOfBestPathToNodeFromStart) {
         this.bestPreviousNode = bestPreviousNode;
-        this.bestDistanceFromStart = bestDistanceFromStart;
+        this.probabilityOfBestPathToNodeFromStart = probabilityOfBestPathToNodeFromStart;
     }
 
-    public double getBestDistanceFromStart() {
-        return bestDistanceFromStart;
+    public double getProbabilityOfBestPathToNodeFromStart() {
+        return probabilityOfBestPathToNodeFromStart;
     }
 
-    public double getDistancesFromPreviousNodesLevel(FineGrainedPointOfSail previousNode) {
-        return distancesFromPreviousNodesLevel[previousNode.ordinal()];
+    public double getProbabilitiesFromPreviousNodesLevel(FineGrainedPointOfSail previousNode) {
+        return probabilitiesFromPreviousNodesLevel[previousNode.ordinal()];
     }
 
-    public void setDistancesFromPreviousNodesLevel(FineGrainedPointOfSail previousNode, double distanceToThisNode) {
-        this.distancesFromPreviousNodesLevel[previousNode.ordinal()] = distanceToThisNode;
+    public void setProbabilitiesFromPreviousNodesLevel(FineGrainedPointOfSail previousNode,
+            double probabilityToThisNode) {
+        this.probabilitiesFromPreviousNodesLevel[previousNode.ordinal()] = probabilityToThisNode;
     }
 
 }

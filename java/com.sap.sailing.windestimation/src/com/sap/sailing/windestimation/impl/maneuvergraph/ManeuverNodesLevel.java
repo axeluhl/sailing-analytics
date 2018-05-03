@@ -15,7 +15,7 @@ public interface ManeuverNodesLevel<SelfType extends ManeuverNodesLevel<SelfType
 
     CompleteManeuverCurveWithEstimationData getManeuver();
 
-    void computeDistancesFromPreviousLevelToThisLevel();
+    void computeProbabilitiesFromPreviousLevelToThisLevel();
     
     void computeBestPathsToThisLevel();
     
@@ -23,9 +23,9 @@ public interface ManeuverNodesLevel<SelfType extends ManeuverNodesLevel<SelfType
 
     FineGrainedPointOfSail getBestPreviousNode(FineGrainedPointOfSail toNode);
 
-    double getBestDistanceToNodeFromStart(FineGrainedPointOfSail toNode);
+    double getProbabilityOfBestPathToNodeFromStart(FineGrainedPointOfSail toNode);
 
-    double getDistanceFromPreviousLevelNodeToThisLevelNode(FineGrainedPointOfSail previousLevelNode,
+    double getProbabilityFromPreviousLevelNodeToThisLevelNode(FineGrainedPointOfSail previousLevelNode,
             FineGrainedPointOfSail thisLevelNode);
 
 }

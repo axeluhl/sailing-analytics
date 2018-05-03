@@ -1,5 +1,6 @@
 package com.sap.sailing.windestimation.impl.maneuvergraph;
 
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 
 /**
@@ -33,14 +34,28 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
     }
 
     @Override
-    public double getBestDistanceToNodeFromStart(FineGrainedPointOfSail toNode) {
-        return nodeTransitions[toNode.ordinal()].getBestDistanceFromStart();
+    public double getProbabilityOfBestPathToNodeFromStart(FineGrainedPointOfSail toNode) {
+        return nodeTransitions[toNode.ordinal()].getProbabilityOfBestPathToNodeFromStart();
     }
 
     @Override
-    public double getDistanceFromPreviousLevelNodeToThisLevelNode(FineGrainedPointOfSail previousLevelNode,
+    public double getProbabilityFromPreviousLevelNodeToThisLevelNode(FineGrainedPointOfSail previousLevelNode,
             FineGrainedPointOfSail thisLevelNode) {
-        return nodeTransitions[thisLevelNode.ordinal()].getDistancesFromPreviousNodesLevel(previousLevelNode);
+        return nodeTransitions[thisLevelNode.ordinal()].getProbabilitiesFromPreviousNodesLevel(previousLevelNode);
+    }
+
+    protected void normalizeNodeTransitions() {
+        for (NodeTransitionProperties nodeTransition : nodeTransitions) {
+            double probabilitiesSum = 0;
+            for (FineGrainedPointOfSail previousNode : FineGrainedPointOfSail.values()) {
+                probabilitiesSum += nodeTransition.getProbabilitiesFromPreviousNodesLevel(previousNode);
+            }
+            for (FineGrainedPointOfSail previousNode : FineGrainedPointOfSail.values()) {
+                double normalizedTransitionProbability = nodeTransition
+                        .getProbabilitiesFromPreviousNodesLevel(previousNode) / probabilitiesSum;
+                nodeTransition.setProbabilitiesFromPreviousNodesLevel(previousNode, normalizedTransitionProbability);
+            }
+        }
     }
 
     protected void setNextLevel(SelfType nextLevel) {
@@ -74,14 +89,15 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
         if (previousLevel != null) {
             for (FineGrainedPointOfSail previousNode : FineGrainedPointOfSail.values()) {
                 for (FineGrainedPointOfSail currentNode : FineGrainedPointOfSail.values()) {
-                    double distanceFromStart = previousLevel.getBestDistanceToNodeFromStart(previousNode)
-                            + this.getDistanceFromPreviousLevelNodeToThisLevelNode(previousNode, currentNode)
-                                    * getPenaltyFactorForTransitionConsideringWholeBestPath(previousNode, currentNode);
-                    double existingBestDistanceToNodeFromStart = this.getBestDistanceToNodeFromStart(currentNode);
-                    if (existingBestDistanceToNodeFromStart == 0
-                            || distanceFromStart < existingBestDistanceToNodeFromStart) {
+                    double probabilityOfBestPathToNodeFromStart = previousLevel
+                            .getProbabilityOfBestPathToNodeFromStart(previousNode)
+                            * this.getProbabilityFromPreviousLevelNodeToThisLevelNode(previousNode, currentNode)
+                            * getPenaltyFactorForTransitionConsideringWholeBestPath(previousNode, currentNode);
+                    double existingProbabilityOfBestPathToNodeFromStart = this
+                            .getProbabilityOfBestPathToNodeFromStart(currentNode);
+                    if (probabilityOfBestPathToNodeFromStart > existingProbabilityOfBestPathToNodeFromStart) {
                         this.nodeTransitions[currentNode.ordinal()].setBestPreviousNode(previousNode,
-                                distanceFromStart);
+                                probabilityOfBestPathToNodeFromStart);
                     }
                 }
             }
@@ -94,6 +110,10 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
         // lowest speed, max/avg turning rate, course change (if not mark passing), maneuver time loss (if
         // not mark passing)
         return 0;
+    }
+
+    public Bearing getCourse() {
+        return getManeuver().getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing();
     }
 
 }

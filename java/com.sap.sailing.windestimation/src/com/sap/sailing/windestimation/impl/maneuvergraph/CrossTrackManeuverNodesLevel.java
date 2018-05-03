@@ -18,26 +18,23 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
     }
 
     @Override
-    public void computeDistancesFromPreviousLevelToThisLevel() {
+    public void computeProbabilitiesFromPreviousLevelToThisLevel() {
         for (FineGrainedPointOfSail previousNode : FineGrainedPointOfSail.values()) {
             CrossTrackManeuverNodesLevel previousLevel = getPreviousLevel();
             for (FineGrainedPointOfSail currentNode : FineGrainedPointOfSail.values()) {
-                double distanceSum = 0;
-                int distanceCount = 0;
+                double probabilitiesSum = 0;
+                int probabilitiesCount = 0;
                 if (previousLevel != null) {
                     SingleTrackManeuverNodesLevel previousLevelNextSingleTrackLevel = previousLevel
                             .getSingleTrackManeuverNodesLevel().getNextLevel();
                     if (previousLevelNextSingleTrackLevel != null) {
-                        double courseDiffBetweenThisLevelAndPreviousLevelNextSingleTrackLevel = this.getManeuver()
-                                .getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing()
-                                .getDifferenceTo(previousLevelNextSingleTrackLevel.getManeuver()
-                                        .getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing())
-                                .getDegrees();
+                        double courseDiffBetweenThisLevelAndPreviousLevelNextSingleTrackLevel = this.getCourse()
+                                .getDifferenceTo(previousLevelNextSingleTrackLevel.getCourse()).getDegrees();
                         FineGrainedPointOfSail nextSingleTrackNode = currentNode
                                 .getNextPointOfSail(courseDiffBetweenThisLevelAndPreviousLevelNextSingleTrackLevel);
-                        distanceSum += previousLevelNextSingleTrackLevel
-                                .getDistanceFromPreviousLevelNodeToThisLevelNode(previousNode, nextSingleTrackNode);
-                        distanceCount++;
+                        probabilitiesSum += previousLevelNextSingleTrackLevel
+                                .getProbabilityFromPreviousLevelNodeToThisLevelNode(previousNode, nextSingleTrackNode);
+                        probabilitiesCount++;
                     }
                 }
                 SingleTrackManeuverNodesLevel thisLevelCurrentSingleTrackLevel = this
@@ -46,21 +43,20 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
                         .getPreviousLevel();
                 if (thisLevelPreviousSingleTrackLevel != null) {
                     double courseDiffBetweenThisLevelPreviousSingleTrackLevelAndPreviousLevel = thisLevelPreviousSingleTrackLevel
-                            .getManeuver().getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter()
-                            .getBearing().getDifferenceTo(previousLevel.getManeuver()
-                                    .getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing())
-                            .getDegrees();
+                            .getCourse().getDifferenceTo(previousLevel.getCourse()).getDegrees();
                     FineGrainedPointOfSail previousSingleTrackNode = previousNode
                             .getNextPointOfSail(courseDiffBetweenThisLevelPreviousSingleTrackLevelAndPreviousLevel);
-                    distanceSum += thisLevelCurrentSingleTrackLevel
-                            .getDistanceFromPreviousLevelNodeToThisLevelNode(previousSingleTrackNode, currentNode);
-                    distanceCount++;
+                    probabilitiesSum += thisLevelCurrentSingleTrackLevel
+                            .getProbabilityFromPreviousLevelNodeToThisLevelNode(previousSingleTrackNode, currentNode);
+                    probabilitiesCount++;
                 }
-                double distance = distanceSum / distanceCount
+                double probability = probabilitiesSum / probabilitiesCount
                         * getNodeTransitionPenaltyFactor(previousLevel, previousNode, this, currentNode);
-                this.nodeTransitions[currentNode.ordinal()].setDistancesFromPreviousNodesLevel(previousNode, distance);
+                this.nodeTransitions[currentNode.ordinal()].setProbabilitiesFromPreviousNodesLevel(previousNode,
+                        probability);
             }
         }
+        normalizeNodeTransitions();
     }
 
     private double getNodeTransitionPenaltyFactor(CrossTrackManeuverNodesLevel previousLevel,
@@ -80,8 +76,7 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
     }
 
     private double getWindCourseInDegrees(FineGrainedPointOfSail node) {
-        double windCourse = (getManeuver().getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing()
-                .getDegrees() - node.getTwa() + 180) % 360;
+        double windCourse = (getCourse().getDegrees() - node.getTwa() + 180) % 360;
         if (windCourse < 0) {
             windCourse += 360;
         }
