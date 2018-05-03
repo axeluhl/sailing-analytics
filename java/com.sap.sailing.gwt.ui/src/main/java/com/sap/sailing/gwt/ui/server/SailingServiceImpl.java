@@ -7639,15 +7639,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     
                     @Override
                     public void visit(RaceLogCourseDesignChangedEvent event) {
-                        // Only course changes up to the end of the sliced race are copied
-                        // to be able to cut several training races where the course is changed
-                        // between races in preparation for the next race. In this case the course
-                        // for a sliced is the course that was valid at the time that race took place.
-                        if (event.getLogicalTimePoint().before(sliceTo)) {
-                            raceLog.add(new RaceLogCourseDesignChangedEventImpl(event.getCreatedAt(),
-                                    event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                    raceLog.getCurrentPassId(), event.getCourseDesign(), event.getCourseDesignerMode()));
-                        }
+                        raceLog.add(new RaceLogCourseDesignChangedEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                raceLog.getCurrentPassId(), event.getCourseDesign(), event.getCourseDesignerMode()));
                     }
                     
                     @Override

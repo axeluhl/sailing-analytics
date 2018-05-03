@@ -328,7 +328,13 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             @Override
             public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
                 try {
-                    trackedRegattaRegistry.removeRace(getRegatta(), getRace());
+                    final RaceDefinition race = getRace();
+                    for (final Fleet fleet : raceColumn.getFleets()) {
+                        if (race.equals(raceColumn.getRaceDefinition(fleet))) {
+                            trackedRegattaRegistry.removeRace(getRegatta(), race);
+                            break;
+                        }
+                    }
                 } catch (IOException | InterruptedException e) {
                     logger.log(Level.WARNING, "Error trying to remove smart phone / race log tracked race whose race column was deleted: "+
                             e.getMessage(), e);
