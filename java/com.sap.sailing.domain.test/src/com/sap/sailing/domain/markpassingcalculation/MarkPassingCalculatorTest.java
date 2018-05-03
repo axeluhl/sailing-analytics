@@ -27,6 +27,17 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.util.IntHolder;
 
 public class MarkPassingCalculatorTest {
+    private static class MyMarkPassingCalculator extends MarkPassingCalculator {
+        public MyMarkPassingCalculator(DynamicTrackedRace race, boolean doListen,
+                boolean waitForInitialMarkPassingCalculation) {
+            super(race, doListen, waitForInitialMarkPassingCalculation);
+        }
+
+        @Override
+        protected void enqueueUpdate(StorePositionUpdateStrategy update) {
+            super.enqueueUpdate(update);
+        }
+    }
     @Test
     public void testSuspendResume() throws InterruptedException {
         final boolean[] executed = new boolean[1];
@@ -40,7 +51,7 @@ public class MarkPassingCalculatorTest {
         when(race.getCompetitors()).thenReturn(Collections.emptyList());
         Course course = new CourseImpl("Course", Collections.emptyList());
         when(race.getCourse()).thenReturn(course);
-        MarkPassingCalculator mpc = new MarkPassingCalculator(trackedRace, /* doListen */ true, /* waitForInitialMarkPassingCalculation */ true);
+        MyMarkPassingCalculator mpc = new MyMarkPassingCalculator(trackedRace, /* doListen */ true, /* waitForInitialMarkPassingCalculation */ true);
         mpc.suspend();
         mpc.enqueueUpdate(new StorePositionUpdateStrategy() {
             @Override
