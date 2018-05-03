@@ -155,7 +155,7 @@ public class MultiVideoDialog extends DialogBox {
         int y = 0;
         dataTable.removeAllRows();
         dataTable.clear();
-        dataTable.setWidget(y, DELETE_COLUMN, new Label(stringMessages.delete()));
+        dataTable.setWidget(y, DELETE_COLUMN, new Label(stringMessages.addMediaTrack()));
         dataTable.setWidget(y, URL_COLUMN, new Label(stringMessages.url()));
         dataTable.setWidget(y, STATUS_COLUMN, new Label(stringMessages.status()));
         dataTable.setWidget(y, DURATION_COLUMN, new Label(stringMessages.duration()));
@@ -170,12 +170,17 @@ public class MultiVideoDialog extends DialogBox {
             dataTable.setWidget(y, URL_COLUMN, link);
             dataTable.setWidget(y, STATUS_COLUMN, new Label(asString(remoteFile.status)));
             
-            Button removeVideo = new Button(stringMessages.remove());
+            CheckBox removeVideo = new CheckBox();
             removeVideo.setEnabled(!isWorking);
-            removeVideo.addClickHandler(new ClickHandler() {
+            removeVideo.setValue(remoteFile.status == EStatus.WAITING_FOR_LINK);
+            removeVideo.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
-                public void onClick(ClickEvent event) {
-                    remoteFiles.remove(remoteFile);
+                public void onValueChange(ValueChangeEvent<Boolean> event) {
+                    if (Boolean.TRUE.equals(event.getValue())) {
+                        remoteFile.status = EStatus.DO_NOT_PROCESS;
+                    } else {
+                        remoteFile.status = EStatus.WAITING_FOR_LINK;
+                    }
                     updateUI();
                 }
             });
@@ -332,7 +337,7 @@ public class MultiVideoDialog extends DialogBox {
                                     @Override
                                     public void onSuccess(MediaTrack result) {
                                         if (result == null) {
-                                            remoteFile.status = EStatus.WAITING_FOR_LINK;
+                                            remoteFile.status = EStatus.DO_NOT_PROCESS;
                                         } else {
                                             remoteFile.status = EStatus.ALREADY_ADDED;
                                             remoteFile.knownMediaTrack = result;
@@ -558,10 +563,12 @@ public class MultiVideoDialog extends DialogBox {
         DONE,
         ALREADY_ADDED,
         GETTING_MEDIATRACK,
-        ERROR_LINKING;
+        ERROR_LINKING,
+        DO_NOT_PROCESS;
     }
 
     static class RemoteFileInfo {
+        protected boolean selected;
         protected MediaTrack knownMediaTrack;
         protected Set<RegattaAndRaceIdentifier> candidates;
         protected MimeType mime;
