@@ -479,9 +479,10 @@ public class MarkPassingCalculator {
 
     void enqueueUpdate(StorePositionUpdateStrategy update) {
         synchronized (this) {
-            final boolean wasQueueEmpty = queue.isEmpty();
             queue.add(update);
-            if (!suspended && wasQueueEmpty && listenerThread == null) {
+            // regardless of whether the queue is empty or not, launch the thread if it doesn't run yet and we are not suspended;
+            // the queue may have filled up while we were suspended
+            if (!suspended && listenerThread == null) {
                 listenerThread = createAndStartListenerThread();
             }
         }
