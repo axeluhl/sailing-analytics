@@ -125,12 +125,7 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
     }
     
     private GroupKey groupKeyToSeriesKey(GroupKey groupKey) {
-        if (groupKey.hasSubKeys()) {
-            List<? extends GroupKey> subKeys = GroupKey.Util.getSubKeys(groupKey);
-            return subKeys.size() == 1 ? subKeys.get(0) : new CompoundGroupKey(subKeys);
-        } else {
-            return simpleResultSeriesKey;
-        }
+        return new CompoundGroupKey(groupKey.getKeys());
     }
 
 
