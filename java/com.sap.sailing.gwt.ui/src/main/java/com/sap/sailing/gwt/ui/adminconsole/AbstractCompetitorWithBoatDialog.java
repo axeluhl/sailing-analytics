@@ -15,13 +15,13 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
  * @author Frank Mittag
  * 
  */
-public abstract class AbstractCompetitorWithBoatDialog extends CompetitorEditDialog {
+public abstract class AbstractCompetitorWithBoatDialog extends CompetitorEditDialog<CompetitorWithBoatDTO>{
     protected final SuggestBox boatClassNameTextBox;
     protected final TextBox sailIdTextBox;
     protected final TextBox boatNameTextBox;
     protected final TextBox boatDisplayColorTextBox;
     
-    protected static class CompetitorWithBoatValidator extends CompetitorWithoutBoatValidator {
+    protected static class CompetitorWithBoatValidator extends CompetitorWithoutBoatValidator<CompetitorWithBoatDTO> {
         protected final StringMessages stringMessages;
 
         public CompetitorWithBoatValidator(StringMessages stringMessages) {
@@ -87,7 +87,7 @@ public abstract class AbstractCompetitorWithBoatDialog extends CompetitorEditDia
 
     @Override
     protected CompetitorWithBoatDTO getResult() {
-        CompetitorDTO c = super.getResult();
+        CompetitorDTO c = getBaseResult();
         BoatDTO boat = getBoat();
         CompetitorWithBoatDTO result = new CompetitorWithBoatDTOImpl(c.getName(), c.getShortName(), c.getColor(), c.getEmail(),
                 c.getTwoLetterIsoCountryCode(), c.getThreeLetterIocCountryCode(), c.getCountryName(),

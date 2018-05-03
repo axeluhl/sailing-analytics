@@ -33,14 +33,14 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
     /**
      * The competitor list, ordered ascending by total rank, suppressed competitors removed
      */
-    public List<CompetitorWithBoatDTO> competitors;
+    public List<CompetitorDTO> competitors;
 
     /**
      * A list with set semantics; no duplicates are allowed.
      */
-    private List<CompetitorWithBoatDTO> suppressedCompetitors;
+    private List<CompetitorDTO> suppressedCompetitors;
 
-    private Map<String, List<CompetitorWithBoatDTO>> competitorOrderingPerRaceColumnName;
+    private Map<String, List<CompetitorDTO>> competitorOrderingPerRaceColumnName;
 
     /**
      * The validity time point for which this leaderboard DTO was requested (not to be confused with
@@ -63,13 +63,17 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
      */
     private boolean hasOverallDetails;
 
+    @Deprecated
     LeaderboardDTO() {} // for serialization
 
     /**
      * @param uuidGenerator used to provide the {@link #id ID} for this object (see also {@link #getId()}) and for any clones produced
      * from it by the {@link #clone()} operation.
      */
-    public LeaderboardDTO(Date timepoint, Date timePointOfLastCorrectionsValidity, String comment, ScoringSchemeType scoringScheme, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator, boolean hasOverallDetails) {
+    public LeaderboardDTO(Date timepoint, Date timePointOfLastCorrectionsValidity, String comment,
+            ScoringSchemeType scoringScheme, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator,
+            boolean hasOverallDetails, BoatClassDTO boatClass) {
+        super(boatClass);
         initCollections();
         id = uuidGenerator.generateRandomUUID();
         this.timePoint = timepoint;
@@ -81,11 +85,12 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
     }
 
     private void initCollections() {
-        competitorOrderingPerRaceColumnName = new HashMap<String, List<CompetitorWithBoatDTO>>();
-        this.suppressedCompetitors = new ArrayList<CompetitorWithBoatDTO>();
+        competitorOrderingPerRaceColumnName = new HashMap<String, List<CompetitorDTO>>();
+        this.suppressedCompetitors = new ArrayList<>();
     }
     
-    protected LeaderboardDTO(String id) {
+    protected LeaderboardDTO(String id, BoatClassDTO boatClass) {
+        super(boatClass);
         initCollections();
         this.id = id;
     }
@@ -94,18 +99,18 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
         return id;
     }
 
-    public Iterable<CompetitorWithBoatDTO> getSuppressedCompetitors() {
+    public Iterable<CompetitorDTO> getSuppressedCompetitors() {
         return suppressedCompetitors;
     }
     
     /**
      * @param suppressedCompetitors must not contain any duplicates ("set" semantics)
      */
-    public void setSuppressedCompetitors(List<CompetitorWithBoatDTO> suppressedCompetitors) {
+    public void setSuppressedCompetitors(List<CompetitorDTO> suppressedCompetitors) {
         this.suppressedCompetitors = suppressedCompetitors;
     }
 
-    public void setSuppressed(CompetitorWithBoatDTO competitor, boolean suppressed) {
+    public void setSuppressed(CompetitorDTO competitor, boolean suppressed) {
         if (suppressed && !suppressedCompetitors.contains(competitor)) {
             suppressedCompetitors.add(competitor);
         } else {
@@ -117,7 +122,7 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
         return higherScoresIsBetter;
     }
 
-    public BoatDTO getBoatOfCompetitor(String raceColumnName, CompetitorWithBoatDTO competitor) {
+    public BoatDTO getBoatOfCompetitor(String raceColumnName, CompetitorDTO competitor) {
         BoatDTO result = null;
         if (rows != null) { 
             LeaderboardRowDTO leaderboardRow = rows.get(competitor);
@@ -156,31 +161,31 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
         }
     }
 
-    public void setCompetitorsFromBestToWorst(String raceColumnName, List<CompetitorWithBoatDTO> orderedCompetitors) {
+    public void setCompetitorsFromBestToWorst(String raceColumnName, List<CompetitorDTO> orderedCompetitors) {
         competitorOrderingPerRaceColumnName.put(raceColumnName, orderedCompetitors);
     }
     
-    public void setCompetitorsFromBestToWorst(RaceColumnDTO raceColumn, List<CompetitorWithBoatDTO> newOrdering) {
+    public void setCompetitorsFromBestToWorst(RaceColumnDTO raceColumn, List<CompetitorDTO> newOrdering) {
         setCompetitorsFromBestToWorst(raceColumn.getName(), newOrdering);
     }
     
-    public void setCompetitorOrderingPerRace(Map<String, List<CompetitorWithBoatDTO>> competitorOrderingPerRaceColumnName) {
+    public void setCompetitorOrderingPerRace(Map<String, List<CompetitorDTO>> competitorOrderingPerRaceColumnName) {
         this.competitorOrderingPerRaceColumnName = competitorOrderingPerRaceColumnName;
     }
 
-    public Map<String, List<CompetitorWithBoatDTO>> getCompetitorOrderingPerRaceColumnName() {
+    public Map<String, List<CompetitorDTO>> getCompetitorOrderingPerRaceColumnName() {
         return competitorOrderingPerRaceColumnName;
     }
     
-    public List<CompetitorWithBoatDTO> getCompetitorsFromBestToWorst(String raceColumnName) {
+    public List<CompetitorDTO> getCompetitorsFromBestToWorst(String raceColumnName) {
         return competitorOrderingPerRaceColumnName.get(raceColumnName);
     }
 
-    public List<CompetitorWithBoatDTO> getCompetitorsFromBestToWorst(RaceColumnDTO raceColumn) {
+    public List<CompetitorDTO> getCompetitorsFromBestToWorst(RaceColumnDTO raceColumn) {
         return competitorOrderingPerRaceColumnName.get(raceColumn.getName());
     }
 
-    public int getTotalRank(CompetitorWithBoatDTO competitor) {
+    public int getTotalRank(CompetitorDTO competitor) {
         return competitors.indexOf(competitor) + 1;
     };
 

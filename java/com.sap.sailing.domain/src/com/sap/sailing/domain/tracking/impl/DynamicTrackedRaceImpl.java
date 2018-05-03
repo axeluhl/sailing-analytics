@@ -355,9 +355,13 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void setDelayToLiveInMillis(long delayToLiveInMillis) {
-        if (!delayToLiveInMillisFixed && getDelayToLiveInMillis() != delayToLiveInMillis) {
-            super.setDelayToLiveInMillis(delayToLiveInMillis);
-            notifyListenersDelayToLiveChanged(delayToLiveInMillis);
+        if (!delayToLiveInMillisFixed) {
+            if (getDelayToLiveInMillis() != delayToLiveInMillis) {
+                super.setDelayToLiveInMillis(delayToLiveInMillis);
+                notifyListenersDelayToLiveChanged(delayToLiveInMillis);
+            }
+        } else {
+            logger.info("Not setting live delay for race "+getRace().getName()+" to "+delayToLiveInMillis+"ms because delay has been fixed");
         }
     }
 

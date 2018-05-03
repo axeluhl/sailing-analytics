@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -30,7 +31,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * @author Alexander Tatarinovich
  *
  */
-public class ImportCompetitorCallback implements DialogCallback<Pair<Map<CompetitorDescriptor, CompetitorWithBoatDTO>, String>> {
+public class ImportCompetitorCallback implements DialogCallback<Pair<Map<CompetitorDescriptor, CompetitorDTO>, String>> {
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
@@ -47,22 +48,22 @@ public class ImportCompetitorCallback implements DialogCallback<Pair<Map<Competi
     }
 
     @Override
-    public void ok(final Pair<Map<CompetitorDescriptor, CompetitorWithBoatDTO>, String> competitorsForRegisteringAndSearchTag) {
-        final Set<CompetitorWithBoatDTO> existingCompetitorsSelected = new HashSet<>();
-        for (final CompetitorWithBoatDTO existingCompetitor : competitorsForRegisteringAndSearchTag.getA().values()) {
+    public void ok(final Pair<Map<CompetitorDescriptor, CompetitorDTO>, String> competitorsForRegisteringAndSearchTag) {
+        final Set<CompetitorDTO> existingCompetitorsSelected = new HashSet<>();
+        for (final CompetitorDTO existingCompetitor : competitorsForRegisteringAndSearchTag.getA().values()) {
             if (existingCompetitor != null) {
                 existingCompetitor.addToSearchTag(competitorsForRegisteringAndSearchTag.getB());
                 existingCompetitorsSelected.add(existingCompetitor);
             }
         }
         sailingService.addOrUpdateCompetitors(new ArrayList<>(existingCompetitorsSelected), new MarkedAsyncCallback<>(
-                new AsyncCallback<List<CompetitorWithBoatDTO>>() {
+                new AsyncCallback<List<CompetitorDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(caught.getMessage());
                     }
                     @Override
-                    public void onSuccess(List<CompetitorWithBoatDTO> result) {
+                    public void onSuccess(List<CompetitorDTO> result) {
                         // TODO trigger an update of any client-side competitor display
                     }
                 }));
@@ -81,7 +82,7 @@ public class ImportCompetitorCallback implements DialogCallback<Pair<Map<Competi
      *            created with a new ID on the server
      */
     private void registerCompetitorsAfterSaving(final List<CompetitorDescriptor> competitorsForSaving,
-            final Iterable<CompetitorWithBoatDTO> competitorsForRegistration, String searchTag) {
+            final Iterable<CompetitorDTO> competitorsForRegistration, String searchTag) {
         sailingService.addCompetitors(competitorsForSaving, searchTag, new AsyncCallback<List<CompetitorWithBoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -90,7 +91,7 @@ public class ImportCompetitorCallback implements DialogCallback<Pair<Map<Competi
 
             @Override
             public void onSuccess(List<CompetitorWithBoatDTO> result) {
-                final Set<CompetitorWithBoatDTO> competitorsToAddWithNewOnesReplacedBySavedOnesWithId = new HashSet<>();
+                final Set<CompetitorDTO> competitorsToAddWithNewOnesReplacedBySavedOnesWithId = new HashSet<>();
                 Util.addAll(competitorsForRegistration, competitorsToAddWithNewOnesReplacedBySavedOnesWithId);
                 // add those competitors returned by the server after saving to the competitor store where they received an ID:
                 competitorsToAddWithNewOnesReplacedBySavedOnesWithId.addAll(result);
@@ -99,7 +100,7 @@ public class ImportCompetitorCallback implements DialogCallback<Pair<Map<Competi
         });
     }
 
-    protected void registerCompetitors(Set<CompetitorWithBoatDTO> competitorDTOs) {
+    protected void registerCompetitors(Set<CompetitorDTO> competitorDTOs) {
         // Don't register by default
     }
 }

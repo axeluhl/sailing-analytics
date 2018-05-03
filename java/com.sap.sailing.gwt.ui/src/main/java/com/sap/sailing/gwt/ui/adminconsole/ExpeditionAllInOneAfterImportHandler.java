@@ -10,7 +10,7 @@ import java.util.UUID;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -50,11 +51,13 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final String sensorImporterType;
     private List<Triple<String, String, String>> raceEntries;
     private String regattaName;
+    @SuppressWarnings("unused") // the following could become useful in order to show the start times used for a split
+    private Iterable<TimePoint> startTimes;
 
     public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName,
             String leaderboardGroupName, List<Triple<String,  String, String>> raceEntries,
             List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
-            final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+            Iterable<TimePoint> startTimes, final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
         this.leaderboardGroupName = leaderboardGroupName;
         this.sensorImporterType = sensorImporterType;
@@ -63,7 +66,8 @@ public class ExpeditionAllInOneAfterImportHandler {
         this.stringMessages = stringMessages;
         this.raceEntries = raceEntries;
         this.regattaName = regattaName;
-                
+        this.startTimes = startTimes;
+        // TODO from the start times, suggest the user to split the session into one session per start, with start tracking at n minutes before start
         sailingService.getEventById(eventId, false, new DataLoadingCallback<EventDTO>() {
             @Override
             public void onSuccess(EventDTO result) {
@@ -120,14 +124,14 @@ public class ExpeditionAllInOneAfterImportHandler {
         }
     }
     
-    private static class ValidatorForCompetitorRegistrationDialog implements Validator<Set<CompetitorWithBoatDTO>> {
+    private static class ValidatorForCompetitorRegistrationDialog implements Validator<Set<CompetitorDTO>> {
         private CompetitorRegistrationsPanel competitorRegistrationsPanel;
         private StringMessages stringMessages;
         public ValidatorForCompetitorRegistrationDialog(StringMessages stringMessages) {
             this.stringMessages = stringMessages;
         }
         @Override
-        public String getErrorMessage(Set<CompetitorWithBoatDTO> valueToValidate) {
+        public String getErrorMessage(Set<CompetitorDTO> valueToValidate) {
             if (competitorRegistrationsPanel == null || competitorRegistrationsPanel.getSelectedRegisteredCompetitors().size() != 1) {
                 return stringMessages.selectOneCompetitorToMapTheImportedData();
             }
@@ -138,11 +142,11 @@ public class ExpeditionAllInOneAfterImportHandler {
         }
     }
     
-    private class CallbackForCompetitorRegistrationDialog extends CancelImportDialogCallback<Set<CompetitorWithBoatDTO>> {
+    private class CallbackForCompetitorRegistrationDialog extends CancelImportDialogCallback<Set<CompetitorDTO>> {
         private CompetitorRegistrationsPanel competitorRegistrationsPanel;
         
         @Override
-        public void ok(Set<CompetitorWithBoatDTO> competitors) {
+        public void ok(Set<CompetitorDTO> competitors) {
             if (competitors.isEmpty()) {
                 Window.alert(stringMessages.importCanceledNoCompetitorAdded());
             } else {
@@ -172,11 +176,11 @@ public class ExpeditionAllInOneAfterImportHandler {
                 leaderboard.canBoatsOfCompetitorsChangePerRace).show();
     }
     
-    private void mapCompetitorsToGPSFixDeviceIds(final Set<CompetitorWithBoatDTO> mappedCompetitors) {
+    private void mapCompetitorsToGPSFixDeviceIds(final Set<CompetitorDTO> mappedCompetitors) {
         if (gpsFixesDeviceIDs.size() == 1 && mappedCompetitors.size() == 1) {
             // If there is exactly one device and one Competitor, the mapping is automatically added without user interaction
             final TrackFileImportDeviceIdentifierDTO deviceIdentifierDTO = gpsFixesDeviceIDs.iterator().next();
-            final CompetitorWithBoatDTO competitor = mappedCompetitors.iterator().next();
+            final CompetitorDTO competitor = mappedCompetitors.iterator().next();
             saveCompetitorGPSMapping(mappedCompetitors, Collections.singleton(new DeviceMappingDTO(deviceIdentifierDTO, deviceIdentifierDTO.from, deviceIdentifierDTO.to, competitor, null)));
         } else {
             new RegattaLogFixesAddMappingsDialog(sailingService, errorReporter, stringMessages,
@@ -191,17 +195,17 @@ public class ExpeditionAllInOneAfterImportHandler {
         }
     }
 
-    private void saveCompetitorGPSMapping(final Set<CompetitorWithBoatDTO> mappedCompetitors, final Collection<DeviceMappingDTO> mappings) {
+    private void saveCompetitorGPSMapping(final Set<CompetitorDTO> mappedCompetitors, final Collection<DeviceMappingDTO> mappings) {
         new AddDeviceMappingsToRegattaLog(leaderboard.getName(), mappings, () -> {
             mapCompetitorsToSensorFixDeviceIds(mappedCompetitors);
         });
     }
 
-    private final void mapCompetitorsToSensorFixDeviceIds(final Set<CompetitorWithBoatDTO> mappedCompetitors) {
+    private final void mapCompetitorsToSensorFixDeviceIds(final Set<CompetitorDTO> mappedCompetitors) {
         if (sensorFixesDeviceIDs.size() == 1 && mappedCompetitors.size() == 1) {
             // If there is exactly one device and one Competitor, the mapping is automatically added without user interaction
             final TrackFileImportDeviceIdentifierDTO deviceIdentifierDTO = sensorFixesDeviceIDs.iterator().next();
-            final CompetitorWithBoatDTO competitor = mappedCompetitors.iterator().next();
+            final CompetitorDTO competitor = mappedCompetitors.iterator().next();
             saveCompetitorSensorFixMapping(Collections.singleton(new TypedDeviceMappingDTO(deviceIdentifierDTO, deviceIdentifierDTO.from, deviceIdentifierDTO.to, competitor, null, sensorImporterType)));
         } else if (sensorFixesDeviceIDs.size() > 0) {
             new RegattaLogSensorDataAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboard.getName(),

@@ -33,10 +33,17 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
     private int infoBoxHeight;
     private int infoBoxWidth;
     private double cornerRadius;
+    
+    private final double fontScalingFactor;
 
     public SmallTransparentInfoOverlay(MapWidget map, int zIndex, String infoText, CoordinateSystem coordinateSystem) {
+        this(map, zIndex, infoText, coordinateSystem, /* fontScalingFactor */ 1.0);
+    }
+    
+    public SmallTransparentInfoOverlay(MapWidget map, int zIndex, String infoText, CoordinateSystem coordinateSystem, double fontScalingFactor) {
         super(map, zIndex, coordinateSystem);
         this.infoText = infoText;
+        this.fontScalingFactor = fontScalingFactor;
         canvasWidth = 20;
         canvasHeight = 45;
         infoBoxWidth = 20;
@@ -61,10 +68,9 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
             LatLng latLngPosition = coordinateSystem.toLatLng(position);
             Context2d context2d = getCanvas().getContext2d();
             CssColor grayTransparentColor = CssColor.make("rgba(255,255,255,0.75)");
-            final int fontSizeInPx = 12+2*Math.max(0, map.getZoom()-15);
+            final int fontSizeInPx = (int) (fontScalingFactor*(12+2*Math.max(0, map.getZoom()-15)));
             final int LINE_HEIGHT = fontSizeInPx+LINE_SPACING;
             context2d.setFont(""+fontSizeInPx+"px Roboto, Arial, sans-serif");
-//            context2d.setFont(""+fontSizeInPx+"px bold Verdana sans-serif");
             double textWidth = 0;
             infoBoxHeight = BOTTOM_MARGIN;
             for (final String line : infoText.split("\n")) {
@@ -81,12 +87,10 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
             getCanvas().setCoordinateSpaceWidth(canvasWidth);
             getCanvas().setHeight(String.valueOf(canvasHeight));
             getCanvas().setCoordinateSpaceHeight(canvasHeight);
-
             // Change origin and dimensions to match true size (a stroke makes the shape a bit larger)
             context2d.setFillStyle(grayTransparentColor);
             drawRoundedRect(context2d, cornerRadius / 2, cornerRadius / 2, infoBoxWidth - cornerRadius, infoBoxHeight
                     - cornerRadius, cornerRadius);
-
             // this translation is important for drawing lines with a real line width of 1 pixel
             context2d.translate(-0.5, -0.5);
             context2d.setStrokeStyle("gray");
@@ -96,10 +100,8 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
             context2d.lineTo(cornerRadius / 2, canvasHeight);
             context2d.stroke();
             context2d.translate(0.0, 0.0);
-
             context2d.beginPath();
             context2d.setFillStyle("black");
-//            context2d.setFont(""+fontSizeInPx+"px bold Verdana sans-serif");
             context2d.setFont(""+fontSizeInPx+"px Roboto, Arial, sans-serif");
             int y = LINE_HEIGHT;
             for (final String line : infoText.split("\n")) {
@@ -107,7 +109,6 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
                 y += LINE_HEIGHT;
             }
             context2d.stroke();
-
             Point objectPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
             setCanvasPosition(objectPositionInPx.getX(), objectPositionInPx.getY() - canvasHeight);
         }

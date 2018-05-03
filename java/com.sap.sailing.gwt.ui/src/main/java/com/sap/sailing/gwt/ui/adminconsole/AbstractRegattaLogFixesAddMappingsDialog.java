@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -32,7 +33,7 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
     private final StringMessages stringMessages;
     private final SimplePanel importWidgetHolder;
     protected final TrackFileImportDeviceIdentifierTableWrapper deviceIdTable;
-    private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorWithBoatDTO>> competitorTable;
+    private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
     private final MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>> markTable;
     private final BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>> boatTable;
 
@@ -108,9 +109,9 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
 
     private void getCompetitorRegistrations(SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
         sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName,
-                new AsyncCallback<Collection<CompetitorWithBoatDTO>>() {
+                new AsyncCallback<Collection<CompetitorDTO>>() {
                     @Override
-                    public void onSuccess(Collection<CompetitorWithBoatDTO> result) {
+                    public void onSuccess(Collection<CompetitorDTO> result) {
                         competitorTable.refreshCompetitorList(result);
                     }
 

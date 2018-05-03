@@ -57,7 +57,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
-    private static final int REQUIRED_SIZE = 10000000;
+    private static final int REQUIRED_SIZE_IN_BYTES = 10000000;
     private static final long serialVersionUID = -8917349579281305977L;
 
     public MediaServiceImpl() {
@@ -145,7 +145,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
             URL input = new URL(url);
             // check size and do rangerequests if possible
             long fileSize = determineFileSize(input);
-            if (fileSize > 2 * REQUIRED_SIZE) {
+            if (fileSize > 2 * REQUIRED_SIZE_IN_BYTES) {
                 response = checkMetadataByPartialDownloads(input, fileSize);
             } else {
                 response = checkMetadataByFullFileDownload(input);
@@ -185,10 +185,10 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
 
     private VideoMetadataDTO checkMetadataByPartialDownloads(URL input, long fileSize)
             throws IOException, ProtocolException {
-        byte[] start = new byte[REQUIRED_SIZE];
-        byte[] end = new byte[REQUIRED_SIZE];
-        downloadPartOfFile(input, start, "bytes=0-" + REQUIRED_SIZE);
-        downloadPartOfFile(input, end, "bytes=" + (fileSize - REQUIRED_SIZE) + "-");
+        byte[] start = new byte[REQUIRED_SIZE_IN_BYTES];
+        byte[] end = new byte[REQUIRED_SIZE_IN_BYTES];
+        downloadPartOfFile(input, start, "bytes=0-" + REQUIRED_SIZE_IN_BYTES);
+        downloadPartOfFile(input, end, "bytes=" + (fileSize - REQUIRED_SIZE_IN_BYTES) + "-");
         long skipped = fileSize - start.length - end.length;
         return checkMetadata(start, end, skipped);
     }

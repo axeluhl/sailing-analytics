@@ -2127,7 +2127,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String expeditionVmgTargVmgDelta();
     String expeditionRateOfTurn();
     String expeditionRudderAngle();
-    String expeditionHeel();
     String expeditionTargetHeel();
     String expeditionTimeToPortLayline();
     String expeditionTimeToStbLayline();
@@ -2161,6 +2160,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String noDataManeuverTable();
     String errorTryingToDetermineBoatLinkedToCompetitor(String raceColumnName, String leaderboardName, String message);
     String delaysMustNotBeNegative();
+    String managePlaybackMedia();
+    String filterToBoatsRegisteredOnRegatta();
+    String unableToObtainCompetitorsAndBoatsForRaceInFleetInLeaderboard(String raceColumnName, String fleetName, String leaderboardName, String message);
+    String unableToObtainBoatsRegisteredWith(String leaderboardName, String message);
+    String importStartData();
+    String startCountDownFontSizeScaling();
     String multiVideoURLOfIndex();
     String multiVideoScan();
     String multiVideoLinking();
