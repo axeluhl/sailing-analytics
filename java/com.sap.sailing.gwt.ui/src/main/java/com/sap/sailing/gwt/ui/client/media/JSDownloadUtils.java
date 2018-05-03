@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.client.media;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.typedarrays.shared.Int8Array;
 
 /**
@@ -170,19 +173,74 @@ public class JSDownloadUtils {
     }-*/;
 
     public static void getFileList(String url, JSHrefCallback callback) {
-        getFileListNative(url, callback);
+        List<String> openWork = new ArrayList<>();
+        List<String> closedWork = new ArrayList<>();
+        openWork.add(url);
+        getFileList(openWork, closedWork, callback);
     }
-    
+
+    /**
+    * Tries to async determine all content in a folder 
+     * @param closedWork 
+    */
+    private static void getFileList(List<String> openWork, List<String> closedWork, JSHrefCallback callback) {
+        if (!openWork.isEmpty()) {
+            String next = openWork.remove(0);
+            closedWork.add(next);
+            getFileListNative(next, new JSHrefCallback() {
+                @Override
+                public void noResult() {
+                    // maybe it was a file after all? check with file mode again
+                    callback.newHref(next);
+                    // continue next file in open list
+                    getFileList(openWork, closedWork, callback);
+                }
+
+                @Override
+                public void newHref(String foundLink) {
+                    if (foundLink.equals("../")) {
+                        return;
+                    }
+                    if (foundLink.equals("./")) {
+                        return;
+                    }
+                    if (!foundLink.startsWith("http://") || foundLink.startsWith("https://")) {
+                        if (!next.endsWith("/")) {
+                            foundLink = "/" + foundLink;
+                        }
+                        foundLink = next + foundLink;
+                    }
+                    if (foundLink.endsWith("/")) {
+                        // is a folder
+                        if (!closedWork.contains(foundLink)) {
+                            openWork.add(foundLink);
+                        }
+                    } else {
+                        callback.newHref(foundLink);
+                    }
+                }
+
+                @Override
+                public void complete() {
+                    // continue next file in open list
+                    getFileList(openWork, closedWork, callback);
+                }
+            });
+        } else {
+            callback.complete();
+        }
+    }
+
     private native static void getFileListNative(String url, JSHrefCallback callback)/*-{
-        try{
+        try {
             var xmlHttp = null;
             var allLinks = []; //set of all internal and external links
             xmlHttp = new XMLHttpRequest();
-            xmlHttp.open( "GET", url, true );
-            xmlHttp.send( null );
-            xmlHttp.onreadystatechange = function () {
-                if ( xmlHttp.readyState == 4) {
-                     if (xmlHttp.status == 200){
+            xmlHttp.open("GET", url, true);
+            xmlHttp.send(null);
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp.readyState == 4) {
+                    if (xmlHttp.status == 200) {
                         var container = document.createElement("p");
                         container.innerHTML = xmlHttp.responseText;
                         var anchors = container.getElementsByTagName("a");
@@ -198,7 +256,7 @@ public class JSDownloadUtils {
                     } else {
                         callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::noResult()();
                     }
-                } 
+                }
             };
         } catch (error) {
             callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::noResult()();

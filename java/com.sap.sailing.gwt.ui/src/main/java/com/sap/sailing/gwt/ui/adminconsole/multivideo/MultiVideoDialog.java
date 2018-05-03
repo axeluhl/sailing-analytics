@@ -310,6 +310,8 @@ public class MultiVideoDialog extends DialogBox {
                             remoteFile.message = result.getMessage();
                             if (result.getDuration() == null) {
                                 remoteFile.status = EStatus.ERROR_ANALYZE;
+                                updateUI();
+                                startNextInitializingRemoteTask();
                             } else {
                                 remoteFile.duration = result.getDuration();
                                 if (result.getRecordStartedTime() != null) {
@@ -515,21 +517,8 @@ public class MultiVideoDialog extends DialogBox {
                     return;
                 }
                 // nginx dummy file in video folder
-                if (foundLink.equalsIgnoreCase(
-                        "If%20you%20only%20see%20this%20file%2C%20you%20need%20to%20copy%20your%20files%20to%20place_videos_here%20folder")) {
+                if (foundLink.contains("place_videos_here%20folder")) {
                     return;
-                }
-                if (foundLink.startsWith("..")) {
-                    return;
-                }
-                if (foundLink.startsWith("./")) {
-                    foundLink = foundLink.substring(2);
-                }
-                if (!foundLink.startsWith("http://") || foundLink.startsWith("https://")) {
-                    if (!url.endsWith("/")) {
-                        foundLink = "/" + foundLink;
-                    }
-                    foundLink = url + foundLink;
                 }
                 remoteFiles.add(new RemoteFileInfo(foundLink));
             }
