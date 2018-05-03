@@ -134,7 +134,6 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
                     });
                     buffer.close();
                 }
-                
             }
         });
         return importedFixes.get();
@@ -170,7 +169,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
      * key set are present in {@code colIndicesInFile}'s key set. If not, an
      * exception is thrown that reports the columns missing.
      */
-    private void validateHeader(Map<String, Integer> colIndicesInFile) throws FormatNotSupportedException {
+    public static void validateHeader(Map<String, Integer> colIndicesInFile) throws FormatNotSupportedException {
         final boolean dateTimeFormatOk;
         if (colIndicesInFile.containsKey(UTC_COLUMN)) {
             dateTimeFormatOk = true;
@@ -251,7 +250,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
      * </ol>
      * If none of the above is found, {@link null} is returned.
      */
-    protected static TimePoint getTimePointFromLine(Map<String, Integer> columnsInFileFromHeader,
+    public static TimePoint getTimePointFromLine(Map<String, Integer> columnsInFileFromHeader,
             String[] lineContentTokens) throws ParseException {
         final TimePoint timePoint;
         final String date;

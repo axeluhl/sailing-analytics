@@ -6,7 +6,10 @@ import java.util.UUID;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
+import com.sap.sailing.domain.common.dto.ExpeditionAllInOneConstants;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
 
@@ -47,6 +50,17 @@ public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
                     .add(new Triple<String, String, String>(raceName, raceColumnName, fleetName));
         }
         return raceNameRaceColumnNameFleetNameList;
+    }
+    
+    public final Iterable<TimePoint> getStartTimes() {
+        final List<TimePoint> result = new ArrayList<>();
+        JSONObject jsonView = new JSONObject(this);
+        JSONArray startTimesList = jsonView.get(ExpeditionAllInOneConstants.START_TIMES).isArray();
+        for (int i = 0; i < startTimesList.size(); i++) {
+            final long startTimeAsMillis = (long) startTimesList.get(i).isNumber().doubleValue();
+            result.add(new MillisecondsTimePoint(startTimeAsMillis));
+        }
+        return result;
     }
 
     public final List<String> getGpsDeviceIds() {

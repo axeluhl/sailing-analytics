@@ -63,7 +63,6 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
 
     private void adjustMapSettings() {
         RaceMap raceMap = getRaceBoardPanel().getMap();
-        
         final RaceMapSettings defaultSettings = raceMap.getLifecycle().createDefaultSettings();
         final RaceMapSettings additiveSettings = new RaceMapSettings(
                 new RaceMapZoomSettings(Collections.singleton(ZoomTypes.BOATS), /* zoomToSelected */ false),
@@ -81,10 +80,9 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                 defaultSettings.isShowMapControls(),
                 defaultSettings.getManeuverTypesToShow(),
                 defaultSettings.isShowDouglasPeuckerPoints(),
-                defaultSettings.isShowEstimatedDuration());
-        
+                defaultSettings.isShowEstimatedDuration(),
+                defaultSettings.getStartCountDownFontSizeScaling());
         ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
-
             @Override
             public void onSettingsReloaded(RaceMapSettings patchedSettings) {
              // try to update the settings once; the problem is the "wind up" display; it changes pan/zoom

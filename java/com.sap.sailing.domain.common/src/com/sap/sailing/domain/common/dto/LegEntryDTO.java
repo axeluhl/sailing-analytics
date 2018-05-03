@@ -409,10 +409,10 @@ public class LegEntryDTO implements Serializable {
         }
     }
 
-    public void setExpeditionTimeToGUN(Double expeditionTimeToGUN) {
-        if (expeditionTimeToGUN != null) {
+    public void setExpeditionTimeToGunInSeconds(Double expeditionTimeToGunInSeconds) {
+        if (expeditionTimeToGunInSeconds != null) {
             ensureExpeditionHolder();
-            expeditionHolder.expeditionTimeToGUN = expeditionTimeToGUN;
+            expeditionHolder.expeditionTimeToGunInSeconds = expeditionTimeToGunInSeconds;
         }
     }
 
@@ -430,10 +430,10 @@ public class LegEntryDTO implements Serializable {
         }
     }
 
-    public void setExpeditionTimeToBurnToLine(Double expeditionTimeToBurnToLine) {
-        if (expeditionTimeToBurnToLine != null) {
+    public void setExpeditionTimeToBurnToLineInSeconds(Double expeditionTimeToBurnToLineInSeconds) {
+        if (expeditionTimeToBurnToLineInSeconds != null) {
             ensureExpeditionHolder();
-            expeditionHolder.expeditionTimeToBurnToLine = expeditionTimeToBurnToLine;
+            expeditionHolder.expeditionTimeToBurnToLineInSeconds = expeditionTimeToBurnToLineInSeconds;
         }
     }
 
@@ -465,10 +465,10 @@ public class LegEntryDTO implements Serializable {
         }
     }
 
-    public void setExpeditionDistanceBelowLine(Double expeditionDistanceBelowLine) {
-        if (expeditionDistanceBelowLine != null) {
+    public void setExpeditionDistanceBelowLineInMeters(Double expeditionDistanceBelowLineInMeters) {
+        if (expeditionDistanceBelowLineInMeters != null) {
             ensureExpeditionHolder();
-            expeditionHolder.expeditionDistanceBelowLine = expeditionDistanceBelowLine;
+            expeditionHolder.expeditionDistanceBelowLineInMeters = expeditionDistanceBelowLineInMeters;
         }
     }
 
@@ -538,7 +538,7 @@ public class LegEntryDTO implements Serializable {
     }
 
     public Double getExpeditionDistanceBelowLine() {
-        return expeditionHolder == null ? null : expeditionHolder.expeditionDistanceBelowLine;
+        return expeditionHolder == null ? null : expeditionHolder.expeditionDistanceBelowLineInMeters;
     }
 
     public Double getExpeditionDistanceToCommitteeBoat() {
@@ -582,7 +582,7 @@ public class LegEntryDTO implements Serializable {
     }
 
     public Double getExpeditionTimeToGUN() {
-        return expeditionHolder == null ? null : expeditionHolder.expeditionTimeToGUN;
+        return expeditionHolder == null ? null : expeditionHolder.expeditionTimeToGunInSeconds;
     }
 
     public Double getExpeditionTimeToCommitteeBoat() {
@@ -601,8 +601,8 @@ public class LegEntryDTO implements Serializable {
         return expeditionHolder == null ? null : expeditionHolder.expeditionTimeToBurnToCommitteeBoat;
     }
 
-    public Double getExpeditionTimeToBurnToLine() {
-        return expeditionHolder == null ? null : expeditionHolder.expeditionTimeToBurnToLine;
+    public Double getExpeditionTimeToBurnToLineInSeconds() {
+        return expeditionHolder == null ? null : expeditionHolder.expeditionTimeToBurnToLineInSeconds;
     }
 
     public Double getExpeditionTargetHeel() {
@@ -690,7 +690,7 @@ public class LegEntryDTO implements Serializable {
         public Double expeditionAWS;
         public Double expeditionBoatSpeed;
         public Double expeditionCOG;
-        public Double expeditionDistanceBelowLine;
+        public Double expeditionDistanceBelowLineInMeters;
         public Double expeditionDistanceToCommitteeBoat;
         public Double expeditionDistToPortLayline;
         public Double expeditionDistToStbLayline;
@@ -701,12 +701,12 @@ public class LegEntryDTO implements Serializable {
         public Double expeditionTimeToStbLayline;
         public Double expeditionTimeToPortLayline;
         public Double expeditionTimeToPin;
-        public Double expeditionTimeToGUN;
+        public Double expeditionTimeToGunInSeconds;
         public Double expeditionTimeToCommitteeBoat;
         public Double expeditionTimeToBurnToPin;
         public Double expeditionTargTWA;
         public Double expeditionTimeToBurnToCommitteeBoat;
-        public Double expeditionTimeToBurnToLine;
+        public Double expeditionTimeToBurnToLineInSeconds;
         public Double expeditionTargetHeel;
         public Double expeditionTargBoatSpeed;
         public Double expeditionSOG;
@@ -735,7 +735,7 @@ public class LegEntryDTO implements Serializable {
             result = prime * result
                     + ((expeditionDistToStbLayline == null) ? 0 : expeditionDistToStbLayline.hashCode());
             result = prime * result
-                    + ((expeditionDistanceBelowLine == null) ? 0 : expeditionDistanceBelowLine.hashCode());
+                    + ((expeditionDistanceBelowLineInMeters == null) ? 0 : expeditionDistanceBelowLineInMeters.hashCode());
             result = prime * result
                     + ((expeditionDistanceToCommitteeBoat == null) ? 0 : expeditionDistanceToCommitteeBoat.hashCode());
             result = prime * result
@@ -762,11 +762,11 @@ public class LegEntryDTO implements Serializable {
             result = prime * result + ((expeditionTimeToBurnToCommitteeBoat == null) ? 0
                     : expeditionTimeToBurnToCommitteeBoat.hashCode());
             result = prime * result
-                    + ((expeditionTimeToBurnToLine == null) ? 0 : expeditionTimeToBurnToLine.hashCode());
+                    + ((expeditionTimeToBurnToLineInSeconds == null) ? 0 : expeditionTimeToBurnToLineInSeconds.hashCode());
             result = prime * result + ((expeditionTimeToBurnToPin == null) ? 0 : expeditionTimeToBurnToPin.hashCode());
             result = prime * result
                     + ((expeditionTimeToCommitteeBoat == null) ? 0 : expeditionTimeToCommitteeBoat.hashCode());
-            result = prime * result + ((expeditionTimeToGUN == null) ? 0 : expeditionTimeToGUN.hashCode());
+            result = prime * result + ((expeditionTimeToGunInSeconds == null) ? 0 : expeditionTimeToGunInSeconds.hashCode());
             result = prime * result + ((expeditionTimeToPin == null) ? 0 : expeditionTimeToPin.hashCode());
             result = prime * result
                     + ((expeditionTimeToPortLayline == null) ? 0 : expeditionTimeToPortLayline.hashCode());
@@ -826,10 +826,10 @@ public class LegEntryDTO implements Serializable {
                     return false;
             } else if (!expeditionDistToStbLayline.equals(other.expeditionDistToStbLayline))
                 return false;
-            if (expeditionDistanceBelowLine == null) {
-                if (other.expeditionDistanceBelowLine != null)
+            if (expeditionDistanceBelowLineInMeters == null) {
+                if (other.expeditionDistanceBelowLineInMeters != null)
                     return false;
-            } else if (!expeditionDistanceBelowLine.equals(other.expeditionDistanceBelowLine))
+            } else if (!expeditionDistanceBelowLineInMeters.equals(other.expeditionDistanceBelowLineInMeters))
                 return false;
             if (expeditionDistanceToCommitteeBoat == null) {
                 if (other.expeditionDistanceToCommitteeBoat != null)
@@ -936,10 +936,10 @@ public class LegEntryDTO implements Serializable {
                     return false;
             } else if (!expeditionTimeToBurnToCommitteeBoat.equals(other.expeditionTimeToBurnToCommitteeBoat))
                 return false;
-            if (expeditionTimeToBurnToLine == null) {
-                if (other.expeditionTimeToBurnToLine != null)
+            if (expeditionTimeToBurnToLineInSeconds == null) {
+                if (other.expeditionTimeToBurnToLineInSeconds != null)
                     return false;
-            } else if (!expeditionTimeToBurnToLine.equals(other.expeditionTimeToBurnToLine))
+            } else if (!expeditionTimeToBurnToLineInSeconds.equals(other.expeditionTimeToBurnToLineInSeconds))
                 return false;
             if (expeditionTimeToBurnToPin == null) {
                 if (other.expeditionTimeToBurnToPin != null)
@@ -951,10 +951,10 @@ public class LegEntryDTO implements Serializable {
                     return false;
             } else if (!expeditionTimeToCommitteeBoat.equals(other.expeditionTimeToCommitteeBoat))
                 return false;
-            if (expeditionTimeToGUN == null) {
-                if (other.expeditionTimeToGUN != null)
+            if (expeditionTimeToGunInSeconds == null) {
+                if (other.expeditionTimeToGunInSeconds != null)
                     return false;
-            } else if (!expeditionTimeToGUN.equals(other.expeditionTimeToGUN))
+            } else if (!expeditionTimeToGunInSeconds.equals(other.expeditionTimeToGunInSeconds))
                 return false;
             if (expeditionTimeToPin == null) {
                 if (other.expeditionTimeToPin != null)
