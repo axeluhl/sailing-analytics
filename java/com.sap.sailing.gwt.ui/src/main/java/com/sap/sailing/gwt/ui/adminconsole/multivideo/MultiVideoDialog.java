@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -76,6 +77,7 @@ public class MultiVideoDialog extends DialogBox {
     private Button doSaveButton;
     private Runnable afterLinking;
     private ErrorReporter errorReporter;
+    protected int offsetTimeInMS;
 
     public MultiVideoDialog(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             StringMessages stringMessages, ErrorReporter errorReporter, Runnable afterLinking) {
@@ -106,6 +108,22 @@ public class MultiVideoDialog extends DialogBox {
 
         statusLabel = new Label(stringMessages.multiVideoIdle());
         mainContent.add(statusLabel);
+
+        FlowPanel offsetPanel = new FlowPanel();
+        TextBox timeOffset = new TextBox();
+        timeOffset.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                offsetTimeInMS = Integer.parseInt(event.getValue());
+                updateUI();
+            }
+        });
+        Label lbl = new Label(stringMessages.multiVideoOffsetInput());
+        lbl.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+        offsetPanel.add(lbl);
+        offsetPanel.add(timeOffset);
+        
+        mainContent.add(offsetPanel);
 
         FlowPanel buttonPanel = new FlowPanel();
 
@@ -209,12 +227,12 @@ public class MultiVideoDialog extends DialogBox {
                 dataTable.setWidget(y, STARTTIME_COLUMN, new Label(EMPTY_TEXT));
             } else {
                 DateAndTimeInput startTimeInput = new DateAndTimeInput(Accuracy.SECONDS);
-                startTimeInput.setValue(remoteFile.startTime.asDate());
+                startTimeInput.setValue(new Date(remoteFile.startTime.asMillis()+offsetTimeInMS));
                 startTimeInput.addValueChangeHandler(new ValueChangeHandler<Date>() {
 
                     @Override
                     public void onValueChange(ValueChangeEvent<Date> event) {
-                        remoteFile.startTime = new MillisecondsTimePoint(event.getValue());
+                        remoteFile.startTime = new MillisecondsTimePoint(event.getValue().getTime() - offsetTimeInMS);
                     }
                 });
                 dataTable.setWidget(y, STARTTIME_COLUMN, startTimeInput);
@@ -254,7 +272,7 @@ public class MultiVideoDialog extends DialogBox {
             });
             ft.add(refresh);
             if (remoteFile.candidates == null) {
-                //empty flowpanel
+                // empty flowpanel
             } else if (remoteFile.candidates.isEmpty()) {
                 ft.add(new Label(stringMessages.empty()));
             } else {
@@ -416,11 +434,15 @@ public class MultiVideoDialog extends DialogBox {
                                 RaceDTO race = raceColumn.getRace(fleet);
                                 if (race.trackedRace != null) {
                                     if (race.endOfRace == null || race.endOfRace.after(remoteFile.startTime.asDate())) {
-                                        if (race.trackedRace.endOfTracking == null || race.trackedRace.endOfTracking.after(remoteFile.startTime.asDate())) {
-                                            if (race.startOfRace == null || race.startOfRace.before(new Date(
-                                                    remoteFile.startTime.asMillis() + remoteFile.duration.asMillis()))) {
-                                                if (race.trackedRace.startOfTracking == null || race.trackedRace.startOfTracking.before(new Date(
-                                                        remoteFile.startTime.asMillis() + remoteFile.duration.asMillis()))) {
+                                        if (race.trackedRace.endOfTracking == null || race.trackedRace.endOfTracking
+                                                .after(remoteFile.startTime.asDate())) {
+                                            if (race.startOfRace == null
+                                                    || race.startOfRace.before(new Date(remoteFile.startTime.asMillis()
+                                                            + remoteFile.duration.asMillis()))) {
+                                                if (race.trackedRace.startOfTracking == null
+                                                        || race.trackedRace.startOfTracking
+                                                                .before(new Date(remoteFile.startTime.asMillis()
+                                                                        + remoteFile.duration.asMillis()))) {
                                                     candidates.add(race.getRaceIdentifier());
                                                 }
                                             }
