@@ -1,5 +1,6 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 
 /**
@@ -27,5 +28,13 @@ public interface ManeuverNodesLevel<SelfType extends ManeuverNodesLevel<SelfType
 
     double getProbabilityFromPreviousLevelNodeToThisLevelNode(FineGrainedPointOfSail previousLevelNode,
             FineGrainedPointOfSail thisLevelNode);
+
+    Bearing getCourse();
+
+    default double getWindCourseInDegrees(FineGrainedPointOfSail node) {
+        return getWindCourseInDegrees(node.getTwa());
+    }
+    
+    double getWindCourseInDegrees(double twa);
 
 }

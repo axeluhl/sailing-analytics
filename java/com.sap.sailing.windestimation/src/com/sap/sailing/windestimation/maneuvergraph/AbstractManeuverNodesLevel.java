@@ -112,8 +112,27 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
         return 0;
     }
 
+    @Override
     public Bearing getCourse() {
         return getManeuver().getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing();
+    }
+    
+    @Override
+    public double getWindCourseInDegrees(FineGrainedPointOfSail node) {
+        double windCourse = (getCourse().getDegrees() - node.getTwa() + 180) % 360;
+        if (windCourse < 0) {
+            windCourse += 360;
+        }
+        return windCourse;
+    }
+    
+    @Override
+    public double getWindCourseInDegrees(double twa) {
+        double windCourse = (getCourse().getDegrees() - twa + 180) % 360;
+        if (windCourse < 0) {
+            windCourse += 360;
+        }
+        return windCourse;
     }
 
 }

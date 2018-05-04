@@ -75,14 +75,6 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
                 + Math.pow((absWindCourseShift - TRESHOLD_FOR_SMALL_PENALTY_WIND_COURSE_SHIFT_IN_DEGREES) / 5, 2));
     }
 
-    private double getWindCourseInDegrees(FineGrainedPointOfSail node) {
-        double windCourse = (getCourse().getDegrees() - node.getTwa() + 180) % 360;
-        if (windCourse < 0) {
-            windCourse += 360;
-        }
-        return windCourse;
-    }
-
     public static ManeuverNodesLevelFactory<CrossTrackManeuverNodesLevel, SingleTrackManeuverNodesLevel> getFactory() {
         return new ManeuverNodesLevelFactory<CrossTrackManeuverNodesLevel, SingleTrackManeuverNodesLevel>() {
 
