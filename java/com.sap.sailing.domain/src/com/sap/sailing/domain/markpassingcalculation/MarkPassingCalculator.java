@@ -477,7 +477,8 @@ public class MarkPassingCalculator {
         return endMarkerCandidate == endMarker;
     }
 
-    void enqueueUpdate(StorePositionUpdateStrategy update) {
+    // protected for test case access
+    protected void enqueueUpdate(StorePositionUpdateStrategy update) {
         synchronized (this) {
             queue.add(update);
             // regardless of whether the queue is empty or not, launch the thread if it doesn't run yet and we are not suspended;
