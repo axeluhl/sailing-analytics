@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.ui.adminconsole.PairingListPreviewDialog;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -25,7 +26,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
-public class PairingListEntryPoint extends AbstractSailingEntryPoint {
+public class PairingListEntryPoint extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
 
     private PairingListContextDefinition pairingListContextDefinition;
 
@@ -169,4 +170,8 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 		}, 100);
     }-*/;
 
+    @Override
+    public String getLeaderboardname() {
+        return leaderboardName;
+    }
 }

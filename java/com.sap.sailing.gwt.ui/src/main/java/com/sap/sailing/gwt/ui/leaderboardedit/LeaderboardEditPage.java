@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.settings.client.leaderboardedit.LeaderboardEditContextDefinition;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
@@ -29,20 +30,21 @@ import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
-public class LeaderboardEditPage extends AbstractSailingEntryPoint {
+public class LeaderboardEditPage extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
     private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());
+    private String leaderboardName;
     
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         
+        final LeaderboardEditContextDefinition settings = new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new LeaderboardEditContextDefinition());
+        leaderboardName = settings.getLeaderboardName();
         getSailingService().getLeaderboardNames(new MarkedAsyncCallback<List<String>>(
                 new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> leaderboardNames) {
-                final LeaderboardEditContextDefinition settings = new SettingsToUrlSerializer()
-                        .deserializeFromCurrentLocation(new LeaderboardEditContextDefinition());
-                final String leaderboardName = settings.getLeaderboardName();
                 if (leaderboardNames.contains(leaderboardName)) {
                     getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<Iterable<DetailType>>() {
 
@@ -90,5 +92,10 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
 //        header.getElement().getStyle().setTop(0, Unit.PX);
         header.getElement().getStyle().setWidth(100, Unit.PCT);
         return header;
+    }
+
+    @Override
+    public String getLeaderboardname() {
+        return leaderboardName;
     }
 }
