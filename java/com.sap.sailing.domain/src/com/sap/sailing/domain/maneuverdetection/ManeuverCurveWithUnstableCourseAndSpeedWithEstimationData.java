@@ -64,4 +64,19 @@ public interface ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData
      */
     int getGpsFixesCount();
 
+    /**
+     * Gets the longest duration between two GPS-fixes contained within maneuver curve with unstable course and speed.
+     */
+    Duration getLongestIntervalBetweenTwoFixes();
+
+    /**
+     * Gets the duration between the last GPS-fix of the curve and the next GPS-fix contained within the track.
+     */
+    Duration getIntervalBetweenLastFixOfCurveAndNextFix();
+
+    /**
+     * Gets the duration between the first GPS-fix of the curve and the previous GPS-fix contained within the track.
+     */
+    Duration getIntervalBetweenFirstFixOfCurveAndPreviousFix();
+
 }
