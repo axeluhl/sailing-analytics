@@ -13,6 +13,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.media.client.MediaBase;
 import com.google.gwt.typedarrays.shared.Int8Array;
@@ -40,6 +42,8 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
@@ -63,7 +67,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     private TextBox titleBox;
 
-    protected TextBox startTimeBox;
+    protected DateAndTimeInput startTimeBox;
 
     private SimplePanel infoLabel; // showing either mime type or youtube id
 
@@ -98,37 +102,14 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     @Override
     protected MediaTrack getResult() {
         mediaTrack.title = titleBox.getValue();
-        updateStartTimeFromUi();
-        updateDurationFromUi();
         connectMediaWithRace();
         return mediaTrack;
-    }
-
-    private void updateDurationFromUi() {
-        String duration = durationBox.getValue();
-        if (duration != null && !duration.trim().isEmpty()) {
-            mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(duration);
-        } else {
-            mediaTrack.duration = null;
-        }
     }
 
     protected void connectMediaWithRace() {
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         assignedRaces.add(this.raceIdentifier);
         mediaTrack.assignedRaces = assignedRaces;
-    }
-
-    protected void updateStartTimeFromUi() {
-        String startTimeText = startTimeBox.getValue();
-        if (startTimeText != null && !startTimeText.equals("")) {
-            try {
-                Date startTime = TimeFormatUtil.DATETIME_FORMAT.parse(startTimeText);
-                mediaTrack.startTime = new MillisecondsTimePoint(startTime);
-            } catch (IllegalArgumentException ex) {
-                // TODO: highlight format error in UI
-            }
-        }
     }
 
     private void loadMediaDuration() {
@@ -166,7 +147,18 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         Grid formGrid = new Grid(6, 2);
         formGrid.setCellSpacing(3);
         formGrid.setWidget(0, 0, new Label(stringMessages.url() + ":"));
-        urlBox = createUrlBox();
+        urlBox = createTextBox(null);
+        urlBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        updateFromUrl();
+                    }
+                });
+            }
+        });
         formGrid.setWidget(0, 1, urlBox);
         formGrid.setWidget(1, 0, new Label(stringMessages.name() + ":"));
         titleBox = createTextBox(null);
@@ -177,9 +169,17 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         infoLabel.setWidget(new Label(""));
         formGrid.setWidget(2, 1, infoLabel);
         formGrid.setWidget(3, 0, new Label(stringMessages.startTime() + ":"));
-        startTimeBox = createTextBox(null);
+        
+        startTimeBox = new DateAndTimeInput(Accuracy.SECONDS);
         FlowPanel startTimePanel = new FlowPanel();
         startTimePanel.add(startTimeBox);
+        startTimeBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Date> event) {
+                mediaTrack.startTime = new MillisecondsTimePoint(event.getValue());
+            }
+        });
+        
         defaultTimeButton = new Button(StringMessages.INSTANCE.resetStartTimeToDefault());
         defaultTimeButton.addClickHandler(new ClickHandler() {
             @Override
@@ -192,27 +192,22 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         formGrid.setWidget(3, 1, startTimePanel);
         formGrid.setWidget(4, 0, new Label(stringMessages.duration() + ":"));
         durationBox = createTextBox(null);
+        durationBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                String duration = durationBox.getValue();
+                if (duration != null && !duration.trim().isEmpty()) {
+                    mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(duration);
+                } else {
+                    mediaTrack.duration = null;
+                }
+            }
+        });
         formGrid.setWidget(4, 1, durationBox);
         busyIndicator = new SimpleBusyIndicator();
         formGrid.setWidget(5, 0, busyIndicator);
         mainPanel.add(formGrid);
         return mainPanel;
-    }
-
-    private TextBox createUrlBox() {
-        TextBox result = createTextBox(null);
-        result.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                        updateFromUrl();
-                    }
-                });
-            }
-        });
-        return result;
     }
 
     protected void updateFromUrl() {
@@ -315,7 +310,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         refreshUI();
     }
 
-    private void refreshUI() {
+    protected void refreshUI() {
         titleBox.setValue(mediaTrack.title, DONT_FIRE_EVENTS);
         if (mediaTrack.isYoutube()) {
             infoLabelLabel.setText(stringMessages.youtubeId() + ":");
@@ -335,10 +330,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
             }
         }
         TimePoint startTime = mediaTrack.startTime != null ? mediaTrack.startTime : defaultStartTime; 
-        String startTimeText = TimeFormatUtil.DATETIME_FORMAT.format(startTime.asDate());
-
-        startTimeBox.setText(startTimeText);
-        updateStartTimeFromUi();
+        startTimeBox.setValue(startTime == null ? null : startTime.asDate());
         if (mediaTrack.duration != null) {
             durationBox.setText(TimeFormatUtil.durationToHrsMinSec(mediaTrack.duration));
         } else {
