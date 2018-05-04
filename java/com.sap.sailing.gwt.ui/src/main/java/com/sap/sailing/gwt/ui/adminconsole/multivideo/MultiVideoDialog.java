@@ -196,7 +196,7 @@ public class MultiVideoDialog extends DialogBox {
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
                     remoteFile.candidates = null;
                     if (Boolean.TRUE.equals(event.getValue())) {
-                        remoteFile.status = EStatus.NOT_ANALYSED;
+                        remoteFile.status = EStatus.WAITING_FOR_LINK;
                         // retrive remote data
                         setWorking(true);
                         startNextInitializingRemoteTask();
@@ -225,7 +225,7 @@ public class MultiVideoDialog extends DialogBox {
             if (remoteFile.startTime == null) {
                 dataTable.setWidget(y, STARTTIME_COLUMN, new Label(EMPTY_TEXT));
             } else {
-                DateAndTimeInput startTimeInput = new DateAndTimeInput(Accuracy.SECONDS);
+                DateAndTimeInput startTimeInput = new DateAndTimeInput(Accuracy.MILLISECONDS);
                 startTimeInput.setValue(new Date(remoteFile.startTime.asMillis() + offsetTimeInMS));
                 startTimeInput.addValueChangeHandler(new ValueChangeHandler<Date>() {
 
@@ -351,7 +351,7 @@ public class MultiVideoDialog extends DialogBox {
                     public void onSuccess(List<EventDTO> result) {
                         Set<RegattaAndRaceIdentifier> candidates = new HashSet<>();
                         collectAllOverlappingRaces(remoteFile, result, candidates);
-                        remoteFile.status = EStatus.WAIT_FOR_SAVE;
+                        remoteFile.status = EStatus.DO_NOT_PROCESS;
                         remoteFile.isWorking = false;
                         remoteFile.candidates = candidates;
                         updateUI();
@@ -626,7 +626,7 @@ public class MultiVideoDialog extends DialogBox {
         protected String message;
         protected TimePoint startTime;
         protected Duration duration;
-        protected EStatus status = EStatus.DO_NOT_PROCESS;
+        protected EStatus status = EStatus.NOT_ANALYSED;
         final String url;
         protected boolean isWorking = false;
 
