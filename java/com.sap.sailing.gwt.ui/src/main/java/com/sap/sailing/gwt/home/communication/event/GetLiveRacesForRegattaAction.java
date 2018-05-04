@@ -69,7 +69,7 @@ public class GetLiveRacesForRegattaAction implements SailingAction<ResultWithTTL
     }
 
     @Override
-    public String getLeaderboardname() {
+    public String getLeaderboardName() {
         return regattaName;
     }
 

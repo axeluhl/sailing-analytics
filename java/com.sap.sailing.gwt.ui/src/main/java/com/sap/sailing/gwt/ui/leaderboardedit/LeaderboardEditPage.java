@@ -95,7 +95,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint implements Pr
     }
 
     @Override
-    public String getLeaderboardname() {
+    public String getLeaderboardName() {
         return leaderboardName;
     }
 }

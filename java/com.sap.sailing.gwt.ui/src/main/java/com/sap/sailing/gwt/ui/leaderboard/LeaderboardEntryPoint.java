@@ -268,7 +268,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
     }
     
     @Override
-    public String getLeaderboardname() {
+    public String getLeaderboardName() {
         return leaderboardName;
     }
 }

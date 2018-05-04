@@ -58,7 +58,7 @@ public class GetRegattaWithProgressAction implements SailingAction<ResultWithTTL
     }
 
     @Override
-    public String getLeaderboardname() {
+    public String getLeaderboardName() {
         return regattaId;
     }
 }

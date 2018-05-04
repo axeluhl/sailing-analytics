@@ -61,7 +61,7 @@ public class GetCompetitionFormatRacesAction implements
     }
 
     @Override
-    public String getLeaderboardname() {
+    public String getLeaderboardName() {
         return regattaId;
     }
 }

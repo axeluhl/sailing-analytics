@@ -62,7 +62,7 @@ public class GetFinishedRacesAction implements SailingAction<ResultWithTTL<ListR
     }
 
     @Override
-    public String getLeaderboardname() {
+    public String getLeaderboardName() {
         return regattaId;
     }
 }

@@ -77,7 +77,7 @@ public class GetMiniLeaderbordAction implements SailingAction<ResultWithTTL<GetM
     }
 
     @Override
-    public String getLeaderboardname() {
+    public String getLeaderboardName() {
         return leaderboardName;
     }
 }

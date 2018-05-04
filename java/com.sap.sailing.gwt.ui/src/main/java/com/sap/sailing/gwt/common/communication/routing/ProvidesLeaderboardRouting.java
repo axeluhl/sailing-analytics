@@ -9,12 +9,12 @@ import com.sap.sse.gwt.client.ServiceRoutingProvider;
 public interface ProvidesLeaderboardRouting extends ServiceRoutingProvider {
     String LEADERBOARDNAME_PREFIX ="/leaderboard/";
 
-    String  getLeaderboardname();
+    String getLeaderboardName();
     
     default String routingSuffixPath() {
         return new StringBuilder()
                 .append(LEADERBOARDNAME_PREFIX)
-                .append(URL.encodePathSegment(getLeaderboardname()))
+                .append(URL.encodePathSegment(getLeaderboardName()))
                 .toString();
     }
 }

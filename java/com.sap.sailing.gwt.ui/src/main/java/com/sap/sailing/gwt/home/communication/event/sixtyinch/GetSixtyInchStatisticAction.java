@@ -99,7 +99,7 @@ public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchSt
     }
 
     @Override
-    public String getLeaderboardname() {
+    public String getLeaderboardName() {
         return regattaname;
     }
 }

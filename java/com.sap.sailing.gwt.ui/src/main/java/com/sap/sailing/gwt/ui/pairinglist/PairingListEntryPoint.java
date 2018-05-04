@@ -171,7 +171,7 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint implements 
     }-*/;
 
     @Override
-    public String getLeaderboardname() {
+    public String getLeaderboardName() {
         return leaderboardName;
     }
 }

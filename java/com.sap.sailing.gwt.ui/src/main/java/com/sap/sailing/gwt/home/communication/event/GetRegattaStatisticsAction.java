@@ -56,7 +56,7 @@ public class GetRegattaStatisticsAction implements SailingAction<ResultWithTTL<E
     }
 
     @Override
-    public String getLeaderboardname() {
+    public String getLeaderboardName() {
         return regattaId;
     }
 }

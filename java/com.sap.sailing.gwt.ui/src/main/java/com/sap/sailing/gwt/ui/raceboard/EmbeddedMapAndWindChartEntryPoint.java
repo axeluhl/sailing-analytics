@@ -257,7 +257,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
     }
 
     @Override
-    public String getLeaderboardname() {
+    public String getLeaderboardName() {
         return regattaLikeName;
     }
 }

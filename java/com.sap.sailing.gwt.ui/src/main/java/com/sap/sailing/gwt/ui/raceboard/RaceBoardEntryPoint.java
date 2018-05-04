@@ -207,7 +207,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
     }  
     
     @Override
-    public String getLeaderboardname() {
+    public String getLeaderboardName() {
         return leaderBoardName;
     }
 }
