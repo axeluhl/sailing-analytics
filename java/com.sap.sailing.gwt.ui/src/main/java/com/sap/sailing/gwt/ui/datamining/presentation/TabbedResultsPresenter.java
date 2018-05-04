@@ -88,7 +88,15 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
                 addTabAndFocus(new ManeuverSpeedDetailsResultsPresenter(TabbedResultsPresenter.this,
                         getComponentContext(), stringMessages));
                 removeTab(oldHeader);
-            } else {
+            } 
+            else if (result.getResultType()
+                    .equals("com.sap.sse.datamining.shared.data.PairWithStats")) {
+                CloseableTabHeader oldHeader = getSelectedHeader();
+                addTabAndFocus(new NumberPairResultsPresenter(TabbedResultsPresenter.this,
+                        getComponentContext(), stringMessages));
+                removeTab(oldHeader);
+            }
+            else {
                 if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
                     CloseableTabHeader oldHeader = getSelectedHeader();
                     addTabAndFocus(new MultiResultsPresenter(this, getComponentContext(), drillDownCallback, stringMessages));
