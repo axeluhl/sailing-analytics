@@ -260,7 +260,7 @@ public class MultiVideoDialog extends DialogBox {
             FlowPanel ft = new FlowPanel();
             dataTable.setWidget(y, RACES_COLUMN, ft);
             Button refresh = new Button(stringMessages.refresh());
-            refresh.setEnabled(!remoteFile.isWorking);
+            refresh.setEnabled(remoteFile.status == EStatus.WAIT_FOR_SAVE);
             refresh.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
