@@ -485,7 +485,7 @@ public class EventsResource extends AbstractSailingServerResource {
     }
     
     private void addRaceColumns(String regattaName, String seriesName, int numberOfRaces) {
-        final Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        final Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             throw new IllegalArgumentException(ExceptionManager.objectNotFoundMsg("regatta", regattaName));
         }

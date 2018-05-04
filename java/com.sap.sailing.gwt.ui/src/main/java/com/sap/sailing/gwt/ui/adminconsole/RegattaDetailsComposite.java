@@ -316,7 +316,6 @@ public class RegattaDetailsComposite extends Composite {
         List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
         final List<Pair<String, Integer>> raceColumnNamesToAddWithInsertIndex = new ArrayList<>();
         final List<String> raceColumnsToRemove = new ArrayList<>();
-        
         // TODO see bug 1447: the resulting order currently doesn't necessarily match the order of races in this dialog!
         int insertIndex = 0;
         for (RaceColumnDTO newRaceColumn : newRaceColumns) {
@@ -359,7 +358,6 @@ public class RegattaDetailsComposite extends Composite {
                                         public void onFailure(Throwable caught) {
                                             errorReporter.reportError("Error trying to add race columns " + raceColumnNamesToAddWithInsertIndex
                                                     + " to series " + series.getName() + ": " + caught.getMessage());
-
                                         }
 
                                         @Override
