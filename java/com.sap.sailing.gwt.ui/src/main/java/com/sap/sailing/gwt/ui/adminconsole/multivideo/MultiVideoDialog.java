@@ -73,11 +73,11 @@ public class MultiVideoDialog extends DialogBox {
     private Button doScanButton;
     private Label statusLabel;
     private SailingServiceAsync sailingService;
-    private boolean isWorking;
     private Button doSaveButton;
     private Runnable afterLinking;
     private ErrorReporter errorReporter;
     protected int offsetTimeInMS;
+    private boolean isWorking;
 
     public MultiVideoDialog(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             StringMessages stringMessages, ErrorReporter errorReporter, Runnable afterLinking) {
@@ -122,7 +122,7 @@ public class MultiVideoDialog extends DialogBox {
         lbl.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
         offsetPanel.add(lbl);
         offsetPanel.add(timeOffset);
-        
+
         mainContent.add(offsetPanel);
 
         FlowPanel buttonPanel = new FlowPanel();
@@ -189,15 +189,14 @@ public class MultiVideoDialog extends DialogBox {
             dataTable.setWidget(y, STATUS_COLUMN, new Label(asString(remoteFile.status)));
 
             CheckBox removeVideo = new CheckBox();
-            removeVideo.setEnabled(!isWorking);
-            removeVideo.setValue(
-                    remoteFile.status == EStatus.WAITING_FOR_LINK || remoteFile.status == EStatus.WAIT_FOR_SAVE);
+            removeVideo.setEnabled(!remoteFile.isWorking);
+            removeVideo.setValue(remoteFile.status != EStatus.DO_NOT_PROCESS);
             removeVideo.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
+                    remoteFile.candidates = null;
                     if (Boolean.TRUE.equals(event.getValue())) {
-                        remoteFile.status = EStatus.WAITING_FOR_LINK;
-                        remoteFile.candidates = null;
+                        remoteFile.status = EStatus.NOT_ANALYSED;
                         // retrive remote data
                         setWorking(true);
                         startNextInitializingRemoteTask();
@@ -227,7 +226,7 @@ public class MultiVideoDialog extends DialogBox {
                 dataTable.setWidget(y, STARTTIME_COLUMN, new Label(EMPTY_TEXT));
             } else {
                 DateAndTimeInput startTimeInput = new DateAndTimeInput(Accuracy.SECONDS);
-                startTimeInput.setValue(new Date(remoteFile.startTime.asMillis()+offsetTimeInMS));
+                startTimeInput.setValue(new Date(remoteFile.startTime.asMillis() + offsetTimeInMS));
                 startTimeInput.addValueChangeHandler(new ValueChangeHandler<Date>() {
 
                     @Override
@@ -261,7 +260,7 @@ public class MultiVideoDialog extends DialogBox {
             FlowPanel ft = new FlowPanel();
             dataTable.setWidget(y, RACES_COLUMN, ft);
             Button refresh = new Button(stringMessages.refresh());
-            refresh.setEnabled(!isWorking);
+            refresh.setEnabled(!remoteFile.isWorking);
             refresh.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -279,7 +278,7 @@ public class MultiVideoDialog extends DialogBox {
                 for (RegattaAndRaceIdentifier candidate : remoteFile.candidates) {
                     CheckBox cb = new CheckBox(candidate.getRegattaName() + " " + candidate.getRaceName());
                     cb.setValue(true, false);
-                    cb.setEnabled(!isWorking);
+                    cb.setEnabled(!remoteFile.isWorking);
                     cb.addStyleName(style.style().checkboxStyle());
                     ft.add(cb);
                     cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -314,6 +313,7 @@ public class MultiVideoDialog extends DialogBox {
                     @Override
                     public void onSuccess(String result) {
                         remoteFile.status = EStatus.DONE;
+                        remoteFile.isWorking = false;
                         updateUI();
                         startNextLinkingRemoteTask();
                     }
@@ -321,6 +321,7 @@ public class MultiVideoDialog extends DialogBox {
                     @Override
                     public void onFailure(Throwable caught) {
                         remoteFile.status = EStatus.DONE;
+                        remoteFile.isWorking = false;
                         updateUI();
                         startNextLinkingRemoteTask();
                     }
@@ -329,14 +330,46 @@ public class MultiVideoDialog extends DialogBox {
             }
         }
         afterLinking.run();
-        hide();
     }
 
     private void startNextInitializingRemoteTask() {
+        // do not start overlapping tasks, as this might need excessive resources for file analysis
+        for (RemoteFileInfo remoteFile : remoteFiles) {
+            if (remoteFile.isWorking) {
+                return;
+            }
+        }
         doSaveButton.setEnabled(false);
         for (RemoteFileInfo remoteFile : remoteFiles) {
             statusLabel.setText(stringMessages.analyze() + ": " + remoteFile.url);
+            statusLabel.setText(remoteFile.url);
+            if (remoteFile.status == EStatus.WAITING_FOR_LINK) {
+                remoteFile.isWorking = true;
+                sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+
+                    @Override
+                    public void onSuccess(List<EventDTO> result) {
+                        Set<RegattaAndRaceIdentifier> candidates = new HashSet<>();
+                        collectAllOverlappingRaces(remoteFile, result, candidates);
+                        remoteFile.status = EStatus.WAIT_FOR_SAVE;
+                        remoteFile.isWorking = false;
+                        remoteFile.candidates = candidates;
+                        updateUI();
+                        startNextInitializingRemoteTask();
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(caught.getMessage());
+                        remoteFile.status = EStatus.ERROR_LINKING;
+                        updateUI();
+                    }
+
+                });
+                return;
+            }
             if (remoteFile.status == EStatus.NOT_ANALYSED) {
+                remoteFile.isWorking = true;
                 checkMetadata(remoteFile, new AsyncCallback<VideoMetadataDTO>() {
                     @Override
                     public void onSuccess(VideoMetadataDTO result) {
@@ -344,6 +377,7 @@ public class MultiVideoDialog extends DialogBox {
                             remoteFile.message = result.getMessage();
                             if (result.getDuration() == null) {
                                 remoteFile.status = EStatus.ERROR_ANALYZE;
+                                remoteFile.isWorking = false;
                                 updateUI();
                                 startNextInitializingRemoteTask();
                             } else {
@@ -353,11 +387,13 @@ public class MultiVideoDialog extends DialogBox {
                                 }
                                 remoteFile.mime = result.isSpherical() ? MimeType.mp4panorama : MimeType.mp4;
                                 remoteFile.status = EStatus.GETTING_MEDIATRACK;
+                                remoteFile.isWorking = false;
                                 updateUI();
                                 mediaService.getMediaTrackByUrl(remoteFile.url, new AsyncCallback<MediaTrack>() {
 
                                     @Override
                                     public void onFailure(Throwable caught) {
+                                        remoteFile.isWorking = false;
                                         remoteFile.status = EStatus.ERROR_ANALYZE;
                                         updateUI();
                                         startNextInitializingRemoteTask();
@@ -366,8 +402,10 @@ public class MultiVideoDialog extends DialogBox {
                                     @Override
                                     public void onSuccess(MediaTrack result) {
                                         if (result == null) {
-                                            remoteFile.status = EStatus.DO_NOT_PROCESS;
+                                            remoteFile.isWorking = false;
+                                            remoteFile.status = EStatus.WAITING_FOR_LINK;
                                         } else {
+                                            remoteFile.isWorking = false;
                                             remoteFile.status = EStatus.ALREADY_ADDED;
                                             remoteFile.knownMediaTrack = result;
                                         }
@@ -389,32 +427,6 @@ public class MultiVideoDialog extends DialogBox {
                         remoteFile.status = EStatus.ERROR_DOWNLOAD;
                         updateUI();
                     }
-                });
-                return;
-            }
-        }
-        for (RemoteFileInfo remoteFile : remoteFiles) {
-            statusLabel.setText(remoteFile.url);
-            if (remoteFile.status == EStatus.WAITING_FOR_LINK) {
-                sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
-
-                    @Override
-                    public void onSuccess(List<EventDTO> result) {
-                        Set<RegattaAndRaceIdentifier> candidates = new HashSet<>();
-                        collectAllOverlappingRaces(remoteFile, result, candidates);
-                        remoteFile.status = EStatus.WAIT_FOR_SAVE;
-                        remoteFile.candidates = candidates;
-                        updateUI();
-                        startNextInitializingRemoteTask();
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError(caught.getMessage());
-                        remoteFile.status = EStatus.ERROR_LINKING;
-                        updateUI();
-                    }
-
                 });
                 return;
             }
@@ -577,7 +589,6 @@ public class MultiVideoDialog extends DialogBox {
             @Override
             public void complete() {
                 updateUI();
-                startNextInitializingRemoteTask();
             }
         });
     }
@@ -609,15 +620,15 @@ public class MultiVideoDialog extends DialogBox {
     }
 
     static class RemoteFileInfo {
-        protected boolean selected;
         protected MediaTrack knownMediaTrack;
         protected Set<RegattaAndRaceIdentifier> candidates;
         protected MimeType mime;
         protected String message;
         protected TimePoint startTime;
         protected Duration duration;
-        protected EStatus status = EStatus.NOT_ANALYSED;;
+        protected EStatus status = EStatus.DO_NOT_PROCESS;
         final String url;
+        protected boolean isWorking = false;
 
         public RemoteFileInfo(String foundLink) {
             this.url = foundLink;
