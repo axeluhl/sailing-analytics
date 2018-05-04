@@ -87,6 +87,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     private Button defaultTimeButton;
 
     private SimpleBusyIndicator busyIndicator;
+    boolean manuallyEditedStartTime = false;
 
     public NewMediaDialog(MediaServiceAsync mediaService, TimePoint defaultStartTime, StringMessages stringMessages,
             RegattaAndRaceIdentifier raceIdentifier, DialogCallback<MediaTrack> dialogCallback) {
@@ -131,7 +132,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     }-*/;
 
     public void loadedmetadata(MediaElement mediaElement) {
-        mediaTrack.startTime = this.defaultStartTime;
+        if (!manuallyEditedStartTime) {
+            mediaTrack.startTime = this.defaultStartTime;
+        }
         double duration = mediaElement.getDuration();
         if (duration > 0) {
             mediaTrack.duration = new MillisecondsDurationImpl((long) Math.round(duration * 1000));
@@ -154,6 +157,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                 Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                     @Override
                     public void execute() {
+                        manuallyEditedStartTime = false;
                         updateFromUrl();
                     }
                 });
@@ -170,12 +174,13 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         formGrid.setWidget(2, 1, infoLabel);
         formGrid.setWidget(3, 0, new Label(stringMessages.startTime() + ":"));
         
-        startTimeBox = new DateAndTimeInput(Accuracy.SECONDS);
+        startTimeBox = new DateAndTimeInput(Accuracy.MILLISECONDS);
         FlowPanel startTimePanel = new FlowPanel();
         startTimePanel.add(startTimeBox);
         startTimeBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
+                manuallyEditedStartTime = true;
                 mediaTrack.startTime = new MillisecondsTimePoint(event.getValue());
             }
         });
@@ -184,6 +189,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         defaultTimeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                manuallyEditedStartTime = true;
                 mediaTrack.startTime = defaultStartTime;
                 refreshUI();
             }
@@ -431,7 +437,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         } else {
             mediaTrack.duration = result.getDuration();
             mediaTrack.mimeType = result.isSpherical() ? MimeType.mp4panorama : MimeType.mp4;
-            if (result.getRecordStartedTime() != null) {
+            if (result.getRecordStartedTime() != null && !manuallyEditedStartTime) {
                 mediaTrack.startTime = new MillisecondsTimePoint(result.getRecordStartedTime());
             }
             refreshUI();
