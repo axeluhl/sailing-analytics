@@ -43,7 +43,6 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
 
     @Override
     public SailingServiceAsync getSailingService(ProvidesLeaderboardRouting routingProvider) {
-       
         if (routingProvider == null) {
             return sailingService;
         } else {

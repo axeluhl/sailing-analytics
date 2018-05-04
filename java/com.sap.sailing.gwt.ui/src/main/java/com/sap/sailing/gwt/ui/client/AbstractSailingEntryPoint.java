@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sse.gwt.client.ServiceRoutingProvider;
 import com.sap.sse.security.ui.client.AbstractSecureEntryPoint;
 
@@ -12,11 +13,8 @@ public abstract class AbstractSailingEntryPoint extends AbstractSecureEntryPoint
     }
     
     /**
-     * Lazily initialize sailing service. Concrete entry point subclasses may influence
-     * sailing service creation by implementing a given routing information providing interface,
-     * see @see 
-     * 
-     * @return
+     * Lazily initialize sailing service. Concrete entry point subclasses may influence sailing service creation by
+     * implementing a given routing information providing interface {@link ProvidesLeaderboardRouting}.
      */
     protected SailingServiceAsync getSailingService() {
         if (sailingService == null) {

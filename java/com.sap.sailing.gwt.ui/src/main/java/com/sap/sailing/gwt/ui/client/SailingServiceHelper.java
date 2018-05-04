@@ -5,8 +5,7 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.sap.sse.gwt.client.ServiceRoutingProvider;
 
 /**
- * Set of convinience factory methods that create an async sailing service instance. 
- *
+ * Set of convenience factory methods that create a {@link SailingServiceAsync} instance. 
  */
 public abstract class SailingServiceHelper {
     private final static String moduleBaseURL = GWT.getModuleBaseURL();
@@ -15,36 +14,31 @@ public abstract class SailingServiceHelper {
     }
 
     /**
-     * Creates a new sailing service instance, should be used when code resides in the same bundle as the sailing service code.
-     * @return
+     * Creates a new {@link SailingServiceAsync} instance, should be used when code resides in the same bundle as the sailing service code.
      */
     public static SailingServiceAsync createSailingServiceInstance() {
         return createSailingServiceInstance(true, null);
     }
     /**
-     * Creates a new sailing service instance.
-     * @param sameBundle
-     * @return
+     * Creates a new {@link SailingServiceAsync} instance.
+     * 
+     * @param sameBundle {@code false} if using {@link SailingService} from a different OSGi bundle (e.g. dashboards), {@code true} otherwise
      */
     public static SailingServiceAsync createSailingServiceInstance(boolean sameBundle) {
         return createSailingServiceInstance(sameBundle, null);
     }
 
     /**
-     * Creates a new sailing service instance that uses a routing provider, for code in same bundle.  
-     * @param routingProvider
-     * @return
+     * Creates a new {@link SailingServiceAsync} instance that uses a routing provider, for code in same bundle.
      */
     public static SailingServiceAsync createSailingServiceInstance(ServiceRoutingProvider routingProvider) {
         return createSailingServiceInstance(true, routingProvider);
     }
 
     /**
-     * Crates a new sailing service instance.
+     * Crates a new {@link SailingServiceAsync} instance.
      * 
-     * @param sameBundle
-     * @param routingProvider
-     * @return
+     * @param sameBundle {@code false} if using {@link SailingService} from a different OSGi bundle (e.g. dashboards), {@code true} otherwise
      */
     public static SailingServiceAsync createSailingServiceInstance(boolean sameBundle, ServiceRoutingProvider routingProvider) {
         SailingServiceAsync service = GWT.create(SailingService.class);
