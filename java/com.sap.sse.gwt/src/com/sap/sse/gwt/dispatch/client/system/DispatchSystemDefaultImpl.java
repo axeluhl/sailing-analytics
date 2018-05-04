@@ -62,7 +62,7 @@ public abstract class DispatchSystemDefaultImpl<CTX extends DispatchContext> imp
             if (!dispatchRPCPath.endsWith("/")) {
                 destinationUrlBuilder.append("/");
             }
-            destinationUrlBuilder.append(routing);
+            destinationUrlBuilder.append(routing.startsWith("/") ? routing.substring(1) : routing);
         }
         DefaultTransport<CTX> transport = new DefaultTransport<CTX>(destinationUrlBuilder.toString());
         DispatchSystemAsync<CTX> dispatch = new CachingDispatch<CTX>(new AutomaticBatchingDispatch<CTX>(

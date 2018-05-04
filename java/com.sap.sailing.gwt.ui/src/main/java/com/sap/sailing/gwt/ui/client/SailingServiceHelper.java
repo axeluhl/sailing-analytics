@@ -52,7 +52,7 @@ public abstract class SailingServiceHelper {
         baseURL.append(RemoteServiceMappingConstants.sailingServiceRemotePath);
         
         if (routingProvider != null) {
-            baseURL.append(routingProvider.routingSuffixPath()).append("/");
+            baseURL.append(routingProvider.routingSuffixPath());
         }
         serviceToRegister.setServiceEntryPoint(baseURL.toString());
         return service;
