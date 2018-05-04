@@ -190,16 +190,12 @@ public class MultiVideoDialog extends DialogBox {
 
             CheckBox removeVideo = new CheckBox();
             removeVideo.setEnabled(!remoteFile.isWorking);
-            removeVideo.setValue(remoteFile.status != EStatus.DO_NOT_PROCESS);
+            removeVideo.setValue(remoteFile.status == EStatus.WAIT_FOR_SAVE || remoteFile.status == EStatus.WAITING_FOR_LINK);
             removeVideo.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
-                    remoteFile.candidates = null;
                     if (Boolean.TRUE.equals(event.getValue())) {
-                        remoteFile.status = EStatus.WAITING_FOR_LINK;
-                        // retrive remote data
-                        setWorking(true);
-                        startNextInitializingRemoteTask();
+                        remoteFile.status = EStatus.WAIT_FOR_SAVE;
                     } else {
                         remoteFile.status = EStatus.DO_NOT_PROCESS;
                     }
@@ -589,6 +585,7 @@ public class MultiVideoDialog extends DialogBox {
             @Override
             public void complete() {
                 updateUI();
+                startNextInitializingRemoteTask();
             }
         });
     }
