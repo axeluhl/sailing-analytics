@@ -14,7 +14,9 @@ public abstract class AbstractSailingEntryPoint extends AbstractSecureEntryPoint
     
     /**
      * Lazily initialize sailing service. Concrete entry point subclasses may influence sailing service creation by
-     * implementing a given routing information providing interface {@link ProvidesLeaderboardRouting}.
+     * implementing a given routing information providing interface {@link ProvidesLeaderboardRouting}. The routing
+     * information provided via {@link ProvidesLeaderboardRouting#getLeaderboardname()} needs to be available when this
+     * method is called for the first time. Repetitive calls will not cause a new leaderboard name to take effect.
      */
     protected SailingServiceAsync getSailingService() {
         if (sailingService == null) {
