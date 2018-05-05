@@ -42,6 +42,8 @@
                             Previously it was only possible to import a new event structure.</li>
                         <li>The Expedition log file import now prefers "GPS Time" for time stamping over "Utc" and over other date / time formats, making it
                             more consistent with the Expedition live connector which uses column 146 for time stamping which is GPS Time.</li>
+                        <li>Two dimensional metrics can now be displayed by using a scatter plot presenter within the data mining tool.
+                            Select a metric that returns a pair of numbers and choose "Average" or "Identity" as an aggregator.</li>
                         <li>Replication was made more robust for fixes that are delivered and applied asynchronously. If a race was removed
                             while still in tracking mode, fix-related operations may have been queued already on the replica when the
                             tracked race is removed. The pending GPS fix operations then would have clogged the executor threads until
