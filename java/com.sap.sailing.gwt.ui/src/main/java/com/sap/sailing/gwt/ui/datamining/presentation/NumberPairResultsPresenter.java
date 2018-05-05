@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -16,8 +15,8 @@ import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
-import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker.Symbol;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -27,7 +26,6 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.PairWithStats;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
-import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -38,7 +36,6 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
     private final SimpleLayoutPanel chartPanel;
     private final Chart chart;
     private final Map<GroupKey, Series> seriesMappedByGroupKey;
-    private final GroupKey simpleResultSeriesKey;
 
     public NumberPairResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context, stringMessages);
@@ -50,7 +47,6 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
                 chart.redraw();
             }
         };
-        simpleResultSeriesKey = new GenericGroupKey<>(stringMessages.results());
         chart = createChart();
         chartPanel.setWidget(chart);
     }
