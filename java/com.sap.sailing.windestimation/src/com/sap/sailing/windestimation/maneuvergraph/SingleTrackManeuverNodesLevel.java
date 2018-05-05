@@ -1,5 +1,6 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NauticalSide;
 
@@ -11,10 +12,13 @@ import com.sap.sailing.domain.common.NauticalSide;
 public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<SingleTrackManeuverNodesLevel> {
 
     private final SingleManeuverClassificationResult maneuverClassificationResult;
+    private final BoatClass boatClass;
 
-    public SingleTrackManeuverNodesLevel(SingleManeuverClassificationResult singleManeuverClassificationResult) {
+    public SingleTrackManeuverNodesLevel(SingleManeuverClassificationResult singleManeuverClassificationResult,
+            BoatClass boatClass) {
         super(singleManeuverClassificationResult.getManeuver());
         maneuverClassificationResult = singleManeuverClassificationResult;
+        this.boatClass = boatClass;
     }
 
     @Override
@@ -59,15 +63,21 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
         return 1 / (1 + Math.pow((courseDifference) / 15, 2));
     }
 
-    public static ManeuverNodesLevelFactory<SingleTrackManeuverNodesLevel, SingleManeuverClassificationResult> getFactory() {
+    public static ManeuverNodesLevelFactory<SingleTrackManeuverNodesLevel, SingleManeuverClassificationResult> getFactory(
+            BoatClass boatClass) {
         return new ManeuverNodesLevelFactory<SingleTrackManeuverNodesLevel, SingleManeuverClassificationResult>() {
 
             @Override
             public SingleTrackManeuverNodesLevel createNewManeuverNodesLevel(
                     SingleManeuverClassificationResult singleManeuverClassificationResult) {
-                return new SingleTrackManeuverNodesLevel(singleManeuverClassificationResult);
+                return new SingleTrackManeuverNodesLevel(singleManeuverClassificationResult, boatClass);
             }
         };
+    }
+
+    @Override
+    public BoatClass getBoatClass() {
+        return boatClass;
     }
 
 }

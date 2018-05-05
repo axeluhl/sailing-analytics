@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.sap.sailing.domain.polars.PolarDataService;
+
 /**
  * 
  * @author Vladislav Chumak (D069712)
@@ -12,10 +14,10 @@ import java.util.List;
 public class CrossTrackManeuverSequenceGraph
         extends ManeuverSequenceGraph<CrossTrackManeuverNodesLevel, SingleTrackManeuverNodesLevel> {
 
-    public CrossTrackManeuverSequenceGraph(
-            Iterable<SingleTrackManeuverSequenceGraph> singleTrackManeuverSequenceGraphs) {
+    public CrossTrackManeuverSequenceGraph(Iterable<SingleTrackManeuverSequenceGraph> singleTrackManeuverSequenceGraphs,
+            PolarDataService polarService) {
         super(getSingleTrackManeuverNodeLevels(singleTrackManeuverSequenceGraphs),
-                CrossTrackManeuverNodesLevel.getFactory());
+                CrossTrackManeuverNodesLevel.getFactory(), polarService);
     }
 
     private static List<SingleTrackManeuverNodesLevel> getSingleTrackManeuverNodeLevels(

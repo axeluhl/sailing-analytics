@@ -1,5 +1,7 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
+import com.sap.sailing.domain.base.BoatClass;
+
 /**
  * 
  * @author Vladislav Chumak (D069712)
@@ -88,6 +90,11 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
 
     public SingleTrackManeuverNodesLevel getSingleTrackManeuverNodesLevel() {
         return singleTrackManeuverNodesLevel;
+    }
+
+    @Override
+    public BoatClass getBoatClass() {
+        return singleTrackManeuverNodesLevel.getBoatClass();
     }
 
 }

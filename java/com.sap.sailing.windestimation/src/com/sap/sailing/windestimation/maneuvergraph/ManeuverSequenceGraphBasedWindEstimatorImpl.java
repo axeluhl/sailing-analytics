@@ -29,7 +29,8 @@ public class ManeuverSequenceGraphBasedWindEstimatorImpl extends ManeuverAndPola
                     getPolarService(), track.getManeuverCurves());
             singleTrackGraphs.add(graph);
         }
-        CrossTrackManeuverSequenceGraph crossTrackGraph = new CrossTrackManeuverSequenceGraph(singleTrackGraphs);
+        CrossTrackManeuverSequenceGraph crossTrackGraph = new CrossTrackManeuverSequenceGraph(singleTrackGraphs,
+                getPolarService());
         return crossTrackGraph.estimateWindTrack();
     }
 
