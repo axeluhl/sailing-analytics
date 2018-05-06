@@ -53,7 +53,7 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
                     probabilitiesCount++;
                 }
                 double probability = probabilitiesSum / probabilitiesCount
-                        * getNodeTransitionPenaltyFactor(previousLevel, previousNode, this, currentNode);
+                        * getNodeTransitionPenaltyFactor(previousNode, currentNode);
                 this.nodeTransitions[currentNode.ordinal()].setProbabilitiesFromPreviousNodesLevel(previousNode,
                         probability);
             }
@@ -61,11 +61,10 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
         normalizeNodeTransitions();
     }
 
-    private double getNodeTransitionPenaltyFactor(CrossTrackManeuverNodesLevel previousLevel,
-            FineGrainedPointOfSail previousNode, CrossTrackManeuverNodesLevel crossTrackManeuverNodesLevel,
+    private double getNodeTransitionPenaltyFactor(FineGrainedPointOfSail previousNode,
             FineGrainedPointOfSail currentNode) {
-        double windCourseInDegreesOfPreviousNode = previousLevel.getWindCourseInDegrees(previousNode);
-        double windCourseInDegreesOfCurrentNode = crossTrackManeuverNodesLevel.getWindCourseInDegrees(currentNode);
+        double windCourseInDegreesOfPreviousNode = getPreviousLevel().getWindCourseInDegrees(previousNode);
+        double windCourseInDegreesOfCurrentNode = getWindCourseInDegrees(currentNode);
         double absWindCourseShift = Math.abs(windCourseInDegreesOfPreviousNode - windCourseInDegreesOfCurrentNode);
         if (absWindCourseShift <= TRESHOLD_FOR_PENALTY_FREE_WIND_COURSE_SHIFT_IN_DEGREES) {
             return 1;
