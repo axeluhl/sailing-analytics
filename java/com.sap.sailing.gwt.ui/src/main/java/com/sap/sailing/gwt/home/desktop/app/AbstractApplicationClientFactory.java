@@ -27,7 +27,6 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
         this.navigator = navigator;
         sailingService = SailingServiceHelper.createSailingServiceInstance();
         mediaService = GWT.create(MediaService.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
     }
     
