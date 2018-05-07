@@ -22,6 +22,13 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
 
+                    <h2 class="articleSubheadline">May 2018</h2>
+                    <ul class="bulletList">
+                        <li>On the "Edit mark positions" panel within RaceBoard, now a "Clear selection" button appears
+                            when selecting a mark from the table, which provides an easier and more obvious way to
+                            deselect all marks, what is needed in order to see the full course with all marks again.</li>
+                    </ul>
+
                     <h2 class="articleSubheadline">April 2018</h2>
                     <ul class="bulletList">
                         <li>The import of additional expedition data was extended to read many additional measures.
@@ -33,6 +40,16 @@
                             Expedition specific measures - if available - are shown at the end of the list.</li>
                         <li>The all in one expedition import has been extended to be able to import new competitor tracks or new races to an existing regatta.
                             Previously it was only possible to import a new event structure.</li>
+                        <li>The Expedition log file import now prefers "GPS Time" for time stamping over "Utc" and over other date / time formats, making it
+                            more consistent with the Expedition live connector which uses column 146 for time stamping which is GPS Time.</li>
+                        <li>Two dimensional metrics can now be displayed by using a scatter plot presenter within the data mining tool.
+                            Select a metric that returns a pair of numbers and choose "Average" or "Identity" as an aggregator.</li>
+                        <li>Replication was made more robust for fixes that are delivered and applied asynchronously. If a race was removed
+                            while still in tracking mode, fix-related operations may have been queued already on the replica when the
+                            tracked race is removed. The pending GPS fix operations then would have clogged the executor threads until
+                            the entire replica comes to a halt. With the change, race-related asynchronous operations will simply be
+                            dropped when the race to which they pertain is not found on the replica.</li>
+                        <li>When editing mark positions, all fixes are now displayed, including potential outliers.</li>
                     </ul>
 
                     <h2 class="articleSubheadline">March 2018</h2>

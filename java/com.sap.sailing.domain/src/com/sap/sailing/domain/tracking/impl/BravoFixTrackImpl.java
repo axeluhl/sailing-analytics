@@ -68,6 +68,8 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     private transient TimeRangeCache<Pair<Double, Long>> expeditionTimeToGunCache;
     private transient TimeRangeCache<Pair<Double, Long>> expeditionRudderCache;
     private transient TimeRangeCache<Pair<Double, Long>> expeditionRateOfTurnCache;
+    private transient TimeRangeCache<Pair<Double, Long>> expeditionTimeToBurnToLineCache;
+    private transient TimeRangeCache<Pair<Double, Long>> expeditionDistanceBelowLineInMetersCache;
     
     /**
      * If a GPS track was provided at construction time, remember it non-transiently. It is needed when restoring
@@ -144,6 +146,8 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         this.expeditionTimeToGunCache = createTimeRangeCache(trackedItem, "expeditionTimeToGunCache");
         this.expeditionRudderCache = createTimeRangeCache(trackedItem, "expeditionRudderCache");
         this.expeditionRateOfTurnCache = createTimeRangeCache(trackedItem, "expeditionRateOfTurnCache");
+        this.expeditionTimeToBurnToLineCache = createTimeRangeCache(trackedItem, "expeditionTimeToBurnToLineCache");
+        this.expeditionDistanceBelowLineInMetersCache = createTimeRangeCache(trackedItem, "expeditionDistanceBelowLineCache");
     }
 
     public GPSFixTrack<ItemType, GPSFixMoving> getGpsTrack() {
@@ -582,13 +586,13 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
 
     @Override
     public Double getAverageExpeditionVMGIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
+        // TODO column currently unkown
         return null;
     }
 
     @Override
     public Double getAverageExpeditionVMGTargVMGDeltaIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
+        // TODO column currently unkown
         return null;
     }
 
@@ -601,7 +605,6 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     public Double getAverageExpeditionRudderAngleIfAvailable(TimePoint start, TimePoint endTimePoint) {
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint,
                 new Function<BravoExtendedFix, Double>() {
-
                     @Override
                     public Double apply(BravoExtendedFix t) {
                         final Bearing rudder = t.getRudder();
@@ -615,172 +618,168 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
 
     @Override
-    public Double getAverageExpeditionHeelIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
+    public Double getAverageExpeditionTargetHeelIfAvailable(TimePoint start, TimePoint endTimePoint) {
+        // TODO column currently unkown
         return null;
     }
 
     @Override
-    public Double getAverageExpeditionTargetHeelIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
+    public Double getAverageExpeditionTimeToPortLaylineIfAvailable(TimePoint start, TimePoint endTimePoint) {
+        // TODO column currently unkown
         return null;
     }
 
     @Override
-    public Double getAverageExpeditionTimeToPortLaylineIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
-        return null;
-    }
-
-    @Override
-    public Double getAverageExpeditionTimeToStbLaylineIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionTimeToStbLaylineIfAvailable(TimePoint start, TimePoint endTimePoint) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getAverageExpeditionDistToPortLaylineIfAvailable(TimePoint start, TimePoint endTimePoint){
+    public Double getAverageExpeditionDistToPortLaylineIfAvailable(TimePoint start, TimePoint endTimePoint) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Double getAverageExpeditionDistToStbLaylineIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
+    public Double getAverageExpeditionDistToStbLaylineIfAvailable(TimePoint start, TimePoint endTimePoint) {
+        // TODO column currently unkown
         return null;
     }
 
     @Override
-    public Double getAverageExpeditionTimeToGUNIfAvailable(TimePoint start, TimePoint endTimePoint){
-        return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionTmToGun, expeditionTimeToGunCache);
+    public Double getAverageExpeditionTimeToGunInSecondsIfAvailable(TimePoint start, TimePoint endTimePoint) {
+        return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint,
+                BravoExtendedFix::getExpeditionTmToGunInSeconds, expeditionTimeToGunCache);
     }
 
     @Override
-    public Double getAverageExpeditionTimeToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
+    public Double getAverageExpeditionTimeToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint) {
+        // TODO column currently unkown
         return null;
     }
 
     @Override
-    public Double getAverageExpeditionTimeToPinIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
+    public Double getAverageExpeditionTimeToPinIfAvailable(TimePoint start, TimePoint endTimePoint) {
+        // TODO column currently unkown
         return null;
     }
 
     @Override
-    public Double getAverageExpeditionTimeToBurnToLineIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
+    public Double getAverageExpeditionTimeToBurnToLineInSecondsIfAvailable(TimePoint start, TimePoint endTimePoint) {
+        return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint,
+                BravoExtendedFix::getExpeditionTmToBurnInSeconds, expeditionTimeToBurnToLineCache);
+    }
+
+    @Override
+    public Double getAverageExpeditionTimeToBurnToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint) {
+        // TODO column currently unkown
         return null;
     }
 
     @Override
-    public Double getAverageExpeditionTimeToBurnToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
+    public Double getAverageExpeditionTimeToBurnToPinIfAvailable(TimePoint start, TimePoint endTimePoint) {
+        // TODO column currently unkown
         return null;
     }
 
     @Override
-    public Double getAverageExpeditionTimeToBurnToPinIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
+    public Double getAverageExpeditionDistanceToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint) {
+        // TODO column currently unkown
         return null;
     }
 
     @Override
-    public Double getAverageExpeditionDistanceToCommitteeBoatIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
+    public Double getAverageExpeditionDistanceToPinDetailIfAvailable(TimePoint start, TimePoint endTimePoint) {
+        // TODO column currently unkown
         return null;
     }
 
     @Override
-    public Double getAverageExpeditionDistanceToPinDetailIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
-        return null;
+    public Double getAverageExpeditionDistanceBelowLineInMetersIfAvailable(TimePoint start, TimePoint endTimePoint) {
+        return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint,
+                BravoExtendedFix::getExpeditionBelowLnInMeters, expeditionDistanceBelowLineInMetersCache);
     }
 
     @Override
-    public Double getAverageExpeditionDistanceBelowLineIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
+    public Double getAverageExpeditionLineSquareForWindIfAvailable(TimePoint start, TimePoint endTimePoint) {
+        // column currently unkown
         return null;
     }
 
-    @Override
-    public Double getAverageExpeditionLineSquareForWindIfAvailable(TimePoint start, TimePoint endTimePoint){
-        //column currently unkown
-        return null;
-    }
-    
-    public Double getExpeditionValueForDouble(TimePoint timePoint, final Function<BravoExtendedFix, Double> getter){
+    public Double getExpeditionValueForDouble(TimePoint timePoint, final Function<BravoExtendedFix, Double> getter) {
         if (hasExtendedFixes) {
-            return this.<Double, Double>getValueFromExtendedFixSkippingNullValues(timePoint, getter, ScalableDouble::new);
+            return this.<Double, Double> getValueFromExtendedFixSkippingNullValues(timePoint, getter,
+                    ScalableDouble::new);
         }
         return null;
     }
-    
+
     @Override
-    public Double getExpeditionAWAIfAvailable(TimePoint at){
+    public Double getExpeditionAWAIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionAWA);
     }
-    
+
     @Override
-    public Double getExpeditionAWSIfAvailable(TimePoint at){
+    public Double getExpeditionAWSIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionAWS);
     }
-    
+
     @Override
-    public Double getExpeditionTWAIfAvailable(TimePoint at){
+    public Double getExpeditionTWAIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTWA);
     }
-    
+
     @Override
-    public Double getExpeditionTWSIfAvailable(TimePoint at){
+    public Double getExpeditionTWSIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTWS);
     }
-    
+
     @Override
-    public Double getExpeditionTWDIfAvailable(TimePoint at){
+    public Double getExpeditionTWDIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTWD);
     }
-    
+
     @Override
-    public Double getExpeditionTargTWAIfAvailable(TimePoint at){
+    public Double getExpeditionTargTWAIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTWA);
     }
-    
+
     @Override
-    public Double getExpeditionBoatSpeedIfAvailable(TimePoint at){
+    public Double getExpeditionBoatSpeedIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionBSP);
     }
-    
+
     @Override
-    public Double getExpeditionTargBoatSpeedIfAvailable(TimePoint at){
+    public Double getExpeditionTargBoatSpeedIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionBSP_TR);
     }
-    
+
     @Override
-    public Double getExpeditionSOGIfAvailable(TimePoint at){
+    public Double getExpeditionSOGIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionSOG);
     }
-    
+
     @Override
-    public Double getExpeditionCOGIfAvailable(TimePoint at){
+    public Double getExpeditionCOGIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionCOG);
     }
-    
+
     @Override
-    public Double getExpeditionForestayLoadIfAvailable(TimePoint at){
+    public Double getExpeditionForestayLoadIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionForestayLoad);
     }
-    
+
     @Override
-    public Double getExpeditionRakeIfAvailable(TimePoint at){
+    public Double getExpeditionRakeIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionRake);
     }
-    
+
     @Override
-    public Double getExpeditionCourseDetailIfAvailable(TimePoint at){
+    public Double getExpeditionCourseDetailIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionCourse);
     }
-    
+
     @Override
     public Double getExpeditionBaroIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionBARO);
@@ -810,121 +809,115 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     public Double getExpeditionMastButtIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionMastButt);
     }
-    
+
     @Override
-    public Double getExpeditionHeadingIfAvailable(TimePoint at){
-     	return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionHDG);
+    public Double getExpeditionHeadingIfAvailable(TimePoint at) {
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionHDG);
     }
-    
+
     @Override
-    public Double getExpeditionVMGIfAvailable(TimePoint at){
-        //column currently unkown
+    public Double getExpeditionVMGIfAvailable(TimePoint at) {
+        // TODO column currently unkown
         return null;
     }
-    
+
     @Override
-    public Double getExpeditionVMGTargVMGDeltaIfAvailable(TimePoint at){
-        //column currently unkown
+    public Double getExpeditionVMGTargVMGDeltaIfAvailable(TimePoint at) {
+        // TODO column currently unkown
         return null;
     }
-    
+
     @Override
-    public Double getExpeditionRateOfTurnIfAvailable(TimePoint at){
+    public Double getExpeditionRateOfTurnIfAvailable(TimePoint at) {
         return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionRateOfTurn);
     }
-    
+
     @Override
-    public Double getExpeditionHeelIfAvailable(TimePoint at){
-        //column currently unkown
+    public Double getExpeditionTargetHeelIfAvailable(TimePoint at) {
+        return getExpeditionValueForDouble(at, bravoExtendedFix->{
+            final Bearing targetHeel = bravoExtendedFix.getTargetHeel();
+            return targetHeel == null ? null : targetHeel.getDegrees();
+        });
+    }
+
+    @Override
+    public Double getExpeditionTimeToPortLaylineIfAvailable(TimePoint at) {
+        // TODO column currently unkown
         return null;
     }
-    
+
     @Override
-    public Double getExpeditionTargetHeelIfAvailable(TimePoint at){
-        //column currently unkown
+    public Double getExpeditionTimeToStbLaylineIfAvailable(TimePoint at) {
+        // TODO column currently unkown
         return null;
     }
-    
+
     @Override
-    public Double getExpeditionTimeToPortLaylineIfAvailable(TimePoint at){
-        //column currently unkown
+    public Double getExpeditionDistToPortLaylineIfAvailable(TimePoint at) {
+        // TODO column currently unkown
         return null;
     }
-    
+
     @Override
-    public Double getExpeditionTimeToStbLaylineIfAvailable(TimePoint at){
-        //column currently unkown
+    public Double getExpeditionDistToStbLaylineIfAvailable(TimePoint at) {
+        // TODO column currently unkown
         return null;
     }
-    
+
     @Override
-    public Double getExpeditionDistToPortLaylineIfAvailable(TimePoint at){
-        //column currently unkown
+    public Double getExpeditionTimeToGunInSecondsIfAvailable(TimePoint at) {
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTmToGunInSeconds);
+    }
+
+    @Override
+    public Double getExpeditionTimeToCommitteeBoatIfAvailable(TimePoint at) {
+        // TODO column currently unkown
         return null;
     }
-    
+
     @Override
-    public Double getExpeditionDistToStbLaylineIfAvailable(TimePoint at){
-        //column currently unkown
+    public Double getExpeditionTimeToPinIfAvailable(TimePoint at) {
+        // TODO column currently unkown
         return null;
     }
-    
+
     @Override
-    public Double getExpeditionTimeToGUNIfAvailable(TimePoint at){
-        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTmToGun);
+    public Double getExpeditionTimeToBurnToLineInSecondsIfAvailable(TimePoint at) {
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionTmToBurnInSeconds);
     }
-    
+
     @Override
-    public Double getExpeditionTimeToCommitteeBoatIfAvailable(TimePoint at){
-        //column currently unkown
+    public Double getExpeditionTimeToBurnToCommitteeBoatIfAvailable(TimePoint at) {
+        // TODO column currently unkown
         return null;
     }
-    
+
     @Override
-    public Double getExpeditionTimeToPinIfAvailable(TimePoint at){
-        //column currently unkown
+    public Double getExpeditionTimeToBurnToPinIfAvailable(TimePoint at) {
+        // TODO column currently unkown
         return null;
     }
-    
+
     @Override
-    public Double getExpeditionTimeToBurnToLineIfAvailable(TimePoint at){
-        //column currently unkown
+    public Double getExpeditionDistanceToCommitteeBoatIfAvailable(TimePoint at) {
+        // TODO column currently unkown
         return null;
     }
-    
+
     @Override
-    public Double getExpeditionTimeToBurnToCommitteeBoatIfAvailable(TimePoint at){
-        //column currently unkown
+    public Double getExpeditionDistanceToPinDetailIfAvailable(TimePoint at) {
+        // TODO column currently unkown
         return null;
     }
-    
+
     @Override
-    public Double getExpeditionTimeToBurnToPinIfAvailable(TimePoint at){
-        //column currently unkown
-        return null;
+    public Double getExpeditionDistanceBelowLineInMetersIfAvailable(TimePoint at) {
+        return getExpeditionValueForDouble(at, BravoExtendedFix::getExpeditionBelowLnInMeters);
     }
-    
+
     @Override
-    public Double getExpeditionDistanceToCommitteeBoatIfAvailable(TimePoint at){
-        //column currently unkown
-        return null;
-    }
-    
-    @Override
-    public Double getExpeditionDistanceToPinDetailIfAvailable(TimePoint at){
-        //column currently unkown
-        return null;
-    }
-    
-    @Override
-    public Double getExpeditionDistanceBelowLineIfAvailable(TimePoint at){
-        //column currently unkown
-        return null;
-    }
-    
-    @Override
-    public Double getExpeditionLineSquareForWindIfAvailable(TimePoint at){
-        //column currently unkown
+    public Double getExpeditionLineSquareForWindIfAvailable(TimePoint at) {
+        // TODO column currently unkown
         return null;
     }
     

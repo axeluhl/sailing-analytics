@@ -12,6 +12,6 @@
         }
     </ui:style>
     <div class="{style.player}">
-        <video class="{style.player} video-js vjs-default-skin vjs-big-play-centered" ui:field="videoElement"></video>
+        <video class="{style.player} video-js vjs-default-skin vjs-big-play-centered" ui:field="videoElement" preload="auto"></video>
     </div>
 </ui:UiBinder>

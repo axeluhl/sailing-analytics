@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,6 +41,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -159,6 +161,9 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 return leaderboard.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no();
             }
         };
+        leaderboardCanBoatsOfCompetitorsChangePerRaceColumn.setSortable(true);
+        leaderboardColumnListHandler.setComparator(leaderboardCanBoatsOfCompetitorsChangePerRaceColumn, (l1, l2)->
+            Boolean.valueOf(l1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(l2.canBoatsOfCompetitorsChangePerRace)));
 
         ImagesBarColumn<StrippedLeaderboardDTO, RaceLogTrackingEventManagementImagesBarCell> leaderboardActionColumn =
                 new ImagesBarColumn<StrippedLeaderboardDTO, RaceLogTrackingEventManagementImagesBarCell>(
@@ -176,9 +181,9 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
 
                     new RegattaLogCompetitorRegistrationDialog(boatClassName, sailingService, stringMessages,
                             errorReporter, /* editable */true, leaderboardName, canBoatsOfCompetitorsChangePerRace,
-                            new DialogCallback<Set<CompetitorWithBoatDTO>>() {
+                            new DialogCallback<Set<CompetitorDTO>>() {
                                 @Override
-                                public void ok(Set<CompetitorWithBoatDTO> registeredCompetitors) {
+                                public void ok(Set<CompetitorDTO> registeredCompetitors) {
                                     sailingService.setCompetitorRegistrationsInRegattaLog(leaderboardName,
                                             registeredCompetitors, new AsyncCallback<Void>() {
                                                 @Override
@@ -409,21 +414,18 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTO) {
         RegattaDTO regatta = getSelectedRegatta();
         String boatClassName = regatta.boatClass.getName();
-
         RaceLogCompetitorRegistrationDialog dialog = new RaceLogCompetitorRegistrationDialog(boatClassName, sailingService, stringMessages,
             errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, raceColumnName, fleetName,
-            raceColumnDTOAndFleetDTO.getA().getFleets(), new DialogCallback<Set<CompetitorWithBoatDTO>>() {
+            raceColumnDTOAndFleetDTO.getA().getFleets(), new DialogCallback<Set<CompetitorDTO>>() {
                 @Override
-                public void ok(final Set<CompetitorWithBoatDTO> registeredCompetitors) {
+                public void ok(final Set<CompetitorDTO> registeredCompetitors) {
                     if (canBoatsOfCompetitorsChangePerRace) {
-                        sailingService.getCompetitorAndBoatRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Map<CompetitorWithBoatDTO,BoatDTO>>() {
-                            
+                        sailingService.getCompetitorAndBoatRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
                             @Override
-                            public void onSuccess(Map<CompetitorWithBoatDTO, BoatDTO> existingCompetitorToBoatMappings) {
+                            public void onSuccess(Map<CompetitorDTO, BoatDTO> existingCompetitorToBoatMappings) {
                                 // remove the competitors which has been removed in the first dialog (competitor selection)
-                                Map<CompetitorWithBoatDTO, BoatDTO> newCompetitorToBoatMappings = new HashMap<>();
-                                
-                                for (CompetitorWithBoatDTO competitorDTO: registeredCompetitors) {
+                                Map<CompetitorDTO, BoatDTO> newCompetitorToBoatMappings = new HashMap<>();
+                                for (CompetitorDTO competitorDTO : registeredCompetitors) {
                                     if (existingCompetitorToBoatMappings.containsKey((competitorDTO))) {
                                         BoatDTO boatDTO = existingCompetitorToBoatMappings.get(competitorDTO);
                                         newCompetitorToBoatMappings.put(competitorDTO, boatDTO);
@@ -431,11 +433,10 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                                         newCompetitorToBoatMappings.put(competitorDTO, null);
                                     }
                                 }
-                                
                                 new CompetitorToBoatMappingsDialog(sailingService, stringMessages,
-                                        errorReporter, newCompetitorToBoatMappings, new DialogCallback<Map<CompetitorWithBoatDTO, BoatDTO>>() {
+                                        errorReporter, leaderboardName, newCompetitorToBoatMappings, new DialogCallback<Map<CompetitorDTO, BoatDTO>>() {
                                     @Override
-                                    public void ok(final Map<CompetitorWithBoatDTO, BoatDTO> competitorToBoatMappings) {
+                                    public void ok(final Map<CompetitorDTO, BoatDTO> competitorToBoatMappings) {
                                         sailingService.setCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName,
                                             fleetName, competitorToBoatMappings, new AsyncCallback<Void>() {
                                             @Override
@@ -459,10 +460,13 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                                 errorReporter.reportError("Could not read the competitor/boat assignments: " + caught.getMessage());
                             }
                         });
-                        
                     } else {
+                        final Set<CompetitorWithBoatDTO> registeredCompetitorsWithBoat = new HashSet<>();
+                        for (final CompetitorDTO competitor : registeredCompetitors) {
+                            registeredCompetitorsWithBoat.add((CompetitorWithBoatDTO) competitor);
+                        }
                         sailingService.setCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName,
-                            fleetName, registeredCompetitors, new AsyncCallback<Void>() {
+                            fleetName, registeredCompetitorsWithBoat, new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
                             }

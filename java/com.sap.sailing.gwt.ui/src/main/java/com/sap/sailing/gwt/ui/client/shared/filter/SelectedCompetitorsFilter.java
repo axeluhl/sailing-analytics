@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class SelectedCompetitorsFilter implements FilterWithUI<CompetitorWithBoatDTO>, CompetitorSelectionProviderFilterContext {
+public class SelectedCompetitorsFilter implements FilterWithUI<CompetitorDTO>, CompetitorSelectionProviderFilterContext {
     public static final String FILTER_NAME = "SelectedCompetitorsFilter";
 
     private CompetitorSelectionProvider competitorSelectionProvider;
@@ -14,7 +14,7 @@ public class SelectedCompetitorsFilter implements FilterWithUI<CompetitorWithBoa
     }
 
     @Override
-    public boolean matches(CompetitorWithBoatDTO competitor) {
+    public boolean matches(CompetitorDTO competitor) {
         boolean result = false;
         if(competitorSelectionProvider != null && competitorSelectionProvider.isSelected(competitor)) {
             result = true;
@@ -53,12 +53,12 @@ public class SelectedCompetitorsFilter implements FilterWithUI<CompetitorWithBoa
     }
 
     @Override
-    public FilterUIFactory<CompetitorWithBoatDTO> createUIFactory() {
+    public FilterUIFactory<CompetitorDTO> createUIFactory() {
         return null;
     }
 
     @Override
-    public FilterWithUI<CompetitorWithBoatDTO> copy() {
+    public FilterWithUI<CompetitorDTO> copy() {
         return new SelectedCompetitorsFilter();
     }
 }
