@@ -134,7 +134,6 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                     .entity("Could not find competitor with id " +
                             StringEscapeUtils.escapeHtml(competitorId)).type(MediaType.TEXT_PLAIN).build());
         }
-
         String fileExtension = "";
         if (fileType.equals("image/jpeg")) {
             fileExtension = ".jpg";
@@ -161,13 +160,12 @@ public class CompetitorsResource extends AbstractSailingServerResource {
             throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity("Could not store competitor image").type(MediaType.TEXT_PLAIN).build());
         }
-
         getService().getCompetitorAndBoatStore().updateCompetitor(competitorId, competitor.getName(), competitor.getShortName(), 
                 competitor.getColor(), competitor.getEmail(), 
                 competitor.getTeam().getNationality(), imageUri, competitor.getFlagImage(),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, competitor.getSearchTag());
+                /* timeOnTimeFactor */ competitor.getTimeOnTimeFactor(),
+                /* timeOnDistanceAllowancePerNauticalMile */ competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag());
         logger.log(Level.INFO, "Set team image for competitor " + competitor.getName());
-
         JSONObject result = new JSONObject();
         result.put(DeviceMappingConstants.JSON_TEAM_IMAGE_URI, imageUri.toString());
         return result.toString();
