@@ -2182,4 +2182,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String multiVideoIdle();
     String multiVideoDoNoAdd();
     String multiVideoOffsetInput();
+    String multiVideoDescription();
 }

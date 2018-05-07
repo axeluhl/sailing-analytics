@@ -89,6 +89,10 @@ public class MultiVideoDialog extends DialogBox {
         setGlassEnabled(true);
 
         FlowPanel mainContent = new FlowPanel();
+        
+        Label descriptionLabel = new Label(this.stringMessages.multiVideoDescription());
+        descriptionLabel.getElement().getStyle().setPadding(0.5, Unit.EM);
+        mainContent.add(descriptionLabel);
 
         Label indexUrl = new Label(stringMessages.multiVideoURLOfIndex());
         mainContent.add(indexUrl);
@@ -186,19 +190,19 @@ public class MultiVideoDialog extends DialogBox {
             link.setHref(remoteFile.url);
             link.setTarget("_blank");
             dataTable.setWidget(y, URL_COLUMN, link);
-            dataTable.setWidget(y, STATUS_COLUMN, new Label(asString(remoteFile.status)));
+            if(remoteFile.selected || remoteFile.status != EStatus.WAIT_FOR_SAVE) {
+                dataTable.setWidget(y, STATUS_COLUMN, new Label(asString(remoteFile.status)));
+            }else {
+                dataTable.setWidget(y, STATUS_COLUMN, new Label(stringMessages.multiVideoDoNoAdd()));
+            }
 
             CheckBox removeVideo = new CheckBox();
-            removeVideo.setEnabled(!remoteFile.isWorking);
-            removeVideo.setValue(remoteFile.status == EStatus.WAIT_FOR_SAVE || remoteFile.status == EStatus.WAITING_FOR_LINK);
+            removeVideo.setEnabled(!remoteFile.isWorking && remoteFile.status ==  EStatus.WAIT_FOR_SAVE);
+            removeVideo.setValue(remoteFile.selected);
             removeVideo.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
-                    if (Boolean.TRUE.equals(event.getValue())) {
-                        remoteFile.status = EStatus.WAIT_FOR_SAVE;
-                    } else {
-                        remoteFile.status = EStatus.DO_NOT_PROCESS;
-                    }
+                    remoteFile.selected = event.getValue();
                     updateUI();
                 }
             });
@@ -301,7 +305,7 @@ public class MultiVideoDialog extends DialogBox {
 
     private void startNextLinkingRemoteTask() {
         for (RemoteFileInfo remoteFile : remoteFiles) {
-            if (remoteFile.status == EStatus.WAIT_FOR_SAVE) {
+            if (remoteFile.status == EStatus.WAIT_FOR_SAVE && remoteFile.selected) {
                 MediaTrack mediaTrack = new MediaTrack(remoteFile.url, remoteFile.url, remoteFile.startTime,
                         remoteFile.duration, remoteFile.mime, remoteFile.candidates);
                 mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
@@ -347,7 +351,7 @@ public class MultiVideoDialog extends DialogBox {
                     public void onSuccess(List<EventDTO> result) {
                         Set<RegattaAndRaceIdentifier> candidates = new HashSet<>();
                         collectAllOverlappingRaces(remoteFile, result, candidates);
-                        remoteFile.status = EStatus.DO_NOT_PROCESS;
+                        remoteFile.status = EStatus.WAIT_FOR_SAVE;
                         remoteFile.isWorking = false;
                         remoteFile.candidates = candidates;
                         updateUI();
@@ -552,8 +556,6 @@ public class MultiVideoDialog extends DialogBox {
             return stringMessages.multiVideoWaitingForLinkPhase();
         case WAIT_FOR_SAVE:
             return stringMessages.multiVideoWaitingForSave();
-        case DO_NOT_PROCESS:
-            return stringMessages.multiVideoDoNoAdd();
         default:
             return stringMessages.unknown();
         }
@@ -612,11 +614,11 @@ public class MultiVideoDialog extends DialogBox {
         DONE,
         ALREADY_ADDED,
         GETTING_MEDIATRACK,
-        ERROR_LINKING,
-        DO_NOT_PROCESS;
+        ERROR_LINKING;
     }
 
     static class RemoteFileInfo {
+        protected boolean selected;
         protected MediaTrack knownMediaTrack;
         protected Set<RegattaAndRaceIdentifier> candidates;
         protected MimeType mime;
