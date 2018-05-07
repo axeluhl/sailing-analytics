@@ -110,11 +110,17 @@ public class ShortTimeWindCache {
     }
     
     /**
-     * Must be called while owning the {@link #order} monitor (synchronized)
+     * Must be called while owning the {@link #order} monitor (synchronized).
+     * The task of cleaning the caches is so short and on the other hand so
+     * important, especially during server start-up, that it shouldn't have to
+     * compete with millions of other background tasks (as they are generated
+     * during a system start-up) but rather should execute timely, according
+     * to schedule. That's why we schedule them with the default foreground
+     * executor.
      */
     private void ensureTimerIsRunning() {
         if (invalidatorHandle == null) {
-            invalidatorHandle = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().
+            invalidatorHandle = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().
                     scheduleAtFixedRate(new CacheInvalidator(), /* delay */ preserveHowManyMilliseconds, preserveHowManyMilliseconds, TimeUnit.MILLISECONDS);
         }
     }
