@@ -1299,6 +1299,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String startBrowserFullscreen();
     String switchToLiveRaceAutomatically();
     String timeBeforeRaceStart();
+    String timeAfterRaceEnd(); 
     String showXYDiagram();
     String xyDiagram();
     String boatSpeed();
@@ -1532,6 +1533,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tabbedResultsPresenter();
     String polarResultsPresenter();
     String maneuverSpeedDetailsResultsPresenter();
+    String numberPairResultsPresenter();
     String dataMiningRetrieval();
     String actionWatch();
     String actionAnalyze();
@@ -2126,7 +2128,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String expeditionVmgTargVmgDelta();
     String expeditionRateOfTurn();
     String expeditionRudderAngle();
-    String expeditionHeel();
     String expeditionTargetHeel();
     String expeditionTimeToPortLayline();
     String expeditionTimeToStbLayline();
@@ -2152,11 +2153,19 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String newExpeditionRace();
     String newExpeditionCompetitor();
     String selectOneCompetitorToMapTheImportedData();
-    String startTypingForSuggestions(); 
+    String startTypingForSuggestions();
     String maneuverTable();
     String speedIn();
     String speedOut();
     String selectAtLeastOneCompetitorManeuver();
     String noDataManeuverTable();
     String errorTryingToDetermineBoatLinkedToCompetitor(String raceColumnName, String leaderboardName, String message);
+    String delaysMustNotBeNegative();
+    String managePlaybackMedia();
+    String filterToBoatsRegisteredOnRegatta();
+    String unableToObtainCompetitorsAndBoatsForRaceInFleetInLeaderboard(String raceColumnName, String fleetName, String leaderboardName, String message);
+    String unableToObtainBoatsRegisteredWith(String leaderboardName, String message);
+    String importStartData();
+    String startCountDownFontSizeScaling();
+    String pleaseClearSelectionToSeeFullCourse();
 }

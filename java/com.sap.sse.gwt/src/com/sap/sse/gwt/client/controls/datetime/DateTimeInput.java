@@ -19,15 +19,15 @@ public interface DateTimeInput extends IsWidget, HasValue<Date> {
      * Enumeration describing the accuracy of an input field of type "datetime-local" or "time".
      */
     public enum Accuracy {
-        MINUTES(60, "yyyy-MM-dd'T'HH:mm", "HH:mm"), SECONDS(1, "yyyy-MM-dd'T'HH:mm:ss", "HH:mm:ss");
+        MINUTES("60", "yyyy-MM-dd'T'HH:mm", "HH:mm"), SECONDS("1", "yyyy-MM-dd'T'HH:mm:ss", "HH:mm:ss"), MILLISECONDS("0.001", "yyyy-MM-dd'T'HH:mm:ss.SSS", "HH:mm:ss.SSS" );
 
         private static final DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat("yyyy-MM-dd");
 
         private final DateTimeFormat datetimeFormat, timeFormat;
         private final String step;
 
-        private Accuracy(int step, String datetimeFormat, String timeFormat) {
-            this.step = String.valueOf(step);
+        private Accuracy(String step, String datetimeFormat, String timeFormat) {
+            this.step = step;
             this.datetimeFormat = DateTimeFormat.getFormat(datetimeFormat);
             this.timeFormat = DateTimeFormat.getFormat(timeFormat);
         }

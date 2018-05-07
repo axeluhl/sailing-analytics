@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
@@ -76,7 +76,8 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
                 defaultSettings.isShowMapControls(),
                 defaultSettings.getManeuverTypesToShow(),
                 defaultSettings.isShowDouglasPeuckerPoints(),
-                defaultSettings.isShowEstimatedDuration());
+                defaultSettings.isShowEstimatedDuration(),
+                defaultSettings.getStartCountDownFontSizeScaling());
         
         ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
 
@@ -93,7 +94,7 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
      * view. The number is determined to be at least one tenth of the number of competitors, but at least one if there are
      * one or more competitors.
      */
-    private int getHowManyCompetitorsToSelect(Iterable<CompetitorWithBoatDTO> competitors) {
+    private int getHowManyCompetitorsToSelect(Iterable<CompetitorDTO> competitors) {
         final int numberOfCompetitors = Util.size(competitors);
         return numberOfCompetitors==0 ? 0 : numberOfCompetitors<=4 ? 1 : numberOfCompetitors <=9 ? 2 : 3;
     }

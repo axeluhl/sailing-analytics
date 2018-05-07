@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.impl.data;
 
+import java.util.List;
 import java.util.function.BiFunction;
 
 import com.sap.sailing.datamining.Activator;
@@ -7,17 +8,21 @@ import com.sap.sailing.datamining.SailingClusterGroups;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
@@ -110,6 +115,28 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
         TimePoint timePoint = getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getEndOfTracking();
         return getTrackedLegOfCompetitor().getDistanceTraveled(timePoint);
     }
+    
+    @Override
+    public Double getSpeedAverage() {
+        if (getTrackedRace() == null) {
+            return null;
+        } else {
+            final List<Leg> legs = getTrackedRace().getRace().getCourse().getLegs();
+            if (legs.isEmpty()) {
+                return null;
+            } else {
+                final Leg lastLeg = legs.get(legs.size() - 1);
+                TimePoint finished = getTrackedRace().getTrackedLeg(getCompetitor(), lastLeg).getFinishTime();
+                return getTrackedRace().getAverageSpeedOverGround(getCompetitor(), finished).getKnots();
+            }
+        }
+    }
+    
+    @Override 
+    public Pair<Double, Double> getSpeedAverageVsDistanceTraveled(){
+        return new Pair<Double, Double>(getSpeedAverage(), getDistanceTraveled().getMeters());
+    }
+    
     
     @Override
     public Double getRankGainsOrLosses() {

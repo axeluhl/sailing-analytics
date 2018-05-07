@@ -261,6 +261,7 @@ import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.Renamable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -3113,6 +3114,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 trackedRegatta.unlockTrackedRacesAfterRead();
             }
         }
+        // The replication added new TrackedRegattas -> inform the respective listeners
+        regattaTrackingCache.values().forEach(trackedRegattaListener::regattaAdded);
         logger.info(logoutput.toString());
     }
 
@@ -4266,7 +4269,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     @Override
     public PairingList<RaceColumn, Fleet, Competitor,Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate,
-            final String leaderboardName, final Iterable<RaceColumn> selectedRaceColumn) {
+            final String leaderboardName, final Iterable<RaceColumn> selectedRaceColumn) throws PairingListCreationException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         List<Competitor> competitors = Util.createList(leaderboard.getAllCompetitors());
         Collections.shuffle(competitors);

@@ -23,7 +23,7 @@ public class TrackedRaceStatisticsDTO implements Serializable {
     
     public Integer totalLegsCount;
     public Integer currentLegNo;
-    public CompetitorWithBoatDTO leaderOrWinner;
+    public CompetitorAndBoatDTO leaderOrWinner;
     /**
      * Default constructor for GWT-Serialization
      */
