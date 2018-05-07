@@ -75,8 +75,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.ErrorImportDTO;
-import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.TrackImportDTO;
+import com.sap.sailing.server.gateway.trackfiles.impl.ImportResult.ErrorImportDTO;
+import com.sap.sailing.server.gateway.trackfiles.impl.ImportResult.TrackImportDTO;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter.WindImportResult;
 import com.sap.sailing.server.gateway.windimport.expedition.WindImporter;
@@ -214,7 +214,7 @@ public class ExpeditionAllInOneImporter {
         final String trackedRaceName = filenameWithDateTimeSuffix;
         final String windSourceId = filenameWithDateTimeSuffix;
         final int[] discardThresholds = new int[0];
-        final ImportResultDTO jsonHolderForGpsFixImport = new ImportResultDTO(logger);
+        final ImportResult jsonHolderForGpsFixImport = new ImportResult(logger);
         // Import GPS Fixes
         final List<Pair<String, FileItem>> filesForGpsFixImport = Arrays.asList(new Pair<>(filenameWithSuffix, fileItem));
         try {
@@ -228,7 +228,7 @@ public class ExpeditionAllInOneImporter {
         }
         errors.addAll(jsonHolderForGpsFixImport.getErrorList());
         // Import Extended Sensor Data
-        final ImportResultDTO jsonHolderForSensorFixImport = new ImportResultDTO(logger);
+        final ImportResult jsonHolderForSensorFixImport = new ImportResult(logger);
         final String sensorFixImporterType = DoubleVectorFixImporter.EXPEDITION_EXTENDED_TYPE;
         final Iterable<Pair<String, FileItem>> importerNamesAndFilesForSensorFixImport = Arrays
                 .asList(new Pair<>(sensorFixImporterType, fileItem));
@@ -684,7 +684,7 @@ public class ExpeditionAllInOneImporter {
         return trackedRace;
     }
 
-    private void ensureSuccessfulImport(ImportResultDTO result, String errorMessage) throws AllinOneImportException {
+    private void ensureSuccessfulImport(ImportResult result, String errorMessage) throws AllinOneImportException {
         if (!result.getErrorList().isEmpty()) {
             throw new AllinOneImportException(errorMessage, result.getErrorList());
         }

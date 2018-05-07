@@ -8,8 +8,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.dto.ImportConstants;
-import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.ErrorImportDTO;
-import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.TrackImportDTO;
+import com.sap.sailing.server.gateway.trackfiles.impl.ImportResult.ErrorImportDTO;
+import com.sap.sailing.server.gateway.trackfiles.impl.ImportResult.TrackImportDTO;
 import com.sap.sse.common.Util.Triple;
 
 /**
@@ -17,7 +17,7 @@ import com.sap.sse.common.Util.Triple;
  */
 class ImportResultSerializer {
 
-    static JSONObject serializeImportResult(ImportResultDTO result) {
+    static JSONObject serializeImportResult(ImportResult result) {
         final JSONObject json = new JSONObject();
         json.put(ImportConstants.ERRORS, serializeErrorList(result.getErrorList()));
         json.put(ImportConstants.UPLOADS, serializeTrackList(result.getImportResult()));
