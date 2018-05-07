@@ -229,7 +229,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("SERBIA (Republic of Serbia)", "RS", "SRB", "rs", null, "SRB", "688", "381"));
         add(new CountryCodeImpl("SEYCHELLES", "SC", "SYC", "sc", "SY", "SEY", "690", "248"));
         add(new CountryCodeImpl("SIERRA LEONE", "SL", "SLE", "sl", "WAL", "SLE", "694", "232"));
-        add(new CountryCodeImpl("SINGAPORE", "SG", "SGP", "sg", "SGP", "SIN", "702", "65"));
+        add(new CountryCodeImpl("SINGAPORE", "SG", "SGP", "sg", "SGP", "SGP", "702", "65"));
         add(new CountryCodeImpl("SINT MAARTEN", "SX", "SXM", "sx", null, null, "534", "599"));
         add(new CountryCodeImpl("SLOVAKIA (Slovak Republic)", "SK", "SVK", "sk", "SK", "SVK", "703", "421"));
         add(new CountryCodeImpl("SLOVENIA", "SI", "SVN", "si", "SLO", "SLO", "705", "386"));
