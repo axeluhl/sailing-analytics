@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -188,7 +188,7 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
                 @SuppressWarnings("unchecked")
                 final Iterable<CompetitorDescriptor>[] competitorDescriptors = (Iterable<CompetitorDescriptor>[]) new Iterable<?>[1];
                 @SuppressWarnings("unchecked")
-                final Iterable<CompetitorWithBoatDTO>[] competitors = (Iterable<CompetitorWithBoatDTO>[]) new Iterable<?>[1];
+                final Iterable<CompetitorDTO>[] competitors = (Iterable<CompetitorDTO>[]) new Iterable<?>[1];
                 final ParallelExecutionCallback<List<CompetitorDescriptor>> getCompetitorDescriptorsCallback =
                         new ParallelExecutionCallback<List<CompetitorDescriptor>>() {
                     @Override
@@ -197,10 +197,10 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
                         super.onSuccess(myCompetitorDescriptors);
                     }
                 };
-                final ParallelExecutionCallback<Iterable<CompetitorWithBoatDTO>> getCompetitorsCallback =
-                        new ParallelExecutionCallback<Iterable<CompetitorWithBoatDTO>>() {
+                final ParallelExecutionCallback<Iterable<CompetitorDTO>> getCompetitorsCallback =
+                        new ParallelExecutionCallback<Iterable<CompetitorDTO>>() {
                             @Override
-                            public void onSuccess(Iterable<CompetitorWithBoatDTO> myCompetitors) {
+                            public void onSuccess(Iterable<CompetitorDTO> myCompetitors) {
                                 competitors[0] = myCompetitors;
                                 super.onSuccess(myCompetitors);
                             }
@@ -240,7 +240,7 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
      */
     public interface MatchImportedCompetitorsDialogFactory {
         MatchImportedCompetitorsDialog createMatchImportedCompetitorsDialog(
-                Iterable<CompetitorDescriptor> competitorDescriptors, Iterable<CompetitorWithBoatDTO> competitors);
+                Iterable<CompetitorDescriptor> competitorDescriptors, Iterable<CompetitorDTO> competitors);
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.maneuverdetection.ManeuverMainCurveWithEstimationData;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -22,6 +23,7 @@ public class ManeuverMainCurveWithEstimationDataImpl extends ManeuverCurveBounda
     private final Bearing courseAtMaxTurningRate;
     private final double avgTurningRateInDegreesPerSecond;
     private final int gpsFixesCount;
+    private final Duration longestIntervalBetweenTwoFixes;
 
     public ManeuverMainCurveWithEstimationDataImpl(TimePoint timePointBefore, TimePoint timePointAfter,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
@@ -30,7 +32,7 @@ public class ManeuverMainCurveWithEstimationDataImpl extends ManeuverCurveBounda
             double maxTurningRateInDegreesPerSecond, Bearing courseAtMaxTurningRate,
             Distance distanceSailedWithinManeuver, Distance distanceSailedWithinManeuverTowardMiddleAngleProjection,
             Distance distanceSailedIfNotManeuvering, Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuvering,
-            double avgTurningRateInDegreesPerSecond, int gpsFixesCount) {
+            double avgTurningRateInDegreesPerSecond, int gpsFixesCount, Duration longestIntervalBetweenTwoFixes) {
         super(timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees,
                 lowestSpeed, distanceSailedWithinManeuver, distanceSailedWithinManeuverTowardMiddleAngleProjection,
                 distanceSailedIfNotManeuvering, distanceSailedTowardMiddleAngleProjectionIfNotManeuvering);
@@ -42,6 +44,7 @@ public class ManeuverMainCurveWithEstimationDataImpl extends ManeuverCurveBounda
         this.courseAtMaxTurningRate = courseAtMaxTurningRate;
         this.avgTurningRateInDegreesPerSecond = avgTurningRateInDegreesPerSecond;
         this.gpsFixesCount = gpsFixesCount;
+        this.longestIntervalBetweenTwoFixes = longestIntervalBetweenTwoFixes;
     }
 
     @Override
@@ -87,6 +90,11 @@ public class ManeuverMainCurveWithEstimationDataImpl extends ManeuverCurveBounda
     @Override
     public int getGpsFixesCount() {
         return gpsFixesCount;
+    }
+
+    @Override
+    public Duration getLongestIntervalBetweenTwoFixes() {
+        return longestIntervalBetweenTwoFixes;
     }
 
 }

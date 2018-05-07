@@ -2,7 +2,7 @@ package com.sap.sailing.dashboards.gwt.shared.dto;
 
 import java.util.List;
 
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 /**
@@ -11,15 +11,15 @@ import com.sap.sse.gwt.dispatch.shared.commands.Result;
  */
 public class LeaderboardCompetitorsDTO implements Result {
 
-    private List<CompetitorWithBoatDTO> competitors;
+    private List<CompetitorDTO> competitors;
 
     public LeaderboardCompetitorsDTO() {}
 
-    public List<CompetitorWithBoatDTO> getCompetitors() {
+    public List<CompetitorDTO> getCompetitors() {
         return competitors;
     }
 
-    public void setCompetitors(List<CompetitorWithBoatDTO> competitors) {
+    public void setCompetitors(List<CompetitorDTO> competitors) {
         this.competitors = competitors;
     }
 }

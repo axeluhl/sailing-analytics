@@ -7,14 +7,19 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel.NotificationType;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWithStylableHeaders;
@@ -34,13 +39,12 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
     private final ListDataProvider<MarkDTO> markDataProvider;    
     private final FlushableSortedCellTableWithStylableHeaders<MarkDTO> markTable;
     
-    public MarksPanel(final EditMarkPositionPanel parent, ComponentContext<?> context,
-            final ListDataProvider<MarkDTO> markDataProvider, final StringMessages stringMessages) {
+    public MarksPanel(final EditMarkPositionPanel parent, ComponentContext<?> context, final StringMessages stringMessages) {
         super(parent, context);
-        this.markDataProvider = markDataProvider;
         markTable = new FlushableSortedCellTableWithStylableHeaders<MarkDTO>(10000, tableResources);
-        markTable.setStyleName("EditMarkPositionMarkTable");
-        SortableColumn<MarkDTO, String> markNameColumn = new SortableColumn<MarkDTO, String>(new TextCell(), SortingOrder.NONE) {
+        markDataProvider = markTable.getDataProvider();
+        markTable.addStyleName("EditMarkPositionMarkTable");
+        SortableColumn<MarkDTO, String> markNameColumn = new SortableColumn<MarkDTO, String>(new TextCell(), SortingOrder.ASCENDING) {
             @Override
             public String getValue(MarkDTO object) {
                 return object.getName();
@@ -48,15 +52,19 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
 
             @Override
             public InvertibleComparator<MarkDTO> getComparator() {
-                return null;
+                return new InvertibleComparatorAdapter<MarkDTO>() {
+                    public int compare(MarkDTO m1, MarkDTO m2) {
+                        return m1.getName().compareTo(m2.getName());
+                    }
+                };
             }
 
             @Override
             public Header<?> getHeader() {
-                return null;
+                return new TextHeader(stringMessages.marks());
             }
         };
-        markTable.addColumn(markNameColumn, new TextHeader(stringMessages.marks()));
+        markTable.addColumn(markNameColumn);
         SortableColumn<MarkDTO, String> addFixColumn = new SortableColumn<MarkDTO, String>(new ButtonCell(), SortingOrder.NONE) {
             @Override
             public String getValue(MarkDTO object) {
@@ -70,11 +78,9 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
 
             @Override
             public Header<?> getHeader() {
-                return null;
+                return new TextHeader("");
             }
         };
-       
-        
         addFixColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {
             @Override
             public void update(int index, final MarkDTO mark, String value) {
@@ -97,8 +103,9 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
                 }
             }
         });
-        markTable.addColumn(addFixColumn, new TextHeader(""));
-        SingleSelectionModel<MarkDTO> selectionModel = new RefreshableSingleSelectionModel<MarkDTO>(new EntityIdentityComparator<MarkDTO>() {
+        markTable.addColumn(addFixColumn);
+        final SingleSelectionModel<MarkDTO> selectionModel = new RefreshableSingleSelectionModel<MarkDTO>(
+                new EntityIdentityComparator<MarkDTO>() {
             @Override
             public boolean representSameEntity(MarkDTO dto1, MarkDTO dto2) {
                 return dto1.getIdAsString().equals(dto2.getIdAsString());
@@ -107,15 +114,38 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
             public int hashCode(MarkDTO t) {
                 return t.getIdAsString().hashCode();
             }
-        },this.markDataProvider);
+        }, this.markDataProvider);
         markTable.setSelectionModel(selectionModel);
         markTable.getSelectionModel().addSelectionChangeHandler(parent);
-        markDataProvider.addDataDisplay(markTable);
-        initWidget(markTable);
+
+        final FlowPanel mainPanel = new FlowPanel();
+        final Widget clearSelection = createClearSelection(event -> selectionModel.clear(), stringMessages);
+        markTable.getSelectionModel().addSelectionChangeHandler(
+                event -> clearSelection.setVisible(!selectionModel.getSelectedSet().isEmpty()));
+        mainPanel.add(clearSelection);
+        mainPanel.add(markTable);
+        initWidget(mainPanel);
         setTitle(stringMessages.marks());
     }
 
-	@Override
+    private Widget createClearSelection(final ClickHandler clearSelectionHandler, final StringMessages stringMessages) {
+        final FlowPanel clearSelectionPanel = new FlowPanel();
+        clearSelectionPanel.addStyleName("EditMarkPositionHintPanel");
+        clearSelectionPanel.add(new Label(stringMessages.pleaseClearSelectionToSeeFullCourse()));
+        clearSelectionPanel.add(new Button(stringMessages.clearSelection(), clearSelectionHandler));
+        clearSelectionPanel.add(new Label());
+        clearSelectionPanel.setVisible(false);
+        return clearSelectionPanel;
+    }
+
+    void updateMarks(final Iterable<MarkDTO> marks) {
+        markTable.getDataProvider().getList().clear();
+        for (final MarkDTO mark : marks) {
+            markTable.getDataProvider().getList().add(mark);
+        }
+    }
+    
+    @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
     }
@@ -155,7 +185,7 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
                	return mark;
             }
         }
-        return null;               
+        return null;
     }
     
     public void deselectMark() {

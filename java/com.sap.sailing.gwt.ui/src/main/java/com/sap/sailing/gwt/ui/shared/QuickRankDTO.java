@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public class QuickRankDTO implements IsSerializable {
-    public CompetitorWithBoatDTO competitor;
+    public CompetitorDTO competitor;
     
     public int oneBasedRank;
     
@@ -15,7 +15,7 @@ public class QuickRankDTO implements IsSerializable {
 
     public QuickRankDTO() {}
     
-    public QuickRankDTO(CompetitorWithBoatDTO competitorDTO, int oneBasedRank, int legNumberOneBased) {
+    public QuickRankDTO(CompetitorDTO competitorDTO, int oneBasedRank, int legNumberOneBased) {
         this.competitor = competitorDTO;
         this.oneBasedRank = oneBasedRank;
         this.legNumberOneBased = legNumberOneBased;

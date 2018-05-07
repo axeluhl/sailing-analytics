@@ -346,10 +346,6 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_LEG_RUDDER_ANGLE,
                         new DoubleDetailTypeExtractor(LegEntryDTO::getExpeditionRudderAngle), detailHeaderStyle,
                         detailColumnStyle, leaderboardPanel));
-        result.put(DetailType.EXPEDITION_LEG_HEEL,
-                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_LEG_HEEL,
-                        new DoubleDetailTypeExtractor(LegEntryDTO::getExpeditionHeel), detailHeaderStyle,
-                        detailColumnStyle, leaderboardPanel));
         result.put(DetailType.EXPEDITION_LEG_TARGET_HEEL,
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_LEG_TARGET_HEEL,
                         new DoubleDetailTypeExtractor(LegEntryDTO::getExpeditionTargetHeel), detailHeaderStyle,
@@ -384,7 +380,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                         detailColumnStyle, leaderboardPanel));
         result.put(DetailType.EXPEDITION_LEG_TIME_TO_BURN_TO_LINE,
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_LEG_TIME_TO_BURN_TO_LINE,
-                        new DoubleDetailTypeExtractor(LegEntryDTO::getExpeditionTimeToBurnToLine),
+                        new DoubleDetailTypeExtractor(LegEntryDTO::getExpeditionTimeToBurnToLineInSeconds),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.EXPEDITION_LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT,
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.EXPEDITION_LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT,

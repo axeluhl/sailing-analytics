@@ -14,6 +14,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * 
@@ -64,6 +65,7 @@ public class ManeuverWithContext implements HasManeuverContext {
     public ManeuverType getTypeOfNextManeuver() {
         return nextManeuver != null ? nextManeuver.getType() : ManeuverType.UNKNOWN;
     }
+    
 
     @Override
     public Double getManeuverEnteringSpeed() {
@@ -141,6 +143,11 @@ public class ManeuverWithContext implements HasManeuverContext {
             }
         }
         return null;
+    }
+    
+    public Pair<Double, Double> getWindSpeedVsManeuverLoss(){
+        Wind wind = getTrackedLegOfCompetitorContext().getTrackedRace().getWind(maneuver.getPosition(), getTimePointBeforeForAnalysis());
+        return new Pair<>(wind.getKnots(), getManeuverLoss().getMeters());
     }
 
     @Override

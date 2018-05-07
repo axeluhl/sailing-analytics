@@ -175,6 +175,28 @@ public class Util {
     }
     
     /**
+     * Retains all elements from <code>what</code> in <code>retainIn</code> and removes all others from
+     * {@code retainIn}.
+     * 
+     * @return <code>retainIn</code> for chained use.
+     * @throws NullPointerException in case {@code what} or {@code retainIn} are {@code null}
+     */
+    public static <T> Collection<T> retainAll(Iterable<? extends T> what, Collection<T> retainIn) {
+        if (what == null || retainIn == null) {
+            throw new NullPointerException();
+        } else {
+            if (what instanceof Collection) {
+                retainIn.retainAll((Collection<?>) what);
+            } else {
+                final Set<T> set = new HashSet<>(); // for quick contains
+                addAll(what, set);
+                retainIn.retainAll(set);
+            }
+            return retainIn;
+        }
+    }
+    
+    /**
      * Adds <code>v</code> to the value set for key <code>k</code>. If no entry exists yet for <code>k</code>, the
      * entry is created using a {@link HashSet} for the value set.
      */

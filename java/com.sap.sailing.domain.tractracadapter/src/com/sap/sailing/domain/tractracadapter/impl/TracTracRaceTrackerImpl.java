@@ -363,6 +363,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                     if (getRace() != null) {
                         DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(getRace());
                         if (trackedRace != null) {
+                            logger.info("Setting delay to live for race "+trackedRace.getRace().getName()+" to "+delayToLiveInMillis+"ms");
                             trackedRace.setDelayToLiveInMillis(delayToLiveInMillis);
                         }
                     }

@@ -209,18 +209,13 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
         }
     }
 
-    protected boolean isValidCompetitorWithBoat(Competitor competitor) {
-        assert competitor != null;
-        return competitor.hasBoat();
-    }
-
     @Override
     public DynamicCompetitorWithBoat getExistingCompetitorWithBoatById(Serializable competitorId) {
         final DynamicCompetitorWithBoat result;
         LockUtil.lockForRead(lock);
         try {
             DynamicCompetitor competitor = competitorCache.get(competitorId);
-            if (competitor != null && isValidCompetitorWithBoat(competitor)) {
+            if (competitor != null && competitor.hasBoat()) {
                 result = (DynamicCompetitorWithBoat) competitor;
             } else {
                 result = null;
@@ -236,7 +231,7 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
         LockUtil.lockForRead(lock);
         try {
             Competitor competitor = competitorsByIdAsString.get(competitorIdAsString);
-            if (competitor != null && isValidCompetitorWithBoat(competitor)) {
+            if (competitor != null && competitor.hasBoat()) {
                 return (CompetitorWithBoat) competitor;
             } else {
                 return null;
@@ -625,7 +620,7 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
             Set<DynamicBoat> boats = new HashSet<>(boatCache.values());
             Set<DynamicBoat> boatsEmbeddedInCompetitors = new HashSet<>();
             for (Competitor competitor : competitorCache.values()) {
-                if (isValidCompetitorWithBoat(competitor)) {
+                if (competitor.hasBoat()) {
                     boatsEmbeddedInCompetitors.add(((DynamicCompetitorWithBoat) competitor).getBoat()); 
                 }
             }
@@ -722,30 +717,27 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
     }
     
     @Override
-    public CompetitorWithBoatDTO convertToCompetitorWithBoatDTO(Competitor competitor, Boat boat) {
+    public CompetitorWithBoatDTO convertToCompetitorWithBoatDTO(CompetitorWithBoat competitor) {
         CompetitorDTO c = convertToCompetitorDTO(competitor);
-        BoatDTO boatDTO = null;
-        if (boat != null) {
-            boatDTO = convertToBoatDTO(boat); 
-        }
+        BoatDTO boatDTO = convertToBoatDTO(competitor.getBoat()); 
         CompetitorWithBoatDTO competitorDTO = new CompetitorWithBoatDTOImpl(c, boatDTO);
         return competitorDTO;
     }
 
     @Override
-    public CompetitorWithBoatDTO convertToCompetitorWithOptionalBoatDTO(Competitor competitor) {
-        if (isValidCompetitorWithBoat(competitor)) {
-            return convertToCompetitorWithBoatDTO(competitor, ((CompetitorWithBoat) competitor).getBoat());
+    public CompetitorDTO convertToCompetitorWithOptionalBoatDTO(Competitor competitor) {
+        if (competitor.hasBoat()) {
+            return convertToCompetitorWithBoatDTO((CompetitorWithBoat) competitor);
         } else {
-            return convertToCompetitorWithBoatDTO(competitor, null);
+            return convertToCompetitorDTO(competitor);
         }
     }
 
     @Override
-    public Map<CompetitorWithBoatDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, ? extends Boat> competitorsAndBoats) {
-        Map<CompetitorWithBoatDTO, BoatDTO> result = new HashMap<>();
+    public Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, ? extends Boat> competitorsAndBoats) {
+        Map<CompetitorDTO, BoatDTO> result = new HashMap<>();
         for (Entry<Competitor, ? extends Boat> entry : competitorsAndBoats.entrySet()) {
-            CompetitorWithBoatDTO competitorDTO = convertToCompetitorWithOptionalBoatDTO(entry.getKey());
+            CompetitorDTO competitorDTO = convertToCompetitorWithOptionalBoatDTO(entry.getKey());
             BoatDTO boatDTO = convertToBoatDTO(entry.getValue());
             result.put(competitorDTO, boatDTO);
         }
