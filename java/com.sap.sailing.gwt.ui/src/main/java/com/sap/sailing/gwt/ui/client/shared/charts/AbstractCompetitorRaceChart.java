@@ -431,8 +431,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 }
                 if (retrievedDataType.isDegreeTypeWithRecalculation()) {
                     for (int i = 1; i < newRaceDataPoints.length; i++) {
-                        final Point previous = newRaceDataPoints[i - 1], current = newRaceDataPoints[1];
-                        newRaceDataPoints[i] = ChartPointRecalculator.stayClosestToPreviousPoint(previous, current);
+                        final Point previous = newRaceDataPoints[i - 1];
+                        newRaceDataPoints[i] = ChartPointRecalculator.stayClosestToPreviousPointWithDeltaLimit(previous, newRaceDataPoints[i], 45);
                     }
                 }
                 setSeriesPoints(competitorDataSeries, newRaceDataPoints, /* manageZoom */ append);
