@@ -16,8 +16,8 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
     private SelfType previousLevel = null;
     private SelfType nextLevel = null;
 
-    protected NodeTransitionProperties[] nodeTransitions = new NodeTransitionProperties[FineGrainedPointOfSail
-            .values().length];
+    private double[][] transitionProbabilitiesFromPreviousToThisNodesLevel = new double[FineGrainedPointOfSail
+            .values().length][FineGrainedPointOfSail.values().length];
 
     public AbstractManeuverNodesLevel(CompleteManeuverCurveWithEstimationData maneuver) {
         this.maneuver = maneuver;
@@ -29,31 +29,43 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
     }
 
     @Override
-    public FineGrainedPointOfSail getBestPreviousNode(FineGrainedPointOfSail toNode) {
-        return nodeTransitions[toNode.ordinal()].getBestPreviousNode();
-    }
-
-    @Override
-    public double getProbabilityOfBestPathToNodeFromStart(FineGrainedPointOfSail toNode) {
-        return nodeTransitions[toNode.ordinal()].getProbabilityOfBestPathToNodeFromStart();
-    }
-
-    @Override
     public double getProbabilityFromPreviousLevelNodeToThisLevelNode(FineGrainedPointOfSail previousLevelNode,
             FineGrainedPointOfSail thisLevelNode) {
-        return nodeTransitions[thisLevelNode.ordinal()].getProbabilitiesFromPreviousNodesLevel(previousLevelNode);
+        return transitionProbabilitiesFromPreviousToThisNodesLevel[previousLevelNode.ordinal()][thisLevelNode
+                .ordinal()];
+    }
+
+    protected void setProbabilityFromPreviousLevelNodeToThisLevelNode(FineGrainedPointOfSail previousLevelNode,
+            FineGrainedPointOfSail thisLevelNode, double transitionProbability) {
+        if (previousLevelNode != null) {
+            transitionProbabilitiesFromPreviousToThisNodesLevel[previousLevelNode.ordinal()][thisLevelNode
+                    .ordinal()] = transitionProbability;
+        } else {
+            final FineGrainedPointOfSail pointOfSailBeforeManeuver = thisLevelNode.getNextPointOfSail(
+                    getManeuver().getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees() * -1);
+            for (FineGrainedPointOfSail previousNodeToSet : FineGrainedPointOfSail.values()) {
+                if (previousNodeToSet != pointOfSailBeforeManeuver) {
+                    transitionProbabilitiesFromPreviousToThisNodesLevel[previousNodeToSet.ordinal()][thisLevelNode
+                            .ordinal()] = 0;
+                } else {
+                    transitionProbabilitiesFromPreviousToThisNodesLevel[previousNodeToSet.ordinal()][thisLevelNode
+                            .ordinal()] = transitionProbability;
+                }
+            }
+        }
     }
 
     protected void normalizeNodeTransitions() {
-        for (NodeTransitionProperties nodeTransition : nodeTransitions) {
+        for (FineGrainedPointOfSail previousNode : FineGrainedPointOfSail.values()) {
             double probabilitiesSum = 0;
-            for (FineGrainedPointOfSail previousNode : FineGrainedPointOfSail.values()) {
-                probabilitiesSum += nodeTransition.getProbabilitiesFromPreviousNodesLevel(previousNode);
+            for (FineGrainedPointOfSail currentNode : FineGrainedPointOfSail.values()) {
+                probabilitiesSum += getProbabilityFromPreviousLevelNodeToThisLevelNode(previousNode, currentNode);
             }
-            for (FineGrainedPointOfSail previousNode : FineGrainedPointOfSail.values()) {
-                double normalizedTransitionProbability = nodeTransition
-                        .getProbabilitiesFromPreviousNodesLevel(previousNode) / probabilitiesSum;
-                nodeTransition.setProbabilitiesFromPreviousNodesLevel(previousNode, normalizedTransitionProbability);
+            for (FineGrainedPointOfSail currentNode : FineGrainedPointOfSail.values()) {
+                double normalizedTransitionProbability = getProbabilityFromPreviousLevelNodeToThisLevelNode(
+                        previousNode, currentNode) / probabilitiesSum;
+                transitionProbabilitiesFromPreviousToThisNodesLevel[previousNode.ordinal()][currentNode
+                        .ordinal()] = normalizedTransitionProbability;
             }
         }
     }
@@ -84,39 +96,10 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
     }
 
     @Override
-    public void computeBestPathsToThisLevel() {
-        SelfType previousLevel = getPreviousLevel();
-        if (previousLevel != null) {
-            for (FineGrainedPointOfSail previousNode : FineGrainedPointOfSail.values()) {
-                for (FineGrainedPointOfSail currentNode : FineGrainedPointOfSail.values()) {
-                    double probabilityOfBestPathToNodeFromStart = previousLevel
-                            .getProbabilityOfBestPathToNodeFromStart(previousNode)
-                            * this.getProbabilityFromPreviousLevelNodeToThisLevelNode(previousNode, currentNode)
-                            * getPenaltyFactorForTransitionConsideringWholeBestPath(previousNode, currentNode);
-                    double existingProbabilityOfBestPathToNodeFromStart = this
-                            .getProbabilityOfBestPathToNodeFromStart(currentNode);
-                    if (probabilityOfBestPathToNodeFromStart > existingProbabilityOfBestPathToNodeFromStart) {
-                        this.nodeTransitions[currentNode.ordinal()].setBestPreviousNode(previousNode,
-                                probabilityOfBestPathToNodeFromStart);
-                    }
-                }
-            }
-        }
-    }
-
-    protected double getPenaltyFactorForTransitionConsideringWholeBestPath(FineGrainedPointOfSail previousNode,
-            FineGrainedPointOfSail currentNode) {
-        // TODO consider average speed/course as actual polars, comparing tacks vs. jibes regarding average
-        // lowest speed, max/avg turning rate, course change (if not mark passing), maneuver time loss (if
-        // not mark passing)
-        return 0;
-    }
-
-    @Override
     public Bearing getCourse() {
         return getManeuver().getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing();
     }
-    
+
     @Override
     public double getWindCourseInDegrees(FineGrainedPointOfSail node) {
         double windCourse = (getCourse().getDegrees() - node.getTwa() + 180) % 360;
@@ -125,7 +108,7 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
         }
         return windCourse;
     }
-    
+
     @Override
     public double getWindCourseInDegrees(double twa) {
         double windCourse = (getCourse().getDegrees() - twa + 180) % 360;

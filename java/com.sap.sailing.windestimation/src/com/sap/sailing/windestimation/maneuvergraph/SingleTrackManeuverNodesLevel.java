@@ -27,12 +27,12 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
             double likelihoodForCurrentNode = maneuverClassificationResult
                     .getLikelihoodForPointOfSailAfterManeuver(currentNode.getCoarseGrainedPointOfSail());
             if (getPreviousLevel() == null) {
-                this.nodeTransitions[currentNode.ordinal()].setBestPreviousNode(null, likelihoodForCurrentNode);
+                setProbabilityFromPreviousLevelNodeToThisLevelNode(null, currentNode, likelihoodForCurrentNode);
             } else {
                 for (FineGrainedPointOfSail previousNode : FineGrainedPointOfSail.values()) {
                     double likelihoodForTransitionFromPreviousNodeToCurrentNode = likelihoodForCurrentNode
                             * getNodeTransitionPenaltyFactor(previousNode, currentNode);
-                    nodeTransitions[currentNode.ordinal()].setProbabilitiesFromPreviousNodesLevel(previousNode,
+                    setProbabilityFromPreviousLevelNodeToThisLevelNode(previousNode, currentNode,
                             likelihoodForTransitionFromPreviousNodeToCurrentNode);
                 }
             }

@@ -19,13 +19,7 @@ public interface ManeuverNodesLevel<SelfType extends ManeuverNodesLevel<SelfType
 
     void computeProbabilitiesFromPreviousLevelToThisLevel();
 
-    void computeBestPathsToThisLevel();
-
     void appendNextManeuverNodesLevel(SelfType nextManeuverNodesLevel);
-
-    FineGrainedPointOfSail getBestPreviousNode(FineGrainedPointOfSail toNode);
-
-    double getProbabilityOfBestPathToNodeFromStart(FineGrainedPointOfSail toNode);
 
     double getProbabilityFromPreviousLevelNodeToThisLevelNode(FineGrainedPointOfSail previousLevelNode,
             FineGrainedPointOfSail thisLevelNode);

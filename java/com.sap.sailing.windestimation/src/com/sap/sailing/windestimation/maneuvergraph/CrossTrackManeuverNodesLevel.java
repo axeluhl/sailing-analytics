@@ -54,8 +54,7 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
                 }
                 double probability = probabilitiesSum / probabilitiesCount
                         * getNodeTransitionPenaltyFactor(previousNode, currentNode);
-                this.nodeTransitions[currentNode.ordinal()].setProbabilitiesFromPreviousNodesLevel(previousNode,
-                        probability);
+                setProbabilityFromPreviousLevelNodeToThisLevelNode(previousNode, currentNode, probability);
             }
         }
         normalizeNodeTransitions();

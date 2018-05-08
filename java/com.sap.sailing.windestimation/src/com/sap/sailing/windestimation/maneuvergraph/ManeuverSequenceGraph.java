@@ -32,19 +32,22 @@ public class ManeuverSequenceGraph<T extends ManeuverNodesLevel<T>, R> {
     private T lastGraphLevel = null;
     private final ManeuverNodesLevelFactory<T, R> maneuverNodesLevelFactory;
     private final PolarDataService polarService;
+    private final BestPathsCalculator<T> bestPathsCalculator;
 
     public ManeuverSequenceGraph(Iterable<R> maneuverSequence,
-            ManeuverNodesLevelFactory<T, R> maneuverNodesLevelFactory, PolarDataService polarService) {
-        this(maneuverNodesLevelFactory, polarService);
+            ManeuverNodesLevelFactory<T, R> maneuverNodesLevelFactory, PolarDataService polarService,
+            BestPathsCalculator<T> bestPathsCalculator) {
+        this(maneuverNodesLevelFactory, polarService, bestPathsCalculator);
         for (R maneuver : maneuverSequence) {
             appendManeuverAsGraphLevel(maneuver);
         }
     }
 
     public ManeuverSequenceGraph(ManeuverNodesLevelFactory<T, R> maneuverNodesLevelFactory,
-            PolarDataService polarService) {
+            PolarDataService polarService, BestPathsCalculator<T> bestPathsCalculator) {
         this.maneuverNodesLevelFactory = maneuverNodesLevelFactory;
         this.polarService = polarService;
+        this.bestPathsCalculator = bestPathsCalculator;
     }
 
     protected void appendManeuverAsGraphLevel(R nodeLevelReference) {
@@ -58,14 +61,15 @@ public class ManeuverSequenceGraph<T extends ManeuverNodesLevel<T>, R> {
             lastGraphLevel = newManeuverNodesLevel;
         }
         newManeuverNodesLevel.computeProbabilitiesFromPreviousLevelToThisLevel();
-        newManeuverNodesLevel.computeBestPathsToThisLevel();
+        bestPathsCalculator.computeBestPathsToNextLevel(newManeuverNodesLevel);
     }
 
     public void recomputePossiblePathsWithDistances() {
         T currentLevel = firstGraphLevel;
+        bestPathsCalculator.resetState();
         while (currentLevel != null) {
             currentLevel.computeProbabilitiesFromPreviousLevelToThisLevel();
-            currentLevel.computeBestPathsToThisLevel();
+            bestPathsCalculator.computeBestPathsToNextLevel(currentLevel);
             currentLevel = currentLevel.getNextLevel();
         }
     }
@@ -79,7 +83,7 @@ public class ManeuverSequenceGraph<T extends ManeuverNodesLevel<T>, R> {
             double maxProbability = 0;
             FineGrainedPointOfSail pointOfSailWithMaxProbability = null;
             for (FineGrainedPointOfSail pointOfSail : FineGrainedPointOfSail.values()) {
-                double probability = lastGraphLevel.getProbabilityOfBestPathToNodeFromStart(pointOfSail);
+                double probability = bestPathsCalculator.getProbabilityOfBestPathToNodeFromStart(pointOfSail);
                 if (probability > probabilitiesOfBestPathToCoarseGrainedPointOfSail[pointOfSail
                         .getCoarseGrainedPointOfSail().ordinal()]) {
                     probabilitiesOfBestPathToCoarseGrainedPointOfSail[pointOfSail.getCoarseGrainedPointOfSail()
@@ -112,14 +116,16 @@ public class ManeuverSequenceGraph<T extends ManeuverNodesLevel<T>, R> {
 
     private List<WindWithConfidence<TimePoint>> getWindTrackWithLastNodeOfLastLevelConsideringMiddleCoursesOfCleanTacksAndJibes(
             FineGrainedPointOfSail lastNode, T lastLevel, double baseConfidence) {
-        FineGrainedPointOfSail currentNode = lastNode;
-        T currentLevel = lastLevel;
         List<WindWithConfidence<TimePoint>> windTrack = new ArrayList<>();
-        while (currentLevel.getPreviousLevel() != null) {
-            FineGrainedPointOfSail previousNode = currentNode.getNextPointOfSail(
+        List<Pair<T, FineGrainedPointOfSail>> bestPath = bestPathsCalculator.getBestPath(lastLevel, lastNode);
+        for (Pair<T, FineGrainedPointOfSail> pathEntry : bestPath) {
+            final T currentLevel = pathEntry.getA();
+            final FineGrainedPointOfSail currentNode = pathEntry.getB();
+            final FineGrainedPointOfSail pointOfSailBeforeManeuver = currentNode.getNextPointOfSail(
                     currentLevel.getManeuver().getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees() * -1);
-            if (previousNode.getCoarseGrainedPointOfSail().getLegType() == currentNode.getCoarseGrainedPointOfSail()
-                    .getLegType() && previousNode.getTack() != currentNode.getTack()
+            if (pointOfSailBeforeManeuver.getCoarseGrainedPointOfSail().getLegType() == currentNode
+                    .getCoarseGrainedPointOfSail().getLegType()
+                    && pointOfSailBeforeManeuver.getTack() != currentNode.getTack()
                     && Math.abs(currentLevel.getManeuver().getMainCurve().getDirectionChangeInDegrees()) < 110
                     && isCleanManeuver(currentLevel)) {
                 ManeuverType tackOrJibe;
@@ -138,8 +144,6 @@ public class ManeuverSequenceGraph<T extends ManeuverNodesLevel<T>, R> {
                     }
                 }
             }
-            currentNode = currentLevel.getBestPreviousNode(currentNode);
-            currentLevel = currentLevel.getPreviousLevel();
         }
         return windTrack;
     }
@@ -196,11 +200,12 @@ public class ManeuverSequenceGraph<T extends ManeuverNodesLevel<T>, R> {
 
     private List<WindWithConfidence<TimePoint>> getWindTrackWithLastNodeOfLastLevelConsideringStableCourses(
             FineGrainedPointOfSail lastNode, T lastLevel, double baseConfidence) {
-        FineGrainedPointOfSail currentNode = lastNode;
-        T currentLevel = lastLevel;
         List<WindWithConfidence<TimePoint>> windTrack = new ArrayList<>();
-        while (currentLevel != null) {
-            FineGrainedPointOfSail pointOfSailBeforeManeuver = currentNode.getNextPointOfSail(
+        List<Pair<T, FineGrainedPointOfSail>> bestPath = bestPathsCalculator.getBestPath(lastLevel, lastNode);
+        for (Pair<T, FineGrainedPointOfSail> pathEntry : bestPath) {
+            final T currentLevel = pathEntry.getA();
+            final FineGrainedPointOfSail currentNode = pathEntry.getB();
+            final FineGrainedPointOfSail pointOfSailBeforeManeuver = currentNode.getNextPointOfSail(
                     currentLevel.getManeuver().getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees() * -1);
             if (pointOfSailBeforeManeuver.getCoarseGrainedPointOfSail() != currentNode.getCoarseGrainedPointOfSail()) {
                 FineGrainedPointOfSail pointOfSailForWindSpeedDetermination = null;
@@ -223,27 +228,24 @@ public class ManeuverSequenceGraph<T extends ManeuverNodesLevel<T>, R> {
                     }
                 }
             }
-            currentNode = currentLevel.getBestPreviousNode(currentNode);
-            currentLevel = currentLevel.getPreviousLevel();
         }
         return windTrack;
     }
 
     private List<WindWithConfidence<TimePoint>> getWindTrackWithLastNodeOfLastLevelConsideringPointOfSailsWithoutWindSpeed(
             FineGrainedPointOfSail lastNode, T lastLevel, double baseConfidence) {
-        FineGrainedPointOfSail currentNode = lastNode;
-        T currentLevel = lastLevel;
         List<WindWithConfidence<TimePoint>> windTrack = new ArrayList<>();
-        while (currentLevel != null) {
-            FineGrainedPointOfSail pointOfSailBeforeManeuver = currentNode.getNextPointOfSail(
+        List<Pair<T, FineGrainedPointOfSail>> bestPath = bestPathsCalculator.getBestPath(lastLevel, lastNode);
+        for (Pair<T, FineGrainedPointOfSail> pathEntry : bestPath) {
+            final T currentLevel = pathEntry.getA();
+            final FineGrainedPointOfSail currentNode = pathEntry.getB();
+            final FineGrainedPointOfSail pointOfSailBeforeManeuver = currentNode.getNextPointOfSail(
                     currentLevel.getManeuver().getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees() * -1);
             if (pointOfSailBeforeManeuver.getCoarseGrainedPointOfSail() != currentNode.getCoarseGrainedPointOfSail()) {
                 WindWithConfidenceImpl<TimePoint> windWithConfidence = getWindWithConfidenceWithoutSpeed(
                         pointOfSailBeforeManeuver, currentLevel, baseConfidence);
                 windTrack.add(windWithConfidence);
             }
-            currentNode = currentLevel.getBestPreviousNode(currentNode);
-            currentLevel = currentLevel.getPreviousLevel();
         }
         return windTrack;
     }

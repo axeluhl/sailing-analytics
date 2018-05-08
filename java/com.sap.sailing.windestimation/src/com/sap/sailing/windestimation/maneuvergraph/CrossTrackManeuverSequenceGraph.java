@@ -17,7 +17,7 @@ public class CrossTrackManeuverSequenceGraph
     public CrossTrackManeuverSequenceGraph(Iterable<SingleTrackManeuverSequenceGraph> singleTrackManeuverSequenceGraphs,
             PolarDataService polarService) {
         super(getSingleTrackManeuverNodeLevels(singleTrackManeuverSequenceGraphs),
-                CrossTrackManeuverNodesLevel.getFactory(), polarService);
+                CrossTrackManeuverNodesLevel.getFactory(), polarService, new BestPathsCalculator<>());
     }
 
     private static List<SingleTrackManeuverNodesLevel> getSingleTrackManeuverNodeLevels(

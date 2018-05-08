@@ -18,7 +18,7 @@ public class SingleTrackManeuverSequenceGraph
     public SingleTrackManeuverSequenceGraph(BoatClass boatClass, PolarDataService polarService,
             Iterable<CompleteManeuverCurveWithEstimationData> maneuverSequence) {
         super(getClassificationResults(boatClass, polarService, maneuverSequence),
-                SingleTrackManeuverNodesLevel.getFactory(boatClass), polarService);
+                SingleTrackManeuverNodesLevel.getFactory(boatClass), polarService, new BestPathsCalculator<>());
     }
 
     private static List<SingleManeuverClassificationResult> getClassificationResults(BoatClass boatClass,
