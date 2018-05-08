@@ -664,7 +664,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         if(selectedGroup != null) {
             leaderboardsProvider.getList().addAll(availableLeaderboards);
             leaderboardsProvider.getList().removeAll(selectedGroup.leaderboards);
-            leaderboardsFilterablePanel.getTextBox().setText("");
             leaderboardsFilterablePanel.updateAll(leaderboardsProvider.getList());
             refreshableLeaderboardsSelectionModel.clear();
             final Set<StrippedLeaderboardDTO> selectedLeaderboards = refreshableLeaderboardsSelectionModel.getSelectedSet();
