@@ -59,7 +59,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     private static final String DATE_COLUMN_2 = "mm/dd/yy";
     private static final String DATE_COLUMN_2_PATTERN = "MM/dd/yy";
     private static final String TIME_COLUMN = "hhmmss";
-    private static final String GPS_TIME_COLUMN = "GPS Time";
+    private static final String GPS_TIME_COLUMN = "GPS Time"; // FIXME this has to be "GPS time" with a lowercase t but then we need to handle all these odd values...
     private static final Pattern BOAT_CHECK_PATTERN = Pattern.compile("[1-9]?[0-9]");
     private final Map<String, Integer> columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix;
     /**
@@ -292,9 +292,6 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
      * Converts a value from a column such as "GPS Time" to a {@link TimePoint}.
      * The value is expected to be provided in decimal format, representing the
      * days since the {@link #EXCEL_EPOCH_START "Excel Epoch Start"}.
-     * 
-     * @param time_ExcelEpoch
-     * @return
      */
     public static TimePoint getTimePoint(String time_ExcelEpoch) {
         final TimePoint timePoint;
