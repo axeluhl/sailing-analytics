@@ -47,18 +47,19 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
         if (targetPointOfSail == currentNode) {
             return 1;
         }
+        double windCourseDeviation = targetPointOfSail.getDifferenceInDegrees(currentNode);
         if (targetPointOfSail.getCoarseGrainedPointOfSail() == currentNode.getCoarseGrainedPointOfSail()) {
-            return 1 / (1 + Math.abs(courseDifference / 45));
+            return 1 / (1 + Math.abs(windCourseDeviation / 45));
         }
         if (targetPointOfSail.getTack() == currentNode.getTack() && (targetPointOfSail.getLegType() == LegType.REACHING
                 || currentNode.getLegType() == LegType.REACHING)) {
-            return 1 / (1 + Math.abs(courseDifference / 30));
+            return 1 / (1 + Math.abs(windCourseDeviation / 30));
         }
         if (targetPointOfSail.getNextPointOfSail(NauticalSide.STARBOARD) == currentNode
                 || targetPointOfSail.getNextPointOfSail(NauticalSide.PORT) == currentNode) {
-            return 1 / (1 + Math.abs((courseDifference) / 15));
+            return 1 / (1 + Math.abs((windCourseDeviation) / 15));
         }
-        return 1 / (1 + Math.pow((courseDifference) / 15, 2));
+        return 1 / (1 + Math.pow((windCourseDeviation) / 15, 2));
     }
 
     public static ManeuverNodesLevelFactory<SingleTrackManeuverNodesLevel, SingleManeuverClassificationResult> getFactory(
