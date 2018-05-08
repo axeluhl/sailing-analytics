@@ -168,6 +168,7 @@ import com.sap.sailing.domain.base.impl.SailingServerConfigurationImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
@@ -1657,7 +1658,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 // dedicated boat mappings is found that includes this competitor. In this case, the Boat that is
                 // referenced here will be removed from the competitor *and* from the DB. An orphaned copy will
                 // remain in the RaceLogRegisterCompetitorEventImpl object created here, but when loading this object
-                // from the DB the next time the boat ID cannot be resolved anymore.
+                // from the DB the next time the boat ID cannot be resolved anymore. However, during a second run, the
+                // else if (boat == null) branch below will be executed because a non-null boat ID was not resolved to
+                // a valid boat; a 2nd league boat will then be assigned.
                 result = new RaceLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, passId, competitor, ((CompetitorWithBoat) competitor).getBoat());
             } else {
                 logger.warning("Bug2822: Competitor with ID "+competitorId+" already seems to have been migrated to one without boat."+
@@ -1699,12 +1702,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private int secondLeagueBoatCounter = 0;
     /**
-     * map the competitors cyclically to the six boats used in the 2017 season of the 2. Segelbundesliga
+     * map the competitors cyclically to the six boats used in the 2017 season of the 2. Segelbundesliga and create
+     * the boat with that ID if it doesn't exist yet
      */
     private RaceLogRegisterCompetitorEvent createBoatForSecondGermanLeague2017(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, Competitor competitor) {
-        final String auxiliaryBoatId = "b2567e08-26d9-45c1-b5e0-8c410c8db18b#"+(secondLeagueBoatCounter++ % 6 + 1);
-        final Boat auxiliaryBoat = baseDomainFactory.getCompetitorAndBoatStore().getExistingBoatById(auxiliaryBoatId);
+        final String sailId = ""+(secondLeagueBoatCounter++ % 6 + 1);
+        final String auxiliaryBoatId = "b2567e08-26d9-45c1-b5e0-8c410c8db18b#"+sailId;
+        final Boat auxiliaryBoat = baseDomainFactory.getCompetitorAndBoatStore().getOrCreateBoat(auxiliaryBoatId, sailId,
+                baseDomainFactory.getOrCreateBoatClass(BoatClassMasterdata.J70.getDisplayName()), sailId, /* color */ null);
         return createRaceLogRegisterCompetitorEventImpl(createdAt, author, logicalTimePoint, id, passId, auxiliaryBoat, competitor);
     }
     

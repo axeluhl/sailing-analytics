@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,7 +54,7 @@ public class CourseImpl extends RenamableImpl implements Course {
     
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
         super(name);
-        updateMonitor = ""; 
+        updateMonitor = ""+new Random().nextDouble(); 
         lock = new NamedReentrantReadWriteLock("lock for CourseImpl "+name,
                 /* fair */ true); // if non-fair, course update may need to wait forever for many concurrent readers
         listeners = new HashSet<CourseListener>();
