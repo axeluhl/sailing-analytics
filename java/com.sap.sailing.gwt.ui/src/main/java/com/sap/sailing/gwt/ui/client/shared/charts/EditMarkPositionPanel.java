@@ -529,7 +529,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     
     public void resetPointColor(int index) {
         Point[] points = markSeries.getPoints();
-        if (points.length > index) {
+        if (points.length > index && selectedMark != null) {
             points[index].setMarker(new Marker().setFillColor(selectedMark.color==null?null:selectedMark.color.getAsHtml()));
             setSeriesPoints(markSeries, points, /* manageZoom */ true);
         }
