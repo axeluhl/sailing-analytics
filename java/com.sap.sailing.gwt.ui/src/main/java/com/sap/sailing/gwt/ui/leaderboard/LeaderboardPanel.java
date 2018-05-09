@@ -928,11 +928,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     private class BoatInfoColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
         private final BoatFetcher<T> boatFetcher;
-        private final CompetitorFetcher<T> competitorFetcher;
 
-        public BoatInfoColumn(CompetitorFetcher<T> competitorFetcher, BoatFetcher<T> boatFetcher, LeaderBoardStyle style) {            
+        public BoatInfoColumn(BoatFetcher<T> boatFetcher, LeaderBoardStyle style) {            
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
-            this.competitorFetcher = competitorFetcher;
             this.boatFetcher = boatFetcher;
             // This style is adding to avoid contained images CSS property "max-width: 100%", which could cause
             // an overflow to the next column (see https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3537)
@@ -948,12 +946,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
             BoatDTO boat = boatFetcher.getBoat(object);
-            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
-            boolean boatColorShown = renderBoatColorIfNecessary(competitor, sb);
             sb.appendEscaped(getShortInfo(boat));
-            if (boatColorShown) {
-                sb.appendHtmlConstant("</div>");
-            }
         }
         
         private String getShortInfo(BoatDTO boat) {
@@ -3181,9 +3174,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
                     || !(getLeaderboardTable()
                             .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof LeaderboardPanel.BoatInfoColumn)) {
-                CompetitorFetcher<LeaderboardRowDTO> competitorFetcher = (LeaderboardRowDTO row) -> row.competitor;
                 BoatFetcher<LeaderboardRowDTO> boatFetcher = (LeaderboardRowDTO row) -> row.boat;
-                BoatInfoColumn<LeaderboardRowDTO> boatInfoColumn = new BoatInfoColumn<LeaderboardRowDTO>(competitorFetcher, boatFetcher, style);                
+                BoatInfoColumn<LeaderboardRowDTO> boatInfoColumn = new BoatInfoColumn<LeaderboardRowDTO>(boatFetcher, style);                
                 insertColumn(columnIndexWhereToInsertTheNextColumn, boatInfoColumn);
             }
             columnIndexWhereToInsertTheNextColumn++;
