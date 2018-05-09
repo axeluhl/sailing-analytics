@@ -17,7 +17,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -136,7 +136,7 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
                     flagImageResource = FlagImageResolverImpl.get().getFlagImageResource(twoLetterIsoCountryCode);
                 }
                 if (flagImageResource != null) {
-                    sb.append(FlagImageResolver.FLAG_RENDERER_TEMPLATE.image(flagImageResource.getSafeUri().asString()));
+                    sb.append(FlagImageRenderer.image(flagImageResource.getSafeUri().asString()));
                     sb.appendHtmlConstant("&nbsp;");
                 }
 

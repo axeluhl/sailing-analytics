@@ -18,7 +18,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -93,7 +93,7 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
                 final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
                 final String flagImageURL = competitor.getFlagImageURL();
                 if (flagImageURL != null && !flagImageURL.isEmpty()) {
-                    sb.append(FlagImageResolver.FLAG_RENDERER_TEMPLATE.imageWithTitle(flagImageURL, competitor.getName()));
+                    sb.append(FlagImageRenderer.imageWithTitle(flagImageURL, competitor.getName()));
                     sb.appendHtmlConstant("&nbsp;");
                 } else {
                     final ImageResource flagImageResource;
@@ -103,7 +103,7 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
                         flagImageResource = FlagImageResolverImpl.get().getFlagImageResource(twoLetterIsoCountryCode);
                     }
                     if (flagImageResource != null) {
-                        sb.append(FlagImageResolver.FLAG_RENDERER_TEMPLATE.image(flagImageResource.getSafeUri().asString()));
+                        sb.append(FlagImageRenderer.image(flagImageResource.getSafeUri().asString()));
                         sb.appendHtmlConstant("&nbsp;");
                     }
                 }

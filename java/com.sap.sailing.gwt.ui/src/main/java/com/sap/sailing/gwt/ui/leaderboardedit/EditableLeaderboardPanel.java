@@ -56,7 +56,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSetti
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleTableResources;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
-import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -157,7 +157,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 flagImageResource = FlagImageResolverImpl.get().getFlagImageResource(twoLetterIsoCountryCode);
             }
             if (flagImageResource != null) {
-                sb.append(FlagImageResolver.FLAG_RENDERER_TEMPLATE.image(flagImageResource.getSafeUri().asString(), 18, 12));
+                sb.append(FlagImageRenderer.image(flagImageResource.getSafeUri().asString()));
                 sb.appendHtmlConstant("&nbsp;");
             }
             sb.appendEscaped(object.getShortInfo());
