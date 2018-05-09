@@ -104,6 +104,8 @@ public class BestPathsCalculator<T extends ManeuverNodesLevel<T>> {
                 setNewWindDeviationWithinProvidedWindDeviationArray(currentLevel, currentNode,
                         windDeviationUntilNodeWithinBestPath, bestPathsUntilLevel.windDeviationWithinBestPaths);
             }
+            // avoid that probability product becomes zero due to precision of Double
+            ProbabilityUtil.normalizeLikelihoodArray(bestPathsUntilLevel.probabilitiesOfBestPathToNodeFromStart);
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
         }
         this.lastLevel = currentLevel;

@@ -59,11 +59,11 @@ public class SingleManeuverClassificationResult {
         return highestSpeedWithBeginningSpeedRatio;
     }
 
-    public double getManeuverTypeLikelihoodByAngleAnalysis(PresumedManeuverType maneuverType) {
+    public double getManeuverTypeLikelihoodByAngleAnalysis(CoarseGrainedManeuverType maneuverType) {
         return presumedManeuverTypeLikelihoodsByAngleAnalysis[maneuverType.ordinal()];
     }
 
-    public double getManeuverTypeLikelihoodBySpeedAnalysis(PresumedManeuverType maneuverType) {
+    public double getManeuverTypeLikelihoodBySpeedAnalysis(CoarseGrainedManeuverType maneuverType) {
         return presumedManeuverTypeLikelihoodsBySpeedAnalysis[maneuverType.ordinal()];
     }
 
@@ -77,131 +77,120 @@ public class SingleManeuverClassificationResult {
 
     private void computeLikelihoodsForPointOfSailBeforeManeuver() {
         likelihoodsForPointOfSailBeforeManeuvers = new double[CoarseGrainedPointOfSail.values().length];
-        for (CoarseGrainedPointOfSail pointOfSailBeforeManeuver : CoarseGrainedPointOfSail.values()) {
-            double likelihoodByAngleAnalysisSum = 0;
-            double likelihoodBySpeedAnalysisSum = 0;
-            double summandsCount = 0;
-            for (PresumedManeuverType maneuverType : PresumedManeuverType.values()) {
-                if (presumedManeuverTypeLikelihoodsByAngleAnalysis[maneuverType.ordinal()] != 0) {
-                    boolean addLikelihood = false;
-                    switch (maneuverType) {
-                    case TACK:
-                        if (courseChangeDeg < 0
-                                && (pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.UPWIND_STARBOARD
-                                        || (courseChangeDeg <= -110
-                                                && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_STARBOARD))
-                                || courseChangeDeg > 0
-                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.UPWIND_PORT
-                                || (courseChangeDeg >= 110
-                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_PORT)) {
-                            addLikelihood = true;
-                        }
-                        break;
-                    case JIBE:
-                        if (courseChangeDeg < 0
-                                && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.DOWNWIND_STARBOARD
-                                || (courseChangeDeg <= -85
-                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_STARBOARD)
-                                || courseChangeDeg > 0
-                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.DOWNWIND_PORT
-                                || (courseChangeDeg >= 85
-                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_PORT)) {
-                            addLikelihood = true;
-                        }
-                        break;
-                    case MARK_PASSING_LUV:
-                        if (courseChangeDeg < 0 && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.UPWIND_PORT
-                                || (courseChangeDeg >= -85
-                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_PORT)
-                                || courseChangeDeg > 0
-                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.UPWIND_STARBOARD
-                                || (courseChangeDeg <= 85
-                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_STARBOARD)) {
-                            addLikelihood = true;
-                        }
-                        break;
-                    case MARK_PASSING_LEE:
-                        if (courseChangeDeg < 0
-                                && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.DOWNWIND_STARBOARD
-                                || (courseChangeDeg >= -85
-                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_STARBOARD)
-                                || courseChangeDeg > 0
-                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.DOWNWIND_PORT
-                                || (courseChangeDeg <= 85
-                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_PORT)) {
-                            addLikelihood = true;
-                        }
-                        break;
-                    case HEAD_UP_BEAR_AWAY:
-                    case _180:
-                        addLikelihood = true;
-                        break;
-                    case _360:
-                        double courseChangeUntilLowestSpeed = this.courseChangeUntilLowestSpeed;
-                        if (courseChangeUntilLowestSpeed < 0) {
-                            if (courseChangeUntilLowestSpeed >= -100) {
-                                if (pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.UPWIND_STARBOARD) {
-                                    addLikelihood = true;
-                                }
-                            } else {
-                                while (courseChangeUntilLowestSpeed <= -360) {
-                                    courseChangeUntilLowestSpeed += 360;
-                                }
-                                if (courseChangeUntilLowestSpeed >= -100 || courseChangeUntilLowestSpeed <= -225) {
-                                    if (pointOfSailBeforeManeuver.getLegType() == LegType.UPWIND) {
-                                        addLikelihood = true;
-                                    }
-                                } else {
-                                    if (pointOfSailBeforeManeuver.getLegType() == LegType.DOWNWIND) {
-                                        addLikelihood = true;
-                                    }
-                                }
-                            }
-                        } else {
-                            if (courseChangeUntilLowestSpeed <= 100) {
-                                if (pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.UPWIND_PORT) {
-                                    addLikelihood = true;
-                                }
-                            } else {
-                                while (courseChangeUntilLowestSpeed >= 360) {
-                                    courseChangeUntilLowestSpeed -= 360;
-                                }
-                                if (courseChangeUntilLowestSpeed <= 100 || courseChangeUntilLowestSpeed >= 225) {
-                                    if (pointOfSailBeforeManeuver.getLegType() == LegType.UPWIND) {
-                                        addLikelihood = true;
-                                    }
-                                } else {
-                                    if (pointOfSailBeforeManeuver.getLegType() == LegType.DOWNWIND) {
-                                        addLikelihood = true;
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    }
-                    if (addLikelihood) {
-                        likelihoodByAngleAnalysisSum += presumedManeuverTypeLikelihoodsByAngleAnalysis[maneuverType
-                                .ordinal()];
-                        likelihoodBySpeedAnalysisSum += presumedManeuverTypeLikelihoodsBySpeedAnalysis[maneuverType
-                                .ordinal()];
-                        ++summandsCount;
-                    }
-                }
-            }
-            likelihoodsForPointOfSailBeforeManeuvers[pointOfSailBeforeManeuver
-                    .ordinal()] = (likelihoodByAngleAnalysisSum + likelihoodBySpeedAnalysisSum) / summandsCount / 2;
-        }
-        normalizeLikelihoodArray(likelihoodsForPointOfSailBeforeManeuvers);
-    }
-
-    private void normalizeLikelihoodArray(double[] likelihoodsForPointOfSailAfterManeuver) {
-        double likelihoodSum = 0;
-        for (double likelihood : likelihoodsForPointOfSailAfterManeuver) {
-            likelihoodSum += likelihood;
-        }
-        for (int i = 0; i < likelihoodsForPointOfSailAfterManeuver.length; i++) {
-            likelihoodsForPointOfSailAfterManeuver[i] = likelihoodsForPointOfSailAfterManeuver[i] / likelihoodSum;
-        }
+//        for (CoarseGrainedPointOfSail pointOfSailBeforeManeuver : CoarseGrainedPointOfSail.values()) {
+//            double likelihoodByAngleAnalysisSum = 0;
+//            double likelihoodBySpeedAnalysisSum = 0;
+//            double summandsCount = 0;
+//            for (CoarseGrainedManeuverType maneuverType : CoarseGrainedManeuverType.values()) {
+//                if (presumedManeuverTypeLikelihoodsByAngleAnalysis[maneuverType.ordinal()] != 0) {
+//                    boolean addLikelihood = false;
+//                    switch (maneuverType) {
+//                    case TACK:
+//                        if (courseChangeDeg < 0
+//                                && (pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.UPWIND_STARBOARD
+//                                        || (courseChangeDeg <= -110
+//                                                && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_STARBOARD))
+//                                || courseChangeDeg > 0
+//                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.UPWIND_PORT
+//                                || (courseChangeDeg >= 110
+//                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_PORT)) {
+//                            addLikelihood = true;
+//                        }
+//                        break;
+//                    case JIBE:
+//                        if (courseChangeDeg < 0
+//                                && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.DOWNWIND_STARBOARD
+//                                || (courseChangeDeg <= -85
+//                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_STARBOARD)
+//                                || courseChangeDeg > 0
+//                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.DOWNWIND_PORT
+//                                || (courseChangeDeg >= 85
+//                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_PORT)) {
+//                            addLikelihood = true;
+//                        }
+//                        break;
+//                    case MARK_PASSING_LUV:
+//                        if (courseChangeDeg < 0 && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.UPWIND_PORT
+//                                || (courseChangeDeg >= -85
+//                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_PORT)
+//                                || courseChangeDeg > 0
+//                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.UPWIND_STARBOARD
+//                                || (courseChangeDeg <= 85
+//                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_STARBOARD)) {
+//                            addLikelihood = true;
+//                        }
+//                        break;
+//                    case MARK_PASSING_LEE:
+//                        if (courseChangeDeg < 0
+//                                && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.DOWNWIND_STARBOARD
+//                                || (courseChangeDeg >= -85
+//                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_STARBOARD)
+//                                || courseChangeDeg > 0
+//                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.DOWNWIND_PORT
+//                                || (courseChangeDeg <= 85
+//                                        && pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.REACHING_PORT)) {
+//                            addLikelihood = true;
+//                        }
+//                        break;
+//                    case HEAD_UP_BEAR_AWAY:
+//                    case _180:
+//                        addLikelihood = true;
+//                        break;
+//                    case _360:
+//                        double courseChangeUntilLowestSpeed = this.courseChangeUntilLowestSpeed;
+//                        if (courseChangeUntilLowestSpeed < 0) {
+//                            if (courseChangeUntilLowestSpeed >= -100) {
+//                                if (pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.UPWIND_STARBOARD) {
+//                                    addLikelihood = true;
+//                                }
+//                            } else {
+//                                while (courseChangeUntilLowestSpeed <= -360) {
+//                                    courseChangeUntilLowestSpeed += 360;
+//                                }
+//                                if (courseChangeUntilLowestSpeed >= -100 || courseChangeUntilLowestSpeed <= -225) {
+//                                    if (pointOfSailBeforeManeuver.getLegType() == LegType.UPWIND) {
+//                                        addLikelihood = true;
+//                                    }
+//                                } else {
+//                                    if (pointOfSailBeforeManeuver.getLegType() == LegType.DOWNWIND) {
+//                                        addLikelihood = true;
+//                                    }
+//                                }
+//                            }
+//                        } else {
+//                            if (courseChangeUntilLowestSpeed <= 100) {
+//                                if (pointOfSailBeforeManeuver == CoarseGrainedPointOfSail.UPWIND_PORT) {
+//                                    addLikelihood = true;
+//                                }
+//                            } else {
+//                                while (courseChangeUntilLowestSpeed >= 360) {
+//                                    courseChangeUntilLowestSpeed -= 360;
+//                                }
+//                                if (courseChangeUntilLowestSpeed <= 100 || courseChangeUntilLowestSpeed >= 225) {
+//                                    if (pointOfSailBeforeManeuver.getLegType() == LegType.UPWIND) {
+//                                        addLikelihood = true;
+//                                    }
+//                                } else {
+//                                    if (pointOfSailBeforeManeuver.getLegType() == LegType.DOWNWIND) {
+//                                        addLikelihood = true;
+//                                    }
+//                                }
+//                            }
+//                        }
+//                        break;
+//                    }
+//                    if (addLikelihood) {
+//                        likelihoodByAngleAnalysisSum += presumedManeuverTypeLikelihoodsByAngleAnalysis[maneuverType
+//                                .ordinal()];
+//                        likelihoodBySpeedAnalysisSum += presumedManeuverTypeLikelihoodsBySpeedAnalysis[maneuverType
+//                                .ordinal()];
+//                        ++summandsCount;
+//                    }
+//                }
+//            }
+//            likelihoodsForPointOfSailBeforeManeuvers[pointOfSailBeforeManeuver
+//                    .ordinal()] = (likelihoodByAngleAnalysisSum + likelihoodBySpeedAnalysisSum) / summandsCount / 2;
+//        }
     }
 
     public double getLikelihoodForPointOfSailAfterManeuver(CoarseGrainedPointOfSail pointOfSailBeforeManeuver) {

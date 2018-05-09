@@ -57,16 +57,8 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
 
     protected void normalizeNodeTransitions() {
         for (FineGrainedPointOfSail previousNode : FineGrainedPointOfSail.values()) {
-            double probabilitiesSum = 0;
-            for (FineGrainedPointOfSail currentNode : FineGrainedPointOfSail.values()) {
-                probabilitiesSum += getProbabilityFromPreviousLevelNodeToThisLevelNode(previousNode, currentNode);
-            }
-            for (FineGrainedPointOfSail currentNode : FineGrainedPointOfSail.values()) {
-                double normalizedTransitionProbability = getProbabilityFromPreviousLevelNodeToThisLevelNode(
-                        previousNode, currentNode) / probabilitiesSum;
-                transitionProbabilitiesFromPreviousToThisNodesLevel[previousNode.ordinal()][currentNode
-                        .ordinal()] = normalizedTransitionProbability;
-            }
+            ProbabilityUtil.normalizeLikelihoodArray(
+                    transitionProbabilitiesFromPreviousToThisNodesLevel[previousNode.ordinal()]);
         }
     }
 

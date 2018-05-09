@@ -28,10 +28,6 @@ public enum CoarseGrainedPointOfSail {
         this.fineGrainedPointOfSailCoverage = fineGrainedPointOfSailCoverage;
     }
 
-    public static final int getFineGrainedPointOfSailCount() {
-        return 14;
-    }
-
     public LegType getLegType() {
         switch (this) {
         case DOWNWIND_PORT:

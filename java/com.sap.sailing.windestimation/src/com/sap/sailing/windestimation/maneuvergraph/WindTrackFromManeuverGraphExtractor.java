@@ -13,7 +13,6 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
-import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
@@ -52,16 +51,17 @@ public class WindTrackFromManeuverGraphExtractor<T extends ManeuverNodesLevel<T>
     private List<WindWithConfidence<TimePoint>> getWindTrackWithLastNodeOfLastLevelConsideringMiddleCoursesOfCleanTacksAndJibes(
             List<Pair<T, FineGrainedPointOfSail>> bestPath, double baseConfidence) {
         List<WindWithConfidence<TimePoint>> windTrack = new ArrayList<>();
+        FineGrainedPointOfSail pointOfSailAfterPreviousManeuver = null;
         for (Pair<T, FineGrainedPointOfSail> pathEntry : bestPath) {
             final T currentLevel = pathEntry.getA();
             final FineGrainedPointOfSail currentNode = pathEntry.getB();
-            final FineGrainedPointOfSail pointOfSailBeforeManeuver = currentNode.getNextPointOfSail(
-                    currentLevel.getManeuver().getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees() * -1);
+            final FineGrainedPointOfSail pointOfSailBeforeManeuver = currentLevel
+                    .getPointOfSailBeforeManeuver(currentNode);
             if (pointOfSailBeforeManeuver.getCoarseGrainedPointOfSail().getLegType() == currentNode
                     .getCoarseGrainedPointOfSail().getLegType()
                     && pointOfSailBeforeManeuver.getTack() != currentNode.getTack()
                     && Math.abs(currentLevel.getManeuver().getMainCurve().getDirectionChangeInDegrees()) < 110
-                    && isCleanManeuver(currentLevel)) {
+                    && currentLevel.isCleanManeuver(pointOfSailAfterPreviousManeuver, currentNode)) {
                 ManeuverType tackOrJibe;
                 if (currentNode.getCoarseGrainedPointOfSail().getLegType() == LegType.UPWIND) {
                     tackOrJibe = ManeuverType.TACK;
@@ -78,58 +78,9 @@ public class WindTrackFromManeuverGraphExtractor<T extends ManeuverNodesLevel<T>
                     }
                 }
             }
+            pointOfSailAfterPreviousManeuver = currentNode;
         }
         return windTrack;
-    }
-
-    private boolean isCleanManeuver(T maneuverNodesLevel) {
-        boolean maneuverBeginningClean = isManeuverBeginningClean(maneuverNodesLevel);
-        boolean maneuverEndClean = isManeuverEndClean(maneuverNodesLevel);
-        if (maneuverNodesLevel.getManeuver().isMarkPassing() || !maneuverBeginningClean || !maneuverEndClean) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean isManeuverEndClean(T maneuverNodesLevel) {
-        // TODO implement duration to next fix
-        // consider mark passing, duration to next fix from both maneuver boundary sides
-        CompleteManeuverCurveWithEstimationData maneuver = maneuverNodesLevel.getManeuver();
-        CompleteManeuverCurveWithEstimationData nextManeuver = maneuverNodesLevel.getNextLevel() == null ? null
-                : maneuverNodesLevel.getNextLevel().getManeuver();
-        double secondsToNextManeuver = maneuver.getCurveWithUnstableCourseAndSpeed()
-                .getDurationFromManeuverEndToNextManeuverStart().asSeconds();
-        int gpsFixesCountToNextManeuver = maneuver.getCurveWithUnstableCourseAndSpeed()
-                .getGpsFixesCountFromManeuverEndToNextManeuverStart();
-        if (maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots() > 1
-                && (secondsToNextManeuver >= 4 && gpsFixesCountToNextManeuver / secondsToNextManeuver >= 0.125
-                        || nextManeuver != null
-                                && Math.abs(nextManeuver.getMainCurve().getDirectionChangeInDegrees()) < Math
-                                        .abs(maneuver.getMainCurve().getDirectionChangeInDegrees()) * 0.3)) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isManeuverBeginningClean(T maneuverNodesLevel) {
-        // TODO implement duration to next fix
-        // consider mark passing, duration to next fix from both maneuver boundary sides
-        CompleteManeuverCurveWithEstimationData maneuver = maneuverNodesLevel.getManeuver();
-        CompleteManeuverCurveWithEstimationData previousManeuver = maneuverNodesLevel.getPreviousLevel() == null ? null
-                : maneuverNodesLevel.getPreviousLevel().getManeuver();
-        double secondsToPreviousManeuver = maneuver.getCurveWithUnstableCourseAndSpeed()
-                .getDurationFromPreviousManeuverEndToManeuverStart().asSeconds();
-        int gpsFixesCountToPreviousManeuver = maneuver.getCurveWithUnstableCourseAndSpeed()
-                .getGpsFixesCountFromPreviousManeuverEndToManeuverStart();
-        if (maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots() > 1
-                && (secondsToPreviousManeuver >= 4
-                        && gpsFixesCountToPreviousManeuver / secondsToPreviousManeuver >= 0.125
-                        || previousManeuver != null
-                                && Math.abs(previousManeuver.getMainCurve().getDirectionChangeInDegrees()) < Math
-                                        .abs(maneuver.getMainCurve().getDirectionChangeInDegrees()) * 0.3)) {
-            return true;
-        }
-        return false;
     }
 
     private List<WindWithConfidence<TimePoint>> getWindTrackWithLastNodeOfLastLevelConsideringStableCourses(
@@ -138,16 +89,16 @@ public class WindTrackFromManeuverGraphExtractor<T extends ManeuverNodesLevel<T>
         for (Pair<T, FineGrainedPointOfSail> pathEntry : bestPath) {
             final T currentLevel = pathEntry.getA();
             final FineGrainedPointOfSail currentNode = pathEntry.getB();
-            final FineGrainedPointOfSail pointOfSailBeforeManeuver = currentNode.getNextPointOfSail(
-                    currentLevel.getManeuver().getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees() * -1);
+            final FineGrainedPointOfSail pointOfSailBeforeManeuver = currentLevel
+                    .getPointOfSailBeforeManeuver(currentNode);
             if (pointOfSailBeforeManeuver.getCoarseGrainedPointOfSail() != currentNode.getCoarseGrainedPointOfSail()) {
                 FineGrainedPointOfSail pointOfSailForWindSpeedDetermination = null;
                 Speed boatSpeedForWindSpeedDetermination = null;
-                if (isManeuverEndClean(currentLevel)) {
+                if (currentLevel.isManeuverEndClean()) {
                     pointOfSailForWindSpeedDetermination = currentNode;
                     boatSpeedForWindSpeedDetermination = currentLevel.getManeuver().getCurveWithUnstableCourseAndSpeed()
                             .getSpeedWithBearingAfter();
-                } else if (isManeuverBeginningClean(currentLevel)) {
+                } else if (currentLevel.isManeuverBeginningClean()) {
                     pointOfSailForWindSpeedDetermination = pointOfSailBeforeManeuver;
                     boatSpeedForWindSpeedDetermination = currentLevel.getManeuver().getCurveWithUnstableCourseAndSpeed()
                             .getSpeedWithBearingBefore();
@@ -171,8 +122,8 @@ public class WindTrackFromManeuverGraphExtractor<T extends ManeuverNodesLevel<T>
         for (Pair<T, FineGrainedPointOfSail> pathEntry : bestPath) {
             final T currentLevel = pathEntry.getA();
             final FineGrainedPointOfSail currentNode = pathEntry.getB();
-            final FineGrainedPointOfSail pointOfSailBeforeManeuver = currentNode.getNextPointOfSail(
-                    currentLevel.getManeuver().getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees() * -1);
+            final FineGrainedPointOfSail pointOfSailBeforeManeuver = currentLevel
+                    .getPointOfSailBeforeManeuver(currentNode);
             if (pointOfSailBeforeManeuver.getCoarseGrainedPointOfSail() != currentNode.getCoarseGrainedPointOfSail()) {
                 WindWithConfidenceImpl<TimePoint> windWithConfidence = getWindWithConfidenceWithoutSpeed(
                         pointOfSailBeforeManeuver, currentLevel, baseConfidence);
