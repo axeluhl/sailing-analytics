@@ -1,8 +1,12 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
+import java.util.ListIterator;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.windestimation.maneuvergraph.classifier.SingleManeuverClassificationResult;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * 
@@ -13,6 +17,8 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
 
     private final SingleManeuverClassificationResult maneuverClassificationResult;
     private final BoatClass boatClass;
+    private double tackProbabilityBonus = 0;
+    private boolean calculationOfTransitionProbabilitiesNeeded = true;
 
     public SingleTrackManeuverNodesLevel(SingleManeuverClassificationResult singleManeuverClassificationResult,
             BoatClass boatClass) {
@@ -24,8 +30,8 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
     @Override
     public void computeProbabilitiesFromPreviousLevelToThisLevel() {
         for (FineGrainedPointOfSail currentNode : FineGrainedPointOfSail.values()) {
-            double likelihoodForCurrentNode = maneuverClassificationResult
-                    .getLikelihoodForPointOfSailAfterManeuver(currentNode.getCoarseGrainedPointOfSail());
+            double likelihoodForCurrentNode = maneuverClassificationResult.getLikelihoodForPointOfSailAfterManeuver(
+                    currentNode.getCoarseGrainedPointOfSail(), getTackProbabilityBonus());
             if (getPreviousLevel() == null) {
                 setProbabilityFromPreviousLevelNodeToThisLevelNode(null, currentNode, likelihoodForCurrentNode);
             } else {
@@ -38,6 +44,7 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
             }
         }
         normalizeNodeTransitions();
+        calculationOfTransitionProbabilitiesNeeded = false;
     }
 
     private double getNodeTransitionPenaltyFactor(FineGrainedPointOfSail previousNode,
@@ -77,6 +84,31 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
     @Override
     public BoatClass getBoatClass() {
         return boatClass;
+    }
+
+    @Override
+    public Pair<SingleTrackManeuverNodesLevel, FineGrainedPointOfSail> getPreviousManeuverNodesLevelOfSameTrack(
+            ListIterator<Pair<SingleTrackManeuverNodesLevel, FineGrainedPointOfSail>> iteratorWithCurrentManeuverAsNext) {
+        if (iteratorWithCurrentManeuverAsNext.hasPrevious()) {
+            return iteratorWithCurrentManeuverAsNext.previous();
+        }
+        return null;
+    }
+
+    @Override
+    public void setTackProbabilityBonusToManeuver(double tackProbabilityBonus) {
+        this.calculationOfTransitionProbabilitiesNeeded = Math.abs(tackProbabilityBonus - this.tackProbabilityBonus) > 0.001;
+        this.tackProbabilityBonus = tackProbabilityBonus;
+    }
+
+    @Override
+    public double getTackProbabilityBonus() {
+        return tackProbabilityBonus;
+    }
+    
+    @Override
+    public boolean isCalculationOfTransitionProbabilitiesNeeded() {
+        return calculationOfTransitionProbabilitiesNeeded;
     }
 
 }

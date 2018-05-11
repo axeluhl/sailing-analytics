@@ -1,6 +1,9 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
+import java.util.ListIterator;
+
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * 
@@ -13,6 +16,8 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
     private static final double TRESHOLD_FOR_SMALL_PENALTY_WIND_COURSE_SHIFT_IN_DEGREES = 45;
     private static final double TRESHOLD_FOR_PENALTY_FREE_WIND_COURSE_SHIFT_IN_DEGREES = 10;
     private final SingleTrackManeuverNodesLevel singleTrackManeuverNodesLevel;
+
+    private boolean calculationOfTransitionProbabilitiesNeeded = true;
 
     public CrossTrackManeuverNodesLevel(SingleTrackManeuverNodesLevel singleTrackManeuverNodesLevel) {
         super(singleTrackManeuverNodesLevel.getManeuver());
@@ -58,6 +63,7 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
             }
         }
         normalizeNodeTransitions();
+        calculationOfTransitionProbabilitiesNeeded = false;
     }
 
     private double getNodeTransitionPenaltyFactor(FineGrainedPointOfSail previousNode,
@@ -93,6 +99,54 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
     @Override
     public BoatClass getBoatClass() {
         return singleTrackManeuverNodesLevel.getBoatClass();
+    }
+
+    @Override
+    public Pair<CrossTrackManeuverNodesLevel, FineGrainedPointOfSail> getPreviousManeuverNodesLevelOfSameTrack(
+            ListIterator<Pair<CrossTrackManeuverNodesLevel, FineGrainedPointOfSail>> iteratorWithCurrentManeuverAsNext) {
+        SingleTrackManeuverNodesLevel previousLevelOfSingleManeuverNodesLevelTrack = this
+                .getSingleTrackManeuverNodesLevel().getPreviousLevel();
+        if (previousLevelOfSingleManeuverNodesLevelTrack != null) {
+            while (iteratorWithCurrentManeuverAsNext.hasPrevious()) {
+                Pair<CrossTrackManeuverNodesLevel, FineGrainedPointOfSail> pair = iteratorWithCurrentManeuverAsNext
+                        .previous();
+                if (pair.getA().getSingleTrackManeuverNodesLevel() == previousLevelOfSingleManeuverNodesLevelTrack) {
+                    return pair;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void setTackProbabilityBonusToManeuver(double tackProbabilityBonus) {
+        singleTrackManeuverNodesLevel.setTackProbabilityBonusToManeuver(tackProbabilityBonus);
+        if (singleTrackManeuverNodesLevel.isCalculationOfTransitionProbabilitiesNeeded()) {
+            this.calculationOfTransitionProbabilitiesNeeded = true;
+            SingleTrackManeuverNodesLevel thisLevelPreviousSingleTrackLevel = singleTrackManeuverNodesLevel
+                    .getPreviousLevel();
+            if (thisLevelPreviousSingleTrackLevel != null) {
+                CrossTrackManeuverNodesLevel matchedCrossTrackManeuverNodesLevel = getPreviousLevel();
+                while (matchedCrossTrackManeuverNodesLevel != null
+                        && thisLevelPreviousSingleTrackLevel != matchedCrossTrackManeuverNodesLevel
+                                .getSingleTrackManeuverNodesLevel()) {
+                    matchedCrossTrackManeuverNodesLevel = matchedCrossTrackManeuverNodesLevel.getPreviousLevel();
+                }
+                if (matchedCrossTrackManeuverNodesLevel != null) {
+                    matchedCrossTrackManeuverNodesLevel.calculationOfTransitionProbabilitiesNeeded = true;
+                }
+            }
+        }
+    }
+
+    @Override
+    public double getTackProbabilityBonus() {
+        return singleTrackManeuverNodesLevel.getTackProbabilityBonus();
+    }
+
+    @Override
+    public boolean isCalculationOfTransitionProbabilitiesNeeded() {
+        return calculationOfTransitionProbabilitiesNeeded;
     }
 
 }

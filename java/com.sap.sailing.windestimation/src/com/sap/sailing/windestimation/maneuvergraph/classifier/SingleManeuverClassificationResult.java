@@ -1,8 +1,10 @@
-package com.sap.sailing.windestimation.maneuvergraph;
+package com.sap.sailing.windestimation.maneuvergraph.classifier;
 
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
+import com.sap.sailing.windestimation.maneuvergraph.CoarseGrainedManeuverType;
+import com.sap.sailing.windestimation.maneuvergraph.CoarseGrainedPointOfSail;
 
 /**
  * 
@@ -193,7 +195,7 @@ public class SingleManeuverClassificationResult {
 //        }
     }
 
-    public double getLikelihoodForPointOfSailAfterManeuver(CoarseGrainedPointOfSail pointOfSailBeforeManeuver) {
+    public double getLikelihoodForPointOfSailAfterManeuver(CoarseGrainedPointOfSail pointOfSailBeforeManeuver, double tackProbabilityBonus) {
         return likelihoodsForPointOfSailBeforeManeuvers[pointOfSailBeforeManeuver.ordinal()];
     }
 

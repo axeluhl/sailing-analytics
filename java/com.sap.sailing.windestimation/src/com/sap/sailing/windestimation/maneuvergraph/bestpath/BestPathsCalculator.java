@@ -1,11 +1,17 @@
-package com.sap.sailing.windestimation.maneuvergraph;
+package com.sap.sailing.windestimation.maneuvergraph.bestpath;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Stack;
 
+import com.sap.sailing.windestimation.maneuvergraph.CoarseGrainedPointOfSail;
+import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
+import com.sap.sailing.windestimation.maneuvergraph.ManeuverNodesLevel;
+import com.sap.sailing.windestimation.maneuvergraph.ProbabilityUtil;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
@@ -43,6 +49,27 @@ public class BestPathsCalculator<T extends ManeuverNodesLevel<T>> {
         do {
             computeBestPathsToNextLevel(currentLevel);
         } while ((currentLevel = currentLevel.getNextLevel()) != null);
+    }
+
+    public void recomputeBestPathsFromLevel(T fromLevel) {
+        List<T> levelsToKeep = new LinkedList<>();
+        T currentLevel = fromLevel.getPreviousLevel();
+        while (currentLevel != null) {
+            levelsToKeep.add(currentLevel);
+            currentLevel = currentLevel.getPreviousLevel();
+        }
+        Iterator<Entry<T, BestPathsUntilLevel>> iterator = bestPathsPerLevel.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Entry<T, BestPathsUntilLevel> entry = iterator.next();
+            if (!levelsToKeep.contains(entry.getKey())) {
+                iterator.remove();
+            }
+        }
+        lastLevel = fromLevel.getPreviousLevel();
+        currentLevel = fromLevel;
+        do {
+            computeBestPathsToNextLevel(currentLevel);
+        } while (currentLevel != null);
     }
 
     public void resetState() {
@@ -243,6 +270,60 @@ public class BestPathsCalculator<T extends ManeuverNodesLevel<T>> {
                 .values().length];
         private double[] probabilitiesOfBestPathToNodeFromStart = new double[bestPreviousNodes.length];
         private WindRange[] windDeviationWithinBestPaths = new WindRange[bestPreviousNodes.length];
+    }
+
+    private static class WindRange {
+
+        private final double windCourseOnPortsideBoundary;
+        private final double windCourseDeviationTowardStarboardInDegrees;
+        private final double secondsPassedSincePortsideBoundaryRecord;
+        private final double secondsPassedSinceStarboardBoundaryRecord;
+
+        public WindRange(double windCourseOnPortsideBoundary, double windCourseDeviationTowardStarboardInDegrees,
+                double secondsPassedSincePortsideBoundaryRecord, double secondsPassedSinceStarboardBoundaryRecord) {
+            this.windCourseOnPortsideBoundary = windCourseOnPortsideBoundary;
+            this.windCourseDeviationTowardStarboardInDegrees = windCourseDeviationTowardStarboardInDegrees;
+            this.secondsPassedSincePortsideBoundaryRecord = secondsPassedSincePortsideBoundaryRecord;
+            this.secondsPassedSinceStarboardBoundaryRecord = secondsPassedSinceStarboardBoundaryRecord;
+        }
+
+        public WindRange calculateForNextManeuverNodesLevel(double nextWindCourse,
+                double secondsPassedSincePreviousManeuver) {
+            double deviationFromPortsideBoundaryTowardStarboard = nextWindCourse - windCourseOnPortsideBoundary;
+            if (deviationFromPortsideBoundaryTowardStarboard < 0) {
+                deviationFromPortsideBoundaryTowardStarboard += 360;
+            }
+            double deviationFromRecordedWindCourseDeviationTowardStarboardInDegrees = deviationFromPortsideBoundaryTowardStarboard
+                    - windCourseDeviationTowardStarboardInDegrees;
+            if (deviationFromRecordedWindCourseDeviationTowardStarboardInDegrees <= 0) {
+                // new wind course is within the previous wind deviation range
+                return new WindRange(windCourseOnPortsideBoundary, windCourseDeviationTowardStarboardInDegrees,
+                        secondsPassedSincePortsideBoundaryRecord + secondsPassedSincePreviousManeuver,
+                        secondsPassedSinceStarboardBoundaryRecord + secondsPassedSincePreviousManeuver);
+            } else {
+                double deviationFromRecordedPortsideBoundaryTowardPortside = 360
+                        - deviationFromPortsideBoundaryTowardStarboard;
+                if (deviationFromRecordedWindCourseDeviationTowardStarboardInDegrees > deviationFromRecordedPortsideBoundaryTowardPortside) {
+                    return new WindRange(nextWindCourse,
+                            windCourseDeviationTowardStarboardInDegrees
+                                    + deviationFromRecordedPortsideBoundaryTowardPortside,
+                            0, secondsPassedSinceStarboardBoundaryRecord + secondsPassedSincePreviousManeuver);
+                } else {
+                    return new WindRange(windCourseOnPortsideBoundary, deviationFromPortsideBoundaryTowardStarboard,
+                            secondsPassedSincePortsideBoundaryRecord + secondsPassedSincePreviousManeuver, 0);
+                }
+            }
+        }
+
+        public boolean isCalculatedWithinLastSeconds(double lastSeconds) {
+            return secondsPassedSinceStarboardBoundaryRecord < lastSeconds
+                    && secondsPassedSincePortsideBoundaryRecord < lastSeconds;
+        }
+
+        public double getWindCourseDeviationRangeInDegrees() {
+            return windCourseDeviationTowardStarboardInDegrees;
+        }
+
     }
 
 }

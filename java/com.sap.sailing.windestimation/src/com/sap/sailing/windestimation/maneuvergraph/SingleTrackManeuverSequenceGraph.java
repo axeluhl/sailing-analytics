@@ -6,6 +6,11 @@ import java.util.List;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.windestimation.maneuvergraph.bestpath.BestPathsCalculator;
+import com.sap.sailing.windestimation.maneuvergraph.bestpath.SameBoatClassBestPathsEvaluator;
+import com.sap.sailing.windestimation.maneuvergraph.classifier.RulesBasedSingleManeuverClassifierImpl;
+import com.sap.sailing.windestimation.maneuvergraph.classifier.SingleManeuverClassificationResult;
+import com.sap.sailing.windestimation.maneuvergraph.classifier.SingleManeuverClassifier;
 
 /**
  * 
@@ -18,7 +23,8 @@ public class SingleTrackManeuverSequenceGraph
     public SingleTrackManeuverSequenceGraph(BoatClass boatClass, PolarDataService polarService,
             Iterable<CompleteManeuverCurveWithEstimationData> maneuverSequence) {
         super(getClassificationResults(boatClass, polarService, maneuverSequence),
-                SingleTrackManeuverNodesLevel.getFactory(boatClass), polarService, new BestPathsCalculator<>());
+                SingleTrackManeuverNodesLevel.getFactory(boatClass), polarService, new BestPathsCalculator<>(),
+                new SameBoatClassBestPathsEvaluator<>());
     }
 
     private static List<SingleManeuverClassificationResult> getClassificationResults(BoatClass boatClass,
@@ -32,6 +38,20 @@ public class SingleTrackManeuverSequenceGraph
             result.add(classificationResult);
         }
         return result;
+    }
+
+    @Override
+    protected SingleTrackManeuverNodesLevel recomputeTransitionProbabilitiesAtLevelsWhereNeeded() {
+        SingleTrackManeuverNodesLevel currentLevel = this.getLastGraphLevel();
+        SingleTrackManeuverNodesLevel lastReadjustedLevel = null;
+        while (currentLevel != null) {
+            if (currentLevel.isCalculationOfTransitionProbabilitiesNeeded()) {
+                currentLevel.computeProbabilitiesFromPreviousLevelToThisLevel();
+                lastReadjustedLevel = currentLevel;
+            }
+            currentLevel = currentLevel.getPreviousLevel();
+        }
+        return lastReadjustedLevel;
     }
 
 }

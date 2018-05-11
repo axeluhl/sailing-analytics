@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.windestimation.maneuvergraph.bestpath.BestPathsCalculator;
+import com.sap.sailing.windestimation.maneuvergraph.bestpath.MultipleBoatClassBestsPathEvaluator;
 
 /**
  * 
@@ -17,7 +19,8 @@ public class CrossTrackManeuverSequenceGraph
     public CrossTrackManeuverSequenceGraph(Iterable<SingleTrackManeuverSequenceGraph> singleTrackManeuverSequenceGraphs,
             PolarDataService polarService) {
         super(getSingleTrackManeuverNodeLevels(singleTrackManeuverSequenceGraphs),
-                CrossTrackManeuverNodesLevel.getFactory(), polarService, new BestPathsCalculator<>());
+                CrossTrackManeuverNodesLevel.getFactory(), polarService, new BestPathsCalculator<>(),
+                new MultipleBoatClassBestsPathEvaluator<>());
     }
 
     private static List<SingleTrackManeuverNodesLevel> getSingleTrackManeuverNodeLevels(
@@ -33,6 +36,25 @@ public class CrossTrackManeuverSequenceGraph
         Collections.sort(singleTrackManeuverNodesLevels,
                 (o1, o2) -> o1.getManeuver().getTimePoint().compareTo(o2.getManeuver().getTimePoint()));
         return singleTrackManeuverNodesLevels;
+    }
+
+    @Override
+    protected CrossTrackManeuverNodesLevel recomputeTransitionProbabilitiesAtLevelsWhereNeeded() {
+        CrossTrackManeuverNodesLevel currentLevel = this.getLastGraphLevel();
+        CrossTrackManeuverNodesLevel lastReadjustedLevel = null;
+        while (currentLevel != null) {
+            SingleTrackManeuverNodesLevel singleTrackManeuverNodesLevel = currentLevel
+                    .getSingleTrackManeuverNodesLevel();
+            if (singleTrackManeuverNodesLevel.isCalculationOfTransitionProbabilitiesNeeded()) {
+                singleTrackManeuverNodesLevel.computeProbabilitiesFromPreviousLevelToThisLevel();
+            }
+            if (currentLevel.isCalculationOfTransitionProbabilitiesNeeded()) {
+                currentLevel.computeProbabilitiesFromPreviousLevelToThisLevel();
+                lastReadjustedLevel = currentLevel;
+            }
+            currentLevel = currentLevel.getPreviousLevel();
+        }
+        return lastReadjustedLevel;
     }
 
 }

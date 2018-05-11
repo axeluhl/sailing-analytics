@@ -1,12 +1,14 @@
-package com.sap.sailing.windestimation.maneuvergraph;
+package com.sap.sailing.windestimation.maneuvergraph.bestpath;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.ListIterator;
 
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
+import com.sap.sailing.windestimation.maneuvergraph.FineGrainedManeuverType;
+import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
+import com.sap.sailing.windestimation.maneuvergraph.ManeuverNodesLevel;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 
@@ -15,13 +17,10 @@ import com.sap.sse.common.Util.Triple;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class BestPathsEvaluator<T extends ManeuverNodesLevel<T>> {
+public class SameBoatClassBestPathsEvaluator<T extends ManeuverNodesLevel<T>> implements BestPathsEvaluator<T> {
 
-    public BestPathsEvaluator() {
-    }
-
-    public BestPathEvaluationResult<T> evaluateBestPath(List<Pair<T, FineGrainedPointOfSail>> bestPath,
-            BestPathEvaluationResult<T> previousEvaluationResult) {
+    @Override
+    public BestPathEvaluationResult<T> evaluateBestPath(List<Pair<T, FineGrainedPointOfSail>> bestPath) {
         BestPathEvaluationResult<T> result = new BestPathEvaluationResult<>();
         AverageStatistics<T> averageStatistics = calculateAverageStatistics(bestPath);
         double lowestAverageSpeedUpwind = 0;
@@ -137,40 +136,16 @@ public class BestPathsEvaluator<T extends ManeuverNodesLevel<T>> {
 
     private AverageStatistics<T> calculateAverageStatistics(List<Pair<T, FineGrainedPointOfSail>> bestPath) {
         AverageStatistics<T> averageStatistics = new AverageStatistics<>();
-        FineGrainedPointOfSail pointOfSailAfterPreviousManeuver = null;
-        for (Pair<T, FineGrainedPointOfSail> pair : bestPath) {
+        for (ListIterator<Pair<T, FineGrainedPointOfSail>> iterator = bestPath.listIterator(); iterator.hasNext();) {
+            Pair<T, FineGrainedPointOfSail> pair = iterator.next();
             T currentLevel = pair.getA();
             FineGrainedPointOfSail pointOfSailAfterCurrentManeuver = pair.getB();
-            if (currentLevel.isCleanManeuver(pointOfSailAfterPreviousManeuver, pointOfSailAfterCurrentManeuver)) {
-                FineGrainedManeuverType maneuverType = currentLevel
-                        .getTypeOfCleanManeuver(pointOfSailAfterCurrentManeuver);
-                averageStatistics.addRecordToStatistics(currentLevel, maneuverType, pointOfSailAfterCurrentManeuver);
+            if (currentLevel.isCleanManeuver(iterator)) {
+                averageStatistics.addRecordToStatistics(currentLevel, pointOfSailAfterCurrentManeuver);
 
             }
-            pointOfSailAfterPreviousManeuver = pointOfSailAfterCurrentManeuver;
         }
         return averageStatistics;
-    }
-
-    public static class BestPathEvaluationResult<T extends ManeuverNodesLevel<T>> {
-        private Map<T, Double> probabilityBonusForLevels = new HashMap<>();
-
-        public void addTackProbabilityBonusForManeuverOfLevel(T maneuverLevel, double tackProbabilityBonus) {
-            probabilityBonusForLevels.put(maneuverLevel, tackProbabilityBonus);
-        }
-
-        public void reset() {
-            probabilityBonusForLevels.clear();
-        }
-
-        public void removeTackProbabilityBonusForManeuverOfLevel(T maneuverLevel) {
-            probabilityBonusForLevels.remove(maneuverLevel);
-        }
-
-        public double getTackProbabilityBonusForManeuverOfLevel(T maneuverLevel) {
-            Double tackProbabilityBonus = probabilityBonusForLevels.get(maneuverLevel);
-            return tackProbabilityBonus == null ? 0 : tackProbabilityBonus;
-        }
     }
 
     private static class AverageStatistics<T extends ManeuverNodesLevel<T>> {
@@ -210,9 +185,9 @@ public class BestPathsEvaluator<T extends ManeuverNodesLevel<T>> {
                             / trackCountPerPointOfSail[pointOfSail.ordinal()];
         }
 
-        public void addRecordToStatistics(T maneuverLevel, FineGrainedManeuverType maneuverType,
-                FineGrainedPointOfSail pointOfSailAfterManeuver) {
+        public void addRecordToStatistics(T maneuverLevel, FineGrainedPointOfSail pointOfSailAfterManeuver) {
             CompleteManeuverCurveWithEstimationData maneuver = maneuverLevel.getManeuver();
+            FineGrainedManeuverType maneuverType = maneuverLevel.getTypeOfCleanManeuver(pointOfSailAfterManeuver);
             boolean maneuverDataAdded = false;
             if (maneuver.getMainCurve().getLongestIntervalBetweenTwoFixes().asSeconds() < 6) {
                 // maneuver data

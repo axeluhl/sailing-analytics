@@ -2,6 +2,7 @@ package com.sap.sailing.windestimation.maneuvergraph;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
@@ -51,8 +52,8 @@ public class WindTrackFromManeuverGraphExtractor<T extends ManeuverNodesLevel<T>
     private List<WindWithConfidence<TimePoint>> getWindTrackWithLastNodeOfLastLevelConsideringMiddleCoursesOfCleanTacksAndJibes(
             List<Pair<T, FineGrainedPointOfSail>> bestPath, double baseConfidence) {
         List<WindWithConfidence<TimePoint>> windTrack = new ArrayList<>();
-        FineGrainedPointOfSail pointOfSailAfterPreviousManeuver = null;
-        for (Pair<T, FineGrainedPointOfSail> pathEntry : bestPath) {
+        for (ListIterator<Pair<T, FineGrainedPointOfSail>> iterator = bestPath.listIterator(); iterator.hasNext();) {
+            Pair<T, FineGrainedPointOfSail> pathEntry = iterator.next();
             final T currentLevel = pathEntry.getA();
             final FineGrainedPointOfSail currentNode = pathEntry.getB();
             final FineGrainedPointOfSail pointOfSailBeforeManeuver = currentLevel
@@ -61,7 +62,7 @@ public class WindTrackFromManeuverGraphExtractor<T extends ManeuverNodesLevel<T>
                     .getCoarseGrainedPointOfSail().getLegType()
                     && pointOfSailBeforeManeuver.getTack() != currentNode.getTack()
                     && Math.abs(currentLevel.getManeuver().getMainCurve().getDirectionChangeInDegrees()) < 110
-                    && currentLevel.isCleanManeuver(pointOfSailAfterPreviousManeuver, currentNode)) {
+                    && currentLevel.isCleanManeuver(iterator)) {
                 ManeuverType tackOrJibe;
                 if (currentNode.getCoarseGrainedPointOfSail().getLegType() == LegType.UPWIND) {
                     tackOrJibe = ManeuverType.TACK;
@@ -78,7 +79,6 @@ public class WindTrackFromManeuverGraphExtractor<T extends ManeuverNodesLevel<T>
                     }
                 }
             }
-            pointOfSailAfterPreviousManeuver = currentNode;
         }
         return windTrack;
     }

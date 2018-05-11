@@ -1,5 +1,7 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
+import java.util.ListIterator;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.BearingChangeAnalyzer;
@@ -8,6 +10,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * 
@@ -108,8 +111,21 @@ public interface ManeuverNodesLevel<SelfType extends ManeuverNodesLevel<SelfType
         throw new IllegalStateException();
     }
 
-    default boolean isCleanManeuver(FineGrainedPointOfSail pointOfSailAfterPreviousManeuver,
-            FineGrainedPointOfSail pointOfSailAfterCurrentManeuver) {
+    Pair<SelfType, FineGrainedPointOfSail> getPreviousManeuverNodesLevelOfSameTrack(
+            ListIterator<Pair<SelfType, FineGrainedPointOfSail>> iteratorWithCurrentManeuverAsNext);
+
+    default boolean isCleanManeuver(
+            ListIterator<Pair<SelfType, FineGrainedPointOfSail>> iteratorWithCurrentManeuverAsPrevious) {
+        Pair<SelfType, FineGrainedPointOfSail> pair = iteratorWithCurrentManeuverAsPrevious.previous();
+        if (pair.getA() != this) {
+            throw new IllegalArgumentException(
+                    "The provided iterator does not point to this level by iteratorWithCurrentManeuverAsPrevious.previous() call");
+        }
+        FineGrainedPointOfSail pointOfSailAfterCurrentManeuver = pair.getB();
+        Pair<SelfType, FineGrainedPointOfSail> previousPairOfSameTrack = getPreviousManeuverNodesLevelOfSameTrack(
+                iteratorWithCurrentManeuverAsPrevious);
+        FineGrainedPointOfSail pointOfSailAfterPreviousManeuver = previousPairOfSameTrack == null ? null
+                : previousPairOfSameTrack.getB();
         FineGrainedPointOfSail targetPointOfSailAfterPreviousManeuver = getPointOfSailBeforeManeuver(
                 pointOfSailAfterCurrentManeuver);
         if (targetPointOfSailAfterPreviousManeuver != pointOfSailAfterPreviousManeuver) {
@@ -164,4 +180,10 @@ public interface ManeuverNodesLevel<SelfType extends ManeuverNodesLevel<SelfType
         return false;
     }
 
+    void setTackProbabilityBonusToManeuver(double tackProbabilityBonus);
+
+    double getTackProbabilityBonus();
+    
+    boolean isCalculationOfTransitionProbabilitiesNeeded();
+    
 }
