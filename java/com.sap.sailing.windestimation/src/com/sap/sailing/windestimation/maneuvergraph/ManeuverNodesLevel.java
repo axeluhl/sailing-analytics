@@ -124,8 +124,6 @@ public interface ManeuverNodesLevel<SelfType extends ManeuverNodesLevel<SelfType
     }
 
     default boolean isManeuverEndClean() {
-        // TODO implement duration to next fix
-        // consider mark passing, duration to next fix from both maneuver boundary sides
         CompleteManeuverCurveWithEstimationData maneuver = getManeuver();
         CompleteManeuverCurveWithEstimationData nextManeuver = getNextLevel() == null ? null
                 : getNextLevel().getManeuver();
@@ -133,13 +131,13 @@ public interface ManeuverNodesLevel<SelfType extends ManeuverNodesLevel<SelfType
                 .getCurveWithUnstableCourseAndSpeed();
         double secondsToNextManeuver = curveWithUnstableCourseAndSpeed.getDurationFromManeuverEndToNextManeuverStart()
                 .asSeconds();
-        int gpsFixesCountToNextManeuver = curveWithUnstableCourseAndSpeed
-                .getGpsFixesCountFromManeuverEndToNextManeuverStart();
         if (curveWithUnstableCourseAndSpeed.getSpeedWithBearingBefore().getKnots() > 1
                 && curveWithUnstableCourseAndSpeed.getSpeedWithBearingAfter().getKnots() > 1
                 && Math.abs(curveWithUnstableCourseAndSpeed.getDirectionChangeInDegrees()
                         - maneuver.getMainCurve().getDirectionChangeInDegrees()) < 30
-                && (secondsToNextManeuver >= 4 && gpsFixesCountToNextManeuver / secondsToNextManeuver >= 0.125
+                && (secondsToNextManeuver >= 4
+                        && maneuver.getCurveWithUnstableCourseAndSpeed().getIntervalBetweenLastFixOfCurveAndNextFix()
+                                .asSeconds() < 8
                         || nextManeuver != null
                                 && Math.abs(nextManeuver.getMainCurve().getDirectionChangeInDegrees()) < Math
                                         .abs(maneuver.getMainCurve().getDirectionChangeInDegrees()) * 0.3)) {
@@ -149,18 +147,15 @@ public interface ManeuverNodesLevel<SelfType extends ManeuverNodesLevel<SelfType
     }
 
     default boolean isManeuverBeginningClean() {
-        // TODO implement duration to next fix
-        // consider mark passing, duration to next fix from both maneuver boundary sides
         CompleteManeuverCurveWithEstimationData maneuver = getManeuver();
         CompleteManeuverCurveWithEstimationData previousManeuver = getPreviousLevel() == null ? null
                 : getPreviousLevel().getManeuver();
         double secondsToPreviousManeuver = maneuver.getCurveWithUnstableCourseAndSpeed()
                 .getDurationFromPreviousManeuverEndToManeuverStart().asSeconds();
-        int gpsFixesCountToPreviousManeuver = maneuver.getCurveWithUnstableCourseAndSpeed()
-                .getGpsFixesCountFromPreviousManeuverEndToManeuverStart();
         if (maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots() > 1
                 && (secondsToPreviousManeuver >= 4
-                        && gpsFixesCountToPreviousManeuver / secondsToPreviousManeuver >= 0.125
+                        && maneuver.getCurveWithUnstableCourseAndSpeed()
+                                .getIntervalBetweenFirstFixOfCurveAndPreviousFix().asSeconds() < 8
                         || previousManeuver != null
                                 && Math.abs(previousManeuver.getMainCurve().getDirectionChangeInDegrees()) < Math
                                         .abs(maneuver.getMainCurve().getDirectionChangeInDegrees()) * 0.3)) {
