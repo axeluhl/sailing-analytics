@@ -22,6 +22,9 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerial
     public final static String GPS_FIXES_COUNT_FROM_PREVIOUS_MANEUVER_IN_SECONDS = "gpsFixesCountFromPreviousManeuver";
     public final static String GPS_FIXES_COUNT_TO_NEXT_MANEUVER_IN_SECONDS = "gpsFixesCountToNextManeuver";
     public static final String GPS_FIXES_COUNT = "gpsFixesCount";
+    public static final String LONGEST_INTERVAL_BETWEEN_TWO_FIXES = "longestIntervalBetweenTwoFixesInSeconds";
+    public static final String INTERVAL_BETWEEN_LAST_FIX_OF_CURVE_AND_NEXT_FIX = "intervalBetweenLastFixOfCurveAndNextFixInSeconds";
+    public static final String INTERVAL_BETWEEN_FIRST_FIX_OF_CURVE_AND_PREVIOUS_FIX = "intervalBetweenFirstFixOfCurveAndPreviousFixInSeconds";
 
     @Override
     public JSONObject serialize(ManeuverCurveBoundaries curveBoundaries) {
@@ -47,6 +50,11 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerial
                     curve.getGpsFixesCountFromPreviousManeuverEndToManeuverStart());
             result.put(GPS_FIXES_COUNT_TO_NEXT_MANEUVER_IN_SECONDS,
                     curve.getGpsFixesCountFromManeuverEndToNextManeuverStart());
+            result.put(LONGEST_INTERVAL_BETWEEN_TWO_FIXES, curve.getLongestIntervalBetweenTwoFixes().asSeconds());
+            result.put(INTERVAL_BETWEEN_LAST_FIX_OF_CURVE_AND_NEXT_FIX,
+                    curve.getIntervalBetweenLastFixOfCurveAndNextFix().asSeconds());
+            result.put(INTERVAL_BETWEEN_FIRST_FIX_OF_CURVE_AND_PREVIOUS_FIX,
+                    curve.getIntervalBetweenFirstFixOfCurveAndPreviousFix().asSeconds());
         }
         return result;
     }

@@ -43,6 +43,12 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeseri
                 ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.GPS_FIXES_COUNT_TO_NEXT_MANEUVER_IN_SECONDS));
         Integer gpsFixesCount = CompleteManeuverCurveWithEstimationDataJsonDeserializer.getInteger(
                 object.get(ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.GPS_FIXES_COUNT));
+        Double longestIntervalBetweenTwoFixes = (Double) object.get(
+                ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.LONGEST_INTERVAL_BETWEEN_TWO_FIXES);
+        Double intervalBetweenLastFixOfCurveAndNextFix = (Double) object.get(
+                ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.INTERVAL_BETWEEN_LAST_FIX_OF_CURVE_AND_NEXT_FIX);
+        Double intervalBetweenFirstFixOfCurveAndPreviousFix = (Double) object.get(
+                ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.INTERVAL_BETWEEN_FIRST_FIX_OF_CURVE_AND_PREVIOUS_FIX);
         return new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl(boundaries.getTimePointBefore(),
                 boundaries.getTimePointAfter(), boundaries.getSpeedWithBearingBefore(),
                 boundaries.getSpeedWithBearingAfter(), boundaries.getDirectionChangeInDegrees(),
@@ -52,7 +58,10 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeseri
                 gpsFixesCountAfter, boundaries.getDistanceSailedWithinManeuver(),
                 boundaries.getDistanceSailedWithinManeuverTowardMiddleAngleProjection(),
                 boundaries.getDistanceSailedIfNotManeuvering(),
-                boundaries.getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering(), gpsFixesCount);
+                boundaries.getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering(), gpsFixesCount,
+                convertDuration(longestIntervalBetweenTwoFixes),
+                convertDuration(intervalBetweenLastFixOfCurveAndNextFix),
+                convertDuration(intervalBetweenFirstFixOfCurveAndPreviousFix));
     }
 
     private SpeedWithBearing convertSpeedWithBearing(Double speedInKnots, Double cog) {

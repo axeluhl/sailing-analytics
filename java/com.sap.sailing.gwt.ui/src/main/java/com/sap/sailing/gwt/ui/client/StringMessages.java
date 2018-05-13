@@ -1533,6 +1533,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tabbedResultsPresenter();
     String polarResultsPresenter();
     String maneuverSpeedDetailsResultsPresenter();
+    String numberPairResultsPresenter();
     String dataMiningRetrieval();
     String actionWatch();
     String actionAnalyze();
@@ -2164,4 +2165,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String filterToBoatsRegisteredOnRegatta();
     String unableToObtainCompetitorsAndBoatsForRaceInFleetInLeaderboard(String raceColumnName, String fleetName, String leaderboardName, String message);
     String unableToObtainBoatsRegisteredWith(String leaderboardName, String message);
+    String importStartData();
+    String startCountDownFontSizeScaling();
+    String pleaseClearSelectionToSeeFullCourse();
 }
