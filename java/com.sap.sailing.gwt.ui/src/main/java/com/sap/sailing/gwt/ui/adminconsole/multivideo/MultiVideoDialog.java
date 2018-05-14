@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -114,11 +115,16 @@ public class MultiVideoDialog extends DialogBox {
         mainContent.add(statusLabel);
 
         FlowPanel offsetPanel = new FlowPanel();
-        TextBox timeOffset = new TextBox();
-        timeOffset.addValueChangeHandler(new ValueChangeHandler<String>() {
+        IntegerBox timeOffset = new IntegerBox();
+        timeOffset.addValueChangeHandler(new ValueChangeHandler<Integer>() {
             @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                offsetTimeInMS = Integer.parseInt(event.getValue());
+            public void onValueChange(ValueChangeEvent<Integer> event) {
+                Integer value = event.getValue();
+                if (value == null) {
+                    offsetTimeInMS = 0;
+                } else {
+                    offsetTimeInMS = value;
+                }
                 updateUI();
             }
         });
