@@ -56,6 +56,11 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 
+/**
+ * This class allows to add multiple videos at once, by crawling index sites of a given url, and using the metadata of
+ * mp4 files to fill starttime and duration. Additionally it allows to add the new mediatracks directly to the races
+ * that are overlapping.
+ */
 public class MultiVideoDialog extends DialogBox {
     private static final String EMPTY_TEXT = "";
     private static final int DELETE_COLUMN = 0;
