@@ -724,7 +724,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         competitor.getColor(), competitor.getEmail(), competitor.getFlagImage(), 
                         competitor.getTeam()==null?null:competitor.getTeam().getNationality(),
                         competitor.getTimeOnTimeFactor(),
-                        competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
+                        competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(),
+                        competitor.hasBoat() ? ((CompetitorWithBoat) competitor).getBoat().getId() : null));
             }
         });
         this.competitorAndBoatStore.addBoatUpdateListener(new BoatUpdateListener() {
@@ -2608,7 +2609,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 replicate(new TrackRegatta(regatta.getRegattaIdentifier()));
                 regattaTrackingCache.put(regatta, result);
                 ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(result);
-
                 trackedRegattaListener.regattaAdded(result);
             }
             return result;
@@ -2995,7 +2995,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             regatta.addRegattaListener(this);
             logoutput.append(String.format("%3s\n", regatta.toString()));
         }
-
         logger.info("Reading all events...");
         eventsById.putAll((Map<Serializable, Event>) ois.readObject());
         logoutput.append("\nReceived " + eventsById.size() + " NEW events\n");
