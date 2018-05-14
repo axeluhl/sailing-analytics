@@ -105,12 +105,13 @@ public class MultiVideoDialog extends DialogBox {
 
         Label indexUrl = new Label(stringMessages.multiVideoURLOfIndex());
         mainContent.add(indexUrl);
-
+        ;
         TextBox urlInput = new TextBox();
         mainContent.add(urlInput);
         doScanButton = new Button(stringMessages.multiVideoScan());
         mainContent.add(doScanButton);
         doScanButton.addClickHandler(new ClickHandler() {
+
             @Override
             public void onClick(ClickEvent event) {
                 setWorking(true);
@@ -240,16 +241,16 @@ public class MultiVideoDialog extends DialogBox {
                 });
                 dataTable.setWidget(y, DURATION_COLUMN, durationInput);
             }
-            if (remoteFile.startTimeInFile == null) {
+            if (remoteFile.startTime == null) {
                 dataTable.setWidget(y, STARTTIME_COLUMN, new Label(EMPTY_TEXT));
             } else {
                 DateAndTimeInput startTimeInput = new DateAndTimeInput(Accuracy.MILLISECONDS);
-                startTimeInput.setValue(new Date(remoteFile.startTimeInFile.asMillis() + offsetTimeInMS));
+                startTimeInput.setValue(new Date(remoteFile.startTime.asMillis() + offsetTimeInMS));
                 startTimeInput.addValueChangeHandler(new ValueChangeHandler<Date>() {
 
                     @Override
                     public void onValueChange(ValueChangeEvent<Date> event) {
-                        remoteFile.startTimeWithOffset = new MillisecondsTimePoint(event.getValue().getTime());
+                        remoteFile.startTime = new MillisecondsTimePoint(event.getValue().getTime() - offsetTimeInMS);
                     }
                 });
                 dataTable.setWidget(y, STARTTIME_COLUMN, startTimeInput);
@@ -329,7 +330,7 @@ public class MultiVideoDialog extends DialogBox {
         }
         for (RemoteFileInfo remoteFile : remoteFiles) {
             if (remoteFile.status == EStatus.WAIT_FOR_SAVE && remoteFile.selected) {
-                MediaTrack mediaTrack = new MediaTrack(remoteFile.url, remoteFile.url, remoteFile.startTimeWithOffset,
+                MediaTrack mediaTrack = new MediaTrack(remoteFile.url, remoteFile.url, remoteFile.startTime,
                         remoteFile.duration, remoteFile.mime, remoteFile.candidates);
                 mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
 
@@ -409,8 +410,7 @@ public class MultiVideoDialog extends DialogBox {
                             } else {
                                 remoteFile.duration = result.getDuration();
                                 if (result.getRecordStartedTime() != null) {
-                                    remoteFile.startTimeInFile = new MillisecondsTimePoint(result.getRecordStartedTime());
-                                    remoteFile.startTimeWithOffset = remoteFile.startTimeInFile;
+                                    remoteFile.startTime = new MillisecondsTimePoint(result.getRecordStartedTime());
                                 }
                                 remoteFile.mime = result.isSpherical() ? MimeType.mp4panorama : MimeType.mp4;
                                 remoteFile.status = EStatus.GETTING_MEDIATRACK;
@@ -472,15 +472,15 @@ public class MultiVideoDialog extends DialogBox {
                             if (raceColumn.isTrackedRace(fleet)) {
                                 RaceDTO race = raceColumn.getRace(fleet);
                                 if (race.trackedRace != null) {
-                                    if (race.endOfRace == null || race.endOfRace.after(remoteFile.startTimeWithOffset.asDate())) {
+                                    if (race.endOfRace == null || race.endOfRace.after(remoteFile.startTime.asDate())) {
                                         if (race.trackedRace.endOfTracking == null || race.trackedRace.endOfTracking
-                                                .after(remoteFile.startTimeWithOffset.asDate())) {
+                                                .after(remoteFile.startTime.asDate())) {
                                             if (race.startOfRace == null
-                                                    || race.startOfRace.before(new Date(remoteFile.startTimeWithOffset.asMillis()
+                                                    || race.startOfRace.before(new Date(remoteFile.startTime.asMillis()
                                                             + remoteFile.duration.asMillis()))) {
                                                 if (race.trackedRace.startOfTracking == null
                                                         || race.trackedRace.startOfTracking
-                                                                .before(new Date(remoteFile.startTimeWithOffset.asMillis()
+                                                                .before(new Date(remoteFile.startTime.asMillis()
                                                                         + remoteFile.duration.asMillis()))) {
                                                     candidates.add(race.getRaceIdentifier());
                                                 }
@@ -657,8 +657,7 @@ public class MultiVideoDialog extends DialogBox {
         protected Set<RegattaAndRaceIdentifier> candidates;
         protected MimeType mime;
         protected String message;
-        protected TimePoint startTimeInFile;
-        protected TimePoint startTimeWithOffset;
+        protected TimePoint startTime;
         protected Duration duration;
         protected EStatus status = EStatus.NOT_ANALYSED;
         final String url;
