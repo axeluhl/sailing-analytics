@@ -247,11 +247,12 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
 
     /**
-     * Some boxes (we don't actually need to read) create internal tempfiles, we delete them here, as the VM could run quite long
+     * Some boxes (we don't actually need to read) create internal tempfiles, we delete them here, as the VM could run
+     * quite long
      */
     private void removeTempFiles(IsoFile isof) {
         List<MediaDataBox> boxesWithTempFiles = isof.getBoxes(MediaDataBox.class, true);
-        for(MediaDataBox box:boxesWithTempFiles) {
+        for (MediaDataBox box : boxesWithTempFiles) {
             try {
                 Field field = box.getClass().getDeclaredField("dataFile");
                 field.setAccessible(true);
