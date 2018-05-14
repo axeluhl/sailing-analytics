@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Display;
@@ -70,7 +72,8 @@ public class MultiVideoDialog extends DialogBox {
     private static final int STARTTIME_COLUMN = 4;
     private static final int MIMETYPE_COLUMN = 5;
     private static final int RACES_COLUMN = 6;
-
+    
+    private static final Logger logger = Logger.getLogger(MultiVideoDialog.class.getName());
     private static final Style STYLE = GWT.<StyleHolder> create(StyleHolder.class).style();
     private StringMessages stringMessages;
     private List<RemoteFileInfo> remoteFiles = new ArrayList<>();
@@ -612,6 +615,11 @@ public class MultiVideoDialog extends DialogBox {
             public void complete() {
                 updateUI();
                 startNextInitializingRemoteTask();
+            }
+
+            @Override
+            public void error(Object error) {
+                logger.log(Level.WARNING, "An error occured while downloading the filelist from the webserver: " + error);
             }
         });
     }

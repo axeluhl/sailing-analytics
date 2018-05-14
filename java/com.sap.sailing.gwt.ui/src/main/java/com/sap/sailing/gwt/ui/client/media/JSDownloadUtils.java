@@ -23,6 +23,7 @@ public class JSDownloadUtils {
         void newHref(String foundLink);
         void noResult();
         void complete();
+        void error(Object error);
     }
     
     interface JSSizeCallback {
@@ -225,6 +226,11 @@ public class JSDownloadUtils {
                     // continue next file in open list
                     getFileList(openWork, closedWork, callback);
                 }
+
+                @Override
+                public void error(Object error) {
+                    callback.error(error);
+                }
             });
         } else {
             callback.complete();
@@ -249,7 +255,7 @@ public class JSDownloadUtils {
                                 var href = anchors[i].getAttribute("href");
                                 callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::newHref(Ljava/lang/String;)(href);
                             } catch (error) {
-                                console.log(error);
+                                callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::error(Ljava/lang/Object;)(error);
                             }
                         }
                         callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSHrefCallback::complete()();
