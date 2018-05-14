@@ -93,9 +93,10 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         };
         competitorNameColumn.setSortable(true);
         competitorColumnListHandler.setComparator(competitorNameColumn, new Comparator<CompetitorDTO>() {
+            private final NaturalComparator comparator = new NaturalComparator(/*case sensitive*/ false);
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                return o1.getName().compareTo(o2.getName());
+                return comparator.compare(o1.getName(), o2.getName());
             }
         });
 
@@ -126,7 +127,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
                 BoatDTO boat1 = o1.hasBoat() ? ((CompetitorWithBoatDTO) o1).getBoat() : null;
-                BoatDTO boat2 = o1.hasBoat() ? ((CompetitorWithBoatDTO) o1).getBoat() : null;
+                BoatDTO boat2 = o2.hasBoat() ? ((CompetitorWithBoatDTO) o2).getBoat() : null;
                 if (boat1 == null && boat2 == null) {
                     return 0;
                 } else if (boat1 != null && boat2 == null) { 
@@ -162,6 +163,14 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return sb.toSafeHtml();
             }
         };
+        flagImageColumn.setSortable(true);
+        competitorColumnListHandler.setComparator(flagImageColumn, new Comparator<CompetitorDTO>() {
+            private final NaturalComparator comparator = new NaturalComparator(/* case sensitive */ false);
+            @Override
+            public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+                return comparator.compare(o1.getThreeLetterIocCountryCode(), o2.getThreeLetterIocCountryCode());
+            }
+        });
 
         TextColumn<CompetitorDTO> sailIdColumn = new TextColumn<CompetitorDTO>() {
             @Override
@@ -175,7 +184,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
                 BoatDTO boat1 = o1.hasBoat() ? ((CompetitorWithBoatDTO) o1).getBoat() : null;
-                BoatDTO boat2 = o1.hasBoat() ? ((CompetitorWithBoatDTO) o1).getBoat() : null;
+                BoatDTO boat2 = o2.hasBoat() ? ((CompetitorWithBoatDTO) o2).getBoat() : null;
                 if (boat1 == null && boat2 == null) {
                     return 0;
                 } else if (boat1 != null && boat2 == null) { 
