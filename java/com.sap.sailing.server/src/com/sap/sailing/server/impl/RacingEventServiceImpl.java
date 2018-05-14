@@ -1772,7 +1772,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             DynamicTrackedRegatta trackedRegatta) {
         if (regattasObservedForDefaultLeaderboard.add(trackedRegatta)) {
             trackedRegatta.addRaceListener(new RaceAdditionListener(),
-                    Optional.of(this.getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()));
+                    /* ThreadLocalTransporter */ Optional.empty(), // registering for synchronous callbacks; no thread locals need to be transported
+                    /* register for synchronous execution in order to ensure that any replication-related effects happen before
+                     * any subsequent replication operations referring to a new race hit the outbound replication queue
+                     */ true);
         }
     }
 

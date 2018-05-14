@@ -75,7 +75,7 @@ public class TrackedRegattaTest {
                     throw new RuntimeException(e);
                 }
             }
-        }, Optional.empty());
+        }, Optional.empty(), /* synchronous */ false);
         
         DynamicTrackedRace race1 = createRace("R1");
         Thread thread1 = new Thread(() -> {
