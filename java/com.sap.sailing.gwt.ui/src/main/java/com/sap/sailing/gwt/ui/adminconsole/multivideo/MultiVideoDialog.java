@@ -2,11 +2,15 @@ package com.sap.sailing.gwt.ui.adminconsole.multivideo;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Display;
@@ -294,20 +298,18 @@ public class MultiVideoDialog extends DialogBox {
             } else if (remoteFile.candidates.isEmpty()) {
                 ft.add(new Label(stringMessages.empty()));
             } else {
-                for (RegattaAndRaceIdentifier candidate : remoteFile.candidates) {
+                for (Entry<RegattaAndRaceIdentifier, Boolean> entry : remoteFile.candidates.entrySet()) {
+                    RegattaAndRaceIdentifier candidate = entry.getKey();
+                    Boolean selected = entry.getValue();
                     CheckBox cb = new CheckBox(candidate.getRegattaName() + " " + candidate.getRaceName());
-                    cb.setValue(true, false);
+                    cb.setValue(selected, false);
                     cb.setEnabled(!remoteFile.isWorking);
                     cb.addStyleName(STYLE.checkboxStyle());
                     ft.add(cb);
                     cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                         @Override
                         public void onValueChange(ValueChangeEvent<Boolean> event) {
-                            if (Boolean.FALSE.equals(event.getValue())) {
-                                remoteFile.candidates.remove(candidate);
-                            } else {
-                                remoteFile.candidates.add(candidate);
-                            }
+                            remoteFile.candidates.put(candidate, event.getValue());
                         }
                     });
                 }
@@ -330,9 +332,12 @@ public class MultiVideoDialog extends DialogBox {
         }
         for (RemoteFileInfo remoteFile : remoteFiles) {
             if (remoteFile.status == EStatus.WAIT_FOR_SAVE && remoteFile.selected) {
+                final Set<RegattaAndRaceIdentifier> selectedCandidates = remoteFile.candidates.entrySet().stream()
+                        .filter(Entry::getValue).map(Entry::getKey).collect(Collectors.toSet());
+                
                 MediaTrack mediaTrack = new MediaTrack(remoteFile.url, remoteFile.url,
                         remoteFile.startTime.plus(offsetTimeInMS), remoteFile.duration, remoteFile.mime,
-                        remoteFile.candidates);
+                        selectedCandidates);
                 mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
 
                     @Override
@@ -381,7 +386,9 @@ public class MultiVideoDialog extends DialogBox {
                         collectAllOverlappingRaces(remoteFile, result, candidates);
                         remoteFile.status = EStatus.WAIT_FOR_SAVE;
                         remoteFile.isWorking = false;
-                        remoteFile.candidates = candidates;
+                        for(RegattaAndRaceIdentifier candidate:candidates) {
+                            remoteFile.candidates.put(candidate, true);
+                        }
                         updateUI();
                         startNextInitializingRemoteTask();
                     }
@@ -656,7 +663,7 @@ public class MultiVideoDialog extends DialogBox {
     static class RemoteFileInfo {
         protected boolean selected;
         protected MediaTrack knownMediaTrack;
-        protected Set<RegattaAndRaceIdentifier> candidates;
+        protected Map<RegattaAndRaceIdentifier, Boolean> candidates = new HashMap<>();
         protected MimeType mime;
         protected String message;
         protected TimePoint startTime;
