@@ -69,5 +69,4 @@ public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace>
         // Mark passings are computed on master and are replicated separately.
         // See UpdateMarkPassings
     }
-
 }

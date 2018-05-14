@@ -3,7 +3,6 @@ package com.sap.sailing.server.operationaltransformation;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
 /**
@@ -24,10 +23,8 @@ public class RecordMarkGPSFixForNewMarkTrack extends RecordMarkGPSFix {
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        DynamicTrackedRace trackedRace = getTrackedRace(toState);
-	if (trackedRace != null) {
-	    trackedRace.recordFix(mark, getFix(), /* onlyWhenInTrackingTimeInterval */ false); // record the fix in any case
-	}
+        // FIXME bug 4527 this is a problem: we cannot easily push execution of this task to an executor when this operation needs to be executed synchronously; it has to precede the other RecordMarkGPSFixForExistingTrack operations for the same mark at least
+        doWithTrackedRace(toState, trackedRace->trackedRace.recordFix(mark, getFix(), /* onlyWhenInTrackingTimeInterval */ false)); // record the fix in any case
         return null;
     }
 }
