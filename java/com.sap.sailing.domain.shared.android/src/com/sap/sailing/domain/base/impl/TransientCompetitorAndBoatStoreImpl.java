@@ -440,8 +440,9 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
                 LockUtil.unlockAfterWrite(lock);
             }
         } else if (isCompetitorToUpdateDuringGetOrCreate(result)) {
+            assert result.getBoat() == boat;
             updateCompetitorWithBoat(result.getId().toString(), name, shortName, displayColor, email, team.getNationality(),
-                    team.getImage(), flagImage, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+                    team.getImage(), flagImage, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
             competitorNoLongerToUpdateDuringGetOrCreate(result);
         }
         return result;
@@ -450,7 +451,7 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
     @Override
     public CompetitorWithBoat updateCompetitorWithBoat(String idAsString, String newName, String newShortName, Color newDisplayColor, String newEmail,
             Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
-            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String newSearchTag, DynamicBoat boat) {
+            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String newSearchTag) {
         DynamicCompetitorWithBoat competitor = (DynamicCompetitorWithBoat) getExistingCompetitorByIdAsString(idAsString);
         if (competitor != null) {
             LockUtil.lockForWrite(lock);
@@ -465,12 +466,6 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
                 competitor.setTimeOnTimeFactor(timeOnTimeFactor);
                 competitor.setTimeOnDistanceAllowancePerNauticalMile(timeOnDistanceAllowancePerNauticalMile);
                 competitor.setSearchTag(newSearchTag);
-                DynamicBoat boatOfCompetitor = competitor.getBoat();
-                if (boatOfCompetitor != null && boat != null) {
-                    boatOfCompetitor.setName(boat.getName());
-                    boatOfCompetitor.setSailId(boat.getSailID());
-                    boatOfCompetitor.setColor(boat.getColor());
-                }
                 weakCompetitorDTOCache.remove(competitor);
             } finally {
                 LockUtil.unlockAfterWrite(lock);
