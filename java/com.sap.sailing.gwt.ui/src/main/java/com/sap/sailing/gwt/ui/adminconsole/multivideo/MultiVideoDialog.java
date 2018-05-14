@@ -66,7 +66,7 @@ public class MultiVideoDialog extends DialogBox {
     private static final int MIMETYPE_COLUMN = 5;
     private static final int RACES_COLUMN = 6;
 
-    private static final StyleHolder style = GWT.create(StyleHolder.class);
+    private static final Style STYLE = GWT.<StyleHolder> create(StyleHolder.class).style();
     private StringMessages stringMessages;
     private List<RemoteFileInfo> remoteFiles = new ArrayList<>();
     private FlexTable dataTable;
@@ -90,7 +90,7 @@ public class MultiVideoDialog extends DialogBox {
         setGlassEnabled(true);
 
         FlowPanel mainContent = new FlowPanel();
-        
+
         Label descriptionLabel = new Label(this.stringMessages.multiVideoDescription());
         descriptionLabel.getElement().getStyle().setPadding(0.5, Unit.EM);
         mainContent.add(descriptionLabel);
@@ -142,8 +142,8 @@ public class MultiVideoDialog extends DialogBox {
         dockPanel.add(new ScrollPanel(mainContent), DockPanel.CENTER);
 
         dataTable = new FlexTable();
-        style.style().ensureInjected();
-        dataTable.addStyleName(style.style().tableStyle());
+        STYLE.ensureInjected();
+        dataTable.addStyleName(STYLE.tableStyle());
         mainContent.add(dataTable);
 
         Button cancelButton = new Button(stringMessages.close());
@@ -190,20 +190,25 @@ public class MultiVideoDialog extends DialogBox {
         dataTable.setWidget(y, STARTTIME_COLUMN, new Label(stringMessages.startTime()));
         dataTable.setWidget(y, MIMETYPE_COLUMN, new Label(stringMessages.mimeType()));
         dataTable.setWidget(y, RACES_COLUMN, new Label(stringMessages.linkedRaces()));
+
+        for (int row = 0; row < dataTable.getCellCount(0); row++) {
+            dataTable.getFlexCellFormatter().addStyleName(y, row, STYLE.tableHeader());
+        }
+
         y++;
         for (RemoteFileInfo remoteFile : remoteFiles) {
             Anchor link = new Anchor(remoteFile.url);
             link.setHref(remoteFile.url);
             link.setTarget("_blank");
             dataTable.setWidget(y, URL_COLUMN, link);
-            if(remoteFile.selected || remoteFile.status != EStatus.WAIT_FOR_SAVE) {
+            if (remoteFile.selected || remoteFile.status != EStatus.WAIT_FOR_SAVE) {
                 dataTable.setWidget(y, STATUS_COLUMN, new Label(asString(remoteFile.status)));
-            }else {
+            } else {
                 dataTable.setWidget(y, STATUS_COLUMN, new Label(stringMessages.multiVideoDoNoAdd()));
             }
 
             CheckBox removeVideo = new CheckBox();
-            removeVideo.setEnabled(!remoteFile.isWorking && remoteFile.status ==  EStatus.WAIT_FOR_SAVE);
+            removeVideo.setEnabled(!remoteFile.isWorking && remoteFile.status == EStatus.WAIT_FOR_SAVE);
             removeVideo.setValue(remoteFile.selected);
             removeVideo.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
@@ -285,7 +290,7 @@ public class MultiVideoDialog extends DialogBox {
                     CheckBox cb = new CheckBox(candidate.getRegattaName() + " " + candidate.getRaceName());
                     cb.setValue(true, false);
                     cb.setEnabled(!remoteFile.isWorking);
-                    cb.addStyleName(style.style().checkboxStyle());
+                    cb.addStyleName(STYLE.checkboxStyle());
                     ft.add(cb);
                     cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                         @Override
@@ -605,6 +610,8 @@ public class MultiVideoDialog extends DialogBox {
 
     static interface Style extends CssResource {
         String tableStyle();
+
+        String tableHeader();
 
         String checkboxStyle();
     }
