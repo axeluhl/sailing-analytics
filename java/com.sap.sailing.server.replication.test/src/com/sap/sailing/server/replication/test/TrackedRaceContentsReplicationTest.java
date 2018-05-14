@@ -74,7 +74,6 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
     public void setUp() throws Exception, UnknownHostException, InterruptedException {
         super.setUp();
         final String boatClassName = "49er";
-        // FIXME use master DomainFactory; see bug 592
         final DomainFactory masterDomainFactory = testSetUp.getMaster().getBaseDomainFactory();
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */true);
         competitor = masterDomainFactory.getCompetitorAndBoatStore().getOrCreateCompetitor("GER 61", "Tina Lutz", "TL", Color.RED, "someone@nowhere.de", null, new TeamImpl("Tina Lutz + Susann Beucke",
@@ -173,7 +172,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         Thread.sleep(1000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         Mark replicaMark = replicaTrackedRace.getRace().getCourse().getFirstWaypoint().getMarks().iterator().next();
-//        assertNotSame(replicaMark, masterMark); // TODO this would require solving bug 592
+        assertNotSame(replicaMark, masterMark);
         GPSFixTrack<Mark, GPSFix> replicaMarkTrack = replicaTrackedRace.getOrCreateTrack(replicaMark);
         replicaMarkTrack.lockForRead();
         try {
