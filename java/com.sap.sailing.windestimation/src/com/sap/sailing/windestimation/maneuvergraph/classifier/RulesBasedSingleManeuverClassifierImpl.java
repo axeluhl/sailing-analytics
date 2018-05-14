@@ -2,11 +2,12 @@ package com.sap.sailing.windestimation.maneuvergraph.classifier;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
-import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.windestimation.maneuvergraph.CoarseGrainedManeuverType;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -18,181 +19,222 @@ public class RulesBasedSingleManeuverClassifierImpl implements SingleManeuverCla
 
     private final BoatClass boatClass;
     private final PolarDataService polarService;
+    private final boolean hasPolarsForBoatClass;
 
     public RulesBasedSingleManeuverClassifierImpl(BoatClass boatClass, PolarDataService polarService) {
         this.boatClass = boatClass;
         this.polarService = polarService;
+        this.hasPolarsForBoatClass = polarService.getAllBoatClassesWithPolarSheetsAvailable().contains(boatClass);
     }
 
-    public SingleManeuverClassificationResult classifyManeuver(CompleteManeuverCurveWithEstimationData maneuverCurve) {
-//        SpeedWithBearing lowestSpeedWithinManeuverMainCurve = maneuverCurve.getMainCurve().getLowestSpeed();
-//        double lowestSpeedWithBeginningSpeedRatio = lowestSpeedWithinManeuverMainCurve.getKnots()
-//                / maneuverCurve.getMainCurve().getSpeedWithBearingBefore().getKnots();
-//        double courseChangeDegUntilLowestSpeed = maneuverCurve.getMainCurve().getSpeedWithBearingBefore().getBearing()
-//                .getDifferenceTo(lowestSpeedWithinManeuverMainCurve.getBearing()).getDegrees();
-//        if (courseChangeDegUntilLowestSpeed * maneuverCurve.getMainCurve().getDirectionChangeInDegrees() < 0) {
-//            courseChangeDegUntilLowestSpeed = courseChangeDegUntilLowestSpeed < 0
-//                    ? courseChangeDegUntilLowestSpeed + 360 : courseChangeDegUntilLowestSpeed - 360;
-//        }
-//        double highestSpeedWithBeginningSpeedRatio = maneuverCurve.getMainCurve().getHighestSpeed().getKnots()
-//                / maneuverCurve.getMainCurve().getSpeedWithBearingBefore().getKnots();
-//        double enteringExitingSpeedRatio = maneuverCurve.getCurveWithUnstableCourseAndSpeed()
-//                .getSpeedWithBearingBefore().getKnots()
-//                / maneuverCurve.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots();
-//        double courseChangeDeg = maneuverCurve.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees();
-//        double[] presumedManeuverTypeLikelihoodsByAngleAnalysis = new double[CoarseGrainedManeuverType.values().length];
-//        double[] presumedManeuverTypeLikelihoodsBySpeedAnalysis = new double[presumedManeuverTypeLikelihoodsByAngleAnalysis.length];
-//        SpeedWithBearingWithConfidence<Void> speedWithTwaIfTack = null;
-//        SpeedWithBearingWithConfidence<Void> speedWithTwaIfJibe = null;
-//        double absCourseChangeDeg = Math.abs(courseChangeDeg);
-//        if (Math.abs(maneuverCurve.getMainCurve().getDirectionChangeInDegrees()) <= 45) {
-//            // jibe, bear away, head up
-//            Pair<Double, SpeedWithBearingWithConfidence<Void>> jibeLikelihoodWithTwaTws = polarService
-//                    .getManeuverLikelihoodAndTwsTwa(boatClass,
-//                            maneuverCurve.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore(),
-//                            courseChangeDeg, ManeuverType.JIBE);
-//            if (jibeLikelihoodWithTwaTws.getA() == 0) {
-//                presumedManeuverTypeLikelihoodsByAngleAnalysis[CoarseGrainedManeuverType.HEAD_UP_BEAR_AWAY.ordinal()] = 0.8;
-//                presumedManeuverTypeLikelihoodsByAngleAnalysis[CoarseGrainedManeuverType.JIBE.ordinal()] = 0.2;
-//            } else {
-//                double jibeLikelihoodBonus = jibeLikelihoodWithTwaTws.getA() - 0.5;
-//                if (jibeLikelihoodBonus < -0.2) {
-//                    jibeLikelihoodBonus = -0.2;
-//                } else if (jibeLikelihoodBonus > 0.4) {
-//                    jibeLikelihoodBonus = 0.4;
-//                }
-//                presumedManeuverTypeLikelihoodsByAngleAnalysis[CoarseGrainedManeuverType.HEAD_UP_BEAR_AWAY.ordinal()] = 0.5
-//                        - jibeLikelihoodBonus;
-//                presumedManeuverTypeLikelihoodsByAngleAnalysis[CoarseGrainedManeuverType.JIBE.ordinal()] = 0.5
-//                        + jibeLikelihoodBonus;
-//                speedWithTwaIfJibe = new SpeedWithBearingWithConfidenceImpl<Void>(
-//                        jibeLikelihoodWithTwaTws.getB().getObject(), jibeLikelihoodWithTwaTws.getA(), null);
-//            }
-//        } else if (absCourseChangeDeg <= 110) {
-//            // tack, jibe, mark passings, head up, bear away
-//            SpeedWithBearing speedWithBearingBefore = maneuverCurve.getCurveWithUnstableCourseAndSpeed()
-//                    .getSpeedWithBearingBefore();
-//            Pair<Double, SpeedWithBearingWithConfidence<Void>> tackLikelihoodWithTwaTws = polarService
-//                    .getManeuverLikelihoodAndTwsTwa(boatClass, speedWithBearingBefore, courseChangeDeg,
-//                            ManeuverType.TACK);
-//            Pair<Double, SpeedWithBearingWithConfidence<Void>> jibeLikelihoodWithTwaTws = polarService
-//                    .getManeuverLikelihoodAndTwsTwa(boatClass, speedWithBearingBefore, courseChangeDeg,
-//                            ManeuverType.JIBE);
-//
-//            double markPassingLikelihoodBonus = (Math.abs(maneuverCurve.getMainCurve().getDirectionChangeInDegrees())
-//                    - 70) / 100;
-//            if (markPassingLikelihoodBonus < -0.4) {
-//                markPassingLikelihoodBonus = -0.4;
-//            } else if (markPassingLikelihoodBonus > 0.4) {
-//                markPassingLikelihoodBonus = 0.4;
-//            }
-//
-//            double markPassingLikelihood = 0.5 + markPassingLikelihoodBonus;
-//            double headUpBearAwayLikelihood = 1 - markPassingLikelihood;
-//
-//            double tackLikelihood = tackLikelihoodWithTwaTws.getA() + 0.1;
-//            double jibeLikelihood = jibeLikelihoodWithTwaTws.getA() + 0.1;
-//            double likelihoodSum = markPassingLikelihood * 2 + headUpBearAwayLikelihood + tackLikelihood
-//                    + jibeLikelihood;
-//
-//            if (tackLikelihoodWithTwaTws.getA() != 0) {
-//                speedWithTwaIfTack = new SpeedWithBearingWithConfidenceImpl<Void>(
-//                        tackLikelihoodWithTwaTws.getB().getObject(), tackLikelihoodWithTwaTws.getA(), null);
-//            } else if (jibeLikelihoodWithTwaTws.getA() != 0) {
-//                speedWithTwaIfJibe = new SpeedWithBearingWithConfidenceImpl<Void>(
-//                        jibeLikelihoodWithTwaTws.getB().getObject(), jibeLikelihoodWithTwaTws.getA(), null);
-//            }
-//
-//            presumedManeuverTypeLikelihoodsByAngleAnalysis[CoarseGrainedManeuverType.HEAD_UP_BEAR_AWAY
-//                    .ordinal()] = headUpBearAwayLikelihood / likelihoodSum;
-//            presumedManeuverTypeLikelihoodsByAngleAnalysis[CoarseGrainedManeuverType.TACK.ordinal()] = tackLikelihood
-//                    / likelihoodSum;
-//            presumedManeuverTypeLikelihoodsByAngleAnalysis[CoarseGrainedManeuverType.JIBE.ordinal()] = jibeLikelihood
-//                    / likelihoodSum;
-//            presumedManeuverTypeLikelihoodsByAngleAnalysis[CoarseGrainedManeuverType.MARK_PASSING_LEE
-//                    .ordinal()] = markPassingLikelihood / likelihoodSum;
-//            presumedManeuverTypeLikelihoodsByAngleAnalysis[CoarseGrainedManeuverType.MARK_PASSING_LUV
-//                    .ordinal()] = markPassingLikelihood / likelihoodSum;
-//
-//            double markPassingLuvLikelihoodBonus = (highestSpeedWithBeginningSpeedRatio - 1.01) * 5;
-//            double markPassingLeeLikelihoodBonus = 0;
-//            if (markPassingLuvLikelihoodBonus <= 0) {
-//                if (markPassingLuvLikelihoodBonus < -0.2) {
-//                    markPassingLuvLikelihoodBonus = -0.2;
-//                }
-//                markPassingLeeLikelihoodBonus = (0.95 - Math.abs(enteringExitingSpeedRatio)) * 2;
-//                if (markPassingLeeLikelihoodBonus < -0.1) {
-//                    markPassingLeeLikelihoodBonus = -0.1;
-//                } else if (markPassingLeeLikelihoodBonus > 0.1) {
-//                    markPassingLeeLikelihoodBonus = 0.1;
-//                }
-//            } else if (markPassingLuvLikelihoodBonus > 0.3) {
-//                markPassingLuvLikelihoodBonus = 0.3;
-//            }
-//
-//            tackLikelihood = 0.5 - markPassingLuvLikelihoodBonus - markPassingLeeLikelihoodBonus;
-//            jibeLikelihood = tackLikelihood;
-//            double markPassingLeeLikelihood = 0.5 + markPassingLeeLikelihoodBonus - markPassingLuvLikelihoodBonus;
-//            double markPassingLuvLikelihood = 0.5 + markPassingLuvLikelihoodBonus - markPassingLeeLikelihoodBonus;
-//            headUpBearAwayLikelihood = 0.1 + Math.max(markPassingLuvLikelihood, markPassingLeeLikelihood);
-//            likelihoodSum = tackLikelihood + jibeLikelihood + markPassingLeeLikelihood + markPassingLeeLikelihood
-//                    + headUpBearAwayLikelihood;
-//
-//            presumedManeuverTypeLikelihoodsBySpeedAnalysis[CoarseGrainedManeuverType.HEAD_UP_BEAR_AWAY
-//                    .ordinal()] = headUpBearAwayLikelihood / likelihoodSum;
-//            presumedManeuverTypeLikelihoodsBySpeedAnalysis[CoarseGrainedManeuverType.TACK.ordinal()] = tackLikelihood
-//                    / likelihoodSum;
-//            presumedManeuverTypeLikelihoodsBySpeedAnalysis[CoarseGrainedManeuverType.JIBE.ordinal()] = jibeLikelihood
-//                    / likelihoodSum;
-//            presumedManeuverTypeLikelihoodsBySpeedAnalysis[CoarseGrainedManeuverType.MARK_PASSING_LEE
-//                    .ordinal()] = markPassingLeeLikelihood / likelihoodSum;
-//            presumedManeuverTypeLikelihoodsBySpeedAnalysis[CoarseGrainedManeuverType.MARK_PASSING_LUV
-//                    .ordinal()] = markPassingLuvLikelihood / likelihoodSum;
-//
-//        } else if (absCourseChangeDeg <= 140) {
-//            // mark passing, or wider jibe, wider tack
-//            double markPassingLuvLikelihoodBonus = (highestSpeedWithBeginningSpeedRatio - 1.04) * 5;
-//            double markPassingLeeLikelihoodBonus = 0;
-//            if (markPassingLuvLikelihoodBonus <= 0) {
-//                if (markPassingLuvLikelihoodBonus < -0.2) {
-//                    markPassingLuvLikelihoodBonus = -0.2;
-//                }
-//                markPassingLeeLikelihoodBonus = (0.95 - Math.abs(enteringExitingSpeedRatio)) * 2;
-//                if (markPassingLeeLikelihoodBonus < -0.1) {
-//                    markPassingLeeLikelihoodBonus = -0.1;
-//                } else if (markPassingLeeLikelihoodBonus > 0.1) {
-//                    markPassingLeeLikelihoodBonus = 0.1;
-//                }
-//            } else if (markPassingLuvLikelihoodBonus > 0.3) {
-//                markPassingLuvLikelihoodBonus = 0.3;
-//            }
-//            presumedManeuverTypeLikelihoodsByAngleAnalysis[CoarseGrainedManeuverType.TACK.ordinal()] = 0.25;
-//            presumedManeuverTypeLikelihoodsByAngleAnalysis[CoarseGrainedManeuverType.JIBE.ordinal()] = 0.25;
-//            presumedManeuverTypeLikelihoodsByAngleAnalysis[CoarseGrainedManeuverType.MARK_PASSING_LEE.ordinal()] = 0.25;
-//            presumedManeuverTypeLikelihoodsByAngleAnalysis[CoarseGrainedManeuverType.MARK_PASSING_LUV.ordinal()] = 0.25;
-//
-//            presumedManeuverTypeLikelihoodsBySpeedAnalysis[CoarseGrainedManeuverType.TACK.ordinal()] = 0.25
-//                    - markPassingLeeLikelihoodBonus / 3 - markPassingLuvLikelihoodBonus / 3;
-//            presumedManeuverTypeLikelihoodsBySpeedAnalysis[CoarseGrainedManeuverType.JIBE.ordinal()] = 0.25
-//                    - markPassingLeeLikelihoodBonus / 3 - markPassingLuvLikelihoodBonus / 3;
-//            presumedManeuverTypeLikelihoodsBySpeedAnalysis[CoarseGrainedManeuverType.MARK_PASSING_LEE.ordinal()] = 0.25
-//                    + markPassingLeeLikelihoodBonus - markPassingLuvLikelihoodBonus / 3;
-//            presumedManeuverTypeLikelihoodsBySpeedAnalysis[CoarseGrainedManeuverType.MARK_PASSING_LUV.ordinal()] = 0.25
-//                    - markPassingLeeLikelihoodBonus / 3 + markPassingLuvLikelihoodBonus;
-//        } else if (absCourseChangeDeg <= 310) {
-//            // 180
-//            // => course at lowest speed may refer either upwind, or downwind
-//            presumedManeuverTypeLikelihoodsByAngleAnalysis[CoarseGrainedManeuverType._180.ordinal()] = 1.0;
-//        } else {
-//            // the maneuver is a >= 360
-//            // => course at lowest speed refers upwind
-//            presumedManeuverTypeLikelihoodsByAngleAnalysis[CoarseGrainedManeuverType._360.ordinal()] = 1.0;
-//        }
-//        return new SingleManeuverClassificationResult(maneuverCurve, lowestSpeedWithBeginningSpeedRatio,
-//                courseChangeDegUntilLowestSpeed, highestSpeedWithBeginningSpeedRatio, enteringExitingSpeedRatio,
-//                courseChangeDeg, presumedManeuverTypeLikelihoodsByAngleAnalysis,
-//                presumedManeuverTypeLikelihoodsBySpeedAnalysis, speedWithTwaIfTack, speedWithTwaIfJibe);
-        return null;
+    public SingleManeuverClassificationResult classifyManeuver(CompleteManeuverCurveWithEstimationData maneuver,
+            CompleteManeuverCurveWithEstimationData previousManeuver,
+            CompleteManeuverCurveWithEstimationData nextManeuver) {
+        double[] likelihoodPerManeuverType = new double[CoarseGrainedManeuverType.values().length];
+
+        double absCourseChangeDegMainCurve = Math.abs(maneuver.getMainCurve().getDirectionChangeInDegrees());
+        if (maneuver.isManeuverBeginningClean(previousManeuver) && maneuver.isManeuverEndClean(nextManeuver)) {
+            if (absCourseChangeDegMainCurve <= 15) {
+                // jibe, bear away, head up - hard to distinguish
+                double bearAwayLikelihoodBonus = computeBearAwayLikelihoodBonus(maneuver);
+                double headUpLikelihoodBonus = -bearAwayLikelihoodBonus;
+                double jibeLikelihoodBonus = limitProbabilityBonus(computeJibeLikelihoodBonus(maneuver), -1,
+                        Math.abs(bearAwayLikelihoodBonus) + 0.01);
+                likelihoodPerManeuverType[CoarseGrainedManeuverType.JIBE.ordinal()] = 1 + jibeLikelihoodBonus;
+                likelihoodPerManeuverType[CoarseGrainedManeuverType.BEAR_AWAY.ordinal()] = 1 + bearAwayLikelihoodBonus;
+                likelihoodPerManeuverType[CoarseGrainedManeuverType.HEAD_UP.ordinal()] = 1 + headUpLikelihoodBonus;
+            } else if (absCourseChangeDegMainCurve <= 45) {
+                // jibe, bear away, head up
+                double bearAwayLikelihoodBonus = computeBearAwayLikelihoodBonus(maneuver);
+                double headUpLikelihoodBonus = -bearAwayLikelihoodBonus;
+                double jibeLikelihoodBonus = computeJibeLikelihoodBonus(maneuver) / 2;
+                likelihoodPerManeuverType[CoarseGrainedManeuverType.JIBE.ordinal()] = 1 + jibeLikelihoodBonus;
+                likelihoodPerManeuverType[CoarseGrainedManeuverType.BEAR_AWAY.ordinal()] = 1 + bearAwayLikelihoodBonus;
+                likelihoodPerManeuverType[CoarseGrainedManeuverType.HEAD_UP.ordinal()] = 1 + headUpLikelihoodBonus;
+                likelihoodPerManeuverType[CoarseGrainedManeuverType.TACK.ordinal()] = 0.1;
+            } else if (absCourseChangeDegMainCurve <= 120) {
+                // tack, jibe, bear away, head up
+                double bearAwayLikelihoodBonus = computeBearAwayLikelihoodBonus(maneuver);
+                double headUpLikelihoodBonus = -bearAwayLikelihoodBonus;
+                double jibeLikelihoodBonus = computeJibeLikelihoodBonus(maneuver);
+                double tackLikelihoodBonus = computeTackLikelihoodBonus(maneuver);
+                likelihoodPerManeuverType[CoarseGrainedManeuverType.JIBE.ordinal()] = 1 + jibeLikelihoodBonus;
+                likelihoodPerManeuverType[CoarseGrainedManeuverType.BEAR_AWAY.ordinal()] = 1 + bearAwayLikelihoodBonus;
+                likelihoodPerManeuverType[CoarseGrainedManeuverType.HEAD_UP.ordinal()] = 1 + headUpLikelihoodBonus;
+                likelihoodPerManeuverType[CoarseGrainedManeuverType.TACK.ordinal()] = 1 + tackLikelihoodBonus;
+            } else if (absCourseChangeDegMainCurve <= 150) {
+                // wide tack, jibe, bear away, head up
+                double bearAwayLikelihoodBonus = computeBearAwayLikelihoodBonus(maneuver);
+                double headUpLikelihoodBonus = -bearAwayLikelihoodBonus;
+                double _180LikelihoodBonus = computeTackJibeProbabilityBonus(maneuver)
+                        + Math.max(bearAwayLikelihoodBonus, headUpLikelihoodBonus) - 0.01;
+                likelihoodPerManeuverType[CoarseGrainedManeuverType._180.ordinal()] = 1 + _180LikelihoodBonus;
+                likelihoodPerManeuverType[CoarseGrainedManeuverType.BEAR_AWAY.ordinal()] = 1 + bearAwayLikelihoodBonus;
+                likelihoodPerManeuverType[CoarseGrainedManeuverType.HEAD_UP.ordinal()] = 1 + headUpLikelihoodBonus;
+            } else if (absCourseChangeDegMainCurve < 315) {
+                // It is likely that the maneuver contains one tack or one jibe
+                // => course at lowest speed may refer either upwind, or downwind
+                likelihoodPerManeuverType[CoarseGrainedManeuverType._180.ordinal()] = 1.0;
+            } else if (absCourseChangeDegMainCurve < 400) {
+                // It is likely that the maneuver contains one tack and one jibe.
+                // => course at lowest speed refers upwind
+                likelihoodPerManeuverType[CoarseGrainedManeuverType._360.ordinal()] = 1.0;
+                likelihoodPerManeuverType[CoarseGrainedManeuverType._180.ordinal()] = 1
+                        / (5 + (absCourseChangeDegMainCurve - 315) / 5);
+            } else {
+                // It is highly likely that the maneuver contains at least one tack and one jibe.
+                // => course at lowest speed refers upwind
+                likelihoodPerManeuverType[CoarseGrainedManeuverType._360.ordinal()] = 1.0;
+            }
+        }
+        return new SingleManeuverClassificationResult(maneuver, likelihoodPerManeuverType);
+    }
+
+    private double computeJibeLikelihoodBonus(CompleteManeuverCurveWithEstimationData maneuver) {
+        SpeedWithBearing speedWithBearingBefore = maneuver.getCurveWithUnstableCourseAndSpeed()
+                .getSpeedWithBearingBefore();
+        SpeedWithBearing speedWithBearingAfter = maneuver.getCurveWithUnstableCourseAndSpeed()
+                .getSpeedWithBearingAfter();
+        double lowestSpeedEnteringSpeedRatio = maneuver.getMainCurve().getLowestSpeed().getKnots()
+                / maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots();
+        if (lowestSpeedEnteringSpeedRatio >= 0.98) {
+            return -0.5;
+        }
+        double highestSpeedEnteringSpeedRatio = maneuver.getMainCurve().getHighestSpeed().getKnots()
+                / maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots();
+        if (highestSpeedEnteringSpeedRatio >= 1.07) {
+            return -0.5;
+        }
+        double enteringExitingSpeedRatio = speedWithBearingBefore.getKnots() / speedWithBearingAfter.getKnots();
+        double lowestSpeedExitingSpeedRatio = maneuver.getMainCurve().getLowestSpeed().getKnots()
+                / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots();
+
+        double maneuverAngleBonus = 0;
+        if (hasPolarsForBoatClass) {
+            Pair<Double, SpeedWithBearingWithConfidence<Void>> jibeLikelihoodWithTwaTws = polarService
+                    .getManeuverLikelihoodAndTwsTwa(boatClass, speedWithBearingBefore,
+                            maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees(),
+                            ManeuverType.JIBE);
+            if (jibeLikelihoodWithTwaTws.getA() == 0) {
+                maneuverAngleBonus = -0.5;
+            } else {
+                maneuverAngleBonus = jibeLikelihoodWithTwaTws.getA() - 0.5;
+            }
+        }
+        double enteringExitingSpeedRatioBonus = limitProbabilityBonus(
+                5 * (0.07 - Math.abs(1 - enteringExitingSpeedRatio)), 0.2);
+        double lowestSpeedEnteringSpeedRatioBonus = limitProbabilityBonus(
+                Math.abs(0.95 - lowestSpeedEnteringSpeedRatio) * 5, 0.2);
+        double lowestSpeedExitingSpeedRatioBonus = limitProbabilityBonus(
+                0.4 - Math.abs(1 - lowestSpeedExitingSpeedRatio / lowestSpeedEnteringSpeedRatio) * 5, 0.2);
+        double highestSpeedEnteringSpeedRatioPenalty = limitProbabilityBonus(1 - highestSpeedEnteringSpeedRatio * 10,
+                -1, 0);
+        double jibeLikelihoodBonus = (maneuverAngleBonus + enteringExitingSpeedRatioBonus
+                + lowestSpeedEnteringSpeedRatioBonus + lowestSpeedExitingSpeedRatioBonus
+                + highestSpeedEnteringSpeedRatioPenalty) / 4;
+        return jibeLikelihoodBonus + computeTackJibeProbabilityBonus(maneuver);
+    }
+
+    private double computeTackLikelihoodBonus(CompleteManeuverCurveWithEstimationData maneuver) {
+        SpeedWithBearing speedWithBearingBefore = maneuver.getCurveWithUnstableCourseAndSpeed()
+                .getSpeedWithBearingBefore();
+        SpeedWithBearing speedWithBearingAfter = maneuver.getCurveWithUnstableCourseAndSpeed()
+                .getSpeedWithBearingAfter();
+        double lowestSpeedEnteringSpeedRatio = maneuver.getMainCurve().getLowestSpeed().getKnots()
+                / maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots();
+        if (lowestSpeedEnteringSpeedRatio >= 0.9) {
+            return -0.5;
+        }
+        double highestSpeedEnteringSpeedRatio = maneuver.getMainCurve().getHighestSpeed().getKnots()
+                / maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots();
+        if (highestSpeedEnteringSpeedRatio >= 1.02) {
+            return -0.5;
+        }
+        double enteringExitingSpeedRatio = speedWithBearingBefore.getKnots() / speedWithBearingAfter.getKnots();
+        double lowestSpeedExitingSpeedRatio = maneuver.getMainCurve().getLowestSpeed().getKnots()
+                / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots();
+
+        double maneuverAngleBonus = 0;
+        if (hasPolarsForBoatClass) {
+            Pair<Double, SpeedWithBearingWithConfidence<Void>> tackLikelihoodWithTwaTws = polarService
+                    .getManeuverLikelihoodAndTwsTwa(boatClass, speedWithBearingBefore,
+                            maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees(),
+                            ManeuverType.TACK);
+            if (tackLikelihoodWithTwaTws.getA() == 0) {
+                maneuverAngleBonus = -0.5;
+            } else {
+                maneuverAngleBonus = tackLikelihoodWithTwaTws.getA() - 0.5;
+            }
+        }
+        double enteringExitingSpeedRatioBonus = limitProbabilityBonus(
+                5 * (0.07 - Math.abs(1 - enteringExitingSpeedRatio)), 0.2);
+        double lowestSpeedEnteringSpeedRatioBonus = limitProbabilityBonus(
+                Math.abs(0.85 - lowestSpeedEnteringSpeedRatio) * 5, 0.2);
+        double lowestSpeedExitingSpeedRatioBonus = limitProbabilityBonus(
+                0.4 - Math.abs(1 - lowestSpeedExitingSpeedRatio / lowestSpeedEnteringSpeedRatio) * 5, 0.2);
+        double highestSpeedEnteringSpeedRatioPenalty = limitProbabilityBonus(1 - highestSpeedEnteringSpeedRatio * 10,
+                -1, 0);
+        double tackLikelihoodBonus = (maneuverAngleBonus + enteringExitingSpeedRatioBonus
+                + lowestSpeedEnteringSpeedRatioBonus + lowestSpeedExitingSpeedRatioBonus
+                + highestSpeedEnteringSpeedRatioPenalty) / 4;
+        return tackLikelihoodBonus + computeTackJibeProbabilityBonus(maneuver);
+    }
+
+    private double computeBearAwayLikelihoodBonus(CompleteManeuverCurveWithEstimationData maneuver) {
+        double lowestSpeedEnteringSpeedRatio = maneuver.getMainCurve().getLowestSpeed().getKnots()
+                / maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots();
+        double highestSpeedEnteringSpeedRatio = maneuver.getMainCurve().getHighestSpeed().getKnots()
+                / maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots();
+        double enteringExitingSpeedRatio = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore()
+                .getKnots() / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots();
+        double enteringExitingSpeedRatioBonus = limitProbabilityBonus(enteringExitingSpeedRatio / 2 - 0.5, 0.1);
+        double highestSpeedEnteringSpeedRatioBonus = limitProbabilityBonus(highestSpeedEnteringSpeedRatio - 1, 0.2);
+        double lowestSpeedEnteringSpeedRatioBonus = limitProbabilityBonus(lowestSpeedEnteringSpeedRatio - 1, 0.2);
+        double bearAwayLikelihoodBonus = (enteringExitingSpeedRatioBonus + highestSpeedEnteringSpeedRatioBonus
+                + lowestSpeedEnteringSpeedRatioBonus) / 3;
+        return bearAwayLikelihoodBonus;
+    }
+
+    private double computeTackJibeProbabilityBonus(CompleteManeuverCurveWithEstimationData maneuver) {
+        Bearing before = maneuver.getRelativeBearingToNextMarkBeforeManeuver();
+        Bearing after = maneuver.getRelativeBearingToNextMarkBeforeManeuver();
+        double absCourseChangeDeg = Math
+                .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees());
+        if (before != null && absCourseChangeDeg >= 30 && absCourseChangeDeg <= 120) {
+            if (maneuver.isMarkPassing()) {
+                double enteringExitingSpeedRatio = maneuver.getCurveWithUnstableCourseAndSpeed()
+                        .getSpeedWithBearingBefore().getKnots()
+                        / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots();
+                if (Math.abs(1 - enteringExitingSpeedRatio) > 0.15) {
+                    return -0.2;
+                }
+            } else if (after != null) {
+                if (Math.signum(before.getDegrees()) != Math.signum(after.getDegrees())
+                        || isBearingNearlyZero(before) && !isBearingNearlyZero(after)
+                        || !isBearingNearlyZero(before) && isBearingNearlyZero(after)) {
+                    return 1;
+                }
+            }
+
+        }
+        return 0;
+    }
+
+    private boolean isBearingNearlyZero(Bearing bearing) {
+        return Math.abs(bearing.getDegrees()) <= 10;
+    }
+
+    private double limitProbabilityBonus(double probabilityBonus, double limit) {
+        return limitProbabilityBonus(probabilityBonus, -limit, limit);
+    }
+
+    private double limitProbabilityBonus(double probabilityBonus, double lowestLimit, double upperLimit) {
+        if (probabilityBonus < lowestLimit) {
+            return lowestLimit;
+        } else if (probabilityBonus > upperLimit) {
+            return upperLimit;
+        }
+        return probabilityBonus;
     }
 
 }

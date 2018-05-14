@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation.maneuvergraph;
 import java.util.ListIterator;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -147,6 +148,16 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
     @Override
     public boolean isCalculationOfTransitionProbabilitiesNeeded() {
         return calculationOfTransitionProbabilitiesNeeded;
+    }
+
+    @Override
+    public CompleteManeuverCurveWithEstimationData getPreviousManeuverOfSameTrack() {
+        return singleTrackManeuverNodesLevel.getPreviousManeuverOfSameTrack();
+    }
+
+    @Override
+    public CompleteManeuverCurveWithEstimationData getNextManeuverOfSameTrack() {
+        return singleTrackManeuverNodesLevel.getNextManeuverOfSameTrack();
     }
 
 }

@@ -5,6 +5,7 @@ import java.util.ListIterator;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.windestimation.maneuvergraph.classifier.SingleManeuverClassificationResult;
 import com.sap.sse.common.Util.Pair;
 
@@ -97,7 +98,8 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
 
     @Override
     public void setTackProbabilityBonusToManeuver(double tackProbabilityBonus) {
-        this.calculationOfTransitionProbabilitiesNeeded = Math.abs(tackProbabilityBonus - this.tackProbabilityBonus) > 0.001;
+        this.calculationOfTransitionProbabilitiesNeeded = Math
+                .abs(tackProbabilityBonus - this.tackProbabilityBonus) > 0.001;
         this.tackProbabilityBonus = tackProbabilityBonus;
     }
 
@@ -105,10 +107,20 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
     public double getTackProbabilityBonus() {
         return tackProbabilityBonus;
     }
-    
+
     @Override
     public boolean isCalculationOfTransitionProbabilitiesNeeded() {
         return calculationOfTransitionProbabilitiesNeeded;
+    }
+
+    @Override
+    public CompleteManeuverCurveWithEstimationData getPreviousManeuverOfSameTrack() {
+        return getPreviousLevel() == null ? null : getPreviousLevel().getManeuver();
+    }
+
+    @Override
+    public CompleteManeuverCurveWithEstimationData getNextManeuverOfSameTrack() {
+        return getNextLevel() == null ? null : getNextLevel().getManeuver();
     }
 
 }

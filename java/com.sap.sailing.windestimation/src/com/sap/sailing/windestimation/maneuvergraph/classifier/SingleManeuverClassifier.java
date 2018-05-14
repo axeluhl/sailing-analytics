@@ -9,6 +9,6 @@ import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimat
  */
 public interface SingleManeuverClassifier {
 
-    SingleManeuverClassificationResult classifyManeuver(CompleteManeuverCurveWithEstimationData maneuver);
+    SingleManeuverClassificationResult classifyManeuver(CompleteManeuverCurveWithEstimationData maneuver, CompleteManeuverCurveWithEstimationData previousManeuver, CompleteManeuverCurveWithEstimationData nextManeuver);
 
 }

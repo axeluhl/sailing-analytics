@@ -131,59 +131,23 @@ public interface ManeuverNodesLevel<SelfType extends ManeuverNodesLevel<SelfType
         if (targetPointOfSailAfterPreviousManeuver != pointOfSailAfterPreviousManeuver) {
             return false;
         }
-        boolean maneuverBeginningClean = isManeuverBeginningClean();
-        boolean maneuverEndClean = isManeuverEndClean();
-        if (getManeuver().isMarkPassing() || !maneuverBeginningClean || !maneuverEndClean) {
+        CompleteManeuverCurveWithEstimationData maneuver = getManeuver();
+        boolean maneuverBeginningClean = maneuver.isManeuverBeginningClean(getPreviousManeuverOfSameTrack());
+        boolean maneuverEndClean = maneuver.isManeuverEndClean(getNextManeuverOfSameTrack());
+        if (maneuver.isMarkPassing() || !maneuverBeginningClean || !maneuverEndClean) {
             return false;
         }
         return true;
     }
 
-    default boolean isManeuverEndClean() {
-        CompleteManeuverCurveWithEstimationData maneuver = getManeuver();
-        CompleteManeuverCurveWithEstimationData nextManeuver = getNextLevel() == null ? null
-                : getNextLevel().getManeuver();
-        ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData curveWithUnstableCourseAndSpeed = maneuver
-                .getCurveWithUnstableCourseAndSpeed();
-        double secondsToNextManeuver = curveWithUnstableCourseAndSpeed.getDurationFromManeuverEndToNextManeuverStart()
-                .asSeconds();
-        if (curveWithUnstableCourseAndSpeed.getSpeedWithBearingBefore().getKnots() > 1
-                && curveWithUnstableCourseAndSpeed.getSpeedWithBearingAfter().getKnots() > 1
-                && Math.abs(curveWithUnstableCourseAndSpeed.getDirectionChangeInDegrees()
-                        - maneuver.getMainCurve().getDirectionChangeInDegrees()) < 30
-                && (secondsToNextManeuver >= 4
-                        && maneuver.getCurveWithUnstableCourseAndSpeed().getIntervalBetweenLastFixOfCurveAndNextFix()
-                                .asSeconds() < 8
-                        || nextManeuver != null
-                                && Math.abs(nextManeuver.getMainCurve().getDirectionChangeInDegrees()) < Math
-                                        .abs(maneuver.getMainCurve().getDirectionChangeInDegrees()) * 0.3)) {
-            return true;
-        }
-        return false;
-    }
+    CompleteManeuverCurveWithEstimationData getPreviousManeuverOfSameTrack();
 
-    default boolean isManeuverBeginningClean() {
-        CompleteManeuverCurveWithEstimationData maneuver = getManeuver();
-        CompleteManeuverCurveWithEstimationData previousManeuver = getPreviousLevel() == null ? null
-                : getPreviousLevel().getManeuver();
-        double secondsToPreviousManeuver = maneuver.getCurveWithUnstableCourseAndSpeed()
-                .getDurationFromPreviousManeuverEndToManeuverStart().asSeconds();
-        if (maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots() > 1
-                && (secondsToPreviousManeuver >= 4
-                        && maneuver.getCurveWithUnstableCourseAndSpeed()
-                                .getIntervalBetweenFirstFixOfCurveAndPreviousFix().asSeconds() < 8
-                        || previousManeuver != null
-                                && Math.abs(previousManeuver.getMainCurve().getDirectionChangeInDegrees()) < Math
-                                        .abs(maneuver.getMainCurve().getDirectionChangeInDegrees()) * 0.3)) {
-            return true;
-        }
-        return false;
-    }
+    CompleteManeuverCurveWithEstimationData getNextManeuverOfSameTrack();
 
     void setTackProbabilityBonusToManeuver(double tackProbabilityBonus);
 
     double getTackProbabilityBonus();
-    
+
     boolean isCalculationOfTransitionProbabilitiesNeeded();
-    
+
 }

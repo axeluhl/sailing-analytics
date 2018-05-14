@@ -94,11 +94,12 @@ public class WindTrackFromManeuverGraphExtractor<T extends ManeuverNodesLevel<T>
             if (pointOfSailBeforeManeuver.getCoarseGrainedPointOfSail() != currentNode.getCoarseGrainedPointOfSail()) {
                 FineGrainedPointOfSail pointOfSailForWindSpeedDetermination = null;
                 Speed boatSpeedForWindSpeedDetermination = null;
-                if (currentLevel.isManeuverEndClean()) {
+                if (currentLevel.getManeuver().isManeuverEndClean(currentLevel.getNextManeuverOfSameTrack())) {
                     pointOfSailForWindSpeedDetermination = currentNode;
                     boatSpeedForWindSpeedDetermination = currentLevel.getManeuver().getCurveWithUnstableCourseAndSpeed()
                             .getSpeedWithBearingAfter();
-                } else if (currentLevel.isManeuverBeginningClean()) {
+                } else if (currentLevel.getManeuver()
+                        .isManeuverBeginningClean(currentLevel.getPreviousManeuverOfSameTrack())) {
                     pointOfSailForWindSpeedDetermination = pointOfSailBeforeManeuver;
                     boatSpeedForWindSpeedDetermination = currentLevel.getManeuver().getCurveWithUnstableCourseAndSpeed()
                             .getSpeedWithBearingBefore();

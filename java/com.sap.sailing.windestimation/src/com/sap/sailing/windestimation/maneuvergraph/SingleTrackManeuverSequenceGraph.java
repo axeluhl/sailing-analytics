@@ -1,6 +1,7 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -32,10 +33,16 @@ public class SingleTrackManeuverSequenceGraph
         SingleManeuverClassifier singleManeuverClassifier = new RulesBasedSingleManeuverClassifierImpl(boatClass,
                 polarService);
         List<SingleManeuverClassificationResult> result = new ArrayList<>();
-        for (CompleteManeuverCurveWithEstimationData maneuver : maneuverSequence) {
+        Iterator<CompleteManeuverCurveWithEstimationData> iterator = maneuverSequence.iterator();
+        CompleteManeuverCurveWithEstimationData previousManeuver = null;
+        CompleteManeuverCurveWithEstimationData currentManeuver = iterator.hasNext() ? iterator.next() : null;
+        while (currentManeuver != null) {
+            CompleteManeuverCurveWithEstimationData nextManeuver = iterator.hasNext() ? iterator.next() : null;
             SingleManeuverClassificationResult classificationResult = singleManeuverClassifier
-                    .classifyManeuver(maneuver);
+                    .classifyManeuver(currentManeuver, previousManeuver, nextManeuver);
             result.add(classificationResult);
+            previousManeuver = currentManeuver;
+            currentManeuver = nextManeuver;
         }
         return result;
     }

@@ -36,7 +36,7 @@ public interface CompleteManeuverCurveWithEstimationData extends Timed, Position
         }
         return isManeuverStartsByRunningAwayFromWind() ? ManeuverType.BEAR_AWAY : ManeuverType.HEAD_UP;
     }
-    
+
     @Override
     default TimePoint getTimePoint() {
         return getMainCurve().getTimePointOfMaxTurningRate();
@@ -102,4 +102,38 @@ public interface CompleteManeuverCurveWithEstimationData extends Timed, Position
      */
     @Dimension(messageKey = "MarkPassing")
     boolean isMarkPassing();
+
+    default boolean isManeuverEndClean(CompleteManeuverCurveWithEstimationData nextManeuver) {
+        ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData curveWithUnstableCourseAndSpeed = getCurveWithUnstableCourseAndSpeed();
+        double secondsToNextManeuver = curveWithUnstableCourseAndSpeed.getDurationFromManeuverEndToNextManeuverStart()
+                .asSeconds();
+        if (curveWithUnstableCourseAndSpeed.getSpeedWithBearingBefore().getKnots() > 1
+                && curveWithUnstableCourseAndSpeed.getSpeedWithBearingAfter().getKnots() > 1
+                && Math.abs(curveWithUnstableCourseAndSpeed.getDirectionChangeInDegrees()
+                        - getMainCurve().getDirectionChangeInDegrees()) < 30
+                && (secondsToNextManeuver >= 4
+                        && getCurveWithUnstableCourseAndSpeed().getIntervalBetweenLastFixOfCurveAndNextFix()
+                                .asSeconds() < 8
+                        || nextManeuver != null
+                                && Math.abs(nextManeuver.getMainCurve().getDirectionChangeInDegrees()) < Math
+                                        .abs(getMainCurve().getDirectionChangeInDegrees()) * 0.3)) {
+            return true;
+        }
+        return false;
+    }
+
+    default boolean isManeuverBeginningClean(CompleteManeuverCurveWithEstimationData previousManeuver) {
+        double secondsToPreviousManeuver = getCurveWithUnstableCourseAndSpeed()
+                .getDurationFromPreviousManeuverEndToManeuverStart().asSeconds();
+        if (getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots() > 1
+                && (secondsToPreviousManeuver >= 4
+                        && getCurveWithUnstableCourseAndSpeed().getIntervalBetweenFirstFixOfCurveAndPreviousFix()
+                                .asSeconds() < 8
+                        || previousManeuver != null
+                                && Math.abs(previousManeuver.getMainCurve().getDirectionChangeInDegrees()) < Math
+                                        .abs(getMainCurve().getDirectionChangeInDegrees()) * 0.3)) {
+            return true;
+        }
+        return false;
+    }
 }
