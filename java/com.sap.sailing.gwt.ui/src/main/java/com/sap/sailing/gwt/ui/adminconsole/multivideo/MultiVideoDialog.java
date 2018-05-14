@@ -330,8 +330,9 @@ public class MultiVideoDialog extends DialogBox {
         }
         for (RemoteFileInfo remoteFile : remoteFiles) {
             if (remoteFile.status == EStatus.WAIT_FOR_SAVE && remoteFile.selected) {
-                MediaTrack mediaTrack = new MediaTrack(remoteFile.url, remoteFile.url, remoteFile.startTime,
-                        remoteFile.duration, remoteFile.mime, remoteFile.candidates);
+                MediaTrack mediaTrack = new MediaTrack(remoteFile.url, remoteFile.url,
+                        remoteFile.startTime.plus(offsetTimeInMS), remoteFile.duration, remoteFile.mime,
+                        remoteFile.candidates);
                 mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
 
                     @Override
@@ -472,16 +473,17 @@ public class MultiVideoDialog extends DialogBox {
                             if (raceColumn.isTrackedRace(fleet)) {
                                 RaceDTO race = raceColumn.getRace(fleet);
                                 if (race.trackedRace != null) {
-                                    if (race.endOfRace == null || race.endOfRace.after(remoteFile.startTime.asDate())) {
-                                        if (race.trackedRace.endOfTracking == null || race.trackedRace.endOfTracking
-                                                .after(remoteFile.startTime.asDate())) {
+                                    Date startTimeWithOffset = remoteFile.startTime.plus(offsetTimeInMS).asDate();
+                                    if (race.endOfRace == null || race.endOfRace.after(startTimeWithOffset)) {
+                                        if (race.trackedRace.endOfTracking == null
+                                                || race.trackedRace.endOfTracking.after(startTimeWithOffset)) {
+                                            final long endTimeWithOffset = startTimeWithOffset.getTime()
+                                                    + remoteFile.duration.asMillis();
                                             if (race.startOfRace == null
-                                                    || race.startOfRace.before(new Date(remoteFile.startTime.asMillis()
-                                                            + remoteFile.duration.asMillis()))) {
+                                                    || race.startOfRace.before(new Date(endTimeWithOffset))) {
                                                 if (race.trackedRace.startOfTracking == null
                                                         || race.trackedRace.startOfTracking
-                                                                .before(new Date(remoteFile.startTime.asMillis()
-                                                                        + remoteFile.duration.asMillis()))) {
+                                                                .before(new Date(endTimeWithOffset))) {
                                                     candidates.add(race.getRaceIdentifier());
                                                 }
                                             }
