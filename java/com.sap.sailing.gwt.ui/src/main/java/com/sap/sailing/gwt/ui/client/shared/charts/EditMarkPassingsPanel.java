@@ -470,7 +470,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
 
     @Override
     public String getLocalizedShortName() {
-        return null;
+        return stringMessages.editMarkPassings();
     }
 
     @Override
