@@ -35,6 +35,12 @@ public interface CompetitorFactory {
     DynamicCompetitor getOrCreateCompetitor(Serializable competitorId, String name, String shortName, Color displayColor, String email,
             URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag);
     
+    /**
+     * Updates only the competitor fields; the {@code boat} parameter is used only when the competitor needs to be
+     * created because it doesn't exist yet. In this case the boat is assigned to the new competitor and stored in the
+     * competitor and boat store. If changes to an existing competitor's {@link Boat} object shall be stored, use
+     * {@link CompetitorAndBoatStore#getOrCreateBoat(Serializable, String, BoatClass, String, Color)}.
+     */
     DynamicCompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName, Color displayColor, String email,
             URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat);
 
