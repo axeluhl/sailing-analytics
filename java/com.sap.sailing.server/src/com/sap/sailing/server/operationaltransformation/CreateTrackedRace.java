@@ -16,7 +16,7 @@ import com.sap.sailing.server.RacingEventServiceOperation;
  * Creates a tracked race for a race identifier by a {@link RaceIdentifier}. The operation assumes that the
  * {@link RaceDefinition}, therefore the {@link Regatta} as well as the {@link TrackedRegatta} into which the
  * new {@link TrackedRace} will be composed already exist and that the {@link TrackedRace} does not yet
- * exist.
+ * exist. The operation is intended only for execution on a replica, not on the master.
  * 
  * @author Axel Uhl (d043530)
  *
