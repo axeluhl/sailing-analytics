@@ -311,10 +311,15 @@ public class MultiVideoDialog extends DialogBox {
         if (!isWorking) {
             statusLabel.setText(stringMessages.multiVideoIdle());
         }
-        center();
+        if (isShowing()) {
+            center();
+        }
     }
 
     private void startNextLinkingRemoteTask() {
+        if (!isShowing()) {
+            return;
+        }
         for (RemoteFileInfo remoteFile : remoteFiles) {
             if (remoteFile.status == EStatus.WAIT_FOR_SAVE && remoteFile.selected) {
                 MediaTrack mediaTrack = new MediaTrack(remoteFile.url, remoteFile.url, remoteFile.startTime,
@@ -344,6 +349,9 @@ public class MultiVideoDialog extends DialogBox {
     }
 
     private void startNextInitializingRemoteTask() {
+        if (!isShowing()) {
+            return;
+        }
         // do not start overlapping tasks, as this might need excessive resources for file analysis
         for (RemoteFileInfo remoteFile : remoteFiles) {
             if (remoteFile.isWorking) {
