@@ -113,7 +113,7 @@ public class CompetitorStoreTest {
 
         DynamicTeam differentTeam = (DynamicTeam) AbstractLeaderboardTest.createCompetitorWithBoat("Test Competitor").getTeam();
         differentTeam.setNationality(DomainFactory.INSTANCE.getOrCreateNationality("GHA")); // Ghana
-        CompetitorWithBoat competitor3 = persistentStore2.getOrCreateCompetitorWithBoat(template.getId(), template.getName(), template.getShortName(),
+        DynamicCompetitorWithBoat competitor3 = persistentStore2.getOrCreateCompetitorWithBoat(template.getId(), template.getName(), template.getShortName(),
                 template.getColor(), template.getEmail(), template.getFlagImage(), differentTeam, /* timeOnTimeFactor */
                 null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */null, null, template.getBoat());
         assertSame(competitor2, competitor3); // use existing competitor despite the different team
@@ -124,7 +124,7 @@ public class CompetitorStoreTest {
         persistentStore2.allowCompetitorResetToDefaults(competitor2);
         CompetitorWithBoat competitor4 = persistentStore2.getOrCreateCompetitorWithBoat(template.getId(), template.getName(), template.getShortName(),
                 template.getColor(), template.getEmail(), template.getFlagImage(), differentTeam, /* timeOnTimeFactor */
-                null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */null, null, template.getBoat());
+                null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */null, null, competitor3.getBoat());
         assertSame(competitor2, competitor4); // expecting an in-place update
         assertEquals(differentTeam.getNationality(), competitor4.getTeam().getNationality());
     }
