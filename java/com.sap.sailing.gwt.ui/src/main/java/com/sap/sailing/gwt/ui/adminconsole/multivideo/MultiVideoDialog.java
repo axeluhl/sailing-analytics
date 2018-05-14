@@ -143,7 +143,6 @@ public class MultiVideoDialog extends DialogBox {
         Button cancelButton = new Button(stringMessages.close());
         cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
         cancelButton.ensureDebugId("CancelButton");
-        buttonPanel.add(cancelButton);
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -152,7 +151,6 @@ public class MultiVideoDialog extends DialogBox {
         });
 
         doSaveButton = new Button(stringMessages.addMediaTrack());
-        buttonPanel.add(doSaveButton);
         doSaveButton.addClickHandler(new ClickHandler() {
 
             @Override
@@ -162,6 +160,8 @@ public class MultiVideoDialog extends DialogBox {
             }
         });
         doSaveButton.setEnabled(false);
+        buttonPanel.add(doSaveButton);
+        buttonPanel.add(cancelButton);
 
         dockPanel.add(buttonPanel, DockPanel.SOUTH);
 
