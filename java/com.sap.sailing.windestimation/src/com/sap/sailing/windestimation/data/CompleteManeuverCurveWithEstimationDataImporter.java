@@ -31,7 +31,7 @@ import org.json.simple.parser.ParseException;
  */
 public class CompleteManeuverCurveWithEstimationDataImporter {
 
-    public static final String REST_API_BASE_URL = "http://127.0.0.1:8888/sailingserver/api/v1";
+    public static final String REST_API_BASE_URL = "https://www.sapsailing.com/sailingserver/api/v1";
     public static final String REST_API_REGATTAS_PATH = "/regattas";
     public static final String REST_API_RACES_PATH = "/races";
     public static final String REST_API_ESTIMATION_DATA_PATH = "/completeManeuverCurvesWithEstimationData";

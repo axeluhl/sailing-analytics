@@ -16,7 +16,11 @@ Require-Bundle: org.eclipse.osgi;bundle-version="3.10.1",
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.domain.common;bundle-version="1.0.0",
  com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0",
- com.sap.sailing.server.gateway.serialization.shared.android;bundle-version="1.0.0"
+ com.sap.sailing.server.gateway.serialization.shared.android;bundle-version="1.0.0",
+ com.sap.sailing.polars,
+ org.apache.commons.io,
+ com.sap.sse.replication,
+ slf4j.api
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.windestimation
