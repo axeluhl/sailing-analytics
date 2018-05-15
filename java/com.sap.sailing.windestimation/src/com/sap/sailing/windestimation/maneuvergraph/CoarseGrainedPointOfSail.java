@@ -1,5 +1,9 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
 
@@ -59,6 +63,16 @@ public enum CoarseGrainedPointOfSail {
 
     public FineGrainedPointOfSail[] getFineGrainedPointOfSailCoverage() {
         return fineGrainedPointOfSailCoverage;
+    }
+
+    public Collection<CoarseGrainedPointOfSail> getNextPossiblePointOfSails(double degreesToAdd) {
+        Set<CoarseGrainedPointOfSail> result = new HashSet<>();
+        for (FineGrainedPointOfSail fineGrainedPointOfSail : fineGrainedPointOfSailCoverage) {
+            CoarseGrainedPointOfSail coarseGrainedPointOfSail = fineGrainedPointOfSail.getNextPointOfSail(degreesToAdd)
+                    .getCoarseGrainedPointOfSail();
+            result.add(coarseGrainedPointOfSail);
+        }
+        return result;
     }
 
 }

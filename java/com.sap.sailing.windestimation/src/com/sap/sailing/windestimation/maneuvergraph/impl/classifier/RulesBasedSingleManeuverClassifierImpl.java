@@ -35,10 +35,13 @@ public class RulesBasedSingleManeuverClassifierImpl implements SingleManeuverCla
         double[] likelihoodPerManeuverType = new double[CoarseGrainedManeuverType.values().length];
 
         double absCourseChangeDegMainCurve = Math.abs(maneuver.getMainCurve().getDirectionChangeInDegrees());
+        final boolean cleanManeuverBoundaries;
         if (maneuver.isManeuverBeginningClean(previousManeuver) && maneuver.isManeuverEndClean(nextManeuver)) {
+            cleanManeuverBoundaries = true;
             if (absCourseChangeDegMainCurve <= 15) {
                 // jibe, bear away, head up - hard to distinguish
-                double bearAwayLikelihoodBonus = computeBearAwayLikelihoodBonus(maneuver);
+                double bearAwayLikelihoodBonus = limitProbabilityBonus(computeBearAwayLikelihoodBonus(maneuver) / 4,
+                        0.05);
                 double headUpLikelihoodBonus = -bearAwayLikelihoodBonus;
                 double jibeLikelihoodBonus = limitProbabilityBonus(computeJibeLikelihoodBonus(maneuver), -1,
                         Math.abs(bearAwayLikelihoodBonus) + 0.01);
@@ -89,9 +92,10 @@ public class RulesBasedSingleManeuverClassifierImpl implements SingleManeuverCla
                 likelihoodPerManeuverType[CoarseGrainedManeuverType._360.ordinal()] = 1.0;
             }
         } else {
+            cleanManeuverBoundaries = false;
             Arrays.fill(likelihoodPerManeuverType, 1);
         }
-        return new SingleManeuverClassificationResult(maneuver, likelihoodPerManeuverType);
+        return new SingleManeuverClassificationResult(maneuver, likelihoodPerManeuverType, cleanManeuverBoundaries);
     }
 
     private double computeJibeLikelihoodBonus(CompleteManeuverCurveWithEstimationData maneuver) {
