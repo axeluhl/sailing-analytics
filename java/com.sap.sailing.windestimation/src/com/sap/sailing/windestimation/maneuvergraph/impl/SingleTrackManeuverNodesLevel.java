@@ -40,7 +40,8 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
             } else {
                 for (FineGrainedPointOfSail previousNode : FineGrainedPointOfSail.values()) {
                     double likelihoodForTransitionFromPreviousNodeToCurrentNode = likelihoodForCurrentNode
-                            * getNodeTransitionPenaltyFactor(previousNode, currentNode);
+                            * getNodeTransitionPenaltyFactor(previousNode, currentNode)
+                            * getBonusFactorForSymmetricTransition(previousNode, currentNode);
                     setProbabilityFromPreviousLevelNodeToThisLevelNode(previousNode, currentNode,
                             likelihoodForTransitionFromPreviousNodeToCurrentNode);
                 }
@@ -48,6 +49,23 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
         }
         normalizeNodeTransitions();
         calculationOfTransitionProbabilitiesNeeded = false;
+    }
+
+    private double getBonusFactorForSymmetricTransition(FineGrainedPointOfSail previousNode,
+            FineGrainedPointOfSail currentNode) {
+        int previousAbsTwa = previousNode.getTwa();
+        if (previousAbsTwa > 180) {
+            previousAbsTwa = 360 - previousAbsTwa;
+        }
+        int currentAbsTwa = currentNode.getTwa();
+        if (currentAbsTwa > 180) {
+            currentAbsTwa = 360 - currentAbsTwa;
+        }
+
+        if (currentAbsTwa == previousAbsTwa) {
+            return 1.02;
+        }
+        return 1;
     }
 
     private double getNodeTransitionPenaltyFactor(FineGrainedPointOfSail previousNode,
