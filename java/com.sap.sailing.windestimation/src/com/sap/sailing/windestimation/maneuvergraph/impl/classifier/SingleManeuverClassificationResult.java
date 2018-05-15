@@ -18,9 +18,11 @@ public class SingleManeuverClassificationResult {
     private final double[] likelihoodsForPointOfSailAfterManeuvers = new double[CoarseGrainedPointOfSail
             .values().length];
     private final double[] likelihoodPerManeuverType;
+    private final CompleteManeuverCurveWithEstimationData maneuver;
 
     public SingleManeuverClassificationResult(CompleteManeuverCurveWithEstimationData maneuver,
             double[] likelihoodPerManeuverType, boolean cleanManeuverBoundaries) {
+        this.maneuver = maneuver;
         this.likelihoodPerManeuverType = likelihoodPerManeuverType;
         SpeedWithBearing lowestSpeedWithinManeuverMainCurve = maneuver.getMainCurve().getLowestSpeed();
         double courseChangeDegUntilLowestSpeed = maneuver.getMainCurve().getSpeedWithBearingBefore().getBearing()
@@ -29,16 +31,11 @@ public class SingleManeuverClassificationResult {
             courseChangeDegUntilLowestSpeed = courseChangeDegUntilLowestSpeed < 0
                     ? courseChangeDegUntilLowestSpeed + 360 : courseChangeDegUntilLowestSpeed - 360;
         }
-        computeLikelihoodsForPointOfSailAfterManeuver(maneuver, courseChangeDegUntilLowestSpeed,
-                cleanManeuverBoundaries);
+        computeLikelihoodsForPointOfSailAfterManeuver(courseChangeDegUntilLowestSpeed, cleanManeuverBoundaries);
     }
 
-    public double getManeuverTypeLikelihood(CoarseGrainedManeuverType maneuverType) {
-        return likelihoodPerManeuverType[maneuverType.ordinal()];
-    }
-
-    private void computeLikelihoodsForPointOfSailAfterManeuver(CompleteManeuverCurveWithEstimationData maneuver,
-            double courseChangeDegUntilLowestSpeed, boolean cleanManeuverBoundaries) {
+    private void computeLikelihoodsForPointOfSailAfterManeuver(double courseChangeDegUntilLowestSpeed,
+            boolean cleanManeuverBoundaries) {
         double courseChangeDeg = maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees();
         for (CoarseGrainedPointOfSail pointOfSailAfterManeuver : CoarseGrainedPointOfSail.values()) {
             double likelihoodSum = 0;
@@ -193,6 +190,14 @@ public class SingleManeuverClassificationResult {
             likelihoodsForPointOfSailAfterManeuvers[pointOfSailAfterManeuver.ordinal()] = likelihoodSum
                     / numberOfLikelihoodSummands;
         }
+    }
+
+    public CompleteManeuverCurveWithEstimationData getManeuver() {
+        return maneuver;
+    }
+
+    public double getManeuverTypeLikelihood(CoarseGrainedManeuverType maneuverType) {
+        return likelihoodPerManeuverType[maneuverType.ordinal()];
     }
 
     public double getLikelihoodForPointOfSailAfterManeuver(CoarseGrainedPointOfSail pointOfSailBeforeManeuver,
