@@ -611,6 +611,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     addTracTracUpdateHandlers(tracTracUpdateURI, tracTracEventUuid, tracTracUsername, tracTracPassword,
                             raceDefinition, trackedRace, tractracRace);
                     raceCache.put(raceId, raceDefinition);
+                    // the following unblocks waiters in DomainFactory.getAndWaitForRaceDefinition(...)
                     raceCache.notifyAll();
                 } else {
                     final String reasonForNotAddingRaceToRegatta = "Not adding race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta()
