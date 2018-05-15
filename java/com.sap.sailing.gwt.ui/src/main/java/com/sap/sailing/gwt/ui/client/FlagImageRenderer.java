@@ -6,6 +6,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.safecss.shared.SafeStyles;
 import com.google.gwt.safecss.shared.SafeStylesBuilder;
+import com.google.gwt.safecss.shared.SafeStylesUtils;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 
@@ -31,7 +32,8 @@ public class FlagImageRenderer {
 
     private static SafeStyles getStyle(int width, int height, String backgroundImage) {
         return new SafeStylesBuilder().verticalAlign(VerticalAlign.MIDDLE)
-                .appendTrustedString("background-repeat:no-repeat;").appendTrustedString("background-size:contain;")
+                .append(SafeStylesUtils.fromTrustedNameAndValue("background-repeat", "no-repeat"))
+                .append(SafeStylesUtils.fromTrustedNameAndValue("background-size", "contain"))
                 .display(Display.INLINE_BLOCK).width(width, Unit.PX).height(height, Unit.PX)
                 .trustedBackgroundImage("url(" + backgroundImage + ")").toSafeStyles();
     }
