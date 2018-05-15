@@ -1,4 +1,6 @@
-package com.sap.sailing.windestimation.maneuvergraph.classifier;
+package com.sap.sailing.windestimation.maneuvergraph.impl.classifier;
+
+import java.util.Arrays;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
@@ -86,6 +88,8 @@ public class RulesBasedSingleManeuverClassifierImpl implements SingleManeuverCla
                 // => course at lowest speed refers upwind
                 likelihoodPerManeuverType[CoarseGrainedManeuverType._360.ordinal()] = 1.0;
             }
+        } else {
+            Arrays.fill(likelihoodPerManeuverType, 1);
         }
         return new SingleManeuverClassificationResult(maneuver, likelihoodPerManeuverType);
     }

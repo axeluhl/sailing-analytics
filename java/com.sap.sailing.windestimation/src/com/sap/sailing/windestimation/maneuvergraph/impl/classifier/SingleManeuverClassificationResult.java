@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuvergraph.classifier;
+package com.sap.sailing.windestimation.maneuvergraph.impl.classifier;
 
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;

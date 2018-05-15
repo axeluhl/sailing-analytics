@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuvergraph.bestpath;
+package com.sap.sailing.windestimation.maneuvergraph.impl.bestpath;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,7 +11,7 @@ import java.util.Stack;
 import com.sap.sailing.windestimation.maneuvergraph.CoarseGrainedPointOfSail;
 import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
 import com.sap.sailing.windestimation.maneuvergraph.ManeuverNodesLevel;
-import com.sap.sailing.windestimation.maneuvergraph.ProbabilityUtil;
+import com.sap.sailing.windestimation.maneuvergraph.impl.ProbabilityUtil;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 

@@ -1,12 +1,12 @@
-package com.sap.sailing.windestimation.maneuvergraph;
+package com.sap.sailing.windestimation.maneuvergraph.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.windestimation.maneuvergraph.bestpath.BestPathsCalculator;
-import com.sap.sailing.windestimation.maneuvergraph.bestpath.MultipleBoatClassBestsPathEvaluator;
+import com.sap.sailing.windestimation.maneuvergraph.impl.bestpath.BestPathsCalculator;
+import com.sap.sailing.windestimation.maneuvergraph.impl.bestpath.MultipleBoatClassBestsPathEvaluator;
 
 /**
  * 
@@ -14,7 +14,7 @@ import com.sap.sailing.windestimation.maneuvergraph.bestpath.MultipleBoatClassBe
  *
  */
 public class CrossTrackManeuverSequenceGraph
-        extends ManeuverSequenceGraph<CrossTrackManeuverNodesLevel, SingleTrackManeuverNodesLevel> {
+        extends AbstractManeuverSequenceGraphImpl<CrossTrackManeuverNodesLevel, SingleTrackManeuverNodesLevel> {
 
     public CrossTrackManeuverSequenceGraph(Iterable<SingleTrackManeuverSequenceGraph> singleTrackManeuverSequenceGraphs,
             PolarDataService polarService) {

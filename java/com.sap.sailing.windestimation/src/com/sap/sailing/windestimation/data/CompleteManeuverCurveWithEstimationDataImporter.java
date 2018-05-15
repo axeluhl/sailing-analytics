@@ -36,12 +36,12 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
     public static final String REST_API_RACES_PATH = "/races";
     public static final String REST_API_ESTIMATION_DATA_PATH = "/completeManeuverCurvesWithEstimationData";
     private final HttpClient client;
-    private final PersistenceManager persistanceManager;
+    private final EstimationDataPersistenceManager persistanceManager;
     private final DateTimeFormatter logTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public CompleteManeuverCurveWithEstimationDataImporter() throws UnknownHostException {
         this.client = new SystemDefaultHttpClient();
-        this.persistanceManager = new PersistenceManager();
+        this.persistanceManager = new EstimationDataPersistenceManager();
     }
 
     public static void main(String[] args) throws Exception {

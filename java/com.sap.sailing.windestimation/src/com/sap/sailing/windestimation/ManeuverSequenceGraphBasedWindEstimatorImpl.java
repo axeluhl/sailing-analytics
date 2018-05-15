@@ -1,12 +1,13 @@
-package com.sap.sailing.windestimation.maneuvergraph;
+package com.sap.sailing.windestimation;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.windestimation.ManeuverAndPolarsBasedWindEstimatorBaseImpl;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
+import com.sap.sailing.windestimation.maneuvergraph.impl.CrossTrackManeuverSequenceGraph;
+import com.sap.sailing.windestimation.maneuvergraph.impl.SingleTrackManeuverSequenceGraph;
 import com.sap.sse.common.TimePoint;
 
 /**

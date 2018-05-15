@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuvergraph;
+package com.sap.sailing.windestimation.maneuvergraph.impl;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -7,11 +7,11 @@ import java.util.List;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.windestimation.maneuvergraph.bestpath.BestPathsCalculator;
-import com.sap.sailing.windestimation.maneuvergraph.bestpath.SameBoatClassBestPathsEvaluator;
-import com.sap.sailing.windestimation.maneuvergraph.classifier.RulesBasedSingleManeuverClassifierImpl;
-import com.sap.sailing.windestimation.maneuvergraph.classifier.SingleManeuverClassificationResult;
-import com.sap.sailing.windestimation.maneuvergraph.classifier.SingleManeuverClassifier;
+import com.sap.sailing.windestimation.maneuvergraph.impl.bestpath.BestPathsCalculator;
+import com.sap.sailing.windestimation.maneuvergraph.impl.bestpath.SameBoatClassBestPathsEvaluator;
+import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.RulesBasedSingleManeuverClassifierImpl;
+import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.SingleManeuverClassificationResult;
+import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.SingleManeuverClassifier;
 
 /**
  * 
@@ -19,7 +19,7 @@ import com.sap.sailing.windestimation.maneuvergraph.classifier.SingleManeuverCla
  *
  */
 public class SingleTrackManeuverSequenceGraph
-        extends ManeuverSequenceGraph<SingleTrackManeuverNodesLevel, SingleManeuverClassificationResult> {
+        extends AbstractManeuverSequenceGraphImpl<SingleTrackManeuverNodesLevel, SingleManeuverClassificationResult> {
 
     public SingleTrackManeuverSequenceGraph(BoatClass boatClass, PolarDataService polarService,
             Iterable<CompleteManeuverCurveWithEstimationData> maneuverSequence) {

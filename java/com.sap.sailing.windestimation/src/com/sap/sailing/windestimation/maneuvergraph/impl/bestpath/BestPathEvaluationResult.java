@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuvergraph.bestpath;
+package com.sap.sailing.windestimation.maneuvergraph.impl.bestpath;
 
 import java.util.HashMap;
 import java.util.Map;

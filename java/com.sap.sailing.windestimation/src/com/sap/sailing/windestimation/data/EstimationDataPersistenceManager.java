@@ -35,7 +35,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class PersistenceManager {
+public class EstimationDataPersistenceManager {
 
     private static final int DB_PORT = 27017;
     private static final String DB_HOST = "127.0.0.1";
@@ -59,7 +59,7 @@ public class PersistenceManager {
     private final DetailedBoatClassJsonDeserializer boatClassDeserializer = new DetailedBoatClassJsonDeserializer();
     private final JSONParser jsonParser = new JSONParser();
 
-    public PersistenceManager() throws UnknownHostException {
+    public EstimationDataPersistenceManager() throws UnknownHostException {
         db = new MongoClient(DB_HOST, DB_PORT).getDB(DB_NAME);
     }
 

@@ -1,9 +1,12 @@
-package com.sap.sailing.windestimation.maneuvergraph;
+package com.sap.sailing.windestimation.maneuvergraph.impl;
 
 import java.util.ListIterator;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
+import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
+import com.sap.sailing.windestimation.maneuvergraph.ManeuverNodesLevel;
+import com.sap.sailing.windestimation.maneuvergraph.ManeuverNodesLevelFactory;
 import com.sap.sse.common.Util.Pair;
 
 /**
