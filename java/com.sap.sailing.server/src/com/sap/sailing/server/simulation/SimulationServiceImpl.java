@@ -284,7 +284,7 @@ public class SimulationServiceImpl implements SimulationService {
                 DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
                 SimulationRaceListener raceListener = new SimulationRaceListener(); 
                 raceListeners.put(legIdentifier.getRegattaName(), raceListener);
-                trackedRegatta.addRaceListener(raceListener, /* Not replicated */ Optional.empty());
+                trackedRegatta.addRaceListener(raceListener, /* Not replicated */ Optional.empty(), /* synchronous */ false);
             }
             if (!legListeners.containsKey(legIdentifier.getRaceIdentifier())) {
                 TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);

@@ -550,7 +550,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     markPassingCalculator.stop();
                 }
                 }
-            }, /* Not relevant For replication */ Optional.empty());
+            }, /* Not relevant For replication */ Optional.empty(), /* synchronous */ false);
         } else {
             markPassingCalculator = null;
         }
