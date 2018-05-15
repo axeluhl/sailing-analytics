@@ -48,6 +48,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
@@ -520,6 +521,29 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         @SuppressWarnings("unchecked")
         NavigableSet<GPSFix> result = (NavigableSet<GPSFix>) getInternalFixes();
         return result;
+    }
+    
+    @Override
+    public Duration getLongestIntervalBetweenTwoFixes(TimePoint from, TimePoint to) {
+        long maxIntervalMillis = 0;
+        lockForRead();
+        try {
+            FixType previousFix = null;
+            for (FixType fix : getFixes(from, true, to, true)) {
+                if (previousFix == null) {
+                    previousFix = fix;
+                } else {
+                    long intervalMillis = fix.getTimePoint().asMillis() - previousFix.getTimePoint().asMillis();
+                    if (maxIntervalMillis < intervalMillis) {
+                        maxIntervalMillis = intervalMillis;
+                    }
+                    previousFix = fix;
+                }
+            }
+        } finally {
+            unlockAfterRead();
+        }
+        return new MillisecondsDurationImpl(maxIntervalMillis);
     }
 
     @Override

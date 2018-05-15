@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.maneuverdetection;
 
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sse.common.Duration;
 
 /**
@@ -12,7 +11,7 @@ import com.sap.sse.common.Duration;
  *
  */
 public interface ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData
-        extends ManeuverCurveBoundaries, HasDetailedManeuverLoss {
+        extends ManeuverCurveBoundariesWithDetailedManeuverLoss {
 
     /**
      * Gets the average speed and course measured from the end of the previous maneuver until the start of this
@@ -64,5 +63,20 @@ public interface ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData
      * Gets the number of GPS-fixes contained within the maneuver curve.
      */
     int getGpsFixesCount();
+
+    /**
+     * Gets the longest duration between two GPS-fixes contained within maneuver curve with unstable course and speed.
+     */
+    Duration getLongestIntervalBetweenTwoFixes();
+
+    /**
+     * Gets the duration between the last GPS-fix of the curve and the next GPS-fix contained within the track.
+     */
+    Duration getIntervalBetweenLastFixOfCurveAndNextFix();
+
+    /**
+     * Gets the duration between the first GPS-fix of the curve and the previous GPS-fix contained within the track.
+     */
+    Duration getIntervalBetweenFirstFixOfCurveAndPreviousFix();
 
 }

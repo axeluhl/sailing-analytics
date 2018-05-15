@@ -19,6 +19,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -27,6 +28,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
@@ -135,7 +137,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         // now allow for resetting to default through some event, such as receiving a GPS position
         master.apply(new AllowCompetitorResetToDefaults(Collections.singleton(competitor.getId().toString())));
         // modify the competitor on the master "from below" without an UpdateCompetitor operation, only locally:
-        master.getBaseDomainFactory().getCompetitorStore().updateCompetitor(competitor.getId().toString(), competitorName, competitorShortName, Color.RED, competitor.getEmail(),
+        master.getBaseDomainFactory().getCompetitorAndBoatStore().updateCompetitor(competitor.getId().toString(), competitorName, competitorShortName, Color.RED, competitor.getEmail(),
                 competitor.getTeam().getNationality(), competitor.getTeam().getImage(), competitor.getFlagImage(), 
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         final RegattaAndRaceIdentifier raceIdentifier = masterRegatta.getRaceIdentifier(raceDefinition);
@@ -150,24 +152,44 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedTrackedRace.getTrack(replicatedCompetitor).getFirstRawFix());
         assertEquals(competitorName, replicatedCompetitor.getName());
         assertEquals(competitorShortName, replicatedCompetitor.getShortName());
-   }
+    }
     
     @Test
     public void testCompetitorCreationReplication() throws InterruptedException, URISyntaxException {
         final String competitorName = "Der mit dem Kiel zieht";
         final String shortCcompetitorName = "Kiel";
         URI flagImageURI = new URI("http://www.sapsailing.com");
-        
-                Competitor competitor = master.getBaseDomainFactory().getOrCreateCompetitor(
-                123, competitorName, shortCcompetitorName, Color.RED, "someone@nowhere.de", flagImageURI,
-                new TeamImpl("STG", Collections.singleton(new PersonImpl(competitorName, new NationalityImpl("GER"),
-                /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
-                        new NationalityImpl("NED"),
-                        /* dateOfBirth */null, "This is Rigo, the coach")),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+        Competitor competitor = master.getBaseDomainFactory().getOrCreateCompetitor(
+            123, competitorName, shortCcompetitorName, Color.RED, "someone@nowhere.de", flagImageURI,
+            new TeamImpl("STG", Collections.singleton(new PersonImpl(competitorName, new NationalityImpl("GER"),
+                    /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
+                    new NationalityImpl("NED"), /* dateOfBirth */null, "This is Rigo, the coach")),
+                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
         Thread.sleep(1000);
-        assertTrue(StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorStore().getAllCompetitors().spliterator(), /* parallel */ false).anyMatch(
-                c->
-                    c.getId().equals(competitor.getId())));
+        Competitor[] replicaCompetitor = new Competitor[1];
+        StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorAndBoatStore().getAllCompetitors().spliterator(), /* parallel */ false).filter(
+                c->c.getId().equals(competitor.getId())).forEach(c->replicaCompetitor[0]=c);
+        assertNotNull(replicaCompetitor[0]);
+        assertEquals(competitor.getClass().getName(), replicaCompetitor[0].getClass().getName());
+    }
+
+    @Test
+    public void testCompetitorWithBoatCreationReplication() throws InterruptedException, URISyntaxException {
+        final String competitorName = "Der mit dem Kiel zieht";
+        final String shortCcompetitorName = "Kiel";
+        URI flagImageURI = new URI("http://www.sapsailing.com");
+        DynamicBoat boat = master.getBaseDomainFactory().getOrCreateBoat(234, "The Boat", master.getBaseDomainFactory().getOrCreateBoatClass("49er"), "234", null);
+        CompetitorWithBoat competitor = master.getBaseDomainFactory().getOrCreateCompetitorWithBoat(
+            123, competitorName, shortCcompetitorName, Color.RED, "someone@nowhere.de", flagImageURI,
+            new TeamImpl("STG", Collections.singleton(new PersonImpl(competitorName, new NationalityImpl("GER"),
+                    /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
+                    new NationalityImpl("NED"), /* dateOfBirth */null, "This is Rigo, the coach")),
+                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, boat);
+        Thread.sleep(1000);
+        Competitor[] replicaCompetitor = new Competitor[1];
+        StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorAndBoatStore().getAllCompetitors().spliterator(), /* parallel */ false).filter(
+                c->c.getId().equals(competitor.getId())).forEach(c->replicaCompetitor[0]=c);
+        assertNotNull(replicaCompetitor[0]);
+        assertEquals(competitor.getClass().getName(), replicaCompetitor[0].getClass().getName());
     }
 }

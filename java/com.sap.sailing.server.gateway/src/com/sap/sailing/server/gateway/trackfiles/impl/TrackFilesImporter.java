@@ -74,7 +74,6 @@ public class TrackFilesImporter {
                     + importersToTry.stream().map(i -> i.getType()).collect(Collectors.joining(", ")));
             AtomicBoolean succeeded = new AtomicBoolean(false);
             parsersLoop: for (GPSFixImporter importer : importersToTry) {
-
                 HashSet<TrackFileImportDeviceIdentifier> deviceIds = new HashSet<>();
                 logger.log(Level.INFO, "Trying to import file " + fileName + " with importer " + importer.getType());
                 try (BufferedInputStream in = new BufferedInputStream(fileItem.getInputStream())) {

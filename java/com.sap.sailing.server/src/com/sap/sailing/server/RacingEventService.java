@@ -26,6 +26,7 @@ import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
@@ -45,6 +46,8 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
+import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
@@ -88,6 +91,7 @@ import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.simulation.SimulationService;
+import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
@@ -142,6 +146,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     DynamicTrackedRace getTrackedRace(Regatta regatta, RaceDefinition race);
 
+    /**
+     * When the regatta, tracked regatta and race definition are found, this method waits for the
+     * tracked race to appear.
+     */
     DynamicTrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
     /**
@@ -263,6 +271,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void removeSeries(Series series) throws MalformedURLException, IOException, InterruptedException;
 
+    /**
+     * Returns {@code null} if the regatta or the race definition or the tracked regatta or the tracked race are not
+     * found.
+     */
     DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
     /**
@@ -603,7 +615,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     AbstractLogEventAuthor getServerAuthor();
     
-    CompetitorAndBoatStore getCompetitorStore();
+    CompetitorAndBoatStore getCompetitorAndBoatStore();
     
     TypeBasedServiceFinderFactory getTypeBasedServiceFinderFactory();
 
@@ -821,10 +833,21 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Matches the competitors of a leaderboard to the {@link PairingList}
      * 
-     * @param pairingListTemplate the returned {@link PairingList} is based upon it 
-     * @param leaderboardName name of the leaderboard
+     * @param pairingListTemplate
+     *            the returned {@link PairingList} is based upon it
+     * @param leaderboardName
+     *            name of the leaderboard
      * @return {@link PairingList} that contains competitor objects matched to {@link RaceColumn}s and {@link Fleet}s
+     * @throws PairingListCreationException
+     *             for example if the number of boats available for the leaderboard is too small to create the pairing
+     *             list
      */
     PairingList<RaceColumn, Fleet, Competitor,Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate, 
-            final String leaderboardName, final Iterable<RaceColumn> selectedFlights);
+            final String leaderboardName, final Iterable<RaceColumn> selectedFlights) throws PairingListCreationException;
+
+    /**
+     * From a {@link CompetitorDescriptor} looks up or creates a {@link CompetitorWithBoat} object which is then guaranteed
+     * to be in the {@link CompetitorStore}.
+     */
+    DynamicCompetitorWithBoat convertCompetitorDescriptorToCompetitorWithBoat(CompetitorDescriptor competitorDescriptor, String searchTag);
 }

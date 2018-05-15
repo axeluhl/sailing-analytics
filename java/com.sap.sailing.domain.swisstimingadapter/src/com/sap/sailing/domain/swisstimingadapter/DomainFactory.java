@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +47,7 @@ public interface DomainFactory {
 
     Pair<Competitor, Boat> createCompetitorWithID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass);
 
-    Pair<Competitor, Boat> createCompetitorWithoutID(String boatID, String threeLetterIOCCode, String name, String raceId, BoatClass boatClass);
+    Pair<Competitor, Boat> createCompetitorWithoutID(String competitorId, String threeLetterIOCCode, String name, String raceId, BoatClass boatClass);
     
     String getCompetitorID(String boatID, RaceType raceType);
 
@@ -54,7 +55,7 @@ public interface DomainFactory {
 
     RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course);
 
-    com.sap.sailing.domain.base.Mark getOrCreateMark(String trackerID);
+    com.sap.sailing.domain.base.Mark getOrCreateMark(Serializable trackerID, String description);
     
     GPSFixMoving createGPSFix(TimePoint timePointOfTransmission, Fix fix);
 
@@ -71,7 +72,7 @@ public interface DomainFactory {
             long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm, boolean trackWind, boolean correctWindDirectionByMagneticDeclination);
 
-    ControlPoint getOrCreateControlPoint(Iterable<String> devices, MarkType markType);
+    ControlPoint getOrCreateControlPoint(String description, Iterable<Serializable> deviceIds, MarkType markType);
 
     RaceDefinition createRaceDefinition(Regatta regatta, String swissTimingRaceID, Map<Competitor, Boat> competitorsAndBoats,
             List<ControlPoint> courseDefinition, String raceName, String raceIdForRaceDefinition);

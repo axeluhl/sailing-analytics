@@ -25,4 +25,39 @@ public interface BravoExtendedFix extends BravoFix {
     Bearing getTargetHeel();
     Distance getDeflector();
     Double getTargetBoatspeedP();
+    Double getExpeditionAWA();
+    Double getExpeditionAWS();
+    Double getExpeditionTWA();
+    Double getExpeditionTWS();
+    Double getExpeditionTWD();
+    Double getExpeditionBSP();
+    Double getExpeditionBSP_TR();
+    Double getExpeditionSOG();
+    Double getExpeditionCOG();
+    Double getExpeditionForestayLoad();
+    Double getExpeditionRake();
+    Double getExpeditionHDG();
+    Double getExpeditionHeel();
+    Double getExpeditionTG_Heell();
+    /**
+     * The time to gun in seconds; the value is converted from the Expedition-internal time format based on days
+     */
+    Double getExpeditionTmToGunInSeconds();
+    /**
+     * The time to burn to the line in seconds; the value is converted from the Expedition-internal time format based on days
+     */
+    Double getExpeditionTmToBurnInSeconds();
+    
+    /**
+     * @return the distance below the line in meters; the Expedition value which is given in nautical miles is converted
+     */
+    Double getExpeditionBelowLnInMeters();
+    Double getExpeditionCourse();
+    Double getExpeditionJibCarStbd();
+    Double getExpeditionJibCarPort();
+    Double getExpeditionLoadS();
+    Double getExpeditionLoadP();
+    Double getExpeditionBARO();
+    Double getExpeditionMastButt();
+    Double getExpeditionRateOfTurn();
 }

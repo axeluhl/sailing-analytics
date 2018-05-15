@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
@@ -58,7 +59,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     private static final String DATE_COLUMN_2 = "mm/dd/yy";
     private static final String DATE_COLUMN_2_PATTERN = "MM/dd/yy";
     private static final String TIME_COLUMN = "hhmmss";
-    private static final String GPS_TIME_COLUMN = "GPS Time";
+    private static final String GPS_TIME_COLUMN = "GPS Time"; // FIXME this has to be "GPS time" with a lowercase t but then we need to handle all these odd values...
     private static final Pattern BOAT_CHECK_PATTERN = Pattern.compile("[1-9]?[0-9]");
     private final Map<String, Integer> columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix;
     /**
@@ -133,7 +134,6 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
                     });
                     buffer.close();
                 }
-                
             }
         });
         return importedFixes.get();
@@ -169,7 +169,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
      * key set are present in {@code colIndicesInFile}'s key set. If not, an
      * exception is thrown that reports the columns missing.
      */
-    private void validateHeader(Map<String, Integer> colIndicesInFile) throws FormatNotSupportedException {
+    public static void validateHeader(Map<String, Integer> colIndicesInFile) throws FormatNotSupportedException {
         final boolean dateTimeFormatOk;
         if (colIndicesInFile.containsKey(UTC_COLUMN)) {
             dateTimeFormatOk = true;
@@ -217,10 +217,6 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
             Map<String, Integer> columnsInFileFromHeader, LineParserCallback callback) {
         try {
             String[] lineContentTokens = split(line);
-            final TimePoint timePoint;
-            final String date;
-            final String dateFormatPattern;
-                         
             final Integer boatColumnIndex = columnsInFileFromHeader.get(BOAT_COL);
             if (boatColumnIndex != null) {
                 // Not all file types contain a boat column.
@@ -231,27 +227,7 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
                     return;
                 }
             }
-
-            if (columnsInFileFromHeader.containsKey(UTC_COLUMN)) {
-                timePoint = getTimePoint(lineContentTokens[columnsInFileFromHeader.get(UTC_COLUMN)]);
-            } else if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1)
-                    || columnsInFileFromHeader.containsKey(DATE_COLUMN_2)) {
-                if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1)) {
-                    date = lineContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_1)];
-                    dateFormatPattern = DATE_COLUMN_1_PATTERN;
-                } else {
-                    date = lineContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_2)];
-                    dateFormatPattern = DATE_COLUMN_2_PATTERN;
-                }
-                final String time = lineContentTokens[columnsInFileFromHeader.get(TIME_COLUMN)];
-                final DateFormat df = new SimpleDateFormat(dateFormatPattern + "'T'HH:mm:ssX");
-                final Date timestamp = df.parse(date + "T" + time + "+00:00"); // assuming
-                                                                                // UTC
-                timePoint = new MillisecondsTimePoint(timestamp);
-            } else {
-                // assume that "GPS Time" is present:
-                timePoint = getTimePoint(lineContentTokens[columnsInFileFromHeader.get(GPS_TIME_COLUMN)]);
-            }
+            final TimePoint timePoint = getTimePointFromLine(columnsInFileFromHeader, lineContentTokens);
             if (timePoint != null) {
                 callback.accept(timePoint, lineContentTokens, columnsInFileFromHeader);
             }
@@ -259,6 +235,47 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
             logger.warning(
                     "Error parsing line nr " + lineNr + " in file " + filename + " with exception: " + e.getMessage());
         }
+    }
+
+    /**
+     * Obtains the time from a line from the Expedition log file. Three time sources are considered in the following
+     * order of decreasing precedence:
+     * <ol>
+     * <li>{@code GPS Time}: the time as reported by the GPS device, in an Excel-like format as days since the
+     * epoch</li>
+     * <li>{@code Utc}: the time as reported by the computer Expedition was running on when recording the log, in an
+     * Excel-like format as days since the epoch</li>
+     * <li>{@code dd/mm/yy + hhmmss} or {@code mm/dd/yy + hhmmss}: an unknown time source, probably from the computer
+     * Expedition was running on when the log was recorded; assumed to be reported in UTC</li>
+     * </ol>
+     * If none of the above is found, {@link null} is returned.
+     */
+    public static TimePoint getTimePointFromLine(Map<String, Integer> columnsInFileFromHeader,
+            String[] lineContentTokens) throws ParseException {
+        final TimePoint timePoint;
+        final String date;
+        final String dateFormatPattern;
+        if (columnsInFileFromHeader.containsKey(GPS_TIME_COLUMN) && !lineContentTokens[columnsInFileFromHeader.get(GPS_TIME_COLUMN)].trim().isEmpty()) {
+            timePoint = getTimePoint(lineContentTokens[columnsInFileFromHeader.get(GPS_TIME_COLUMN)]);
+        } else if (columnsInFileFromHeader.containsKey(UTC_COLUMN) && !lineContentTokens[columnsInFileFromHeader.get(UTC_COLUMN)].trim().isEmpty()) {
+            timePoint = getTimePoint(lineContentTokens[columnsInFileFromHeader.get(UTC_COLUMN)]);
+        } else if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1) && !lineContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_1)].trim().isEmpty()
+                || columnsInFileFromHeader.containsKey(DATE_COLUMN_2) && !lineContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_2)].trim().isEmpty()) {
+            if (columnsInFileFromHeader.containsKey(DATE_COLUMN_1)) {
+                date = lineContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_1)];
+                dateFormatPattern = DATE_COLUMN_1_PATTERN;
+            } else {
+                date = lineContentTokens[columnsInFileFromHeader.get(DATE_COLUMN_2)];
+                dateFormatPattern = DATE_COLUMN_2_PATTERN;
+            }
+            final String time = lineContentTokens[columnsInFileFromHeader.get(TIME_COLUMN)];
+            final DateFormat df = new SimpleDateFormat(dateFormatPattern + "'T'HH:mm:ssX");
+            final Date timestamp = df.parse(date + "T" + time + "+00:00"); // assuming UTC
+            timePoint = new MillisecondsTimePoint(timestamp);
+        } else {
+            timePoint = null;
+        }
+        return timePoint;
     }
 
     /**
@@ -275,9 +292,6 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
      * Converts a value from a column such as "GPS Time" to a {@link TimePoint}.
      * The value is expected to be provided in decimal format, representing the
      * days since the {@link #EXCEL_EPOCH_START "Excel Epoch Start"}.
-     * 
-     * @param time_ExcelEpoch
-     * @return
      */
     public static TimePoint getTimePoint(String time_ExcelEpoch) {
         final TimePoint timePoint;

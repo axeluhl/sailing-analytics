@@ -7,6 +7,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SourceElement;
 import com.google.gwt.dom.client.VideoElement;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -26,8 +27,16 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
 
     interface VideoJSPlayerUiBinder extends UiBinder<Element, VideoJSPlayer> {
     }
+    
+    interface VideoJSStyle extends CssResource {
+        String invertedVideoPlayer();
+    }
 
-    @UiField VideoElement videoElement;
+    @UiField
+    VideoJSStyle style;
+    
+    @UiField
+    VideoElement videoElement;
     
     private final String elementId;
     private JavaScriptObject player;
@@ -63,16 +72,19 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
     }
 
     public void setVideo(MimeType mimeType, String source) {
+        if (mimeType == null || mimeType.mediaType != MediaType.video) {
+            return;
+        }
         this.panorama = mimeType.isPanorama();
         if (this.panorama) {
             videoElement.setAttribute("crossorigin", "anonymous");
         }
+        if (mimeType.isFlippedPanorama()) {
+            videoElement.addClassName(style.invertedVideoPlayer());
+        }
         if (isAttached()) {
             _onLoad(autoplay, panorama, StringMessages.INSTANCE.threeSixtyVideoHint());
             resizeChecker.scheduleRepeating(RESIZE_CHECK);
-        }
-        if (mimeType == null || mimeType.mediaType != MediaType.video) {
-            return;
         }
         String type = null;
         if (mimeType.mediaSubType == MediaSubType.youtube) {

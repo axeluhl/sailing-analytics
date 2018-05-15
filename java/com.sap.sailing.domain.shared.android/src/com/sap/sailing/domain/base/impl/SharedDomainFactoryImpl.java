@@ -161,7 +161,8 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         return getOrCreateMark(name, name, markType);
     }
     
-    private Mark getOrCreateMark(Serializable id, String name, MarkType markType) {
+    @Override
+    public Mark getOrCreateMark(Serializable id, String name, MarkType markType) {
         return getOrCreateMark(id, name, markType, /* color */ null, /* shape */ null, /* pattern */ null);
     }
 
@@ -333,60 +334,60 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public CompetitorAndBoatStore getCompetitorStore() {
+    public CompetitorAndBoatStore getCompetitorAndBoatStore() {
         return competitorAndBoatStore;
     }
 
     @Override
     public Competitor getExistingCompetitorById(Serializable competitorId) {
-        return getCompetitorStore().getExistingCompetitorById(competitorId);
+        return getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
     }
 
     @Override
     public CompetitorWithBoat getExistingCompetitorWithBoatById(Serializable competitorId) {
-        return getCompetitorStore().getExistingCompetitorWithBoatById(competitorId);
+        return getCompetitorAndBoatStore().getExistingCompetitorWithBoatById(competitorId);
     }
 
     @Override
     public boolean isCompetitorToUpdateDuringGetOrCreate(Competitor competitor) {
-        return getCompetitorStore().isCompetitorToUpdateDuringGetOrCreate(competitor);
+        return getCompetitorAndBoatStore().isCompetitorToUpdateDuringGetOrCreate(competitor);
     }
 
     @Override
-    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, String shortname, Color displayColor, String email,
+    public DynamicCompetitor getOrCreateCompetitor(Serializable competitorId, String name, String shortname, Color displayColor, String email,
             URI flagImage, DynamicTeam team, Double timeOnTimeFactor,
             Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
         }
-        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, shortname, displayColor, email, flagImage, team,
+        return getCompetitorAndBoatStore().getOrCreateCompetitor(competitorId, name, shortname, displayColor, email, flagImage, team,
                 timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
     }
 
     @Override
-    public CompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName,
+    public DynamicCompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName,
             Color displayColor, String email, URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor,
             Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
         }
-        return getCompetitorStore().getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email, flagImageURI, team,
+        return getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email, flagImageURI, team,
                 timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
     }
 
     @Override
-    public Boat getExistingBoatById(Serializable boatId) {
-        return getCompetitorStore().getExistingBoatById(boatId);
+    public DynamicBoat getExistingBoatById(Serializable boatId) {
+        return getCompetitorAndBoatStore().getExistingBoatById(boatId);
     }
 
     @Override
     public boolean isBoatToUpdateDuringGetOrCreate(Boat boat) {
-        return getCompetitorStore().isBoatToUpdateDuringGetOrCreate(boat);
+        return getCompetitorAndBoatStore().isBoatToUpdateDuringGetOrCreate(boat);
     }
 
     @Override
-    public Boat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color) {
-        return getCompetitorStore().getOrCreateBoat(id, name, boatClass, sailId, color);
+    public DynamicBoat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color) {
+        return getCompetitorAndBoatStore().getOrCreateBoat(id, name, boatClass, sailId, color);
     }
 
     @Override

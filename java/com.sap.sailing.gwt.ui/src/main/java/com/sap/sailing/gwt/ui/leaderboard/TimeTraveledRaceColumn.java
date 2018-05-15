@@ -15,12 +15,12 @@ import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.DurationAsHoursMinutesSecondsFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.DataExtractor;
 import com.sap.sse.common.InvertibleComparator;
 import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
 
-public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue {
+public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue<LeaderboardRowDTO> {
     
     private static final DetailType DETAIL_TYPE = DetailType.RACE_TIME_TRAVELED;
 
@@ -29,7 +29,7 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
 
     private String columnStyle;
     private String headerStyle;
-    private MinMaxRenderer minmaxRenderer;
+    private MinMaxRenderer<LeaderboardRowDTO> minmaxRenderer;
 
     public TimeTraveledRaceColumn(LeaderboardPanel<?> leaderboardPanel, RaceNameProvider raceNameProvider, StringMessages stringMessages, String headerStyle, String columnStyle,
             String detailHeaderStyle, String detailColumnStyle) {
@@ -41,7 +41,7 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
         this.stringMessages = stringMessages;
         this.columnStyle = columnStyle;
         this.headerStyle = headerStyle;
-        this.minmaxRenderer = new MinMaxRenderer(this, getComparator());
+        this.minmaxRenderer = new MinMaxRenderer<LeaderboardRowDTO>(this, getComparator());
     }
 
     @Override
@@ -98,21 +98,21 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
         return result;
     }
     
-    private class RaceTimeTraveledUpwindInSeconds implements LegDetailField<Double> {
+    private class RaceTimeTraveledUpwindInSeconds implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             return getTimeTraveledFor(row, LegType.UPWIND);
         }
     }
     
-    private class RaceTimeTraveledDownwindInSeconds implements LegDetailField<Double> {
+    private class RaceTimeTraveledDownwindInSeconds implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             return getTimeTraveledFor(row, LegType.DOWNWIND);
         }
     }
     
-    private class RaceTimeTraveledReachingInSeconds implements LegDetailField<Double> {
+    private class RaceTimeTraveledReachingInSeconds implements DataExtractor<Double, LeaderboardRowDTO> {
         @Override
         public Double get(LeaderboardRowDTO row) {
             return getTimeTraveledFor(row, LegType.REACHING);
@@ -167,7 +167,7 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
 
     @Override
     public void updateMinMax() {
-        minmaxRenderer.updateMinMax(getDisplayedLeaderboardRowsProvider());
+        minmaxRenderer.updateMinMax(getDisplayedLeaderboardRowsProvider().getRowsToDisplay().values());
     }
 
     /**

@@ -10,8 +10,9 @@ import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorAndBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -59,13 +60,19 @@ public interface DomainFactory extends SharedDomainFactory {
     
     ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType);
 
+    /**
+     * If the {@code competitor} is a {@link CompetitorWithBoat}, a {@link CompetitorWithBoatDTO} will result; if the
+     * type of {@code competitor} is already known at compile time, consider using
+     * {@link #convertToCompetitorWithBoatDTO(CompetitorWithBoat)} instead. If {@code competitor} is not a
+     * {@link CompetitorWithBoat}, a {@link CompetitorDTO} will result that is not a {@link CompetitorWithBoatDTO}.
+     */
     CompetitorDTO convertToCompetitorDTO(Competitor competitor);
 
-    CompetitorWithBoatDTO convertToCompetitorWithOptionalBoatDTO(Competitor competitor);
+    CompetitorWithBoatDTO convertToCompetitorWithBoatDTO(CompetitorWithBoat competitor);
 
-    CompetitorWithBoatDTO convertToCompetitorDTO(Competitor competitor, Boat boat);
+    CompetitorAndBoatDTO convertToCompetitorAndBoatDTO(Competitor competitor, Boat boat);
 
-    Map<CompetitorWithBoatDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats);
+    Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, ? extends Boat> competitorsAndBoats);
 
     BoatDTO convertToBoatDTO(Boat boat);
 
@@ -78,11 +85,11 @@ public interface DomainFactory extends SharedDomainFactory {
 
     PlacemarkDTO convertToPlacemarkDTO(Placemark placemark);
 
-    List<CompetitorWithBoatDTO> getCompetitorDTOList(Map<Competitor, Boat> competitors);
+    List<CompetitorAndBoatDTO> getCompetitorDTOList(Map<Competitor, Boat> competitors);
 
-    List<CompetitorWithBoatDTO> getCompetitorDTOList(Iterable<Competitor> competitors);
+    List<CompetitorDTO> getCompetitorDTOList(Iterable<Competitor> competitors);
 
-    List<CompetitorWithBoatDTO> getCompetitorDTOList(List<Pair<Competitor, Boat>> competitors);
+    List<CompetitorAndBoatDTO> getCompetitorDTOList(List<Pair<Competitor, Boat>> competitors);
     
     TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace);
 

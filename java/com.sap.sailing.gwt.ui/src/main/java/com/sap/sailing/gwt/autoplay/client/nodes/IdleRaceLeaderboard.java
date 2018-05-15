@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
+import java.util.Arrays;
+
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveOwnSettings;
@@ -50,7 +53,7 @@ public class IdleRaceLeaderboard extends FiresPlaceNode {
                 cf.getUserService(), AutoplayHelper.asyncActionsExecutor,
                 new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardTimer,
                 cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), cf.getErrorReporter(), stringMessages,
-                withFullscreenButton);
+                withFullscreenButton, Arrays.asList(DetailType.values()));
 
         setPlaceToGo(new LeaderboardPlace(leaderboardPerspective));
         getBus().fireEvent(new AutoPlayHeaderEvent(headerSettings.getTitle(), ""));

@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.ListBox;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sse.common.filter.TextFilter;
 import com.sap.sse.common.filter.TextOperator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public abstract class AbstractCompetitorTextFilterUIFactory implements FilterUIFactory<CompetitorWithBoatDTO> {
+public abstract class AbstractCompetitorTextFilterUIFactory implements FilterUIFactory<CompetitorDTO> {
     
     protected List<TextOperator.Operators> supportedOperators;
     protected TextOperator.Operators defaultOperator;
-    protected TextFilter<CompetitorWithBoatDTO> competitorTextFilter;
+    protected TextFilter<CompetitorDTO> competitorTextFilter;
 
-    public AbstractCompetitorTextFilterUIFactory(TextFilter<CompetitorWithBoatDTO> competitorTextFilter, TextOperator.Operators defaultOperator) {
+    public AbstractCompetitorTextFilterUIFactory(TextFilter<CompetitorDTO> competitorTextFilter, TextOperator.Operators defaultOperator) {
         this.competitorTextFilter = competitorTextFilter;
         this.defaultOperator = defaultOperator;
         supportedOperators = new ArrayList<TextOperator.Operators>();

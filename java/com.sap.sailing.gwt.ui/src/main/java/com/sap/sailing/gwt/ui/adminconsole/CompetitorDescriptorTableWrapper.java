@@ -9,7 +9,6 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
@@ -17,7 +16,8 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -36,13 +36,6 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
     private final LabeledAbstractFilterablePanel<CompetitorDescriptor> filterablePanelCompetitorDescriptor;
 
     private final CompetitorImportMatcher competitorImportMatcher;
-    
-    private static final Template TEMPLATE = GWT.create(Template.class);
-    
-    interface Template extends SafeHtmlTemplates {
-        @SafeHtmlTemplates.Template("<div style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:{1}px;height:{2}px;background-image:url({0})'></div>")
-        SafeHtml image(String imageUri,int width, int height);
-    }
     
     private static class CompetitorImportTableActionIcons extends ImagesBarCell {
         static final String ACTION_UNLINK = "ACTION_UNLINK";
@@ -87,7 +80,7 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
      */
     public static interface CompetitorsToImportToExistingLinking {
         void unlinkCompetitor(CompetitorDescriptor competitor);
-        CompetitorWithBoatDTO getExistingCompetitorToUseInsteadOf(CompetitorDescriptor competitor);
+        CompetitorDTO getExistingCompetitorToUseInsteadOf(CompetitorDescriptor competitor);
     }
 
     public CompetitorDescriptorTableWrapper(CompetitorImportMatcher competitorImportMatcherParam,
@@ -144,7 +137,7 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
                     flagImageResource = FlagImageResolverImpl.get().getFlagImageResource(twoLetterIsoCountryCode);
                 }
                 if (flagImageResource != null) {
-                    sb.append(TEMPLATE.image(flagImageResource.getSafeUri().asString(), 18, 12));
+                    sb.append(FlagImageRenderer.image(flagImageResource.getSafeUri().asString()));
                     sb.appendHtmlConstant("&nbsp;");
                 }
 
@@ -225,7 +218,7 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
             ImagesBarColumn<CompetitorDescriptor, CompetitorImportTableActionIcons> unlinkColumn, CompetitorsToImportToExistingLinking unlinkCallback) {
         ListHandler<CompetitorDescriptor> competitorColumnListHandler = getColumnSortHandler();
         final NaturalComparator caseInsensitiveNaturalComparator = new NaturalComparator(/* case sensitive */ false);
-        final Comparator<CompetitorWithBoatDTO> nullFirstComparator = Comparator.nullsFirst(/* real comparator */ null);
+        final Comparator<CompetitorDTO> nullFirstComparator = Comparator.nullsFirst(/* real comparator */ null);
         competitorColumnListHandler.setComparator(competitorNameColumn, (cd1, cd2)->caseInsensitiveNaturalComparator.compare(cd1.getName(), cd2.getName()));
         competitorColumnListHandler.setComparator(boatClassNameColumn, (cd1, cd2)->caseInsensitiveNaturalComparator.compare(cd1.getBoatClassName(), cd2.getBoatClassName()));
         competitorColumnListHandler.setComparator(sailIdColumn, (cd1, cd2)->caseInsensitiveNaturalComparator.compare(cd1.getSailNumber(), cd2.getSailNumber()));

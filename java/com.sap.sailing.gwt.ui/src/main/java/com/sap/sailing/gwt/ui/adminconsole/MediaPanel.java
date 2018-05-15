@@ -39,6 +39,7 @@ import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
+import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiVideoDialog;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -116,6 +117,22 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
             }
         });
         buttonAndFilterPanel.add(addUrlButton);
+        
+        Button multiVideo = new Button(stringMessages.multiVideoLinking());
+        multiVideo.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new MultiVideoDialog(sailingService, mediaService, stringMessages, errorReporter, new Runnable() {
+                    
+                    @Override
+                    public void run() {
+                        loadMediaTracks();
+                    }
+                }).center();
+            }
+        });
+        buttonAndFilterPanel.add(multiVideo);
+        
         add(buttonAndFilterPanel);
         
         Label lblFilterRaces = new Label(stringMessages.filterMediaByName() + ":");
@@ -129,6 +146,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
             public List<String> getSearchableStrings(MediaTrack t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.title);
+                strings.add(t.url);
                 if (t.startTime == null) {
                     GWT.log("startTime of media track "+t.title+" undefined");
                 } else {
@@ -440,6 +458,19 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         });
         mediaTracksTable.addColumn(durationColumn, stringMessages.duration());
         mediaTracksTable.setColumnWidth(durationColumn, 100, Unit.PCT);
+        // media type
+        Column<MediaTrack, String> mimeTypeColumn = new Column<MediaTrack, String>(new TextCell()) {
+            @Override
+            public String getValue(MediaTrack mediaTrack) {
+                return mediaTrack.mimeType == null ? "" : mediaTrack.mimeType.toString();
+            }
+        };
+        mimeTypeColumn.setSortable(true);
+        mediaTracksTable.addColumn(mimeTypeColumn, stringMessages.mimeType());
+        mediaTracksTable.setColumnWidth(mimeTypeColumn, 100, Unit.PCT);
+        sortHandler.setComparator(mimeTypeColumn, (mt1, mt2)->
+            (mt1.mimeType == null ? "" : mt1.mimeType.toString()).compareTo(
+                    mt2.mimeType == null ? "" : mt2.mimeType.toString()));
 
         // delete action
         ImagesBarColumn<MediaTrack, MediaActionBarCell> mediaActionColumn = new ImagesBarColumn<MediaTrack, MediaActionBarCell>(

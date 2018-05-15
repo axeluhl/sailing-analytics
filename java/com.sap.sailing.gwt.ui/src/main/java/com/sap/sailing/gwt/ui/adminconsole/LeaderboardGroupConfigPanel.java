@@ -658,44 +658,41 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     @Override
     public void fillLeaderboards(Iterable<StrippedLeaderboardDTO> leaderboards) {
         availableLeaderboards.clear();
+        leaderboardsProvider.getList().clear();
         if (leaderboards != null) {
             Util.addAll(leaderboards, availableLeaderboards);
         }
-        leaderboardsFilterablePanel.updateAll(availableLeaderboards);
+        final LeaderboardGroupDTO selectedGroup = getSelectedGroup();
+        if(selectedGroup != null) {
+            leaderboardsProvider.getList().addAll(availableLeaderboards);
+            leaderboardsProvider.getList().removeAll(selectedGroup.leaderboards);
+            leaderboardsFilterablePanel.updateAll(leaderboardsProvider.getList());
+            refreshableLeaderboardsSelectionModel.clear();
+            final Set<StrippedLeaderboardDTO> selectedLeaderboards = refreshableLeaderboardsSelectionModel.getSelectedSet();
+            for (StrippedLeaderboardDTO leaderboard : selectedLeaderboards) {
+                refreshableLeaderboardsSelectionModel.setSelected(leaderboard, true);
+            }
+        }
     }
 
     /**
-     * If no leaderboard group is selected or more than one is selected, this method is a no-op because the
-     * leaderboard list displayed is defined to the be list of all leaderboards available, excluding those
-     * leaderboards that are already assigned to <em>the</em> selected leaderboard group. In other words,
-     * the leaderboard list is only well-defined in case a single leaderboard group is selected.
+     * If no leaderboard group is selected or more than one is selected, this method is a no-op because the leaderboard
+     * list displayed is defined to the be list of all leaderboards available, excluding those leaderboards that are
+     * already assigned to <em>the</em> selected leaderboard group. In other words, the leaderboard list is only
+     * well-defined in case a single leaderboard group is selected.
      */
     private void refreshLeaderboardsList() {
-        final LeaderboardGroupDTO selectedGroup = getSelectedGroup();
-        final Set<StrippedLeaderboardDTO> selectedLeaderboards = refreshableLeaderboardsSelectionModel.getSelectedSet();
-        if (isSingleGroupSelected && selectedGroup != null) {
+        if (isSingleGroupSelected && getSelectedGroup() != null) {
             sailingService.getLeaderboards(new MarkedAsyncCallback<List<StrippedLeaderboardDTO>>(
                     new AsyncCallback<List<StrippedLeaderboardDTO>>() {
                         @Override
                         public void onFailure(Throwable t) {
                             errorReporter.reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
                         }
-        
+
                         @Override
                         public void onSuccess(List<StrippedLeaderboardDTO> leaderboards) {
-                            availableLeaderboards.clear();
-                            if (leaderboards != null) {
-                                availableLeaderboards.addAll(leaderboards);
-                            }
-                            leaderboardsProvider.getList().clear();
-                            leaderboardsProvider.getList().addAll(availableLeaderboards);
-                            leaderboardsProvider.getList().removeAll(selectedGroup.leaderboards);
-                            leaderboardsFilterablePanel.getTextBox().setText("");
-                            leaderboardsFilterablePanel.updateAll(availableLeaderboards);
-                            refreshableLeaderboardsSelectionModel.clear();
-                            for (StrippedLeaderboardDTO leaderboard : selectedLeaderboards) {
-                                refreshableLeaderboardsSelectionModel.setSelected(leaderboard, true);
-                            }
+                            fillLeaderboards(leaderboards);
                         }
                     }));
         }
@@ -905,7 +902,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             }
             updateGroup(selectedGroup);
             //Refilters the leaderboards list (hides the moved leaderboards if they don't fit to the filter) and resorts the list
-            leaderboardsFilterablePanel.updateAll(availableLeaderboards);
+            leaderboardsFilterablePanel.updateAll(leaderboardsProvider.getList());
 
         }
     }

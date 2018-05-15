@@ -22,7 +22,7 @@ public class BoatsResource extends AbstractSailingServerResource {
     @Path("{boatId}")
     public Response getBoat(@PathParam("boatId") String boatIdAsString) {
         Response response;
-        Boat boat = getService().getCompetitorStore().getExistingBoatByIdAsString(boatIdAsString);
+        Boat boat = getService().getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatIdAsString);
         if (boat == null) {
             response = Response.status(Status.NOT_FOUND)
                     .entity("Could not find a boat with id '" + StringEscapeUtils.escapeHtml(boatIdAsString) + "'.")

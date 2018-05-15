@@ -74,7 +74,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
@@ -123,6 +123,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.impl.UUIDHelper;
 import com.sap.sse.security.shared.Permission.DefaultModes;
 
 @Path("/v1/leaderboards")
@@ -148,7 +149,6 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @DefaultValue("Live") @QueryParam("resultState") ResultStates resultState,
             @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount) {
         Response response;
-
         TimePoint requestTimePoint = MillisecondsTimePoint.now();
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
@@ -159,16 +159,10 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             try {
                 TimePoint timePoint = calculateTimePointForResultState(leaderboard, resultState);
                 JSONObject jsonLeaderboard;
-                if (timePoint != null || resultState == ResultStates.Live) {
-                    jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount);
-                } else {
-                    jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint,
-                            maxCompetitorsCount);
-                }
-
+                jsonLeaderboard = getLeaderboardJson(resultState, maxCompetitorsCount, requestTimePoint, leaderboard, timePoint,
+                        /* race column names */ null, /* race detail names */ null);
                 StringWriter sw = new StringWriter();
                 jsonLeaderboard.writeJSONString(sw);
-
                 String json = sw.getBuffer().toString();
                 response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
@@ -176,28 +170,25 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                         .type(MediaType.TEXT_PLAIN).build();
             }
         }
-
         return response;
     }
 
-    private JSONObject getLeaderboardJson(Leaderboard leaderboard,
-            TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount)
+    @Override
+    protected JSONObject getLeaderboardJson(Leaderboard leaderboard,
+            TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount, List<String> raceColumnNames,
+            List<String> raceDetailNames)
             throws NoWindException, InterruptedException, ExecutionException {
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(
                 resultTimePoint, Collections.<String> emptyList(), /* addOverallDetails */
                 false, getService(), getService().getBaseDomainFactory(),
                 /* fillTotalPointsUncorrected */false);
-
         JSONObject jsonLeaderboard = new JSONObject();
-
-        writeCommonLeaderboardData(jsonLeaderboard, leaderboardDTO, resultState, maxCompetitorsCount);
-
+        writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, leaderboardDTO.getTimePoint(), maxCompetitorsCount);
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
         int counter = 1;
-        for (CompetitorWithBoatDTO competitor : leaderboardDTO.competitors) {
+        for (CompetitorDTO competitor : leaderboardDTO.competitors) {
             LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);
-
             if (maxCompetitorsCount != null && counter > maxCompetitorsCount) {
                 break;
             }
@@ -210,13 +201,10 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             JSONObject jsonRaceColumns = new JSONObject();
             jsonCompetitor.put("raceScores", jsonRaceColumns);
             for (RaceColumnDTO raceColumn : leaderboardDTO.getRaceList()) {
-                List<CompetitorWithBoatDTO> regattaRankedCompetitorsForColumn = leaderboardDTO
-                        .getCompetitorOrderingPerRaceColumnName().get(raceColumn.getName());
+                List<CompetitorDTO> regattaRankedCompetitorsForColumn = leaderboardDTO.getCompetitorOrderingPerRaceColumnName().get(raceColumn.getName());
                 JSONObject jsonEntry = new JSONObject();
                 jsonRaceColumns.put(raceColumn.getName(), jsonEntry);
-                LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumn
-                        .getName());
-
+                LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumn.getName());
                 final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
                 jsonEntry.put("fleet", fleetOfCompetitor == null ? "" : fleetOfCompetitor.getName());
                 jsonEntry.put("totalPoints", leaderboardEntry.totalPoints);
@@ -225,8 +213,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 MaxPointsReason maxPointsReason = leaderboardEntry.reasonForMaxPoints;
                 jsonEntry.put("maxPointsReason", maxPointsReason != null ? maxPointsReason.toString() : null);
                 jsonEntry.put("rank", regattaRankedCompetitorsForColumn.indexOf(competitor) + 1);
-                List<CompetitorWithBoatDTO> raceRankedCompetitorsInColumn = leaderboardDTO
-                        .getCompetitorsFromBestToWorst(raceColumn);
+                List<CompetitorDTO> raceRankedCompetitorsInColumn = leaderboardDTO.getCompetitorsFromBestToWorst(raceColumn);
                 jsonEntry.put("raceRank", raceRankedCompetitorsInColumn.indexOf(competitor) + 1);
                 jsonEntry.put("isDiscarded", leaderboardEntry.discarded);
                 jsonEntry.put("isCorrected", leaderboardEntry.hasScoreCorrection());
@@ -286,7 +273,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         final Named mappedTo;
         if (competitorId != null) {
             // map to a competitor
-            final Competitor mappedToCompetitor = domainFactory.getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
+            final Competitor mappedToCompetitor = domainFactory.getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorId);
             mappedTo = mappedToCompetitor;
             if (mappedToCompetitor == null) {
                 logger.warning("No competitor found for id " + competitorId);
@@ -304,7 +291,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     from, /* to */ null);
         } else if (boatId != null) {
             // map to a boat
-            final Boat mappedToBoat = domainFactory.getCompetitorStore().getExistingBoatByIdAsString(boatId);
+            final Boat mappedToBoat = domainFactory.getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatId);
             mappedTo = mappedToBoat;
             if (mappedToBoat == null) {
                 logger.warning("No boat found for id " + boatId);
@@ -322,7 +309,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     from, /* to */ null);
         } else {
             // map to a mark
-            final Mark mappedToMark = domainFactory.getExistingMarkById(Helpers.tryUuidConversion(markId));
+            final Mark mappedToMark = domainFactory.getExistingMarkById(UUIDHelper.tryUuidConversion(markId));
             mappedTo = mappedToMark;
             if (mappedToMark == null) {
                 logger.warning("No mark found for id " + markId);
@@ -378,7 +365,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         }
         final NamedWithID mappedTo;
         if (competitorId != null) {
-            final Competitor mappedToCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
+            final Competitor mappedToCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorId);
             mappedTo = mappedToCompetitor;
             if (mappedToCompetitor == null) {
                 logger.warning("No competitor found for id " + competitorId);
@@ -386,7 +373,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                         .type(MediaType.TEXT_PLAIN).build();
             }
         } else if (boatId != null) {
-            final Boat mappedToBoat = getService().getCompetitorStore().getExistingBoatByIdAsString(boatId);
+            final Boat mappedToBoat = getService().getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatId);
             mappedTo = mappedToBoat;
             if (mappedToBoat == null) {
                 logger.warning("No boat found for id " + boatId);
@@ -396,7 +383,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         } else {
             // map to mark
             DomainFactory domainFactory = getService().getDomainObjectFactory().getBaseDomainFactory();
-            final Mark mappedToMark = domainFactory.getExistingMarkById(Helpers.tryUuidConversion(markId));
+            final Mark mappedToMark = domainFactory.getExistingMarkById(UUIDHelper.tryUuidConversion(markId));
             mappedTo = mappedToMark;
             if (mappedToMark == null) {
                 logger.warning("No mark found for id " + markId);
@@ -433,7 +420,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @PathParam("competitorId") String competitorIdAsString) {
         Response response;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
+        Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
                 competitorIdAsString);
 
         if (competitor == null) {

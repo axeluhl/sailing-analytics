@@ -21,6 +21,7 @@ import com.sap.sse.util.DateParser;
 import com.sun.jersey.api.core.ResourceContext;
 
 public abstract class AbstractSailingServerResource {
+    private static final String SLASH_ENCODING = "__";
     @Context ServletContext servletContext;
     @Context ResourceContext resourceContext;
     
@@ -49,13 +50,20 @@ public abstract class AbstractSailingServerResource {
     }
     
     protected Regatta findRegattaByName(String regattaName) {
-        return getService().getRegattaByName(regattaName);
+        Regatta regatta = getService().getRegattaByName(regattaName);
+        if (regatta == null && regattaName.contains(SLASH_ENCODING)) {
+            regatta = getService().getRegattaByName(regattaName.replaceAll(SLASH_ENCODING, "/"));
+        }
+        return regatta;
     }
 
     protected RaceDefinition findRaceByName(Regatta regatta, String raceName) {
         RaceDefinition result = null;
         if (regatta != null) {
             result = regatta.getRaceByName(raceName);
+            if (result == null && raceName.contains(SLASH_ENCODING)) {
+                result = regatta.getRaceByName(raceName.replaceAll(SLASH_ENCODING, "/"));
+            }
         }
         return result;
     }

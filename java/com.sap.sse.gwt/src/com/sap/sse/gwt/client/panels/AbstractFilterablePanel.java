@@ -92,7 +92,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         this(all, display, filtered, /* show default filter text box */ true);
     }
 
-    private void setAll(Iterable<T> all) {
+    private void setAll(Iterable<? extends T> all) {
         this.all.getList().clear();
         if (all != null) {
             for (T t : all) {
@@ -118,7 +118,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     /**
      * Updates the set of all objects to be shown in the table and applies the search filter to update the table view.
      */
-    public void updateAll(Iterable<T> all) {
+    public void updateAll(Iterable<? extends T> all) {
         setAll(all);
         filter();
     }

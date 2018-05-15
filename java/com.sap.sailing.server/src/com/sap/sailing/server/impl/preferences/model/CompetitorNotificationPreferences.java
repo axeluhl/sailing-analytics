@@ -13,7 +13,7 @@ public class CompetitorNotificationPreferences extends AbstractGenericSerializab
 
     public CompetitorNotificationPreferences(RacingEventService racingEventService) {
         competitors = new SettingsList<>("competitors", this,
-                () -> new CompetitorNotificationPreference(racingEventService.getCompetitorStore()));
+                () -> new CompetitorNotificationPreference(racingEventService.getCompetitorAndBoatStore()));
     }
 
     @Override

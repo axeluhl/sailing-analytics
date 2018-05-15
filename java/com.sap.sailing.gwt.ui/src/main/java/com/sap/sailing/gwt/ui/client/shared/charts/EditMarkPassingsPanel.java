@@ -28,7 +28,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -65,7 +65,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
     private final CompetitorSelectionProvider competitorSelectionModel;
     private final RaceIdentifierToLeaderboardRaceColumnAndFleetMapper raceIdentifierToLeaderboardRaceColumnAndFleetMapper;
 
-    private CompetitorWithBoatDTO competitor;
+    private CompetitorDTO competitor;
     
     /**
      * The fixed mark passings; keys are zero-based waypoint indexes
@@ -320,12 +320,12 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
     }
 
     @Override
-    public void addedToSelection(CompetitorWithBoatDTO competitor) {
+    public void addedToSelection(CompetitorDTO competitor) {
         processCompetitorSelectionChange(isVisible());
     }
 
     @Override
-    public void removedFromSelection(CompetitorWithBoatDTO competitor) {
+    public void removedFromSelection(CompetitorDTO competitor) {
         processCompetitorSelectionChange(isVisible());
     }
 
@@ -470,7 +470,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
 
     @Override
     public String getLocalizedShortName() {
-        return null;
+        return stringMessages.editMarkPassings();
     }
 
     @Override
@@ -479,16 +479,16 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
     }
 
     @Override
-    public void filterChanged(FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> oldFilterSet,
-            FilterSet<CompetitorWithBoatDTO, ? extends Filter<CompetitorWithBoatDTO>> newFilterSet) {
+    public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
+            FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
     }
 
     @Override
-    public void competitorsListChanged(Iterable<CompetitorWithBoatDTO> competitors) {
+    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
     }
 
     @Override
-    public void filteredCompetitorsListChanged(Iterable<CompetitorWithBoatDTO> filteredCompetitors) {
+    public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
     }
 
     @Override

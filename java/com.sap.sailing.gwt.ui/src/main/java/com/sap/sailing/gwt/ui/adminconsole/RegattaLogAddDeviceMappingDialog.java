@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
@@ -32,15 +32,16 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
-import com.sap.sse.gwt.client.controls.datetime.DateInput;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTimeBox<DeviceMappingDTO> {
     private final String leaderboardName;
     private final GenericListBox<EventDTO> events; 
 
-    protected final DateInput from;
-    protected final DateInput to;
+    protected final DateAndTimeInput from;
+    protected final DateAndTimeInput to;
     protected final ListBox deviceType;
     protected final TextBox deviceId;
     protected final DeviceMappingQRCodeWidget qrWidget;
@@ -84,9 +85,9 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
 
-        from = createDateBox(new Date());
+        from = createDateTimeBox(new Date(), Accuracy.SECONDS);
         from.setValue(null);
-        to = createDateBox(new Date());
+        to = createDateTimeBox(new Date(), Accuracy.SECONDS);
         to.setValue(null);
 
         deviceType = createListBox(false);
@@ -121,7 +122,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
                     }
 
                     @Override
-                    public void onSelectionChange(CompetitorWithBoatDTO competitor) {
+                    public void onSelectionChange(CompetitorDTO competitor) {
                         selectedItem = competitor;
                         qrWidget.setMappedItem(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
                                 competitor.getIdAsString());

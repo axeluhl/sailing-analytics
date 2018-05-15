@@ -145,14 +145,18 @@ public abstract class DataEntryDialog<T> {
             @Override
             public void onClick(ClickEvent event) {
                 dateEntryDialog.hide();
-                callback.cancel();
+                if (callback != null) {
+                    callback.cancel();
+                }
             }
         });
         dateEntryDialog.setWidget(dialogFPanel);
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 dateEntryDialog.hide();
-                callback.ok(getResult());
+                if (callback != null) {
+                    callback.ok(getResult());
+                }
             }
         });
     }

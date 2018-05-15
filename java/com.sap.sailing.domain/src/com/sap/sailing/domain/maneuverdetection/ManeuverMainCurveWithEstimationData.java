@@ -2,7 +2,7 @@ package com.sap.sailing.domain.maneuverdetection;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.annotations.Statistic;
 
@@ -13,7 +13,7 @@ import com.sap.sse.datamining.annotations.Statistic;
  * @author Vladislav Chumak (D069712)
  *
  */
-public interface ManeuverMainCurveWithEstimationData extends ManeuverCurveBoundaries, HasDetailedManeuverLoss {
+public interface ManeuverMainCurveWithEstimationData extends ManeuverCurveBoundariesWithDetailedManeuverLoss {
 
     /**
      * Gets the lowest speed measured within the main curve with corresponding course.
@@ -78,5 +78,10 @@ public interface ManeuverMainCurveWithEstimationData extends ManeuverCurveBounda
      * Gets the number of GPS-fixes contained within the maneuver main curve.
      */
     int getGpsFixesCount();
+
+    /**
+     * Gets the longest duration between two GPS-fixes contained within maneuver main curve.
+     */
+    Duration getLongestIntervalBetweenTwoFixes();
 
 }

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sse.common.Color;
 
 /**
@@ -13,7 +14,7 @@ public interface BoatFactory {
      * the caller must check the result of {@link #isBoatToUpdateDuringGetOrCreate(Boat)}, and if <code>true</code>,
      * must call {@link #getOrCreateBoat()} to cause an update of the boat's values.
      */
-    Boat getExistingBoatById(Serializable boatId);
+    DynamicBoat getExistingBoatById(Serializable boatId);
 
     /**
      * Checks if the <code>boat</code> shall be updated from the default provided by, e.g., a tracking infrastructure.
@@ -23,5 +24,5 @@ public interface BoatFactory {
      */
     boolean isBoatToUpdateDuringGetOrCreate(Boat result);
 
-    Boat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color);
+    DynamicBoat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color);
 }

@@ -236,20 +236,21 @@ public class MediaSynchControl implements EditFlag {
     }
 
     private void updateUiState() {
+        final boolean showEditUI = isEditing || isDirty();
         for (int i = 0; i < fineTuningPanel.getWidgetCount(); i++) {
             Widget widget = fineTuningPanel.getWidget(i);
             if (widget instanceof FocusWidget) {
-                ((FocusWidget) widget).setEnabled(isEditing);
+                ((FocusWidget) widget).setEnabled(showEditUI);
             }
         }
-        mediaSynchAdapter.setControlsVisible(isEditing);
-        previewButton.setEnabled(isEditing);
+        mediaSynchAdapter.setControlsVisible(showEditUI);
+        previewButton.setEnabled(showEditUI);
         boolean hasRightToEdit = hasRightToEdit();
-        editButton.setEnabled(hasRightToEdit && !isEditing);
-        mainPanel.getElement().getStyle().setDisplay(isEditing && hasRightToEdit ? Display.BLOCK : Display.NONE);
+        editButton.setEnabled(hasRightToEdit && !showEditUI);
+        mainPanel.getElement().getStyle().setDisplay(showEditUI && hasRightToEdit ? Display.BLOCK : Display.NONE);
         boolean isDirty = isDirty();
-        saveButton.setEnabled(isEditing || isDirty);
-        discardButton.setEnabled(isEditing || isDirty);
+        saveButton.setEnabled(showEditUI || isDirty);
+        discardButton.setEnabled(showEditUI || isDirty);
     }
 
     private boolean hasRightToEdit() {
@@ -282,6 +283,7 @@ public class MediaSynchControl implements EditFlag {
 
     private void changeOffsetBy(int delta) {
         mediaSynchAdapter.changeOffsetBy(delta);
+        updateUiState();
     }
 
     public Widget widget() {

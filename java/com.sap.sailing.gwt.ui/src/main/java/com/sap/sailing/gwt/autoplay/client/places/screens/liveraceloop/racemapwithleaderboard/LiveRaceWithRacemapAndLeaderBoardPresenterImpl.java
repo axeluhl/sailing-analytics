@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.core.client.Scheduler;
@@ -8,9 +9,10 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
@@ -39,7 +41,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
     private Timer selectionTimer;
     private SingleRaceLeaderboardPanel leaderboardPanel;
     private int selected = -1;
-    ArrayList<CompetitorWithBoatDTO> compList = new ArrayList<>();
+    ArrayList<CompetitorDTO> compList = new ArrayList<>();
     private com.sap.sse.gwt.client.player.Timer timer;
 
     public LiveRaceWithRacemapAndLeaderBoardPresenterImpl(LiveRaceWithRacemapAndLeaderBoardPlace place,
@@ -72,7 +74,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
             if (selected > compList.size() - 1) {
                 selected = 0;
             }
-            CompetitorWithBoatDTO marked = compList.get(selected);
+            CompetitorDTO marked = compList.get(selected);
             getPlace().getRaceMapSelectionProvider().setSelected(marked, true);
             onSelect(marked);
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
@@ -128,7 +130,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
         }
     }
 
-    private void onSelect(CompetitorWithBoatDTO marked) {
+    private void onSelect(CompetitorDTO marked) {
         view.onCompetitorSelect(marked);
     }
 
@@ -161,9 +163,9 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardPanel = new SingleRaceLeaderboardPanel(null, null, sailingService, new AsyncActionsExecutor(),
                 leaderboardSettings, true, liveRace, getPlace().getRaceMapSelectionProvider(), timer, null,
-                getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE,
+                getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(true),
-                FlagImageResolverImpl.get());
+                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
         getPlace().getRaceMap().setQuickRanksDTOProvider(new QuickRanksDTOFromLeaderboardDTOProvider(
                 new RaceCompetitorSet(getPlace().getRaceMapSelectionProvider()), liveRace));
         view.startingWith(this, panel, getPlace().getRaceMap(), leaderboardPanel);

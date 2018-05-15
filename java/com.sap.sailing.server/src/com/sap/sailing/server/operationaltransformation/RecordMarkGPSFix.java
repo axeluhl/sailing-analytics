@@ -2,8 +2,6 @@ package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
 public abstract class RecordMarkGPSFix extends AbstractRaceOperation<Void> {
@@ -17,11 +15,6 @@ public abstract class RecordMarkGPSFix extends AbstractRaceOperation<Void> {
 
     protected GPSFix getFix() {
         return fix;
-    }
-
-    protected DynamicTrackedRace getTrackedRace(RacingEventService toState) {
-        DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
-        return trackedRace;
     }
 
     @Override

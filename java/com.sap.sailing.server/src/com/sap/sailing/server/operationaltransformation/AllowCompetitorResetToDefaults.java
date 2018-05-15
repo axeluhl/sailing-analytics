@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sse.common.Util;
@@ -21,11 +22,14 @@ public class AllowCompetitorResetToDefaults extends AbstractRacingEventServiceOp
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        final CompetitorAndBoatStore competitorStore = toState.getBaseDomainFactory().getCompetitorStore();
+        final CompetitorAndBoatStore competitorStore = toState.getBaseDomainFactory().getCompetitorAndBoatStore();
         for (String competitorIdAsString : competitorIdsAsStrings) {
             Competitor competitor = competitorStore.getExistingCompetitorByIdAsString(competitorIdAsString);
             if (competitor != null) {
                 competitorStore.allowCompetitorResetToDefaults(competitor);
+                if (competitor.hasBoat()) {
+                    competitorStore.allowBoatResetToDefaults(((DynamicCompetitorWithBoat) competitor).getBoat());
+                }
             }
         }
         return null;

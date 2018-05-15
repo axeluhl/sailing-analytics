@@ -63,6 +63,11 @@ public abstract class AbstractEntryPoint<S extends StringMessages> implements En
     public void reportError(String message) {
         errorReporter.reportError(message);
     }
+    
+    @Override
+    public void reportError(String title, String message) {
+        errorReporter.reportError(title, message);
+    }
 
     @Override
     public void reportError(String message, boolean silentMode) {

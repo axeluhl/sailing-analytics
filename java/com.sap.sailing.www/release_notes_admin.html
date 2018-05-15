@@ -22,6 +22,39 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
 
+                    <h2 class="articleSubheadline">May 2018</h2>
+                    <ul class="bulletList">
+                        <li>Added the ability to add multiple mp4 videos as mediatracks at once via the new multi video dialog, located at trackedraces -> Audio & Video.
+                            This features requires a webserver with index listing enabled. Additionally the dialog offers the ability to add the new mediatracks 
+                            directly to all races overlapping the starttime and duration of the mediatrack.</li>
+                        <li>On the "Edit mark positions" panel within RaceBoard, now a "Clear selection" button appears
+                            when selecting a mark from the table, which provides an easier and more obvious way to
+                            deselect all marks, what is needed in order to see the full course with all marks again.</li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">April 2018</h2>
+                    <ul class="bulletList">
+                        <li>The import of additional expedition data was extended to read many additional measures.
+                            These can be visualized in the leaderboard as well as the competitor charts in <tt>RaceBoard.html</tt>.
+                            In addition, the leaderboard has been extended to provide bravo and expedition related measures consistently on race and leg level.
+                            The respective settings dialogs were changed as well to only show specific options, if bravo or expedition tracks are available.
+                            Any previously imported expedition tracks may be dropped and reimported to gain access to the newly introduced measures.</li>
+                        <li>The settings dialog of the competitor charts in <tt>RaceBoard.html</tt> now provides the measures in alphabetical order (based on the current locale).
+                            Expedition specific measures - if available - are shown at the end of the list.</li>
+                        <li>The all in one expedition import has been extended to be able to import new competitor tracks or new races to an existing regatta.
+                            Previously it was only possible to import a new event structure.</li>
+                        <li>The Expedition log file import now prefers "GPS Time" for time stamping over "Utc" and over other date / time formats, making it
+                            more consistent with the Expedition live connector which uses column 146 for time stamping which is GPS Time.</li>
+                        <li>Two dimensional metrics can now be displayed by using a scatter plot presenter within the data mining tool.
+                            Select a metric that returns a pair of numbers and choose "Average" or "Identity" as an aggregator.</li>
+                        <li>Replication was made more robust for fixes that are delivered and applied asynchronously. If a race was removed
+                            while still in tracking mode, fix-related operations may have been queued already on the replica when the
+                            tracked race is removed. The pending GPS fix operations then would have clogged the executor threads until
+                            the entire replica comes to a halt. With the change, race-related asynchronous operations will simply be
+                            dropped when the race to which they pertain is not found on the replica.</li>
+                        <li>When editing mark positions, all fixes are now displayed, including potential outliers.</li>
+                    </ul>
+
                     <h2 class="articleSubheadline">March 2018</h2>
                     <ul class="bulletList">
                         <li>Boats are now separate entities. See the "Tracked Races / Boats" tab in the admin console.
@@ -72,6 +105,7 @@
                         </li>
                     </ul>
 
+                    <h2 class="articleSubheadline">February 2018</h2>
                     <ul class="bulletList">
                         <li>Further improvements of maneuver detection algorithm were introduced. Mark Passing is no longer regarded as a separate maneuver type. Instead, it is regarded as a supplementary information which gets appended to a maneuver instance. Therefore, a new filtering dimension was added for maneuver data mining, which is boolean and is named as "Mark Passing".</li>
                         <li>Added leaderboard group name as a dimension to a leaderboard's context</li>
