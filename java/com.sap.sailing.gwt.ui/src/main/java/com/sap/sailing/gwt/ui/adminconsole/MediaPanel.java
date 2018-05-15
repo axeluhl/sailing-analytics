@@ -39,6 +39,7 @@ import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
+import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiVideoDialog;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -114,6 +115,22 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
             }
         });
         buttonAndFilterPanel.add(addUrlButton);
+        
+        Button multiVideo = new Button(stringMessages.multiVideoLinking());
+        multiVideo.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new MultiVideoDialog(sailingService, mediaService, stringMessages, errorReporter, new Runnable() {
+                    
+                    @Override
+                    public void run() {
+                        loadMediaTracks();
+                    }
+                }).center();
+            }
+        });
+        buttonAndFilterPanel.add(multiVideo);
+        
         add(buttonAndFilterPanel);
         
         Label lblFilterRaces = new Label(stringMessages.filterMediaByName() + ":");
