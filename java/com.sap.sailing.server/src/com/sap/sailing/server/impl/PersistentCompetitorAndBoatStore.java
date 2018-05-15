@@ -165,9 +165,9 @@ public class PersistentCompetitorAndBoatStore extends TransientCompetitorAndBoat
     @Override
     public CompetitorWithBoat updateCompetitorWithBoat(String idAsString, String newName, String newShortName, Color newRgbDisplayColor, String newEmail,
             Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile,
-            String searchTag, DynamicBoat boat) {
+            String searchTag) {
         CompetitorWithBoat result = super.updateCompetitorWithBoat(idAsString, newName, newShortName, newRgbDisplayColor, newEmail, newNationality,
-                newTeamImageUri, newFlagImageUri, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+                newTeamImageUri, newFlagImageUri, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
         storeTo.storeCompetitor(result);
         return result;
     }

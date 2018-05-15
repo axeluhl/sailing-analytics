@@ -9,6 +9,8 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.BoatChangeListener;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorChangeListener;
 import com.sap.sailing.domain.base.Fleet;
@@ -44,6 +46,7 @@ public class LeaderboardCacheManager {
     private final WeakHashMap<Leaderboard, NameChangeListener> nameChangeListeners;
     private final NamedReentrantReadWriteLock scoreCorrectionAndCompetitorAndNameChangeListenersLock;
     private final WeakHashMap<Leaderboard, CacheInvalidationUponCompetitorChangeListener> competitorChangeListeners;
+    private final WeakHashMap<Leaderboard, CacheInvalidationUponBoatChangeListener> boatChangeListeners;
     private final ConcurrentWeakHashMap<Leaderboard, ConcurrentMap<TrackedRace, Set<CacheInvalidationListener>>> invalidationListenersPerLeaderboard;
     private final WeakHashMap<Leaderboard, RaceColumnListener> raceColumnListeners;
     
@@ -84,10 +87,52 @@ public class LeaderboardCacheManager {
         }
     }
     
+    private class CacheInvalidationUponBoatChangeListener implements BoatChangeListener {
+        private static final long serialVersionUID = -8117073993497852698L;
+        private final Leaderboard leaderboard;
+        private final Set<Boat> boatsToStopObserving;
+
+        public CacheInvalidationUponBoatChangeListener(Leaderboard leaderboard) {
+            super();
+            this.leaderboard = leaderboard;
+            boatsToStopObserving = registerBoatListeners();
+        }
+
+        public Set<Boat> registerBoatListeners() {
+            Set<Boat> boatsToStopObserving = new HashSet<>();
+            for (Boat boat : leaderboard.getAllBoats()) {
+                boat.addBoatChangeListener(this); // start observing boat
+                boatsToStopObserving.add(boat);
+            }
+            return boatsToStopObserving;
+        }
+
+        public synchronized void removeFromAllBoats() {
+            for (Boat boat : boatsToStopObserving) {
+                boat.removeBoatChangeListener(this);
+            }
+        }
+
+        @Override
+        public void nameChanged(String oldName, String newName) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void colorChanged(Color oldColor, Color newColor) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void sailIdChanged(String oldSailId, String newSailId) {
+            removeFromCache(leaderboard);
+        }
+    }
+    
     private class CacheInvalidationUponCompetitorChangeListener implements CompetitorChangeListener {
         private static final long serialVersionUID = 8308312509904366143L;
         private final Leaderboard leaderboard;
-        private final Set<Competitor> observedCompetitors;
+        private final Set<Competitor> competitorsToStopObserving;
         
         /**
          * Registers this listener as listener for all of the <code>leaderboard</code>'s current
@@ -95,8 +140,7 @@ public class LeaderboardCacheManager {
          */
         public CacheInvalidationUponCompetitorChangeListener(Leaderboard leaderboard) {
             this.leaderboard = leaderboard;
-            observedCompetitors = new HashSet<>();
-            updateCompetitorListeners();
+            competitorsToStopObserving = registerCompetitorListeners();
         }
 
         @Override
@@ -119,23 +163,17 @@ public class LeaderboardCacheManager {
             removeFromCache(leaderboard);
         }
         
-        public synchronized void updateCompetitorListeners() {
-            Set<Competitor> competitorsToStopObserving = new HashSet<>(observedCompetitors);
+        public Set<Competitor> registerCompetitorListeners() {
+            Set<Competitor> competitorsToStopObserving = new HashSet<>();
             for (Competitor competitor : leaderboard.getCompetitors()) {
-                if (!observedCompetitors.contains(competitor)) {
-                    competitor.addCompetitorChangeListener(this); // start observing competitor
-                } else {
-                    competitorsToStopObserving.remove(competitor); // keep observing competitor
-                }
+                competitor.addCompetitorChangeListener(this); // start observing competitor
+                competitorsToStopObserving.add(competitor);
             }
-            for (Competitor competitorToStopObserving : competitorsToStopObserving) {
-                competitorToStopObserving.removeCompetitorChangeListener(this);
-                observedCompetitors.remove(competitorToStopObserving);
-            }
+            return competitorsToStopObserving;
         }
 
         public synchronized void removeFromAllCompetitors() {
-            for (Competitor competitor : observedCompetitors) {
+            for (Competitor competitor : competitorsToStopObserving) {
                 competitor.removeCompetitorChangeListener(this);
             }
         }
@@ -218,6 +256,7 @@ public class LeaderboardCacheManager {
         this.scoreCorrectionAndCompetitorAndNameChangeListenersLock = new NamedReentrantReadWriteLock(
                 "Score correction and competitor and name change listeners", /* fair */false);
         this.competitorChangeListeners = new WeakHashMap<>();
+        this.boatChangeListeners = new WeakHashMap<>();
     }
     
     private void removeFromCache(Leaderboard leaderboard) {
@@ -237,10 +276,12 @@ public class LeaderboardCacheManager {
         LockUtil.lockForWrite(scoreCorrectionAndCompetitorAndNameChangeListenersLock);
         final CacheInvalidationUponScoreCorrectionListener removedScoreCorrectionListener;
         final CacheInvalidationUponCompetitorChangeListener removedCompetitorChangeListener;
+        final CacheInvalidationUponBoatChangeListener removedBoatChangeListener;
         final NameChangeListener removedNameChangeListener;
         try {
             removedScoreCorrectionListener = scoreCorrectionListeners.remove(leaderboard);
             removedCompetitorChangeListener = competitorChangeListeners.remove(leaderboard);
+            removedBoatChangeListener = boatChangeListeners.remove(leaderboard);
             removedNameChangeListener = nameChangeListeners.remove(leaderboard);
         } finally {
             LockUtil.unlockAfterWrite(scoreCorrectionAndCompetitorAndNameChangeListenersLock);
@@ -250,6 +291,9 @@ public class LeaderboardCacheManager {
         }
         if (removedCompetitorChangeListener != null) {
             removedCompetitorChangeListener.removeFromAllCompetitors();
+        }
+        if (removedBoatChangeListener != null) {
+            removedBoatChangeListener.removeFromAllBoats();
         }
         if (removedNameChangeListener != null) {
             leaderboard.removeLeaderboardChangeListener(removedNameChangeListener);
@@ -286,15 +330,15 @@ public class LeaderboardCacheManager {
                 for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
                     registerListener(leaderboard, trackedRace);
                 }
-                final CacheInvalidationUponScoreCorrectionListener scoreCorrectionListener = new CacheInvalidationUponScoreCorrectionListener(
-                        leaderboard);
-                final CacheInvalidationUponCompetitorChangeListener competitorChangeListener = new CacheInvalidationUponCompetitorChangeListener(
-                        leaderboard);
+                final CacheInvalidationUponScoreCorrectionListener scoreCorrectionListener = new CacheInvalidationUponScoreCorrectionListener(leaderboard);
+                final CacheInvalidationUponCompetitorChangeListener competitorChangeListener = new CacheInvalidationUponCompetitorChangeListener(leaderboard);
+                final CacheInvalidationUponBoatChangeListener boatChangeListener = new CacheInvalidationUponBoatChangeListener(leaderboard);
                 final NameChangeListener nameChangeListener = new NameChangeListener(leaderboard);
                 leaderboard.addScoreCorrectionListener(scoreCorrectionListener);
                 leaderboard.addLeaderboardChangeListener(nameChangeListener);
                 scoreCorrectionListeners.put(leaderboard, scoreCorrectionListener);
                 competitorChangeListeners.put(leaderboard, competitorChangeListener);
+                boatChangeListeners.put(leaderboard, boatChangeListener);
                 nameChangeListeners.put(leaderboard, nameChangeListener);
                 final RaceColumnListener raceColumnListener = new RaceColumnListenerWithDefaultAction() {
                     private static final long serialVersionUID = 8165124797028386317L;

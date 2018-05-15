@@ -140,7 +140,7 @@ public interface CompetitorAndBoatStore extends CompetitorFactory, BoatFactory {
      */
     CompetitorWithBoat updateCompetitorWithBoat(String idAsString, String newName, String newShortName, Color newDisplayColor, String newEmail,
             Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
-            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat);
+            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag);
     
     /**
      * If a valid boat is returned and the caller has information available that could be used to update the boat,
