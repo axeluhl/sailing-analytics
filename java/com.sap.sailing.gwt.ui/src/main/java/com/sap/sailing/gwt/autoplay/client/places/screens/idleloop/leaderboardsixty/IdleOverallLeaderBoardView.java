@@ -10,4 +10,8 @@ public interface IdleOverallLeaderBoardView {
     }
 
     void onStop();
+
+    void scrollLeaderBoardToTop();
+
+    void scrollIntoView(int selected);
 }

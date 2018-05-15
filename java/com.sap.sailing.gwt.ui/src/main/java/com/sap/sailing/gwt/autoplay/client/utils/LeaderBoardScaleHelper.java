@@ -8,20 +8,19 @@ public class LeaderBoardScaleHelper {
     /**
      * Useable for 50% split designs, assumes the leaderboard is on the left side and has full height(apart from header)
      */
-    public static void scaleContentWidget(int headerHeight, Widget contentWidget) {
+    public static void scaleContentWidget(int headerHeight, Widget contentWidget, boolean independent) {
         int clientWidth = Window.getClientWidth();
         int contentWidth = contentWidget.getOffsetWidth();
         double scaleFactorX = clientWidth / (double) contentWidth;
-        // if(scaleFactorX > 1){
-        // scaleFactorX = 1;
-        // }
-        
+
         int clientHeight = Window.getClientHeight()-headerHeight;
         int contentHeight = contentWidget.getOffsetHeight();
         double scaleFactorY = clientHeight / (double)contentHeight;
-//        if(scaleFactorY < 1){
-//            scaleFactorY = 1;
-//        }
+        
+        if(!independent) {
+            scaleFactorX = Math.min(scaleFactorX, scaleFactorY);
+            scaleFactorY = Math.min(scaleFactorX, scaleFactorY);
+        }
         
         scaleContentWidget(contentWidget, scaleFactorX,scaleFactorY);
     }

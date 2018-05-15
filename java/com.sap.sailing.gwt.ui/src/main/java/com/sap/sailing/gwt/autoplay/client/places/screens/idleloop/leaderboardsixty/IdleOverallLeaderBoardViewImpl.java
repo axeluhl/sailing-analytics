@@ -3,15 +3,10 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboards
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayMainViewImpl;
-import com.sap.sailing.gwt.autoplay.client.utils.LeaderBoardScaleHelper;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
 public class IdleOverallLeaderBoardViewImpl extends ResizeComposite implements IdleOverallLeaderBoardView {
@@ -22,7 +17,8 @@ public class IdleOverallLeaderBoardViewImpl extends ResizeComposite implements I
     @UiField
     ResizableFlowPanel leaderBoardHolder;
 
-    private Timer resizer;
+
+    private MultiRaceLeaderboardPanel leaderboardPanel;
 
     interface LifeRaceWithRacemapViewImplUiBinder extends UiBinder<Widget, IdleOverallLeaderBoardViewImpl> {
     }
@@ -33,21 +29,22 @@ public class IdleOverallLeaderBoardViewImpl extends ResizeComposite implements I
 
     @Override
     public void onStop() {
-        resizer.cancel();
+    }
+
+    @Override
+    public void scrollLeaderBoardToTop() {
+        leaderBoardHolder.getElement().setScrollTop(0);
     }
 
     @Override
     public void startingWith(Slide7Presenter p, AcceptsOneWidget panel, MultiRaceLeaderboardPanel leaderboardPanel) {
         panel.setWidget(this);
+        this.leaderboardPanel = leaderboardPanel;
         leaderBoardHolder.add(leaderboardPanel);
-        resizer = new Timer() {
+    }
 
-            @Override
-            public void run() {
-                SortedCellTable<LeaderboardRowDTO> tbl = leaderboardPanel.getLeaderboardTable();
-                LeaderBoardScaleHelper.scaleContentWidget(AutoPlayMainViewImpl.SAP_HEADER_IN_PX + TOOLBAR_SIZE, tbl);
-            }
-        };
-        resizer.scheduleRepeating(100);
+    @Override
+    public void scrollIntoView(int selected) {
+        leaderboardPanel.scrollRowIntoView(selected);
     }
 }

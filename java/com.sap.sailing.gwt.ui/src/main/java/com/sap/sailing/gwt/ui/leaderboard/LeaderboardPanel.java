@@ -204,13 +204,16 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
         String determineBoatColorDivStyle(String competitorColor);
 
-        void afterConstructorHook(FlowPanel contentPanel, LeaderboardPanel<?> leaderboardPanel);
+        void afterConstructorHook(LeaderboardPanel<?> leaderboardPanel);
 
         void afterLeaderboardUpdate(LeaderboardDTO leaderboard);
 
         boolean preUpdateToolbarHook(LeaderboardDTO leaderboard);
 
         boolean hasRaceColumns();
+
+        void hookLeaderBoardAttachment(FlowPanel contentPanel,
+                FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO> leaderboardTable);
     }
 
     /**
@@ -549,7 +552,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         if (enableSyncedScroller) {
             contentPanel.add(new OverlayAssistantScrollPanel(leaderboardTable));
         } else {
-            contentPanel.add(leaderboardTable);
+            style.hookLeaderBoardAttachment(contentPanel, leaderboardTable);
         }
         if (showCompetitorFilterStatus) {
             contentPanel.add(createFilterDeselectionControl());
@@ -569,7 +572,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             loadCompleteLeaderboard(/* showProgress */ false);
         }
         updateSettings(settings);
-        style.afterConstructorHook(contentPanel, this);
+        style.afterConstructorHook(this);
     }
 
     public void scrollRowIntoView(int selected) {

@@ -3,14 +3,17 @@ package com.sap.sailing.gwt.autoplay.client.nodes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
+import com.sap.sailing.gwt.autoplay.client.nodes.base.ProvidesDuration;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleOverallLeaderBoardPlace;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.RaceColumnSelectionStrategies;
@@ -27,10 +30,11 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
+public class IdleOverallLeaderBoardNode extends FiresPlaceNode implements ProvidesDuration {
     private static final Logger logger = Logger.getLogger(IdleOverallLeaderBoardNode.class.getName());
     private final AutoPlayClientFactory cf;
     private Timer timer;
+    private Consumer<Integer> durationConsumer;
 
     public IdleOverallLeaderBoardNode(AutoPlayClientFactory cf) {
         super(IdleOverallLeaderBoardNode.class.getName());
@@ -55,35 +59,40 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
-
+        String leaderBoard = cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName();
+        
         cf.getSailingService().getOverallLeaderboardNamesContaining(
-                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(),
+                leaderBoard,
                 new MarkedAsyncCallback<List<String>>(new AsyncCallback<List<String>>() {
+
                     @Override
                     public void onSuccess(List<String> result) {
-                        if (result.size() == 1) {
-                            String overallLeaderboardName = result.get(0);
-                            CompetitorSelectionProvider provider = new CompetitorSelectionModel(true);
-                            
-                            MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null, null,
-                                    cf.getSailingService(), new AsyncActionsExecutor(), leaderboardSettings, false,
-                                    provider, timer, null, overallLeaderboardName, cf.getErrorReporter(),
-                                    StringMessages.INSTANCE, false, null, false, null, false, true, false, false, false,
-                                    new SixtyInchLeaderBoardStyle(true), FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
-
-                            IdleOverallLeaderBoardPlace place = new IdleOverallLeaderBoardPlace(leaderboardPanel);
-
-                            setPlaceToGo(place);
-                            firePlaceChangeAndStartTimer();
-                            getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getEvent().getName(),
-                                    cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName()));
+                        String leaderboardName = null;
+                        if (result.isEmpty()) {
+                            leaderboardName = leaderBoard;
                         } else {
-                            logger.warning("Not found any overleaderboardname");
+                            leaderboardName = result.get(0);
                         }
+                        CompetitorSelectionProvider provider = new CompetitorSelectionModel(true);
+
+                        MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null, null,
+                                cf.getSailingService(), new AsyncActionsExecutor(), leaderboardSettings, false,
+                                provider, timer, null, leaderboardName, cf.getErrorReporter(), StringMessages.INSTANCE,
+                                false, null, false, null, false, true, false, false, false,
+                                new SixtyInchLeaderBoardStyle(true), FlagImageResolverImpl.get(),
+                                Arrays.asList(DetailType.values()));
+
+                        IdleOverallLeaderBoardPlace place = new IdleOverallLeaderBoardPlace(leaderboardPanel, provider, durationConsumer);
+
+                        setPlaceToGo(place);
+                        firePlaceChangeAndStartTimer();
+                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getEvent().getName(),
+                                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName()));
                     }
 
                     @Override
                     public void onFailure(Throwable caught) {
+                        GWT.debugger();
                         logger.log(Level.SEVERE, "Remote call for Leaderboard loading failed", caught);
                     }
                 }));
@@ -95,5 +104,10 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
             timer.pause();
         }
         super.onStop();
+    }
+
+    @Override
+    public void setDurationConsumer(Consumer<Integer> durationConsumer) {
+        this.durationConsumer = durationConsumer;
     }
 }

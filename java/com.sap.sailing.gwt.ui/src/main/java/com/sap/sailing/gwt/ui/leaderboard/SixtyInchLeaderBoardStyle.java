@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Overflow;
+import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safecss.shared.SafeStylesBuilder;
@@ -8,10 +11,13 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.HeaderPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.autoplay.client.resources.LeaderboardTableResourcesSixty;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel.LeaderBoardStyle;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 
@@ -32,6 +38,7 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
     private LeaderboardPanel<?> leaderBoardPanel;
     private boolean showRaceColumns;
     private boolean ready;
+    private HeaderPanel headerPanel;
     
     public SixtyInchLeaderBoardStyle(boolean showRaceColumns) {
         this.showRaceColumns = showRaceColumns;
@@ -83,13 +90,12 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
     }
 
     @Override
-    public void afterConstructorHook(FlowPanel contentPanel, LeaderboardPanel<?> leaderboardPanel) {
+    public void afterConstructorHook(LeaderboardPanel<?> leaderboardPanel) {
         this.leaderBoardPanel = leaderboardPanel;
         leaderboardPanel.getLeaderboardTable().getElement().getStyle().setMarginTop(0, Unit.PX);
-        Widget toolbarPanel = leaderboardPanel.createToolbarPanel();
-        contentPanel.add(toolbarPanel);
+//        Widget toolbarPanel = leaderboardPanel.createToolbarPanel();
+//        .setFooterWidget(toolbarPanel);
         leaderboardPanel.playPause.setVisible(false);
-
         leaderboardPanel.updateToolbar(laterInit);
         ready = true;
     }
@@ -109,5 +115,21 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
     @Override
     public boolean hasRaceColumns() {
         return showRaceColumns;
+    }
+
+    @Override
+    public void hookLeaderBoardAttachment(FlowPanel contentPanel,
+            FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO> leaderboardTable) {
+//        contentPanel.clear();
+//        contentPanel.getElement().getStyle().setPosition(Position.STATIC);
+        SimplePanel wrapper = new SimplePanel(leaderboardTable);
+        contentPanel.add(wrapper);
+        Style style = wrapper.getElement().getStyle();
+        style.setOverflow(Overflow.HIDDEN);
+        style.setLeft(0, Unit.PX);;
+        style.setRight(0, Unit.PX);
+        style.setTop(0, Unit.PX);
+        style.setBottom(70, Unit.PX);
+        style.setPosition(Position.ABSOLUTE);
     }
 }
