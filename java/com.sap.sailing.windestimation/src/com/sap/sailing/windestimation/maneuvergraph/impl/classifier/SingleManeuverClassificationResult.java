@@ -4,9 +4,11 @@ import java.util.Collection;
 
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.windestimation.maneuvergraph.CoarseGrainedManeuverType;
 import com.sap.sailing.windestimation.maneuvergraph.CoarseGrainedPointOfSail;
+import com.sap.sailing.windestimation.maneuvergraph.impl.ProbabilityUtil;
 
 /**
  * 
@@ -19,11 +21,21 @@ public class SingleManeuverClassificationResult {
             .values().length];
     private final double[] likelihoodPerManeuverType;
     private final CompleteManeuverCurveWithEstimationData maneuver;
+    private double tackProbabilityBonus = 0.0;
+    private final boolean cleanManeuverBeginning;
+    private final boolean cleanManeuverEnd;
 
     public SingleManeuverClassificationResult(CompleteManeuverCurveWithEstimationData maneuver,
-            double[] likelihoodPerManeuverType, boolean cleanManeuverBoundaries) {
+            double[] likelihoodPerManeuverType, boolean cleanManeuverBeginning, boolean cleanManeuverEnd) {
         this.maneuver = maneuver;
         this.likelihoodPerManeuverType = likelihoodPerManeuverType;
+        this.cleanManeuverBeginning = cleanManeuverBeginning;
+        this.cleanManeuverEnd = cleanManeuverEnd;
+        computeLikelihoodsForPointOfSailAfterManeuver();
+    }
+
+    private void computeLikelihoodsForPointOfSailAfterManeuver() {
+        double courseChangeDeg = maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees();
         SpeedWithBearing lowestSpeedWithinManeuverMainCurve = maneuver.getMainCurve().getLowestSpeed();
         double courseChangeDegUntilLowestSpeed = maneuver.getMainCurve().getSpeedWithBearingBefore().getBearing()
                 .getDifferenceTo(lowestSpeedWithinManeuverMainCurve.getBearing()).getDegrees();
@@ -31,18 +43,13 @@ public class SingleManeuverClassificationResult {
             courseChangeDegUntilLowestSpeed = courseChangeDegUntilLowestSpeed < 0
                     ? courseChangeDegUntilLowestSpeed + 360 : courseChangeDegUntilLowestSpeed - 360;
         }
-        computeLikelihoodsForPointOfSailAfterManeuver(courseChangeDegUntilLowestSpeed, cleanManeuverBoundaries);
-    }
-
-    private void computeLikelihoodsForPointOfSailAfterManeuver(double courseChangeDegUntilLowestSpeed,
-            boolean cleanManeuverBoundaries) {
-        double courseChangeDeg = maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees();
         for (CoarseGrainedPointOfSail pointOfSailAfterManeuver : CoarseGrainedPointOfSail.values()) {
             double likelihoodSum = 0;
             int numberOfLikelihoodSummands = 0;
             for (CoarseGrainedManeuverType maneuverType : CoarseGrainedManeuverType.values()) {
                 if (likelihoodPerManeuverType[maneuverType.ordinal()] != 0) {
                     boolean addLikelihood = false;
+                    boolean addTackProbabilityBonus = false;
                     switch (maneuverType) {
                     case TACK:
                         if (courseChangeDeg < 0
@@ -54,6 +61,7 @@ public class SingleManeuverClassificationResult {
                                 || (courseChangeDeg >= 110
                                         && pointOfSailAfterManeuver == CoarseGrainedPointOfSail.REACHING_STARBOARD)) {
                             addLikelihood = true;
+                            addTackProbabilityBonus = true;
                         }
                         break;
                     case JIBE:
@@ -100,21 +108,20 @@ public class SingleManeuverClassificationResult {
                         }
                         break;
                     case _180:
-                        // TODO analyze speed ratio
                         SpeedWithBearing speedWithBearingBefore = maneuver.getCurveWithUnstableCourseAndSpeed()
                                 .getSpeedWithBearingBefore();
                         SpeedWithBearing speedWithBearingAfter = maneuver.getCurveWithUnstableCourseAndSpeed()
                                 .getSpeedWithBearingAfter();
                         double enteringExitingSpeedRatio = speedWithBearingBefore.getKnots()
                                 / speedWithBearingAfter.getKnots();
-                        if (enteringExitingSpeedRatio > 1.15 && Math.abs(courseChangeDegUntilLowestSpeed) < 20) {
-                            if (courseChangeDeg < 0 && pointOfSailAfterManeuver.getLegType() == LegType.DOWNWIND
+                        if (enteringExitingSpeedRatio < 0.85 && Math.abs(courseChangeDegUntilLowestSpeed) < 20) {
+                            if (pointOfSailAfterManeuver.getLegType() == LegType.DOWNWIND
                                     || pointOfSailAfterManeuver.getLegType() == LegType.REACHING) {
                                 addLikelihood = true;
                             }
-                        } else if (enteringExitingSpeedRatio < 0.85
+                        } else if (enteringExitingSpeedRatio > 1.15
                                 && Math.abs(courseChangeDeg - courseChangeDegUntilLowestSpeed) < 20) {
-                            if (courseChangeDeg < 0 && pointOfSailAfterManeuver.getLegType() == LegType.UPWIND
+                            if (pointOfSailAfterManeuver.getLegType() == LegType.UPWIND
                                     || pointOfSailAfterManeuver.getLegType() == LegType.REACHING) {
                                 addLikelihood = true;
                             }
@@ -125,6 +132,12 @@ public class SingleManeuverClassificationResult {
                             }
                         } else {
                             addLikelihood = true;
+                        }
+                        if (addLikelihood) {
+                            if (courseChangeDeg < 0 && pointOfSailAfterManeuver.getTack() == Tack.PORT
+                                    || courseChangeDeg > 0 && pointOfSailAfterManeuver.getTack() == Tack.STARBOARD) {
+                                addTackProbabilityBonus = true;
+                            }
                         }
                         break;
                     case _360:
@@ -184,12 +197,18 @@ public class SingleManeuverClassificationResult {
                     if (addLikelihood) {
                         likelihoodSum += likelihoodPerManeuverType[maneuverType.ordinal()];
                         ++numberOfLikelihoodSummands;
+                        if (addTackProbabilityBonus) {
+                            likelihoodSum += tackProbabilityBonus;
+                        }
                     }
                 }
             }
-            likelihoodsForPointOfSailAfterManeuvers[pointOfSailAfterManeuver.ordinal()] = likelihoodSum
-                    / numberOfLikelihoodSummands;
+            if (numberOfLikelihoodSummands > 0) {
+                likelihoodsForPointOfSailAfterManeuvers[pointOfSailAfterManeuver.ordinal()] = likelihoodSum
+                        / numberOfLikelihoodSummands;
+            }
         }
+        ProbabilityUtil.normalizeLikelihoodArray(likelihoodsForPointOfSailAfterManeuvers, 0.05);
     }
 
     public CompleteManeuverCurveWithEstimationData getManeuver() {
@@ -200,9 +219,33 @@ public class SingleManeuverClassificationResult {
         return likelihoodPerManeuverType[maneuverType.ordinal()];
     }
 
-    public double getLikelihoodForPointOfSailAfterManeuver(CoarseGrainedPointOfSail pointOfSailBeforeManeuver,
-            double tackProbabilityBonus) {
+    public double getLikelihoodForPointOfSailAfterManeuver(CoarseGrainedPointOfSail pointOfSailBeforeManeuver) {
         return likelihoodsForPointOfSailAfterManeuvers[pointOfSailBeforeManeuver.ordinal()];
+    }
+
+    public boolean setTackProbabilityBonus(double tackProbabilityBonus) {
+        if (Math.abs(this.tackProbabilityBonus - tackProbabilityBonus) > 0.0001) {
+            this.tackProbabilityBonus = tackProbabilityBonus;
+            computeLikelihoodsForPointOfSailAfterManeuver();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isCleanManeuverBoundaries() {
+        return cleanManeuverBeginning && cleanManeuverEnd;
+    }
+
+    public boolean isCleanManeuverBeginning() {
+        return cleanManeuverBeginning;
+    }
+
+    public boolean isCleanManeuverEnd() {
+        return cleanManeuverEnd;
+    }
+
+    public double getTackProbabilityBonus() {
+        return tackProbabilityBonus;
     }
 
 }

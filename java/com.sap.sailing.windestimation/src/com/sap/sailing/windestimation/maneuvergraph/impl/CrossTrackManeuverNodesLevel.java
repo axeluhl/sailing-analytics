@@ -1,13 +1,10 @@
 package com.sap.sailing.windestimation.maneuvergraph.impl;
 
-import java.util.ListIterator;
-
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
 import com.sap.sailing.windestimation.maneuvergraph.ManeuverNodesLevel;
 import com.sap.sailing.windestimation.maneuvergraph.ManeuverNodesLevelFactory;
-import com.sap.sse.common.Util.Pair;
 
 /**
  * 
@@ -39,8 +36,8 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
                     SingleTrackManeuverNodesLevel previousLevelNextSingleTrackLevel = previousLevel
                             .getSingleTrackManeuverNodesLevel().getNextLevel();
                     if (previousLevelNextSingleTrackLevel != null) {
-                        double courseDiffBetweenThisLevelAndPreviousLevelNextSingleTrackLevel = this.getCourse()
-                                .getDifferenceTo(previousLevelNextSingleTrackLevel.getCourse()).getDegrees();
+                        double courseDiffBetweenThisLevelAndPreviousLevelNextSingleTrackLevel = this.getCourseAfter()
+                                .getDifferenceTo(previousLevelNextSingleTrackLevel.getCourseAfter()).getDegrees();
                         FineGrainedPointOfSail nextSingleTrackNode = currentNode
                                 .getNextPointOfSail(courseDiffBetweenThisLevelAndPreviousLevelNextSingleTrackLevel);
                         probabilitiesSum += previousLevelNextSingleTrackLevel
@@ -52,15 +49,23 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
                         .getSingleTrackManeuverNodesLevel();
                 SingleTrackManeuverNodesLevel thisLevelPreviousSingleTrackLevel = thisLevelCurrentSingleTrackLevel
                         .getPreviousLevel();
+                FineGrainedPointOfSail previousSingleTrackNode;
                 if (thisLevelPreviousSingleTrackLevel != null) {
                     double courseDiffBetweenThisLevelPreviousSingleTrackLevelAndPreviousLevel = thisLevelPreviousSingleTrackLevel
-                            .getCourse().getDifferenceTo(previousLevel.getCourse()).getDegrees();
-                    FineGrainedPointOfSail previousSingleTrackNode = previousNode
+                            .getCourseAfter().getDifferenceTo(previousLevel.getCourseAfter()).getDegrees();
+                    previousSingleTrackNode = previousNode
                             .getNextPointOfSail(courseDiffBetweenThisLevelPreviousSingleTrackLevelAndPreviousLevel);
-                    probabilitiesSum += thisLevelCurrentSingleTrackLevel
-                            .getProbabilityFromPreviousLevelNodeToThisLevelNode(previousSingleTrackNode, currentNode);
-                    probabilitiesCount++;
+                } else if (previousLevel != null) {
+                    double courseDiffBetweenThisLevelPreviousSingleTrackLevelAndPreviousLevel = getCourseBefore()
+                            .getDifferenceTo(previousLevel.getCourseAfter()).getDegrees();
+                    previousSingleTrackNode = previousNode
+                            .getNextPointOfSail(courseDiffBetweenThisLevelPreviousSingleTrackLevelAndPreviousLevel);
+                } else {
+                    previousSingleTrackNode = previousNode;
                 }
+                probabilitiesSum += thisLevelCurrentSingleTrackLevel
+                        .getProbabilityFromPreviousLevelNodeToThisLevelNode(previousSingleTrackNode, currentNode);
+                probabilitiesCount++;
                 double probability = probabilitiesSum / probabilitiesCount
                         * getNodeTransitionPenaltyFactor(previousNode, currentNode);
                 setProbabilityFromPreviousLevelNodeToThisLevelNode(previousNode, currentNode, probability);
@@ -72,6 +77,9 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
 
     private double getNodeTransitionPenaltyFactor(FineGrainedPointOfSail previousNode,
             FineGrainedPointOfSail currentNode) {
+        if (getPreviousLevel() == null) {
+            return 1;
+        }
         double windCourseInDegreesOfPreviousNode = getPreviousLevel().getWindCourseInDegrees(previousNode);
         double windCourseInDegreesOfCurrentNode = getWindCourseInDegrees(currentNode);
         double absWindCourseShift = Math.abs(windCourseInDegreesOfPreviousNode - windCourseInDegreesOfCurrentNode);
@@ -106,20 +114,13 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
     }
 
     @Override
-    public Pair<CrossTrackManeuverNodesLevel, FineGrainedPointOfSail> getPreviousManeuverNodesLevelOfSameTrack(
-            ListIterator<Pair<CrossTrackManeuverNodesLevel, FineGrainedPointOfSail>> iteratorWithCurrentManeuverAsNext) {
-        SingleTrackManeuverNodesLevel previousLevelOfSingleManeuverNodesLevelTrack = this
-                .getSingleTrackManeuverNodesLevel().getPreviousLevel();
-        if (previousLevelOfSingleManeuverNodesLevelTrack != null) {
-            while (iteratorWithCurrentManeuverAsNext.hasPrevious()) {
-                Pair<CrossTrackManeuverNodesLevel, FineGrainedPointOfSail> pair = iteratorWithCurrentManeuverAsNext
-                        .previous();
-                if (pair.getA().getSingleTrackManeuverNodesLevel() == previousLevelOfSingleManeuverNodesLevelTrack) {
-                    return pair;
-                }
-            }
-        }
-        return null;
+    public boolean isManeuverBeginningClean() {
+        return singleTrackManeuverNodesLevel.isManeuverBeginningClean();
+    }
+
+    @Override
+    public boolean isManeuverEndClean() {
+        return singleTrackManeuverNodesLevel.isManeuverEndClean();
     }
 
     @Override
@@ -141,11 +142,6 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
                 }
             }
         }
-    }
-
-    @Override
-    public double getTackProbabilityBonus() {
-        return singleTrackManeuverNodesLevel.getTackProbabilityBonus();
     }
 
     @Override

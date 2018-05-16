@@ -23,16 +23,16 @@ public class PolarDataImporter {
     }
 
     public InputStream retrievePolarDataRegressionAsBytes() throws IOException, ParseException {
-        System.out.println("Loading polar regression data from remote server " + polarDataSourceUrl);
+        LoggingUtil.logInfo("Loading polar regression data from remote server " + polarDataSourceUrl);
         final InputStream inputStream = getContentFromResponse();
-        System.out.println("Loading polar regression data succeeded");
+        LoggingUtil.logInfo("Loading polar regression data succeeded");
         return inputStream;
     }
 
     public void persistPolarDataRegressionAsBytes(File targetFile, InputStream inputStream) throws IOException {
-        System.out.println("Persisting polar regression data");
+        LoggingUtil.logInfo("Persisting polar regression data");
         FileUtils.copyInputStreamToFile(inputStream, targetFile);
-        System.out.println("Persisting polar regression data succeeded");
+        LoggingUtil.logInfo("Persisting polar regression data succeeded");
     }
 
     private String getAPIString() {

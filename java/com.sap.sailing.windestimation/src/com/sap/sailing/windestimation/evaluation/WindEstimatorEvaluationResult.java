@@ -151,80 +151,84 @@ public class WindEstimatorEvaluationResult {
     }
 
     public double getAccuracyOfWindDirectionEstimation() {
-        return 1.0 * numberOfCorrectWindDirectionEstimations
-                / (numberOfCorrectWindDirectionEstimations + numberOfIncorrectWindDirectionEstimations);
+        return nullSafeDivision(numberOfCorrectWindDirectionEstimations,
+                numberOfCorrectWindDirectionEstimations + numberOfIncorrectWindDirectionEstimations);
     }
 
     public double getAccuracyOfWindSpeedEstimation() {
-        return 1.0 * numberOfCorrectWindSpeedEstimations
-                / (numberOfCorrectWindSpeedEstimations + numberOfIncorrectWindSpeedEstimations);
+        return nullSafeDivision(numberOfCorrectWindSpeedEstimations,
+                numberOfCorrectWindSpeedEstimations + numberOfIncorrectWindSpeedEstimations);
     }
 
     public double getAccuracyOfWindDirectionWithSpeedEstimation() {
-        return 1.0 * numberOfCorrectWindDirectionWithSpeedEstimations
-                / (numberOfCorrectWindDirectionWithSpeedEstimations
-                        + numberOfIncorrectWindDirectionWithSpeedEstimations);
+        return nullSafeDivision(numberOfCorrectWindDirectionWithSpeedEstimations,
+                numberOfCorrectWindDirectionWithSpeedEstimations + numberOfIncorrectWindDirectionWithSpeedEstimations);
     }
 
     public double getAvgAbsWindCourseErrorInDegreesOfCorrectWindDirectionEstimations() {
-        return sumAbsWindCourseErrorInDegreesOfCorrectEstimations / numberOfCorrectWindDirectionEstimations;
+        return nullSafeDivision(sumAbsWindCourseErrorInDegreesOfCorrectEstimations,
+                numberOfCorrectWindDirectionEstimations);
     }
 
     public double getAvgAbsWindCourseErrorInDegreesOfIncorrectWindDirectionEstimations() {
-        return sumAbsWindCourseErrorInDegreesOfIncorrectEstimations / numberOfIncorrectWindDirectionEstimations;
+        return nullSafeDivision(sumAbsWindCourseErrorInDegreesOfIncorrectEstimations,
+                numberOfIncorrectWindDirectionEstimations);
     }
 
     public double getAvgAbsWindCourseErrorInDegreesOfCorrectAndIncorrectWindDirectionEstimations() {
-        return (sumAbsWindCourseErrorInDegreesOfCorrectEstimations
-                + sumAbsWindCourseErrorInDegreesOfIncorrectEstimations)
-                / (numberOfCorrectWindDirectionEstimations + numberOfIncorrectWindDirectionEstimations);
+        return nullSafeDivision(
+                sumAbsWindCourseErrorInDegreesOfCorrectEstimations
+                        + sumAbsWindCourseErrorInDegreesOfIncorrectEstimations,
+                numberOfCorrectWindDirectionEstimations + numberOfIncorrectWindDirectionEstimations);
     }
 
     public double getAvgAbsWindCourseErrorInDegreesOfCorrectWindDirectionWithSpeedEstimations() {
-        return sumAbsWindCourseErrorInDegreesOfCorrectWindDirectionWithSpeedEstimations
-                / numberOfCorrectWindDirectionWithSpeedEstimations;
+        return nullSafeDivision(sumAbsWindCourseErrorInDegreesOfCorrectWindDirectionWithSpeedEstimations,
+                numberOfCorrectWindDirectionWithSpeedEstimations);
     }
 
     public double getAvgAbsWindCourseErrorInDegreesOfIncorrectWindDirectionWithSpeedEstimations() {
-        return sumAbsWindCourseErrorInDegreesOfIncorrectWindDirectionWithSpeedEstimations
-                / numberOfIncorrectWindDirectionWithSpeedEstimations;
+        return nullSafeDivision(sumAbsWindCourseErrorInDegreesOfIncorrectWindDirectionWithSpeedEstimations,
+                numberOfIncorrectWindDirectionWithSpeedEstimations);
     }
 
     public double getAvgAbsWindCourseErrorInDegreesOfCorrectAndIncorrectWindDirectionWithSpeedEstimations() {
-        return (sumAbsWindCourseErrorInDegreesOfCorrectWindDirectionWithSpeedEstimations
-                + sumAbsWindCourseErrorInDegreesOfIncorrectWindDirectionWithSpeedEstimations)
-                / (numberOfCorrectWindDirectionWithSpeedEstimations
-                        + numberOfIncorrectWindDirectionWithSpeedEstimations);
+        return nullSafeDivision(
+                sumAbsWindCourseErrorInDegreesOfCorrectWindDirectionWithSpeedEstimations
+                        + sumAbsWindCourseErrorInDegreesOfIncorrectWindDirectionWithSpeedEstimations,
+                numberOfCorrectWindDirectionWithSpeedEstimations + numberOfIncorrectWindDirectionWithSpeedEstimations);
     }
 
     public double getAvgAbsWindSpeedErrorInKnotsOfCorrectWindSpeedEstimations() {
-        return sumAbsWindSpeedErrorInKnotsOfCorrectEstimations / numberOfCorrectWindSpeedEstimations;
+        return nullSafeDivision(sumAbsWindSpeedErrorInKnotsOfCorrectEstimations, numberOfCorrectWindSpeedEstimations);
     }
 
     public double getAvgAbsWindSpeedErrorInKnotsOfIncorrectWindSpeedEstimations() {
-        return sumAbsWindSpeedErrorInKnotsOfIncorrectEstimations / numberOfIncorrectWindSpeedEstimations;
+        return nullSafeDivision(sumAbsWindSpeedErrorInKnotsOfIncorrectEstimations,
+                numberOfIncorrectWindSpeedEstimations);
     }
 
     public double getAvgAbsWindSpeedErrorInKnotsOfCorrectAndIncorrectWindSpeedEstimations() {
-        return (sumAbsWindSpeedErrorInKnotsOfCorrectEstimations + sumAbsWindSpeedErrorInKnotsOfIncorrectEstimations)
-                / (numberOfCorrectWindSpeedEstimations + numberOfIncorrectWindSpeedEstimations);
+        return nullSafeDivision(
+                sumAbsWindSpeedErrorInKnotsOfCorrectEstimations + sumAbsWindSpeedErrorInKnotsOfIncorrectEstimations,
+                numberOfCorrectWindSpeedEstimations + numberOfIncorrectWindSpeedEstimations);
     }
 
     public double getAvgAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations() {
-        return sumAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations
-                / numberOfCorrectWindDirectionWithSpeedEstimations;
+        return nullSafeDivision(sumAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations,
+                numberOfCorrectWindDirectionWithSpeedEstimations);
     }
 
     public double getAvgAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations() {
-        return sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations
-                / numberOfIncorrectWindDirectionWithSpeedEstimations;
+        return nullSafeDivision(sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations,
+                numberOfIncorrectWindDirectionWithSpeedEstimations);
     }
 
     public double getAvgAbsWindSpeedErrorInKnotsOfCorrectAndIncorrectWindDirectionWithSpeedEstimations() {
-        return (sumAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations
-                + sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations)
-                / (numberOfCorrectWindDirectionWithSpeedEstimations
-                        + numberOfIncorrectWindDirectionWithSpeedEstimations);
+        return nullSafeDivision(
+                sumAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations
+                        + sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations,
+                numberOfCorrectWindDirectionWithSpeedEstimations + numberOfIncorrectWindDirectionWithSpeedEstimations);
     }
 
     public void printEvaluationStatistics() {
@@ -339,6 +343,13 @@ public class WindEstimatorEvaluationResult {
                 estimationCorrect ? getAvgAbsWindCourseErrorInDegreesOfCorrectWindDirectionEstimations() : 0,
                 estimationCorrect ? 0 : getAvgAbsWindCourseErrorInDegreesOfIncorrectWindDirectionEstimations(), 0, 0, 0,
                 0, 0, 0);
+    }
+
+    private double nullSafeDivision(double dividend, double divisor) {
+        if (divisor == 0) {
+            return 0;
+        }
+        return dividend / divisor;
     }
 
 }

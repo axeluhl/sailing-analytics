@@ -9,6 +9,7 @@ import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimat
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.windestimation.ManeuverAndPolarsBasedWindEstimator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
+import com.sap.sailing.windestimation.data.LoggingUtil;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sse.common.TimePoint;
 
@@ -35,6 +36,8 @@ public class WindEstimationEvaluatorImpl implements WindEstimatorEvaluator {
 
     private WindEstimatorEvaluationResult evaluateOnRace(ManeuverAndPolarsBasedWindEstimator windEstimator,
             RaceWithEstimationData raceWithEstimationData) {
+        LoggingUtil.logInfo("Evaluating on " + raceWithEstimationData.getRegattaName() + " Race "
+                + raceWithEstimationData.getRaceName());
         Map<TimePoint, Wind> targetWindPerTimePoint = new HashMap<>();
         for (CompetitorTrackWithEstimationData competitorTrackWithEstimationData : raceWithEstimationData
                 .getCompetitorTracks()) {
@@ -67,6 +70,9 @@ public class WindEstimationEvaluatorImpl implements WindEstimatorEvaluator {
                 }
             }
         }
+        LoggingUtil.logInfo("Evaluating on " + raceWithEstimationData.getRegattaName() + " Race "
+                + raceWithEstimationData.getRaceName() + " succeeded");
+        result.printEvaluationStatistics();
         return result.getAvgAsSingleResult(minAccuracyPerRaceForCorrectEstimation - 0.00001);
     }
 

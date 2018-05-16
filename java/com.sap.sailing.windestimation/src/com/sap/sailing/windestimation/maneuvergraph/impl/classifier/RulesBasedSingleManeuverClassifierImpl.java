@@ -35,9 +35,9 @@ public class RulesBasedSingleManeuverClassifierImpl implements SingleManeuverCla
         double[] likelihoodPerManeuverType = new double[CoarseGrainedManeuverType.values().length];
 
         double absCourseChangeDegMainCurve = Math.abs(maneuver.getMainCurve().getDirectionChangeInDegrees());
-        final boolean cleanManeuverBoundaries;
-        if (maneuver.isManeuverBeginningClean(previousManeuver) && maneuver.isManeuverEndClean(nextManeuver)) {
-            cleanManeuverBoundaries = true;
+        boolean cleanManeuverBeginning = maneuver.isManeuverBeginningClean(previousManeuver);
+        boolean cleanManeuverEnd = maneuver.isManeuverEndClean(nextManeuver);
+        if (cleanManeuverBeginning && cleanManeuverEnd) {
             if (absCourseChangeDegMainCurve <= 15) {
                 // jibe, bear away, head up - hard to distinguish
                 double bearAwayLikelihoodBonus = limitProbabilityBonus(computeBearAwayLikelihoodBonus(maneuver) / 4,
@@ -92,10 +92,10 @@ public class RulesBasedSingleManeuverClassifierImpl implements SingleManeuverCla
                 likelihoodPerManeuverType[CoarseGrainedManeuverType._360.ordinal()] = 1.0;
             }
         } else {
-            cleanManeuverBoundaries = false;
             Arrays.fill(likelihoodPerManeuverType, 1);
         }
-        return new SingleManeuverClassificationResult(maneuver, likelihoodPerManeuverType, cleanManeuverBoundaries);
+        return new SingleManeuverClassificationResult(maneuver, likelihoodPerManeuverType, cleanManeuverBeginning,
+                cleanManeuverEnd);
     }
 
     private double computeJibeLikelihoodBonus(CompleteManeuverCurveWithEstimationData maneuver) {
@@ -124,9 +124,9 @@ public class RulesBasedSingleManeuverClassifierImpl implements SingleManeuverCla
                             maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees(),
                             ManeuverType.JIBE);
             if (jibeLikelihoodWithTwaTws.getA() == 0) {
-                maneuverAngleBonus = -0.5;
+                maneuverAngleBonus = -0.1;
             } else {
-                maneuverAngleBonus = jibeLikelihoodWithTwaTws.getA() - 0.5;
+                maneuverAngleBonus = limitProbabilityBonus(jibeLikelihoodWithTwaTws.getA() - 0.5, -0.1, 0.5);
             }
         }
         double enteringExitingSpeedRatioBonus = limitProbabilityBonus(
@@ -169,9 +169,9 @@ public class RulesBasedSingleManeuverClassifierImpl implements SingleManeuverCla
                             maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees(),
                             ManeuverType.TACK);
             if (tackLikelihoodWithTwaTws.getA() == 0) {
-                maneuverAngleBonus = -0.5;
+                maneuverAngleBonus = -0.1;
             } else {
-                maneuverAngleBonus = tackLikelihoodWithTwaTws.getA() - 0.5;
+                maneuverAngleBonus = limitProbabilityBonus(tackLikelihoodWithTwaTws.getA() - 0.5, -0.1, 0.5);
             }
         }
         double enteringExitingSpeedRatioBonus = limitProbabilityBonus(
@@ -195,7 +195,7 @@ public class RulesBasedSingleManeuverClassifierImpl implements SingleManeuverCla
                 / maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots();
         double enteringExitingSpeedRatio = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore()
                 .getKnots() / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots();
-        double enteringExitingSpeedRatioBonus = limitProbabilityBonus(enteringExitingSpeedRatio / 2 - 0.5, 0.1);
+        double enteringExitingSpeedRatioBonus = limitProbabilityBonus(0.5 - enteringExitingSpeedRatio / 2, 0.2);
         double highestSpeedEnteringSpeedRatioBonus = limitProbabilityBonus(highestSpeedEnteringSpeedRatio - 1, 0.2);
         double lowestSpeedEnteringSpeedRatioBonus = limitProbabilityBonus(lowestSpeedEnteringSpeedRatio - 1, 0.2);
         double bearAwayLikelihoodBonus = (enteringExitingSpeedRatioBonus + highestSpeedEnteringSpeedRatioBonus

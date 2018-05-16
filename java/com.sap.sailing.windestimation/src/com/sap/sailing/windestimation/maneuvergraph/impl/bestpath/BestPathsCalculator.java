@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Stack;
 
 import com.sap.sailing.windestimation.maneuvergraph.CoarseGrainedPointOfSail;
 import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
@@ -162,10 +161,13 @@ public class BestPathsCalculator<T extends ManeuverNodesLevel<T>> {
                         .isCalculatedWithinLastSeconds(INTERVAL_FOR_WIND_PATH_DEVIATION_ANALYSIS_IN_SECONDS)) {
             TimePoint currentTimePoint = currentLevel.getManeuver().getTimePoint();
             T levelWithinTimePeriodLimitForWindDeviationAnalysis = currentLevel;
-            Stack<FineGrainedPointOfSail> pathForWindDeviationAnalysis = new Stack<>();
-            pathForWindDeviationAnalysis.add(currentNode);
+            LinkedList<FineGrainedPointOfSail> pathForWindDeviationAnalysis = new LinkedList<>();
             FineGrainedPointOfSail bestPreviousNodeForLevelWithinTimePeriodLimitForWindDeviationAnalysis = currentNode;
             while (true) {
+                if (bestPreviousNodeForLevelWithinTimePeriodLimitForWindDeviationAnalysis != null) {
+                    pathForWindDeviationAnalysis.add(0,
+                            bestPreviousNodeForLevelWithinTimePeriodLimitForWindDeviationAnalysis);
+                }
                 T previousLevelToCheck = levelWithinTimePeriodLimitForWindDeviationAnalysis.getPreviousLevel();
                 if (previousLevelToCheck != null && previousLevel.getManeuver().getTimePoint().until(currentTimePoint)
                         .asSeconds() <= INTERVAL_FOR_WIND_PATH_DEVIATION_ANALYSIS_IN_SECONDS) {
@@ -173,18 +175,13 @@ public class BestPathsCalculator<T extends ManeuverNodesLevel<T>> {
                     bestPreviousNodeForLevelWithinTimePeriodLimitForWindDeviationAnalysis = bestPathsPerLevel
                             .get(previousLevelToCheck).bestPreviousNodes[bestPreviousNodeForLevelWithinTimePeriodLimitForWindDeviationAnalysis
                                     .ordinal()];
-                    pathForWindDeviationAnalysis
-                            .push(bestPreviousNodeForLevelWithinTimePeriodLimitForWindDeviationAnalysis);
                 } else {
                     break;
                 }
             }
             newWindDeviationUntilNodeWithinBestPath = new WindRange(levelWithinTimePeriodLimitForWindDeviationAnalysis
-                    .getWindCourseInDegrees(bestPreviousNodeForLevelWithinTimePeriodLimitForWindDeviationAnalysis), 0,
-                    0, 0);
-            pathForWindDeviationAnalysis.pop();
-            FineGrainedPointOfSail pointOfSail;
-            while ((pointOfSail = pathForWindDeviationAnalysis.pop()) != null) {
+                    .getWindCourseInDegrees(pathForWindDeviationAnalysis.pop()), 0, 0, 0);
+            for (FineGrainedPointOfSail pointOfSail : pathForWindDeviationAnalysis) {
                 double secondsPassed = levelWithinTimePeriodLimitForWindDeviationAnalysis.getManeuver().getTimePoint()
                         .until(levelWithinTimePeriodLimitForWindDeviationAnalysis.getNextLevel().getManeuver()
                                 .getTimePoint())
@@ -260,8 +257,8 @@ public class BestPathsCalculator<T extends ManeuverNodesLevel<T>> {
             sumOfprobabilitiesOfBestPathToCoarseGrainedPointOfSail = probabilitiesOfBestPathToCoarseGrainedPointOfSail[coarseGrainedPointOfSail
                     .ordinal()];
         }
-        double bestPathConfidence = probabilitiesOfBestPathToCoarseGrainedPointOfSail[lastNode.ordinal()]
-                / sumOfprobabilitiesOfBestPathToCoarseGrainedPointOfSail;
+        double bestPathConfidence = probabilitiesOfBestPathToCoarseGrainedPointOfSail[lastNode
+                .getCoarseGrainedPointOfSail().ordinal()] / sumOfprobabilitiesOfBestPathToCoarseGrainedPointOfSail;
         return bestPathConfidence;
     }
 

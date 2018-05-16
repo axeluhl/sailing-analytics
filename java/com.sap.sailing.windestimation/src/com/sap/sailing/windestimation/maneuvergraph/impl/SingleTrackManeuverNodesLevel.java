@@ -1,7 +1,5 @@
 package com.sap.sailing.windestimation.maneuvergraph.impl;
 
-import java.util.ListIterator;
-
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -9,7 +7,6 @@ import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimat
 import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
 import com.sap.sailing.windestimation.maneuvergraph.ManeuverNodesLevelFactory;
 import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.SingleManeuverClassificationResult;
-import com.sap.sse.common.Util.Pair;
 
 /**
  * 
@@ -20,7 +17,6 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
 
     private final SingleManeuverClassificationResult maneuverClassificationResult;
     private final BoatClass boatClass;
-    private double tackProbabilityBonus = 0;
     private boolean calculationOfTransitionProbabilitiesNeeded = true;
 
     public SingleTrackManeuverNodesLevel(SingleManeuverClassificationResult singleManeuverClassificationResult,
@@ -33,8 +29,8 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
     @Override
     public void computeProbabilitiesFromPreviousLevelToThisLevel() {
         for (FineGrainedPointOfSail currentNode : FineGrainedPointOfSail.values()) {
-            double likelihoodForCurrentNode = maneuverClassificationResult.getLikelihoodForPointOfSailAfterManeuver(
-                    currentNode.getCoarseGrainedPointOfSail(), getTackProbabilityBonus());
+            double likelihoodForCurrentNode = maneuverClassificationResult
+                    .getLikelihoodForPointOfSailAfterManeuver(currentNode.getCoarseGrainedPointOfSail());
             if (getPreviousLevel() == null) {
                 setProbabilityFromPreviousLevelNodeToThisLevelNode(null, currentNode, likelihoodForCurrentNode);
             } else {
@@ -70,7 +66,7 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
 
     private double getNodeTransitionPenaltyFactor(FineGrainedPointOfSail previousNode,
             FineGrainedPointOfSail currentNode) {
-        double courseDifference = getPreviousLevel().getCourse().getDifferenceTo(getCourse()).getDegrees();
+        double courseDifference = getPreviousLevel().getCourseAfter().getDifferenceTo(getCourseAfter()).getDegrees();
         FineGrainedPointOfSail targetPointOfSail = previousNode.getNextPointOfSail(courseDifference);
         if (targetPointOfSail == currentNode) {
             return 1;
@@ -108,24 +104,9 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
     }
 
     @Override
-    public Pair<SingleTrackManeuverNodesLevel, FineGrainedPointOfSail> getPreviousManeuverNodesLevelOfSameTrack(
-            ListIterator<Pair<SingleTrackManeuverNodesLevel, FineGrainedPointOfSail>> iteratorWithCurrentManeuverAsNext) {
-        if (iteratorWithCurrentManeuverAsNext.hasPrevious()) {
-            return iteratorWithCurrentManeuverAsNext.previous();
-        }
-        return null;
-    }
-
-    @Override
     public void setTackProbabilityBonusToManeuver(double tackProbabilityBonus) {
-        this.calculationOfTransitionProbabilitiesNeeded = Math
-                .abs(tackProbabilityBonus - this.tackProbabilityBonus) > 0.001;
-        this.tackProbabilityBonus = tackProbabilityBonus;
-    }
-
-    @Override
-    public double getTackProbabilityBonus() {
-        return tackProbabilityBonus;
+        this.calculationOfTransitionProbabilitiesNeeded = maneuverClassificationResult
+                .setTackProbabilityBonus(tackProbabilityBonus);
     }
 
     @Override
@@ -141,6 +122,24 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
     @Override
     public CompleteManeuverCurveWithEstimationData getNextManeuverOfSameTrack() {
         return getNextLevel() == null ? null : getNextLevel().getManeuver();
+    }
+
+    @Override
+    public boolean isManeuverBeginningClean() {
+        SingleManeuverClassificationResult maneuverClassificationResult = this.maneuverClassificationResult;
+        if (maneuverClassificationResult == null) {
+            return getManeuver().isManeuverBeginningClean(getPreviousManeuverOfSameTrack());
+        }
+        return maneuverClassificationResult.isCleanManeuverBeginning();
+    }
+
+    @Override
+    public boolean isManeuverEndClean() {
+        SingleManeuverClassificationResult maneuverClassificationResult = this.maneuverClassificationResult;
+        if (maneuverClassificationResult == null) {
+            return getManeuver().isManeuverEndClean(getNextManeuverOfSameTrack());
+        }
+        return maneuverClassificationResult.isCleanManeuverEnd();
     }
 
 }

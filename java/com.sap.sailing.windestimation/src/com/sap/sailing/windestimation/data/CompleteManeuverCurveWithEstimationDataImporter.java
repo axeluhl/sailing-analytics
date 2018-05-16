@@ -8,7 +8,6 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +36,6 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
     public static final String REST_API_ESTIMATION_DATA_PATH = "/completeManeuverCurvesWithEstimationData";
     private final HttpClient client;
     private final EstimationDataPersistenceManager persistanceManager;
-    private final DateTimeFormatter logTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public CompleteManeuverCurveWithEstimationDataImporter() throws UnknownHostException {
         this.client = new SystemDefaultHttpClient();
@@ -51,37 +49,33 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
 
     public void importAllRegattas()
             throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
-        logInfo("Importer for CompleteManeuverCurveWithEstimationData just started");
-        logInfo("Dropping old database");
+        LoggingUtil.logInfo("Importer for CompleteManeuverCurveWithEstimationData just started");
+        LoggingUtil.logInfo("Dropping old database");
         persistanceManager.dropDb();
-        logInfo("Fetching all existing regatta names");
+        LoggingUtil.logInfo("Fetching all existing regatta names");
         ImportStatistics importStatistics = new ImportStatistics();
         HttpGet getAllRegattas = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH);
         JSONArray regattasJson = (JSONArray) getJsonFromResponse(client.execute(getAllRegattas));
-        logInfo(regattasJson.size() + " regatta names have been fetched");
+        LoggingUtil.logInfo(regattasJson.size() + " regatta names have been fetched");
         int i = 0;
         for (Object regattaJson : regattasJson) {
             String regattaName = (String) ((JSONObject) regattaJson).get("name");
-            logInfo("Processing regatta nr. " + ++i + ": \"" + regattaName + "\"");
+            LoggingUtil.logInfo("Processing regatta nr. " + ++i + ": \"" + regattaName + "\"");
             importRegatta(regattaName, importStatistics);
         }
-        logInfo("Import finished");
+        LoggingUtil.logInfo("Import finished");
         importStatistics.regattasCount = regattasJson.size();
         logImportStatistics(importStatistics);
     }
 
     private void logImportStatistics(ImportStatistics importStatistics) {
         Duration duration = Duration.between(importStatistics.startTime, LocalDateTime.now());
-        logInfo("Import statistics: \n\t" + importStatistics.regattasCount + " regattas\n\t"
+        LoggingUtil.logInfo("Import statistics: \n\t" + importStatistics.regattasCount + " regattas\n\t"
                 + importStatistics.racesCount + " races\n\t" + importStatistics.competitorTracksCount
                 + " competitor tracks\n\t" + importStatistics.maneuversCount
                 + " complete maneuver curves with estimation data\n--------------------------------------------\nTime passed: "
                 + duration.toHours() + "h " + (duration.toMinutes() - duration.toHours() * 60) + "m "
                 + duration.get(ChronoUnit.SECONDS) + "s");
-    }
-
-    private void logInfo(String logMessage) {
-        System.out.println(logTimeFormatter.format(LocalDateTime.now()) + " " + logMessage);
     }
 
     private void importRegatta(String regattaName, ImportStatistics importStatistics)
@@ -94,14 +88,14 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
             JSONArray fleets = (JSONArray) trackedRaces.get("fleets");
             for (Object fleetJson : fleets) {
                 JSONArray racesJson = (JSONArray) ((JSONObject) fleetJson).get("races");
-                logInfo("Regatta contains " + racesJson.size() + " races");
+                LoggingUtil.logInfo("Regatta contains " + racesJson.size() + " races");
                 for (Object raceJson : racesJson) {
                     JSONObject race = (JSONObject) raceJson;
                     int i = 0;
                     if ((boolean) race.get("isTracked") && !(boolean) race.get("isLive")
                             && (boolean) race.get("hasGpsData") && (boolean) race.get("hasWindData")) {
                         String trackedRaceName = (String) race.get("trackedRaceName");
-                        logInfo("Processing race nr. " + ++i + ": \"" + trackedRaceName + "\"");
+                        LoggingUtil.logInfo("Processing race nr. " + ++i + ": \"" + trackedRaceName + "\"");
                         importRace(regattaName, trackedRaceName, importStatistics);
                     }
                 }
@@ -135,7 +129,8 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
             }
         }
         persistanceManager.addRace(regattaName, trackedRaceName, competitorTracks);
-        logInfo("Imported " + competitorTracks.size() + " competitor tracks with " + maneuversCount + " maneuvers");
+        LoggingUtil.logInfo(
+                "Imported " + competitorTracks.size() + " competitor tracks with " + maneuversCount + " maneuvers");
         importStatistics.competitorTracksCount += competitorTracks.size();
         importStatistics.maneuversCount += maneuversCount;
     }

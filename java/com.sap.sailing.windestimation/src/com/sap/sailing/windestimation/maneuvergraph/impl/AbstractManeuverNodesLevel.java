@@ -48,7 +48,7 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
             for (FineGrainedPointOfSail previousNodeToSet : FineGrainedPointOfSail.values()) {
                 if (previousNodeToSet != pointOfSailBeforeManeuver) {
                     transitionProbabilitiesFromPreviousToThisNodesLevel[previousNodeToSet.ordinal()][thisLevelNode
-                            .ordinal()] = 0;
+                            .ordinal()] = 0.05;
                 } else {
                     transitionProbabilitiesFromPreviousToThisNodesLevel[previousNodeToSet.ordinal()][thisLevelNode
                             .ordinal()] = transitionProbability;
@@ -90,13 +90,18 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
     }
 
     @Override
-    public Bearing getCourse() {
+    public Bearing getCourseAfter() {
         return getManeuver().getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing();
     }
 
     @Override
+    public Bearing getCourseBefore() {
+        return getManeuver().getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getBearing();
+    }
+
+    @Override
     public double getWindCourseInDegrees(FineGrainedPointOfSail node) {
-        double windCourse = (getCourse().getDegrees() - node.getTwa() + 180) % 360;
+        double windCourse = (getCourseAfter().getDegrees() - node.getTwa() + 180) % 360;
         if (windCourse < 0) {
             windCourse += 360;
         }
@@ -105,7 +110,7 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
 
     @Override
     public double getWindCourseInDegrees(double twa) {
-        double windCourse = (getCourse().getDegrees() - twa + 180) % 360;
+        double windCourse = (getCourseAfter().getDegrees() - twa + 180) % 360;
         if (windCourse < 0) {
             windCourse += 360;
         }

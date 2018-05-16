@@ -64,7 +64,7 @@ public class WindTrackFromManeuverGraphExtractor<T extends ManeuverNodesLevel<T>
                     .getCoarseGrainedPointOfSail().getLegType()
                     && pointOfSailBeforeManeuver.getTack() != currentNode.getTack()
                     && Math.abs(currentLevel.getManeuver().getMainCurve().getDirectionChangeInDegrees()) < 110
-                    && currentLevel.isCleanManeuver(iterator)) {
+                    && currentLevel.isCleanManeuver() && !currentLevel.getManeuver().isMarkPassing()) {
                 ManeuverType tackOrJibe;
                 if (currentNode.getCoarseGrainedPointOfSail().getLegType() == LegType.UPWIND) {
                     tackOrJibe = ManeuverType.TACK;

@@ -1,7 +1,5 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
-import java.util.ListIterator;
-
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.BearingChangeAnalyzer;
@@ -10,7 +8,6 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData;
-import com.sap.sse.common.Util.Pair;
 
 /**
  * 
@@ -32,7 +29,9 @@ public interface ManeuverNodesLevel<SelfType extends ManeuverNodesLevel<SelfType
     double getProbabilityFromPreviousLevelNodeToThisLevelNode(FineGrainedPointOfSail previousLevelNode,
             FineGrainedPointOfSail thisLevelNode);
 
-    Bearing getCourse();
+    Bearing getCourseAfter();
+
+    Bearing getCourseBefore();
 
     default double getWindCourseInDegrees(FineGrainedPointOfSail node) {
         return getWindCourseInDegrees(node.getTwa());
@@ -111,42 +110,19 @@ public interface ManeuverNodesLevel<SelfType extends ManeuverNodesLevel<SelfType
         throw new IllegalStateException();
     }
 
-    Pair<SelfType, FineGrainedPointOfSail> getPreviousManeuverNodesLevelOfSameTrack(
-            ListIterator<Pair<SelfType, FineGrainedPointOfSail>> iteratorWithCurrentManeuverAsNext);
-
-    default boolean isCleanManeuver(
-            ListIterator<Pair<SelfType, FineGrainedPointOfSail>> iteratorWithCurrentManeuverAsPrevious) {
-        Pair<SelfType, FineGrainedPointOfSail> pair = iteratorWithCurrentManeuverAsPrevious.previous();
-        if (pair.getA() != this) {
-            throw new IllegalArgumentException(
-                    "The provided iterator does not point to this level by iteratorWithCurrentManeuverAsPrevious.previous() call");
-        }
-        FineGrainedPointOfSail pointOfSailAfterCurrentManeuver = pair.getB();
-        Pair<SelfType, FineGrainedPointOfSail> previousPairOfSameTrack = getPreviousManeuverNodesLevelOfSameTrack(
-                iteratorWithCurrentManeuverAsPrevious);
-        FineGrainedPointOfSail pointOfSailAfterPreviousManeuver = previousPairOfSameTrack == null ? null
-                : previousPairOfSameTrack.getB();
-        FineGrainedPointOfSail targetPointOfSailAfterPreviousManeuver = getPointOfSailBeforeManeuver(
-                pointOfSailAfterCurrentManeuver);
-        if (targetPointOfSailAfterPreviousManeuver != pointOfSailAfterPreviousManeuver) {
-            return false;
-        }
-        CompleteManeuverCurveWithEstimationData maneuver = getManeuver();
-        boolean maneuverBeginningClean = maneuver.isManeuverBeginningClean(getPreviousManeuverOfSameTrack());
-        boolean maneuverEndClean = maneuver.isManeuverEndClean(getNextManeuverOfSameTrack());
-        if (maneuver.isMarkPassing() || !maneuverBeginningClean || !maneuverEndClean) {
-            return false;
-        }
-        return true;
+    default boolean isCleanManeuver() {
+        return isManeuverBeginningClean() && isManeuverEndClean();
     }
+
+    boolean isManeuverBeginningClean();
+
+    boolean isManeuverEndClean();
 
     CompleteManeuverCurveWithEstimationData getPreviousManeuverOfSameTrack();
 
     CompleteManeuverCurveWithEstimationData getNextManeuverOfSameTrack();
 
     void setTackProbabilityBonusToManeuver(double tackProbabilityBonus);
-
-    double getTackProbabilityBonus();
 
     boolean isCalculationOfTransitionProbabilitiesNeeded();
 

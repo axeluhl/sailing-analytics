@@ -13,24 +13,7 @@ import com.sap.sailing.domain.common.Tack;
  *
  */
 public enum CoarseGrainedPointOfSail {
-    UPWIND_STARBOARD(FineGrainedPointOfSail.VERY_CLOSE_HAULED_STARBOARD, FineGrainedPointOfSail.CLOSE_HAULED_STARBOARD,
-            FineGrainedPointOfSail.CLOSE_REACH_STARBOARD), REACHING_STARBOARD(
-                    FineGrainedPointOfSail.BEAM_REACH_STARBOARD), DOWNWIND_STARBOARD(
-                            FineGrainedPointOfSail.BROAD_REACH_STARBOARD,
-                            FineGrainedPointOfSail.VERY_BROAD_REACH_STARBOARD,
-                            FineGrainedPointOfSail.RUNNING_STARBOARD), DOWNWIND_PORT(
-                                    FineGrainedPointOfSail.RUNNING_PORT, FineGrainedPointOfSail.VERY_BROAD_REACH_PORT,
-                                    FineGrainedPointOfSail.BROAD_REACH_PORT), REACHING_PORT(
-                                            FineGrainedPointOfSail.BEAM_REACH_PORT), UPWIND_PORT(
-                                                    FineGrainedPointOfSail.CLOSE_REACH_PORT,
-                                                    FineGrainedPointOfSail.CLOSE_HAULED_PORT,
-                                                    FineGrainedPointOfSail.VERY_CLOSE_HAULED_PORT);
-
-    private final FineGrainedPointOfSail[] fineGrainedPointOfSailCoverage;
-
-    private CoarseGrainedPointOfSail(FineGrainedPointOfSail... fineGrainedPointOfSailCoverage) {
-        this.fineGrainedPointOfSailCoverage = fineGrainedPointOfSailCoverage;
-    }
+    UPWIND_STARBOARD, REACHING_STARBOARD, DOWNWIND_STARBOARD, DOWNWIND_PORT, REACHING_PORT, UPWIND_PORT;
 
     public LegType getLegType() {
         switch (this) {
@@ -61,16 +44,14 @@ public enum CoarseGrainedPointOfSail {
         return null;
     }
 
-    public FineGrainedPointOfSail[] getFineGrainedPointOfSailCoverage() {
-        return fineGrainedPointOfSailCoverage;
-    }
-
     public Collection<CoarseGrainedPointOfSail> getNextPossiblePointOfSails(double degreesToAdd) {
         Set<CoarseGrainedPointOfSail> result = new HashSet<>();
-        for (FineGrainedPointOfSail fineGrainedPointOfSail : fineGrainedPointOfSailCoverage) {
-            CoarseGrainedPointOfSail coarseGrainedPointOfSail = fineGrainedPointOfSail.getNextPointOfSail(degreesToAdd)
-                    .getCoarseGrainedPointOfSail();
-            result.add(coarseGrainedPointOfSail);
+        for (FineGrainedPointOfSail fineGrainedPointOfSail : FineGrainedPointOfSail.values()) {
+            if (fineGrainedPointOfSail.getCoarseGrainedPointOfSail() == this) {
+                CoarseGrainedPointOfSail coarseGrainedPointOfSail = fineGrainedPointOfSail
+                        .getNextPointOfSail(degreesToAdd).getCoarseGrainedPointOfSail();
+                result.add(coarseGrainedPointOfSail);
+            }
         }
         return result;
     }
