@@ -9,7 +9,6 @@ import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 
@@ -25,10 +24,6 @@ public interface MongoObjectFactory {
     public void storeRoleDefinition(RoleDefinition role);
     
     public void deleteRoleDefinition(RoleDefinition role);
-    
-    public void storeTenant(Tenant tenant);
-    
-    public void deleteTenant(Tenant tenant);
     
     public void storeUserGroup(UserGroup group);
     

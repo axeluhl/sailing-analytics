@@ -24,8 +24,6 @@ import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
-import com.sap.sse.security.shared.Tenant;
-import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
@@ -88,7 +86,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * Same as {@link #createOwnership(String, UserImpl, Tenant, String)}, leaving the display name
      * of the object owned undefined.
      */
-    void createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner);
+    void createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner);
 
     /**
      * @param idOfOwnedObjectAsString
@@ -104,7 +102,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      *            as the object identified by {@link idOfOwnedObjectAsString} may change its name without notifying this
      *            store
      */
-    void createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner, String displayNameOfOwnedObject);
+    void createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject);
 
     void deleteOwnership(String idOfOwnedObjectAsString);
 
@@ -116,27 +114,13 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     Iterable<UserGroup> getUserGroupsOfUser(SecurityUser user);
 
-    Iterable<Tenant> getTenants();
-
-    Tenant getTenant(UUID id);
-
-    Tenant getTenantByName(String name);
-
     UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException;
 
-    Tenant createTenant(UUID id, String name) throws TenantManagementException, UserGroupManagementException;
-
-    void addUserToTenant(Tenant tenant, SecurityUser user);
-    
-    void removeUserFromTenant(Tenant tenant, SecurityUser user);
-    
     void addUserToUserGroup(UserGroup group, SecurityUser user);
     
     void removeUserFromUserGroup(UserGroup group, SecurityUser user);
 
     void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException;
-
-    void deleteTenant(Tenant tenant) throws TenantManagementException, UserGroupManagementException;
 
     Iterable<User> getUserList();
 
@@ -160,7 +144,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * @param validationBaseURL if <code>null</code>, no validation will be attempted
      */
-    SecurityUser createSimpleUser(String username, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException, TenantManagementException, UserGroupManagementException;
+    SecurityUser createSimpleUser(String username, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException, UserGroupManagementException;
 
     /**
      * @param validationBaseURL if <code>null</code>, no validation will be attempted
@@ -173,7 +157,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException;
 
-    SecurityUser createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException, TenantManagementException, UserGroupManagementException;
+    SecurityUser createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException, UserGroupManagementException;
 
     void deleteUser(String username) throws UserManagementException;
 

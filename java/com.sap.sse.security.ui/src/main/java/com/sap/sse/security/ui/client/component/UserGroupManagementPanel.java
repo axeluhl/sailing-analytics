@@ -17,18 +17,18 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
-public class TenantManagementPanel extends DockPanel {
-    private SingleSelectionModel<Tenant> tenantSingleSelectionModel;
-    private TenantListDataProvider tenantListDataProvider;
-    private TenantDetailPanel tenantDetailPanel;
+public class UserGroupManagementPanel extends DockPanel {
+    private SingleSelectionModel<UserGroup> userGroupSingleSelectionModel;
+    private UserGroupListDataProvider userGroupListDataProvider;
+    private UserGroupDetailPanel userGroupDetailPanel;
     
-    public TenantManagementPanel(final UserService userService, final StringMessages stringMessages) {
+    public UserGroupManagementPanel(final UserService userService, final StringMessages stringMessages) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         VerticalPanel west = new VerticalPanel();
         HorizontalPanel buttonPanel = new HorizontalPanel();
@@ -43,20 +43,20 @@ public class TenantManagementPanel extends DockPanel {
         buttonPanel.add(new Button(stringMessages.createTenant(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new CreateTenantDialog(stringMessages, userService, userManagementService, tenantListDataProvider).show();
+                new CreateUserGroupDialog(stringMessages, userService, userManagementService, userGroupListDataProvider).show();
             }
         }));
         buttonPanel.add(new Button(stringMessages.removeTenant(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Tenant tenant = tenantSingleSelectionModel.getSelectedObject();
-                if (tenant == null) {
+                UserGroup userGroup = userGroupSingleSelectionModel.getSelectedObject();
+                if (userGroup == null) {
                     Window.alert(stringMessages.youHaveToSelectATenant());
-                } else if (Window.confirm(stringMessages.doYouReallyWantToRemoveTenant(tenant.getName()))) {
-                    userManagementService.deleteTenant(tenant.getId().toString(), new AsyncCallback<SuccessInfo>() {
+                } else if (Window.confirm(stringMessages.doYouReallyWantToRemoveTenant(userGroup.getName()))) {
+                    userManagementService.deleteUserGroup(userGroup.getId().toString(), new AsyncCallback<SuccessInfo>() {
                         @Override
                         public void onSuccess(SuccessInfo result) {
-                            tenantListDataProvider.updateDisplays();
+                            userGroupListDataProvider.updateDisplays();
                             Window.alert(result.getMessage());
                         }
                         
@@ -68,24 +68,24 @@ public class TenantManagementPanel extends DockPanel {
                 }
             }
         }));
-        tenantSingleSelectionModel = new SingleSelectionModel<>();
+        userGroupSingleSelectionModel = new SingleSelectionModel<>();
         TextBox filterBox = new TextBox();
         filterBox.getElement().setPropertyString("placeholder", stringMessages.filterTenants());
-        final CellList<Tenant> tenantList = new CellList<Tenant>(new AbstractCell<Tenant>() {
+        final CellList<UserGroup> userGroupList = new CellList<UserGroup>(new AbstractCell<UserGroup>() {
             @Override
-            public void render(Context context, Tenant value, SafeHtmlBuilder sb) {
+            public void render(Context context, UserGroup value, SafeHtmlBuilder sb) {
                 if (value != null) {
                     sb.appendEscaped(value.getName());
                 }
             }
         });
-        tenantList.setSelectionModel(tenantSingleSelectionModel);
-        tenantListDataProvider = new TenantListDataProvider(userManagementService, filterBox);
-        tenantList.setPageSize(20);
-        tenantListDataProvider.addDataDisplay(tenantList);
+        userGroupList.setSelectionModel(userGroupSingleSelectionModel);
+        userGroupListDataProvider = new UserGroupListDataProvider(userManagementService, filterBox);
+        userGroupList.setPageSize(20);
+        userGroupListDataProvider.addDataDisplay(userGroupList);
         SimplePager tenantPager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50, true);
-        tenantPager.setDisplay(tenantList);
-        ScrollPanel tenantPanel = new ScrollPanel(tenantList);
+        tenantPager.setDisplay(userGroupList);
+        ScrollPanel tenantPanel = new ScrollPanel(userGroupList);
         VerticalPanel tenantListWrapper = new VerticalPanel();
         tenantListWrapper.add(filterBox);
         tenantListWrapper.add(tenantPanel);
@@ -95,9 +95,9 @@ public class TenantManagementPanel extends DockPanel {
         TextBox userFilterBox = new TextBox();
         userFilterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());
         VerticalPanel userListWrapper = new VerticalPanel();
-        tenantDetailPanel = new TenantDetailPanel(userFilterBox, tenantSingleSelectionModel, tenantListDataProvider, userManagementService, stringMessages);
+        userGroupDetailPanel = new UserGroupDetailPanel(userFilterBox, userGroupSingleSelectionModel, userGroupListDataProvider, userManagementService, stringMessages);
         userListWrapper.add(userFilterBox);
-        userListWrapper.add(tenantDetailPanel);
+        userListWrapper.add(userGroupDetailPanel);
         CaptionPanel userListCaption = new CaptionPanel(stringMessages.users());
         userListCaption.add(userListWrapper);
         HorizontalPanel listsWrapper = new HorizontalPanel();
@@ -108,7 +108,7 @@ public class TenantManagementPanel extends DockPanel {
     }
 
     public void updateTenantsAndUsers() {
-        tenantListDataProvider.updateDisplays();
-        tenantDetailPanel.updateLists();
+        userGroupListDataProvider.updateDisplays();
+        userGroupDetailPanel.updateLists();
     }
 }

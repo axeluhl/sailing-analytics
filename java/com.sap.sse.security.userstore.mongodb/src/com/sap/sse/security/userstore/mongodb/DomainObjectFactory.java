@@ -3,7 +3,6 @@ package com.sap.sse.security.userstore.mongodb;
 import java.util.Map;
 import java.util.UUID;
 
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.UserGroupProvider;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -11,10 +10,10 @@ import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 
 public interface DomainObjectFactory {
     Iterable<AccessControlListAnnotation> loadAllAccessControlLists(UserStore userStore);
@@ -30,14 +29,8 @@ public interface DomainObjectFactory {
      * {@link SecurityUser#getId() user ID}. {@link UserGroup#remove(SecurityUser)} and
      * {@link UserGroup#add(SecurityUser)} have to be used for this process.
      * <p>
-     * 
-     * {@link Tenant}s are special {@link UserGroup}s whose content is stored in the same DB collection as the
-     * {@link UserGroup} objects, but in addition their ID is kept in a separate table, thus marking them as tenants.
-     * 
-     * @return those {@link UserGroup}s that are not {@link Tenant}s in the first component of the pair; all
-     *         {@link Tenant}s found in the second component
      */
-    Pair<Iterable<UserGroup>, Iterable<Tenant>> loadAllUserGroupsAndTenantsWithProxyUsers();
+    Iterable<UserGroup> loadAllUserGroupsAndTenantsWithProxyUsers();
     
     /**
      * @param defaultTenantForRoleMigration
@@ -57,8 +50,8 @@ public interface DomainObjectFactory {
      *         expect valid IDs to be set; those objects need to be resolved against the full set of tenants and users
      *         loaded at a later point in time.
      */
-    Iterable<User> loadAllUsers(Map<UUID, RoleDefinition> roleDefinitionsById, Tenant defaultTenantForRoleMigration,
-            Map<UUID, Tenant> tenants, UserGroupProvider userGroupProvider) throws UserManagementException;
+    Iterable<User> loadAllUsers(Map<UUID, RoleDefinition> roleDefinitionsById, UserGroup defaultTenantForRoleMigration,
+            Map<UUID, UserGroup> userGroups, UserGroupProvider userGroupProvider) throws UserManagementException;
     
     Map<String, Object> loadSettings();
     

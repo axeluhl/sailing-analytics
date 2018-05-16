@@ -25,7 +25,6 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
-import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -44,7 +43,7 @@ public class SecurityResourceTest {
     private AccessControlStore accessControlStore;
 
     @Before
-    public void setUp() throws UserManagementException, MailException, TenantManagementException, UserGroupManagementException {
+    public void setUp() throws UserManagementException, MailException, UserGroupManagementException {
         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase().dropDatabase();
         ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());

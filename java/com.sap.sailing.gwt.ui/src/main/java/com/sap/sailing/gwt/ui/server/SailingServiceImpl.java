@@ -570,7 +570,6 @@ import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.Permission.DefaultModes;
 import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
 import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.server.SecurityDTOFactory;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -3946,7 +3945,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         getSecurityService().createAccessControlList(eventUuid.toString(), eventName);
         getSecurityService().createOwnership(eventUuid.toString(),
                 getSecurityService().getUserByName((String) SecurityUtils.getSubject().getPrincipal()),
-                getSecurityService().getTenantByName(tenantOwnerName), eventName);
+                getSecurityService().getUserGroupByName(tenantOwnerName), eventName);
         EventDTO result = getEventById(eventUuid, false);
         return result;
     }
@@ -4208,15 +4207,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     windFinderTrackerFactory, /* useCachedSpotsForTrackedRaces */ false));
         }
         final SecurityDTOFactory securityDTOFactory = new SecurityDTOFactory();
-        final Map<Tenant, Tenant> fromOriginalToStrippedDownTenant = new HashMap<>();
         final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
         final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
         final AccessControlListAnnotation accessControlList = getSecurityService().getAccessControlList(event.getId().toString());
         eventDTO.setAccessControlList(securityDTOFactory.createAccessControlListDTO(accessControlList==null?null:accessControlList.getAnnotation(),
-                fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         final OwnershipAnnotation ownership = getSecurityService().getOwnership(event.getId().toString());
         eventDTO.setOwnership(securityDTOFactory.createOwnershipDTO(ownership==null?null:ownership.getAnnotation(),
-                fromOriginalToStrippedDownTenant, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         return eventDTO;
     }
     

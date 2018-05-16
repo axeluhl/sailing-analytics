@@ -45,7 +45,7 @@ import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 import com.sap.sse.security.ui.client.component.RoleDefinitionsPanel;
-import com.sap.sse.security.ui.client.component.TenantManagementPanel;
+import com.sap.sse.security.ui.client.component.UserGroupManagementPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel;
 
@@ -315,14 +315,14 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                     }
                 }, getStringMessages().roles(), Permission.MANAGE_ROLES);
 
-        final TenantManagementPanel tenantManagementPanel = new TenantManagementPanel(getUserService(), StringMessages.INSTANCE);
+        final UserGroupManagementPanel userGroupManagementPanel = new UserGroupManagementPanel(getUserService(), StringMessages.INSTANCE);
         panel.addToTabPanel(advancedTabPanel,
-                new DefaultRefreshableAdminConsolePanel<TenantManagementPanel>(tenantManagementPanel) {
+                new DefaultRefreshableAdminConsolePanel<UserGroupManagementPanel>(userGroupManagementPanel) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        tenantManagementPanel.updateTenantsAndUsers();
+                        userGroupManagementPanel.updateTenantsAndUsers();
                     }
-                }, getStringMessages().tenantManagement(), Permission.MANAGE_USERS);
+                }, getStringMessages().userGroupManagement(), Permission.MANAGE_USERS);
 
         final FileStoragePanel fileStoragePanel = new FileStoragePanel(sailingService, this);
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<FileStoragePanel>(fileStoragePanel),

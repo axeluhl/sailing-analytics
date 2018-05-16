@@ -35,7 +35,7 @@ In the course of this concept document there will be no difference in meaning be
 
 The inital idea for this document is based on the existing Shiro RBAC system that handles roles that can imply permissions and that also supports directly granting permissions to a user. Furthermore, ACLs should be introduced. Those should solve the problem of “losing” implied permissions, e.g., upon ownership changes, because the access control lists are directly associated with the data object and do not depend on ownerships, whereas role-implied permissions may well be implied only if ownerships support this. Furthermore, an ACL can be used to explicitly revoke a permission that may otherwise have been implied for a user based on ownerships or the roles the user has assigned.
 
-The existing Shiro authorizing realm that checks for the roles and permissions directly assigned to a user would have to be extended by the ACL concept. This will form what we call a compound realm that if a permission is checked looks for the permission in the roles and permissions of the user *and* in the ACL of the data object. If either the roles and permissions or the ACL grants the permission the user is allowed access.
+The existing Shiro authorizing realm that checks for the roles and permissions directly assigned to a user would have to be extended by the ACL concept. This will form what we call a "compound realm" that if a permission is checked looks for the permission in the roles and permissions of the user *and* in the ACL of the data object. If either the roles and permissions or the ACL grants the permission and the ACL does not revoke the permission then the user is allowed access.
 
 ## Ownership
 

@@ -14,20 +14,20 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
-import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 
-public class TenantListDataProvider extends AbstractDataProvider<Tenant> {
+public class UserGroupListDataProvider extends AbstractDataProvider<UserGroup> {
     private UserManagementServiceAsync userManagementService;
     private TextBox filterBox;
     
-    public interface TenantListDataProviderChangeHandler {
+    public interface UserGroupListDataProviderChangeHandler {
         void onChange();
     }
     
-    private final List<TenantListDataProviderChangeHandler> handlers;
+    private final List<UserGroupListDataProviderChangeHandler> handlers;
     
-    public TenantListDataProvider(UserManagementServiceAsync userManagementService, TextBox filterBox) {
+    public UserGroupListDataProvider(UserManagementServiceAsync userManagementService, TextBox filterBox) {
        this.userManagementService = userManagementService;
        this.filterBox = filterBox;
        this.handlers = new ArrayList<>();
@@ -35,44 +35,44 @@ public class TenantListDataProvider extends AbstractDataProvider<Tenant> {
        filterBox.addChangeHandler(new ChangeHandler() {
            @Override
            public void onChange(ChangeEvent event) {
-               TenantListDataProvider.this.updateDisplays();
+               UserGroupListDataProvider.this.updateDisplays();
            }
        });
        filterBox.addKeyUpHandler(new KeyUpHandler() {
            @Override
            public void onKeyUp(KeyUpEvent event) {
-               TenantListDataProvider.this.updateDisplays();
+               UserGroupListDataProvider.this.updateDisplays();
            }
        });
     }
    
     @Override
-    protected void onRangeChanged(final HasData<Tenant> display) {
+    protected void onRangeChanged(final HasData<UserGroup> display) {
         final Range range = display.getVisibleRange();
-        userManagementService.getTenants(new AsyncCallback<Collection<Tenant>>() {
+        userManagementService.getUserGroups(new AsyncCallback<Collection<UserGroup>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
             }
    
             @Override
-            public void onSuccess(Collection<Tenant> result) {
-                List<Tenant> resultList = new ArrayList<>();
-                for (Tenant tenant : result) {
-                    if (tenant.getName().contains(filterBox.getText())) {
-                        resultList.add(tenant);
+            public void onSuccess(Collection<UserGroup> result) {
+                List<UserGroup> resultList = new ArrayList<>();
+                for (UserGroup userGroup : result) {
+                    if (userGroup.getName().contains(filterBox.getText())) {
+                        resultList.add(userGroup);
                     }
                 }
-                List<Tenant> show = new ArrayList<>();
+                List<UserGroup> show = new ArrayList<>();
                 int start = range.getStart();
                 int end = range.getStart() + range.getLength();
                 for (int i = start; show.size() < end && i < resultList.size(); i++) {
-                    final Tenant e = resultList.get(i);
+                    final UserGroup e = resultList.get(i);
                     show.add(e);
                 }
                 updateRowData(start, show);
                 updateRowCount(resultList.size(), true);
-                for (TenantListDataProviderChangeHandler handler : handlers) {
+                for (UserGroupListDataProviderChangeHandler handler : handlers) {
                     handler.onChange();
                 }
             }
@@ -80,12 +80,12 @@ public class TenantListDataProvider extends AbstractDataProvider<Tenant> {
     }
    
     public void updateDisplays() {
-        for (HasData<Tenant> hd : getDataDisplays()) {
+        for (HasData<UserGroup> hd : getDataDisplays()) {
             onRangeChanged(hd);
         }
     }
     
-    public void addChangeHandler(TenantListDataProviderChangeHandler handler) {
+    public void addChangeHandler(UserGroupListDataProviderChangeHandler handler) {
         handlers.add(handler);
     }
 }

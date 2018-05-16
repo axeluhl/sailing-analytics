@@ -34,16 +34,15 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
-import com.sap.sse.security.ui.client.component.TenantListDataProvider.TenantListDataProviderChangeHandler;
+import com.sap.sse.security.ui.client.component.UserGroupListDataProvider.UserGroupListDataProviderChangeHandler;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 
-public class TenantDetailPanel extends HorizontalPanel implements Handler, ChangeHandler, KeyUpHandler, TenantListDataProviderChangeHandler {
+public class UserGroupDetailPanel extends HorizontalPanel implements Handler, ChangeHandler, KeyUpHandler, UserGroupListDataProviderChangeHandler {
     private final TextBox filterBox;
-    private final SingleSelectionModel<Tenant> tenantSelectionModel;
+    private final SingleSelectionModel<UserGroup> userGroupSelectionModel;
     
     private final CellList<String> tenantUsersList;
     private final MultiSelectionModel<String> tenantUsersSelectionModel;
@@ -76,7 +75,7 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
     private class TenantUsersListDataProvider extends AbstractDataProvider<String> {
         @Override
         protected void onRangeChanged(HasData<String> display) {
-            UserGroup tenant = tenantSelectionModel.getSelectedObject();
+            UserGroup tenant = userGroupSelectionModel.getSelectedObject();
             List<String> result = new ArrayList<>();
             List<String> show = new ArrayList<>();
             final Range range = display.getVisibleRange();
@@ -108,7 +107,7 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
     private class AllUsersListDataProvider extends AbstractDataProvider<UserDTO> {
         @Override
         protected void onRangeChanged(HasData<UserDTO> display) {
-            UserGroup tenant = tenantSelectionModel.getSelectedObject();
+            UserGroup tenant = userGroupSelectionModel.getSelectedObject();
             final List<String> namesOfAlreadyAddedUsers = new ArrayList<>();
             if (tenant != null) {
                 for (final SecurityUser tenantUser : tenant.getUsers()) {
@@ -151,14 +150,14 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
         }
     }
     
-    public TenantDetailPanel(TextBox filterBox, SingleSelectionModel<Tenant> tenantSelectionModel, 
-            TenantListDataProvider tenantListDataProvider, UserManagementServiceAsync userManagementService,
+    public UserGroupDetailPanel(TextBox filterBox, SingleSelectionModel<UserGroup> tenantSelectionModel, 
+            UserGroupListDataProvider tenantListDataProvider, UserManagementServiceAsync userManagementService,
             StringMessages stringMessages) {
         this.filterBox = filterBox;
         filterBox.addChangeHandler(this);
         filterBox.addKeyUpHandler(this);
         tenantSelectionModel.addSelectionChangeHandler(this);
-        this.tenantSelectionModel = tenantSelectionModel;
+        this.userGroupSelectionModel = tenantSelectionModel;
         tenantListDataProvider.addChangeHandler(this);
         this.userManagementService = userManagementService;
         
@@ -204,7 +203,7 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
                     return;
                 }
                 for (final UserDTO user : users) {
-                    userManagementService.addUserToTenant(tenant.getId().toString(), user.getName(), new AsyncCallback<Void>() {
+                    userManagementService.addUserToUserGroup(tenant.getId().toString(), user.getName(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             Window.alert(stringMessages.couldNotAddUserToTenant(user.getName(), tenant.getName(), caught.getMessage()));
@@ -229,7 +228,7 @@ public class TenantDetailPanel extends HorizontalPanel implements Handler, Chang
                     return;
                 }
                 for (String username : users) {
-                    userManagementService.removeUserFromTenant(tenant.getId().toString(), username, new AsyncCallback<Void>() {
+                    userManagementService.removeUserFromUserGroup(tenant.getId().toString(), username, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             Window.alert(stringMessages.couldNotRemoveUserFromTenant(username, tenant.getName(), caught.getMessage()));

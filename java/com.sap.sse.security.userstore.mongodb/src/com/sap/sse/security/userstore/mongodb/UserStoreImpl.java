@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 import org.apache.shiro.SecurityUtils;
 
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.security.PreferenceConverter;
@@ -32,15 +31,13 @@ import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.Tenant;
-import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.TenantImpl;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
+import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 
 /**
  * An implementation of the {@link UserStore} interface, intended to store its state durably in a MongoDB instance.
@@ -66,17 +63,14 @@ public class UserStoreImpl implements UserStore {
 
     private String name = "MongoDB user store";
     
-    private final ConcurrentHashMap<UUID, Tenant> tenants;
-    private final ConcurrentHashMap<String, Tenant> tenantsByName;
-    
     /**
      * If a valid default tenant name was passed to the constructor, this field will contain a valid
-     * {@link Tenant} object whose name equals that of the default tenant name. It will have been used
+     * {@link UserGroup} object whose name equals that of the default tenant name. It will have been used
      * during role migration where string-based roles are mapped to a corresponding {@link RoleDefinition}
      * and the users with the original role will obtain a corresponding {@link Role} with this default
      * tenant as the {@link Role#getQualifiedForTenant() tenant qualifier}.
      */
-    private final Tenant defaultTenant;
+    private final UserGroup defaultTenant;
     
     private final ConcurrentHashMap<UUID, UserGroup> userGroups;
     private final ConcurrentHashMap<String, UserGroup> userGroupsByName;
@@ -136,15 +130,13 @@ public class UserStoreImpl implements UserStore {
      */
     private final transient MongoObjectFactory mongoObjectFactory;
 
-    public UserStoreImpl(String defaultTenantName) throws TenantManagementException, UserGroupManagementException, UserManagementException {
+    public UserStoreImpl(String defaultTenantName) throws UserGroupManagementException, UserManagementException {
         this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), defaultTenantName);
     }
     
     public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory,
-            String defaultTenantName) throws TenantManagementException, UserGroupManagementException, UserManagementException {
-        tenants = new ConcurrentHashMap<>();
-        tenantsByName = new ConcurrentHashMap<>();
+            String defaultTenantName) throws UserGroupManagementException, UserManagementException {
         roleDefinitions = new ConcurrentHashMap<>();
         userGroups = new ConcurrentHashMap<>();
         userGroupsByName = new ConcurrentHashMap<>();
@@ -182,19 +174,15 @@ public class UserStoreImpl implements UserStore {
             for (RoleDefinition roleDefinition : domainObjectFactory.loadAllRoleDefinitions()) {
                 roleDefinitions.put(UUID.fromString(roleDefinition.getId().toString()), roleDefinition);
             }
-            final Pair<Iterable<UserGroup>, Iterable<Tenant>> userGroupsAndTenants = domainObjectFactory.loadAllUserGroupsAndTenantsWithProxyUsers();
-            for (UserGroup group : userGroupsAndTenants.getA()) {
-                userGroups.put(group.getId(), group);
+            final Iterable<UserGroup> userGroups = domainObjectFactory.loadAllUserGroupsAndTenantsWithProxyUsers();
+            for (UserGroup group : userGroups) {
+                this.userGroups.put(group.getId(), group);
                 userGroupsByName.put(group.getName(), group);
             }
-            for (final Tenant tenant : userGroupsAndTenants.getB()) {
-                tenants.put(tenant.getId(), tenant);
-                tenantsByName.put(tenant.getName(), tenant);
-            }
-            final boolean defaultTenantWasCreated = (defaultTenantName != null && getTenantByName(defaultTenantName) == null);
+            final boolean defaultTenantWasCreated = (defaultTenantName != null && getUserGroupByName(defaultTenantName) == null);
             // identify, create and/or set default tenant
             defaultTenant = getOrCreateDefaultTenant(defaultTenantName);
-            for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, defaultTenant, tenants, this)) {
+            for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, defaultTenant, this.userGroups, this)) {
                 users.put(u.getName(), u);
                 if (defaultTenantWasCreated) {
                     // if the default tenant was just created, add all users to it
@@ -207,18 +195,11 @@ public class UserStoreImpl implements UserStore {
             }
             // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
             // replace them based on the username key:
-            for (final UserGroup group : userGroups.values()) {
+            for (final UserGroup group : this.userGroups.values()) {
                 migrateProxyUsersInGroupToRealUsersByUsername(group);
                 for (final SecurityUser userInGroup : group.getUsers()) {
                     Util.addToValueSet(usersInUserGroups, group, userInGroup);
                     Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
-                }
-            }
-            for (final Tenant tenant : tenants.values()) {
-                migrateProxyUsersInGroupToRealUsersByUsername(tenant);
-                for (final SecurityUser userInTenant : tenant.getUsers()) {
-                    Util.addToValueSet(usersInUserGroups, tenant, userInTenant);
-                    Util.addToValueSet(userGroupsContainingUser, userInTenant, tenant);
                 }
             }
             for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
@@ -240,18 +221,18 @@ public class UserStoreImpl implements UserStore {
     }
     
     @Override
-    public Tenant getDefaultTenant() {
+    public UserGroup getDefaultTenant() {
         return defaultTenant;
     }
 
-    private Tenant getOrCreateDefaultTenant(String defaultTenantName)
-            throws TenantManagementException, UserGroupManagementException {
-        final Tenant result;
+    private UserGroup getOrCreateDefaultTenant(String defaultTenantName)
+            throws UserGroupManagementException {
+        final UserGroup result;
         if (defaultTenantName != null) {
-            final Tenant existingTenant =  getTenantByName(defaultTenantName);
+            final UserGroup existingTenant = getUserGroupByName(defaultTenantName);
             if (existingTenant == null) {
                 logger.info("Couldn't find default tenant "+defaultTenantName+"; creating it");
-                result = createTenant(UUID.randomUUID(), defaultTenantName);
+                result = createUserGroup(UUID.randomUUID(), defaultTenantName);
             } else {
                 result = existingTenant;
             }
@@ -291,8 +272,6 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void clear() {
-        tenants.clear();
-        tenantsByName.clear();
         userGroups.clear();
         userGroupsByName.clear();
         LockUtil.lockForWrite(userGroupsUserCacheLock);
@@ -327,10 +306,6 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void replaceContentsFrom(UserStore newUserStore) {
         clear();
-        for (Tenant tenant : newUserStore.getTenants()) {
-            tenants.put(tenant.getId(), tenant);
-            tenantsByName.put(tenant.getName(), tenant);
-        }
         LockUtil.lockForWrite(userGroupsUserCacheLock);
         try {
             for (UserGroup group : newUserStore.getUserGroups()) {
@@ -613,72 +588,7 @@ public class UserStoreImpl implements UserStore {
     }
     
     @Override
-    public Iterable<Tenant> getTenants() {
-        return new HashSet<>(tenants.values());
-    }
-
-    @Override
-    public Tenant getTenantByName(String name) {
-        return name == null ? null : tenantsByName.get(name);
-    }
-    
-    @Override
-    public Tenant getTenant(UUID tenantId) {
-        return tenantId == null ? null : tenants.get(tenantId);
-    }
-
-    @Override
-    public Tenant createTenant(UUID tenantId, String name) throws TenantManagementException, UserGroupManagementException {
-        if (tenants.containsKey(tenantId)) {
-            throw new TenantManagementException(TenantManagementException.TENANT_ALREADY_EXISTS);
-        }
-        logger.info("Creating tenant: " + tenantId);
-        Tenant tenant = new TenantImpl(tenantId, name);
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeTenant(tenant);
-        }
-        updateUserGroup(tenant);
-        tenants.put(tenantId, tenant);
-        tenantsByName.put(tenant.getName(), tenant);
-        return tenant;
-    }
-
-    @Override
-    public void updateTenant(Tenant tenant) {
-        for (final Entry<String, Tenant> tenantByName : tenantsByName.entrySet()) {
-            if (tenantByName.getValue() == tenant && !tenantByName.getKey().equals(tenant.getName())) {
-                // name change
-                tenantsByName.remove(tenantByName.getKey());
-                tenantsByName.put(tenant.getName(), tenant);
-                break;
-            }
-        }
-        updateUserGroup(tenant);
-        logger.info("Updating tenant " + tenant.getId() + " in DB");
-    }
-
-    private void deleteTenantId(Tenant tenant) throws TenantManagementException {
-        if (!tenants.contains(tenant)) {
-            throw new TenantManagementException(TenantManagementException.TENANT_DOES_NOT_EXIST);
-        }
-        logger.info("Deleting tenant: " + tenant);
-        tenants.remove(tenant.getId());
-        tenantsByName.remove(tenant.getName());
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.deleteTenant(tenant);
-        }
-    }
-    
-    @Override
-    public void deleteTenant(Tenant tenant) throws TenantManagementException, UserGroupManagementException {
-        deleteTenantId(tenant);
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.deleteUserGroup(tenant);
-        }
-    }
-
-    @Override
-    public UserImpl createUser(String name, String email, Tenant defaultTenant, Account... accounts) throws UserManagementException {
+    public UserImpl createUser(String name, String email, UserGroup defaultTenant, Account... accounts) throws UserManagementException {
         if (getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }

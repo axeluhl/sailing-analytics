@@ -10,15 +10,16 @@ import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.RoleImpl;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
-import com.sap.sse.security.shared.impl.TenantImpl;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 public class RolesTest {
     @Test
     public void testRoleToString() {
         final RoleDefinition roleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "role");
         final Role role = new RoleImpl(roleDefinition);
-        final TenantImpl tenant = new TenantImpl(UUID.randomUUID(), "tenant");
+        final UserGroup tenant = new UserGroupImpl(UUID.randomUUID(), "tenant");
         final SecurityUserImpl user = new SecurityUserImpl("user", tenant);
         assertEquals("role", role.toString());
         final Role role2 = new RoleImpl(roleDefinition, tenant, /* user qualification */ null);

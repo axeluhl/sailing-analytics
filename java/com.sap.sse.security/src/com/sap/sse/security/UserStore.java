@@ -9,8 +9,6 @@ import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.Tenant;
-import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
@@ -18,13 +16,9 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 
 /**
- * Keeps track of all {@link User}, {@link UserGroup}, {@link Tenant} and {@link Role}
+ * Keeps track of all {@link User}, {@link UserGroup} and {@link Role}
  * objects persistently; furthermore, aspects such as user access tokens, preferences and
  * settings are stored durably.<p>
- * 
- * {@link Tenant}s are special {@link UserGroup}s. Then asking this user store for its
- * {@link UserGroup}s, the {@link Tenant}s will not be part of the answer although technically
- * each {@link Tenant} also is a {@link UserGroup}.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -49,21 +43,6 @@ public interface UserStore extends UserGroupProvider, Named {
     
     void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException;
     
-    /**
-     * Obtains a non-live copy of the current set of {@link Tenant}s known to this user store.
-     */
-    Iterable<Tenant> getTenants();
-    
-    Tenant getTenant(UUID tenantId);
-    
-    Tenant getTenantByName(String name);
-    
-    Tenant createTenant(UUID tenantId, String name) throws TenantManagementException, UserGroupManagementException;
-    
-    void updateTenant(Tenant tenant);
-    
-    void deleteTenant(Tenant tenant) throws TenantManagementException, UserGroupManagementException;
-    
     Iterable<User> getUsers();
     
     boolean hasUsers();
@@ -80,7 +59,7 @@ public interface UserStore extends UserGroupProvider, Named {
     
     User getUserByAccessToken(String accessToken);
 
-    UserImpl createUser(String name, String email, Tenant defaultTenant, Account... accounts) throws UserManagementException;
+    UserImpl createUser(String name, String email, UserGroup defaultTenant, Account... accounts) throws UserManagementException;
 
     void updateUser(User user);
 
@@ -240,10 +219,10 @@ public interface UserStore extends UserGroupProvider, Named {
 
     /**
      * If a valid default tenant name was passed to the constructor, this field will contain a valid
-     * {@link Tenant} object whose name equals that of the default tenant name. It will have been used
+     * {@link UserGroup} object whose name equals that of the default tenant name. It will have been used
      * during role migration where string-based roles are mapped to a corresponding {@link RoleDefinition}
      * and the users with the original role will obtain a corresponding {@link Role} with this default
      * tenant as the {@link Role#getQualifiedForTenant() tenant qualifier}.
      */
-    Tenant getDefaultTenant();
+    UserGroup getDefaultTenant();
 }

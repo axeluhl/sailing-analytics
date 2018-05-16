@@ -11,5 +11,5 @@ import java.io.Serializable;
  */
 public interface Ownership extends Serializable {
     SecurityUser getUserOwner();
-    Tenant getTenantOwner();
+    UserGroup getTenantOwner();
 }

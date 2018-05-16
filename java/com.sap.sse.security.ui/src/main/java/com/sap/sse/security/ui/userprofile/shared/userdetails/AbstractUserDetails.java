@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
-import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -88,7 +88,7 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
         clearPasswordFields();
     }
 
-    private void updateDefaultTenantSelection(Tenant defaultTenant) {
+    private void updateDefaultTenantSelection(UserGroup defaultTenant) {
         boolean found = false;
         for (int i=0; i<defaultTenantUi.getItemCount(); i++) {
             final String idOfTenantFromListBoxAsString = defaultTenantUi.getValue(i);

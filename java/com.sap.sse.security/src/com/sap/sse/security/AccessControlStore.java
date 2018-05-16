@@ -7,7 +7,6 @@ import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroup;
 
 public interface AccessControlStore extends Named {
@@ -42,7 +41,7 @@ public interface AccessControlStore extends Named {
      */
     OwnershipAnnotation getOwnership(String idOfOwnedObjectAsString);
     
-    OwnershipAnnotation createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner, String displayNameOfOwnedObject);
+    OwnershipAnnotation createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject);
     void removeOwnership(String idOfOwnedObjectAsString);
     
     void clear();

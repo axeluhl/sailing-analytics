@@ -20,9 +20,8 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.shared.Tenant;
-import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -50,7 +49,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     private static final HashSet<String> allValues = values(A, B, C);
 
     @Before
-    public void setUp() throws UnknownHostException, MongoException, TenantManagementException, UserGroupManagementException, UserManagementException {
+    public void setUp() throws UnknownHostException, MongoException, UserGroupManagementException, UserManagementException {
         final MongoDBConfiguration dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
         final MongoDBService service = dbConfiguration.getService();
         DB db = service.getDB();
@@ -175,7 +174,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userMappingTest() throws UserManagementException, TenantManagementException, UserGroupManagementException {
+    public void userMappingTest() throws UserManagementException, UserGroupManagementException {
         createUserWithVerifiedEmail(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
@@ -188,8 +187,8 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userWithNonVerifiedEmailIsSkippedTest() throws UserManagementException, TenantManagementException, UserGroupManagementException {
-        store.createUser(user1, mail, store.createTenant(UUID.randomUUID(), user1+"-tenant"));
+    public void userWithNonVerifiedEmailIsSkippedTest() throws UserManagementException, UserGroupManagementException {
+        store.createUser(user1, mail, store.createUserGroup(UUID.randomUUID(), user1+"-tenant"));
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -201,7 +200,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userMappingWithTwoUsersTest() throws UserManagementException, TenantManagementException, UserGroupManagementException {
+    public void userMappingWithTwoUsersTest() throws UserManagementException, UserGroupManagementException {
         createUserWithVerifiedEmail(user1, mail);
         createUserWithVerifiedEmail(user2, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
@@ -219,7 +218,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userMappingWithOneExistingAndOneUnknownUserTest() throws UserManagementException, TenantManagementException, UserGroupManagementException {
+    public void userMappingWithOneExistingAndOneUnknownUserTest() throws UserManagementException, UserGroupManagementException {
         createUserWithVerifiedEmail(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
@@ -235,8 +234,8 @@ public class PreferenceObjectBasedNotificationSetTest {
      * There was a bug that caused the preferences not to be removed when a user was deleted.
      */
     @Test
-    public void deleteUserWithMappingTest() throws UserManagementException, TenantManagementException, UserGroupManagementException {
-        store.createUser(user1, mail, store.createTenant(UUID.randomUUID(), user1+"-tenant"));
+    public void deleteUserWithMappingTest() throws UserManagementException, UserGroupManagementException {
+        store.createUser(user1, mail, store.createUserGroup(UUID.randomUUID(), user1+"-tenant"));
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -247,8 +246,8 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void removePreferenceConverterTest() throws UserManagementException, TenantManagementException, UserGroupManagementException {
-        store.createUser(user1, mail, store.createTenant(UUID.randomUUID(), user1+"-tenant"));
+    public void removePreferenceConverterTest() throws UserManagementException, UserGroupManagementException {
+        store.createUser(user1, mail, store.createUserGroup(UUID.randomUUID(), user1+"-tenant"));
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -266,8 +265,8 @@ public class PreferenceObjectBasedNotificationSetTest {
         return new HashSet<>(Arrays.asList(values));
     }
     
-    private void createUserWithVerifiedEmail(String username, String email) throws UserManagementException, TenantManagementException, UserGroupManagementException {
-        Tenant defaultTenant = store.createTenant(UUID.randomUUID(), username+"-tenant");
+    private void createUserWithVerifiedEmail(String username, String email) throws UserManagementException, UserGroupManagementException {
+        UserGroup defaultTenant = store.createUserGroup(UUID.randomUUID(), username+"-tenant");
         store.createUser(username, email, defaultTenant);
         store.updateUser(new UserImpl(username, email, null, null, null, true, null, null, defaultTenant, Collections.emptySet(), /* userGroupProvider */ null));
     }

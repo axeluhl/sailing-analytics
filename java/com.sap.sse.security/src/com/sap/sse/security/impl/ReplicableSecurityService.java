@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -42,14 +41,6 @@ public interface ReplicableSecurityService extends SecurityService {
     Void internalAddUserToUserGroup(UUID groupId, String username) throws UserGroupManagementException;
 
     Void internalRemoveUserFromUserGroup(UUID groupId, String username) throws UserGroupManagementException;
-    
-    Void internalCreateTenant(UUID groupId, String name) throws TenantManagementException, UserGroupManagementException;
-    
-    Void internalAddUserToTenant(UUID tenantId, String username) throws UserGroupManagementException;
-
-    Void internalRemoveUserFromTenant(UUID tenantId, String username) throws UserGroupManagementException;
-    
-    Void internalDeleteTenant(UUID tenantId) throws TenantManagementException, UserGroupManagementException;
     
     Void internalStoreUser(User user);
 

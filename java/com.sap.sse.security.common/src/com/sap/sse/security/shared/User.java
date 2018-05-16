@@ -85,5 +85,5 @@ public interface User extends SecurityUser {
 
     Locale getLocaleOrDefault();
     
-    void setDefaultTenant(Tenant newDefaultTenant);
+    void setDefaultTenant(UserGroup newDefaultTenant);
 }

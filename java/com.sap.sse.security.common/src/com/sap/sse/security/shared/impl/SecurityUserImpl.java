@@ -11,7 +11,6 @@ import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 
@@ -24,7 +23,7 @@ public class SecurityUserImpl implements SecurityUser {
     /**
      * The tenant to use as {@link Ownership#getTenantOwner() tenant owner} of new objects created by this user
      */
-    private Tenant defaultTenant;
+    private UserGroup defaultTenant;
 
     // For GWT serialization only
     @Deprecated
@@ -34,11 +33,11 @@ public class SecurityUserImpl implements SecurityUser {
     /**
      * Creates a user with empty permission set and empty role set
      */
-    public SecurityUserImpl(String name, Tenant defaultTenant) {
+    public SecurityUserImpl(String name, UserGroup defaultTenant) {
         this(name, /* roles */ new HashSet<Role>(), defaultTenant, /* permissions */ new HashSet<WildcardPermission>());
     }
     
-    public SecurityUserImpl(String name, Iterable<Role> roles, Tenant defaultTenant, Iterable<WildcardPermission> permissions) {
+    public SecurityUserImpl(String name, Iterable<Role> roles, UserGroup defaultTenant, Iterable<WildcardPermission> permissions) {
         this.name = name;
         this.roles = new HashSet<>();
         Util.addAll(roles, this.roles);
@@ -60,11 +59,11 @@ public class SecurityUserImpl implements SecurityUser {
     }
 
     @Override
-    public Tenant getDefaultTenant() {
+    public UserGroup getDefaultTenant() {
         return defaultTenant;
     }
 
-    public void setDefaultTenant(Tenant newDefaultTenant) {
+    public void setDefaultTenant(UserGroup newDefaultTenant) {
         this.defaultTenant = newDefaultTenant;
     }
     

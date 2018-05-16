@@ -41,8 +41,7 @@ import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleImpl;
-import com.sap.sse.security.shared.Tenant;
-import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
@@ -150,28 +149,25 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public AccessControlList addToACL(String idAsString, String groupOrTenantIdAsString, String action) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("tenant:grant_permission:" + groupOrTenantIdAsString)) {
-            UserGroup userGroup = getTenantOrUserGroup(groupOrTenantIdAsString);
+    public AccessControlList addToACL(String idAsString, String groupIdAsString, String action) throws UnauthorizedException {
+        if (SecurityUtils.getSubject().isPermitted("tenant:grant_permission:" + groupIdAsString)) {
+            UserGroup userGroup = getUserGroup(groupIdAsString);
             return securityDTOFactory.createAccessControlListDTO(getSecurityService().addToACL(idAsString, userGroup, action));
         } else {
             throw new UnauthorizedException("Not permitted to grant permission for user");
         }
     }
 
-    private UserGroup getTenantOrUserGroup(String groupOrTenantIdAsString) {
-        UUID groupOrTenantId = UUID.fromString(groupOrTenantIdAsString);
-        UserGroup userGroup = getSecurityService().getTenant(groupOrTenantId);
-        if (userGroup == null) {
-            userGroup = getSecurityService().getUserGroup(groupOrTenantId);
-        }
+    private UserGroup getUserGroup(String groupIdAsString) {
+        UUID groupId = UUID.fromString(groupIdAsString);
+        UserGroup userGroup = getSecurityService().getUserGroup(groupId);
         return userGroup;
     }
 
     @Override
     public AccessControlList removeFromACL(String idAsString, String groupOrTenantIdAsString, String permission) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("tenant:revoke_permission:" + groupOrTenantIdAsString)) {
-            UserGroup userGroup = getTenantOrUserGroup(groupOrTenantIdAsString);
+            UserGroup userGroup = getUserGroup(groupOrTenantIdAsString);
             return securityDTOFactory.createAccessControlListDTO(getSecurityService().removeFromACL(idAsString, userGroup, permission));
         } else {
             throw new UnauthorizedException("Not permitted to revoke permission for user");
@@ -179,72 +175,76 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public Collection<Tenant> getTenants() throws UnauthorizedException {
+    public Collection<UserGroup> getUserGroups() throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("tenants:manage")) {
-            List<Tenant> tenants = new ArrayList<>();
-            for (Tenant t : getSecurityService().getTenants()) {
-                Tenant tenantDTO = securityDTOFactory.createTenantDTOFromTenant(t);
-                tenants.add(tenantDTO);
+            List<UserGroup> userGroups = new ArrayList<>();
+            final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
+            final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+            for (UserGroup g : getSecurityService().getUserGroupList()) {
+                UserGroup userGroupDTO = securityDTOFactory.createUserGroupDTOFromUserGroup(g, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
+                userGroups.add(userGroupDTO);
             }
-            return tenants;
+            return userGroups;
         } else {
             throw new UnauthorizedException("Not permitted to manage tenants");
         }
     }
 
     @Override
-    public Tenant createTenant(String name, String nameOfTenantOwner) throws TenantManagementException, UnauthorizedException {
+    public UserGroup createUserGroup(String name, String nameOfTenantOwner) throws UnauthorizedException, UserGroupManagementException {
         if (SecurityUtils.getSubject().isPermitted("tenant:create")) {
             UUID newTenantId = UUID.randomUUID();
-            Tenant tenant;
+            UserGroup userGroup;
             try {
-                tenant = getSecurityService().createTenant(newTenantId, name);
+                userGroup = getSecurityService().createUserGroup(newTenantId, name);
             } catch (UserGroupManagementException e) {
-                throw new TenantManagementException(e.getMessage());
+                throw new UserGroupManagementException(e.getMessage());
             }
             getSecurityService().createOwnership(newTenantId.toString(),
-                    getSecurityService().getCurrentUser(), getSecurityService().getTenantByName(nameOfTenantOwner), name);
-            return securityDTOFactory.createTenantDTOFromTenant(tenant);
+                    getSecurityService().getCurrentUser(), getSecurityService().getUserGroupByName(nameOfTenantOwner), name);
+            final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
+            final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+            return securityDTOFactory.createUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
         } else {
             throw new UnauthorizedException("Not permitted to create tenants");
         }
     }
 
     @Override
-    public void addUserToTenant(String tenantIdAsString, String username) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("tenant:add_user:" + tenantIdAsString)) {
-            final Tenant tenant = getSecurityService().getTenant(UUID.fromString(tenantIdAsString));
-            getSecurityService().addUserToTenant(tenant, getSecurityService().getUserByName(username));
+    public SuccessInfo deleteUserGroup(String userGroupIdAsString) throws UnauthorizedException {
+        if (SecurityUtils.getSubject().isPermitted("tenant:delete:" + userGroupIdAsString)) {
+            try {
+                UUID userGroupId = UUID.fromString(userGroupIdAsString);
+                final UserGroup userGroup = getSecurityService().getUserGroup(userGroupId);
+                getSecurityService().deleteUserGroup(userGroup);
+                getSecurityService().deleteACL(userGroupIdAsString);
+                getSecurityService().deleteOwnership(userGroupIdAsString);
+                return new SuccessInfo(true, "Deleted user group: " + userGroup.getName() + ".", /* redirectURL */ null, null);
+            } catch (UserGroupManagementException e) {
+                return new SuccessInfo(false, "Could not delete user group.", /* redirectURL */ null, null);
+            }
+        } else {
+            throw new UnauthorizedException("Not permitted to delete user group");
+        }
+    }
+
+    @Override
+    public void addUserToUserGroup(String userGroupIdAsString, String username) throws UnauthorizedException {
+        if (SecurityUtils.getSubject().isPermitted("tenant:add_user:" + userGroupIdAsString)) {
+            final UserGroup tenant = getSecurityService().getUserGroup(UUID.fromString(userGroupIdAsString));
+            getSecurityService().addUserToUserGroup(tenant, getSecurityService().getUserByName(username));
         } else {
             throw new UnauthorizedException("Not permitted to add user to tenant");
         }
     }
 
     @Override
-    public void removeUserFromTenant(String tenantIdAsString, String username) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("tenant:remove_user:" + tenantIdAsString)) {
-            final Tenant tenant = getSecurityService().getTenant(UUID.fromString(tenantIdAsString));
-            getSecurityService().removeUserFromTenant(tenant, getSecurityService().getUserByName(username));
+    public void removeUserFromUserGroup(String userGroupIdAsString, String username) throws UnauthorizedException {
+        if (SecurityUtils.getSubject().isPermitted("tenant:remove_user:" + userGroupIdAsString)) {
+            final UserGroup userGroup = getSecurityService().getUserGroup(UUID.fromString(userGroupIdAsString));
+            getSecurityService().removeUserFromUserGroup(userGroup, getSecurityService().getUserByName(username));
         } else {
             throw new UnauthorizedException("Not permitted to remove user from tenant");
-        }
-    }
-
-    @Override
-    public SuccessInfo deleteTenant(String tenantIdAsString) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("tenant:delete:" + tenantIdAsString)) {
-            try {
-                UUID tenantId = UUID.fromString(tenantIdAsString);
-                final Tenant tenant = getSecurityService().getTenant(tenantId);
-                getSecurityService().deleteTenant(tenant);
-                getSecurityService().deleteACL(tenantIdAsString);
-                getSecurityService().deleteOwnership(tenantIdAsString);
-                return new SuccessInfo(true, "Deleted tenant: " + tenant.getName() + ".", /* redirectURL */ null, null);
-            } catch (UserGroupManagementException e) {
-                return new SuccessInfo(false, "Could not delete tenant.", /* redirectURL */ null, null);
-            }
-        } else {
-            throw new UnauthorizedException("Not permitted to delete tenant");
         }
     }
 
@@ -301,13 +301,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public UserDTO createSimpleUser(String username, String email, String password, String fullName, String company, String localeName, String validationBaseURL, String tenantOwner) throws UserManagementException, MailException, UnauthorizedException {
+    public UserDTO createSimpleUser(String username, String email, String password, String fullName, String company, String localeName, String validationBaseURL, String tenantOwnerName) throws UserManagementException, MailException, UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("user:create")) {
             User currentUser = getSecurityService().getCurrentUser();
             UserImpl u = null;
             try {
                 u = getSecurityService().createSimpleUser(username, email, password, fullName, company, getLocaleFromLocaleName(localeName), validationBaseURL);
-                getSecurityService().createOwnership(username, currentUser, getSecurityService().getTenantByName(tenantOwner));
+                getSecurityService().createOwnership(username, currentUser, getSecurityService().getUserGroupByName(tenantOwnerName));
             } catch (UserManagementException | UserGroupManagementException e) {
                 logger.log(Level.SEVERE, "Error creating user "+username, e);
                 throw new UserManagementException(e.getMessage());
@@ -418,11 +418,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
             Set<Role> rolesToSet = new HashSet<>();
             for (final Triple<UUID, String, String> roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet : roleDefinitionIdAndTenantQualifierNameAndUsernames) {
-                final Tenant tenant;
+                final UserGroup tenant;
                 if (roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB() == null || roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB().trim().isEmpty()) {
                     tenant = null;
                 } else {
-                    tenant = getSecurityService().getTenantByName(roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB());
+                    tenant = getSecurityService().getUserGroupByName(roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB());
                     if (tenant == null) {
                         return new SuccessInfo(false, "Tenant "+roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB()+
                                 " does not exist.", /* redirectURL */ null, /* userDTO */ null);
@@ -467,7 +467,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
         return new RoleImpl(
                 getSecurityService().getRoleDefinition(roleDefinitionId),
-                qualifyingTenantId == null ? null : getSecurityService().getTenant(qualifyingTenantId), user);
+                qualifyingTenantId == null ? null : getSecurityService().getUserGroup(qualifyingTenantId), user);
     }
 
     @Override

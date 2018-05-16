@@ -20,13 +20,12 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.Tenant;
-import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.TenantImpl;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
@@ -38,16 +37,16 @@ public class AccessControlStoreTest {
     private static final String DEFAULT_TENANT_NAME = "TestDefaultTenant";
     private final String testIdAsString = "test";
     private final String testDisplayName = "testDN";
-    private final User testOwner = new UserImpl("admin", "admin@sapsailing.com", new TenantImpl(UUID.randomUUID(), "admin-tenant"),
+    private final User testOwner = new UserImpl("admin", "admin@sapsailing.com", new UserGroupImpl(UUID.randomUUID(), "admin-tenant"),
             /* userGroupProvider */ null);
-    private final Tenant testTenantOwner = new TenantImpl(UUID.randomUUID(), "test-tenant");
+    private final UserGroup testTenantOwner = new UserGroupImpl(UUID.randomUUID(), "test-tenant");
     private final UUID testRoleId = UUID.randomUUID();
 
     private UserStore userStore;
     private AccessControlStore accessControlStore;
 
     @Before
-    public void setUp() throws UnknownHostException, MongoException, TenantManagementException, UserGroupManagementException {
+    public void setUp() throws UnknownHostException, MongoException, UserGroupManagementException {
         final MongoDBConfiguration dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
         final MongoDBService service = dbConfiguration.getService();
         DB db = service.getDB();
@@ -67,7 +66,7 @@ public class AccessControlStoreTest {
     }
 
     @Test
-    public void testCreateAccessControlList() throws TenantManagementException, UserGroupManagementException {
+    public void testCreateAccessControlList() throws UserGroupManagementException {
         accessControlStore.createAccessControlList(testIdAsString, testDisplayName);
         assertNotNull(accessControlStore.getAccessControlList(testIdAsString));
         newStores();
@@ -75,7 +74,7 @@ public class AccessControlStoreTest {
     }
     
     @Test
-    public void testDeleteAccessControlList() throws TenantManagementException, UserGroupManagementException {
+    public void testDeleteAccessControlList() throws UserGroupManagementException {
         accessControlStore.createAccessControlList(testIdAsString, testDisplayName);
         accessControlStore.removeAccessControlList(testIdAsString);
         assertNull(accessControlStore.getAccessControlList(testIdAsString));
@@ -84,7 +83,7 @@ public class AccessControlStoreTest {
     }
     
     @Test
-    public void testCreateOwnership() throws TenantManagementException, UserGroupManagementException {
+    public void testCreateOwnership() throws UserGroupManagementException {
         accessControlStore.createOwnership(testIdAsString, testOwner, testTenantOwner, testDisplayName);
         assertNotNull(accessControlStore.getOwnership(testIdAsString));
         newStores();
@@ -92,7 +91,7 @@ public class AccessControlStoreTest {
     }
     
     @Test
-    public void testDeleteOwnership() throws TenantManagementException, UserGroupManagementException {
+    public void testDeleteOwnership() throws UserGroupManagementException {
         accessControlStore.createOwnership(testIdAsString, testOwner, testTenantOwner, testDisplayName);
         accessControlStore.removeOwnership(testIdAsString);
         // expecting to fall back to default tenant ownership
@@ -110,7 +109,7 @@ public class AccessControlStoreTest {
     }
     
     @Test
-    public void testCreateRole() throws TenantManagementException, UserGroupManagementException {
+    public void testCreateRole() throws UserGroupManagementException {
         userStore.createRoleDefinition(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
         assertNotNull(userStore.getRoleDefinition(testRoleId));
         newStores();
@@ -118,7 +117,7 @@ public class AccessControlStoreTest {
     }
     
     @Test
-    public void testDeleteRole() throws TenantManagementException, UserGroupManagementException {
+    public void testDeleteRole() throws UserGroupManagementException {
         final RoleDefinition role = userStore.createRoleDefinition(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
         userStore.removeRoleDefinition(role);
         assertNull(userStore.getRoleDefinition(testRoleId));

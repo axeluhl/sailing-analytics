@@ -7,7 +7,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
 import com.sap.sse.common.Util;
-import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -117,17 +117,17 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
 
     @Override
     public void fillTenants(ListBox tenantListBox) {
-        userManagementService.getTenants(new AsyncCallback<Collection<Tenant>>() {
+        userManagementService.getUserGroups(new AsyncCallback<Collection<UserGroup>>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Error fetching tenants: "+caught.getMessage());
             }
 
             @Override
-            public void onSuccess(Collection<Tenant> result) {
+            public void onSuccess(Collection<UserGroup> result) {
                 final String oldSelectedTenantIdAsString = tenantListBox.getSelectedValue();
                 tenantListBox.clear();
-                for (final Tenant tenant : result) {
+                for (final UserGroup tenant : result) {
                     tenantListBox.addItem(tenant.getName(), tenant.getId().toString());
                     if (Util.equalsWithNull(tenant.getId().toString(), oldSelectedTenantIdAsString)) {
                         tenantListBox.setSelectedIndex(tenantListBox.getItemCount()-1);

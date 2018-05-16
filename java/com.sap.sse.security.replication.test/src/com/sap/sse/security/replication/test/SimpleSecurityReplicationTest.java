@@ -11,14 +11,13 @@ import org.junit.Test;
 
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.UserImpl;
-import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 
 public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTest {
     @Test
-    public void testSimpleReplicationOfUserCreation() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, TenantManagementException, UserGroupManagementException {
+    public void testSimpleReplicationOfUserCreation() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, UserGroupManagementException {
         final String username = "Ernie";
         final String email = "ernie@sesame-street.com";
         final String password = "BertMyFriend";
@@ -52,7 +51,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
     }
 
     @Test
-    public void testSimpleReplicationOfUserEmailChange() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, TenantManagementException, UserGroupManagementException {
+    public void testSimpleReplicationOfUserEmailChange() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, UserGroupManagementException {
         final String username = "Ernie";
         final String email = "ernie@sesame-street.com";
         final String newEmail = "ernie2@sesame-street.com";
@@ -82,7 +81,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
     }
 
     @Test
-    public void testSimpleReplicationOfUserPasswordChange() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, TenantManagementException, UserGroupManagementException {
+    public void testSimpleReplicationOfUserPasswordChange() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, UserGroupManagementException {
         final String username = "Ernie";
         final String email = "ernie@sesame-street.com";
         final String password = "BertMyFriend";
@@ -104,7 +103,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
     }
 
     @Test
-    public void testReplicationOfPasswordReset() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, TenantManagementException, UserGroupManagementException {
+    public void testReplicationOfPasswordReset() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, UserGroupManagementException {
         final String username = "Ernie";
         final String email = "ernie@sesame-street.com";
         final String password = "BertMyFriend";

@@ -23,14 +23,13 @@ import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.AccessControlListImpl;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
-import com.sap.sse.security.shared.impl.TenantImpl;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 public class PermissionCheckerTest {
     private final String eventDataObjectType = "event";
@@ -40,9 +39,9 @@ public class PermissionCheckerTest {
                     DefaultActions.EDIT, eventId.toString());
     private final UUID userTenantId = UUID.randomUUID();
     private final UUID adminTenantId = UUID.randomUUID();
-    private Tenant adminTenant;
+    private UserGroup adminTenant;
     private SecurityUser adminUser;
-    private Tenant userTenant;
+    private UserGroup userTenant;
     private User user;
     private ArrayList<UserGroup> tenants;
     private Ownership ownership;
@@ -55,10 +54,10 @@ public class PermissionCheckerTest {
     public void setUp() {
         adminUser = new SecurityUserImpl("admin", adminTenant);
         user = new UserImpl("jonas", "jonas@dann.io", userTenant, /* userGroupProvider */ null);
-        userTenant = new TenantImpl(userTenantId, "jonas-tenant");
+        userTenant = new UserGroupImpl(userTenantId, "jonas-tenant");
         userTenant.add(user);
         ownership = new OwnershipImpl(user, userTenant);
-        adminTenant = new TenantImpl(adminTenantId, "admin-tenant");
+        adminTenant = new UserGroupImpl(adminTenantId, "admin-tenant");
         adminTenant.add(adminUser);
         adminOwnership = new OwnershipImpl(adminUser, adminTenant);
         tenants = new ArrayList<>();

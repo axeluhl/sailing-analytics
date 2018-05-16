@@ -10,7 +10,6 @@ import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.impl.AccessControlListImpl;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
@@ -32,7 +31,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
      */
     private final ConcurrentHashMap<String, OwnershipAnnotation> ownerships;
     
-    private final Tenant defaultTenant;
+    private final UserGroup defaultTenant;
     
     /**
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
@@ -134,7 +133,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
     
     @Override
-    public OwnershipAnnotation createOwnership(String idAsString, SecurityUser userOwnerName, Tenant tenantOwner, String displayNameOfOwnedObject) {
+    public OwnershipAnnotation createOwnership(String idAsString, SecurityUser userOwnerName, UserGroup tenantOwner, String displayNameOfOwnedObject) {
         OwnershipAnnotation ownership = new OwnershipAnnotation(new OwnershipImpl(userOwnerName, tenantOwner), idAsString, displayNameOfOwnedObject);
         ownerships.put(idAsString, ownership);
         mongoObjectFactory.storeOwnership(ownership);

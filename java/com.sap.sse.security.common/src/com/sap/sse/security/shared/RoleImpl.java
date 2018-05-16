@@ -15,7 +15,7 @@ public class RoleImpl implements Role {
     private static final String QUALIFIER_SEPARATOR = WildcardPermission.PART_DIVIDER_TOKEN;
     private static final long serialVersionUID = 1243342091492822614L;
     private RoleDefinition roleDefinition;
-    private Tenant qualifiedForTenant;
+    private UserGroup qualifiedForTenant;
     private SecurityUser qualifiedForUser;
     
     public static Triple<String, String, String> getRoleDefinitionNameAndTenantQualifierNameAndUserQualifierName(String roleAsString) {
@@ -30,7 +30,7 @@ public class RoleImpl implements Role {
         this(roleDefinition, /* tenant owner */ null, /* user owner */ null);
     }
     
-    public RoleImpl(RoleDefinition roleDefinition, Tenant qualifiedForTenant, SecurityUser qualifiedForUser) {
+    public RoleImpl(RoleDefinition roleDefinition, UserGroup qualifiedForTenant, SecurityUser qualifiedForUser) {
         if (roleDefinition == null) {
             throw new NullPointerException("A role's definition must not be null");
         }
@@ -55,7 +55,7 @@ public class RoleImpl implements Role {
     }
 
     @Override
-    public Tenant getQualifiedForTenant() {
+    public UserGroup getQualifiedForTenant() {
         return qualifiedForTenant;
     }
 

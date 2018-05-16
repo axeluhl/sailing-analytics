@@ -12,7 +12,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -29,15 +29,15 @@ public interface UserManagementServiceAsync {
 
     void removeFromACL(String acl, String permission, String name, AsyncCallback<AccessControlList> callback);
 
-    void getTenants(AsyncCallback<Collection<Tenant>> callback);
+    void getUserGroups(AsyncCallback<Collection<UserGroup>> callback);
 
-    void createTenant(String name, String nameOfTenantOwner, AsyncCallback<Tenant> callback);
+    void createUserGroup(String name, String nameOfTenantOwner, AsyncCallback<UserGroup> callback);
+    
+    void deleteUserGroup(String userGroupIdAsString, AsyncCallback<SuccessInfo> asyncCallback);
 
-    void addUserToTenant(String tenantIdAsString, String username, AsyncCallback<Void> asyncCallback);
+    void addUserToUserGroup(String userGroupIdAsString, String username, AsyncCallback<Void> asyncCallback);
 
-    void removeUserFromTenant(String tenantIdAsString, String username, AsyncCallback<Void> asyncCallback);
-
-    void deleteTenant(String tenantIdAsString, AsyncCallback<SuccessInfo> callback);
+    void removeUserFromUserGroup(String tenantIdAsString, String username, AsyncCallback<Void> asyncCallback);
 
     void getUserList(AsyncCallback<Collection<UserDTO>> callback);
 

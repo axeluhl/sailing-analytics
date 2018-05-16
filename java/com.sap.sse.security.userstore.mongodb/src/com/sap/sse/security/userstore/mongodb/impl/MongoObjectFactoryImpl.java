@@ -22,7 +22,6 @@ import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
-import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
@@ -124,24 +123,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.Role.QUALIFYING_TENANT_NAME.name(), role.getQualifiedForTenant()==null?null:role.getQualifiedForTenant().getName());
         result.put(FieldNames.Role.QUALIFYING_USERNAME.name(), role.getQualifiedForUser()==null?null:role.getQualifiedForUser().getName());
         return result;
-    }
-    
-    @Override
-    public void storeTenant(Tenant tenant) {
-        DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
-        tenantCollection.createIndex(new BasicDBObject(FieldNames.Tenant.ID.name(), 1));
-        DBObject dbTenant = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.Tenant.ID.name(), tenant.getId());
-        dbTenant.put(FieldNames.Tenant.ID.name(), tenant.getId());
-        tenantCollection.update(query, dbTenant, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
-    }
-
-    @Override
-    public void deleteTenant(Tenant tenant) {
-        DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
-        DBObject dbTenant = new BasicDBObject();
-        dbTenant.put(FieldNames.Tenant.ID.name(), tenant.getId());
-        tenantCollection.remove(dbTenant);
     }
     
     @Override

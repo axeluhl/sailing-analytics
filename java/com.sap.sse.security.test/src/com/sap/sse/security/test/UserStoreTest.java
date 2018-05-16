@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -23,13 +22,13 @@ public class UserStoreTest {
     private final String prefValue = "pv";
     private final String defaulttenantname = username+"-tenant";
     
-    public UserStoreTest() throws TenantManagementException, UserGroupManagementException, UserManagementException {
+    public UserStoreTest() throws UserGroupManagementException, UserManagementException {
         userStore = new UserStoreImpl(null, null, "TestDefaultTenant");
     }
     
     @Before
-    public void setUp() throws UserManagementException, TenantManagementException, UserGroupManagementException {
-        userStore.createUser(username, email, userStore.createTenant(UUID.randomUUID(), defaulttenantname));
+    public void setUp() throws UserManagementException, UserGroupManagementException {
+        userStore.createUser(username, email, userStore.createUserGroup(UUID.randomUUID(), defaulttenantname));
         userStore.setAccessToken(username, accessToken);
         userStore.setPreference(username, prefKey, prefValue);
     }
@@ -44,7 +43,7 @@ public class UserStoreTest {
     }
 
     @Test
-    public void testUpdate() throws UserManagementException, TenantManagementException, UserGroupManagementException {
+    public void testUpdate() throws UserManagementException, UserGroupManagementException {
         UserStore newUserStore = new UserStoreImpl(null, null, "TestDefaultTenant");
         newUserStore.replaceContentsFrom(userStore);
         assertEquals(prefValue, newUserStore.getPreference(username, prefKey));

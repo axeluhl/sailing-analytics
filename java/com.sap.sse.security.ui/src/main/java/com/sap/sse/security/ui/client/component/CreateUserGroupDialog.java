@@ -8,21 +8,21 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.shared.Tenant;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.component.CreateTenantDialog.TenantData;
+import com.sap.sse.security.ui.client.component.CreateUserGroupDialog.UserGroupData;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
-public class CreateTenantDialog extends DataEntryDialog<TenantData> {
+public class CreateUserGroupDialog extends DataEntryDialog<UserGroupData> {
     private final StringMessages stringMessages;
     private final TextBox nameBox;
     private final UserManagementServiceAsync userManagementService;
     
-    public static class TenantData {
+    public static class UserGroupData {
         private final String name;
         
-        protected TenantData(String name) {
+        protected UserGroupData(String name) {
             super();
             this.name = name;
         }
@@ -31,19 +31,19 @@ public class CreateTenantDialog extends DataEntryDialog<TenantData> {
         }
     }
     
-    public CreateTenantDialog(final StringMessages stringMessages, UserService userService, 
-            final UserManagementServiceAsync userManagementService, final TenantListDataProvider tenantListDataProvider) {
-        this(stringMessages, stringMessages.createTenant(), stringMessages.enterTenantName(), userManagementService, null, new DialogCallback<TenantData>() {
+    public CreateUserGroupDialog(final StringMessages stringMessages, UserService userService, 
+            final UserManagementServiceAsync userManagementService, final UserGroupListDataProvider userGroupListDataProvider) {
+        this(stringMessages, stringMessages.createTenant(), stringMessages.enterTenantName(), userManagementService, null, new DialogCallback<UserGroupData>() {
             @Override
-            public void ok(TenantData tenantData) {
-                userManagementService.createTenant(tenantData.name, "tenant", new AsyncCallback<Tenant>() {
+            public void ok(UserGroupData userGroupData) {
+                userManagementService.createUserGroup(userGroupData.name, "tenant", new AsyncCallback<UserGroup>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         Window.alert("Error creating tenant.");
                     }
                     @Override
-                    public void onSuccess(Tenant result) {
-                        tenantListDataProvider.updateDisplays();
+                    public void onSuccess(UserGroup result) {
+                        userGroupListDataProvider.updateDisplays();
                     }
                 });
             }
@@ -53,13 +53,13 @@ public class CreateTenantDialog extends DataEntryDialog<TenantData> {
         });
     }
     
-    private CreateTenantDialog(final StringMessages stringMessages, final String title, final String message,
-                final UserManagementServiceAsync userManagementService, final Tenant tenant
-                , final DialogCallback<TenantData> callback) {
+    private CreateUserGroupDialog(final StringMessages stringMessages, final String title, final String message,
+                final UserManagementServiceAsync userManagementService, final UserGroup tenant
+                , final DialogCallback<UserGroupData> callback) {
         super(title, message, stringMessages.ok(), stringMessages.cancel(),
-                new DataEntryDialog.Validator<TenantData>() {
+                new DataEntryDialog.Validator<UserGroupData>() {
                     @Override
-                    public String getErrorMessage(TenantData valueToValidate) {
+                    public String getErrorMessage(UserGroupData valueToValidate) {
                         return null; // TODO: Check if owner is really a tenant and name is unique?
                     }
                 }, callback);
@@ -97,7 +97,7 @@ public class CreateTenantDialog extends DataEntryDialog<TenantData> {
     }
 
     @Override
-    protected TenantData getResult() {
-        return new TenantData(nameBox.getText());
+    protected UserGroupData getResult() {
+        return new UserGroupData(nameBox.getText());
     }
 }

@@ -14,7 +14,6 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
@@ -64,17 +63,17 @@ public class UserImpl extends SecurityUserImpl implements User {
 
     private transient final UserGroupProvider userGroupProvider;
 
-    public UserImpl(String name, String email, Tenant defaultTenant, UserGroupProvider userGroupProvider, Account... accounts) {
+    public UserImpl(String name, String email, UserGroup defaultTenant, UserGroupProvider userGroupProvider, Account... accounts) {
         this(name, email, defaultTenant, Arrays.asList(accounts), userGroupProvider);
     }
 
-    public UserImpl(String name, String email, Tenant defaultTenant, Collection<Account> accounts, UserGroupProvider userGroupProvider) {
+    public UserImpl(String name, String email, UserGroup defaultTenant, Collection<Account> accounts, UserGroupProvider userGroupProvider) {
         this(name, email, /* fullName */ null, /* company */ null, /* locale */ null, /* is email validated */ false,
              /* password reset secret */ null, /* validation secret */ null, defaultTenant, accounts, userGroupProvider);
     }
 
     public UserImpl(String name, String email, String fullName, String company, Locale locale, Boolean emailValidated,
-            String passwordResetSecret, String validationSecret, Tenant defaultTenant, Collection<Account> accounts, UserGroupProvider userGroupProvider) {
+            String passwordResetSecret, String validationSecret, UserGroup defaultTenant, Collection<Account> accounts, UserGroupProvider userGroupProvider) {
         super(name, defaultTenant);
         this.fullName = fullName;
         this.company = company;

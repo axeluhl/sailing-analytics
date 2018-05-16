@@ -100,8 +100,6 @@ import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
-import com.sap.sse.security.shared.Tenant;
-import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
@@ -457,12 +455,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner) {
+    public void createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner) {
         createOwnership(idOfOwnedObjectAsString, userOwner, tenantOwner, /* displayNameOfOwnedObject */ null);
     }
 
     @Override
-    public void createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, Tenant tenantOwner, String displayNameOfOwnedObject) {
+    public void createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject) {
         final UUID tenantId;
         if (tenantOwner == null || !tenantOwner.contains(userOwner)) {
             tenantId = userOwner == null || userOwner.getDefaultTenant() == null ? null : userOwner.getDefaultTenant().getId();
@@ -475,7 +473,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalCreateOwnership(String idAsString, String userOwnerName, UUID tenantOwnerId, String displayName) {
-        accessControlStore.createOwnership(idAsString, getUserByName(userOwnerName), getTenant(tenantOwnerId), displayName);
+        accessControlStore.createOwnership(idAsString, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName);
         return null;
     }
 
@@ -510,85 +508,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Iterable<UserGroup> getUserGroupsOfUser(SecurityUser user) {
         return userStore.getUserGroupsOfUser(user);
-    }
-
-    @Override
-    public Iterable<Tenant> getTenants() {
-        return userStore.getTenants();
-    }
-
-    @Override
-    public Tenant getTenant(UUID id) {
-        return userStore.getTenant(id);
-    }
-    
-    @Override
-    public Tenant getTenantByName(String name) {
-        return userStore.getTenantByName(name);
-    }
-
-    @Override
-    public Tenant createTenant(UUID tenantId, String name) throws TenantManagementException, UserGroupManagementException {
-        apply(s->s.internalCreateTenant(tenantId, name));
-        return userStore.getTenant(tenantId);
-    }
-
-    @Override
-    public Void internalCreateTenant(UUID tenantId, String name) throws TenantManagementException, UserGroupManagementException {
-        userStore.createTenant(tenantId, name);
-        return null;
-    }
-
-    @Override
-    public void addUserToTenant(Tenant tenant, SecurityUser user) {
-        tenant.add(user);
-        final UUID tenantId = tenant.getId();
-        final String username = user.getName();
-        apply(s->s.internalAddUserToTenant(tenantId, username));
-    }
-
-    @Override
-    public Void internalAddUserToTenant(UUID tenantId, String username) {
-        final Tenant tenant = getTenant(tenantId);
-        tenant.add(getUserByName(username));
-        userStore.updateTenant(tenant);
-        return null;
-    }
-    
-    @Override
-    public Void internalRemoveUserFromTenant(UUID tenantId, String username) {
-        final Tenant tenant = getTenant(tenantId);
-        tenant.remove(getUserByName(username));
-        userStore.updateTenant(tenant);
-        return null;
-    }
-    
-    @Override
-    public void removeUserFromTenant(Tenant tenant, SecurityUser user) {
-        tenant.remove(user);
-        final UUID tenantId = tenant.getId();
-        final String username = user.getName();
-        apply(s->s.internalRemoveUserFromTenant(tenantId, username));
-    }
-
-    @Override
-    public void deleteTenant(Tenant tenant) throws TenantManagementException, UserGroupManagementException {
-        for (OwnershipAnnotation ownership : accessControlStore.getOwnerships()) {
-            if (!Util.equalsWithNull(ownership.getIdOfAnnotatedObjectAsString(), tenant.getId().toString()) &&
-                    Util.equalsWithNull(ownership.getAnnotation().getTenantOwner(), tenant)) {
-                throw new TenantManagementException("The tenant "+tenant.getName()+
-                        " is still used as tenant owner and therefore cannot be removed");
-            }
-        }
-        final UUID tenantId = tenant.getId();
-        apply(s->s.internalDeleteTenant(tenantId));
-        deleteUserGroup(tenant);
-    }
-
-    @Override
-    public Void internalDeleteTenant(UUID tenantId) throws TenantManagementException, UserGroupManagementException {
-        userStore.deleteTenant(getTenant(tenantId));
-        return null;
     }
 
     @Override
@@ -714,7 +633,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
-            String company, final String validationBaseURL) throws UserManagementException, MailException, TenantManagementException, UserGroupManagementException {
+            String company, final String validationBaseURL) throws UserManagementException, MailException, UserGroupManagementException {
         return createSimpleUser(username, email, password, fullName, company, /* locale */ null, validationBaseURL);
     }
 
@@ -725,17 +644,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
         final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
-        final Tenant tenant;
+        final UserGroup tenant;
         if (username == null || username.length() < 3) {
             throw new UserManagementException(UserManagementException.USERNAME_DOES_NOT_MEET_REQUIREMENTS);
         } else if (password == null || password.length() < 5) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
-        if (userStore.getTenantByName(defaultTenantNameForUsername) != null) {
+        if (userStore.getUserGroupByName(defaultTenantNameForUsername) != null) {
             logger.info("Found existing tenant "+defaultTenantNameForUsername+" for new user "+username);
-            tenant = userStore.getTenantByName(defaultTenantNameForUsername);
+            tenant = userStore.getUserGroupByName(defaultTenantNameForUsername);
         } else {
-            tenant = createTenant(UUID.randomUUID(), defaultTenantNameForUsername);
+            tenant = createUserGroup(UUID.randomUUID(), defaultTenantNameForUsername);
         }
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
         byte[] salt = rng.nextBytes().getBytes();
@@ -743,7 +662,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final UserImpl result = userStore.createUser(username, email, tenant, upa); // TODO: get the principal as owner
         addRoleForUser(result, new RoleImpl(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
-        addUserToTenant(tenant, result);
+        addUserToUserGroup(tenant, result);
         // the new user becomes the owning user of its own specific tenant which initially only contains the new user
         accessControlStore.createOwnership(tenant.getId().toString(), result, tenant, tenant.getName());
         result.setFullName(fullName);
@@ -979,7 +898,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
             String nameOfUserQualifyingRole) throws UserManagementException {
         userStore.addRoleForUser(username, new RoleImpl(getRoleDefinition(roleDefinitionId),
-                getTenant(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
+                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
         return null;
     }
 
@@ -1000,7 +919,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
             String nameOfUserQualifyingRole) throws UserManagementException {
         userStore.removeRoleFromUser(username, new RoleImpl(getRoleDefinition(roleDefinitionId),
-                getTenant(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
+                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
         return null;
     }
 
@@ -1068,11 +987,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public SecurityUser createSocialUser(String name, SocialUserAccount socialUserAccount) throws UserManagementException, TenantManagementException, UserGroupManagementException {
+    public SecurityUser createSocialUser(String name, SocialUserAccount socialUserAccount) throws UserManagementException, UserGroupManagementException {
         if (userStore.getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
-        Tenant tenant = createTenant(UUID.randomUUID(), getDefaultTenantNameForUsername(name));
+        UserGroup tenant = createUserGroup(UUID.randomUUID(), getDefaultTenantNameForUsername(name));
         SecurityUser result = userStore.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), tenant, socialUserAccount);
         accessControlStore.createOwnership(tenant.getId().toString(), result, tenant, tenant.getName());
         addUserToUserGroup(tenant, result);

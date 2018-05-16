@@ -8,7 +8,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
-import com.sap.sse.security.shared.Tenant;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
@@ -34,7 +33,7 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
      * @param groups may be {@code null} which is equivalent to passing an empty groups collection
      */
     public UserDTO(String name, String email, String fullName, String company, String locale, boolean emailValidated,
-            List<AccountDTO> accounts, Iterable<Role> roles, Tenant defaultTenant, Iterable<WildcardPermission> permissions,
+            List<AccountDTO> accounts, Iterable<Role> roles, UserGroup defaultTenant, Iterable<WildcardPermission> permissions,
             Iterable<UserGroup> groups) {
         super(name, roles, defaultTenant, permissions);
         this.email = email;

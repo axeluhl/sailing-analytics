@@ -13,9 +13,9 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.Tenant;
-import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UnauthorizedException;
+import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
@@ -34,15 +34,15 @@ public interface UserManagementService extends RemoteService {
 
     AccessControlList removeFromACL(String idOfAccessControlledObjectAsString, String groupOrTenantIdAsString, String action) throws UnauthorizedException;
 
-    Collection<Tenant> getTenants() throws UnauthorizedException;
+    Collection<UserGroup> getUserGroups() throws UnauthorizedException;
 
-    Tenant createTenant(String name, String tenantOwner) throws TenantManagementException, UnauthorizedException;
+    UserGroup createUserGroup(String name, String tenantOwner) throws UserGroupManagementException, UnauthorizedException;
 
-    void addUserToTenant(String tenantIdAsString, String username) throws UnauthorizedException;
+    SuccessInfo deleteUserGroup(String userGroupIdAsString) throws UserGroupManagementException, UnauthorizedException;
+    
+    void addUserToUserGroup(String userGroupIdAsString, String username) throws UnauthorizedException;
 
-    void removeUserFromTenant(String idAsString, String user) throws UnauthorizedException;
-
-    SuccessInfo deleteTenant(String tenantIdAsString) throws UnauthorizedException;
+    void removeUserFromUserGroup(String userGroupIdAsString, String user) throws UnauthorizedException;
 
     Collection<UserDTO> getUserList() throws UnauthorizedException;
 
