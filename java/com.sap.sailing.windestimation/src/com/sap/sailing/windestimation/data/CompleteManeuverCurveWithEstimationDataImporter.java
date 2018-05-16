@@ -73,7 +73,8 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
         LoggingUtil.logInfo("Import statistics: \n\t" + importStatistics.regattasCount + " regattas\n\t"
                 + importStatistics.racesCount + " races\n\t" + importStatistics.competitorTracksCount
                 + " competitor tracks\n\t" + importStatistics.maneuversCount
-                + " complete maneuver curves with estimation data\n--------------------------------------------\nTime passed: "
+                + " complete maneuver curves with estimation data\n\t" + importStatistics.errors
+                + " ingored races due to error\n--------------------------------------------\nTime passed: "
                 + duration.toHours() + "h " + (duration.toMinutes() - duration.toHours() * 60) + "m "
                 + duration.get(ChronoUnit.SECONDS) + "s");
     }
@@ -96,7 +97,13 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
                             && (boolean) race.get("hasGpsData") && (boolean) race.get("hasWindData")) {
                         String trackedRaceName = (String) race.get("trackedRaceName");
                         LoggingUtil.logInfo("Processing race nr. " + ++i + ": \"" + trackedRaceName + "\"");
-                        importRace(regattaName, trackedRaceName, importStatistics);
+                        try {
+                            importRace(regattaName, trackedRaceName, importStatistics);
+                        } catch (Exception e) {
+                            importStatistics.errors += 1;
+                            LoggingUtil.logInfo(
+                                    "Error while processing race nr. " + ++i + ": \"" + trackedRaceName + "\"");
+                        }
                     }
                 }
                 importStatistics.racesCount += racesJson.size();
@@ -157,6 +164,7 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
         private int racesCount = 0;
         private int competitorTracksCount = 0;
         private int maneuversCount = 0;
+        private int errors = 0;
     }
 
 }
