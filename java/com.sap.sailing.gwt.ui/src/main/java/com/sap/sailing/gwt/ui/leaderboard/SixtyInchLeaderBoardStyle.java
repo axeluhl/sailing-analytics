@@ -11,7 +11,6 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -38,7 +37,6 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
     private LeaderboardPanel<?> leaderBoardPanel;
     private boolean showRaceColumns;
     private boolean ready;
-    private HeaderPanel headerPanel;
     
     public SixtyInchLeaderBoardStyle(boolean showRaceColumns) {
         this.showRaceColumns = showRaceColumns;
