@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.maneuverdetection.impl;
 
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 
 /**
  * 
@@ -27,7 +26,7 @@ public class ManeuverLoss {
     }
     
     public Distance getDistanceLost() {
-        return new MeterDistance(distanceSailedIfNotManeuvering.getMeters() - distanceSailed.getMeters());
+        return distanceSailedIfNotManeuvering.add(distanceSailed.scale(-1));
     }
     
     /**

@@ -22,7 +22,7 @@ public class ManeuverDTO implements IsSerializable {
     public Date timePoint;
 
     public Date timePointBefore;
-
+    
     public SpeedWithBearingDTO speedWithBearingBefore;
 
     public SpeedWithBearingDTO speedWithBearingAfter;

@@ -3626,8 +3626,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Date markPassingTimePoint = maneuver.isMarkPassing()
                     ? maneuver.getMarkPassing().getTimePoint().asDate() : null;
             final NauticalSide markPassingSide = maneuver.isMarkPassing() ? maneuver.getToSide() : null;
-            result.add(new ManeuverDTO(type, newTack, position, timepoint, timePointBefore, speedBefore, speedAfter,
-                    directionChangeInDegrees, maneuverLossInMeters, maxTurningRateInDegreesPerSecond,
+            result.add(new ManeuverDTO(type, newTack, position, timepoint, timePointBefore, speedBefore,
+                    speedAfter, directionChangeInDegrees, maneuverLossInMeters, maxTurningRateInDegreesPerSecond,
                     averageTurningRateInDegreesPerSecond, lowestSpeedInKnots, markPassingTimePoint, markPassingSide));
         }
         return result;

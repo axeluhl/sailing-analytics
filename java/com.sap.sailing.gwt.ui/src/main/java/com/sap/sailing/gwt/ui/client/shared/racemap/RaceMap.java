@@ -2433,10 +2433,44 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             LatLng where = getCoordinateSystem().toLatLng(maneuver.position);
             Widget content = getInfoWindowContent(maneuver);
             managedInfoWindow.openAtPosition(content, where);
+//            visualizeManeuver(maneuver, competitor, true);
         });
         maneuverMarkers.add(marker);
         marker.setMap(map);
     }
+    
+//    private final StringBuilder middleManeuverAngleLineText = new StringBuilder();
+//    final LineInfoProvider middleManeuverAngleLineInfoProvider = new LineInfoProvider() {
+//        @Override
+//        public String getLineInfo() {
+//            return stringMessages.finishLine()+middleManeuverAngleLineText;
+//        }
+//    };
+//    private final StringBuilder bearingBeforeManeuverLineText = new StringBuilder();
+//    final LineInfoProvider bearingBeforeManeuverLineInfoProvider = new LineInfoProvider() {
+//        @Override
+//        public String getLineInfo() {
+//            return stringMessages.finishLine()+bearingBeforeManeuverLineText;
+//        }
+//    };
+//
+//    private void visualizeManeuver(ManeuverDTO maneuver, CompetitorDTO competitor, boolean showManeuverVisualization) {
+//        
+//        Bearing bearingBefore = new DegreeBearingImpl(maneuver.speedWithBearingBefore.bearingInDegrees);
+//        Bearing bearingAfter = new DegreeBearingImpl(maneuver.speedWithBearingAfter.bearingInDegrees);
+//        Bearing MiddleManeuverAngle = bearingBefore.middle(bearingAfter);
+//        Distance middleManeuverAngleLineLength = new MeterDistance(100);
+//        Position middleManeuverAnglePosition1 = maneuver.position.translateRhumb(MiddleManeuverAngle.reverse(),
+//                middleManeuverAngleLineLength);
+//        Position middleManeuverAnglePosition2 = maneuver.position.translateRhumb(MiddleManeuverAngle,
+//                middleManeuverAngleLineLength);
+//        
+//
+//        showOrRemoveOrUpdateLine(null, showManeuverVisualization, middleManeuverAnglePosition1,
+//                middleManeuverAnglePosition2, middleManeuverAngleLineInfoProvider, "#ffffff");
+//        
+//        
+//    }
 
     /**
      * @param date
