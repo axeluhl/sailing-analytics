@@ -20,7 +20,7 @@ public class RootNodeSixtyInch extends RootNodeBase {
 
     public RootNodeSixtyInch(AutoPlayClientFactory cf) {
         super(RaceEndWithCompetitorsFlagsNode.class.getName(), cf);
-        this.idleLoop = new AutoPlayLoopNode("IdleLoop", 30, new IdleUpNextNode(cf), new IdleOverallLeaderBoardNode(cf),
+        this.idleLoop = new AutoPlayLoopNode("IdleLoop", 30, new IdleUpNextNode(cf), new IdleSixtyInchLeaderBoardNode(cf),
                 new VideoNode(cf));
         this.preEvent = new AutoPlayLoopNode("PreEvent", 30, new IdlePreEventNode(cf), new VideoNode(cf));
         this.preLiveRaceLoop = new AutoPlayLoopNode("PreLiveRaceLoop", 90,

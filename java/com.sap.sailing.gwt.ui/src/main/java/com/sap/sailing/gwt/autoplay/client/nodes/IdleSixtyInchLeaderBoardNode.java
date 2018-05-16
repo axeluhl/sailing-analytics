@@ -7,14 +7,13 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.ProvidesDuration;
-import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleOverallLeaderBoardPlace;
+import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleSixtyInchLeaderBoardPlace;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -30,14 +29,14 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class IdleOverallLeaderBoardNode extends FiresPlaceNode implements ProvidesDuration {
-    private static final Logger logger = Logger.getLogger(IdleOverallLeaderBoardNode.class.getName());
+public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode implements ProvidesDuration {
+    private static final Logger logger = Logger.getLogger(IdleSixtyInchLeaderBoardNode.class.getName());
     private final AutoPlayClientFactory cf;
     private Timer timer;
     private Consumer<Integer> durationConsumer;
 
-    public IdleOverallLeaderBoardNode(AutoPlayClientFactory cf) {
-        super(IdleOverallLeaderBoardNode.class.getName());
+    public IdleSixtyInchLeaderBoardNode(AutoPlayClientFactory cf) {
+        super(IdleSixtyInchLeaderBoardNode.class.getName());
         this.cf = cf;
     }
 
@@ -53,16 +52,16 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode implements Provid
                 /* namesOfRaceColumnsToShow */ null, /* numberOfLastRacesToShow */ null,
                 /* delayBetweenAutoAdvancesInMilliseconds */ null, RaceColumnSelectionStrategies.EXPLICIT,
                 /* showAddedScores */ true, /* showCompetitorShortNameColumn */ true,
-                /* showCompetitorFullNameColumn */ false, /* showCompetitorBoatInfoColumn */ false, /* isCompetitorNationalityColumnVisible */ true);
+                /* showCompetitorFullNameColumn */ false, /* showCompetitorBoatInfoColumn */ false,
+                /* isCompetitorNationalityColumnVisible */ true);
 
         timer = new Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         String leaderBoard = cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName();
-        
-        cf.getSailingService().getOverallLeaderboardNamesContaining(
-                leaderBoard,
+
+        cf.getSailingService().getOverallLeaderboardNamesContaining(leaderBoard,
                 new MarkedAsyncCallback<List<String>>(new AsyncCallback<List<String>>() {
 
                     @Override
@@ -82,7 +81,8 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode implements Provid
                                 new SixtyInchLeaderBoardStyle(true), FlagImageResolverImpl.get(),
                                 Arrays.asList(DetailType.values()));
 
-                        IdleOverallLeaderBoardPlace place = new IdleOverallLeaderBoardPlace(leaderboardPanel, provider, durationConsumer);
+                        IdleSixtyInchLeaderBoardPlace place = new IdleSixtyInchLeaderBoardPlace(leaderboardPanel, provider,
+                                durationConsumer);
 
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
@@ -92,7 +92,6 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode implements Provid
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        GWT.debugger();
                         logger.log(Level.SEVERE, "Remote call for Leaderboard loading failed", caught);
                     }
                 }));

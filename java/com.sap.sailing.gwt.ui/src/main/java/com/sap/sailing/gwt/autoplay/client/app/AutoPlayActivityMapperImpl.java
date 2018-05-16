@@ -16,9 +16,9 @@ import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext.Id
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard.LeaderboardPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard.LeaderboardPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard.LeaderboardViewImpl;
-import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleOverallLeaderBoardPlace;
-import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleOverallLeaderBoardPresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleOverallLeaderBoardViewImpl;
+import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleSixtyInchLeaderBoardPlace;
+import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleSixtyInchLeaderBoardPresenterImpl;
+import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleSixtyInchLeaderBoardViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.video.VideoPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.video.VideoPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.video.VideoViewImpl;
@@ -105,9 +105,9 @@ public class AutoPlayActivityMapperImpl implements ActivityMapper {
             return new RaceEndWithBoatsPresenterImpl((RaceEndWithCompetitorFlagsPlace) place, clientFactory,
                     new RaceEndWithBoatsViewImpl(new FlagImageProvider()));
         }
-        if (place instanceof IdleOverallLeaderBoardPlace) {
-            return new IdleOverallLeaderBoardPresenterImpl((IdleOverallLeaderBoardPlace) place, clientFactory,
-                    new IdleOverallLeaderBoardViewImpl());
+        if (place instanceof IdleSixtyInchLeaderBoardPlace) {
+            return new IdleSixtyInchLeaderBoardPresenterImpl((IdleSixtyInchLeaderBoardPlace) place, clientFactory,
+                    new IdleSixtyInchLeaderBoardViewImpl());
         }
         return null;
     }

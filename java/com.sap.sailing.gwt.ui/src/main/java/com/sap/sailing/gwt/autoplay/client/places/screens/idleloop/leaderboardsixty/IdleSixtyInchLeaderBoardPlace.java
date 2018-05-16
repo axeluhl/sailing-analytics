@@ -7,42 +7,41 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 
-public class IdleOverallLeaderBoardPlace extends Place {
-    public static class Tokenizer implements PlaceTokenizer<IdleOverallLeaderBoardPlace> {
+public class IdleSixtyInchLeaderBoardPlace extends Place {
+    public static class Tokenizer implements PlaceTokenizer<IdleSixtyInchLeaderBoardPlace> {
         @Override
-        public String getToken(IdleOverallLeaderBoardPlace place) {
+        public String getToken(IdleSixtyInchLeaderBoardPlace place) {
             return "";
         }
 
         @Override
-        public IdleOverallLeaderBoardPlace getPlace(String token) {
-            return new IdleOverallLeaderBoardPlace();
+        public IdleSixtyInchLeaderBoardPlace getPlace(String token) {
+            return new IdleSixtyInchLeaderBoardPlace();
         }
     }
-
 
     private MultiRaceLeaderboardPanel leaderboardPanel;
     private CompetitorSelectionProvider competitorSelectionProvider;
     private Consumer<Integer> durationConsumer;
 
-    public IdleOverallLeaderBoardPlace() {
+    public IdleSixtyInchLeaderBoardPlace() {
     }
 
-
-    public IdleOverallLeaderBoardPlace(MultiRaceLeaderboardPanel leaderboardPanel, CompetitorSelectionProvider competitorSelectionProvider, Consumer<Integer> durationConsumer) {
+    public IdleSixtyInchLeaderBoardPlace(MultiRaceLeaderboardPanel leaderboardPanel,
+            CompetitorSelectionProvider competitorSelectionProvider, Consumer<Integer> durationConsumer) {
         this.leaderboardPanel = leaderboardPanel;
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.durationConsumer = durationConsumer;
     }
-    
+
     public Consumer<Integer> getDurationConsumer() {
         return durationConsumer;
     }
-    
+
     public CompetitorSelectionProvider getCompetitorSelectionProvider() {
         return competitorSelectionProvider;
     }
-    
+
     public MultiRaceLeaderboardPanel getLeaderboardPanel() {
         return leaderboardPanel;
     }

@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
-public class IdleOverallLeaderBoardViewImpl extends ResizeComposite implements IdleOverallLeaderBoardView {
+public class IdleSixtyInchLeaderBoardViewImpl extends ResizeComposite implements IdleSixtyInchLeaderBoardView {
     protected static final int TOOLBAR_SIZE = 80;
 
     private static LifeRaceWithRacemapViewImplUiBinder uiBinder = GWT.create(LifeRaceWithRacemapViewImplUiBinder.class);
@@ -20,10 +20,10 @@ public class IdleOverallLeaderBoardViewImpl extends ResizeComposite implements I
 
     private MultiRaceLeaderboardPanel leaderboardPanel;
 
-    interface LifeRaceWithRacemapViewImplUiBinder extends UiBinder<Widget, IdleOverallLeaderBoardViewImpl> {
+    interface LifeRaceWithRacemapViewImplUiBinder extends UiBinder<Widget, IdleSixtyInchLeaderBoardViewImpl> {
     }
 
-    public IdleOverallLeaderBoardViewImpl() {
+    public IdleSixtyInchLeaderBoardViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
     }
 

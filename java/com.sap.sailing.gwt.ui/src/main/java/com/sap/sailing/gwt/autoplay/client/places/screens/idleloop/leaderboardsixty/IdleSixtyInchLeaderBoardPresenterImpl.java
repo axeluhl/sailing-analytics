@@ -14,18 +14,18 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 
-public class IdleOverallLeaderBoardPresenterImpl extends AutoPlayPresenterConfigured<IdleOverallLeaderBoardPlace>
-        implements IdleOverallLeaderBoardView.Slide7Presenter {
+public class IdleSixtyInchLeaderBoardPresenterImpl extends AutoPlayPresenterConfigured<IdleSixtyInchLeaderBoardPlace>
+        implements IdleSixtyInchLeaderBoardView.Slide7Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
-    private IdleOverallLeaderBoardView view;
+    private IdleSixtyInchLeaderBoardView view;
     private int selected = -1;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
     private MultiRaceLeaderboardPanel leaderboardPanel;
     private Timer selectionTimer;
     private boolean publishedDuration;
 
-    public IdleOverallLeaderBoardPresenterImpl(IdleOverallLeaderBoardPlace place, AutoPlayClientFactory clientFactory,
-            IdleOverallLeaderBoardView lifeRaceWithRacemapViewImpl) {
+    public IdleSixtyInchLeaderBoardPresenterImpl(IdleSixtyInchLeaderBoardPlace place, AutoPlayClientFactory clientFactory,
+            IdleSixtyInchLeaderBoardView lifeRaceWithRacemapViewImpl) {
         super(place, clientFactory);
         this.view = lifeRaceWithRacemapViewImpl;
         selectionTimer = new Timer() {
