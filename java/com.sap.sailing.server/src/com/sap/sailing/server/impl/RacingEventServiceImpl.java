@@ -724,7 +724,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         competitor.getColor(), competitor.getEmail(), competitor.getFlagImage(), 
                         competitor.getTeam()==null?null:competitor.getTeam().getNationality(),
                         competitor.getTimeOnTimeFactor(),
-                        competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
+                        competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(),
+                        competitor.hasBoat() ? ((CompetitorWithBoat) competitor).getBoat().getId() : null));
             }
         });
         this.competitorAndBoatStore.addBoatUpdateListener(new BoatUpdateListener() {
@@ -1772,7 +1773,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             DynamicTrackedRegatta trackedRegatta) {
         if (regattasObservedForDefaultLeaderboard.add(trackedRegatta)) {
             trackedRegatta.addRaceListener(new RaceAdditionListener(),
-                    Optional.of(this.getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()));
+                    /* ThreadLocalTransporter */ Optional.empty(), // registering for synchronous callbacks; no thread locals need to be transported
+                    /* register for synchronous execution in order to ensure that any replication-related effects happen before
+                     * any subsequent replication operations referring to a new race hit the outbound replication queue
+                     */ true);
         }
     }
 
@@ -1878,7 +1882,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
 
         @Override
-        public void maxPointsReasonChanced(Competitor competitor, RaceColumn raceColumn, MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
+        public void maxPointsReasonChanged(Competitor competitor, RaceColumn raceColumn, MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
             notifyForCompetitorIfNotAlreadyNotifiedRecently(competitor, raceColumn);
         }
 
@@ -2605,7 +2609,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 replicate(new TrackRegatta(regatta.getRegattaIdentifier()));
                 regattaTrackingCache.put(regatta, result);
                 ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(result);
-
                 trackedRegattaListener.regattaAdded(result);
             }
             return result;
@@ -2992,7 +2995,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             regatta.addRegattaListener(this);
             logoutput.append(String.format("%3s\n", regatta.toString()));
         }
-
         logger.info("Reading all events...");
         eventsById.putAll((Map<Serializable, Event>) ois.readObject());
         logoutput.append("\nReceived " + eventsById.size() + " NEW events\n");

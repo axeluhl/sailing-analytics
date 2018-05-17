@@ -7,7 +7,6 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface FlagImageResolver {
-    
     public static void get(AsyncCallback<FlagImageResolver> callback) {
         GWT.runAsync(new RunAsyncCallback() {
             @Override
