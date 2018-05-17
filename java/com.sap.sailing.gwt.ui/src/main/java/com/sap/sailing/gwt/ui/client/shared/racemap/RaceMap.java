@@ -2467,6 +2467,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             return stringMessages.finishLine()+LineText3;
         }
     };
+    private final StringBuilder LineText4 = new StringBuilder();
+    final LineInfoProvider LineInfoProvider4 = new LineInfoProvider() {
+        @Override
+        public String getLineInfo() {
+            return stringMessages.finishLine()+LineText4;
+        }
+    };
 
     private void visualizeManeuver(ManeuverDTO maneuver, Position centerPoint, boolean showManeuverVisualization) {
         
@@ -2479,7 +2486,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         // Position middleManeuverAnglePosition2 = maneuver.position.translateRhumb(MiddleManeuverAngle,
         // middleManeuverAngleLineLength);
         //
-
+        
         Bearing bearingBefore = new DegreeBearingImpl(maneuver.maneuverLoss.speedWithBearingBefore.bearingInDegrees);
         Bearing middleManeuverAngle = new DegreeBearingImpl(maneuver.maneuverLoss.middleManeuverAngle);
         Distance extrapolationOfManeuverStartPoint = new MeterDistance(
@@ -2489,20 +2496,24 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 .translateRhumb(bearingBefore, extrapolationOfManeuverStartPoint);
         Position intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint = maneuver.maneuverLoss.maneuverStartPosition
                 .getIntersection(bearingBefore, centerPoint, middleManeuverAngle);
-        Position extrapolatedManeuverStartPositionProjectedOnMiddleManeuverAngle = extrapolatedManeuverStartPosition
+        Position projectedExtrapolatedManeuverStartPosition = extrapolatedManeuverStartPosition
                 .projectToLineThrough(intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint,
                         middleManeuverAngle);
         Position projectedManeuverEndPosition = maneuver.maneuverLoss.maneuverEndPosition.projectToLineThrough(
                 intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
+        String color = maneuver.maneuverLossInMeters >0 ? color = "#FF0000" : "#00FF00";
         
         showOrRemoveOrUpdateLine(null, showManeuverVisualization, intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint,
                 projectedManeuverEndPosition, middleManeuverAngleLineInfoProvider, "#ffffff");
         showOrRemoveOrUpdateLine(null, showManeuverVisualization, maneuver.maneuverLoss.maneuverStartPosition,
-                extrapolatedManeuverStartPosition, LineInfoProvider1, "#070707");
+                extrapolatedManeuverStartPosition, LineInfoProvider1, "#ffffff");
         showOrRemoveOrUpdateLine(null, showManeuverVisualization, extrapolatedManeuverStartPosition,
-                extrapolatedManeuverStartPositionProjectedOnMiddleManeuverAngle, LineInfoProvider2, "#FF0000");
+                projectedExtrapolatedManeuverStartPosition, LineInfoProvider2, "#FFFF00");
         showOrRemoveOrUpdateLine(null, showManeuverVisualization, maneuver.maneuverLoss.maneuverEndPosition,
-                projectedManeuverEndPosition, LineInfoProvider3, "#F7FF00");
+                projectedManeuverEndPosition, LineInfoProvider3, "#FFFF00");
+        showOrRemoveOrUpdateLine(null, showManeuverVisualization,
+                projectedExtrapolatedManeuverStartPosition, projectedManeuverEndPosition,
+                LineInfoProvider4, color);
         
     }
 
