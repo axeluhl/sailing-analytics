@@ -21,10 +21,10 @@ public class ManeuverWithStableSpeedAndCourseBoundariesImpl extends ManeuverImpl
     private static final long serialVersionUID = 5831188137884083419L;
 
     public ManeuverWithStableSpeedAndCourseBoundariesImpl(ManeuverType type, Tack newTack, Position position,
-            Distance maneuverLoss, TimePoint timePoint, ManeuverCurveBoundaries mainCurveBoundaries,
+            Distance maneuverLossDistanceLost, TimePoint timePoint, ManeuverCurveBoundaries mainCurveBoundaries,
             ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries,
             double maxTurningRateInDegreesPerSecond, MarkPassing markPassing) {
-        super(type, newTack, position, maneuverLoss, timePoint, mainCurveBoundaries,
+        super(type, newTack, position, maneuverLossDistanceLost, timePoint, mainCurveBoundaries,
                 maneuverCurveWithStableSpeedAndCourseBoundaries, maxTurningRateInDegreesPerSecond, markPassing);
     }
 

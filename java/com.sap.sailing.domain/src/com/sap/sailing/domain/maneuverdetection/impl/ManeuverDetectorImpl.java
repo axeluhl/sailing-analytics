@@ -1049,7 +1049,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             ManeuverCurveBoundaries maneuverUnstableCourseAndSpeedBoundaries, Wind wind, MarkPassing markPassing) {
         final Maneuver maneuver;
         final ManeuverType maneuverType;
-        Distance maneuverLoss = null;
+        Distance maneuverLossDistanceLost = null;
         Tack tackAfterManeuver = null;
         final Position maneuverPosition = track.getEstimatedPosition(maneuverMainCurveDetails.getTimePoint(),
                 /* extrapolate */false);
@@ -1089,9 +1089,9 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             } else {
                 tackAfterManeuver = null;
             }
-            maneuverLoss = getManeuverLoss(maneuverUnstableCourseAndSpeedBoundaries).getProjectedDistanceLost();
+            maneuverLossDistanceLost = getManeuverLoss(maneuverUnstableCourseAndSpeedBoundaries).getProjectedDistanceLost();
             maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, tackAfterManeuver,
-                    maneuverPosition, maneuverLoss, maneuverMainCurveDetails.getTimePoint(),
+                    maneuverPosition, maneuverLossDistanceLost, maneuverMainCurveDetails.getTimePoint(),
                     maneuverMainCurveDetails.extractCurveBoundariesOnly(), maneuverUnstableCourseAndSpeedBoundaries,
                     maneuverMainCurveDetails.getMaxTurningRateInDegreesPerSecond(), markPassing);
         } else {
@@ -1108,7 +1108,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 tackAfterManeuver = null;
             }
             maneuver = new ManeuverWithMainCurveBoundariesImpl(maneuverType, tackAfterManeuver, maneuverPosition,
-                    maneuverLoss, maneuverMainCurveDetails.getTimePoint(),
+                    maneuverLossDistanceLost, maneuverMainCurveDetails.getTimePoint(),
                     maneuverMainCurveDetails.extractCurveBoundariesOnly(), maneuverUnstableCourseAndSpeedBoundaries,
                     maneuverMainCurveDetails.getMaxTurningRateInDegreesPerSecond(), markPassing);
         }

@@ -62,7 +62,7 @@ public interface Maneuver extends GPSFix {
      * considering the maneuver curve, which was performed between {@link #getTimePointBefore()} and
      * {@link #getTimePointAfter()}.
      */
-    Distance getManeuverLoss();
+    Distance getManeuverLossDistanceLost();
 
     /**
      * Gets the time point of the corresponding maneuver. The time point refers to a point within the main curve of

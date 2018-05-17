@@ -1006,12 +1006,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         case PENALTY_CIRCLE:
                             if (!maneuver.getTimePoint().before(startOfLeg) && (legFinishTime == null || legFinishTime.after(timePoint) ||
                                     maneuver.getTimePoint().before(legFinishTime))) {
-                                if (maneuver.getManeuverLoss() != null) {
+                                if (maneuver.getManeuverLossDistanceLost() != null) {
                                     result.numberOfManeuvers.put(maneuver.getType(),
                                             result.numberOfManeuvers.get(maneuver.getType()) + 1);
                                     totalManeuverLossInMeters.put(maneuver.getType(),
                                             totalManeuverLossInMeters.get(maneuver.getType())
-                                            + maneuver.getManeuverLoss().getMeters());
+                                            + maneuver.getManeuverLossDistanceLost().getMeters());
                                 }
                             }
                             break;

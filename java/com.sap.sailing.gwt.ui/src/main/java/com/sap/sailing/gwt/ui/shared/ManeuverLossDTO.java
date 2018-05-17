@@ -7,7 +7,7 @@ import com.sap.sse.common.Duration;
 public class ManeuverLossDTO implements IsSerializable {
     public Position maneuverStartPosition;
     public Position maneuverEndPosition;
-    public SpeedWithBearingDTO speedWithBearingbefore;
+    public SpeedWithBearingDTO speedWithBearingBefore;
     public Double middleManeuverAngle;
     public Duration maneuverDuration;
     
@@ -16,10 +16,10 @@ public class ManeuverLossDTO implements IsSerializable {
     }
 
     public ManeuverLossDTO(Position maneuverStartPosition, Position maneuverEndPosition,
-            SpeedWithBearingDTO speedWithBearingbefore, Double middleManeuverAngle, Duration maneuverDuration) {
+            SpeedWithBearingDTO speedWithBearingBefore, Double middleManeuverAngle, Duration maneuverDuration) {
         this.maneuverStartPosition = maneuverStartPosition;
         this.maneuverEndPosition = maneuverEndPosition;
-        this.speedWithBearingbefore = speedWithBearingbefore;
+        this.speedWithBearingBefore = speedWithBearingBefore;
         this.middleManeuverAngle = middleManeuverAngle;
         this.maneuverDuration = maneuverDuration;
     }

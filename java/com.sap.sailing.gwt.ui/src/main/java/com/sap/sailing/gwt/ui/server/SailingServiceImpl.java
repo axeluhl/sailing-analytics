@@ -3619,7 +3619,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final SpeedWithBearingDTO speedBefore = createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore());
             final SpeedWithBearingDTO speedAfter = createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter());
             final double directionChangeInDegrees = maneuver.getDirectionChangeInDegrees();
-            final Double maneuverLossInMeters = maneuver.getManeuverLoss() == null ? null : maneuver.getManeuverLoss().getMeters();
+            final Double maneuverLossInMeters = maneuver.getManeuverLossDistanceLost() == null ? null : maneuver.getManeuverLossDistanceLost().getMeters();
             final double maxTurningRateInDegreesPerSecond = maneuver.getMaxTurningRateInDegreesPerSecond();
             final double averageTurningRateInDegreesPerSecond = maneuver.getAvgTurningRateInDegreesPerSecond();
             final double lowestSpeedInKnots = maneuver.getLowestSpeed().getKnots();
@@ -3629,6 +3629,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.add(new ManeuverDTO(type, newTack, position, timepoint, timePointBefore, speedBefore,
                     speedAfter, directionChangeInDegrees, maneuverLossInMeters, maxTurningRateInDegreesPerSecond,
                     averageTurningRateInDegreesPerSecond, lowestSpeedInKnots, markPassingTimePoint, markPassingSide));
+//            final ManeuverLossDTO = new ManeuverLossDTO (maneuver.getMan)
         }
         return result;
     }
