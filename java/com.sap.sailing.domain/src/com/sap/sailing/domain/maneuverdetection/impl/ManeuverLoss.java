@@ -1,40 +1,83 @@
 package com.sap.sailing.domain.maneuverdetection.impl;
 
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sse.common.Duration;
 
 /**
  * 
  * @author Vladislav Chumak (D069712)
  *
  */
+
+/**
+ * Updated ManeuverLoss class to use it to visualize the correct maneuver loss on the race map. To draw the ManeuverLoss
+ * needs the maneuverStartPosition, maneuverEndPosition, middleManeuverAngle, speedWithBearingBefore and
+ * maneuverDuration. The ManeuverLoss is calculated by {@link ManeuverDetectorImpl#getManeuverLoss()}.
+ * 
+ * 
+ * | maneuverEndPosition -> x--¦ \ | )| / maneuverStartPosition -> x´
+ *
+ */
 public class ManeuverLoss {
 
-    private final Distance distanceSailed;
-    private final Distance distanceSailedIfNotManeuvering;
-
-    public ManeuverLoss(Distance distanceSailed, Distance distanceSailedIfNotManeuvering) {
-        this.distanceSailed = distanceSailed;
-        this.distanceSailedIfNotManeuvering = distanceSailedIfNotManeuvering;
+    private final Distance distanceSailedProjectedOnMiddleManeuverAngle;
+    private final Distance distanceSailedIfNotManeuveringProjectedOnMiddeManeuverAngle;
+    private final Position maneuverStartPosition;
+    private final Position maneuverEndPosition;
+    private final Duration maneuverDuration;
+    private final SpeedWithBearing speedWithBearingBefore;
+    private final Bearing middleManeuverAngle;
+    
+    public ManeuverLoss(Distance distanceSailedProjectedOnMiddleManeuverAngle,
+            Distance distanceSailedIfNotManeuveringProjectedOnMiddleManeuverAngle, Position maneuverStartPosition,
+            Position maneuverEndPosition, Duration maneuverDuration, SpeedWithBearing speedWithBearingBefore,
+            Bearing middleManeuverAngle) {
+        this.distanceSailedProjectedOnMiddleManeuverAngle = distanceSailedProjectedOnMiddleManeuverAngle;
+        this.distanceSailedIfNotManeuveringProjectedOnMiddeManeuverAngle = distanceSailedIfNotManeuveringProjectedOnMiddleManeuverAngle;
+        this.maneuverStartPosition = maneuverStartPosition;
+        this.maneuverEndPosition = maneuverEndPosition;
+        this.maneuverDuration = maneuverDuration;
+        this.speedWithBearingBefore = speedWithBearingBefore;
+        this.middleManeuverAngle = middleManeuverAngle;
     }
 
-    public Distance getDistanceSailed() {
-        return distanceSailed;
+    public Distance getDistanceSailedProjectedOnMiddleManeuverAngle() {
+        return distanceSailedProjectedOnMiddleManeuverAngle;
     }
 
-    public Distance getDistanceSailedIfNotManeuvering() {
-        return distanceSailedIfNotManeuvering;
+    public Distance getDistanceSailedIfNotManeuveringProjectedOnMiddleManeuverAngle() {
+        return distanceSailedIfNotManeuveringProjectedOnMiddeManeuverAngle;
     }
     
-    public Distance getDistanceLost() {
-        return distanceSailedIfNotManeuvering.add(distanceSailed.scale(-1));
+    public Distance getProjectedDistanceLost() {
+        return distanceSailedIfNotManeuveringProjectedOnMiddeManeuverAngle.add(distanceSailedProjectedOnMiddleManeuverAngle.scale(-1));
     }
     
     /**
-     * Gets the ratio between {@link #getDistanceSailed()} and
-     * {@link #getDistanceSailedIfNotManeuvering()}.
+     * Gets the ratio between {@link #getDistanceSailedProjectedOnMiddleManeuverAngle()} and
+     * {@link #getDistanceSailedIfNotManeuveringProjectedOnMiddleManeuverAngle()}.
      */
     public double getRatioBetweenDistanceSailedWithAndWithoutManeuver() {
-        return getDistanceSailed().getMeters() / getDistanceSailedIfNotManeuvering().getMeters();
+        return getDistanceSailedProjectedOnMiddleManeuverAngle().getMeters() / getDistanceSailedIfNotManeuveringProjectedOnMiddleManeuverAngle().getMeters();
+    }
+    
+    public Position getManeuverStartPosition() {
+        return maneuverStartPosition;
+    }
+    public Position getManeuverEndPosition() {
+        return maneuverEndPosition;
+    }
+    public Duration getManeuverDuration() {
+        return maneuverDuration;
+    }
+    public SpeedWithBearing getSpeedWithBearingBefore() {
+        return speedWithBearingBefore;
+    }
+    public Bearing getMiddleManeuverAngle() {
+        return middleManeuverAngle;
     }
 
 }

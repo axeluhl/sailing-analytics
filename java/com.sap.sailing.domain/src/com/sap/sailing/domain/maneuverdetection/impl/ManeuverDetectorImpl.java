@@ -335,8 +335,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 stepWithHighestSpeed.getSpeedWithBearing(), stepWithHighestSpeed.getTimePoint(),
                 maneuverCurve.getMainCurveBoundaries().getTimePoint(),
                 maneuverCurve.getMainCurveBoundaries().getMaxTurningRateInDegreesPerSecond(), courseAtMaxTurningRate,
-                distanceSailedWithinManeuver, projectedManeuverLoss.getDistanceSailed(), distanceSailedIfNotManeuvering,
-                projectedManeuverLoss.getDistanceSailedIfNotManeuvering(),
+                distanceSailedWithinManeuver, projectedManeuverLoss.getDistanceSailedProjectedOnMiddleManeuverAngle(), distanceSailedIfNotManeuvering,
+                projectedManeuverLoss.getDistanceSailedIfNotManeuveringProjectedOnMiddleManeuverAngle(),
                 Math.abs(maneuverCurve.getMainCurveBoundaries().getDirectionChangeInDegrees())
                         / maneuverCurve.getMainCurveBoundaries().getDuration().asSeconds(),
                 gpsFixCountWithinMainCurve, longestGpsFixIntervalBetweenTwoFixes);
@@ -391,8 +391,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 durationAndAvgSpeedWithBearingBefore.getB(), durationAndAvgSpeedWithBearingBefore.getA(),
                 gpsFixesCountFromPreviousManeuver, durationAndAvgSpeedWithBearingAfter.getB(),
                 durationAndAvgSpeedWithBearingAfter.getA(), gpsFixesCountToNextManeuver, distanceSailedWithinManeuver,
-                projectedManeuverLoss.getDistanceSailed(), distanceSailedIfNotManeuvering,
-                projectedManeuverLoss.getDistanceSailedIfNotManeuvering(), gpsFixCountWithinWholeCurve,
+                projectedManeuverLoss.getDistanceSailedProjectedOnMiddleManeuverAngle(), distanceSailedIfNotManeuvering,
+                projectedManeuverLoss.getDistanceSailedIfNotManeuveringProjectedOnMiddleManeuverAngle(), gpsFixCountWithinWholeCurve,
                 longestGpsFixIntervalBetweenTwoFixes, intervalBetweenLastFixOfCurveAndNextFix,
                 intervalBetweenFirstFixOfCurveAndPreviousFix);
         TimePoint maneuverTimePoint = maneuverCurve.getMainCurveBoundaries().getTimePoint();
@@ -1089,7 +1089,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             } else {
                 tackAfterManeuver = null;
             }
-            maneuverLoss = getManeuverLoss(maneuverUnstableCourseAndSpeedBoundaries).getDistanceLost();
+            maneuverLoss = getManeuverLoss(maneuverUnstableCourseAndSpeedBoundaries).getProjectedDistanceLost();
             maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, tackAfterManeuver,
                     maneuverPosition, maneuverLoss, maneuverMainCurveDetails.getTimePoint(),
                     maneuverMainCurveDetails.extractCurveBoundariesOnly(), maneuverUnstableCourseAndSpeedBoundaries,
@@ -1125,14 +1125,15 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      */
     private ManeuverLoss getManeuverLoss(ManeuverCurveBoundaries maneuverBoundaries) {
         final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-        SpeedWithBearing speedWhenSpeedStartedToDrop = maneuverBoundaries.getSpeedWithBearingBefore();
-        SpeedWithBearing speedAfterManeuver = maneuverBoundaries.getSpeedWithBearingAfter();
+        SpeedWithBearing speedWithBearingWhenSpeedStartedToDrop = maneuverBoundaries.getSpeedWithBearingBefore();
+        SpeedWithBearing speedWithBearingAfterManeuver = maneuverBoundaries.getSpeedWithBearingAfter();
         TimePoint timePointWhenSpeedStartedToDrop = maneuverBoundaries.getTimePointBefore();
         TimePoint timePointWhenSpeedLevelledOffAfterManeuver = maneuverBoundaries.getTimePointAfter();
+        Duration maneuverDuration = timePointWhenSpeedStartedToDrop.until(timePointWhenSpeedLevelledOffAfterManeuver);
         // For upwind/downwind legs, find the mean course between inbound and outbound course and project actual
         // and
         // extrapolated positions onto it:
-        Bearing middleManeuverAngle = speedWhenSpeedStartedToDrop.getBearing().middle(speedAfterManeuver.getBearing());
+        Bearing middleManeuverAngle = speedWithBearingWhenSpeedStartedToDrop.getBearing().middle(speedWithBearingAfterManeuver.getBearing());
         // extrapolate maximum speed before maneuver to time point of maximum speed after maneuver and project
         // resulting position
         // onto the average maneuver course; compare to the projected position actually reached at the time
@@ -1140,7 +1141,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         // maneuver:
         Position positionWhenSpeedStartedToDrop = track.getEstimatedPosition(timePointWhenSpeedStartedToDrop,
                 /* extrapolate */ false);
-        Position extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver = speedWhenSpeedStartedToDrop.travelTo(
+        Position extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver = speedWithBearingWhenSpeedStartedToDrop.travelTo(
                 positionWhenSpeedStartedToDrop, timePointWhenSpeedStartedToDrop,
                 timePointWhenSpeedLevelledOffAfterManeuver);
         Position actualPositionAtTimePointOfMaxSpeedAfterManeuver = track
@@ -1153,7 +1154,10 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 .getDistance(projectedActualPositionAtTimePointOfMaxSpeedAfterManeuver);
         Distance projectedDistanceSailedIfNotManeuvering = positionWhenSpeedStartedToDrop
                 .getDistance(projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver);
-        return new ManeuverLoss(projectedDistanceSailed, projectedDistanceSailedIfNotManeuvering);
+        return new ManeuverLoss(projectedDistanceSailed, projectedDistanceSailedIfNotManeuvering,
+                positionWhenSpeedStartedToDrop,
+                actualPositionAtTimePointOfMaxSpeedAfterManeuver, maneuverDuration, speedWithBearingWhenSpeedStartedToDrop,
+                middleManeuverAngle);
     }
 
     protected Duration getDurationForDouglasPeuckerExtensionForMainCurveAnalysis(Duration approximateManeuverDuration) {

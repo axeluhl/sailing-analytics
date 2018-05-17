@@ -40,6 +40,8 @@ public class ManeuverDTO implements IsSerializable {
     public Date markPassingTimePoint;
 
     public NauticalSide markPassingSide;
+    
+//    public ManeuverLossDTO maneuverLoss;
 
     public ManeuverDTO() {}
 
