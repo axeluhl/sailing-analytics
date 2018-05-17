@@ -2433,44 +2433,78 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             LatLng where = getCoordinateSystem().toLatLng(maneuver.position);
             Widget content = getInfoWindowContent(maneuver);
             managedInfoWindow.openAtPosition(content, where);
-//            visualizeManeuver(maneuver, competitor, true);
+            visualizeManeuver(maneuver, maneuver.position, true);
         });
         maneuverMarkers.add(marker);
         marker.setMap(map);
     }
     
-//    private final StringBuilder middleManeuverAngleLineText = new StringBuilder();
-//    final LineInfoProvider middleManeuverAngleLineInfoProvider = new LineInfoProvider() {
-//        @Override
-//        public String getLineInfo() {
-//            return stringMessages.finishLine()+middleManeuverAngleLineText;
-//        }
-//    };
-//    private final StringBuilder bearingBeforeManeuverLineText = new StringBuilder();
-//    final LineInfoProvider bearingBeforeManeuverLineInfoProvider = new LineInfoProvider() {
-//        @Override
-//        public String getLineInfo() {
-//            return stringMessages.finishLine()+bearingBeforeManeuverLineText;
-//        }
-//    };
-//
-//    private void visualizeManeuver(ManeuverDTO maneuver, CompetitorDTO competitor, boolean showManeuverVisualization) {
-//        
-//        Bearing bearingBefore = new DegreeBearingImpl(maneuver.speedWithBearingBefore.bearingInDegrees);
-//        Bearing bearingAfter = new DegreeBearingImpl(maneuver.speedWithBearingAfter.bearingInDegrees);
-//        Bearing MiddleManeuverAngle = bearingBefore.middle(bearingAfter);
-//        Distance middleManeuverAngleLineLength = new MeterDistance(100);
-//        Position middleManeuverAnglePosition1 = maneuver.position.translateRhumb(MiddleManeuverAngle.reverse(),
-//                middleManeuverAngleLineLength);
-//        Position middleManeuverAnglePosition2 = maneuver.position.translateRhumb(MiddleManeuverAngle,
-//                middleManeuverAngleLineLength);
-//        
-//
-//        showOrRemoveOrUpdateLine(null, showManeuverVisualization, middleManeuverAnglePosition1,
-//                middleManeuverAnglePosition2, middleManeuverAngleLineInfoProvider, "#ffffff");
-//        
-//        
-//    }
+    private final StringBuilder middleManeuverAngleLineText = new StringBuilder();
+    final LineInfoProvider middleManeuverAngleLineInfoProvider = new LineInfoProvider() {
+        @Override
+        public String getLineInfo() {
+            return stringMessages.finishLine()+middleManeuverAngleLineText;
+        }
+    };
+    private final StringBuilder LineText1 = new StringBuilder();
+    final LineInfoProvider LineInfoProvider1 = new LineInfoProvider() {
+        @Override
+        public String getLineInfo() {
+            return stringMessages.finishLine()+LineText1;
+        }
+    };
+    private final StringBuilder LineText2 = new StringBuilder();
+    final LineInfoProvider LineInfoProvider2 = new LineInfoProvider() {
+        @Override
+        public String getLineInfo() {
+            return stringMessages.finishLine()+LineText2;
+        }
+    };
+    private final StringBuilder LineText3 = new StringBuilder();
+    final LineInfoProvider LineInfoProvider3 = new LineInfoProvider() {
+        @Override
+        public String getLineInfo() {
+            return stringMessages.finishLine()+LineText3;
+        }
+    };
+
+    private void visualizeManeuver(ManeuverDTO maneuver, Position centerPoint, boolean showManeuverVisualization) {
+        
+        // Bearing bearingBefore = new DegreeBearingImpl(maneuver.speedWithBearingBefore.bearingInDegrees);
+        // Bearing bearingAfter = new DegreeBearingImpl(maneuver.speedWithBearingAfter.bearingInDegrees);
+        // Bearing MiddleManeuverAngle = bearingBefore.middle(bearingAfter);
+        // Distance middleManeuverAngleLineLength = new MeterDistance(100);
+        // Position middleManeuverAnglePosition1 = maneuver.maneuverLoss.maneuverStartPosition,
+        // middleManeuverAngleLineLength);
+        // Position middleManeuverAnglePosition2 = maneuver.position.translateRhumb(MiddleManeuverAngle,
+        // middleManeuverAngleLineLength);
+        //
+
+        Bearing bearingBefore = new DegreeBearingImpl(maneuver.maneuverLoss.speedWithBearingBefore.bearingInDegrees);
+        Bearing middleManeuverAngle = new DegreeBearingImpl(maneuver.maneuverLoss.middleManeuverAngle);
+        Distance extrapolationOfManeuverStartPoint = new MeterDistance(
+                maneuver.maneuverLoss.speedWithBearingBefore.speedInKnots
+                        * maneuver.maneuverLoss.maneuverDuration.asHours() * 1852);
+        Position extrapolatedManeuverStartPosition = maneuver.maneuverLoss.maneuverStartPosition
+                .translateRhumb(bearingBefore, extrapolationOfManeuverStartPoint);
+        Position intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint = maneuver.maneuverLoss.maneuverStartPosition
+                .getIntersection(bearingBefore, centerPoint, middleManeuverAngle);
+        Position extrapolatedManeuverStartPositionProjectedOnMiddleManeuverAngle = extrapolatedManeuverStartPosition
+                .projectToLineThrough(intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint,
+                        middleManeuverAngle);
+        Position projectedManeuverEndPosition = maneuver.maneuverLoss.maneuverEndPosition.projectToLineThrough(
+                intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
+        
+        showOrRemoveOrUpdateLine(null, showManeuverVisualization, intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint,
+                projectedManeuverEndPosition, middleManeuverAngleLineInfoProvider, "#ffffff");
+        showOrRemoveOrUpdateLine(null, showManeuverVisualization, maneuver.maneuverLoss.maneuverStartPosition,
+                extrapolatedManeuverStartPosition, LineInfoProvider1, "#070707");
+        showOrRemoveOrUpdateLine(null, showManeuverVisualization, extrapolatedManeuverStartPosition,
+                extrapolatedManeuverStartPositionProjectedOnMiddleManeuverAngle, LineInfoProvider2, "#FF0000");
+        showOrRemoveOrUpdateLine(null, showManeuverVisualization, maneuver.maneuverLoss.maneuverEndPosition,
+                projectedManeuverEndPosition, LineInfoProvider3, "#F7FF00");
+        
+    }
 
     /**
      * @param date
