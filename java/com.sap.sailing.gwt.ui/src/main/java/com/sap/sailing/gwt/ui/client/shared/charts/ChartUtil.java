@@ -5,6 +5,8 @@ import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.events.SeriesCheckboxClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.SeriesCheckboxClickEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.SeriesLegendItemClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesLegendItemClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.PlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
@@ -27,7 +29,15 @@ public class ChartUtil {
                         series.setVisible(seriesCheckboxClickEvent.isChecked());
                         return false; // don't toggle the select state of the series
                     }
-                }));
+                }).setSeriesLegendItemClickEventHandler(new SeriesLegendItemClickEventHandler() {
+            @Override
+            public boolean onClick(SeriesLegendItemClickEvent seriesLegendItemClickEvent) {
+                Series series = chart.getSeries(seriesLegendItemClickEvent.getSeriesId());
+                series.setVisible(!series.isVisible());
+                series.select(series.isVisible());
+                return false;
+            }
+        }));
     }
 
 }
