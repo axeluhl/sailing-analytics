@@ -607,7 +607,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public void addRaceListener(RaceListener listener, Optional<ThreadLocalTransporter> threadLocalTransporter) {
+            public void addRaceListener(RaceListener listener, Optional<ThreadLocalTransporter> threadLocalTransporter, boolean synchronous) {
             }
 
             @Override

@@ -440,48 +440,12 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
                 LockUtil.unlockAfterWrite(lock);
             }
         } else if (isCompetitorToUpdateDuringGetOrCreate(result)) {
-            updateCompetitorWithBoat(result.getId().toString(), name, shortName, displayColor, email, team.getNationality(),
-                    team.getImage(), flagImage, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+            assert result.getBoat() == boat;
+            updateCompetitor(result.getId().toString(), name, shortName, displayColor, email, team.getNationality(),
+                    team.getImage(), flagImage, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
             competitorNoLongerToUpdateDuringGetOrCreate(result);
         }
         return result;
-    }
-        
-    @Override
-    public CompetitorWithBoat updateCompetitorWithBoat(String idAsString, String newName, String newShortName, Color newDisplayColor, String newEmail,
-            Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
-            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String newSearchTag, DynamicBoat boat) {
-        DynamicCompetitorWithBoat competitor = (DynamicCompetitorWithBoat) getExistingCompetitorByIdAsString(idAsString);
-        if (competitor != null) {
-            LockUtil.lockForWrite(lock);
-            try {
-                competitor.setName(newName);
-                competitor.setShortName(newShortName);
-                competitor.setColor(newDisplayColor);
-                competitor.setEmail(newEmail);
-                competitor.setFlagImage(newFlagImageUri);
-                competitor.getTeam().setNationality(newNationality);
-                competitor.getTeam().setImage(newTeamImageUri);
-                competitor.setTimeOnTimeFactor(timeOnTimeFactor);
-                competitor.setTimeOnDistanceAllowancePerNauticalMile(timeOnDistanceAllowancePerNauticalMile);
-                competitor.setSearchTag(newSearchTag);
-                DynamicBoat boatOfCompetitor = competitor.getBoat();
-                if (boatOfCompetitor != null && boat != null) {
-                    boatOfCompetitor.setName(boat.getName());
-                    boatOfCompetitor.setSailId(boat.getSailID());
-                    boatOfCompetitor.setColor(boat.getColor());
-                }
-                weakCompetitorDTOCache.remove(competitor);
-            } finally {
-                LockUtil.unlockAfterWrite(lock);
-            }
-        }
-        synchronized (competitorUpdateListeners) {
-            for (CompetitorUpdateListener listener : competitorUpdateListeners) {
-                listener.competitorUpdated(competitor);
-            }
-        }
-        return (CompetitorWithBoat) competitor;
     }
 
     /** Boat stuff starts here */

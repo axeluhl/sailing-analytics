@@ -30,4 +30,9 @@ public interface MediaService extends RemoteService {
     VideoMetadataDTO checkMetadata(byte[] start, byte[] end, Long skipped);
 
     VideoMetadataDTO checkMetadata(String url);
+    
+    /**
+     * Obtains a MediaTrack for the given literal url, if one exists, {@code null} otherwise 
+     */
+    MediaTrack getMediaTrackByUrl(String url);
 }
