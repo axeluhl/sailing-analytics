@@ -41,7 +41,7 @@ public class ManeuverDTO implements IsSerializable {
 
     public NauticalSide markPassingSide;
     
-//    public ManeuverLossDTO maneuverLoss;
+    public ManeuverLossDTO maneuverLoss;
 
     public ManeuverDTO() {}
 
@@ -49,7 +49,7 @@ public class ManeuverDTO implements IsSerializable {
             SpeedWithBearingDTO speedWithBearingBefore, SpeedWithBearingDTO speedWithBearingAfter,
             double directionChangeInDegrees, Double maneuverLossInMeters, double maxTurningRateInDegreesPerSecond,
             double avgTurningRateInDegreesPerSecond, double lowestSpeedInKnots, Date markPassingTimePoint,
-            NauticalSide markPassingSide) {
+            NauticalSide markPassingSide, ManeuverLossDTO maneuverLoss) {
         this.type = type;
         this.newTack = newTack;
         this.position = position;
@@ -64,6 +64,7 @@ public class ManeuverDTO implements IsSerializable {
         this.lowestSpeedInKnots = lowestSpeedInKnots;
         this.markPassingTimePoint = markPassingTimePoint;
         this.markPassingSide = markPassingSide;
+        this.maneuverLoss = maneuverLoss;
     }
 
     public String toString(StringMessages stringMessages) {

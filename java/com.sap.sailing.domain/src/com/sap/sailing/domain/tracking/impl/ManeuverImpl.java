@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.tracking.impl.AbstractGPSFixImpl;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
+import com.sap.sailing.domain.tracking.ManeuverLoss;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -29,11 +30,12 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     private final ManeuverCurveBoundaries mainCurveBoundaries;
     private final ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries;
     private final MarkPassing markPassing;
+    private final ManeuverLoss maneuverLoss;
 
     public ManeuverImpl(ManeuverType type, Tack newTack, Position position, Distance maneuverLossDistanceLost, TimePoint timePoint,
             ManeuverCurveBoundaries mainCurveBoundaries,
             ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries,
-            double maxTurningRateInDegreesPerSecond, MarkPassing markPassing) {
+            double maxTurningRateInDegreesPerSecond, MarkPassing markPassing, ManeuverLoss maneuverLoss) {
         this.type = type;
         this.newTack = newTack;
         this.position = position;
@@ -43,6 +45,7 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
         this.maneuverCurveWithStableSpeedAndCourseBoundaries = maneuverCurveWithStableSpeedAndCourseBoundaries;
         this.maxTurningRateInDegreesPerSecond = maxTurningRateInDegreesPerSecond;
         this.markPassing = markPassing;
+        this.maneuverLoss = maneuverLoss;
     }
 
     @Override
@@ -139,5 +142,11 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
         return Math.abs(getMainCurveBoundaries().getDirectionChangeInDegrees())
                 / getMainCurveBoundaries().getDuration().asSeconds();
     }
+    
+    @Override
+    public ManeuverLoss getManeuverLoss() {
+        return maneuverLoss;
+    }
+    
 
 }

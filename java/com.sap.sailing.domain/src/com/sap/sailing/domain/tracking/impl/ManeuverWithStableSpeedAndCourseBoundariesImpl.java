@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
+import com.sap.sailing.domain.tracking.ManeuverLoss;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sse.common.TimePoint;
 
@@ -23,9 +24,9 @@ public class ManeuverWithStableSpeedAndCourseBoundariesImpl extends ManeuverImpl
     public ManeuverWithStableSpeedAndCourseBoundariesImpl(ManeuverType type, Tack newTack, Position position,
             Distance maneuverLossDistanceLost, TimePoint timePoint, ManeuverCurveBoundaries mainCurveBoundaries,
             ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries,
-            double maxTurningRateInDegreesPerSecond, MarkPassing markPassing) {
+            double maxTurningRateInDegreesPerSecond, MarkPassing markPassing, ManeuverLoss maneuverLoss) {
         super(type, newTack, position, maneuverLossDistanceLost, timePoint, mainCurveBoundaries,
-                maneuverCurveWithStableSpeedAndCourseBoundaries, maxTurningRateInDegreesPerSecond, markPassing);
+                maneuverCurveWithStableSpeedAndCourseBoundaries, maxTurningRateInDegreesPerSecond, markPassing, maneuverLoss);
     }
 
     @Override

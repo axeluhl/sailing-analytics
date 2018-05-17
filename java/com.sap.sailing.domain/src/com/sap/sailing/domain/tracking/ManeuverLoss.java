@@ -1,9 +1,10 @@
-package com.sap.sailing.domain.maneuverdetection.impl;
+package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sse.common.Duration;
 
 /**

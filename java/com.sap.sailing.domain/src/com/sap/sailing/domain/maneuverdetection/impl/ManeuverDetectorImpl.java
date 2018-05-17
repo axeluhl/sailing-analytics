@@ -35,6 +35,7 @@ import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
+import com.sap.sailing.domain.tracking.ManeuverLoss;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
@@ -1051,6 +1052,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         final ManeuverType maneuverType;
         Distance maneuverLossDistanceLost = null;
         Tack tackAfterManeuver = null;
+        ManeuverLoss maneuverLoss = null;
         final Position maneuverPosition = track.getEstimatedPosition(maneuverMainCurveDetails.getTimePoint(),
                 /* extrapolate */false);
         int numberOfJibes = getNumberOfJibes(maneuverMainCurveDetails, wind);
@@ -1090,10 +1092,11 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 tackAfterManeuver = null;
             }
             maneuverLossDistanceLost = getManeuverLoss(maneuverUnstableCourseAndSpeedBoundaries).getProjectedDistanceLost();
+            maneuverLoss = getManeuverLoss(maneuverUnstableCourseAndSpeedBoundaries);
             maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, tackAfterManeuver,
                     maneuverPosition, maneuverLossDistanceLost, maneuverMainCurveDetails.getTimePoint(),
                     maneuverMainCurveDetails.extractCurveBoundariesOnly(), maneuverUnstableCourseAndSpeedBoundaries,
-                    maneuverMainCurveDetails.getMaxTurningRateInDegreesPerSecond(), markPassing);
+                    maneuverMainCurveDetails.getMaxTurningRateInDegreesPerSecond(), markPassing, maneuverLoss);
         } else {
             // Logic for head-up and bear-away
             try {
@@ -1110,7 +1113,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             maneuver = new ManeuverWithMainCurveBoundariesImpl(maneuverType, tackAfterManeuver, maneuverPosition,
                     maneuverLossDistanceLost, maneuverMainCurveDetails.getTimePoint(),
                     maneuverMainCurveDetails.extractCurveBoundariesOnly(), maneuverUnstableCourseAndSpeedBoundaries,
-                    maneuverMainCurveDetails.getMaxTurningRateInDegreesPerSecond(), markPassing);
+                    maneuverMainCurveDetails.getMaxTurningRateInDegreesPerSecond(), markPassing, maneuverLoss);
         }
         return maneuver;
     }

@@ -395,6 +395,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
+import com.sap.sailing.gwt.ui.shared.ManeuverLossDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
@@ -3626,10 +3627,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Date markPassingTimePoint = maneuver.isMarkPassing()
                     ? maneuver.getMarkPassing().getTimePoint().asDate() : null;
             final NauticalSide markPassingSide = maneuver.isMarkPassing() ? maneuver.getToSide() : null;
+            final SpeedWithBearingDTO speedWithBearingBeforeManeuverLoss = maneuver.getManeuverLoss() == null ? null
+                    : createSpeedWithBearingDTO(maneuver.getManeuverLoss().getSpeedWithBearingBefore());
+            final Double middleManeuverAngle = maneuver.getManeuverLoss() == null ? null : maneuver.getManeuverLoss().getMiddleManeuverAngle().getDegrees();
+            final ManeuverLossDTO maneuverLoss = maneuver.getManeuverLoss() == null ? null
+                    : new ManeuverLossDTO(maneuver.getManeuverLoss().getManeuverStartPosition(),
+                            maneuver.getManeuverLoss().getManeuverEndPosition(), speedWithBearingBeforeManeuverLoss, middleManeuverAngle,
+                            maneuver.getManeuverLoss().getManeuverDuration());
             result.add(new ManeuverDTO(type, newTack, position, timepoint, timePointBefore, speedBefore,
                     speedAfter, directionChangeInDegrees, maneuverLossInMeters, maxTurningRateInDegreesPerSecond,
-                    averageTurningRateInDegreesPerSecond, lowestSpeedInKnots, markPassingTimePoint, markPassingSide));
-//            final ManeuverLossDTO = new ManeuverLossDTO (maneuver.getMan)
+                    averageTurningRateInDegreesPerSecond, lowestSpeedInKnots, markPassingTimePoint, markPassingSide, maneuverLoss));
         }
         return result;
     }
