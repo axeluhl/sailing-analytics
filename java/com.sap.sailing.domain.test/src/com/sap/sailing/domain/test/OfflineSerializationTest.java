@@ -47,9 +47,15 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.AccessControlStore;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.impl.SecurityServiceImpl;
+import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class OfflineSerializationTest extends AbstractSerializationTest {
@@ -105,8 +111,24 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
     public void testSerializingUserStore() throws UserGroupManagementException, UserManagementException, ClassNotFoundException, IOException {
         DomainFactory receiverDomainFactory = new DomainFactoryImpl((srlid)->null);
         UserStore userStore = new UserStoreImpl("defaultTenant");
+        userStore.clear();
+        AccessControlStore aclStore = new AccessControlStoreImpl(userStore);
+        SecurityService securityService = new SecurityServiceImpl(userStore, aclStore);
+        assertNotNull(securityService);
+        {
+            User admin = userStore.getUserByName("admin");
+            UserGroup adminTenant = admin.getDefaultTenant();
+            assertTrue(adminTenant.contains(admin));
+            assertTrue(Util.contains(admin.getUserGroups(), adminTenant));
+        }
         UserStore deserializedUserStore = cloneBySerialization(userStore, receiverDomainFactory);
         assertNotNull(deserializedUserStore);
+        {
+            User admin = deserializedUserStore.getUserByName("admin");
+            UserGroup adminTenant = admin.getDefaultTenant();
+            assertTrue(adminTenant.contains(admin));
+            assertTrue(Util.contains(admin.getUserGroups(), adminTenant));
+        }
     }
 
     @Test

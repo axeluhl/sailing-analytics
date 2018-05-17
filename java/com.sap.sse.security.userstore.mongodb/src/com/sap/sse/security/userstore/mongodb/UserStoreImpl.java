@@ -2,7 +2,6 @@ package com.sap.sse.security.userstore.mongodb;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -266,10 +265,15 @@ public class UserStoreImpl implements UserStore {
                 UserStoreImpl.class.getSimpleName() + " lock for listeners collection", false);
     }
     
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
+    protected Object readResolve() {
+        for (final User user : getUsers()) {
+            if (user instanceof UserImpl) {
+                ((UserImpl) user).setUserGroupProvider(this);
+            }
+        }
+        return this;
     }
-
+    
     @Override
     public void clear() {
         userGroups.clear();
@@ -497,12 +501,12 @@ public class UserStoreImpl implements UserStore {
     
     @Override
     public UserGroup getUserGroupByName(String name) {
-        return userGroupsByName.get(name);
+        return name == null ? null : userGroupsByName.get(name);
     }
 
     @Override
     public UserGroup getUserGroup(UUID id) {
-        return userGroups.get(id);
+        return id == null ? null : userGroups.get(id);
     }
     
     @Override

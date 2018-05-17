@@ -16,6 +16,7 @@ import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
+import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServiceReplicationTest<SecurityService, SecurityServiceImpl> {
@@ -31,10 +32,11 @@ public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServ
             @Override
             protected SecurityServiceImpl createNewMaster()
                     throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException, UserGroupManagementException {
-                final UserStore userStore = new UserStoreImpl(null, null, "TestDefaultTenant"); // no persistence
-                final AccessControlStore accessControlStore = new AccessControlStoreImpl(null, null, userStore); // no persistence
+                final UserStore userStore = new UserStoreImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
+                        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), "TestDefaultTenant");
+                final AccessControlStore accessControlStore = new AccessControlStoreImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
+                        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), userStore);
                 final SecurityServiceImpl newMaster = new SecurityServiceImpl(userStore, accessControlStore);
-                newMaster.clearReplicaState();
                 newMaster.createSimpleUser(username, email, password, fullName, company, /* validationBaseURL */ null);
                 accessToken = newMaster.createAccessToken(username);
                 return newMaster;

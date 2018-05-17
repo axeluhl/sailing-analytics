@@ -661,6 +661,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final UserImpl result = userStore.createUser(username, email, tenant, upa); // TODO: get the principal as owner
+        // now the user creation needs to be replicated so that when replicating role addition and group assignment
+        // the replica will be able to resolve the user correctly
+        apply(s->s.internalStoreUser(result));
         addRoleForUser(result, new RoleImpl(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
         addUserToUserGroup(tenant, result);
         // the new user becomes the owning user of its own specific tenant which initially only contains the new user

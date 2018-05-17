@@ -61,7 +61,7 @@ public class UserImpl extends SecurityUserImpl implements User {
 
     private final Map<AccountType, Account> accounts;
 
-    private transient final UserGroupProvider userGroupProvider;
+    private transient UserGroupProvider userGroupProvider;
 
     public UserImpl(String name, String email, UserGroup defaultTenant, UserGroupProvider userGroupProvider, Account... accounts) {
         this(name, email, defaultTenant, Arrays.asList(accounts), userGroupProvider);
@@ -87,6 +87,14 @@ public class UserImpl extends SecurityUserImpl implements User {
         for (Account a : accounts) {
             this.accounts.put(a.getAccountType(), a);
         }
+    }
+    
+    /**
+     * The main use case for this method is to restore the link to a {@link UserStore} after de-serialization, e.g.,
+     * on a replica.
+     */
+    public void setUserGroupProvider(UserGroupProvider userGroupProvider) {
+        this.userGroupProvider = userGroupProvider;
     }
 
     /**
