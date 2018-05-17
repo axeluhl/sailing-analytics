@@ -72,7 +72,7 @@ public class WindEstimationEvaluatorImpl implements WindEstimatorEvaluator {
         }
         LoggingUtil.logInfo("Evaluating on " + raceWithEstimationData.getRegattaName() + " Race "
                 + raceWithEstimationData.getRaceName() + " succeeded");
-        result.printEvaluationStatistics();
+        result.printEvaluationStatistics(true);
         return result.getAvgAsSingleResult(minAccuracyPerRaceForCorrectEstimation - 0.00001);
     }
 

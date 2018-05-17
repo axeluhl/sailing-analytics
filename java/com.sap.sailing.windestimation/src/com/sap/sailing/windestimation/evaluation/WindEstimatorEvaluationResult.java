@@ -231,47 +231,49 @@ public class WindEstimatorEvaluationResult {
                 numberOfCorrectWindDirectionWithSpeedEstimations + numberOfIncorrectWindDirectionWithSpeedEstimations);
     }
 
-    public void printEvaluationStatistics() {
+    public void printEvaluationStatistics(boolean detailed) {
         System.out.println("### Wind direction ###");
         System.out.println(" Accuracy: " + formatPercentage(getAccuracyOfWindDirectionEstimation()) + " ("
                 + numberOfCorrectWindDirectionEstimations + "/"
                 + (numberOfCorrectWindDirectionEstimations + numberOfIncorrectWindDirectionEstimations) + " correct)");
         System.out.println(" Avg. wind course error : "
                 + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfCorrectWindDirectionEstimations()));
-        System.out.println(" Avg. wind course error of incorrect estimations : "
-                + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfIncorrectWindDirectionEstimations()));
-        System.out.println(" Avg. wind course error of all estimations : "
-                + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfCorrectAndIncorrectWindDirectionEstimations()));
-        System.out.println();
-        System.out.println("### Wind speed ###");
-        System.out.println(" Accuracy: " + formatPercentage(getAccuracyOfWindSpeedEstimation()) + " ("
-                + numberOfCorrectWindSpeedEstimations + "/"
-                + (numberOfCorrectWindSpeedEstimations + numberOfIncorrectWindSpeedEstimations) + " correct)");
-        System.out.println(" Avg. wind speed error : "
-                + formatKnots(getAvgAbsWindSpeedErrorInKnotsOfCorrectWindSpeedEstimations()));
-        System.out.println(" Avg. wind speed error of incorrect estimations : "
-                + formatKnots(getAvgAbsWindSpeedErrorInKnotsOfIncorrectWindSpeedEstimations()));
-        System.out.println(" Avg. wind speed error of all estimations : "
-                + formatKnots(getAvgAbsWindSpeedErrorInKnotsOfCorrectAndIncorrectWindSpeedEstimations()));
-        System.out.println();
-        System.out.println("### Wind course and speed ###");
-        System.out.println(" Accuracy: " + formatPercentage(getAccuracyOfWindDirectionWithSpeedEstimation()) + " ("
-                + numberOfCorrectWindDirectionWithSpeedEstimations + "/"
-                + (numberOfCorrectWindDirectionWithSpeedEstimations
-                        + numberOfIncorrectWindDirectionWithSpeedEstimations)
-                + " correct)");
-        System.out.println(" Avg. wind course error : "
-                + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfCorrectWindDirectionWithSpeedEstimations()));
-        System.out.println(" Avg. wind course error of incorrect estimations : "
-                + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfIncorrectWindDirectionWithSpeedEstimations()));
-        System.out.println(" Avg. wind course error of all estimations : " + formatDegrees(
-                getAvgAbsWindCourseErrorInDegreesOfCorrectAndIncorrectWindDirectionWithSpeedEstimations()));
-        System.out.println(" Avg. wind speed error : "
-                + formatKnots(getAvgAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations()));
-        System.out.println(" Avg. wind speed error of incorrect estimations : "
-                + formatKnots(getAvgAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations()));
-        System.out.println(" Avg. wind speed error of all estimations : "
-                + formatKnots(getAvgAbsWindSpeedErrorInKnotsOfCorrectAndIncorrectWindDirectionWithSpeedEstimations()));
+        if (detailed) {
+            System.out.println(" Avg. wind course error of incorrect estimations : "
+                    + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfIncorrectWindDirectionEstimations()));
+            System.out.println(" Avg. wind course error of all estimations : "
+                    + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfCorrectAndIncorrectWindDirectionEstimations()));
+            System.out.println();
+            System.out.println("### Wind speed ###");
+            System.out.println(" Accuracy: " + formatPercentage(getAccuracyOfWindSpeedEstimation()) + " ("
+                    + numberOfCorrectWindSpeedEstimations + "/"
+                    + (numberOfCorrectWindSpeedEstimations + numberOfIncorrectWindSpeedEstimations) + " correct)");
+            System.out.println(" Avg. wind speed error : "
+                    + formatKnots(getAvgAbsWindSpeedErrorInKnotsOfCorrectWindSpeedEstimations()));
+            System.out.println(" Avg. wind speed error of incorrect estimations : "
+                    + formatKnots(getAvgAbsWindSpeedErrorInKnotsOfIncorrectWindSpeedEstimations()));
+            System.out.println(" Avg. wind speed error of all estimations : "
+                    + formatKnots(getAvgAbsWindSpeedErrorInKnotsOfCorrectAndIncorrectWindSpeedEstimations()));
+            System.out.println();
+            System.out.println("### Wind course and speed ###");
+            System.out.println(" Accuracy: " + formatPercentage(getAccuracyOfWindDirectionWithSpeedEstimation()) + " ("
+                    + numberOfCorrectWindDirectionWithSpeedEstimations + "/"
+                    + (numberOfCorrectWindDirectionWithSpeedEstimations
+                            + numberOfIncorrectWindDirectionWithSpeedEstimations)
+                    + " correct)");
+            System.out.println(" Avg. wind course error : "
+                    + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfCorrectWindDirectionWithSpeedEstimations()));
+            System.out.println(" Avg. wind course error of incorrect estimations : "
+                    + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfIncorrectWindDirectionWithSpeedEstimations()));
+            System.out.println(" Avg. wind course error of all estimations : " + formatDegrees(
+                    getAvgAbsWindCourseErrorInDegreesOfCorrectAndIncorrectWindDirectionWithSpeedEstimations()));
+            System.out.println(" Avg. wind speed error : "
+                    + formatKnots(getAvgAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations()));
+            System.out.println(" Avg. wind speed error of incorrect estimations : "
+                    + formatKnots(getAvgAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations()));
+            System.out.println(" Avg. wind speed error of all estimations : " + formatKnots(
+                    getAvgAbsWindSpeedErrorInKnotsOfCorrectAndIncorrectWindDirectionWithSpeedEstimations()));
+        }
     }
 
     private String formatPercentage(double value) {
@@ -317,8 +319,8 @@ public class WindEstimatorEvaluationResult {
         if (getTotalNumberOfWindDirectionEstimations() == 0) {
             return this;
         }
-        if ((getTotalNumberOfWindDirectionEstimations() - getTotalNumberOfWindSpeedEstimations())
-                / (getTotalNumberOfWindDirectionEstimations() + getTotalNumberOfWindSpeedEstimations()) > 0.9) {
+        if (nullSafeDivision(getTotalNumberOfWindDirectionEstimations() - getTotalNumberOfWindSpeedEstimations(),
+                getTotalNumberOfWindDirectionEstimations() + getTotalNumberOfWindSpeedEstimations()) < 0.2) {
             boolean windCourseCorrect = getAccuracyOfWindDirectionEstimation() >= minAccuracyForCorrectEstimation;
             boolean windSpeedCorrect = getAccuracyOfWindSpeedEstimation() >= minAccuracyForCorrectEstimation;
             boolean windCourseAndSpeedCorrect = getAccuracyOfWindDirectionWithSpeedEstimation() >= minAccuracyForCorrectEstimation;

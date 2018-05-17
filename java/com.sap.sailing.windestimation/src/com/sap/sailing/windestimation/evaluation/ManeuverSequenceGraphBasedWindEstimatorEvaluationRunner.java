@@ -22,7 +22,7 @@ public class ManeuverSequenceGraphBasedWindEstimatorEvaluationRunner {
         WindEstimatorEvaluationResult evaluationResult = evaluator
                 .evaluateWindEstimator(new ManeuverSequenceGraphBasedWindEstimatorFactory(polarService), testSet);
         LoggingUtil.logInfo("Wind estimator evaluation finished");
-        evaluationResult.printEvaluationStatistics();
+        evaluationResult.printEvaluationStatistics(true);
     }
 
 }
