@@ -79,7 +79,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             @Override
             public void raceRemoved(TrackedRace trackedRace) {
             }
-        }, Optional.empty());
+        }, Optional.empty(), /* synchronous */ false);
         for (Receiver receiver : domainFactory
                 .getUpdateReceivers(trackedRegatta, /* delayToLiveInMillis */0l,
                         /* simulator */null, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
