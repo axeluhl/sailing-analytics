@@ -18,6 +18,9 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.SystemDefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -34,12 +37,17 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
     public static final String REST_API_REGATTAS_PATH = "/regattas";
     public static final String REST_API_RACES_PATH = "/races";
     public static final String REST_API_ESTIMATION_DATA_PATH = "/completeManeuverCurvesWithEstimationData";
-    private final HttpClient client;
     private final EstimationDataPersistenceManager persistanceManager;
 
     public CompleteManeuverCurveWithEstimationDataImporter() throws UnknownHostException {
-        this.client = new SystemDefaultHttpClient();
         this.persistanceManager = new EstimationDataPersistenceManager();
+    }
+
+    public HttpClient createNewHttpClient() {
+        HttpParams httpParams = new BasicHttpParams();
+        HttpConnectionParams.setConnectionTimeout(httpParams, 30000);
+        HttpClient client = new SystemDefaultHttpClient(httpParams);
+        return client;
     }
 
     public static void main(String[] args) throws Exception {
@@ -55,12 +63,14 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
         LoggingUtil.logInfo("Fetching all existing regatta names");
         ImportStatistics importStatistics = new ImportStatistics();
         HttpGet getAllRegattas = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH);
-        JSONArray regattasJson = (JSONArray) getJsonFromResponse(client.execute(getAllRegattas));
-        LoggingUtil.logInfo(regattasJson.size() + " regatta names have been fetched");
+        JSONArray regattasJson = (JSONArray) getJsonFromResponse(createNewHttpClient().execute(getAllRegattas));
+        int numberOfRegattas = regattasJson.size();
+        LoggingUtil.logInfo(numberOfRegattas + " regatta names have been fetched");
         int i = 0;
         for (Object regattaJson : regattasJson) {
             String regattaName = (String) ((JSONObject) regattaJson).get("name");
-            LoggingUtil.logInfo("Processing regatta nr. " + ++i + ": \"" + regattaName + "\"");
+            LoggingUtil.logInfo("Processing regatta nr. " + ++i + "/" + numberOfRegattas + " ("
+                    + Math.round(100.0 * i / numberOfRegattas) + "%): \"" + regattaName + "\"");
             importRegatta(regattaName, importStatistics);
         }
         LoggingUtil.logInfo("Import finished");
@@ -83,16 +93,16 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
             throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         String encodedRegattaName = encodeUrlPathPart(regattaName);
         HttpGet getRegatta = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH + "/" + encodedRegattaName);
-        JSONObject regattaJson = (JSONObject) getJsonFromResponse(client.execute(getRegatta));
+        JSONObject regattaJson = (JSONObject) getJsonFromResponse(createNewHttpClient().execute(getRegatta));
         for (Object seriesJson : (JSONArray) regattaJson.get("series")) {
             JSONObject trackedRaces = (JSONObject) ((JSONObject) seriesJson).get("trackedRaces");
             JSONArray fleets = (JSONArray) trackedRaces.get("fleets");
             for (Object fleetJson : fleets) {
                 JSONArray racesJson = (JSONArray) ((JSONObject) fleetJson).get("races");
                 LoggingUtil.logInfo("Regatta contains " + racesJson.size() + " races");
+                int i = 0;
                 for (Object raceJson : racesJson) {
                     JSONObject race = (JSONObject) raceJson;
-                    int i = 0;
                     if ((boolean) race.get("isTracked") && !(boolean) race.get("isLive")
                             && (boolean) race.get("hasGpsData") && (boolean) race.get("hasWindData")) {
                         String trackedRaceName = (String) race.get("trackedRaceName");
@@ -101,8 +111,8 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
                             importRace(regattaName, trackedRaceName, importStatistics);
                         } catch (Exception e) {
                             importStatistics.errors += 1;
-                            LoggingUtil.logInfo(
-                                    "Error while processing race nr. " + ++i + ": \"" + trackedRaceName + "\"");
+                            LoggingUtil
+                                    .logInfo("Error while processing race nr. " + i + ": \"" + trackedRaceName + "\"");
                         }
                     }
                 }
@@ -124,7 +134,26 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
         String encodedRaceName = encodeUrlPathPart(trackedRaceName);
         HttpGet getEstimationData = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH + "/" + encodedRegattaName
                 + REST_API_RACES_PATH + "/" + encodedRaceName + REST_API_ESTIMATION_DATA_PATH);
-        JSONObject resultJson = (JSONObject) getJsonFromResponse(client.execute(getEstimationData));
+        HttpResponse httpResponse = null;
+        IOException lastException = null;
+        for (int i = 1; i <= 10; i++) {
+            try {
+                httpResponse = createNewHttpClient().execute(getEstimationData);
+                break;
+            } catch (IOException e) {
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e1) {
+                }
+                lastException = e;
+                LoggingUtil.logInfo("Connection error (" + i + "/10) while processing race : \"" + trackedRaceName
+                        + "\", retrying...");
+            }
+        }
+        if (httpResponse == null) {
+            throw lastException;
+        }
+        JSONObject resultJson = (JSONObject) getJsonFromResponse(httpResponse);
         List<JSONObject> competitorTracks = new ArrayList<>();
         int maneuversCount = 0;
         for (Object competitorTrackJson : (JSONArray) resultJson.get("bycompetitor")) {
