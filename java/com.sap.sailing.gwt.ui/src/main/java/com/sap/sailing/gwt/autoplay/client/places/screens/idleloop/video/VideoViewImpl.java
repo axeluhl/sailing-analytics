@@ -54,7 +54,7 @@ public class VideoViewImpl extends Composite implements VideoView {
         RepeatingCommand durationDeterminator = new RepeatingCommand() {
             @Override
             public boolean execute() {
-                if (mainPanelUi.isAttached()) {
+                if (player.isVisible() && mainPanelUi.isAttached()) {
                     int duration = player.getDuration();
                     GWT.log("player reports duration of " + duration);
                     if (duration > 0) {
@@ -73,7 +73,7 @@ public class VideoViewImpl extends Composite implements VideoView {
                 }
             }
         };
-        Scheduler.get().scheduleFixedDelay(durationDeterminator, 10);
+        Scheduler.get().scheduleFixedDelay(durationDeterminator, 1000);
 
         mainPanelUi.clear();
         mainPanelUi.add(player);

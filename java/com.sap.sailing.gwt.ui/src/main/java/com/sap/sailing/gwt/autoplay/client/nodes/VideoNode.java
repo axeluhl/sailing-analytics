@@ -16,6 +16,7 @@ public class VideoNode extends FiresPlaceNode implements ProvidesDuration {
     private final AutoPlayClientFactory cf;
     private int lastPlayed = -1;
     private VideoDTO currentVideo = null;
+    private Consumer<Integer> durationConsumer;
     public VideoNode(AutoPlayClientFactory cf) {
         super(VideoNode.class.getName());
         this.cf = cf;
@@ -40,6 +41,8 @@ public class VideoNode extends FiresPlaceNode implements ProvidesDuration {
         }
         currentVideo = videos.get(nextVideo);
         lastPlayed = nextVideo;
+        setPlaceToGo(new VideoPlace(currentVideo, durationConsumer));
+        firePlaceChangeAndStartTimer(); 
     }
 
 
@@ -49,7 +52,6 @@ public class VideoNode extends FiresPlaceNode implements ProvidesDuration {
             durationConsumer.accept(0);
             return;
         }
-        setPlaceToGo(new VideoPlace(currentVideo, durationConsumer));
-        firePlaceChangeAndStartTimer();
+        this.durationConsumer = durationConsumer;
     }
 }

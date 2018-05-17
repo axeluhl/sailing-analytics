@@ -29,17 +29,20 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode implements ProvidesDuration {
+public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode implements ProvidesDuration{
     private static final Logger logger = Logger.getLogger(IdleSixtyInchLeaderBoardNode.class.getName());
     private final AutoPlayClientFactory cf;
     private Timer timer;
+    private boolean overallLeaderBoard;
     private Consumer<Integer> durationConsumer;
 
-    public IdleSixtyInchLeaderBoardNode(AutoPlayClientFactory cf) {
+    public IdleSixtyInchLeaderBoardNode(AutoPlayClientFactory cf, boolean overallLeaderBoard) {
         super(IdleSixtyInchLeaderBoardNode.class.getName());
         this.cf = cf;
+        this.overallLeaderBoard = overallLeaderBoard;
     }
 
+    @Override
     public void onStart() {
         List<DetailType> overallDetails = new ArrayList<>();
         overallDetails.add(DetailType.OVERALL_RANK);
@@ -49,8 +52,8 @@ public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode implements Prov
         // raceDetails.add(DetailType.RACE_RANK);
         final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(
                 /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, raceDetails, overallDetails,
-                /* namesOfRaceColumnsToShow */ null, /* numberOfLastRacesToShow */ null,
-                /* delayBetweenAutoAdvancesInMilliseconds */ null, RaceColumnSelectionStrategies.EXPLICIT,
+                /* namesOfRaceColumnsToShow */ null, /* numberOfLastRacesToShow */5,
+                /* delayBetweenAutoAdvancesInMilliseconds */ null, RaceColumnSelectionStrategies.LAST_N,
                 /* showAddedScores */ true, /* showCompetitorShortNameColumn */ true,
                 /* showCompetitorFullNameColumn */ false, /* showCompetitorBoatInfoColumn */ false,
                 /* isCompetitorNationalityColumnVisible */ true);
@@ -61,40 +64,44 @@ public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode implements Prov
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         String leaderBoard = cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName();
 
-        cf.getSailingService().getOverallLeaderboardNamesContaining(leaderBoard,
-                new MarkedAsyncCallback<List<String>>(new AsyncCallback<List<String>>() {
+        CompetitorSelectionProvider provider = new CompetitorSelectionModel(true);
 
-                    @Override
-                    public void onSuccess(List<String> result) {
-                        String leaderboardName = null;
-                        if (result.isEmpty()) {
-                            leaderboardName = leaderBoard;
-                        } else {
-                            leaderboardName = result.get(0);
+        if (overallLeaderBoard) {
+            cf.getSailingService().getOverallLeaderboardNamesContaining(leaderBoard,
+                    new MarkedAsyncCallback<List<String>>(new AsyncCallback<List<String>>() {
+                        @Override
+                        public void onSuccess(List<String> result) {
+                            if (result.isEmpty()) {
+                                durationConsumer.accept(0);
+                            } else {
+                                startWithLeaderbaord(leaderboardSettings, provider, result.get(0));
+                            }
                         }
-                        CompetitorSelectionProvider provider = new CompetitorSelectionModel(true);
 
-                        MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null, null,
-                                cf.getSailingService(), new AsyncActionsExecutor(), leaderboardSettings, false,
-                                provider, timer, null, leaderboardName, cf.getErrorReporter(), StringMessages.INSTANCE,
-                                false, null, false, null, false, true, false, false, false,
-                                new SixtyInchLeaderBoardStyle(true), FlagImageResolverImpl.get(),
-                                Arrays.asList(DetailType.values()));
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            logger.log(Level.SEVERE, "Remote call for Leaderboard loading failed", caught);
+                        }
+                    }));
+        } else {
+            startWithLeaderbaord(leaderboardSettings, provider, leaderBoard);
+        }
+    }
 
-                        IdleSixtyInchLeaderBoardPlace place = new IdleSixtyInchLeaderBoardPlace(leaderboardPanel, provider,
-                                durationConsumer);
+    private void startWithLeaderbaord(final MultiRaceLeaderboardSettings leaderboardSettings,
+            CompetitorSelectionProvider provider, String leaderboardName) {
+        MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null, null, cf.getSailingService(),
+                new AsyncActionsExecutor(), leaderboardSettings, false, provider, timer, null, leaderboardName,
+                cf.getErrorReporter(), StringMessages.INSTANCE, false, null, false, null, false, true, false, false,
+                false, new SixtyInchLeaderBoardStyle(true), FlagImageResolverImpl.get(),
+                Arrays.asList(DetailType.values()));
 
-                        setPlaceToGo(place);
-                        firePlaceChangeAndStartTimer();
-                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getEvent().getName(),
-                                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName()));
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        logger.log(Level.SEVERE, "Remote call for Leaderboard loading failed", caught);
-                    }
-                }));
+        IdleSixtyInchLeaderBoardPlace place = new IdleSixtyInchLeaderBoardPlace(leaderboardPanel, provider,
+                durationConsumer);
+        setPlaceToGo(place);
+        firePlaceChangeAndStartTimer();
+        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getEvent().getName(),
+                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName()));
     }
 
     @Override
@@ -108,5 +115,7 @@ public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode implements Prov
     @Override
     public void setDurationConsumer(Consumer<Integer> durationConsumer) {
         this.durationConsumer = durationConsumer;
+        this.durationConsumer.accept(600);
     }
+
 }

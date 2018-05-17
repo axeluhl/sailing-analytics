@@ -29,7 +29,6 @@ public class AutoPlayLoopNode extends BaseCompositeNode {
 
     @Override
     protected void transitionTo(AutoPlayNode nextNode) {
-        super.transitionTo(nextNode);
         if (!isStopped()) {
             if (nextNode instanceof ProvidesDuration) {
                 ProvidesDuration nodeWithDuration = (ProvidesDuration) nextNode;
@@ -38,16 +37,22 @@ public class AutoPlayLoopNode extends BaseCompositeNode {
                     public void accept(Integer durationInSeconds) {
                         GWT.log("Got duration published: " + durationInSeconds);
                         if (durationInSeconds == 0) {
+                            transitionTimer.cancel();
                             gotoNext();
                         } else {
                             transitionTimer.schedule(durationInSeconds * 1000);
                         }
                     }
                 });
+                //give it 30 seconds to submit a delay, if not kill it!
+                if(!transitionTimer.isRunning()) {
+                    transitionTimer.schedule(30000);
+                }
             } else {
                 transitionTimer.schedule(loopTimePerNodeInSeconds * 1000);
             }
         }
+        super.transitionTo(nextNode);
     }
 
     public AutoPlayLoopNode(String name, int loopTimePerNodeInSeconds, AutoPlayNode... nodes) {

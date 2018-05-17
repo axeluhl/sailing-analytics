@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -22,7 +23,6 @@ public class IdleSixtyInchLeaderBoardPresenterImpl extends AutoPlayPresenterConf
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
     private MultiRaceLeaderboardPanel leaderboardPanel;
     private Timer selectionTimer;
-    private boolean publishedDuration;
 
     public IdleSixtyInchLeaderBoardPresenterImpl(IdleSixtyInchLeaderBoardPlace place, AutoPlayClientFactory clientFactory,
             IdleSixtyInchLeaderBoardView lifeRaceWithRacemapViewImpl) {
@@ -38,7 +38,6 @@ public class IdleSixtyInchLeaderBoardPresenterImpl extends AutoPlayPresenterConf
 
     @Override
     public void startConfigured(AcceptsOneWidget panel) {
-        publishedDuration = false;
         try {
             leaderboardPanel = getPlace().getLeaderboardPanel();
             view.startingWith(this, panel, getPlace().getLeaderboardPanel());
@@ -61,7 +60,6 @@ public class IdleSixtyInchLeaderBoardPresenterImpl extends AutoPlayPresenterConf
             // sync with Leaderboard sorting
             for (LeaderboardRowDTO item : leaderboardPanel.getLeaderboardTable().getVisibleItems()) {
                 compList.add(item.competitor);
-                competitorSelectionProvider.setSelected(item.competitor, false);
             }
             
             // wait for data in leaderboard, if empty no need to proceed
@@ -69,32 +67,34 @@ public class IdleSixtyInchLeaderBoardPresenterImpl extends AutoPlayPresenterConf
                 selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
                 return;
             }
-            if(!publishedDuration) {
-                publishedDuration = true;
-                getPlace().getDurationConsumer().accept(compList.size()*(SWITCH_COMPETITOR_DELAY/1000));
-            }
             selected++;
-            // overflow, restart
-            if (selected > compList.size() - 1) {
-                selected = 0;
-            }
-            CompetitorDTO marked = compList.get(selected);
-            competitorSelectionProvider.setSelected(marked, true);
-            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                @Override
-                public void execute() {
-                    if (selected == 0) {
-                        view.scrollLeaderBoardToTop();
-                    }
-                    view.scrollIntoView(selected);
+            // end reached, notify we are done
+            if (selected >= compList.size()) {
+                getPlace().getDurationConsumer().accept(2);
+            } else {
+                for (CompetitorDTO competitor : compList) {
+                    competitorSelectionProvider.setSelected(competitor, false);
                 }
-            });
+                CompetitorDTO marked = compList.get(selected);
+                competitorSelectionProvider.setSelected(marked, true);
+                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        if (selected == 0) {
+                            view.scrollLeaderBoardToTop();
+                        }
+                        view.scrollIntoView(selected);
+                    }
+                });
+                selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
+            }
         } catch (Exception e) {
             // ensure that the loop keeps running, no matter if errors occur
-            e.printStackTrace();
+            GWT.debugger();
             selected = 0;
+            selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
         }
-        selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
+        
     }
     
 
