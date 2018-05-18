@@ -128,8 +128,7 @@ class RaceLogTrackingInvitationMailBuilder {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        // this should be the first image! as some mail clients will only show the first one!
-        this.mimeBodyPartSuppliers.add(0, new QRCodeMimeBodyPartSupplier(url));
+        this.mimeBodyPartSuppliers.add(new QRCodeMimeBodyPartSupplier(url));
         this.text.append(url);
         this.text.append(TEXT_LINE_BREAK);
         return this;
