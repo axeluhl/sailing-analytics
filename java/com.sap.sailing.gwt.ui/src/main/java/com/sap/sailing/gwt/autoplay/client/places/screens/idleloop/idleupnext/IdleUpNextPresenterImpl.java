@@ -19,10 +19,8 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpNextPlace>
         implements IdleUpNextView.IdleUpNextPresenter {
-    private static final int IMAGE_SWITCH_DELAY = 10000;
     private static final int SHOW_RACES_STARTED = 1000 * 60 * 30;
     private IdleUpNextView view;
-    private Timer updateImage;
     private Timer updateData;
 
     public IdleUpNextPresenterImpl(IdleUpNextPlace place, AutoPlayClientFactory clientFactory,
@@ -35,13 +33,6 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
     public void startConfigured(AcceptsOneWidget panel) {
         updateEventImage();
         view.startingWith(this, panel);
-        updateImage = new Timer() {
-
-            @Override
-            public void run() {
-                updateEventImage();
-            }
-        };
 
         updateData = new Timer() {
 
@@ -50,7 +41,6 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
                 updateData();
             }
         };
-        updateImage.scheduleRepeating(IMAGE_SWITCH_DELAY);
         updateData.scheduleRepeating(1000);
 
         updateData();
@@ -80,7 +70,6 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
     @Override
     public void onStop() {
         super.onStop();
-        updateImage.cancel();
         updateData.cancel();
     }
 
