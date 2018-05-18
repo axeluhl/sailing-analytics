@@ -1,6 +1,9 @@
 package com.sap.sse.gwt.client.controls.datetime;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 import com.google.gwt.dom.client.Document;
@@ -26,7 +29,7 @@ class NativeDateTimeInput extends Widget implements DateTimeInput {
      * @return the newly created instance as {@link DateTimeInput} abstraction
      */
     static DateTimeInput date() {
-        return new NativeDateTimeInput(DateTimeInputType.DATE, "", Accuracy.getDateFormat());
+        return new NativeDateTimeInput(DateTimeInputType.DATE, "", Accuracy.getDateFormat(), Collections.emptyList());
     }
 
     /**
@@ -38,7 +41,16 @@ class NativeDateTimeInput extends Widget implements DateTimeInput {
      * @return the newly created instance as {@link DateTimeInput} abstraction
      */
     static DateTimeInput time(Accuracy accuracy) {
-        return new NativeDateTimeInput(DateTimeInputType.TIME, accuracy.getStep(), accuracy.getTimeFormat());
+        final List<DateTimeFormat> additionalFormats = new ArrayList<>();
+        switch (accuracy) {
+        case MILLISECONDS:
+            additionalFormats.add(Accuracy.SECONDS.getTimeFormat());
+        case SECONDS:
+            additionalFormats.add(Accuracy.MINUTES.getTimeFormat());
+        default:
+            break;
+        }
+        return new NativeDateTimeInput(DateTimeInputType.TIME, accuracy.getStep(), accuracy.getTimeFormat(), additionalFormats);
     }
 
     /**
@@ -50,14 +62,25 @@ class NativeDateTimeInput extends Widget implements DateTimeInput {
      * @return the newly created instance as {@link DateTimeInput} abstraction
      */
     static DateTimeInput datetimeLocale(Accuracy accuracy) {
+        final List<DateTimeFormat> additionalFormats = new ArrayList<>();
+        switch (accuracy) {
+        case MILLISECONDS:
+            additionalFormats.add(Accuracy.SECONDS.getDatetimeFormat());
+        case SECONDS:
+            additionalFormats.add(Accuracy.MINUTES.getDatetimeFormat());
+        default:
+            break;
+        }
         return new NativeDateTimeInput(DateTimeInputType.DATETIME_LOCAL, accuracy.getStep(),
-                accuracy.getDatetimeFormat());
+                accuracy.getDatetimeFormat(), additionalFormats);
     }
 
     private final DateTimeFormat format;
     private final InputElement input;
+    private final List<DateTimeFormat> additionalFormatsForParsing;
 
-    private NativeDateTimeInput(DateTimeInputType inputType, String step, DateTimeFormat format) {
+    private NativeDateTimeInput(DateTimeInputType inputType, String step, DateTimeFormat format, List<DateTimeFormat> additionalFormatsForParsing) {
+        this.additionalFormatsForParsing = additionalFormatsForParsing;
         this.input = Document.get().createElement(InputElement.TAG).cast();
         this.input.setAttribute(ATTR_TYPE, inputType.getType());
         this.input.setAttribute(ATTR_STEP, step);
@@ -79,19 +102,19 @@ class NativeDateTimeInput extends Widget implements DateTimeInput {
 
     @Override
     public final Date getValue() {
+        final String value = input.getValue();
+        if (value == null || value.isEmpty()) {
+            return null;
+        }
         try {
-            return this.format.parse(input.getValue());
+            return this.format.parse(value);
         } catch (IllegalArgumentException exc) {
-            try {
-                // at least Google Chrome omits the seconds, if they are 00 in input field
-                if (format == Accuracy.SECONDS.getDatetimeFormat()) {
-                    return Accuracy.MINUTES.getDatetimeFormat().parse(input.getValue());
+            for (DateTimeFormat additionalFormat : additionalFormatsForParsing) {
+                try {
+                    // at least Google Chrome omits the seconds, if they are 00 in input field
+                    return additionalFormat.parse(value);
+                } catch (IllegalArgumentException exc2) {
                 }
-                if (format == Accuracy.SECONDS.getTimeFormat()) {
-                    return Accuracy.MINUTES.getTimeFormat().parse(input.getValue());
-                }
-            } catch (IllegalArgumentException exc2) {
-                return null;
             }
         }
         return null;
