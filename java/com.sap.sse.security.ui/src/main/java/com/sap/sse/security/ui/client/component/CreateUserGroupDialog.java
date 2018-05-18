@@ -33,7 +33,7 @@ public class CreateUserGroupDialog extends DataEntryDialog<UserGroupData> {
     
     public CreateUserGroupDialog(final StringMessages stringMessages, UserService userService, 
             final UserManagementServiceAsync userManagementService, final UserGroupListDataProvider userGroupListDataProvider) {
-        this(stringMessages, stringMessages.createTenant(), stringMessages.enterTenantName(), userManagementService, null, new DialogCallback<UserGroupData>() {
+        this(stringMessages, stringMessages.createUserGroup(), stringMessages.enterUserGroupName(), userManagementService, null, new DialogCallback<UserGroupData>() {
             @Override
             public void ok(UserGroupData userGroupData) {
                 userManagementService.createUserGroup(userGroupData.name, "tenant", new AsyncCallback<UserGroup>() {

@@ -161,7 +161,7 @@ public class UserGroupDetailPanel extends HorizontalPanel implements Handler, Ch
         tenantListDataProvider.addChangeHandler(this);
         this.userManagementService = userManagementService;
         
-        final CaptionPanel tenantUsersPanelCaption = new CaptionPanel(stringMessages.usersInTenant());
+        final CaptionPanel tenantUsersPanelCaption = new CaptionPanel(stringMessages.usersInUserGroup());
         final VerticalPanel tenantUsersWrapper = new VerticalPanel();
         tenantUsersList = new CellList<>(new StringCell());
         SimplePager tenantUsersPager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50, true);
@@ -199,14 +199,14 @@ public class UserGroupDetailPanel extends HorizontalPanel implements Handler, Ch
                 UserGroup tenant = tenantSelectionModel.getSelectedObject();
                 Set<UserDTO> users = allUsersSelectionModel.getSelectedSet();
                 if (tenant == null) {
-                    Window.alert(stringMessages.youHaveToSelectATenant());
+                    Window.alert(stringMessages.youHaveToSelectAUserGroup());
                     return;
                 }
                 for (final UserDTO user : users) {
                     userManagementService.addUserToUserGroup(tenant.getId().toString(), user.getName(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert(stringMessages.couldNotAddUserToTenant(user.getName(), tenant.getName(), caught.getMessage()));
+                            Window.alert(stringMessages.couldNotAddUserToUserGroup(user.getName(), tenant.getName(), caught.getMessage()));
                         }
                         @Override
                         public void onSuccess(Void result) {
@@ -224,14 +224,14 @@ public class UserGroupDetailPanel extends HorizontalPanel implements Handler, Ch
                 UserGroup tenant = tenantSelectionModel.getSelectedObject();
                 Set<String> users = tenantUsersSelectionModel.getSelectedSet();
                 if (tenant == null) {
-                    Window.alert(stringMessages.youHaveToSelectATenant());
+                    Window.alert(stringMessages.youHaveToSelectAUserGroup());
                     return;
                 }
                 for (String username : users) {
                     userManagementService.removeUserFromUserGroup(tenant.getId().toString(), username, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert(stringMessages.couldNotRemoveUserFromTenant(username, tenant.getName(), caught.getMessage()));
+                            Window.alert(stringMessages.couldNotRemoveUserFromUserGroup(username, tenant.getName(), caught.getMessage()));
                         }
                         @Override
                         public void onSuccess(Void result) {

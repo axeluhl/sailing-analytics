@@ -37,22 +37,22 @@ public class UserGroupManagementPanel extends DockPanel {
         buttonPanel.add(new Button(stringMessages.refresh(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                updateTenantsAndUsers();
+                updateUserGroupsAndUsers();
             }
         }));
-        buttonPanel.add(new Button(stringMessages.createTenant(), new ClickHandler() {
+        buttonPanel.add(new Button(stringMessages.createUserGroup(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 new CreateUserGroupDialog(stringMessages, userService, userManagementService, userGroupListDataProvider).show();
             }
         }));
-        buttonPanel.add(new Button(stringMessages.removeTenant(), new ClickHandler() {
+        buttonPanel.add(new Button(stringMessages.removeUserGroup(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 UserGroup userGroup = userGroupSingleSelectionModel.getSelectedObject();
                 if (userGroup == null) {
-                    Window.alert(stringMessages.youHaveToSelectATenant());
-                } else if (Window.confirm(stringMessages.doYouReallyWantToRemoveTenant(userGroup.getName()))) {
+                    Window.alert(stringMessages.youHaveToSelectAUserGroup());
+                } else if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(userGroup.getName()))) {
                     userManagementService.deleteUserGroup(userGroup.getId().toString(), new AsyncCallback<SuccessInfo>() {
                         @Override
                         public void onSuccess(SuccessInfo result) {
@@ -62,7 +62,7 @@ public class UserGroupManagementPanel extends DockPanel {
                         
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert(stringMessages.couldNotDeleteTenant());
+                            Window.alert(stringMessages.couldNotDeleteUserGroup());
                         }
                     });
                 }
@@ -70,7 +70,7 @@ public class UserGroupManagementPanel extends DockPanel {
         }));
         userGroupSingleSelectionModel = new SingleSelectionModel<>();
         TextBox filterBox = new TextBox();
-        filterBox.getElement().setPropertyString("placeholder", stringMessages.filterTenants());
+        filterBox.getElement().setPropertyString("placeholder", stringMessages.filterUserGroups());
         final CellList<UserGroup> userGroupList = new CellList<UserGroup>(new AbstractCell<UserGroup>() {
             @Override
             public void render(Context context, UserGroup value, SafeHtmlBuilder sb) {
@@ -90,7 +90,7 @@ public class UserGroupManagementPanel extends DockPanel {
         tenantListWrapper.add(filterBox);
         tenantListWrapper.add(tenantPanel);
         tenantListWrapper.add(tenantPager);
-        CaptionPanel tenantListCaption = new CaptionPanel(stringMessages.tenants());
+        CaptionPanel tenantListCaption = new CaptionPanel(stringMessages.userGroups());
         tenantListCaption.add(tenantListWrapper);
         TextBox userFilterBox = new TextBox();
         userFilterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());
@@ -107,7 +107,7 @@ public class UserGroupManagementPanel extends DockPanel {
         add(west, DockPanel.WEST);
     }
 
-    public void updateTenantsAndUsers() {
+    public void updateUserGroupsAndUsers() {
         userGroupListDataProvider.updateDisplays();
         userGroupDetailPanel.updateLists();
     }

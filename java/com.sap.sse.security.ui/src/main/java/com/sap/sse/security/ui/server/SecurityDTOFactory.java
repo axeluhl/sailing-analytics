@@ -134,13 +134,17 @@ public class SecurityDTOFactory {
     UserGroup createUserGroupDTOFromUserGroup(UserGroup userGroup, Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
             Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
         final UserGroup result;
-        if (fromOriginalToStrippedDownUserGroup.containsKey(userGroup)) {
-            result = fromOriginalToStrippedDownUserGroup.get(userGroup);
+        if (userGroup == null) {
+            result = null;
         } else {
-            result = new UserGroupImpl(userGroup.getId(), userGroup.getName());
-            fromOriginalToStrippedDownUserGroup.put(userGroup, result);
-            for (final SecurityUser user : userGroup.getUsers()) {
-                result.add(createUserDTOFromUser(user, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+            if (fromOriginalToStrippedDownUserGroup.containsKey(userGroup)) {
+                result = fromOriginalToStrippedDownUserGroup.get(userGroup);
+            } else {
+                result = new UserGroupImpl(userGroup.getId(), userGroup.getName());
+                fromOriginalToStrippedDownUserGroup.put(userGroup, result);
+                for (final SecurityUser user : userGroup.getUsers()) {
+                    result.add(createUserDTOFromUser(user, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+                }
             }
         }
         return result;

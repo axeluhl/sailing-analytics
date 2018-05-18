@@ -512,6 +512,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException {
+        logger.info("Creating user group "+name+" with ID "+id);
         apply(s->s.internalCreateUserGroup(id, name));
         return userStore.getUserGroup(id);
     }
@@ -524,6 +525,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void addUserToUserGroup(UserGroup userGroup, SecurityUser user) {
+        logger.info("Adding user "+user.getName()+" to group "+userGroup.getName());
         userGroup.add(user);
         final UUID groupId = userGroup.getId();
         final String username = user.getName();
@@ -548,6 +550,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public void removeUserFromUserGroup(UserGroup userGroup, SecurityUser user) {
+        logger.info("Removing user "+user.getName()+" from group "+userGroup.getName());
         userGroup.remove(user);
         final UUID userGroupId = userGroup.getId();
         final String username = user.getName();
@@ -556,6 +559,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
+        logger.info("Removing user group "+userGroup.getName());
         final UUID groupId = userGroup.getId();
         apply(s->s.internalDeleteUserGroup(groupId));
     }
@@ -640,7 +644,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
             String company, Locale locale, final String validationBaseURL) throws UserManagementException, MailException, UserGroupManagementException {
+        logger.info("Creating user "+username);
         if (userStore.getUserByName(username) != null) {
+            logger.warning("User "+username+" already exists");
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
         final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
@@ -651,9 +657,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
         if (userStore.getUserGroupByName(defaultTenantNameForUsername) != null) {
-            logger.info("Found existing tenant "+defaultTenantNameForUsername+" for new user "+username);
+            logger.info("Found existing tenant "+defaultTenantNameForUsername+" to be used as default tenant for new user "+username);
             tenant = userStore.getUserGroupByName(defaultTenantNameForUsername);
         } else {
+            logger.info("Creating user group "+defaultTenantNameForUsername+" as default tenant for new user "+username);
             tenant = createUserGroup(UUID.randomUUID(), defaultTenantNameForUsername);
         }
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
