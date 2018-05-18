@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.common.settings.GwtIncompatible;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionChecker;
@@ -43,11 +44,6 @@ public class SecurityUserImpl implements SecurityUser {
      */
     private UserGroup defaultTenant;
 
-    // For GWT serialization only
-    @Deprecated
-    protected SecurityUserImpl() {
-    }
-    
     /**
      * Creates a user with empty permission set and empty role set
      */
@@ -66,12 +62,14 @@ public class SecurityUserImpl implements SecurityUser {
         }
     }
     
+    @GwtIncompatible
     private void writeObject(ObjectOutputStream oos) throws IOException {
         roleListForSerialization = new ArrayList<>(roles);
         oos.defaultWriteObject();
         roleListForSerialization = null;
     }
 
+    @GwtIncompatible
     protected Object readResolve() {
         roles = new HashSet<>(roleListForSerialization);
         roleListForSerialization = null;

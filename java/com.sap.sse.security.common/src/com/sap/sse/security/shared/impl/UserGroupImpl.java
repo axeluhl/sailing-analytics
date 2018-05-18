@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.common.settings.GwtIncompatible;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
@@ -33,9 +34,6 @@ public class UserGroupImpl implements UserGroup {
     private List<SecurityUser> usersAsListForSerialization;
     private transient Set<SecurityUser> users;
     
-    @Deprecated
-    protected UserGroupImpl() {} // for GWT serialization only
-        
     public UserGroupImpl(UUID id, String name) {
         this(id, name, new HashSet<SecurityUser>());
     }
@@ -47,12 +45,14 @@ public class UserGroupImpl implements UserGroup {
         Util.addAll(users, this.users);
     }
     
+    @GwtIncompatible
     private void writeObject(ObjectOutputStream oos) throws IOException {
         usersAsListForSerialization = new ArrayList<>(users);
         oos.defaultWriteObject();
         usersAsListForSerialization = null;
     }
     
+    @GwtIncompatible
     protected Object readResolve() {
         users = new HashSet<>();
         users.addAll(usersAsListForSerialization);

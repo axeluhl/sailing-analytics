@@ -23,12 +23,6 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
     private boolean emailValidated;
     private List<UserGroup> groups;
 
-    // for GWT serialization only
-    @Deprecated
-    UserDTO() {
-        super();
-    }
-
     /**
      * @param groups may be {@code null} which is equivalent to passing an empty groups collection
      */
