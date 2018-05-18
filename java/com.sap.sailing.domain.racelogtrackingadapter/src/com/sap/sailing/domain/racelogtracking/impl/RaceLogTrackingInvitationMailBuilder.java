@@ -25,6 +25,11 @@ import com.sap.sse.qrcode.QRCodeGenerationUtil;
 import com.sap.sse.shared.media.ImageDescriptor;
 
 class RaceLogTrackingInvitationMailBuilder {
+    /**
+     * We cannot use the system seperator, as the reader might be another OS. This linebreak seems to work reliable over
+     * all systems
+     */
+    private static final String TEXT_LINE_BREAK = "\r\n";
 
     /**
      * URL prefix, so the iOS app will recognize as deep link and pass anything after it to the app for analysis.
@@ -53,16 +58,18 @@ class RaceLogTrackingInvitationMailBuilder {
         this.html.append(RaceLogTrackingI18n.welcomeTo(locale, event.getName(), lbdn));
         this.html.append("</h1>");
         this.text.append(RaceLogTrackingI18n.welcomeTo(locale, event.getName(), lbdn));
-        this.text.append("\r\n");
+        this.text.append(TEXT_LINE_BREAK);
         return this;
     }
 
     RaceLogTrackingInvitationMailBuilder addSailInSightIntroductoryText(final String invitee) {
-        return this.addIntroductoryText(RaceLogTrackingI18n.sailInSightAppName(locale), invitee);
+        this.addIntroductoryText(RaceLogTrackingI18n.sailInSightAppName(locale), invitee);
+        return this;
     }
 
     RaceLogTrackingInvitationMailBuilder addBuoyPingerIntroductoryText(final String invitee) {
-        return this.addIntroductoryText(RaceLogTrackingI18n.buoyPingerAppName(locale), invitee);
+        this.addIntroductoryText(RaceLogTrackingI18n.buoyPingerAppName(locale), invitee);
+        return this;
     }
 
     RaceLogTrackingInvitationMailBuilder addEventLogo(final Event event) {
@@ -76,9 +83,9 @@ class RaceLogTrackingInvitationMailBuilder {
                 ImageIO.write(image, "png", baos);
                 String inlineImage = new String(Base64.getEncoder().encodeToString(baos.toByteArray()));
                 String cidSource = "cid:logo";
-                String base64Source ="data:image/png;base64," + inlineImage;
-                attachImage(cidSource, base64Source);
-                this.mimeBodyPartSuppliers.add(new SerializableImageMimeBodyPartSupplier(baos.toByteArray(),"image/png","<logo>","logo.png"));
+                insertImage(cidSource, inlineImage);
+                this.mimeBodyPartSuppliers.add(new SerializableImageMimeBodyPartSupplier(baos.toByteArray(),
+                        "image/png", "<logo>", "logo.png"));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -86,33 +93,45 @@ class RaceLogTrackingInvitationMailBuilder {
         return this;
     }
 
-    private void attachImage(String cidSource, String base64Source) {
-        this.html.append("<img src='"+base64Source+"'/>");
+    /**
+     * Inserts a image as both base64 and cid attachment. The caller must ensure the cid attachment is actually added to
+     * the bodypartsuppliers.
+     * 
+     * @param cidSource
+     *            cid image link
+     * @param base64Source
+     *            inline base64 data url Both are added, because most mail clients are only able to render one of them.
+     */
+    private void insertImage(String cidSource, String inlineImage) {
+        String base64Source = "data:image/png;base64," + inlineImage;
+        this.html.append("<img src='" + base64Source + "'/>");
+        // outlook can render both types of images, suppress with MS specific conditional the rendering of the cid
         this.html.append("<!--[if !mso]><!-- -->");
-        this.html.append("<img alt='' src='"+cidSource+"'/>");
+        // empty alt text, to supress missing image icons in browsers that cannot render cid, for example thunderbird
+        this.html.append("<img alt='' src='" + cidSource + "'/>");
+        // outlook conditional end
         this.html.append("<![endif]-->");
         this.html.append("<br>");
     }
 
     RaceLogTrackingInvitationMailBuilder addQrCodeImage(final String url) {
-        try (DataInputStream imageIs = new DataInputStream(QRCodeGenerationUtil.create(url, 250))){
+        try (DataInputStream imageIs = new DataInputStream(QRCodeGenerationUtil.create(url, 250))) {
             byte[] targetArray = new byte[imageIs.available()];
             imageIs.readFully(targetArray);
             String inlineImage = new String(Base64.getEncoder().encodeToString(targetArray));
             String cidSource = "cid:image";
-            String base64Source ="data:image/png;base64," + inlineImage;
-            attachImage(cidSource, base64Source);
-            this.html.append("<a href=\""+url+"\">");
+            insertImage(cidSource, inlineImage);
+            this.html.append("<a href=\"" + url + "\">");
             this.html.append(url);
             this.html.append("</a>");
             this.html.append("<br>");
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //this should be the first image! as some mail clients will only show the first one!
+        // this should be the first image! as some mail clients will only show the first one!
         this.mimeBodyPartSuppliers.add(0, new QRCodeMimeBodyPartSupplier(url));
         this.text.append(url);
-        this.text.append("\r\n");
+        this.text.append(TEXT_LINE_BREAK);
         return this;
     }
 
@@ -127,12 +146,12 @@ class RaceLogTrackingInvitationMailBuilder {
         this.html.append("<tr>");
         if (hasIOSAppUrl) {
             this.html.append("<td>");
-            this.addLink(IOS_DEEP_LINK_PREFIX + targetUrl, RaceLogTrackingI18n::iOSUsers);
+            this.addHtmlLink(IOS_DEEP_LINK_PREFIX + targetUrl, RaceLogTrackingI18n::iOSUsers);
             this.html.append("</td>");
         }
         if (hasAndroidAppUrl) {
             this.html.append("<td>");
-            this.addLink(targetUrl, RaceLogTrackingI18n::androidUsers);
+            this.addHtmlLink(targetUrl, RaceLogTrackingI18n::androidUsers);
             this.html.append("</td>");
         }
         this.html.append("</tr>");
@@ -146,31 +165,32 @@ class RaceLogTrackingInvitationMailBuilder {
         if (hasIOSAppUrl || hasAndroidAppUrl) {
             this.addSpacingTextBlock(RaceLogTrackingI18n::appStoreInstallText);
             text.append(RaceLogTrackingI18n.appStoreInstallText(locale));
-            text.append("\r\n");
+            text.append(TEXT_LINE_BREAK);
         }
         this.html.append("<table border=\"0\" cellspacing=\"20px\" cellpadding=\"0px\">");
         this.html.append("<tr>");
         if (hasIOSAppUrl) {
             this.html.append("<td>");
-            this.addLink(iOSAppUrl, RaceLogTrackingI18n::appIos);
-            text.append(RaceLogTrackingI18n.appIos(locale));
-            text.append(" ");
-            text.append(iOSAppUrl);
-            text.append("\r\n");
+            this.addHtmlLink(iOSAppUrl, RaceLogTrackingI18n::appIos);
+            this.addTextLink(iOSAppUrl, RaceLogTrackingI18n::appIos);
             this.html.append("</td>");
         }
         if (hasAndroidAppUrl) {
             this.html.append("<td>");
-            this.addLink(androidAppUrl, RaceLogTrackingI18n::appAndroid);
-            text.append(RaceLogTrackingI18n.appAndroid(locale));
-            text.append(" ");
-            text.append(iOSAppUrl);
-            text.append("\r\n");
+            this.addHtmlLink(androidAppUrl, RaceLogTrackingI18n::appAndroid);
+            this.addTextLink(androidAppUrl, RaceLogTrackingI18n::appAndroid);
             this.html.append("</td>");
         }
         this.html.append("</tr>");
         this.html.append("</table>");
         return this;
+    }
+
+    private void addTextLink(String url, final Function<Locale, String> textFactory) {
+        text.append(textFactory.apply(locale));
+        text.append(" ");
+        text.append(url);
+        text.append(TEXT_LINE_BREAK);
     }
 
     RaceLogTrackingInvitationMailBuilder addSpacer() {
@@ -189,7 +209,7 @@ class RaceLogTrackingInvitationMailBuilder {
                 mimeBodyPartSuppliers.toArray(new SerializableMimeBodyPartSupplier[mimeBodyPartSuppliers.size()]));
     }
 
-    private RaceLogTrackingInvitationMailBuilder addIntroductoryText(final String appName, final String invitee) {
+    private void addIntroductoryText(final String appName, final String invitee) {
         this.html.append("<p>");
         this.html.append(RaceLogTrackingI18n.scanQRCodeOrVisitUrlToRegisterAs(locale, appName));
         this.html.append(" <b>").append(invitee).append("</b>");
@@ -197,21 +217,20 @@ class RaceLogTrackingInvitationMailBuilder {
         this.text.append(RaceLogTrackingI18n.scanQRCodeOrVisitUrlToRegisterAs(locale, appName));
         this.text.append(" ");
         this.text.append(invitee);
-        text.append("\r\n");
-        return this;
+        this.text.append(TEXT_LINE_BREAK);
     }
 
-    private RaceLogTrackingInvitationMailBuilder addSpacingTextBlock(final Function<Locale, String> textFactory) {
+    private void addSpacingTextBlock(final Function<Locale, String> textFactory) {
         this.html.append("<br><br><p>").append(textFactory.apply(locale)).append("</p><br>");
-        return this;
     }
 
-    private RaceLogTrackingInvitationMailBuilder addLink(final String url, final Function<Locale, String> textFactory) {
-        this.html.append("<div style=\" background-color:#337ab7; border-radius:4px; border:10px solid #337ab7; text-decoration:none;\">");
+    private void addHtmlLink(final String url,
+            final Function<Locale, String> textFactory) {
+        this.html.append(
+                "<div style=\" background-color:#337ab7; border-radius:4px; border:10px solid #337ab7; text-decoration:none;\">");
         this.html.append("<a href=\"").append(url).append("\" style=\"padding:15px; color:#ffffff; width:200px;\">");
         this.html.append(textFactory.apply(locale));
         this.html.append("</a>");
         this.html.append("</div>");
-        return this;
     }
 }
