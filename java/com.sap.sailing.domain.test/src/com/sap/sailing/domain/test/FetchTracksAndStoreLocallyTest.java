@@ -76,7 +76,7 @@ public class FetchTracksAndStoreLocallyTest extends OnlineTracTracBasedTest {
             @Override
             public void raceRemoved(TrackedRace trackedRace) {
             }
-        }, Optional.empty());
+        }, Optional.empty(), /* synchronous */ false);
         super.completeSetupLaunchingControllerAndWaitForRaceDefinition(ReceiverType.RACECOURSE,
                 ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
     }

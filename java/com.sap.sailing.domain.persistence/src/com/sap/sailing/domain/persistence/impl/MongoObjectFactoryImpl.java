@@ -1305,7 +1305,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeCompetitor(Competitor competitor) {
         if (competitor.hasBoat()) {
-            storeCompetitorWithBoat((CompetitorWithBoat) competitor); 
+            storeCompetitorWithBoat((CompetitorWithBoat) competitor);
+            storeBoat(((CompetitorWithBoat) competitor).getBoat());
         } else {
             storeCompetitorWithoutBoat(competitor);
         }

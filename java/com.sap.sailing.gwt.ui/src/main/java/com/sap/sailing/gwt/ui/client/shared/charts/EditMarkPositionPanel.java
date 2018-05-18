@@ -783,7 +783,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
 
     @Override
     public String getLocalizedShortName() {
-        return null;
+        return stringMessages.editMarkPositions();
     }
 
     @Override

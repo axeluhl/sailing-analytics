@@ -44,34 +44,37 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends Abst
         JSONArray byCompetitorJson = new JSONArray();
         result.put(BYCOMPETITOR, byCompetitorJson);
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            final JSONObject forCompetitorJson = new JSONObject();
-            byCompetitorJson.add(forCompetitorJson);
-            forCompetitorJson.put(COMPETITOR_NAME, competitor.getName());
-            forCompetitorJson.put(BOAT_CLASS, boatClassJsonSerializer
-                    .serialize(trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass()));
-            final JSONArray completeManeuverCurvesWithEstimationData = new JSONArray();
-            for (CompleteManeuverCurveWithEstimationData maneuver : getCompleteManeuverCurvesWithEstimationData(
-                    trackedRace, competitor)) {
-                completeManeuverCurvesWithEstimationData
-                        .add(maneuverWithEstimationDataJsonSerializer.serialize(maneuver));
-            }
-            forCompetitorJson.put(MANEUVER_CURVES, completeManeuverCurvesWithEstimationData);
-            Duration averageIntervalBetweenFixes = trackedRace.getTrack(competitor).getAverageIntervalBetweenFixes();
-            forCompetitorJson.put(AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS,
-                    averageIntervalBetweenFixes == null ? 0 : averageIntervalBetweenFixes.asSeconds());
-            GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-            Double distanceTravelledInMeters = null;
             ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
             TrackTimeInfo trackTimeInfo = maneuverDetector.getTrackTimeInfo();
-            if (trackTimeInfo.getTrackStartTimePoint() != null && trackTimeInfo.getTrackEndTimePoint() != null) {
-                distanceTravelledInMeters = track.getDistanceTraveled(trackTimeInfo.getTrackStartTimePoint(),
-                        trackTimeInfo.getTrackEndTimePoint()).getMeters();
+            if (trackTimeInfo != null) {
+                final JSONObject forCompetitorJson = new JSONObject();
+                byCompetitorJson.add(forCompetitorJson);
+                forCompetitorJson.put(COMPETITOR_NAME, competitor.getName());
+                forCompetitorJson.put(BOAT_CLASS, boatClassJsonSerializer
+                        .serialize(trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass()));
+                final JSONArray completeManeuverCurvesWithEstimationData = new JSONArray();
+                for (CompleteManeuverCurveWithEstimationData maneuver : getCompleteManeuverCurvesWithEstimationData(
+                        trackedRace, competitor)) {
+                    completeManeuverCurvesWithEstimationData
+                            .add(maneuverWithEstimationDataJsonSerializer.serialize(maneuver));
+                }
+                forCompetitorJson.put(MANEUVER_CURVES, completeManeuverCurvesWithEstimationData);
+                Duration averageIntervalBetweenFixes = trackedRace.getTrack(competitor)
+                        .getAverageIntervalBetweenFixes();
+                forCompetitorJson.put(AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS,
+                        averageIntervalBetweenFixes == null ? 0 : averageIntervalBetweenFixes.asSeconds());
+                GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                Double distanceTravelledInMeters = null;
+                if (trackTimeInfo.getTrackStartTimePoint() != null && trackTimeInfo.getTrackEndTimePoint() != null) {
+                    distanceTravelledInMeters = track.getDistanceTraveled(trackTimeInfo.getTrackStartTimePoint(),
+                            trackTimeInfo.getTrackEndTimePoint()).getMeters();
+                }
+                forCompetitorJson.put(DISTANCE_TRAVELLED_IN_METERS, distanceTravelledInMeters);
+                forCompetitorJson.put(START_TIME_POINT, trackTimeInfo.getTrackStartTimePoint() == null ? null
+                        : trackTimeInfo.getTrackStartTimePoint().asMillis());
+                forCompetitorJson.put(END_TIME_POINT, trackTimeInfo.getTrackEndTimePoint() == null ? null
+                        : trackTimeInfo.getTrackEndTimePoint().asMillis());
             }
-            forCompetitorJson.put(DISTANCE_TRAVELLED_IN_METERS, distanceTravelledInMeters);
-            forCompetitorJson.put(START_TIME_POINT, trackTimeInfo.getTrackStartTimePoint() == null ? null
-                    : trackTimeInfo.getTrackStartTimePoint().asMillis());
-            forCompetitorJson.put(END_TIME_POINT, trackTimeInfo.getTrackEndTimePoint() == null ? null
-                    : trackTimeInfo.getTrackEndTimePoint().asMillis());
         }
         return result;
     }
