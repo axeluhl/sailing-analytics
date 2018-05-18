@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.ProvidesDuration;
@@ -17,6 +19,7 @@ public class VideoNode extends FiresPlaceNode implements ProvidesDuration {
     private int lastPlayed = -1;
     private VideoDTO currentVideo = null;
     private Consumer<Integer> durationConsumer;
+
     public VideoNode(AutoPlayClientFactory cf) {
         super(VideoNode.class.getName());
         this.cf = cf;
@@ -31,6 +34,13 @@ public class VideoNode extends FiresPlaceNode implements ProvidesDuration {
         if (videos.size() == 0) {
             lastPlayed = -1;
             currentVideo = null;
+            //break the stacktrace, to ensure that if all nodes (not properly configured event ect. return 0, we do not cause stackoverflows)
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    durationConsumer.accept(0);
+                }
+            });
             return;
         }
 
@@ -42,16 +52,12 @@ public class VideoNode extends FiresPlaceNode implements ProvidesDuration {
         currentVideo = videos.get(nextVideo);
         lastPlayed = nextVideo;
         setPlaceToGo(new VideoPlace(currentVideo, durationConsumer));
-        firePlaceChangeAndStartTimer(); 
-    }
+        firePlaceChangeAndStartTimer();
 
+    }
 
     @Override
     public void setDurationConsumer(Consumer<Integer> durationConsumer) {
-        if (currentVideo == null) {
-            durationConsumer.accept(0);
-            return;
-        }
         this.durationConsumer = durationConsumer;
     }
 }

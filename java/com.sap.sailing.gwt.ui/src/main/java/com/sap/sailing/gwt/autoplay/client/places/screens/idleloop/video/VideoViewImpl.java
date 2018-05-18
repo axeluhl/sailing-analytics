@@ -42,7 +42,9 @@ public class VideoViewImpl extends Composite implements VideoView {
     @Override
     protected void onDetach() {
         super.onDetach();
+        player.pause();
         player.disposeIf2D();
+        player.removeFromParent();
     }
 
     @Override
@@ -64,6 +66,8 @@ public class VideoViewImpl extends Composite implements VideoView {
                             duration = MAX_VIDEO_DURATION;
                         }
                         currentPresenter.publishDuration(duration);
+                        player.setCurrentTime(0);
+                        player.play();
                         return false;
                     } else {
                         return true;
