@@ -3,6 +3,8 @@ package com.sap.sse.security.shared;
 import java.util.List;
 import java.util.Set;
 
+import com.sap.sse.common.Util;
+
 /**
  * The {@link PermissionChecker} is an implementation of the permission 
  * checking algorithm proposed in PermissionConcept.docx section 10. It 
@@ -47,7 +49,7 @@ public class PermissionChecker {
         PermissionState result = PermissionState.NONE;
         
         // 1. check user ownership
-        if (ownership != null && user.equals(ownership.getUserOwner())) {
+        if (ownership != null && Util.equalsWithNull(user, ownership.getUserOwner())) {
             result = PermissionState.GRANTED;
         }
         // 2. check ACL
@@ -102,8 +104,8 @@ public class PermissionChecker {
            if (ownership == null) {
                permissionsApply = false; // qualifications cannot be verified as no ownership info is provided; permissions do not apply
            } else {
-               permissionsApply = (!roleIsTenantQualified || role.getQualifiedForTenant().equals(ownership.getTenantOwner())) &&
-                                  (!roleIsUserQualified || role.getQualifiedForUser().equals(ownership.getUserOwner()));
+               permissionsApply = (!roleIsTenantQualified || Util.equalsWithNull(role.getQualifiedForTenant(), ownership.getTenantOwner())) &&
+                                  (!roleIsUserQualified || Util.equalsWithNull(role.getQualifiedForUser(), ownership.getUserOwner()));
            }
        } else {
            permissionsApply = true; // permissions apply without qualifications
