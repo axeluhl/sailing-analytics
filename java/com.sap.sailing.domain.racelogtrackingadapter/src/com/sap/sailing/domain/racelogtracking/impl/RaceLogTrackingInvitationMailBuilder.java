@@ -77,17 +77,21 @@ class RaceLogTrackingInvitationMailBuilder {
                 String inlineImage = new String(Base64.getEncoder().encodeToString(baos.toByteArray()));
                 String cidSource = "cid:logo";
                 String base64Source ="data:image/png;base64," + inlineImage;
-                this.html.append("<img src='"+base64Source+"'/>");
-                this.html.append("<!--[if !mso]><!-- -->");
-                this.html.append("<img alt='' src='"+cidSource+"'/>");
-                this.html.append("<![endif]-->");
-                this.html.append("<br>");
-                this.mimeBodyPartSuppliers.add(new SerializableImageMimeBodyPartSupplier(baos.toByteArray(),"image/png","logo","logo.png"));
+                attachImage(cidSource, base64Source);
+                this.mimeBodyPartSuppliers.add(new SerializableImageMimeBodyPartSupplier(baos.toByteArray(),"image/png","<logo>","logo.png"));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         return this;
+    }
+
+    private void attachImage(String cidSource, String base64Source) {
+        this.html.append("<img src='"+base64Source+"'/>");
+        this.html.append("<!--[if !mso]><!-- -->");
+        this.html.append("<img alt='' src='"+cidSource+"'/>");
+        this.html.append("<![endif]-->");
+        this.html.append("<br>");
     }
 
     RaceLogTrackingInvitationMailBuilder addQrCodeImage(final String url) {
@@ -97,11 +101,7 @@ class RaceLogTrackingInvitationMailBuilder {
             String inlineImage = new String(Base64.getEncoder().encodeToString(targetArray));
             String cidSource = "cid:image";
             String base64Source ="data:image/png;base64," + inlineImage;
-            this.html.append("<img src='"+base64Source+"'/>");
-            this.html.append("<!--[if !mso]><!-- -->");
-            this.html.append("<img alt='' src='"+cidSource+"'/>");
-            this.html.append("<![endif]-->");
-            this.html.append("<br>");
+            attachImage(cidSource, base64Source);
             this.html.append("<a href=\""+url+"\">");
             this.html.append(url);
             this.html.append("</a>");
@@ -110,7 +110,7 @@ class RaceLogTrackingInvitationMailBuilder {
             e.printStackTrace();
         }
         //this should be the first image! as some mail clients will only show the first one!
-        this.mimeBodyPartSuppliers.add(new QRCodeMimeBodyPartSupplier(url));
+        this.mimeBodyPartSuppliers.add(0, new QRCodeMimeBodyPartSupplier(url));
         this.text.append(url);
         this.text.append("\r\n");
         return this;
