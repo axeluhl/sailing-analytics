@@ -2,10 +2,9 @@ package com.sap.sailing.windestimation.data;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -40,6 +39,7 @@ public class EstimationDataPersistenceManager {
     private static final int DB_PORT = 27017;
     private static final String DB_HOST = "127.0.0.1";
     private static final String DB_NAME = "windEstimation";
+    private static final String FIELD_DB_ID = "_id";
     private static final String FIELD_MANEUVER_CURVES = "maneuverCurves";
     private static final String FIELD_BOAT_CLASS = "boatClass";
     private static final String FIELD_AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS = "avgIntervalBetweenFixesInSeconds";
@@ -81,10 +81,21 @@ public class EstimationDataPersistenceManager {
         races.insert(dbObject);
     }
 
-    public List<RaceWithEstimationData> getRacesWithEstimationData()
+    public long countRacesWithEstimationData() {
+        return db.getCollection(COLLECTION_RACES).count();
+    }
+
+    public RaceWithEstimationData getNextRaceWithEstimationData(String lastId)
             throws JsonDeserializationException, ParseException {
-        List<RaceWithEstimationData> racesWithEstimationData = new ArrayList<>();
-        for (DBObject dbObject : db.getCollection(COLLECTION_RACES).find()) {
+        RaceWithEstimationData raceWithEstimationData = null;
+        BasicDBObject gtQuery = null;
+        if (lastId != null) {
+            gtQuery = new BasicDBObject();
+            gtQuery.put("_id", new BasicDBObject("$gt", new ObjectId(lastId)));
+        }
+        DBObject dbObject = db.getCollection(COLLECTION_RACES).findOne(gtQuery);
+        if (dbObject != null) {
+            ObjectId dbId = (ObjectId) dbObject.get(FIELD_DB_ID);
             String regattaName = (String) dbObject.get(FIELD_REGATTA_NAME);
             String raceName = (String) dbObject.get(FIELD_TRACKED_RACE_NAME);
             BasicDBList competitorTracks = (BasicDBList) dbObject.get(FIELD_COMPETITOR_TRACKS);
@@ -116,50 +127,10 @@ public class EstimationDataPersistenceManager {
                         endUnixTime == null ? null : new MillisecondsTimePoint(endUnixTime));
                 competitorTracksWithEstimationData.add(competitorTrackWithEstimationData);
             }
-            RaceWithEstimationData raceWithEstimationData = new RaceWithEstimationData(regattaName, raceName,
+            raceWithEstimationData = new RaceWithEstimationData(dbId.toHexString(), regattaName, raceName,
                     competitorTracksWithEstimationData);
-            racesWithEstimationData.add(raceWithEstimationData);
         }
-        return racesWithEstimationData;
-    }
-
-    public List<CompetitorTrackWithEstimationData> getCompetitorTracks()
-            throws JsonDeserializationException, ParseException {
-        List<CompetitorTrackWithEstimationData> result = new ArrayList<>();
-        for (RaceWithEstimationData race : getRacesWithEstimationData()) {
-            for (CompetitorTrackWithEstimationData competitorTrack : race.getCompetitorTracks()) {
-                result.add(competitorTrack);
-            }
-        }
-        return result;
-    }
-
-    public List<CompleteManeuverCurveWithEstimationData> getCompleteManeuverCurves()
-            throws JsonDeserializationException, ParseException {
-        List<CompleteManeuverCurveWithEstimationData> result = new ArrayList<>();
-        for (RaceWithEstimationData race : getRacesWithEstimationData()) {
-            for (CompetitorTrackWithEstimationData competitorTrack : race.getCompetitorTracks()) {
-                for (CompleteManeuverCurveWithEstimationData maneuverCurve : competitorTrack.getManeuverCurves()) {
-                    result.add(maneuverCurve);
-                }
-            }
-        }
-        return result;
-    }
-
-    public Map<String, List<RaceWithEstimationData>> getRacesWithEstimationDataPerRegatta()
-            throws JsonDeserializationException, ParseException {
-        Map<String, List<RaceWithEstimationData>> result = new HashMap<>();
-        for (RaceWithEstimationData race : getRacesWithEstimationData()) {
-            List<RaceWithEstimationData> regattaRaces = result.get(race.getRegattaName());
-            if (regattaRaces == null) {
-                regattaRaces = new ArrayList<>();
-                result.put(race.getRegattaName(), regattaRaces);
-            }
-            regattaRaces.add(race);
-
-        }
-        return result;
+        return raceWithEstimationData;
     }
 
     private JSONObject getJSONObject(String json) throws ParseException {

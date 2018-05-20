@@ -1,7 +1,8 @@
 package com.sap.sailing.windestimation.evaluation;
 
-import java.util.List;
+import java.util.Iterator;
 
+import com.sap.sailing.windestimation.ManeuverAndPolarsBasedWindEstimator;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 
 /**
@@ -11,7 +12,10 @@ import com.sap.sailing.windestimation.data.RaceWithEstimationData;
  */
 public interface WindEstimatorEvaluator {
 
-    WindEstimatorEvaluationResult evaluateWindEstimator(
-            ManeuverAndPolarsBasedWindEstimatorFactory windEstimatorFactory, List<RaceWithEstimationData> testSet);
+    WindEstimatorEvaluationResult evaluateWindEstimator(ManeuverAndPolarsBasedWindEstimatorFactory windEstimatorFactory,
+            Iterator<RaceWithEstimationData> racesIterator, long numberOfRaces);
+
+    WindEstimatorEvaluationResult evaluateWindEstimator(ManeuverAndPolarsBasedWindEstimator windEstimator,
+            RaceWithEstimationData race);
 
 }

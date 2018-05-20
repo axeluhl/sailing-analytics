@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
 import com.sap.sailing.windestimation.maneuvergraph.ManeuverNodesLevelFactory;
-import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.SingleManeuverClassificationResult;
+import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.ManeuverClassificationResult;
 
 /**
  * 
@@ -15,11 +15,11 @@ import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.SingleManeuv
  */
 public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<SingleTrackManeuverNodesLevel> {
 
-    private final SingleManeuverClassificationResult maneuverClassificationResult;
+    private final ManeuverClassificationResult maneuverClassificationResult;
     private final BoatClass boatClass;
     private boolean calculationOfTransitionProbabilitiesNeeded = true;
 
-    public SingleTrackManeuverNodesLevel(SingleManeuverClassificationResult singleManeuverClassificationResult,
+    public SingleTrackManeuverNodesLevel(ManeuverClassificationResult singleManeuverClassificationResult,
             BoatClass boatClass) {
         super(singleManeuverClassificationResult.getManeuver());
         maneuverClassificationResult = singleManeuverClassificationResult;
@@ -86,13 +86,13 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
         return 1 / (1 + Math.pow((windCourseDeviation) / 15, 2));
     }
 
-    public static ManeuverNodesLevelFactory<SingleTrackManeuverNodesLevel, SingleManeuverClassificationResult> getFactory(
+    public static ManeuverNodesLevelFactory<SingleTrackManeuverNodesLevel, ManeuverClassificationResult> getFactory(
             BoatClass boatClass) {
-        return new ManeuverNodesLevelFactory<SingleTrackManeuverNodesLevel, SingleManeuverClassificationResult>() {
+        return new ManeuverNodesLevelFactory<SingleTrackManeuverNodesLevel, ManeuverClassificationResult>() {
 
             @Override
             public SingleTrackManeuverNodesLevel createNewManeuverNodesLevel(
-                    SingleManeuverClassificationResult singleManeuverClassificationResult) {
+                    ManeuverClassificationResult singleManeuverClassificationResult) {
                 return new SingleTrackManeuverNodesLevel(singleManeuverClassificationResult, boatClass);
             }
         };
@@ -126,7 +126,7 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
 
     @Override
     public boolean isManeuverBeginningClean() {
-        SingleManeuverClassificationResult maneuverClassificationResult = this.maneuverClassificationResult;
+        ManeuverClassificationResult maneuverClassificationResult = this.maneuverClassificationResult;
         if (maneuverClassificationResult == null) {
             return getManeuver().isManeuverBeginningClean(getPreviousManeuverOfSameTrack());
         }
@@ -135,7 +135,7 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
 
     @Override
     public boolean isManeuverEndClean() {
-        SingleManeuverClassificationResult maneuverClassificationResult = this.maneuverClassificationResult;
+        ManeuverClassificationResult maneuverClassificationResult = this.maneuverClassificationResult;
         if (maneuverClassificationResult == null) {
             return getManeuver().isManeuverEndClean(getNextManeuverOfSameTrack());
         }

@@ -10,8 +10,18 @@ public class LoggingUtil {
     private LoggingUtil() {
     }
 
-    public static void logInfo(String logMessage) {
-        System.out.println(logTimeFormatter.format(LocalDateTime.now()) + " " + logMessage);
+    public static int logInfo(String logMessage) {
+        String logOutput = logTimeFormatter.format(LocalDateTime.now()) + " " + logMessage;
+        System.out.println(logOutput);
+        return logOutput.length() + 2;
+    }
+
+    public static void delete(int numberOfCharsToDelete) {
+        StringBuilder str = new StringBuilder("");
+        for (int i = 0; i < numberOfCharsToDelete; i++) {
+            str.append('\b');
+        }
+        System.out.print(str.toString());
     }
 
 }

@@ -86,7 +86,7 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
                 + " complete maneuver curves with estimation data\n\t" + importStatistics.errors
                 + " ingored races due to error\n--------------------------------------------\nTime passed: "
                 + duration.toHours() + "h " + (duration.toMinutes() - duration.toHours() * 60) + "m "
-                + duration.get(ChronoUnit.SECONDS) + "s");
+                + (duration.get(ChronoUnit.SECONDS) % 60) + "s");
     }
 
     private void importRegatta(String regattaName, ImportStatistics importStatistics)
@@ -129,7 +129,8 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
     }
 
     private void importRace(String regattaName, String trackedRaceName, ImportStatistics importStatistics)
-            throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
+            throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException,
+            InterruptedException {
         String encodedRegattaName = encodeUrlPathPart(regattaName);
         String encodedRaceName = encodeUrlPathPart(trackedRaceName);
         HttpGet getEstimationData = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH + "/" + encodedRegattaName
@@ -141,10 +142,7 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
                 httpResponse = createNewHttpClient().execute(getEstimationData);
                 break;
             } catch (IOException e) {
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e1) {
-                }
+                Thread.sleep(10000);
                 lastException = e;
                 LoggingUtil.logInfo("Connection error (" + i + "/10) while processing race : \"" + trackedRaceName
                         + "\", retrying...");

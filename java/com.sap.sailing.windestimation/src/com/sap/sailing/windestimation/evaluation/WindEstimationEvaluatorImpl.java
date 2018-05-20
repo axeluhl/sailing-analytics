@@ -1,8 +1,12 @@
 package com.sap.sailing.windestimation.evaluation;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
@@ -13,6 +17,11 @@ import com.sap.sailing.windestimation.data.LoggingUtil;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class WindEstimationEvaluatorImpl implements WindEstimatorEvaluator {
 
     private final double maxWindCourseDeviationInDegrees;
@@ -28,13 +37,18 @@ public class WindEstimationEvaluatorImpl implements WindEstimatorEvaluator {
 
     @Override
     public WindEstimatorEvaluationResult evaluateWindEstimator(
-            ManeuverAndPolarsBasedWindEstimatorFactory windEstimatorFactory, List<RaceWithEstimationData> testSet) {
-        return testSet.parallelStream()
-                .map(race -> evaluateOnRace(windEstimatorFactory.createNewEstimatorInstance(), race))
+            ManeuverAndPolarsBasedWindEstimatorFactory windEstimatorFactory,
+            Iterator<RaceWithEstimationData> racesIterator, long numberOfRaces) {
+        return StreamSupport
+                .stream(new FixedBatchSpliteratorWrapper<>(
+                        Spliterators.spliterator(racesIterator, numberOfRaces, Spliterator.NONNULL), numberOfRaces, 50),
+                        true)
+                .map(race -> evaluateWindEstimator(windEstimatorFactory.createNewEstimatorInstance(), race))
                 .reduce((one, two) -> one.mergeBySum(two)).orElse(new WindEstimatorEvaluationResult());
     }
 
-    private WindEstimatorEvaluationResult evaluateOnRace(ManeuverAndPolarsBasedWindEstimator windEstimator,
+    @Override
+    public WindEstimatorEvaluationResult evaluateWindEstimator(ManeuverAndPolarsBasedWindEstimator windEstimator,
             RaceWithEstimationData raceWithEstimationData) {
         LoggingUtil.logInfo("Evaluating on " + raceWithEstimationData.getRegattaName() + " Race "
                 + raceWithEstimationData.getRaceName());

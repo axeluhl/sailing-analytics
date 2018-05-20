@@ -195,7 +195,7 @@ public class WindTrackFromManeuverGraphExtractor<T extends ManeuverNodesLevel<T>
                 .getManeuverLikelihoodAndTwsTwa(currentLevel.getBoatClass(), boatSpeed, directionChangeInDegrees,
                         tackOrJibe);
         WindWithConfidenceImpl<TimePoint> windWithConfidence = null;
-        if (tackOrJibeLikelihoodWithTwaTws.getA() != null) {
+        if (tackOrJibeLikelihoodWithTwaTws.getA() > 0.0001) {
             SpeedWithBearing windSpeedAndTwaIfTackOrJibe = tackOrJibeLikelihoodWithTwaTws.getB().getObject();
             SpeedWithBearing windSpeedWithCourse = new KnotSpeedWithBearingImpl(windSpeedAndTwaIfTackOrJibe.getKnots(),
                     currentLevel.getManeuver().getCurveWithUnstableCourseAndSpeed().getMiddleCourse().reverse());

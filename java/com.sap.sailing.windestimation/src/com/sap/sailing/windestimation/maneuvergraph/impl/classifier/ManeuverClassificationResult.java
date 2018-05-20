@@ -15,7 +15,7 @@ import com.sap.sailing.windestimation.maneuvergraph.impl.ProbabilityUtil;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class SingleManeuverClassificationResult {
+public class ManeuverClassificationResult {
 
     private final double[] likelihoodsForPointOfSailAfterManeuvers = new double[CoarseGrainedPointOfSail
             .values().length];
@@ -25,7 +25,7 @@ public class SingleManeuverClassificationResult {
     private final boolean cleanManeuverBeginning;
     private final boolean cleanManeuverEnd;
 
-    public SingleManeuverClassificationResult(CompleteManeuverCurveWithEstimationData maneuver,
+    public ManeuverClassificationResult(CompleteManeuverCurveWithEstimationData maneuver,
             double[] likelihoodPerManeuverType, boolean cleanManeuverBeginning, boolean cleanManeuverEnd) {
         this.maneuver = maneuver;
         this.likelihoodPerManeuverType = likelihoodPerManeuverType;

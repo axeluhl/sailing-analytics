@@ -9,9 +9,9 @@ import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimat
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.maneuvergraph.impl.bestpath.BestPathsCalculator;
 import com.sap.sailing.windestimation.maneuvergraph.impl.bestpath.SameBoatClassBestPathsEvaluator;
-import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.RulesBasedSingleManeuverClassifierImpl;
-import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.SingleManeuverClassificationResult;
-import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.SingleManeuverClassifier;
+import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.RulesBasedManeuverClassifierImpl;
+import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.ManeuverClassificationResult;
+import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.ManeuverClassifier;
 
 /**
  * 
@@ -19,7 +19,7 @@ import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.SingleManeuv
  *
  */
 public class SingleTrackManeuverSequenceGraph
-        extends AbstractManeuverSequenceGraphImpl<SingleTrackManeuverNodesLevel, SingleManeuverClassificationResult> {
+        extends AbstractManeuverSequenceGraphImpl<SingleTrackManeuverNodesLevel, ManeuverClassificationResult> {
 
     public SingleTrackManeuverSequenceGraph(BoatClass boatClass, PolarDataService polarService,
             Iterable<CompleteManeuverCurveWithEstimationData> maneuverSequence) {
@@ -28,17 +28,17 @@ public class SingleTrackManeuverSequenceGraph
                 new SameBoatClassBestPathsEvaluator<>());
     }
 
-    private static List<SingleManeuverClassificationResult> getClassificationResults(BoatClass boatClass,
+    private static List<ManeuverClassificationResult> getClassificationResults(BoatClass boatClass,
             PolarDataService polarService, Iterable<CompleteManeuverCurveWithEstimationData> maneuverSequence) {
-        SingleManeuverClassifier singleManeuverClassifier = new RulesBasedSingleManeuverClassifierImpl(boatClass,
+        ManeuverClassifier singleManeuverClassifier = new RulesBasedManeuverClassifierImpl(boatClass,
                 polarService);
-        List<SingleManeuverClassificationResult> result = new ArrayList<>();
+        List<ManeuverClassificationResult> result = new ArrayList<>();
         Iterator<CompleteManeuverCurveWithEstimationData> iterator = maneuverSequence.iterator();
         CompleteManeuverCurveWithEstimationData previousManeuver = null;
         CompleteManeuverCurveWithEstimationData currentManeuver = iterator.hasNext() ? iterator.next() : null;
         while (currentManeuver != null) {
             CompleteManeuverCurveWithEstimationData nextManeuver = iterator.hasNext() ? iterator.next() : null;
-            SingleManeuverClassificationResult classificationResult = singleManeuverClassifier
+            ManeuverClassificationResult classificationResult = singleManeuverClassifier
                     .classifyManeuver(currentManeuver, previousManeuver, nextManeuver);
             result.add(classificationResult);
             previousManeuver = currentManeuver;

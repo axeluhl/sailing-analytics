@@ -31,7 +31,7 @@ public class Helpers {
     public static JSONObject getNestedObjectSafe(JSONObject parent, String fieldName)
             throws JsonDeserializationException {
         Object childObject = parent.get(fieldName);
-        if (!(childObject instanceof JSONObject)) {
+        if (childObject != null && !(childObject instanceof JSONObject)) {
             throw new JsonDeserializationException(String.format("Field %s with %s wasn't a nested JSON object.",
                     fieldName, childObject.toString()));
         }

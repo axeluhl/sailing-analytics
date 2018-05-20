@@ -17,19 +17,19 @@ import com.sap.sse.common.Util.Pair;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class RulesBasedSingleManeuverClassifierImpl implements SingleManeuverClassifier {
+public class RulesBasedManeuverClassifierImpl implements ManeuverClassifier {
 
     private final BoatClass boatClass;
     private final PolarDataService polarService;
     private final boolean hasPolarsForBoatClass;
 
-    public RulesBasedSingleManeuverClassifierImpl(BoatClass boatClass, PolarDataService polarService) {
+    public RulesBasedManeuverClassifierImpl(BoatClass boatClass, PolarDataService polarService) {
         this.boatClass = boatClass;
         this.polarService = polarService;
         this.hasPolarsForBoatClass = polarService.getAllBoatClassesWithPolarSheetsAvailable().contains(boatClass);
     }
 
-    public SingleManeuverClassificationResult classifyManeuver(CompleteManeuverCurveWithEstimationData maneuver,
+    public ManeuverClassificationResult classifyManeuver(CompleteManeuverCurveWithEstimationData maneuver,
             CompleteManeuverCurveWithEstimationData previousManeuver,
             CompleteManeuverCurveWithEstimationData nextManeuver) {
         double[] likelihoodPerManeuverType = new double[CoarseGrainedManeuverType.values().length];
@@ -94,7 +94,7 @@ public class RulesBasedSingleManeuverClassifierImpl implements SingleManeuverCla
         } else {
             Arrays.fill(likelihoodPerManeuverType, 1);
         }
-        return new SingleManeuverClassificationResult(maneuver, likelihoodPerManeuverType, cleanManeuverBeginning,
+        return new ManeuverClassificationResult(maneuver, likelihoodPerManeuverType, cleanManeuverBeginning,
                 cleanManeuverEnd);
     }
 
