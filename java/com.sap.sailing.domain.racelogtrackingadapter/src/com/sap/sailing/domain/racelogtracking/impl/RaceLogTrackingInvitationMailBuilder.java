@@ -236,11 +236,11 @@ class RaceLogTrackingInvitationMailBuilder {
         this.html.append("<br><br><p>").append(textFactory.apply(locale)).append("</p><br>");
     }
 
-    private void addHtmlLink(final String url,
-            final Function<Locale, String> textFactory) {
-        this.html.append(
-                "<div style=\" background-color:#337ab7; border-radius:4px; border:10px solid #337ab7; text-decoration:none;\">");
-        this.html.append("<a href=\"").append(url).append("\" style=\"padding:15px; color:#ffffff; width:200px;\">");
+    private void addHtmlLink(final String url, final Function<Locale, String> textFactory) {
+        this.html.append("<div style=\"padding:0 15px; background-color:#337ab7; border-radius:4px; ")
+                .append("border:10px solid #337ab7; width:200px; color:#fff;\">");
+        this.html.append("<a href=\"").append(url).append("\" ")
+                .append("style=\"padding:15px 0; color:#fff; text-decoration:none;\">");
         this.html.append(textFactory.apply(locale));
         this.html.append("</a>");
         this.html.append("</div>");
