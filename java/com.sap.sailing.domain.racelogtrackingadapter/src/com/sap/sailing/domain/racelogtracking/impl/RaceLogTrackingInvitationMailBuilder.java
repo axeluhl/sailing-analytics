@@ -5,21 +5,26 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Function;
 
+import javax.activation.DataHandler;
 import javax.imageio.ImageIO;
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sse.common.media.MediaTagConstants;
-import com.sap.sse.mail.QRCodeMimeBodyPartSupplier;
-import com.sap.sse.mail.SerializableDefaultMimeBodyPartSupplier;
-import com.sap.sse.mail.SerializableImageMimeBodyPartSupplier;
-import com.sap.sse.mail.SerializableMimeBodyPartSupplier;
 import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.qrcode.QRCodeGenerationUtil;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -37,7 +42,7 @@ class RaceLogTrackingInvitationMailBuilder {
     private static final String IOS_DEEP_LINK_PREFIX = "comsapsailingtracker://";
 
     private final Locale locale;
-    private final List<SerializableMimeBodyPartSupplier> mimeBodyPartSuppliers = new ArrayList<>();
+    private final Map<String,byte[]> pngAttachAndInline = new HashMap<>();
     private final StringBuilder html = new StringBuilder();
     private final StringBuilder text = new StringBuilder();
 
@@ -49,6 +54,51 @@ class RaceLogTrackingInvitationMailBuilder {
 
     RaceLogTrackingInvitationMailBuilder withSubject(final String invitee) {
         this.subject = RaceLogTrackingI18n.trackingInvitationFor(locale, invitee);
+        html.append("<head>");
+        html.append("<style>");
+        html.append("/* Non-Retina */\n" + 
+                "@media screen and (-webkit-max-device-pixel-ratio: 1) {\n" + 
+                "}\n" + 
+                "\n" + 
+                "/* Retina */\n" + 
+                "@media only screen and (-webkit-min-device-pixel-ratio: 1.5),\n" + 
+                "only screen and (-o-min-device-pixel-ratio: 3/2),\n" + 
+                "only screen and (min--moz-device-pixel-ratio: 1.5),\n" + 
+                "only screen and (min-device-pixel-ratio: 1.5) {\n" + 
+                "        .hideOnIOS {\n" + 
+                "                display: none;\n" + 
+                "        }\n" + 
+                "}\n" + 
+                "\n" + 
+                "/* iPhone Portrait */\n" + 
+                "@media screen and (max-device-width: 480px) and (orientation:portrait) {\n" + 
+                "        .hideOnIOS {\n" + 
+                "                display: none;\n" + 
+                "        }\n" + 
+                "} \n" + 
+                "\n" + 
+                "/* iPhone Landscape */\n" + 
+                "@media screen and (max-device-width: 480px) and (orientation:landscape) {\n" + 
+                "        .hideOnIOS {\n" + 
+                "                display: none;\n" + 
+                "        }\n" + 
+                "}\n" + 
+                "\n" + 
+                "/* iPad Portrait */\n" + 
+                "@media screen and (min-device-width: 481px) and (orientation:portrait) {\n" + 
+                "        .hideOnIOS {\n" + 
+                "                display: none;\n" + 
+                "        }\n" + 
+                "}\n" + 
+                "\n" + 
+                "/* iPad Landscape */\n" + 
+                "@media screen and (min-device-width: 481px) and (orientation:landscape) {\n" + 
+                "        .hideOnIOS {\n" + 
+                "                display: none;\n" + 
+                "        }\n" + 
+                "} ");
+        html.append("</style>");
+        html.append("</head>");
         return this;
     }
 
@@ -82,10 +132,7 @@ class RaceLogTrackingInvitationMailBuilder {
                 BufferedImage image = ImageIO.read(is);
                 ImageIO.write(image, "png", baos);
                 String inlineImage = new String(Base64.getEncoder().encodeToString(baos.toByteArray()));
-                String cidSource = "cid:logo";
-                insertImage(cidSource, inlineImage);
-                this.mimeBodyPartSuppliers.add(new SerializableImageMimeBodyPartSupplier(baos.toByteArray(),
-                        "image/png", "<logo>", "logo.png"));
+                insertImage(baos.toByteArray(), "logo", inlineImage);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -101,14 +148,17 @@ class RaceLogTrackingInvitationMailBuilder {
      *            cid image link
      * @param base64Source
      *            inline base64 data url Both are added, because most mail clients are only able to render one of them.
+     * @throws MessagingException 
      */
-    private void insertImage(String cidSource, String inlineImage) {
-        String base64Source = "data:image/png;base64," + inlineImage;
-        this.html.append("<img src='" + base64Source + "'/>");
+    private void insertImage(byte[] cidImage, String cidSource, String inlineImage) throws MessagingException {
+//        String base64Source = "data:image/png;base64," + inlineImage;
+//        this.html.append("<img alt='' class=\"hideOnIOS\" src='" + base64Source + "'/>");
         // outlook can render both types of images, suppress with MS specific conditional the rendering of the cid
-        this.html.append("<!--[if !mso]><!-- -->");
+//        this.html.append("<!--[if !mso]><!-- -->");
         // empty alt text, to supress missing image icons in browsers that cannot render cid, for example thunderbird
-        this.html.append("<img alt='' src='" + cidSource + "'/>");
+        pngAttachAndInline.put(cidSource, cidImage);
+        
+        this.html.append("<img alt='' src='cid:" + cidSource + "'/>");
         // outlook conditional end
         this.html.append("<![endif]-->");
         this.html.append("<br>");
@@ -119,8 +169,7 @@ class RaceLogTrackingInvitationMailBuilder {
             byte[] targetArray = new byte[imageIs.available()];
             imageIs.readFully(targetArray);
             String inlineImage = new String(Base64.getEncoder().encodeToString(targetArray));
-            String cidSource = "cid:image";
-            insertImage(cidSource, inlineImage);
+            insertImage(targetArray, "image", inlineImage);
             this.html.append("<a href=\"" + url + "\">");
             this.html.append(url);
             this.html.append("</a>");
@@ -128,7 +177,7 @@ class RaceLogTrackingInvitationMailBuilder {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        this.mimeBodyPartSuppliers.add(new QRCodeMimeBodyPartSupplier(url));
+        
         this.text.append(url);
         this.text.append(TEXT_LINE_BREAK);
         return this;
@@ -201,11 +250,54 @@ class RaceLogTrackingInvitationMailBuilder {
         return subject;
     }
 
-    SerializableMultipartSupplier getMultipartSupplier() {
-        mimeBodyPartSuppliers.add(0, new SerializableDefaultMimeBodyPartSupplier(html.toString(), "text/html"));
-        mimeBodyPartSuppliers.add(0, new SerializableDefaultMimeBodyPartSupplier(text.toString(), "text/plain"));
-        return new SerializableMultipartSupplier("alternative",
-                mimeBodyPartSuppliers.toArray(new SerializableMimeBodyPartSupplier[mimeBodyPartSuppliers.size()]));
+    SerializableMultipartSupplier getMultipartSupplier() throws MessagingException {
+        MimeMultipart mixed = new MimeMultipart("mixed");
+        MimeBodyPart mixedBody = new MimeBodyPart();
+        mixed.addBodyPart(mixedBody);;
+
+        MimeMultipart alt = new MimeMultipart("alternative");
+        mixedBody.setContent(alt);
+        
+        MimeBodyPart textContent = new MimeBodyPart();
+        textContent.setContent(text.toString(),"text/plain");
+        
+        MimeMultipart related = new MimeMultipart("related");
+        MimeBodyPart relatedBody = new MimeBodyPart();
+        relatedBody.setContent(related);
+        
+        MimeBodyPart htmlPart = new MimeBodyPart();
+        related.addBodyPart(htmlPart);
+        htmlPart.setContent(html.toString(), "text/html");
+        
+        for(Entry<String, byte[]> img:pngAttachAndInline.entrySet()) {
+            ByteArrayDataSource pin = new ByteArrayDataSource(img.getValue(), "image/png");
+            final MimeBodyPart htmlPartImg = new MimeBodyPart();
+            htmlPartImg.setDataHandler(new DataHandler(pin));
+            htmlPartImg.setHeader("Content-ID", "<" + img.getKey() + ">");
+            htmlPartImg.setDisposition("inline;filename=\"" + img.getKey() + "\"");
+            related.addBodyPart(htmlPartImg);
+        }
+        
+        for(Entry<String, byte[]> img:pngAttachAndInline.entrySet()) {
+            ByteArrayDataSource pin = new ByteArrayDataSource(img.getValue(), "image/png");
+            final MimeBodyPart htmlPartImg = new MimeBodyPart();
+            htmlPartImg.setDataHandler(new DataHandler(pin));
+            htmlPartImg.setHeader("Content-ID", "<" + img.getKey() + ">");
+            htmlPartImg.setDisposition(BodyPart.ATTACHMENT);
+            htmlPartImg.setDisposition("attachment;filename=\"" + img.getKey() + ".png\"");
+            
+            mixed.addBodyPart(htmlPartImg);
+        }        
+        
+        alt.addBodyPart(textContent);
+        alt.addBodyPart(relatedBody);
+        
+        return new SerializableMultipartSupplier("keks", null) {
+            @Override
+            public Multipart get() {
+                return mixed;
+            }
+        };
     }
 
     private void addIntroductoryText(final String appName, final String invitee) {
