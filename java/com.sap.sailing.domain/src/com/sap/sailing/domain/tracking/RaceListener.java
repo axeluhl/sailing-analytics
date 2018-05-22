@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
 /**
- * Can be {@link TrackedRegatta#addRaceListener(RaceListener, java.util.Optional) added to} and
+ * Can be {@link TrackedRegatta#addRaceListener(RaceListener, java.util.Optional, boolean) added to} and
  * {@link TrackedRegatta#removeRaceListener(RaceListener) removed from} a {@link TrackedRegatta} to listen for
  * {@link TrackedRace}s being added and removed from the {@link TrackedRegatta}.
  * <p>

@@ -103,7 +103,7 @@ public class RaceTrackerTest {
             @Override
             public void raceRemoved(TrackedRace trackedRace) {
             }
-        }, Optional.empty());
+        }, Optional.empty(), /* synchronous */ false);
         synchronized (trackedRaces) {
             if (trackedRaces[0] == null) {
                 trackedRaces.wait();
