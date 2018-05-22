@@ -13,18 +13,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import javax.activation.DataHandler;
 import javax.imageio.ImageIO;
-import javax.mail.BodyPart;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.util.ByteArrayDataSource;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.mail.SerializableDefaultMimeBodyPartSupplier;
+import com.sap.sse.mail.SerializableFileMimeBodyPartSupplier;
+import com.sap.sse.mail.SerializableMultipartMimeBodyPartSupplier;
 import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.qrcode.QRCodeGenerationUtil;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -198,53 +195,30 @@ class RaceLogTrackingInvitationMailBuilder {
     }
 
     SerializableMultipartSupplier getMultipartSupplier() throws MessagingException {
-        MimeMultipart mixed = new MimeMultipart("mixed");
-        MimeBodyPart mixedBody = new MimeBodyPart();
-        mixed.addBodyPart(mixedBody);;
 
-        MimeMultipart alt = new MimeMultipart("alternative");
-        mixedBody.setContent(alt);
+        final SerializableMultipartSupplier mixedSupplier = new SerializableMultipartSupplier("mixed");
+
+        final SerializableMultipartSupplier alternativeSupplier = new SerializableMultipartSupplier("alternative");
+        mixedSupplier.addBodyPart(new SerializableMultipartMimeBodyPartSupplier(alternativeSupplier));
+
+        alternativeSupplier.addBodyPart(new SerializableDefaultMimeBodyPartSupplier(text.toString(), "text/plain"));
         
-        MimeBodyPart textContent = new MimeBodyPart();
-        textContent.setContent(text.toString(),"text/plain");
+        final SerializableMultipartSupplier relatedSupplier = new SerializableMultipartSupplier("related");
+        alternativeSupplier.addBodyPart(new SerializableMultipartMimeBodyPartSupplier(relatedSupplier));
         
-        MimeMultipart related = new MimeMultipart("related");
-        MimeBodyPart relatedBody = new MimeBodyPart();
-        relatedBody.setContent(related);
+        relatedSupplier.addBodyPart(new SerializableDefaultMimeBodyPartSupplier(html.toString(), "text/html"));
         
-        MimeBodyPart htmlPart = new MimeBodyPart();
-        related.addBodyPart(htmlPart);
-        htmlPart.setContent(html.toString(), "text/html");
-        
-        for(Entry<String, byte[]> img:pngAttachAndInline.entrySet()) {
-            ByteArrayDataSource pin = new ByteArrayDataSource(img.getValue(), "image/png");
-            final MimeBodyPart htmlPartImg = new MimeBodyPart();
-            htmlPartImg.setDataHandler(new DataHandler(pin));
-            htmlPartImg.setHeader("Content-ID", "<" + img.getKey() + ">");
-            htmlPartImg.setDisposition("inline;filename=\"" + img.getKey() + "\"");
-            related.addBodyPart(htmlPartImg);
+        for (Entry<String, byte[]> img : pngAttachAndInline.entrySet()) {
+            final String contentType = "image/png";
+            final String contentId = "<" + img.getKey() + ">";
+            final String filename = img.getKey() + ".png";
+            relatedSupplier.addBodyPart(
+                    new SerializableFileMimeBodyPartSupplier(img.getValue(), contentType, contentId, filename, false));
+            mixedSupplier.addBodyPart(
+                    new SerializableFileMimeBodyPartSupplier(img.getValue(), contentType, contentId, filename, true));
         }
         
-        for(Entry<String, byte[]> img:pngAttachAndInline.entrySet()) {
-            ByteArrayDataSource pin = new ByteArrayDataSource(img.getValue(), "image/png");
-            final MimeBodyPart htmlPartImg = new MimeBodyPart();
-            htmlPartImg.setDataHandler(new DataHandler(pin));
-            htmlPartImg.setHeader("Content-ID", "<" + img.getKey() + ">");
-            htmlPartImg.setDisposition(BodyPart.ATTACHMENT);
-            htmlPartImg.setDisposition("attachment;filename=\"" + img.getKey() + ".png\"");
-            
-            mixed.addBodyPart(htmlPartImg);
-        }        
-        
-        alt.addBodyPart(textContent);
-        alt.addBodyPart(relatedBody);
-        
-        return new SerializableMultipartSupplier("keks", null) {
-            @Override
-            public Multipart get() {
-                return mixed;
-            }
-        };
+        return mixedSupplier;
     }
 
     private void addIntroductoryText(final String appName, final String invitee) {

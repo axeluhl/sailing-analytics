@@ -14,7 +14,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.mail.SerializableDefaultMimeBodyPartSupplier;
-import com.sap.sse.mail.SerializableImageMimeBodyPartSupplier;
+import com.sap.sse.mail.SerializableFileMimeBodyPartSupplier;
 import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.mail.queue.MailNotification;
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
@@ -78,9 +78,11 @@ public abstract class NotificationSetNotification<T> implements MailNotification
             Locale locale = user.getLocaleOrDefault();
             final NotificationMailTemplate mailTemplate = getMailTemplate(objectToNotifyAbout, locale);
             try {
-                final SerializableMultipartSupplier multipartSupplier = new SerializableMultipartSupplier("related", 
-                        new SerializableDefaultMimeBodyPartSupplier(getMailContent(mailTemplate, user, locale), "text/html"),
-                        new SerializableImageMimeBodyPartSupplier(LOGO_BYTES, "image/png", "saplogo", "saplogo.png"));
+                final SerializableMultipartSupplier multipartSupplier = new SerializableMultipartSupplier("related");
+                multipartSupplier.addBodyPart(new SerializableDefaultMimeBodyPartSupplier(
+                        getMailContent(mailTemplate, user, locale), "text/html"));
+                multipartSupplier.addBodyPart(new SerializableFileMimeBodyPartSupplier(LOGO_BYTES, "image/png",
+                        "saplogo", "saplogo.png", false));
                 mailService.sendMail(user.getEmail(), mailTemplate.getSubject(), multipartSupplier);
             } catch (Exception e) {
                 logger.log(Level.SEVERE,
