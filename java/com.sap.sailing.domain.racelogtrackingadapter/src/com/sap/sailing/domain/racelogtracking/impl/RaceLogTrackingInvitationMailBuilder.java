@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -28,8 +27,8 @@ import com.sap.sse.shared.media.ImageDescriptor;
 
 class RaceLogTrackingInvitationMailBuilder {
     /**
-     * We cannot use the system seperator, as the reader might be another OS. This linebreak seems to work reliable over
-     * all systems
+     * System separator can't be used, as the reader might another OS. This linebreak seems to work reliable over all
+     * systems
      */
     private static final String TEXT_LINE_BREAK = "\r\n";
 
@@ -55,12 +54,10 @@ class RaceLogTrackingInvitationMailBuilder {
     }
 
     RaceLogTrackingInvitationMailBuilder addHeadline(final Event event, final Leaderboard leaderboard) {
-        this.html.append("<h1>");
         final String lbdn = leaderboard.getDisplayName() == null ? leaderboard.getName() : leaderboard.getDisplayName();
-        this.html.append(RaceLogTrackingI18n.welcomeTo(locale, event.getName(), lbdn));
-        this.html.append("</h1>");
-        this.text.append(RaceLogTrackingI18n.welcomeTo(locale, event.getName(), lbdn));
-        this.text.append(TEXT_LINE_BREAK);
+        final String welcomeText = RaceLogTrackingI18n.welcomeTo(locale, event.getName(), lbdn);
+        this.html.append("<h1>").append(welcomeText).append("</h1>");
+        this.text.append(welcomeText).append(TEXT_LINE_BREAK);
         return this;
     }
 
@@ -79,12 +76,11 @@ class RaceLogTrackingInvitationMailBuilder {
         if (imagesWithTag != null && !imagesWithTag.isEmpty()) {
             final ImageDescriptor imageDescriptor = imagesWithTag.get(0);
             final String logoUrl = imageDescriptor.getURL().toString();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try (InputStream is = new URL(logoUrl).openStream();) {
                 BufferedImage image = ImageIO.read(is);
                 ImageIO.write(image, "png", baos);
-                String inlineImage = new String(Base64.getEncoder().encodeToString(baos.toByteArray()));
-                insertImage(baos.toByteArray(), "logo", inlineImage);
+                insertImage(baos.toByteArray(), "logo", logoUrl);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -92,38 +88,14 @@ class RaceLogTrackingInvitationMailBuilder {
         return this;
     }
 
-    /**
-     * Inserts a image as both base64 and cid attachment. The caller must ensure the cid attachment is actually added to
-     * the bodypartsuppliers.
-     * 
-     * @param cidSource
-     *            cid image link
-     * @param base64Source
-     *            inline base64 data url Both are added, because most mail clients are only able to render one of them.
-     * @throws MessagingException 
-     */
-    private void insertImage(byte[] cidImage, String cidSource, String inlineImage) throws MessagingException {
-        pngAttachAndInline.put(cidSource, cidImage);
-        this.html.append("<img alt='' src='cid:" + cidSource + "'/>");
-        this.html.append("<br>");
-    }
-
     RaceLogTrackingInvitationMailBuilder addQrCodeImage(final String url) {
         try (DataInputStream imageIs = new DataInputStream(QRCodeGenerationUtil.create(url, 250))) {
             byte[] targetArray = new byte[imageIs.available()];
             imageIs.readFully(targetArray);
-            String inlineImage = new String(Base64.getEncoder().encodeToString(targetArray));
-            insertImage(targetArray, "image", inlineImage);
-            this.html.append("<a href=\"" + url + "\">");
-            this.html.append(url);
-            this.html.append("</a>");
-            this.html.append("<br>");
+            insertImage(targetArray, "qr", url);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        this.text.append(url);
-        this.text.append(TEXT_LINE_BREAK);
         return this;
     }
 
@@ -132,7 +104,7 @@ class RaceLogTrackingInvitationMailBuilder {
         final boolean hasIOSAppUrl = iOSAppUrl != null && !iOSAppUrl.isEmpty();
         final boolean hasAndroidAppUrl = androidAppUrl != null && !androidAppUrl.isEmpty();
         if (hasIOSAppUrl || hasAndroidAppUrl) {
-            this.addSpacingTextBlock(RaceLogTrackingI18n::alternativelyVisitThisLink);
+            this.html.append("<p>").append(RaceLogTrackingI18n.alternativelyVisitThisLink(this.locale)).append("</p>");
         }
         this.html.append("<table border=\"0\" cellspacing=\"20px\" cellpadding=\"0px\">");
         this.html.append("<tr>");
@@ -140,11 +112,13 @@ class RaceLogTrackingInvitationMailBuilder {
             this.html.append("<td>");
             this.addHtmlLink(IOS_DEEP_LINK_PREFIX + targetUrl, RaceLogTrackingI18n::iOSUsers);
             this.html.append("</td>");
+            this.addTextLink(IOS_DEEP_LINK_PREFIX + targetUrl, RaceLogTrackingI18n::iOSUsers);
         }
         if (hasAndroidAppUrl) {
             this.html.append("<td>");
             this.addHtmlLink(targetUrl, RaceLogTrackingI18n::androidUsers);
             this.html.append("</td>");
+            this.addTextLink(targetUrl, RaceLogTrackingI18n::androidUsers);
         }
         this.html.append("</tr>");
         this.html.append("</table>");
@@ -155,7 +129,7 @@ class RaceLogTrackingInvitationMailBuilder {
         final boolean hasIOSAppUrl = iOSAppUrl != null && !iOSAppUrl.isEmpty();
         final boolean hasAndroidAppUrl = androidAppUrl != null && !androidAppUrl.isEmpty();
         if (hasIOSAppUrl || hasAndroidAppUrl) {
-            this.addSpacingTextBlock(RaceLogTrackingI18n::appStoreInstallText);
+            this.html.append("<p>").append(RaceLogTrackingI18n.appStoreInstallText(this.locale)).append("</p>");
             text.append(RaceLogTrackingI18n.appStoreInstallText(locale));
             text.append(TEXT_LINE_BREAK);
         }
@@ -164,29 +138,17 @@ class RaceLogTrackingInvitationMailBuilder {
         if (hasIOSAppUrl) {
             this.html.append("<td>");
             this.addHtmlLink(iOSAppUrl, RaceLogTrackingI18n::appIos);
-            this.addTextLink(iOSAppUrl, RaceLogTrackingI18n::appIos);
             this.html.append("</td>");
+            this.addTextLink(iOSAppUrl, RaceLogTrackingI18n::appIos);
         }
         if (hasAndroidAppUrl) {
             this.html.append("<td>");
             this.addHtmlLink(androidAppUrl, RaceLogTrackingI18n::appAndroid);
-            this.addTextLink(androidAppUrl, RaceLogTrackingI18n::appAndroid);
             this.html.append("</td>");
+            this.addTextLink(androidAppUrl, RaceLogTrackingI18n::appAndroid);
         }
         this.html.append("</tr>");
         this.html.append("</table>");
-        return this;
-    }
-
-    private void addTextLink(String url, final Function<Locale, String> textFactory) {
-        text.append(textFactory.apply(locale));
-        text.append(" ");
-        text.append(url);
-        text.append(TEXT_LINE_BREAK);
-    }
-
-    RaceLogTrackingInvitationMailBuilder addSpacer() {
-        this.html.append("<br><br>");
         return this;
     }
 
@@ -208,32 +170,36 @@ class RaceLogTrackingInvitationMailBuilder {
         
         relatedSupplier.addBodyPart(new SerializableDefaultMimeBodyPartSupplier(html.toString(), "text/html"));
         
-        for (Entry<String, byte[]> img : pngAttachAndInline.entrySet()) {
+        for (Entry<String, byte[]> imageEntry : pngAttachAndInline.entrySet()) {
             final String contentType = "image/png";
-            final String contentId = "<" + img.getKey() + ">";
-            final String filename = img.getKey() + ".png";
-            relatedSupplier.addBodyPart(
-                    new SerializableFileMimeBodyPartSupplier(img.getValue(), contentType, contentId, filename, false));
-            mixedSupplier.addBodyPart(
-                    new SerializableFileMimeBodyPartSupplier(img.getValue(), contentType, contentId, filename, true));
+            final String cid = "<" + imageEntry.getKey() + ">";
+            final String filename = imageEntry.getKey() + ".png";
+            final byte[] img = imageEntry.getValue();
+            relatedSupplier.addBodyPart(new SerializableFileMimeBodyPartSupplier(img, contentType, cid, filename));
+            mixedSupplier.addBodyPart(new SerializableFileMimeBodyPartSupplier(img, contentType, filename));
         }
         
         return mixedSupplier;
     }
 
     private void addIntroductoryText(final String appName, final String invitee) {
-        this.html.append("<p>");
-        this.html.append(RaceLogTrackingI18n.scanQRCodeOrVisitUrlToRegisterAs(locale, appName));
-        this.html.append(" <b>").append(invitee).append("</b>");
-        this.html.append("</p>");
-        this.text.append(RaceLogTrackingI18n.scanQRCodeOrVisitUrlToRegisterAs(locale, appName));
-        this.text.append(" ");
-        this.text.append(invitee);
-        this.text.append(TEXT_LINE_BREAK);
+        final String introText = RaceLogTrackingI18n.scanQRCodeOrVisitUrlToRegisterAs(locale, appName);
+        this.html.append("<p>").append(introText).append(" <b>").append(invitee).append("</b></p>");
+        this.text.append(introText).append(" ").append(invitee).append(TEXT_LINE_BREAK).append(TEXT_LINE_BREAK);
     }
 
-    private void addSpacingTextBlock(final Function<Locale, String> textFactory) {
-        this.html.append("<br><br><p>").append(textFactory.apply(locale)).append("</p><br>");
+    private void insertImage(byte[] cidImage, String cidSource, String alt) {
+        this.pngAttachAndInline.put(cidSource, cidImage);
+        this.html.append("<img alt=\"").append(alt).append("\" src=\"cid:").append(cidSource).append("\"/>");
+        this.html.append("<br>");
+    }
+
+    private void addTextLink(String url, final Function<Locale, String> textFactory) {
+        text.append(textFactory.apply(locale)).append(":");
+        text.append(TEXT_LINE_BREAK);
+        text.append(url);
+        text.append(TEXT_LINE_BREAK);
+        text.append(TEXT_LINE_BREAK);
     }
 
     private void addHtmlLink(final String url, final Function<Locale, String> textFactory) {

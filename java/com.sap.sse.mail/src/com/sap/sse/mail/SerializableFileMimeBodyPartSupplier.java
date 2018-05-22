@@ -9,19 +9,27 @@ import javax.mail.util.ByteArrayDataSource;
 
 public class SerializableFileMimeBodyPartSupplier implements SerializableMimeBodyPartSupplier {
 
-    private static final long serialVersionUID = 5830871801282568701L;
+    private static final long serialVersionUID = 4259007918955254014L;
 
     private final byte[] bytes;
     private final String contentType;
     private final String contentId;
     private final String disposition;
 
-    public SerializableFileMimeBodyPartSupplier(final byte[] bytes, final String contentType, final String contentId,
-            final String filename, final boolean isAttachment) {
+    public SerializableFileMimeBodyPartSupplier(byte[] bytes, String contentType, String filename) {
+        this(bytes, contentType, null, filename, Part.ATTACHMENT);
+    }
+
+    public SerializableFileMimeBodyPartSupplier(byte[] bytes, String contentType, String contentId, String filename) {
+        this(bytes, contentType, contentId, filename, Part.INLINE);
+    }
+
+    private SerializableFileMimeBodyPartSupplier(final byte[] bytes, final String contentType, final String contentId,
+            final String filename, final String presentedAs) {
         this.bytes = bytes;
         this.contentType = contentType;
         this.contentId = contentId;
-        this.disposition = (isAttachment ? Part.ATTACHMENT : Part.INLINE) + ";filename=\"" + filename + "\"";
+        this.disposition = presentedAs + ";filename=\"" + filename + "\"";
     }
 
     @Override

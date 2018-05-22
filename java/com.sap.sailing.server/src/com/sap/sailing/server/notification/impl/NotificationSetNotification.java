@@ -82,7 +82,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
                 multipartSupplier.addBodyPart(new SerializableDefaultMimeBodyPartSupplier(
                         getMailContent(mailTemplate, user, locale), "text/html"));
                 multipartSupplier.addBodyPart(new SerializableFileMimeBodyPartSupplier(LOGO_BYTES, "image/png",
-                        "saplogo", "saplogo.png", false));
+                        "saplogo", "saplogo.png"));
                 mailService.sendMail(user.getEmail(), mailTemplate.getSubject(), multipartSupplier);
             } catch (Exception e) {
                 logger.log(Level.SEVERE,

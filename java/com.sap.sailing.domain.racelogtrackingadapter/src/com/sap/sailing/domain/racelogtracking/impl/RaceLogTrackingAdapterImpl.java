@@ -302,8 +302,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                             .addSailInSightIntroductoryText(competitor.getName()) //
                             .addQrCodeImage(url) //
                             .addOpenInAppTextAndLinks(url, iOSAppUrl, androidAppUrl) //
-                            .addInstallAppTextAndLinks(iOSAppUrl, androidAppUrl) //
-                            .addSpacer();
+                            .addInstallAppTextAndLinks(iOSAppUrl, androidAppUrl);
                     getMailService().sendMail(toAddress, mail.getSubject(), mail.getMultipartSupplier());
                 } catch (MessagingException | MailException | IOException e) {
                     logger.log(Level.SEVERE, "Error while trying to send invitation mail to competitor"
@@ -335,8 +334,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                         .addBuoyPingerIntroductoryText(buoyTender) //
                         .addQrCodeImage(url) //
                         .addOpenInAppTextAndLinks(url, iOSAppUrl, androidAppUrl) //
-                        .addInstallAppTextAndLinks(iOSAppUrl, androidAppUrl) //
-                        .addSpacer();
+                        .addInstallAppTextAndLinks(iOSAppUrl, androidAppUrl);
                 getMailService().sendMail(toAddress, mail.getSubject(), mail.getMultipartSupplier());
             } catch (MessagingException | MailException | IOException e) {
                 logger.log(Level.SEVERE, "Error while trying to send invitation mail to buoy tender "
