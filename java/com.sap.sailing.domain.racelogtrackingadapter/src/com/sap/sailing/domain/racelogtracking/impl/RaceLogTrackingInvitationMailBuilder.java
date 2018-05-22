@@ -54,51 +54,6 @@ class RaceLogTrackingInvitationMailBuilder {
 
     RaceLogTrackingInvitationMailBuilder withSubject(final String invitee) {
         this.subject = RaceLogTrackingI18n.trackingInvitationFor(locale, invitee);
-        html.append("<head>");
-        html.append("<style>");
-        html.append("/* Non-Retina */\n" + 
-                "@media screen and (-webkit-max-device-pixel-ratio: 1) {\n" + 
-                "}\n" + 
-                "\n" + 
-                "/* Retina */\n" + 
-                "@media only screen and (-webkit-min-device-pixel-ratio: 1.5),\n" + 
-                "only screen and (-o-min-device-pixel-ratio: 3/2),\n" + 
-                "only screen and (min--moz-device-pixel-ratio: 1.5),\n" + 
-                "only screen and (min-device-pixel-ratio: 1.5) {\n" + 
-                "        .hideOnIOS {\n" + 
-                "                display: none;\n" + 
-                "        }\n" + 
-                "}\n" + 
-                "\n" + 
-                "/* iPhone Portrait */\n" + 
-                "@media screen and (max-device-width: 480px) and (orientation:portrait) {\n" + 
-                "        .hideOnIOS {\n" + 
-                "                display: none;\n" + 
-                "        }\n" + 
-                "} \n" + 
-                "\n" + 
-                "/* iPhone Landscape */\n" + 
-                "@media screen and (max-device-width: 480px) and (orientation:landscape) {\n" + 
-                "        .hideOnIOS {\n" + 
-                "                display: none;\n" + 
-                "        }\n" + 
-                "}\n" + 
-                "\n" + 
-                "/* iPad Portrait */\n" + 
-                "@media screen and (min-device-width: 481px) and (orientation:portrait) {\n" + 
-                "        .hideOnIOS {\n" + 
-                "                display: none;\n" + 
-                "        }\n" + 
-                "}\n" + 
-                "\n" + 
-                "/* iPad Landscape */\n" + 
-                "@media screen and (min-device-width: 481px) and (orientation:landscape) {\n" + 
-                "        .hideOnIOS {\n" + 
-                "                display: none;\n" + 
-                "        }\n" + 
-                "} ");
-        html.append("</style>");
-        html.append("</head>");
         return this;
     }
 
@@ -151,16 +106,8 @@ class RaceLogTrackingInvitationMailBuilder {
      * @throws MessagingException 
      */
     private void insertImage(byte[] cidImage, String cidSource, String inlineImage) throws MessagingException {
-//        String base64Source = "data:image/png;base64," + inlineImage;
-//        this.html.append("<img alt='' class=\"hideOnIOS\" src='" + base64Source + "'/>");
-        // outlook can render both types of images, suppress with MS specific conditional the rendering of the cid
-//        this.html.append("<!--[if !mso]><!-- -->");
-        // empty alt text, to supress missing image icons in browsers that cannot render cid, for example thunderbird
         pngAttachAndInline.put(cidSource, cidImage);
-        
         this.html.append("<img alt='' src='cid:" + cidSource + "'/>");
-        // outlook conditional end
-        this.html.append("<![endif]-->");
         this.html.append("<br>");
     }
 
