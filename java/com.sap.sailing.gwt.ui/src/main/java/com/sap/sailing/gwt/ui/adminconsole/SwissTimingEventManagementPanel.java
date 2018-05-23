@@ -114,17 +114,14 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         eventIdBox.getElement().getStyle().setWidth(20, Unit.EM);
         connectionsGrid.setWidget(1, 0, new Label("Manage2Sail Event-ID:"));
         connectionsGrid.setWidget(1, 1, eventIdBox);
-
-        eventIdBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                if (eventIdBox.getValue() != "") {
-                    jsonUrlBox.setValue("http://manage2sail.com/api/public/links/event/" + eventIdBox.getValue()
-                            + "?accesstoken=bDAv8CwsTM94ujZ&mediaType=json&includeRaces=true");
-                }
+        
+        eventIdBox.addChangeHandler(event -> {
+            if (eventIdBox.getValue() != "") {
+                jsonUrlBox.setValue("http://manage2sail.com/api/public/links/event/" + eventIdBox.getValue()
+                        + "?accesstoken=bDAv8CwsTM94ujZ&mediaType=json&includeRaces=true");
             }
         });
-        
+
         connectionsGrid.setWidget(2, 0, new Label("Manage2Sail Event-URL (json):"));
         connectionsGrid.setWidget(2, 1, jsonUrlBox);
 
