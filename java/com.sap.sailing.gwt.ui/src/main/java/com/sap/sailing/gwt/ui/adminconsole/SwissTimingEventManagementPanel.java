@@ -60,6 +60,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private final CellTable<SwissTimingRaceRecordDTO> raceTable;
     private final Map<String, SwissTimingConfigurationDTO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
+    private final TextBox eventIdBox;
     private final TextBox jsonUrlBox;
     private final TextBox hostnameTextbox;
     private final IntegerBox portIntegerbox;
@@ -83,7 +84,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         captionPanelConnections.setContentWidget(verticalPanel);
         captionPanelConnections.setStyleName("bold");
 
-        Grid connectionsGrid = new Grid(5, 2);
+        Grid connectionsGrid = new Grid(6, 2);
         verticalPanel.add(connectionsGrid);
         
         previousConfigurations = new HashMap<String, SwissTimingConfigurationDTO>();
@@ -102,26 +103,42 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             }
         });
         fillConfigurations();
-
+        
         jsonUrlBox = new TextBox();
         jsonUrlBox.getElement().getStyle().setWidth(50, Unit.EM);
 
         connectionsGrid.setWidget(0, 0, new Label(stringMessages.swissTimingEvents() + ":"));
         connectionsGrid.setWidget(0, 1, previousConfigurationsComboBox);
-        connectionsGrid.setWidget(1, 0, new Label("Manage2Sail Event-URL (json):"));
-        connectionsGrid.setWidget(1, 1, jsonUrlBox);
+        
+        eventIdBox = new TextBox();
+        eventIdBox.getElement().getStyle().setWidth(20, Unit.EM);
+        connectionsGrid.setWidget(1, 0, new Label("Manage2Sail Event-ID:"));
+        connectionsGrid.setWidget(1, 1, eventIdBox);
+
+        eventIdBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                if (eventIdBox.getValue() != "") {
+                    jsonUrlBox.setValue("http://manage2sail.com/api/public/links/event/" + eventIdBox.getValue()
+                            + "?accesstoken=bDAv8CwsTM94ujZ&mediaType=json&includeRaces=true");
+                }
+            }
+        });
+        
+        connectionsGrid.setWidget(2, 0, new Label("Manage2Sail Event-URL (json):"));
+        connectionsGrid.setWidget(2, 1, jsonUrlBox);
 
         hostnameTextbox = new TextBox();
         portIntegerbox = new IntegerBox();
 
-        connectionsGrid.setWidget(2, 0,  new Label(stringConstants.hostname() + ":"));
-        connectionsGrid.setWidget(2, 1, hostnameTextbox);
+        connectionsGrid.setWidget(3, 0,  new Label(stringConstants.hostname() + ":"));
+        connectionsGrid.setWidget(3, 1, hostnameTextbox);
         
-        connectionsGrid.setWidget(3, 0, new Label(stringConstants.port() + ":"));
-        connectionsGrid.setWidget(3, 1, portIntegerbox);
+        connectionsGrid.setWidget(4, 0, new Label(stringConstants.port() + ":"));
+        connectionsGrid.setWidget(4, 1, portIntegerbox);
 
         Button btnListRaces = new Button(stringConstants.listRaces());
-        connectionsGrid.setWidget(4, 1, btnListRaces);
+        connectionsGrid.setWidget(5, 1, btnListRaces);
         btnListRaces.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
