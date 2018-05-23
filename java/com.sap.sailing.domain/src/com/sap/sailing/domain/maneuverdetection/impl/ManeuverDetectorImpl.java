@@ -206,6 +206,9 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         ManeuverMainCurveDetailsWithBearingSteps mainCurveDetails = computeManeuverMainCurveDetails(
                 maneuverCurve.getMainCurveBoundaries().getTimePointBefore(),
                 maneuver.getMainCurveBoundaries().getTimePointAfter(), maneuver.getToSide());
+        if (mainCurveDetails == null) {
+            return maneuverCurve;
+        }
         ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries = new ManeuverCurveBoundariesImpl(
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore(),
                 maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter(),
