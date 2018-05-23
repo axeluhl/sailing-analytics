@@ -8,13 +8,12 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
-import com.sap.sailing.gwt.autoplay.client.nodes.base.ProvidesDuration;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.video.VideoPlace;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
-public class VideoNode extends FiresPlaceNode implements ProvidesDuration {
+public class VideoNode extends FiresPlaceNode {
     private final AutoPlayClientFactory cf;
     private int lastPlayed = -1;
     private VideoDTO currentVideo = null;
@@ -57,7 +56,7 @@ public class VideoNode extends FiresPlaceNode implements ProvidesDuration {
     }
 
     @Override
-    public void setDurationConsumer(Consumer<Integer> durationConsumer) {
-        this.durationConsumer = durationConsumer;
+    public void customDurationHook(Consumer<Integer> consumer) {
+        this.durationConsumer = consumer;
     }
 }

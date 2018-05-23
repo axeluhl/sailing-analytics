@@ -12,7 +12,6 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
-import com.sap.sailing.gwt.autoplay.client.nodes.base.ProvidesDuration;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleSixtyInchLeaderBoardPlace;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.RaceColumnSelectionStrategies;
@@ -29,7 +28,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode implements ProvidesDuration{
+public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode {
     private static final Logger logger = Logger.getLogger(IdleSixtyInchLeaderBoardNode.class.getName());
     private final AutoPlayClientFactory cf;
     private Timer timer;
@@ -113,9 +112,9 @@ public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode implements Prov
     }
 
     @Override
-    public void setDurationConsumer(Consumer<Integer> durationConsumer) {
-        this.durationConsumer = durationConsumer;
-        this.durationConsumer.accept(600);
+    public void customDurationHook(Consumer<Integer> consumer) {
+        this.durationConsumer = consumer;
     }
+    
 
 }

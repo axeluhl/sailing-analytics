@@ -30,29 +30,25 @@ public class AutoPlayLoopNode extends BaseCompositeNode {
     @Override
     protected void transitionTo(AutoPlayNode nextNode) {
         if (!isStopped()) {
-            if (nextNode instanceof ProvidesDuration) {
-                ProvidesDuration nodeWithDuration = (ProvidesDuration) nextNode;
-                nodeWithDuration.setDurationConsumer(new Consumer<Integer>() {
-                    @Override
-                    public void accept(Integer durationInSeconds) {
+            // default loop transition, might be overridden by hook
+            transitionTimer.schedule(loopTimePerNodeInSeconds * 1000);
+            nextNode.customDurationHook(new Consumer<Integer>() {
+                @Override
+                public void accept(Integer durationInSeconds) {
+                    if (!isStopped()) {
                         GWT.log("Got duration published: " + durationInSeconds);
                         if (durationInSeconds == 0) {
+                            //the node just told us that it is not required and we should switch asap
                             transitionTimer.cancel();
                             gotoNext();
                         } else {
                             transitionTimer.schedule(durationInSeconds * 1000);
                         }
                     }
-                });
-                //give it 30 seconds to submit a delay, if not kill it!
-                if(!transitionTimer.isRunning()) {
-                    transitionTimer.schedule(30000);
                 }
-            } else {
-                transitionTimer.schedule(loopTimePerNodeInSeconds * 1000);
-            }
+            });
+            super.transitionTo(nextNode);
         }
-        super.transitionTo(nextNode);
     }
 
     public AutoPlayLoopNode(String name, int loopTimePerNodeInSeconds, AutoPlayNode... nodes) {
