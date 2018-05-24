@@ -2401,6 +2401,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
             maneuverLossLines = null;
             maneuverLossLinesCheckBoxValueStore = false;
+            maneuverLossInfoOverlay.removeFromMap();
         }
     }
 
@@ -2466,22 +2467,22 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             return "Middle Maneuver Angle";
         }
     };
-    final LineInfoProvider LineInfoProvider1 = new LineInfoProvider() {
+    final LineInfoProvider extrapolatedLineInfoProvider = new LineInfoProvider() {
         @Override
         public String getLineInfo() {
-            return "";
+            return "Extrapolated Maneuver Start Position";
         }
     };
-    final LineInfoProvider LineInfoProvider2 = new LineInfoProvider() {
+    final LineInfoProvider projectedExtrapolatedLineInfoProvider = new LineInfoProvider() {
         @Override
         public String getLineInfo() {
-            return "";
+            return "Projected extrapolated Maneuver Start Position";
         }
     };
-    final LineInfoProvider LineInfoProvider3 = new LineInfoProvider() {
+    final LineInfoProvider projectedManeuverEndLineInfoProvider = new LineInfoProvider() {
         @Override
         public String getLineInfo() {
-            return "";
+            return "Projected Maneuver End Position";
         }
     };
     final LineInfoProvider maneuverLossLineInfoProvider = new LineInfoProvider() {
@@ -2493,13 +2494,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private Set<Polyline> maneuverLossLines;
     private boolean maneuverLossLinesCheckBoxValueStore = false;
+    private SmallTransparentInfoOverlay maneuverLossInfoOverlay;
     private void visualizeManeuver(ManeuverDTO maneuver, boolean showManeuverVisualization) {
         if (showManeuverVisualization == false) {
             for (Polyline maneuverLossLine : maneuverLossLines) {
                 maneuverLossLine.setMap((MapWidget) null);
             }
             maneuverLossLines = null;
-            maneuverLossLinesCheckBoxValueStore = false;
+            maneuverLossLinesCheckBoxValueStore = false; 
+            maneuverLossInfoOverlay.removeFromMap();
         } else {
             createManeuverLossLines(maneuver);
         }
@@ -2526,17 +2529,25 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true,
                 intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, projectedManeuverEndPosition,
                 middleManeuverAngleLineInfoProvider, "#ffffff"));
-        maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true,
-                intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, projectedManeuverEndPosition,
-                middleManeuverAngleLineInfoProvider, "#ffffff"));
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, maneuver.maneuverLoss.maneuverStartPosition,
-                extrapolatedManeuverStartPosition, LineInfoProvider1, "#ffffff"));
+                extrapolatedManeuverStartPosition, extrapolatedLineInfoProvider, "#ffffff"));
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, extrapolatedManeuverStartPosition,
-                projectedExtrapolatedManeuverStartPosition, LineInfoProvider2, "#FFFF00"));
+                projectedExtrapolatedManeuverStartPosition, projectedExtrapolatedLineInfoProvider, "#FFFF00"));
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, maneuver.maneuverLoss.maneuverEndPosition,
-                projectedManeuverEndPosition, LineInfoProvider3, "#FFFF00"));
+                projectedManeuverEndPosition, projectedManeuverEndLineInfoProvider, "#FFFF00"));
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, projectedExtrapolatedManeuverStartPosition,
                 projectedManeuverEndPosition, maneuverLossLineInfoProvider, color));
+        StringBuilder sb = new StringBuilder();
+        sb.append(maneuverLossLineInfoProvider.getLineInfo() + ": ");
+        sb.append(numberFormatOneDecimal.format(maneuver.maneuverLossInMeters) + " " + stringMessages.metersUnit());
+        sb.append('\n');
+        sb.append("Maneuver Angle" + ": ");
+        sb.append(numberFormatOneDecimal.format(maneuver.directionChangeInDegrees) + " " + stringMessages.degreesUnit());
+        maneuverLossInfoOverlay = new SmallTransparentInfoOverlay((MapWidget) map,
+                RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, sb.toString(), coordinateSystem);
+        maneuverLossInfoOverlay.setPosition(projectedManeuverEndPosition.translateGreatCircle(middleManeuverAngle,
+                new MeterDistance(maneuver.maneuverLossInMeters / 2)), -1);
+        maneuverLossInfoOverlay.draw();
         for (Polyline maneuverLossLine : maneuverLossLines) {
             PolylineOptions options = PolylineOptions.newInstance();
             options.setStrokeOpacity(0.5);
