@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.Timer;
 
 public class AutoPlayLoopNode extends BaseCompositeNode {
@@ -36,7 +35,6 @@ public class AutoPlayLoopNode extends BaseCompositeNode {
                 @Override
                 public void accept(Integer durationInSeconds) {
                     if (!isStopped()) {
-                        GWT.log("Got duration published: " + durationInSeconds);
                         if (durationInSeconds == 0) {
                             //the node just told us that it is not required and we should switch asap
                             transitionTimer.cancel();

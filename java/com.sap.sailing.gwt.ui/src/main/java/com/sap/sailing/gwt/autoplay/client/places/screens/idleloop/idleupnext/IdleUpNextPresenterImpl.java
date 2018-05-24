@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -105,7 +104,6 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
                 Random r = new Random();
                 selected = r.nextInt(usedImages.size());
             }
-            GWT.log("Selecting " + (selected+1) + " from " + usedImages.size());
             ImageDTO imageToUseDTO = usedImages.get(selected);
             if (imageToUseDTO != null) {
                 final StringBuilder thumbnailUrlBuilder = new StringBuilder("url('");

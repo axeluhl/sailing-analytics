@@ -4,7 +4,6 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.places.autoplaystart.AutoPlayStartPlace;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
@@ -51,9 +50,6 @@ public class AutoPlayClientFactoryImpl extends AutoPlayClientFactoryBase {
 
     @Override
     public AutoPlayContext getAutoPlayCtx() {
-        if (currentContext == null) {
-            getEventBus().fireEvent(new AutoPlayFailureEvent("No autoplay context found"));
-        }
         return currentContext;
     }
 

@@ -93,7 +93,9 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
         leaderboardPanel.getLeaderboardTable().getElement().getStyle().setMarginTop(0, Unit.PX);
 //        Widget toolbarPanel = leaderboardPanel.createToolbarPanel();
 //        .setFooterWidget(toolbarPanel);
-        leaderboardPanel.playPause.setVisible(false);
+        if(leaderboardPanel.playPause != null) {
+            leaderboardPanel.playPause.setVisible(false);
+        }
         leaderboardPanel.updateToolbar(laterInit);
         ready = true;
     }

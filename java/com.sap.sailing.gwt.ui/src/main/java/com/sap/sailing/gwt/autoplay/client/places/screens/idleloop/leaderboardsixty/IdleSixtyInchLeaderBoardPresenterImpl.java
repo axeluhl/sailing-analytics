@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -90,7 +89,6 @@ public class IdleSixtyInchLeaderBoardPresenterImpl extends AutoPlayPresenterConf
             }
         } catch (Exception e) {
             // ensure that the loop keeps running, no matter if errors occur
-            GWT.debugger();
             selected = 0;
             selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
         }

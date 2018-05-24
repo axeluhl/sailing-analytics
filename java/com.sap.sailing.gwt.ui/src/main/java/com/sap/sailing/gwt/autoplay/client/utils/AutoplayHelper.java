@@ -74,17 +74,19 @@ public class AutoplayHelper {
                 errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 10000);
 
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard(event, leaderBoardName);
-        for (RaceColumnDTO race : selectedLeaderboard.getRaceList()) {
-            for (FleetDTO fleet : race.getFleets()) {
-                RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
-                if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
-                    raceTimesInfoProvider.addRaceIdentifier(raceIdentifier, false);
+        if (selectedLeaderboard != null) {
+            for (RaceColumnDTO race : selectedLeaderboard.getRaceList()) {
+                for (FleetDTO fleet : race.getFleets()) {
+                    RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
+                    if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
+                        raceTimesInfoProvider.addRaceIdentifier(raceIdentifier, false);
+                    }
                 }
             }
         }
         if (raceTimesInfoProvider.getRaceIdentifiers().isEmpty()) {
-            throw new IllegalStateException(
-                    "No raceidentifier was found, cannot determine currently LifeRace, check event configuration");
+            GWT.log("No raceidentifier was found, cannot determine currently LifeRace, check event configuration");
+            callback.onSuccess(null);
         }
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(new RaceTimesInfoProviderListener() {
             @Override

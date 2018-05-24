@@ -53,11 +53,13 @@ public class IdleUpNextNode extends FiresPlaceNode {
 
         StrippedLeaderboardDTO selectedLeaderboard = AutoplayHelper.getSelectedLeaderboard(
                 cf.getAutoPlayCtx().getEvent(), cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName());
-        for (RaceColumnDTO race : selectedLeaderboard.getRaceList()) {
-            for (FleetDTO fleet : race.getFleets()) {
-                RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
-                if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
-                    raceTimesInfoProvider.addRaceIdentifier(raceIdentifier, false);
+        if (selectedLeaderboard != null) {
+            for (RaceColumnDTO race : selectedLeaderboard.getRaceList()) {
+                for (FleetDTO fleet : race.getFleets()) {
+                    RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
+                    if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
+                        raceTimesInfoProvider.addRaceIdentifier(raceIdentifier, false);
+                    }
                 }
             }
         }

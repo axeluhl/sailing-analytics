@@ -106,11 +106,12 @@ public abstract class RootNodeBase extends BaseCompositeNode {
 
                             boolean comingFromLiveRace = currentLiveRace != null || currentPreLiveRace != null;
 
-                            log("No live race found, " + (!comingFromLiveRace ? "not " : "") + "coming from live race");
-
-                            setCurrentState(false, null,
-                                    comingFromLiveRace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE, currentState);
-
+                            if (comingFromLiveRace) {
+                                log("No live race found, coming from live race");
+                                setCurrentState(false, null, RootNodeState.AFTER_LIVE, currentState);
+                            } else {
+                                setCurrentState(false, null, RootNodeState.IDLE, currentState);
+                            }
                         } else {
 
                             final Long timeToRaceStartInMs = result.getA();
@@ -122,7 +123,6 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                                 log("Received different live race, hard switching to AFTER_LIVE race");
                                 setCurrentState(isPreLiveRace, loadedLiveRace, RootNodeState.AFTER_LIVE, currentState);
                             } else {
-
                                 log("New " + (isPreLiveRace ? "live " : "pre live") + " race found: " + loadedLiveRace
                                         + " starting in " + (timeToRaceStartInMs / 1000) + "s");
 
@@ -161,8 +161,6 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                 log("Switching to state " + goingTo + " coming from " + comingFrom);
                 this.currentState = goingTo;
             }
-        } else {
-            log("Transition to same autoplay state, skipping");
         }
     }
 

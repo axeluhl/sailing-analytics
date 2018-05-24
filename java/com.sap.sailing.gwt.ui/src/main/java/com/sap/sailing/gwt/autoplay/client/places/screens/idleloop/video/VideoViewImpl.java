@@ -58,7 +58,6 @@ public class VideoViewImpl extends Composite implements VideoView {
             public boolean execute() {
                 if (player.isVisible() && mainPanelUi.isAttached()) {
                     int duration = player.getDuration();
-                    GWT.log("player reports duration of " + duration);
                     if (duration > 0) {
                         // prevent autoplay from only playing videos, if a very long video is tagged, adjust if
                         // necessary
