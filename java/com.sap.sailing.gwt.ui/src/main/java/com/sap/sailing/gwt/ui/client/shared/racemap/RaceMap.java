@@ -2220,25 +2220,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             HorizontalPanel hPanel = new HorizontalPanel();
             hPanel.add(maneuverLossWidget);
             hPanel.add(maneuverLossLinesCheckBox);
-            vPanel.add(hPanel);
-
-            
-//          Button visualizeManeuverButton1 = new Button("Show");
-//          visualizeManeuverButton1.addClickHandler(new ClickHandler() {
-//              @Override
-//              public void onClick(ClickEvent event) {
-//                  visualizeManeuver(maneuver, true);
-//              }
-//          });
-//          Button visualizeManeuverButton2 = new Button("Dont");
-//          visualizeManeuverButton2.addClickHandler(new ClickHandler() {
-//              @Override
-//              public void onClick(ClickEvent event) {
-//                  visualizeManeuver(maneuver, false);
-//              }
-//          });
-//            vPanel.add(visualizeManeuverButton1);
-//            vPanel.add(visualizeManeuverButton2);            
+            vPanel.add(hPanel);           
         }
         if (maneuver.markPassingTimePoint != null) {
             vPanel.add(
