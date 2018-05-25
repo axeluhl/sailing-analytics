@@ -12,7 +12,6 @@ public class ManeuverLossDTO implements IsSerializable {
     public Duration maneuverDuration;
     
     public ManeuverLossDTO() {
-        
     }
 
     public ManeuverLossDTO(Position maneuverStartPosition, Position maneuverEndPosition,
@@ -23,7 +22,4 @@ public class ManeuverLossDTO implements IsSerializable {
         this.middleManeuverAngle = middleManeuverAngle;
         this.maneuverDuration = maneuverDuration;
     }
-    
-    
-
 }
