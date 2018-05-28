@@ -36,9 +36,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
 
     @Override
     public final void onStart() {
-        if (cf.getAutoPlayCtxSignalError() == null || //
-                cf.getAutoPlayCtxSignalError().getContextDefinition() == null//
-        ) {
+        if (!cf.isConfigured()) {
             backToConfig();
             return;
         }
