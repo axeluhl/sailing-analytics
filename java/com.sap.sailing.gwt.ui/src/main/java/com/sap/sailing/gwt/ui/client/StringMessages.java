@@ -916,7 +916,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String outlierMinimumNeighborhoodPctString();
     String oneOrMoreParametersAreEmpty();
     String errorWhileAddingSeriesToChart();
-    String generatingPolarSheet();
+    String generatingPolarSheet();    
     String dataCount();
     String generationFinished();
     String generating();
@@ -1455,7 +1455,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceOffice();
     String polarResultsPresenter();
     String maneuverSpeedDetailsResultsPresenter();
-    String numberPairResultsPresenter();
     String actionWatch();
     String actionAnalyze();
     String inviteSelectedCompetitors();

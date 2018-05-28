@@ -27,6 +27,7 @@ import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.PairWithStats;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.ui.client.presentation.AbstractResultsPresenter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
@@ -38,7 +39,7 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
     private final Map<GroupKey, Series> seriesMappedByGroupKey;
 
     public NumberPairResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
-        super(parent, context, stringMessages);
+        super(parent, context);
         seriesMappedByGroupKey = new HashMap<>();
         chartPanel = new SimpleLayoutPanel() {
             @Override
@@ -61,7 +62,7 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
                 .setBorderColor(new Color("#F0AB00"))
                 .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
-                .setChartTitle(new ChartTitle().setText(getStringMessages().dataMiningResult()));
+                .setChartTitle(new ChartTitle().setText(getDataMiningStringMessages().dataMiningResult()));
         chart.setExporting(new Exporting().setEnabled(false));
         chart.getXAxis().setAllowDecimals(false);
         chart.getYAxis().setAxisTitleText("");
@@ -127,7 +128,7 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
 
     @Override
     public String getLocalizedShortName() {
-        return getStringMessages().numberPairResultsPresenter();
+        return getDataMiningStringMessages().numberPairResultsPresenter();
     }
 
     @Override

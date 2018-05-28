@@ -26,31 +26,31 @@ public class TabbedSailingResultsPresenter extends AbstractTabbedResultsPresente
             if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarAggregation")) {
                 CloseableTabHeader oldHeader = getSelectedHeader();
                 addTabAndFocus(
-                        new PolarResultsPresenter(TabbedResultsPresenter.this, getComponentContext(), stringMessages));
+                        new PolarResultsPresenter(TabbedSailingResultsPresenter.this, getComponentContext(), stringMessages));
                 removeTab(oldHeader);
             } else if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarBackendData")) {
                 CloseableTabHeader oldHeader = getSelectedHeader();
-                addTabAndFocus(new PolarBackendResultsPresenter(TabbedResultsPresenter.this, getComponentContext(),
+                addTabAndFocus(new PolarBackendResultsPresenter(TabbedSailingResultsPresenter.this, getComponentContext(),
                         stringMessages));
                 removeTab(oldHeader);
             } else if (result.getResultType()
                     .equals("com.sap.sailing.datamining.shared.ManeuverSpeedDetailsAggregation")) {
                 CloseableTabHeader oldHeader = getSelectedHeader();
-                addTabAndFocus(new ManeuverSpeedDetailsResultsPresenter(TabbedResultsPresenter.this,
+                addTabAndFocus(new ManeuverSpeedDetailsResultsPresenter(TabbedSailingResultsPresenter.this,
                         getComponentContext(), stringMessages));
                 removeTab(oldHeader);
             } 
             else if (result.getResultType()
                     .equals("com.sap.sse.datamining.shared.data.PairWithStats")) {
                 CloseableTabHeader oldHeader = getSelectedHeader();
-                addTabAndFocus(new NumberPairResultsPresenter(TabbedResultsPresenter.this,
+                addTabAndFocus(new NumberPairResultsPresenter(TabbedSailingResultsPresenter.this,
                         getComponentContext(), stringMessages));
                 removeTab(oldHeader);
             }
             else {
                 if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
                     CloseableTabHeader oldHeader = getSelectedHeader();
-                    addTabAndFocus(new MultiResultsPresenter(this, getComponentContext(), drillDownCallback, stringMessages));
+                    addTabAndFocus(new MultiResultsPresenter(this, getComponentContext(), drillDownCallback));
                     removeTab(oldHeader);
                 }
             }

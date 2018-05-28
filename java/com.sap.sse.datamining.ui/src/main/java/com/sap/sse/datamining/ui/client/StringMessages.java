@@ -48,8 +48,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String noStatisticSelectedError();
     String calculateThe();
     String statisticProvider();
-    String groupingProvider();
-    String clearSelection();
+    String groupingProvider();    
     String basedOn();
     String chooseDifferentDimensionTitle();
     String chooseDifferentDimensionMessage();
@@ -58,4 +57,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String dataMiningRetrieval();
     String tabbedResultsPresenter();
     String useStringLiterals();
+    String numberPairResultsPresenter();
 }
