@@ -73,9 +73,6 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
     }
 
     protected void updateEventImage() {
-        if (getClientFactory().getAutoPlayCtxSignalError() == null || getClientFactory().getAutoPlayCtxSignalError().getEvent() == null) {
-            return;
-        }
         List<ImageDTO> teaserHighlight = new ArrayList<>();
         List<ImageDTO> bigScreenImages = new ArrayList<>();
         for (ImageDTO imageDTO : getSlideCtx().getEvent().getImages()) {
