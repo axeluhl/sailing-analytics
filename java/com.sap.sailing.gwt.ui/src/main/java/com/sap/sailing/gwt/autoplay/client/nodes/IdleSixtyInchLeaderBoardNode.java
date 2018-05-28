@@ -61,7 +61,7 @@ public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode {
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
-        String leaderBoard = cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName();
+        String leaderBoard = cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName();
 
         CompetitorSelectionProvider provider = new CompetitorSelectionModel(true);
 
@@ -99,8 +99,8 @@ public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode {
                 durationConsumer);
         setPlaceToGo(place);
         firePlaceChangeAndStartTimer();
-        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getEvent().getName(),
-                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName()));
+        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtxSignalError().getEvent().getName(),
+                cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName()));
     }
 
     @Override

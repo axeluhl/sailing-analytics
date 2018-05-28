@@ -26,7 +26,7 @@ public class VideoNode extends FiresPlaceNode {
 
     @Override
     public void onStart() {
-        EventDTO event = cf.getAutoPlayCtx().getEvent();
+        EventDTO event = cf.getAutoPlayCtxSignalError().getEvent();
 
         List<VideoDTO> videos = event.getVideos().stream().filter(v -> v.hasTag(MediaTagConstants.BIGSCREEN))
                 .collect(Collectors.toList());

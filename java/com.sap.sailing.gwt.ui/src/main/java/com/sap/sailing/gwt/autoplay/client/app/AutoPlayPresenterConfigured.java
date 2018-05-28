@@ -21,7 +21,7 @@ public abstract class AutoPlayPresenterConfigured<P extends Place> extends AutoP
     public final void start(AcceptsOneWidget panel, EventBus eventBus) {
         this.eventBus = eventBus;
         try {
-            if (getClientFactory().getAutoPlayCtx() != null && getClientFactory().getAutoPlayCtx().getEvent() != null) {
+            if (getClientFactory().isConfigured()) {
                 try {
                     startConfigured(panel);
                 } catch (Exception e) {

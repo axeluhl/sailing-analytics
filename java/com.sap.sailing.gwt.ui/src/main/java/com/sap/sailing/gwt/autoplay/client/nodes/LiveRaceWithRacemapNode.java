@@ -34,8 +34,8 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
     public void onStart() {
         place = new LiveRaceWithRacemapAndLeaderBoardPlace();
         AutoplayHelper.create(cf.getSailingService(), cf.getErrorReporter(),
-                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), cf.getAutoPlayCtx().getContextDefinition().getEventId(),
-                cf.getAutoPlayCtx().getEvent(), cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtx().getLiveRace(),
+                cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName(), cf.getAutoPlayCtxSignalError().getContextDefinition().getEventId(),
+                cf.getAutoPlayCtxSignalError().getEvent(), cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtxSignalError().getLiveRace(),
                 new AsyncCallback<RVWrapper>() {
 
                     @Override
@@ -52,8 +52,8 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
                         place.setRaceMap(result.raceboardPerspective, result.csel,result.raceboardTimer,result.creationTimeProvider);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
-                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getLiveRace().getRegattaName(),
-                                cf.getAutoPlayCtx().getLiveRace().getRaceName()));
+                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtxSignalError().getLiveRace().getRegattaName(),
+                                cf.getAutoPlayCtxSignalError().getLiveRace().getRaceName()));
                     }
                 });
         
@@ -63,7 +63,7 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
 
             @Override
             public void run() {
-                cf.getDispatch().execute(new GetSixtyInchStatisticAction(cf.getAutoPlayCtx().getLiveRace().getRaceName(), cf.getAutoPlayCtx().getLiveRace().getRegattaName()),
+                cf.getDispatch().execute(new GetSixtyInchStatisticAction(cf.getAutoPlayCtxSignalError().getLiveRace().getRaceName(), cf.getAutoPlayCtxSignalError().getLiveRace().getRegattaName()),
                         new AsyncCallback<GetSixtyInchStatisticDTO>() {
 
                             @Override

@@ -18,7 +18,7 @@ public class PreLiveRaceLeaderBoardWithCompetitorsNode extends FiresPlaceNode {
         AbstractPreRaceLeaderBoardWithImagePlace place = new PreRaceLeaderBoardWithCompetitorPlace();
         setPlaceToGo(place);
         firePlaceChangeAndStartTimer();
-        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getPreLiveRace().getRegattaName(),
-                cf.getAutoPlayCtx().getPreLiveRace().getRaceName()));
+        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtxSignalError().getPreLiveRace().getRegattaName(),
+                cf.getAutoPlayCtxSignalError().getPreLiveRace().getRaceName()));
     };
 }

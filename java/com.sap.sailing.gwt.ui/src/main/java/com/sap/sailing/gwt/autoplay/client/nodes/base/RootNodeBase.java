@@ -36,8 +36,8 @@ public abstract class RootNodeBase extends BaseCompositeNode {
 
     @Override
     public final void onStart() {
-        if (cf.getAutoPlayCtx() == null || //
-                cf.getAutoPlayCtx().getContextDefinition() == null//
+        if (cf.getAutoPlayCtxSignalError() == null || //
+                cf.getAutoPlayCtxSignalError().getContextDefinition() == null//
         ) {
             backToConfig();
             return;
@@ -59,7 +59,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
     private void doCheck() {
         // start next update, to ensure it is done no matter any error cases
         checkTimer.schedule(UPDATE_STATE_TIMER);
-        final UUID eventUUID = cf.getAutoPlayCtx().getContextDefinition().getEventId();
+        final UUID eventUUID = cf.getAutoPlayCtxSignalError().getContextDefinition().getEventId();
         cf.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
 
             @Override
@@ -72,7 +72,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                     cf.getEventBus().fireEvent(hE);
                     firstTimeEventLoaded = false;
                 }
-                cf.getAutoPlayCtx().updateEvent(event);
+                cf.getAutoPlayCtxSignalError().updateEvent(event);
                 if (event.isFinished() || event.isRunning()) {
                     _doCheck();
                 } else {
@@ -90,11 +90,11 @@ public abstract class RootNodeBase extends BaseCompositeNode {
     }
 
     private void _doCheck() {
-        final RegattaAndRaceIdentifier currentPreLiveRace = cf.getAutoPlayCtx().getPreLiveRace();
-        final RegattaAndRaceIdentifier currentLiveRace = cf.getAutoPlayCtx().getLiveRace();
+        final RegattaAndRaceIdentifier currentPreLiveRace = cf.getAutoPlayCtxSignalError().getPreLiveRace();
+        final RegattaAndRaceIdentifier currentLiveRace = cf.getAutoPlayCtxSignalError().getLiveRace();
 
-        this.leaderBoardName = cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName();
-        AutoplayHelper.getLiveRace(cf.getSailingService(), cf.getErrorReporter(), cf.getAutoPlayCtx().getEvent(),
+        this.leaderBoardName = cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName();
+        AutoplayHelper.getLiveRace(cf.getSailingService(), cf.getErrorReporter(), cf.getAutoPlayCtxSignalError().getEvent(),
                 leaderBoardName, cf.getDispatch(), getWaitTimeAfterRaceEndInMillis(),
                 getSwitchBeforeRaceStartInMillis(), new AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>>() {
                     @Override

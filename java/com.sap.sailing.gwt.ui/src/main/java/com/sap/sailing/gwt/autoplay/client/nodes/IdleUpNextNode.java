@@ -34,7 +34,7 @@ public class IdleUpNextNode extends FiresPlaceNode {
 
     @Override
     public void onStart() {
-        String eventName = cf.getAutoPlayCtx().getEvent().getName();
+        String eventName = cf.getAutoPlayCtxSignalError().getEvent().getName();
         getBus().fireEvent(new AutoPlayHeaderEvent(eventName, ""));
         setPlaceToGo(place);
         firePlaceChangeAndStartTimer();
@@ -52,7 +52,7 @@ public class IdleUpNextNode extends FiresPlaceNode {
                 cf.getErrorReporter(), new ArrayList<RegattaAndRaceIdentifier>(), 10000l);
 
         StrippedLeaderboardDTO selectedLeaderboard = AutoplayHelper.getSelectedLeaderboard(
-                cf.getAutoPlayCtx().getEvent(), cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName());
+                cf.getAutoPlayCtxSignalError().getEvent(), cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName());
         if (selectedLeaderboard != null) {
             for (RaceColumnDTO race : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : race.getFleets()) {

@@ -22,7 +22,7 @@ public class RootNodeClassic extends RootNodeBase {
 
     protected boolean processStateTransition(RegattaAndRaceIdentifier currentPreLiveRace,
             RegattaAndRaceIdentifier currentLiveRace, RootNodeState goingTo, RootNodeState comingFrom) {
-        getClientFactory().getAutoPlayCtx().updateLiveRace(currentPreLiveRace, currentLiveRace);
+        getClientFactory().getAutoPlayCtxSignalError().updateLiveRace(currentPreLiveRace, currentLiveRace);
         switch (goingTo) {
         case PRE_EVENT:
             transitionTo(preEvent);
@@ -41,9 +41,9 @@ public class RootNodeClassic extends RootNodeBase {
 
     protected void processFailure(FailureEvent event) {
         AutoPlayClientFactory cf = getClientFactory();
-        if (cf.getAutoPlayCtx() == null || //
-                cf.getAutoPlayCtx().getContextDefinition() == null || //
-                cf.getAutoPlayCtx().getEvent() == null //
+        if (cf.getAutoPlayCtxSignalError() == null || //
+                cf.getAutoPlayCtxSignalError().getContextDefinition() == null || //
+                cf.getAutoPlayCtxSignalError().getEvent() == null //
         ) {
             backToConfig();
             return;
@@ -56,13 +56,13 @@ public class RootNodeClassic extends RootNodeBase {
 
     @Override
     protected long getSwitchBeforeRaceStartInMillis() {
-        AutoplayPerspectiveOwnSettings ownSettings = getClientFactory().getAutoPlayCtx().getAutoplaySettings().getPerspectiveOwnSettings();
+        AutoplayPerspectiveOwnSettings ownSettings = getClientFactory().getAutoPlayCtxSignalError().getAutoplaySettings().getPerspectiveOwnSettings();
         return ownSettings.getTimeToSwitchBeforeRaceStartInSeconds() * 1000;
     }
 
     @Override
     protected long getWaitTimeAfterRaceEndInMillis() {
-        AutoplayPerspectiveOwnSettings ownSettings = getClientFactory().getAutoPlayCtx().getAutoplaySettings().getPerspectiveOwnSettings();
+        AutoplayPerspectiveOwnSettings ownSettings = getClientFactory().getAutoPlayCtxSignalError().getAutoplaySettings().getPerspectiveOwnSettings();
         return ownSettings.getWaitTimeAfterRaceEndInSeconds() * 1000;
     }
 

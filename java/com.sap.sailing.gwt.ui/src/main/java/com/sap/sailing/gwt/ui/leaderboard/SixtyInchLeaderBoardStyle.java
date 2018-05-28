@@ -91,8 +91,6 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
     public void afterConstructorHook(LeaderboardPanel<?> leaderboardPanel) {
         this.leaderBoardPanel = leaderboardPanel;
         leaderboardPanel.getLeaderboardTable().getElement().getStyle().setMarginTop(0, Unit.PX);
-//        Widget toolbarPanel = leaderboardPanel.createToolbarPanel();
-//        .setFooterWidget(toolbarPanel);
         if(leaderboardPanel.playPause != null) {
             leaderboardPanel.playPause.setVisible(false);
         }
@@ -120,8 +118,6 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
     @Override
     public void hookLeaderBoardAttachment(FlowPanel contentPanel,
             FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO> leaderboardTable) {
-//        contentPanel.clear();
-//        contentPanel.getElement().getStyle().setPosition(Position.STATIC);
         SimplePanel wrapper = new SimplePanel(leaderboardTable);
         contentPanel.add(wrapper);
         Style style = wrapper.getElement().getStyle();

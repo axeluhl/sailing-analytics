@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -44,6 +45,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 public class AutoplayHelper {
+    private static final Logger LOGGER = Logger.getLogger(AutoplayHelper.class.getName());
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     private static Timer fastCurrentTimeProvider = new Timer(PlayModes.Live,
             /* delayBetweenAutoAdvancesInMilliseconds */1000l);
@@ -85,7 +87,7 @@ public class AutoplayHelper {
             }
         }
         if (raceTimesInfoProvider.getRaceIdentifiers().isEmpty()) {
-            GWT.log("No raceidentifier was found, cannot determine currently LifeRace, check event configuration");
+            LOGGER.severe("No raceidentifier was found, cannot determine currently LifeRace, check event configuration");
             callback.onSuccess(null);
         }
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(new RaceTimesInfoProviderListener() {
@@ -178,7 +180,7 @@ public class AutoplayHelper {
     public static void create(SailingServiceAsync sailingService, ErrorReporter errorReporter, String leaderBoardName,
             UUID eventId, EventDTO event, EventBus eventBus, SailingDispatchSystem sailingDispatchSystem,
             RegattaAndRaceIdentifier regattaAndRaceIdentifier, AsyncCallback<RVWrapper> callback) {
-        GWT.log("Creating map for " + regattaAndRaceIdentifier);
+        LOGGER.severe("Creating map for " + regattaAndRaceIdentifier);
         Timer creationTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
 
         creationTimer.setLivePlayDelayInMillis(1000);

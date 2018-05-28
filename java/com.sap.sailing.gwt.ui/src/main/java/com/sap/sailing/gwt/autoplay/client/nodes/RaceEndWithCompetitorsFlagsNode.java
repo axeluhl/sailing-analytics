@@ -22,7 +22,7 @@ public class RaceEndWithCompetitorsFlagsNode extends FiresPlaceNode {
     public void onStart() {
         RaceEndWithCompetitorFlagsPlace place = new RaceEndWithCompetitorFlagsPlace();
 
-        RegattaAndRaceIdentifier lastRace = cf.getAutoPlayCtx().getLastRace();
+        RegattaAndRaceIdentifier lastRace = cf.getAutoPlayCtxSignalError().getLastRace();
         place.setLifeRace(lastRace);
         setPlaceToGo(place);
 
