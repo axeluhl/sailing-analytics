@@ -80,7 +80,6 @@ public class SortedCellTable<T> extends BaseCelltable<T> {
                     ascending = defaultSortOrderMap.get(column);
                     comparator.setAscending(ascending);
                 }
-                
                 sortColumn(column, comparator, ascending);
             }
 
@@ -89,7 +88,6 @@ public class SortedCellTable<T> extends BaseCelltable<T> {
                 comparators.put(column, (InvertibleComparator<T>) comparator);
                 super.setComparator(column, comparator);
             }
-
         };
         addColumnSortHandler(columnSortHandler);
     }
@@ -122,7 +120,7 @@ public class SortedCellTable<T> extends BaseCelltable<T> {
     }
 
     private void sortColumn(Column<T, ?> column, Comparator<T> comparator, boolean ascending) {
-        if(ascending) {
+        if (ascending) {
             Collections.sort(dataProvider.getList(), comparator);
         } else {
             Collections.sort(dataProvider.getList(), Collections.reverseOrder(comparator));

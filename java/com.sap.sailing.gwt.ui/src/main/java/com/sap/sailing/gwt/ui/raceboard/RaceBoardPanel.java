@@ -374,7 +374,6 @@ public class RaceBoardPanel
                     asyncActionsExecutor,
                     competitorSelectionProvider, selectedRaceIdentifier, timer, timeRangeWithZoomModel, stringMessages,
                     errorReporter, true, true, leaderboardGroupName, leaderboardName);
-            competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
             competitorChart.setVisible(false);
             competitorChart.updateSettings(multiCompetitorRaceChartSettings);
             new SliceRaceHandler(sailingService, userService, errorReporter, competitorChart, selectedRaceIdentifier,
@@ -386,7 +385,6 @@ public class RaceBoardPanel
                     windChartSettings, stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */
                     true);
             windChart.setVisible(false);
-            windChart.getEntryWidget().setTitle(stringMessages.windChart());
             componentsForSideBySideViewer.add(windChart);
             
         }

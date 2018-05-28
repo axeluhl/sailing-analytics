@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -45,6 +46,12 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTra
      * {@link #getEstimatedPosition(TimePoint, boolean) estimated positions} at <code>from</code> and <code>to</code>.
      */
     Distance getDistanceTraveled(TimePoint from, TimePoint to);
+
+    /**
+     * Gets the longest duration between two smoothened GPS-fixes contained within the provided period within the track.
+     * Returns {@code Duration.NULL} if there are less than 2 fixes contained within the track.
+     */
+    Duration getLongestIntervalBetweenTwoFixes(TimePoint from, TimePoint to);
 
     /**
      * Computes the distance traveled on the raw, unsmoothened track between the

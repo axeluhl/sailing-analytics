@@ -867,8 +867,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Double getExpeditionTimeToGUN(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTimeToGUNIfAvailable);
+    public Double getExpeditionTimeToGunInSeconds(TimePoint at) {
+        return getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTimeToGunInSecondsIfAvailable);
     }
 
     @Override
@@ -882,8 +882,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Double getExpeditionTimeToBurnToLine(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTimeToBurnToLineIfAvailable);
+    public Double getExpeditionTimeToBurnToLineInSeconds(TimePoint at) {
+        return getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionTimeToBurnToLineInSecondsIfAvailable);
     }
 
     @Override
@@ -907,8 +907,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Double getExpeditionDistanceBelowLine(TimePoint at) {
-        return getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionDistanceBelowLineIfAvailable);
+    public Double getExpeditionDistanceBelowLineInMeters(TimePoint at) {
+        return getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionDistanceBelowLineInMetersIfAvailable);
     }
 
     @Override
@@ -1062,8 +1062,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public Double getAverageExpeditionTimeToGUN(TimePoint at) {
-        return getAverageExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getAverageExpeditionTimeToGUNIfAvailable);
+    public Double getAverageExpeditionTimeToGunInSeconds(TimePoint at) {
+        return getAverageExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getAverageExpeditionTimeToGunInSecondsIfAvailable);
     }
     
     @Override
@@ -1077,8 +1077,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public Double getAverageExpeditionTimeToBurnToLine(TimePoint at) {
-        return getAverageExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getAverageExpeditionTimeToBurnToLineIfAvailable);
+    public Double getAverageExpeditionTimeToBurnToLineInSeconds(TimePoint at) {
+        return getAverageExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getAverageExpeditionTimeToBurnToLineInSecondsIfAvailable);
     }
     
     @Override
@@ -1102,8 +1102,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public Double getAverageExpeditionDistanceBelowLine(TimePoint at) {
-        return getAverageExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getAverageExpeditionDistanceBelowLineIfAvailable);
+    public Double getAverageExpeditionDistanceBelowLineInMeters(TimePoint at) {
+        return getAverageExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getAverageExpeditionDistanceBelowLineInMetersIfAvailable);
     }
     
     @Override

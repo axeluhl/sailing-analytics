@@ -9,6 +9,7 @@ import com.sap.sailing.domain.maneuverdetection.impl.ManeuverMainCurveWithEstima
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverMainCurveWithEstimationDataJsonSerializer;
 import com.sap.sse.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -42,6 +43,8 @@ public class ManeuverMainCurveWithEstimationDataJsonDeserializer
                 .get(ManeuverMainCurveWithEstimationDataJsonSerializer.MAX_TURNING_RATE_IN_DEGREES_PER_SECOND);
         Integer gpsFixesCount = CompleteManeuverCurveWithEstimationDataJsonDeserializer
                 .getInteger(object.get(ManeuverMainCurveWithEstimationDataJsonSerializer.GPS_FIXES_COUNT));
+        Double longestIntervalBetweenTwoFixes = (Double) object
+                .get(ManeuverMainCurveWithEstimationDataJsonSerializer.LONGEST_INTERVAL_BETWEEN_TWO_FIXES);
         return new ManeuverMainCurveWithEstimationDataImpl(boundaries.getTimePointBefore(),
                 boundaries.getTimePointAfter(), boundaries.getSpeedWithBearingBefore(),
                 boundaries.getSpeedWithBearingAfter(), boundaries.getDirectionChangeInDegrees(),
@@ -55,7 +58,8 @@ public class ManeuverMainCurveWithEstimationDataJsonDeserializer
                 boundaries.getDistanceSailedWithinManeuverTowardMiddleAngleProjection(),
                 boundaries.getDistanceSailedIfNotManeuvering(),
                 boundaries.getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering(),
-                avgTurningRateInDegreesPerSecond, gpsFixesCount);
+                avgTurningRateInDegreesPerSecond, gpsFixesCount,
+                new MillisecondsDurationImpl((long) (longestIntervalBetweenTwoFixes * 1000.0)));
     }
 
 }

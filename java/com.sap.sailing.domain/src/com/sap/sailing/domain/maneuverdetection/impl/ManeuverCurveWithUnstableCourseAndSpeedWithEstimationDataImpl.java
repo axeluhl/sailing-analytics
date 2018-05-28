@@ -18,6 +18,9 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl
     private final int gpsFixesCount;
     private final int gpsFixesCountFromPreviousManeuverEndToManeuverStart;
     private final int gpsFixesCountFromManeuverEndToNextManeuverStart;
+    private final Duration longestIntervalBetweenTwoFixes;
+    private final Duration intervalBetweenLastFixOfCurveAndNextFix;
+    private final Duration intervalBetweenFirstFixOfCurveAndPreviousFix;
 
     public ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl(TimePoint timePointBefore,
             TimePoint timePointAfter, SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
@@ -27,7 +30,8 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl
             Duration durationFromManeuverEndToNextManeuverStart, int gpsFixesCountFromManeuverEndToNextManeuverStart,
             Distance distanceSailedWithinManeuver, Distance distanceSailedWithinManeuverTowardMiddleAngleProjection,
             Distance distanceSailedIfNotManeuvering, Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuvering,
-            int gpsFixesCount) {
+            int gpsFixesCount, Duration longestIntervalBetweenTwoFixes,
+            Duration intervalBetweenLastFixOfCurveAndNextFix, Duration intervalBetweenFirstFixOfCurveAndPreviousFix) {
         super(timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees,
                 lowestSpeed, distanceSailedWithinManeuver, distanceSailedWithinManeuverTowardMiddleAngleProjection,
                 distanceSailedIfNotManeuvering, distanceSailedTowardMiddleAngleProjectionIfNotManeuvering);
@@ -38,6 +42,9 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl
         this.durationFromManeuverEndToNextManeuverStart = durationFromManeuverEndToNextManeuverStart;
         this.gpsFixesCountFromManeuverEndToNextManeuverStart = gpsFixesCountFromManeuverEndToNextManeuverStart;
         this.gpsFixesCount = gpsFixesCount;
+        this.longestIntervalBetweenTwoFixes = longestIntervalBetweenTwoFixes;
+        this.intervalBetweenLastFixOfCurveAndNextFix = intervalBetweenLastFixOfCurveAndNextFix;
+        this.intervalBetweenFirstFixOfCurveAndPreviousFix = intervalBetweenFirstFixOfCurveAndPreviousFix;
     }
 
     @Override
@@ -73,6 +80,21 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl
     @Override
     public int getGpsFixesCountFromManeuverEndToNextManeuverStart() {
         return gpsFixesCountFromManeuverEndToNextManeuverStart;
+    }
+
+    @Override
+    public Duration getLongestIntervalBetweenTwoFixes() {
+        return longestIntervalBetweenTwoFixes;
+    }
+
+    @Override
+    public Duration getIntervalBetweenLastFixOfCurveAndNextFix() {
+        return intervalBetweenLastFixOfCurveAndNextFix;
+    }
+
+    @Override
+    public Duration getIntervalBetweenFirstFixOfCurveAndPreviousFix() {
+        return intervalBetweenFirstFixOfCurveAndPreviousFix;
     }
 
 }

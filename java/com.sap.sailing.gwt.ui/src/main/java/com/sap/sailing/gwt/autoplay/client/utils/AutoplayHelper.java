@@ -280,7 +280,7 @@ public class AutoplayHelper {
         RaceMapZoomSettings autoFollowRace = new RaceMapZoomSettings(typesToConsiderOnZoom, true);
         RaceMapSettings settings = new RaceMapSettings(autoFollowRace, new RaceMapHelpLinesSettings(), false, 15,
                 100000l, false, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS, false, true, false, false, false, false,
-                RaceMapSettings.getDefaultManeuvers(), false, false);
+                RaceMapSettings.getDefaultManeuvers(), false, false, /* startCountDownFontSizeScaling */ 1.5);
         RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE);
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace, competitorsAndTheirBoats);
         RaceCompetitorSelectionModel competitorSelectionProvider = new RaceCompetitorSelectionModel(

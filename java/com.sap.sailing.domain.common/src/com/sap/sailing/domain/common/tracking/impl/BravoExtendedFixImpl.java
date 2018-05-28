@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.tracking.impl;
 
+import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.sensordata.BravoExtendedSensorDataMetadata;
 import com.sap.sailing.domain.common.sensordata.ColumnMetadata;
@@ -223,18 +224,21 @@ public class BravoExtendedFixImpl extends BravoFixImpl implements BravoExtendedF
     }
 
     @Override
-    public Double getExpeditionTmToGun() {
-        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOGUN.getColumnIndex());
+    public Double getExpeditionTmToGunInSeconds() {
+        final Double days = fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOGUN.getColumnIndex());
+        return days == null ? null : days*24.0*3600.0;
     }
 
     @Override
-    public Double getExpeditionTmToBurn() {
-        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN.getColumnIndex());
+    public Double getExpeditionTmToBurnInSeconds() {
+        final Double days = fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_TMTOBURN.getColumnIndex());
+        return days == null ? null : days*24.0*3600.0;
     }
-    
+
     @Override
-    public Double getExpeditionBelowLn() {
-        return fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_BELOWLN.getColumnIndex());
+    public Double getExpeditionBelowLnInMeters() {
+        final Double nauticalMiles = fix.get(BravoExtendedSensorDataMetadata.EXPEDITION_BELOWLN.getColumnIndex());
+        return nauticalMiles == null ? null : (nauticalMiles * Mile.METERS_PER_NAUTICAL_MILE);
     }
     
     @Override

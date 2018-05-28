@@ -3185,7 +3185,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             }
             case EXPEDITION_RACE_DISTANCE_BELOW_LINE: {
-                result = getBravoDoubleValue(BravoFixTrack::getExpeditionDistanceBelowLineIfAvailable, trackedRace, competitor, timePoint);
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionDistanceBelowLineInMetersIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
             case EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT: {
@@ -3261,7 +3261,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             }
             case EXPEDITION_RACE_TIME_TO_BURN_TO_LINE: {
-                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToBurnToLineIfAvailable, trackedRace, competitor, timePoint);
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToBurnToLineInSecondsIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
             case EXPEDITION_RACE_TIME_TO_BURN_TO_PIN: {
@@ -3273,7 +3273,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             }
             case EXPEDITION_RACE_TIME_TO_GUN: {
-                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToGUNIfAvailable, trackedRace, competitor, timePoint);
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionTimeToGunInSecondsIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
             case EXPEDITION_RACE_TIME_TO_PIN: {
@@ -5174,7 +5174,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
             // new boat
             DynamicBoat boat = (DynamicBoat) addOrUpdateBoatInternal(competitor.getBoat());
-            
             result = getBaseDomainFactory().getOrCreateCompetitorWithBoat(competitorUUID, competitor.getName(), competitor.getShortName(),
                             competitor.getColor(), competitor.getEmail(), 
                             competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()), team,
@@ -6001,7 +6000,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        
         RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(),
                 getService().getServerAuthor(), raceLog.getCurrentPassId(), course, CourseDesignerMode.ADMIN_CONSOLE);
         raceLog.add(event);
@@ -7051,7 +7049,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final List<GPSFixDTO> result = new ArrayList<>();
         track.lockForRead();
         try {
-            for (final GPSFix fix : track.getFixes()) {
+            for (final GPSFix fix : track.getRawFixes()) {
                 result.add(convertToGPSFixDTO(fix));
             }
         } finally {
@@ -7640,15 +7638,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     
                     @Override
                     public void visit(RaceLogCourseDesignChangedEvent event) {
-                        // Only course changes up to the end of the sliced race are copied
-                        // to be able to cut several training races where the course is changed
-                        // between races in preparation for the next race. In this case the course
-                        // for a sliced is the course that was valid at the time that race took place.
-                        if (event.getLogicalTimePoint().before(sliceTo)) {
-                            raceLog.add(new RaceLogCourseDesignChangedEventImpl(event.getCreatedAt(),
-                                    event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
-                                    raceLog.getCurrentPassId(), event.getCourseDesign(), event.getCourseDesignerMode()));
-                        }
+                        raceLog.add(new RaceLogCourseDesignChangedEventImpl(event.getCreatedAt(),
+                                event.getLogicalTimePoint(), event.getAuthor(), UUID.randomUUID(),
+                                raceLog.getCurrentPassId(), event.getCourseDesign(), event.getCourseDesignerMode()));
                     }
                     
                     @Override

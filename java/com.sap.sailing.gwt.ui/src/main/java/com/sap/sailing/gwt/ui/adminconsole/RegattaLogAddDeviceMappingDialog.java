@@ -32,15 +32,16 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
-import com.sap.sse.gwt.client.controls.datetime.DateInput;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTimeBox<DeviceMappingDTO> {
     private final String leaderboardName;
     private final GenericListBox<EventDTO> events; 
 
-    protected final DateInput from;
-    protected final DateInput to;
+    protected final DateAndTimeInput from;
+    protected final DateAndTimeInput to;
     protected final ListBox deviceType;
     protected final TextBox deviceId;
     protected final DeviceMappingQRCodeWidget qrWidget;
@@ -84,9 +85,9 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
 
-        from = createDateBox(new Date());
+        from = createDateTimeBox(new Date(), Accuracy.SECONDS);
         from.setValue(null);
-        to = createDateBox(new Date());
+        to = createDateTimeBox(new Date(), Accuracy.SECONDS);
         to.setValue(null);
 
         deviceType = createListBox(false);

@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
@@ -23,6 +24,12 @@ public interface HasTrackedLegOfCompetitorContext extends HasWindOnTrackedLeg {
     
     @Statistic(messageKey="DistanceTraveled", resultDecimals=0, ordinal=0)
     public Distance getDistanceTraveled();
+    
+    @Statistic(messageKey="SpeedAverage", resultDecimals=0, ordinal=0)
+    public Double getSpeedAverage();
+    
+    @Statistic(messageKey="SpeedAverageVsDistanceTraveled", resultDecimals=0, ordinal=0)
+    public Pair<Double, Double> getSpeedAverageVsDistanceTraveled();
     
     @Statistic(messageKey="RankGainsOrLosses", resultDecimals=2, ordinal=1)
     public Double getRankGainsOrLosses();

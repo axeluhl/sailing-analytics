@@ -345,24 +345,24 @@ public class LeaderboardEntryDTO implements Serializable {
         }
     }
 
-    public void setExpeditionTimeToGun(Double expeditionTmToGun) {
-        if (expeditionTmToGun != null) {
+    public void setExpeditionTimeToGunInSeconds(Double expeditionTmToGunInSeconds) {
+        if (expeditionTmToGunInSeconds != null) {
             ensureExpeditionHolder();
-            expeditionDataHolder.expeditionTimeToGun = expeditionTmToGun;
+            expeditionDataHolder.expeditionTimeToGunInSeconds = expeditionTmToGunInSeconds;
         }
     }
 
-    public void setExpeditionTimeToBurnToLine(Double expeditionTmToBurn) {
-        if (expeditionTmToBurn != null) {
+    public void setExpeditionTimeToBurnToLineInSeconds(Double expeditionTmToBurnInSeconds) {
+        if (expeditionTmToBurnInSeconds != null) {
             ensureExpeditionHolder();
-            expeditionDataHolder.expeditionTimeToBurnToLine = expeditionTmToBurn;
+            expeditionDataHolder.expeditionTimeToBurnToLineInSeconds = expeditionTmToBurnInSeconds;
         }
     }
 
-    public void setExpeditionDistanceBelowLine(Double expeditionBelowLn) {
-        if (expeditionBelowLn != null) {
+    public void setExpeditionDistanceBelowLineInMeters(Double expeditionBelowLnInMeters) {
+        if (expeditionBelowLnInMeters != null) {
             ensureExpeditionHolder();
-            expeditionDataHolder.expeditionDistanceBelowLine = expeditionBelowLn;
+            expeditionDataHolder.expeditionDistanceBelowLine = expeditionBelowLnInMeters;
         }
     }
 
@@ -484,7 +484,7 @@ public class LeaderboardEntryDTO implements Serializable {
     }
 
     public Double getExpeditionTimeToGun() {
-        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToGun;
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToGunInSeconds;
     }
 
     public Double getExpeditionTimeToCommitteeBoat() {
@@ -504,7 +504,7 @@ public class LeaderboardEntryDTO implements Serializable {
     }
 
     public Double getExpeditionTimeToBurnToLine() {
-        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToBurnToLine;
+        return expeditionDataHolder == null ? null : expeditionDataHolder.expeditionTimeToBurnToLineInSeconds;
     }
 
     public Double getExpeditionTargetHeel() {
@@ -815,12 +815,12 @@ public class LeaderboardEntryDTO implements Serializable {
         public Double expeditionTimeToStbLayline;
         public Double expeditionTimeToPortLayline;
         public Double expeditionTimeToPin;
-        public Double expeditionTimeToGun;
+        public Double expeditionTimeToGunInSeconds;
         public Double expeditionTimeToCommitteeBoat;
         public Double expeditionTimeToBurnToPin;
         public Double expeditionTargTWA;
         public Double expeditionTimeToBurnToCommitteeBoat;
-        public Double expeditionTimeToBurnToLine;
+        public Double expeditionTimeToBurnToLineInSeconds;
         public Double expeditionTargetHeel;
         public Double expeditionTargBoatSpeed;
         public Double expeditionSOG;
@@ -878,11 +878,11 @@ public class LeaderboardEntryDTO implements Serializable {
             result = prime * result + ((expeditionTimeToBurnToCommitteeBoat == null) ? 0
                     : expeditionTimeToBurnToCommitteeBoat.hashCode());
             result = prime * result
-                    + ((expeditionTimeToBurnToLine == null) ? 0 : expeditionTimeToBurnToLine.hashCode());
+                    + ((expeditionTimeToBurnToLineInSeconds == null) ? 0 : expeditionTimeToBurnToLineInSeconds.hashCode());
             result = prime * result + ((expeditionTimeToBurnToPin == null) ? 0 : expeditionTimeToBurnToPin.hashCode());
             result = prime * result
                     + ((expeditionTimeToCommitteeBoat == null) ? 0 : expeditionTimeToCommitteeBoat.hashCode());
-            result = prime * result + ((expeditionTimeToGun == null) ? 0 : expeditionTimeToGun.hashCode());
+            result = prime * result + ((expeditionTimeToGunInSeconds == null) ? 0 : expeditionTimeToGunInSeconds.hashCode());
             result = prime * result + ((expeditionTimeToPin == null) ? 0 : expeditionTimeToPin.hashCode());
             result = prime * result
                     + ((expeditionTimeToPortLayline == null) ? 0 : expeditionTimeToPortLayline.hashCode());
@@ -1057,10 +1057,10 @@ public class LeaderboardEntryDTO implements Serializable {
                     return false;
             } else if (!expeditionTimeToBurnToCommitteeBoat.equals(other.expeditionTimeToBurnToCommitteeBoat))
                 return false;
-            if (expeditionTimeToBurnToLine == null) {
-                if (other.expeditionTimeToBurnToLine != null)
+            if (expeditionTimeToBurnToLineInSeconds == null) {
+                if (other.expeditionTimeToBurnToLineInSeconds != null)
                     return false;
-            } else if (!expeditionTimeToBurnToLine.equals(other.expeditionTimeToBurnToLine))
+            } else if (!expeditionTimeToBurnToLineInSeconds.equals(other.expeditionTimeToBurnToLineInSeconds))
                 return false;
             if (expeditionTimeToBurnToPin == null) {
                 if (other.expeditionTimeToBurnToPin != null)
@@ -1072,10 +1072,10 @@ public class LeaderboardEntryDTO implements Serializable {
                     return false;
             } else if (!expeditionTimeToCommitteeBoat.equals(other.expeditionTimeToCommitteeBoat))
                 return false;
-            if (expeditionTimeToGun == null) {
-                if (other.expeditionTimeToGun != null)
+            if (expeditionTimeToGunInSeconds == null) {
+                if (other.expeditionTimeToGunInSeconds != null)
                     return false;
-            } else if (!expeditionTimeToGun.equals(other.expeditionTimeToGun))
+            } else if (!expeditionTimeToGunInSeconds.equals(other.expeditionTimeToGunInSeconds))
                 return false;
             if (expeditionTimeToPin == null) {
                 if (other.expeditionTimeToPin != null)

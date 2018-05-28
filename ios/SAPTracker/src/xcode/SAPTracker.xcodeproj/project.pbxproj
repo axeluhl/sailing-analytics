@@ -344,6 +344,7 @@
 		C87A74E81F504EBB003DE396 /* CreateEventData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A74E71F504EBB003DE396 /* CreateEventData.swift */; };
 		C87A74EA1F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A74E91F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift */; };
 		C87A74EC1F5068D0003DE396 /* CreateTrainingData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A74EB1F5068D0003DE396 /* CreateTrainingData.swift */; };
+		C880646E2087DA1F005FBE57 /* BoatClassData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C880646D2087DA1F005FBE57 /* BoatClassData.swift */; };
 		C88F6D2B1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2A1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift */; };
 		C88F6D2D1FEACC5700A616BE /* LeaderboardGroupData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2C1FEACC5700A616BE /* LeaderboardGroupData.swift */; };
 		C88F6D2F1FEACD7400A616BE /* RegattaRaceCourseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2E1FEACD7400A616BE /* RegattaRaceCourseData.swift */; };
@@ -766,6 +767,7 @@
 		C87A74E71F504EBB003DE396 /* CreateEventData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateEventData.swift; sourceTree = "<group>"; };
 		C87A74E91F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaCompetitorCreateAndAddData.swift; sourceTree = "<group>"; };
 		C87A74EB1F5068D0003DE396 /* CreateTrainingData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateTrainingData.swift; sourceTree = "<group>"; };
+		C880646D2087DA1F005FBE57 /* BoatClassData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoatClassData.swift; sourceTree = "<group>"; };
 		C88F6D2A1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardAutoCourseData.swift; sourceTree = "<group>"; };
 		C88F6D2C1FEACC5700A616BE /* LeaderboardGroupData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardGroupData.swift; sourceTree = "<group>"; };
 		C88F6D2E1FEACD7400A616BE /* RegattaRaceCourseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegattaRaceCourseData.swift; sourceTree = "<group>"; };
@@ -1351,23 +1353,24 @@
 		C8739E101D2BF13200A89F3C /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				C891886D2057DB4A00E37CC3 /* BoatData.swift */,
 				C8739E171D2BF2DC00A89F3C /* BaseData.swift */,
+				C880646D2087DA1F005FBE57 /* BoatClassData.swift */,
+				C891886D2057DB4A00E37CC3 /* BoatData.swift */,
 				7F0658FE19F7EE910077FF95 /* CheckInData.swift */,
-				C87A74E91F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift */,
 				C8739E151D2BF17900A89F3C /* CompetitorData.swift */,
 				C87A74E71F504EBB003DE396 /* CreateEventData.swift */,
 				C87A74EB1F5068D0003DE396 /* CreateTrainingData.swift */,
 				C8739E111D2BF14F00A89F3C /* EventData.swift */,
+				C88F6D2A1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift */,
 				C8739E131D2BF16300A89F3C /* LeaderboardData.swift */,
+				C88F6D2C1FEACC5700A616BE /* LeaderboardGroupData.swift */,
 				C8739E1B1D2D5F1700A89F3C /* LocationData.swift */,
 				C8FF5B7B1EB8CF2C00CF9764 /* MarkData.swift */,
-				C8BFCCC31D51C53500FC1A27 /* TeamData.swift */,
+				C87A74E91F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift */,
 				C8CF22B31F67C4D800A01E0A /* RegattaRaceColumnAddData.swift */,
-				C8CF22B71F68133000A01E0A /* TrainingRaceData.swift */,
-				C88F6D2A1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift */,
-				C88F6D2C1FEACC5700A616BE /* LeaderboardGroupData.swift */,
 				C88F6D2E1FEACD7400A616BE /* RegattaRaceCourseData.swift */,
+				C8BFCCC31D51C53500FC1A27 /* TeamData.swift */,
+				C8CF22B71F68133000A01E0A /* TrainingRaceData.swift */,
 			);
 			name = Data;
 			sourceTree = "<group>";
@@ -2040,6 +2043,7 @@
 				C8739E121D2BF14F00A89F3C /* EventData.swift in Sources */,
 				C843D4881EBCADDC00250F01 /* CompetitorSessionController.swift in Sources */,
 				C8F71EDF1D8691F700826DE4 /* AFURLConnectionOperation.m in Sources */,
+				C880646E2087DA1F005FBE57 /* BoatClassData.swift in Sources */,
 				C891887A2057F55100E37CC3 /* BoatSessionController.swift in Sources */,
 				C8F71EE31D8691F700826DE4 /* SVIndefiniteAnimatedView.m in Sources */,
 				C8739E0F1D2BEE7900A89F3C /* SessionController.swift in Sources */,

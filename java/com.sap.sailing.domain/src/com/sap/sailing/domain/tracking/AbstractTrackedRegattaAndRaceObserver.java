@@ -108,7 +108,7 @@ public abstract class AbstractTrackedRegattaAndRaceObserver implements TrackedRe
                     RegattaListener.this.raceAdded(trackedRace);
                 }
             };
-            trackedRegatta.addRaceListener(raceListener, /* Not replicated */ Optional.empty());
+            trackedRegatta.addRaceListener(raceListener, /* Not replicated */ Optional.empty(), /* synchronous */ false);
         }
 
         public synchronized void raceRemoved(TrackedRace trackedRace) {
