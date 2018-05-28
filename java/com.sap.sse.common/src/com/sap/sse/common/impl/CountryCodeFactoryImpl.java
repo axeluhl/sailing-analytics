@@ -256,7 +256,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("TOGO", "TG", "TGO", "tg", "TG", "TOG", "768", "228"));
         add(new CountryCodeImpl("TOKELAU", "TK", "TKL", "tk", null, null, "772", "690"));
         add(new CountryCodeImpl("TONGA", "TO", "TON", "to", null, "TGA", "776", "676"));
-        add(new CountryCodeImpl("TRINIDAD AND TOBAGO", "TT", "TTO", "tt", "TT", "TRI", "780", "1-868"));
+        add(new CountryCodeImpl("TRINIDAD AND TOBAGO", "TT", "TTO", "tt", "TT", "TTO", "780", "1-868"));
         add(new CountryCodeImpl("TUNISIA", "TN", "TUN", "tn", "TN", "TUN", "788", "216"));
         add(new CountryCodeImpl("TURKEY", "TR", "TUR", "tr", "TR", "TUR", "792", "90"));
         add(new CountryCodeImpl("TURKMENISTAN", "TM", "TKM", "tm", "TM", "TKM", "795", "993"));
