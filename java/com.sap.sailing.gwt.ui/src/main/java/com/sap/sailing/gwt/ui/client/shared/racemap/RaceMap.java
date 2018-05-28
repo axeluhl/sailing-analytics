@@ -2298,10 +2298,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings>
                 createInfoWindowLabelAndValue(stringMessages.position(), markDTO.position.getAsSignedDecimalDegrees()));
         return vPanel;
     }
-
-    private Map<Position, Boolean> maneuverLossCheckBoxValueStore = new HashMap<>();
     
-    private Widget getInfoWindowContent(ManeuverDTO maneuver) {
+    private Widget getInfoWindowContent(ManeuverDTO maneuver, CompetitorDTO competitor) {
         SpeedWithBearingDTO before = maneuver.speedWithBearingBefore;
         SpeedWithBearingDTO after = maneuver.speedWithBearingAfter;
         VerticalPanel vPanel = new VerticalPanel();
@@ -2334,15 +2332,17 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings>
             Widget maneuverLossWidget = createInfoWindowLabelAndValue(stringMessages.maneuverLoss(),
                     numberFormatOneDecimal.format(maneuver.maneuverLossInMeters) + " " + stringMessages.metersUnit());
             CheckBox maneuverLossLinesCheckBox = new CheckBox(stringMessages.show());
+            Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.timePoint,
+                    maneuver.type);
             if (maneuverLossCheckBoxValueStore.isEmpty()) {
-                maneuverLossCheckBoxValueStore.put(maneuver.position, false);
+                maneuverLossCheckBoxValueStore.put(t, false);
             }
-            maneuverLossLinesCheckBox.setValue(maneuverLossCheckBoxValueStore.get(maneuver.position));
+            maneuverLossLinesCheckBox.setValue(maneuverLossCheckBoxValueStore.get(t));
             maneuverLossLinesCheckBox.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    visualizeManeuver(maneuver, maneuverLossLinesCheckBox.getValue());
-                    maneuverLossCheckBoxValueStore.put(maneuver.position, maneuverLossLinesCheckBox.getValue());
+                    visualizeManeuver(maneuver, maneuverLossLinesCheckBox.getValue(), competitor);
+                    maneuverLossCheckBoxValueStore.put(t, maneuverLossLinesCheckBox.getValue());
                 }
             });
             HorizontalPanel hPanel = new HorizontalPanel();
@@ -2570,14 +2570,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings>
                 List<ManeuverDTO> maneuversForCompetitor = maneuvers.get(competitorDTO);
                 for (ManeuverDTO maneuver : maneuversForCompetitor) {
                     if (settings.isShowManeuverType(maneuver.type)) {
-                        createAndAddMarkerOfManeuver(maneuver);
+                        createAndAddMarkerOfManeuver(maneuver, competitorDTO);
                     }
                 }
             }
         }
     }
 
-    private void createAndAddMarkerOfManeuver(ManeuverDTO maneuver) {
+    private void createAndAddMarkerOfManeuver(ManeuverDTO maneuver, CompetitorDTO competitor) {
         LatLng latLng = coordinateSystem.toLatLng(maneuver.position);
         Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndDirectionIndicatingColor
                 .get(new Pair<ManeuverType, ManeuverColor>(maneuver.type, ManeuverColor.getManeuverColor(maneuver)));
@@ -2588,7 +2588,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings>
         marker.setTitle(ManeuverTypeFormatter.format(maneuver.type, stringMessages));
         marker.addClickHandler(event -> {
             LatLng where = getCoordinateSystem().toLatLng(maneuver.position);
-            Widget content = getInfoWindowContent(maneuver);
+            Widget content = getInfoWindowContent(maneuver, competitor);
             managedInfoWindow.openAtPosition(content, where);
         });
         maneuverMarkers.add(marker);
@@ -2626,51 +2626,59 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings>
         }
     };
 
-    private void visualizeManeuver(ManeuverDTO maneuver, boolean showManeuverVisualization) {
+    private void visualizeManeuver(ManeuverDTO maneuver, boolean showManeuverVisualization, CompetitorDTO competitor) {
         if (showManeuverVisualization == false) {
-                for (Polyline p : maneuverLossLinesMap.get(maneuver.position)) {
-                    p.setMap((MapWidget) null);
-                }
-                maneuverLossInfoOverlayMap.get(maneuver.position).removeFromMap();
+            Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.timePoint,
+                    maneuver.type);
+            for (Polyline p : maneuverLossLinesMap.get(t)) {
+                p.setMap((MapWidget) null);
             }
-         else {
-            createManeuverLossLines(maneuver);
+            maneuverLossInfoOverlayMap.get(t).removeFromMap();
+        } else {
+            createManeuverLossLines(maneuver, competitor);
         }
-    }  
-
+    }
+    
+    private Map<Triple<String, Date, ManeuverType>, Boolean> maneuverLossCheckBoxValueStore = new HashMap<>();
     private SmallTransparentInfoOverlay maneuverLossInfoOverlay;
     private Set<Polyline> maneuverLossLines;
-    private Map<Position, Set<Polyline>> maneuverLossLinesMap = new HashMap<>();
-    private Map<Position, SmallTransparentInfoOverlay> maneuverLossInfoOverlayMap = new HashMap<>();
-    
+    private Map<Triple<String, Date, ManeuverType>, Set<Polyline>> maneuverLossLinesMap = new HashMap<>();
+    private Map<Triple<String, Date, ManeuverType>, SmallTransparentInfoOverlay> maneuverLossInfoOverlayMap = new HashMap<>();
+
+    /**
+     * Removes the Polylines visualizing the ManeuverLoss and the SmallTransparentInfoOverlays attached to the
+     * Polylines. Also clears the Checkbox that defines whether a maneuverLoss is visualized or not.
+     */
     private void removeManeuverLossLines() {
         if (!maneuverLossLinesMap.isEmpty()) {
-            for (Position pos : maneuverLossLinesMap.keySet()) {
-                for (Polyline maneuverLossLine : maneuverLossLinesMap.get(pos)) {
+            for (Triple<String, Date, ManeuverType> t : maneuverLossLinesMap.keySet()) {
+                for (Polyline maneuverLossLine : maneuverLossLinesMap.get(t)) {
                     maneuverLossLine.setMap((MapWidget) null);
-                    ;
                 }
             }
             maneuverLossLinesMap.clear();
         }
         if (!maneuverLossInfoOverlayMap.isEmpty()) {
-            for (Map.Entry<Position, SmallTransparentInfoOverlay> e : maneuverLossInfoOverlayMap.entrySet()) {
+            for (Map.Entry<Triple<String, Date, ManeuverType>, SmallTransparentInfoOverlay> e : maneuverLossInfoOverlayMap
+                    .entrySet()) {
                 e.getValue().removeFromMap();
             }
             maneuverLossInfoOverlayMap.clear();
         }
         if (!maneuverLossCheckBoxValueStore.isEmpty()) {
-            for (Map.Entry<Position, Boolean> e : maneuverLossCheckBoxValueStore.entrySet()) {
+            for (Map.Entry<Triple<String, Date, ManeuverType>, Boolean> e : maneuverLossCheckBoxValueStore.entrySet()) {
                 e.setValue(false);
             }
             maneuverLossCheckBoxValueStore.clear();
         }
     }
     
-/** Visualizes the ManeuverLoss as calculated in {@link ManeuverDetectorImpl#getManeuverLoss()}
- * 
- */
-    private void createManeuverLossLines(ManeuverDTO maneuver) {
+    /**
+     * Creates the ManeuverLoss Lines as calculated in {@link ManeuverDetectorImpl#getManeuverLoss()} and draw
+     * SmallTransparentInfoOverlays attached to the Polylines visualizing the maneuver.
+     * 
+     */
+    private void createManeuverLossLines(ManeuverDTO maneuver, CompetitorDTO competitor) {
         maneuverLossLines = new HashSet<>();
         Bearing bearingBefore = new DegreeBearingImpl(maneuver.maneuverLoss.speedWithBearingBefore.bearingInDegrees);
         Bearing middleManeuverAngle = new DegreeBearingImpl(maneuver.maneuverLoss.middleManeuverAngle);
@@ -2702,10 +2710,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings>
             options.setStrokeOpacity(0.5);
             maneuverLossLine.setOptions(options);
         }
-        maneuverLossLinesMap.put(maneuver.position, maneuverLossLines);
+        Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.timePoint,
+                maneuver.type);
+        maneuverLossLinesMap.put(t, maneuverLossLines);
         StringBuilder sb = new StringBuilder();
         sb.append(stringMessages.maneuverLoss() + ": " + numberFormatOneDecimal.format(maneuver.maneuverLossInMeters)
-                + " " + stringMessages.metersUnit() + '\n');
+                + stringMessages.metersUnit() + '\n');
         if (maneuver.type == ManeuverType.TACK) {
             sb.append(stringMessages.tackAngle() + ": ");
         } else if (maneuver.type == ManeuverType.JIBE) {
@@ -2713,14 +2723,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings>
         } else {
             sb.append(stringMessages.maneuverAngle() + ": ");
         }
-        sb.append(numberFormatOneDecimal.format(Math.abs(maneuver.directionChangeInDegrees)) + " "
+        sb.append(numberFormatOneDecimal.format(Math.abs(maneuver.directionChangeInDegrees))
                 + stringMessages.degreesUnit());
         maneuverLossInfoOverlay = new SmallTransparentInfoOverlay((MapWidget) map,
                 RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, sb.toString(), coordinateSystem);
         maneuverLossInfoOverlay.setPosition(projectedManeuverEndPosition.translateGreatCircle(middleManeuverAngle,
                 new MeterDistance(maneuver.maneuverLossInMeters / 2)), -1);
         maneuverLossInfoOverlay.draw();
-        maneuverLossInfoOverlayMap.put(maneuver.position, maneuverLossInfoOverlay);
+        maneuverLossInfoOverlayMap.put(t, maneuverLossInfoOverlay);
     }
 
     /**
