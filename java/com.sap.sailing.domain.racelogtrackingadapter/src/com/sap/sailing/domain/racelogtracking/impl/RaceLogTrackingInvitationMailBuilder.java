@@ -11,6 +11,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.mail.MessagingException;
@@ -30,6 +32,8 @@ import com.sap.sse.shared.media.ImageDescriptor;
  * as text and html body to support a great variety of mail clients.
  */
 class RaceLogTrackingInvitationMailBuilder {
+    private static final Logger LOG = Logger.getLogger(RaceLogTrackingInvitationMailBuilder.class.getName());
+    
     /**
      * System separator can't be used, as the reader might use any mail client and OS. This line break seems to work reliable over all
      * systems.
@@ -91,7 +95,7 @@ class RaceLogTrackingInvitationMailBuilder {
                 ImageIO.write(image, "png", baos);
                 insertImage(baos.toByteArray(), "logo", logoUrl);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOG.log(Level.WARNING, "Error while getting event image for invitation mail", e);
             }
         }
         return this;
@@ -103,7 +107,7 @@ class RaceLogTrackingInvitationMailBuilder {
             imageIs.readFully(targetArray);
             insertImage(targetArray, "qr", url);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.log(Level.WARNING, "Error while generating QR code for invitation mail", e);
         }
         return this;
     }
