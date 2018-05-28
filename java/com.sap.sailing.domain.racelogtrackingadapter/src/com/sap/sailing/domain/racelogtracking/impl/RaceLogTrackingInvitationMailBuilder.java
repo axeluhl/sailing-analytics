@@ -25,10 +25,14 @@ import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.qrcode.QRCodeGenerationUtil;
 import com.sap.sse.shared.media.ImageDescriptor;
 
+/**
+ * Builder to create invitation mails for competitor and buoy tracking. This class ensures that the mail is being sent
+ * as text and html body to support a great variety of mail clients.
+ */
 class RaceLogTrackingInvitationMailBuilder {
     /**
-     * System separator can't be used, as the reader might another OS. This linebreak seems to work reliable over all
-     * systems
+     * System separator can't be used, as the reader might use any mail client and OS. This line break seems to work reliable over all
+     * systems.
      */
     private static final String TEXT_LINE_BREAK = "\r\n";
 
@@ -44,6 +48,11 @@ class RaceLogTrackingInvitationMailBuilder {
 
     private String subject;
 
+    /**
+     * @param locale
+     *            the locale in which the resulting mail will be generated. If there are no specific messages available
+     *            for the given locale, English locale is used as fallback.
+     */
     RaceLogTrackingInvitationMailBuilder(final Locale locale) {
         this.locale = locale;
     }
@@ -157,7 +166,6 @@ class RaceLogTrackingInvitationMailBuilder {
     }
 
     SerializableMultipartSupplier getMultipartSupplier() throws MessagingException {
-
         final SerializableMultipartSupplier mixedSupplier = new SerializableMultipartSupplier("mixed");
 
         final SerializableMultipartSupplier alternativeSupplier = new SerializableMultipartSupplier("alternative");
