@@ -215,13 +215,14 @@ class RaceLogTrackingInvitationMailBuilder {
     }
 
     private void addHtmlLink(final String url, final Function<Locale, String> textFactory) {
-        //outer href for clickablity of all the button
-        this.html.append("<a href=\"").append(url).append("\" style=\"color:#fff; text-decoration:none;\">");
-        //table being used for the styling, as some mail clients have isssues with divs
+        final String anchor = "<a href=\"" + url + "\" style=\"color:#fff; text-decoration:none;\">";
+        // outer href for clickablity of the whole button
+        this.html.append(anchor);
+        // table being used for the styling, as some mail clients have isssues with divs
         this.html.append("<table width=\"100%\" style=\"background-color: #337ab7; color:#fff;\"><tr>");
         this.html.append("<td style=\"padding: 15px; text-align: center; color:#fff;\">");
-        //inner href, so that outlook does work (it does not recognize the outer
-        this.html.append("<a href=\"").append(url).append("\" style=\"color:#fff; text-decoration:none;\">");
+        // inner href, so that outlook does work (it does not recognize the outer)
+        this.html.append(anchor);
         this.html.append(textFactory.apply(locale));
         this.html.append("</a>");
         this.html.append("</td>");
