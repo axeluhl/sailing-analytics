@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveOwnSettings;
@@ -9,6 +12,7 @@ import com.sap.sailing.gwt.autoplay.client.nodes.base.RootNodeBase;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.RootNodeState;
 
 public class RootNodeClassic extends RootNodeBase {
+    private static final Logger LOGGER = Logger.getLogger(RootNodeClassic.class.getName());
     private final AutoPlayNode idle;
     private final AutoPlayNode live;
     private final IdlePreEventNode preEvent;
@@ -49,7 +53,7 @@ public class RootNodeClassic extends RootNodeBase {
             return;
         }
         if (event.getCaught() != null) {
-            event.getCaught().printStackTrace();
+            LOGGER.log(Level.WARNING, "error hook called", event.getCaught());
         }
         transitionTo(idle);
     }

@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapw
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -37,6 +39,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
         extends AutoPlayPresenterConfigured<LiveRaceWithRacemapAndLeaderBoardPlace>
         implements LiveRaceWithRacemapAndLeaderBoardView.Slide7Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
+    private static final Logger LOGGER = Logger.getLogger(LiveRaceWithRacemapAndLeaderBoardPresenterImpl.class.getName());
     private LiveRaceWithRacemapAndLeaderBoardView view;
     private Timer selectionTimer;
     private SingleRaceLeaderboardPanel leaderboardPanel;
@@ -89,7 +92,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
             });
         } catch (Exception e) {
             // ensure that the loop keeps running, no matter if errors occur
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "error in leaderboard loop" , e);
             selected = 0;
         }
         selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);

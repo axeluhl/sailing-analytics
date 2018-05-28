@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -17,6 +19,7 @@ import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 public class IdleSixtyInchLeaderBoardPresenterImpl extends AutoPlayPresenterConfigured<IdleSixtyInchLeaderBoardPlace>
         implements IdleSixtyInchLeaderBoardView.Slide7Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
+    private static final Logger LOGGER = Logger.getLogger(IdleSixtyInchLeaderBoardPresenterImpl.class.getName());
     private IdleSixtyInchLeaderBoardView view;
     private int selected = -1;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
@@ -42,7 +45,7 @@ public class IdleSixtyInchLeaderBoardPresenterImpl extends AutoPlayPresenterConf
             view.startingWith(this, panel, getPlace().getLeaderboardPanel());
             selectionTimer.schedule(SWITCH_COMPETITOR_DELAY+AnimationPanel.ANIMATION_DURATION+AnimationPanel.DELAY);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "error strting idle leaderboard", e.getCause());
         }
     }
 
