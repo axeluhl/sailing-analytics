@@ -73,10 +73,7 @@ public class RootNodeSixtyInch extends RootNodeBase {
 
     protected void processFailure(FailureEvent event) {
         AutoPlayClientFactory cf = getClientFactory();
-        if (cf.getAutoPlayCtxSignalError() == null || //
-                cf.getAutoPlayCtxSignalError().getContextDefinition() == null || //
-                cf.getAutoPlayCtxSignalError().getEvent() == null //
-        ) {
+        if (!cf.isConfigured()) {
             backToConfig();
             return;
         }
