@@ -114,6 +114,8 @@ public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode {
     @Override
     public void customDurationHook(Consumer<Integer> consumer) {
         this.durationConsumer = consumer;
+        // ten minutes should be enough to show all competitors
+        consumer.accept(10 * 60);
     }
     
 
