@@ -5,6 +5,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayLoopNode;
+import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNodeBase;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlaySequenceNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.RootNodeBase;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.RootNodeState;
@@ -13,7 +14,7 @@ public class RootNodeSixtyInch extends RootNodeBase {
 
     private final AutoPlayLoopNode idleLoop;
     private final AutoPlayLoopNode preLiveRaceLoop;
-    private final AutoPlayLoopNode liveRaceLoop;
+    private final AutoPlayNodeBase liveRaceLoop;
     private final AutoPlaySequenceNode afterLiveRaceLoop;
     protected boolean afterRaceFinished = true;
     private AutoPlayLoopNode preEvent;
@@ -26,7 +27,8 @@ public class RootNodeSixtyInch extends RootNodeBase {
         this.preEvent = new AutoPlayLoopNode("PreEvent", 30, new IdlePreEventNode(cf), new VideoNode(cf));
         this.preLiveRaceLoop = new AutoPlayLoopNode("PreLiveRaceLoop", 90,
                 new PreLiveRaceLeaderBoardWithCompetitorsNode(cf), new PreLiveRaceWithRacemapNode(cf));
-        this.liveRaceLoop = new AutoPlayLoopNode("LiveRaceLoop", 30, new LiveRaceWithRacemapNode(cf));
+        // We currently show only the race map in live state. Therefore we do not need loop support here.
+        this.liveRaceLoop = new LiveRaceWithRacemapNode(cf);
         this.afterLiveRaceLoop = new AutoPlaySequenceNode("AfterLiveRaceLoop", 30,
                 new RaceEndWithCompetitorsBoatsNode(cf), new RaceEndWithCompetitorsFlagsNode(cf));
 
