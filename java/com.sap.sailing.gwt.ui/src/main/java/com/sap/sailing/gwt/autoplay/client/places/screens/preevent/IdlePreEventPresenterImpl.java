@@ -81,9 +81,6 @@ public class IdlePreEventPresenterImpl extends AutoPlayPresenterConfigured<IdleP
     }
 
     protected void updateEventImage() {
-        if (!getClientFactory().isConfigured()) {
-            return;
-        }
         List<ImageDTO> teaserHighlight = new ArrayList<>();
         List<ImageDTO> bigScreenImages = new ArrayList<>();
         for (ImageDTO imageDTO : getSlideCtx().getEvent().getImages()) {
