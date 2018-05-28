@@ -82,7 +82,7 @@ public class ClassicLeaderboardStyle implements LeaderBoardStyle {
     @Override
     public void hookLeaderBoardAttachment(FlowPanel contentPanel,
             FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO> leaderboardTable) {
-        contentPanel.add(leaderboardTable);        
+        contentPanel.add(leaderboardTable);
     }
 
 }

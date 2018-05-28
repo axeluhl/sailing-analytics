@@ -91,7 +91,7 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
     public void afterConstructorHook(LeaderboardPanel<?> leaderboardPanel) {
         this.leaderBoardPanel = leaderboardPanel;
         leaderboardPanel.getLeaderboardTable().getElement().getStyle().setMarginTop(0, Unit.PX);
-        if(leaderboardPanel.playPause != null) {
+        if (leaderboardPanel.playPause != null) {
             leaderboardPanel.playPause.setVisible(false);
         }
         leaderboardPanel.updateToolbar(laterInit);
