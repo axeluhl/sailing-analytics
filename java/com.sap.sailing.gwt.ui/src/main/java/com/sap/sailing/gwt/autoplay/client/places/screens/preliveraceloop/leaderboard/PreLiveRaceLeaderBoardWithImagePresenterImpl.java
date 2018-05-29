@@ -111,7 +111,7 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardPanel = new SingleRaceLeaderboardPanel(null,null,sailingService, new AsyncActionsExecutor(),
-                leaderboardSettings, true, liveRace, competitorSelectionProvider, timer, null,
+                leaderboardSettings, false, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(false),
                 FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));

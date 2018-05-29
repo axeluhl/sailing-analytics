@@ -7,7 +7,6 @@ import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWithStylableHeaders;
@@ -63,15 +62,6 @@ public class ClassicLeaderboardStyle implements LeaderBoardStyle {
 
     @Override
     public void afterConstructorHook(LeaderboardPanel<?> leaderboardPanel) {
-    }
-
-    @Override
-    public void afterLeaderboardUpdate(LeaderboardDTO leaderboard) {
-    }
-
-    @Override
-    public boolean preUpdateToolbarHook(LeaderboardDTO leaderboard) {
-        return true;
     }
 
     @Override

@@ -206,10 +206,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
         void afterConstructorHook(LeaderboardPanel<?> leaderboardPanel);
 
-        void afterLeaderboardUpdate(LeaderboardDTO leaderboard);
-
-        boolean preUpdateToolbarHook(LeaderboardDTO leaderboard);
-
         boolean hasRaceColumns();
 
         void hookLeaderBoardAttachment(FlowPanel contentPanel,
@@ -407,6 +403,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private FlagImageResolver flagImageResolver;
 
+    private Widget toolbarPanel;
+
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LS settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
@@ -531,9 +529,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         busyIndicator.ensureDebugId("BusyIndicator");
         busyStateChangeListeners = new HashSet<>();
 
+        //required to enforce proper margin layouting
+        contentPanel.add(new Label());
+        
         // the information panel
         if (!isEmbedded) {
-            Widget toolbarPanel = createToolbarPanel();
+            toolbarPanel = createToolbarPanel();
             contentPanel.add(toolbarPanel);
         }
         if (competitorSearchTextBox != null) {
@@ -573,6 +574,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
         updateSettings(settings);
         style.afterConstructorHook(this);
+        
+        //ensure proper margin styling
+        contentPanel.add(new Label());
     }
 
     public void scrollRowIntoView(int selected) {
@@ -2637,26 +2641,22 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
             informLeaderboardUpdateListenersAboutLeaderboardUpdated(leaderboard);
         }
-        style.afterLeaderboardUpdate(leaderboard);
     }
 
     protected void updateToolbar(LeaderboardDTO leaderboard) {
-        boolean doExecute = style.preUpdateToolbarHook(leaderboard);
-        if (doExecute) {
-            scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
-            if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
-                Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
-                String lastUpdate = DateAndTimeFormatterUtil.formatLongDateAndTimeGMT(lastCorrectionDate);
-                scoreCorrectionLastUpdateTimeLabel.setText(stringMessages.lastScoreUpdate() + ": " + lastUpdate);
-            } else {
-                scoreCorrectionLastUpdateTimeLabel.setText("");
-            }
-
-            boolean hasLiveRace = !leaderboard.getLiveRaces(timer.getLiveTimePointInMillis()).isEmpty();
-            liveRaceLabel.setText(hasLiveRace ? getLiveRacesText() : "");
-            scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
-            liveRaceLabel.setVisible(hasLiveRace);
+        scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
+        if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
+            Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
+            String lastUpdate = DateAndTimeFormatterUtil.formatLongDateAndTimeGMT(lastCorrectionDate);
+            scoreCorrectionLastUpdateTimeLabel.setText(stringMessages.lastScoreUpdate() + ": " + lastUpdate);
+        } else {
+            scoreCorrectionLastUpdateTimeLabel.setText("");
         }
+
+        boolean hasLiveRace = !leaderboard.getLiveRaces(timer.getLiveTimePointInMillis()).isEmpty();
+        liveRaceLabel.setText(hasLiveRace ? getLiveRacesText() : "");
+        scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
+        liveRaceLabel.setVisible(hasLiveRace);
     }
 
     protected abstract void processAutoExpands(AbstractSortableColumnWithMinMax<?, ?> c, RaceColumn<?> lastRaceColumn);

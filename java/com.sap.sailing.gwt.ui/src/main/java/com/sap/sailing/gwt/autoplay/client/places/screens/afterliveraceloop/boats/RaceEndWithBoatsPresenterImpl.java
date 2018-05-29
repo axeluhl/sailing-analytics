@@ -73,7 +73,7 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
                 PlayStates.Paused,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardPanel = new SingleRaceLeaderboardPanel(null, null, sailingService, new AsyncActionsExecutor(), leaderboardSettings,
-                true, liveRace, competitorSelectionProvider, timer, null,
+                false, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(true),
                 FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));

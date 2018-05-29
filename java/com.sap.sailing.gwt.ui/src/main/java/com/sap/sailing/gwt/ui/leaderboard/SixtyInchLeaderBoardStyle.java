@@ -12,8 +12,8 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.autoplay.client.resources.LeaderboardTableResourcesSixty;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWithStylableHeaders;
@@ -33,10 +33,7 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
     }
 
     
-    private LeaderboardDTO laterInit;
-    private LeaderboardPanel<?> leaderBoardPanel;
     private boolean showRaceColumns;
-    private boolean ready;
     
     public SixtyInchLeaderBoardStyle(boolean showRaceColumns) {
         this.showRaceColumns = showRaceColumns;
@@ -89,25 +86,20 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
 
     @Override
     public void afterConstructorHook(LeaderboardPanel<?> leaderboardPanel) {
-        this.leaderBoardPanel = leaderboardPanel;
         leaderboardPanel.getLeaderboardTable().getElement().getStyle().setMarginTop(0, Unit.PX);
+        leaderboardPanel.getElement().getStyle().setWidth(100, Unit.PCT);
+        leaderboardPanel.getElement().getStyle().setHeight(100, Unit.PCT);
         if (leaderboardPanel.playPause != null) {
             leaderboardPanel.playPause.setVisible(false);
         }
-        leaderboardPanel.updateToolbar(laterInit);
-        ready = true;
-    }
-
-    @Override
-    public void afterLeaderboardUpdate(LeaderboardDTO leaderboard) {
-        if(ready){
-            leaderBoardPanel.updateToolbar(leaderboard);
+        Widget toolBar = leaderboardPanel.getToolbarWidget(); 
+        if(toolBar != null) {
+            Style style = toolBar.getElement().getStyle();
+            style.setPosition(Position.ABSOLUTE);
+            style.setLeft(0, Unit.PX);
+            style.setRight(0, Unit.PX);
+            style.setBottom(0, Unit.PX);
         }
-    }
-
-    @Override
-    public boolean preUpdateToolbarHook(LeaderboardDTO leaderboard) {
-        return ready;
     }
 
     @Override
@@ -120,6 +112,9 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
             FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO> leaderboardTable) {
         SimplePanel wrapper = new SimplePanel(leaderboardTable);
         contentPanel.add(wrapper);
+        contentPanel.getElement().getStyle().setWidth(100, Unit.PCT);
+        contentPanel.getElement().getStyle().setHeight(100, Unit.PCT);
+        contentPanel.getElement().getStyle().setPosition(Position.RELATIVE);
         Style style = wrapper.getElement().getStyle();
         style.setOverflow(Overflow.HIDDEN);
         style.setLeft(0, Unit.PX);;
