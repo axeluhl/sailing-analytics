@@ -18,13 +18,15 @@ import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 
 public class IdleSixtyInchLeaderBoardPresenterImpl extends AutoPlayPresenterConfigured<IdleSixtyInchLeaderBoardPlace>
         implements IdleSixtyInchLeaderBoardView.Slide7Presenter {
-    protected static final int SWITCH_COMPETITOR_DELAY = 2000;
+    private static final int SWITCH_COMPETITOR_DELAY = 2000;
+    private static final int WAIT_FOR_POPULATION_DELAY = 10000;
     private static final Logger LOGGER = Logger.getLogger(IdleSixtyInchLeaderBoardPresenterImpl.class.getName());
     private IdleSixtyInchLeaderBoardView view;
     private int selected = -1;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
     private MultiRaceLeaderboardPanel leaderboardPanel;
     private Timer selectionTimer;
+    private int emptyTries;
 
     public IdleSixtyInchLeaderBoardPresenterImpl(IdleSixtyInchLeaderBoardPlace place, AutoPlayClientFactory clientFactory,
             IdleSixtyInchLeaderBoardView lifeRaceWithRacemapViewImpl) {
@@ -40,6 +42,7 @@ public class IdleSixtyInchLeaderBoardPresenterImpl extends AutoPlayPresenterConf
 
     @Override
     public void startConfigured(AcceptsOneWidget panel) {
+        emptyTries = 0;
         try {
             leaderboardPanel = getPlace().getLeaderboardPanel();
             view.startingWith(this, panel, getPlace().getLeaderboardPanel());
@@ -66,8 +69,16 @@ public class IdleSixtyInchLeaderBoardPresenterImpl extends AutoPlayPresenterConf
             
             // wait for data in leaderboard, if empty no need to proceed
             if (compList.isEmpty()) {
+                //ensure that if for some reasons the leaderboard will not be populated, we are not trapped here
+                if (emptyTries * SWITCH_COMPETITOR_DELAY > WAIT_FOR_POPULATION_DELAY) {
+                    getPlace().getDurationConsumer().accept(0);
+                    return;
+                }
+                emptyTries++;
                 selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
                 return;
+            } else {
+                emptyTries = 0;
             }
             selected++;
             // end reached, notify we are done
