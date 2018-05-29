@@ -125,10 +125,11 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
         
         List<LeaderboardRowDTO> sortedCompetitors = leaderboardPanel.getLeaderboardTable().getVisibleItems();
         if (sortedCompetitors.size() > 0) {
-            if(getPlace().getStatistic() == null){
-                view.setStatistic(windSpeed,null, AutoplayHelper.durationOfCurrentLiveRaceRunning());
-            }else{
-                view.setStatistic(windSpeed,getPlace().getStatistic().getDistance(), AutoplayHelper.durationOfCurrentLiveRaceRunning());
+            if (getPlace().getStatistic() == null) {
+                view.setStatistic(windSpeed, null, AutoplayHelper.durationOfCurrentLiveRaceRunning());
+            } else {
+                view.setStatistic(windSpeed, getPlace().getStatistic().getDistance(),
+                        AutoplayHelper.durationOfCurrentLiveRaceRunning());
             }
         }
     }
