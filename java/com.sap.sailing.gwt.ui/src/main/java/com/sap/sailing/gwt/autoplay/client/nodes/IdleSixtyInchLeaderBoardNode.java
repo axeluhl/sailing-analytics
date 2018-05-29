@@ -44,11 +44,12 @@ public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode {
     @Override
     public void onStart() {
         List<DetailType> overallDetails = new ArrayList<>();
-        if (this.overallLeaderBoard) {
-            overallDetails.add(DetailType.OVERALL_RANK);
-        } else {
+        //TODO Enable this, once Leaderboards can actually show the OverallRank see Bug 4588
+//        if (this.overallLeaderBoard) {
+//            overallDetails.add(DetailType.OVERALL_RANK);
+//        } else {
             overallDetails.add(DetailType.REGATTA_RANK);
-        }
+//        }
 
         List<DetailType> raceDetails = new ArrayList<>();
         // raceDetails.add(DetailType.RACE_RANK);
