@@ -37,7 +37,7 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
     @UiField
     Label statisticProperty3;
     
-    private NumberFormat compactFormat = NumberFormat.getFormat("#.0");
+    private NumberFormat compactFormat = NumberFormat.getFormat("0.0");
 
     private RaceMap rawRaceMap;
 
