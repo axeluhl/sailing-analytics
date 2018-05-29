@@ -44,8 +44,11 @@ public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode {
     @Override
     public void onStart() {
         List<DetailType> overallDetails = new ArrayList<>();
-        overallDetails.add(DetailType.OVERALL_RANK);
-        overallDetails.add(DetailType.REGATTA_RANK);
+        if (this.overallLeaderBoard) {
+            overallDetails.add(DetailType.OVERALL_RANK);
+        } else {
+            overallDetails.add(DetailType.REGATTA_RANK);
+        }
 
         List<DetailType> raceDetails = new ArrayList<>();
         // raceDetails.add(DetailType.RACE_RANK);
