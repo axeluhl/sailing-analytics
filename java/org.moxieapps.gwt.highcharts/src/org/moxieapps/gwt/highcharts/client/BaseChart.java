@@ -1998,10 +1998,8 @@ public abstract class BaseChart<T> extends Widget {
      * @return A reference to this {@link BaseChart} instance for convenient method chaining.
      */
     public T addSeries(Series series, boolean redraw, Animation animation) {
-
         // Whether or not we've been rendered yet or not, maintain a reference to all of the series that we're managing
         seriesList.add(series);
-
         if (isRendered()) {
             final JavaScriptObject seriesOptions = convertSeriesToJSON(series).getJavaScriptObject();
             if (animation == null || animation.getOptions() == null) {
@@ -2012,7 +2010,7 @@ public abstract class BaseChart<T> extends Widget {
                 nativeAddSeries(chart, seriesOptions, redraw, animationOptions);
             }
             series.setRendered(true);
-
+            series.show();
             // Once we're rendered, we're maintaining the point state in the DOM, so we can dump our internal list to save memory
             series.clearInternalPointsList();
         }

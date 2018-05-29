@@ -63,7 +63,6 @@ public interface TrackedRegatta extends Serializable {
      * @param raceDefinitionSetToUpdate
      *            if not <code>null</code>, after creating the {@link TrackedRace}, the <code>raceDefinition</code> is
      *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace) added} to that object.
-     * @param raceLogResolver TODO
      */
     DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
@@ -87,11 +86,28 @@ public interface TrackedRegatta extends Serializable {
     void removeTrackedRace(TrackedRace trackedRace, Optional<ThreadLocalTransporter> beforeAndAfterNotificationHandler);
 
     /**
-     * Listener will be notified when {@link #addTrackedRace(TrackedRace)} is called and
-     * upon registration for each tracked race already known. Therefore, the listener
-     * won't miss any tracked race.
+     * Listener will be notified when {@link #addTrackedRace(TrackedRace)} is called and upon registration for each
+     * tracked race already known. Therefore, the listener won't miss any tracked race.<br>
+     * 
+     * Events for synchronous listeners are processed in the calling thread. This implies that implementations must not
+     * block for events triggered only by other callbacks to implementations of this interface, or else they risk a
+     * deadlock. For example, trying a blocking wait for another {@link TrackedRace} to appear is a bad idea because the
+     * appearance of that other race may have to be signalled by a {@link #raceAdded(TrackedRace)} callback.
+     * 
+     * @param listener
+     *            the listener to add
+     * @param beforeAndAfterNotificationHandler
+     *            can be used to carry across the state of any {@link ThreadLocal}s from the thread where the callback
+     *            is triggered to the thread executing the listener's code; this is only useful for listeners registering
+     *            for asynchronous callbacks ({@code synchronous==false}).
+     * @param synchronous
+     *            if {@code true}, the listener will be invoked synchronously where the callback is triggered; there is no need
+     *            for transporting {@link ThreadLocal} state to the executing thread in this case. If {@code false}, a work queue
+     *            will be created specifically for the {@code listener} registered by this call, and a separate thread for this
+     *            queue will execute its callback invocations, preserving the "per-listener callback order" but without
+     *            guaranteeing any ordering across several distinct listeners.
      */
-    void addRaceListener(RaceListener listener, Optional<ThreadLocalTransporter> beforeAndAfterNotificationHandler);
+    void addRaceListener(RaceListener listener, Optional<ThreadLocalTransporter> beforeAndAfterNotificationHandler, boolean synchronous);
     
     /**
      * Removes the given listener and returns a {@link Future} that will be completed
