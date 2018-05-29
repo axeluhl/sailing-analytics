@@ -99,8 +99,15 @@ public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode {
                 durationConsumer);
         setPlaceToGo(place);
         firePlaceChangeAndStartTimer();
-        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtxSignalError().getEvent().getName(),
-                cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName()));
+        final String title, subtitle;
+        if (this.overallLeaderBoard) {
+            title = leaderboardName;
+            subtitle = null;
+        } else {
+            title = cf.getAutoPlayCtxSignalError().getEvent().getName();
+            subtitle = leaderboardName;
+        }
+        getBus().fireEvent(new AutoPlayHeaderEvent(title, subtitle));
     }
 
     @Override
