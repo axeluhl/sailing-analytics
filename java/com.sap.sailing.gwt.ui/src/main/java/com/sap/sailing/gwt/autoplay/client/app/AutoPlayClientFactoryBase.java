@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
@@ -21,6 +24,8 @@ public abstract class AutoPlayClientFactoryBase
     private final MediaServiceAsync mediaService;
     private final AutoPlayPlaceNavigator navigator;
 
+    private final Map<String, SailingServiceAsync> services = new HashMap<>();
+    
     public AutoPlayClientFactoryBase(ApplicationTopLevelView root, EventBus eventBus, PlaceController placeController,
             AutoPlayPlaceNavigator navigator) {
         super(root, eventBus, placeController);
@@ -40,16 +45,25 @@ public abstract class AutoPlayClientFactoryBase
 
     @Override
     public SailingServiceAsync getSailingService() {
+        if (getAutoPlayCtx() != null && 
+                getAutoPlayCtx().getContextDefinition() != null && 
+                getAutoPlayCtx().getContextDefinition().getLeaderboardName() != null) {
+            return getSailingService( ()->getAutoPlayCtx().getContextDefinition().getLeaderboardName());
+        } 
         return sailingService;
     }
     
     @Override
     public SailingServiceAsync getSailingService(ProvidesLeaderboardRouting routingProvider) {
-        // TODO: cache created services?
         if (routingProvider == null) {
             return sailingService;
         } else {            
-            return SailingServiceHelper.createSailingServiceInstance(routingProvider);
+            SailingServiceAsync sailingServiceAsync = services.get(routingProvider.routingSuffixPath());
+            if (sailingServiceAsync == null) {
+                sailingServiceAsync = SailingServiceHelper.createSailingServiceInstance(routingProvider);
+                services.put(routingProvider.routingSuffixPath(), sailingServiceAsync);
+            }
+            return sailingServiceAsync;
         }
     }
 
