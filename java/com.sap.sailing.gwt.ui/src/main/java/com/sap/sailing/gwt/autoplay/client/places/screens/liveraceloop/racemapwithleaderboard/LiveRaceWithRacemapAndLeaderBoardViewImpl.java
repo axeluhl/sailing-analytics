@@ -41,6 +41,8 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
 
     private RaceMap rawRaceMap;
 
+    private SingleRaceLeaderboardPanel leaderboardPanel;
+
     interface LifeRaceWithRacemapViewImplUiBinder extends UiBinder<Widget, LiveRaceWithRacemapAndLeaderBoardViewImpl> {
     }
 
@@ -61,7 +63,7 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
 
     @Override
     public void scrollLeaderBoardToTop() {
-        leaderBoardHolder.getElement().setScrollTop(0);
+        leaderboardPanel.getHeaderWidget().getElement().setScrollTop(0);
     }
 
     @Override
@@ -74,6 +76,7 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
         panel.setWidget(this);
         rawRaceMap = raceMap;
         racemap.add(raceMap);
+        this.leaderboardPanel = leaderboardPanel;
         leaderBoardHolder.add(leaderboardPanel);
     }
 
@@ -98,6 +101,15 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
         statisticProperty3.setText(StringMessages.INSTANCE.durationPlain());
         statisticValue3.setText(compactFormat.format(duration/1000f/60f) + " " + StringMessages.INSTANCE.minutes());
     }
+
+
+    @Override
+    public native void ensureMapVisibility() /*-{
+        try {
+            $wnd.dispatchEvent(new Event("resize"));
+        } catch (error) {
+        }
+    }-*/;
 
 }
 
