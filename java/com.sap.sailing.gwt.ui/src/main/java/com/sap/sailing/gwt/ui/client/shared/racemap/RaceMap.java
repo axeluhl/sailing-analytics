@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -1116,8 +1117,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings>
                             removeAllManeuverMarkers();
                         }
                         if (maneuverLossLines != null) {
-                            removeManeuverLossLines();
+                            removeManeuverLossLinesAndInfoOverlays();
                         }
+                        removeManeuverLossTargetVmgLines();
 
                         if (requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown) {
                             updateCoordinateSystemFromSettings();
@@ -2345,9 +2347,23 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings>
                     maneuverLossCheckBoxValueStore.put(t, maneuverLossLinesCheckBox.getValue());
                 }
             });
+            CheckBox maneuverLossTargetVMGCheckBox = new CheckBox ("Target VMG");
+            if (maneuverLossTargetVMGCheckBoxValueStore.isEmpty()) {
+                maneuverLossTargetVMGCheckBoxValueStore.put(t, false);
+            }
+            maneuverLossTargetVMGCheckBox.setValue(maneuverLossTargetVMGCheckBoxValueStore.get(t));
+            maneuverLossTargetVMGCheckBox.addClickHandler(new ClickHandler() {
+                
+                @Override
+                public void onClick(ClickEvent event) {
+                    showManeuverLossTargetVmg(competitor, maneuver, maneuverLossTargetVMGCheckBox.getValue());
+                    maneuverLossTargetVMGCheckBoxValueStore.put(t, maneuverLossTargetVMGCheckBox.getValue());
+                }
+            });
             HorizontalPanel hPanel = new HorizontalPanel();
             hPanel.add(maneuverLossWidget);
             hPanel.add(maneuverLossLinesCheckBox);
+            hPanel.add(maneuverLossTargetVMGCheckBox);
             vPanel.add(hPanel);
         }
         if (maneuver.markPassingTimePoint != null) {
@@ -2630,26 +2646,90 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings>
         if (showManeuverVisualization == false) {
             Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.timePoint,
                     maneuver.type);
-            for (Polyline p : maneuverLossLinesMap.get(t)) {
-                p.setMap((MapWidget) null);
+            if (maneuverLossLinesMap.get(t) != null) {
+                for (Polyline p : maneuverLossLinesMap.get(t)) {
+                    p.setMap((MapWidget) null);
+                }
             }
             maneuverLossInfoOverlayMap.get(t).removeFromMap();
         } else {
-            createManeuverLossLines(maneuver, competitor);
+            createManeuverLossLinesAndInfoOverlays(maneuver, competitor);
         }
     }
-    
+
+    private void showManeuverLossTargetVmg(CompetitorDTO competitor, ManeuverDTO maneuver,
+            boolean showManeuverLossTargetVmg) {
+        Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.timePoint,
+                maneuver.type);
+        if (!showManeuverLossTargetVmg) {
+            if (maneuverLossTargetVmgMap.get(t) != null) {
+                for (Polyline p : maneuverLossTargetVmgMap.get(t)) {
+                    p.setMap((MapWidget) null);
+                }
+            }
+        } else {
+            maneuverLossTargetVmgMap.put(t, createManeuverLossTargetVmgPolyline(competitor, maneuver));
+        }
+
+    }
+
+    private Set<Polyline> createManeuverLossTargetVmgPolyline(CompetitorDTO competitor, ManeuverDTO maneuver) {
+        List<Date> timePointList = new ArrayList<>();
+        Set<Polyline> result = new HashSet<>();
+        int stepInSeconds = 1;
+        for (long l = maneuver.timePointBefore.getTime() / 1000; l <= maneuver.timePointBefore.getTime() / 1000
+                + maneuver.maneuverLoss.maneuverDuration.asSeconds(); l += stepInSeconds) {
+            timePointList.add(new Date(l * 1000));
+        }
+        PolylineOptions options = PolylineOptions.newInstance();
+        options.setGeodesic(true);
+        options.setStrokeOpacity(1.0);
+        options.setStrokeWeight(10);
+        //Color needs to be set individual
+        options.setStrokeColor("#000000");
+        options.setZindex(RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX);
+        options.setMap(map);
+        ListIterator<Date> iter = timePointList.listIterator();
+        while (iter.hasNext()) {
+            iter.next();
+            MVCArray<LatLng> pointsAsArray = MVCArray.newInstance();
+            pointsAsArray.push(coordinateSystem.toLatLng(getBoatFix(competitor, iter.previous()).position));
+            iter.next();
+            pointsAsArray.push(coordinateSystem.toLatLng(getBoatFix(competitor, iter.next()).position));
+            options.setPath(pointsAsArray);
+            Polyline res = Polyline.newInstance(options);
+            result.add(res);
+        }
+        return result;
+    }
+
+    private void removeManeuverLossTargetVmgLines() {
+        if (!maneuverLossTargetVmgMap.isEmpty()) {
+            for (Triple<String, Date, ManeuverType> t : maneuverLossTargetVmgMap.keySet()) {
+                for (Polyline p : maneuverLossTargetVmgMap.get(t)) {
+                    p.setMap((MapWidget) null);
+                }
+            }
+            maneuverLossTargetVmgMap.clear();
+        }
+        if (!maneuverLossTargetVMGCheckBoxValueStore.isEmpty()) {
+            maneuverLossTargetVMGCheckBoxValueStore.clear();
+        }
+    }
+
     private Map<Triple<String, Date, ManeuverType>, Boolean> maneuverLossCheckBoxValueStore = new HashMap<>();
+    private Map<Triple<String, Date, ManeuverType>, Boolean> maneuverLossTargetVMGCheckBoxValueStore = new HashMap<>();
     private SmallTransparentInfoOverlay maneuverLossInfoOverlay;
     private Set<Polyline> maneuverLossLines;
     private Map<Triple<String, Date, ManeuverType>, Set<Polyline>> maneuverLossLinesMap = new HashMap<>();
+    private Map<Triple<String, Date, ManeuverType>, Set<Polyline>> maneuverLossTargetVmgMap = new HashMap<>();
     private Map<Triple<String, Date, ManeuverType>, SmallTransparentInfoOverlay> maneuverLossInfoOverlayMap = new HashMap<>();
 
     /**
      * Removes the Polylines visualizing the ManeuverLoss and the SmallTransparentInfoOverlays attached to the
-     * Polylines. Also clears the Checkbox that defines whether a maneuverLoss is visualized or not.
+     * Polylines. Also clears the CheckboxValueStore for maneuverLoss.
      */
-    private void removeManeuverLossLines() {
+    private void removeManeuverLossLinesAndInfoOverlays() {
         if (!maneuverLossLinesMap.isEmpty()) {
             for (Triple<String, Date, ManeuverType> t : maneuverLossLinesMap.keySet()) {
                 for (Polyline maneuverLossLine : maneuverLossLinesMap.get(t)) {
@@ -2666,9 +2746,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings>
             maneuverLossInfoOverlayMap.clear();
         }
         if (!maneuverLossCheckBoxValueStore.isEmpty()) {
-            for (Map.Entry<Triple<String, Date, ManeuverType>, Boolean> e : maneuverLossCheckBoxValueStore.entrySet()) {
-                e.setValue(false);
-            }
             maneuverLossCheckBoxValueStore.clear();
         }
     }
@@ -2678,7 +2755,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings>
      * SmallTransparentInfoOverlays attached to the Polylines visualizing the maneuver.
      * 
      */
-    private void createManeuverLossLines(ManeuverDTO maneuver, CompetitorDTO competitor) {
+    private void createManeuverLossLinesAndInfoOverlays(ManeuverDTO maneuver, CompetitorDTO competitor) {
         maneuverLossLines = new HashSet<>();
         Bearing bearingBefore = new DegreeBearingImpl(maneuver.maneuverLoss.speedWithBearingBefore.bearingInDegrees);
         Bearing middleManeuverAngle = new DegreeBearingImpl(maneuver.maneuverLoss.middleManeuverAngle);
@@ -2951,7 +3028,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings>
             if (!(timer.getPlayState() == PlayStates.Playing) && lastManeuverResult != null) {
                 removeAllManeuverMarkers();
                 showManeuvers(lastManeuverResult);
-                removeManeuverLossLines();
+                removeManeuverLossLinesAndInfoOverlays();
+                removeManeuverLossTargetVmgLines();
             }
         }
         if (newSettings.isShowDouglasPeuckerPoints() != settings.isShowDouglasPeuckerPoints()) {
