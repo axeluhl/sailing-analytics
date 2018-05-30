@@ -41,10 +41,22 @@
             padding: 10px 10px;
             
         }
+        .googleMaps {
+	        border-color: black;
+	        border-width: 1px;
+	        border-style: solid;
+            font-family: monospace, monospace;
+            display: block;
+            margin-top: 1em;
+            margin-bottom: 1em;
+            padding: 1em;
+        }
+        
     </ui:style>
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {style.outerPanel}">
         <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
             <a href="http://www.sap.com/about/legal/impressum.html"><ui:text from='{i18n.footerLegal}' /></a>
+            <g:Label styleName="{style.googleMaps}" ui:field="googleLegal"/>
             <g:ValueListBox ui:field="componentListUi"
                 styleName="{style.listbox}" />
             <h1 ui:field="nameUi" class="{style.owner}"/>
