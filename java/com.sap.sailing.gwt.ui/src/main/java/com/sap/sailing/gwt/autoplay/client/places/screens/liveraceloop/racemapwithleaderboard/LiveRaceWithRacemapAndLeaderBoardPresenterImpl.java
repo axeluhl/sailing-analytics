@@ -40,7 +40,8 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
         extends AutoPlayPresenterConfigured<LiveRaceWithRacemapAndLeaderBoardPlace>
         implements LiveRaceWithRacemapAndLeaderBoardView.Slide7Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
-    private static final Logger LOGGER = Logger.getLogger(LiveRaceWithRacemapAndLeaderBoardPresenterImpl.class.getName());
+    private static final Logger LOGGER = Logger
+            .getLogger(LiveRaceWithRacemapAndLeaderBoardPresenterImpl.class.getName());
     private LiveRaceWithRacemapAndLeaderBoardView view;
     private Timer selectionTimer;
     private SingleRaceLeaderboardPanel leaderboardPanel;
@@ -85,14 +86,12 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
                 @Override
                 public void execute() {
                     leaderboardPanel.scrollRowIntoView(selected);
-                    if (selected == 0) {
-                        view.ensureMapVisibility();
-                    }
+                    view.ensureMapVisibility();
                 }
             });
         } catch (Exception e) {
             // ensure that the loop keeps running, no matter if errors occur
-            LOGGER.log(Level.WARNING, "error in leaderboard loop" , e);
+            LOGGER.log(Level.WARNING, "error in leaderboard loop", e);
             selected = 0;
         }
         selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
@@ -121,8 +120,6 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
             }
         }
 
-        
-        
         List<LeaderboardRowDTO> sortedCompetitors = leaderboardPanel.getLeaderboardTable().getVisibleItems();
         if (sortedCompetitors.size() > 0) {
             if (getPlace().getStatistic() == null) {
@@ -167,7 +164,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardPanel = new SingleRaceLeaderboardPanel(null, null, sailingService, new AsyncActionsExecutor(),
                 leaderboardSettings, false, liveRace, getPlace().getRaceMapSelectionProvider(), timer, null,
-                getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
+                getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE,
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(true),
                 FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
         getPlace().getRaceMap().setQuickRanksDTOProvider(new QuickRanksDTOFromLeaderboardDTOProvider(
@@ -181,10 +178,10 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
         if (timer != null) {
             timer.pause();
         }
-        if(getPlace().getRaceboardTimer() != null){
+        if (getPlace().getRaceboardTimer() != null) {
             getPlace().getRaceboardTimer().pause();
         }
-        if(getPlace().getTimeProvider() != null){
+        if (getPlace().getTimeProvider() != null) {
             getPlace().getTimeProvider().terminate();
         }
         selectionTimer.cancel();
