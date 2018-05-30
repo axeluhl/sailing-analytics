@@ -107,6 +107,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.RS_AERO.getDisplayName(), imageResources.RSAEROIcon());
         boatClassIconsMap.put(BoatClassMasterdata.RS_X.getDisplayName(), imageResources.RSXIcon());
         boatClassIconsMap.put(BoatClassMasterdata.RS_FEVA.getDisplayName(), imageResources.RSFevaIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.RS_TERA.getDisplayName(), imageResources.RSTeraIcon());
         boatClassIconsMap.put(BoatClassMasterdata.SKUD_18.getDisplayName(), imageResources.Skud18Icon());
         boatClassIconsMap.put(BoatClassMasterdata.SONAR.getDisplayName(), imageResources.SonarIcon());
         boatClassIconsMap.put(BoatClassMasterdata.SOLING.getDisplayName(), imageResources.SolingIcon());
