@@ -42,13 +42,9 @@ public class RootNodeSixtyInch extends RootNodeBase {
 
     protected boolean processStateTransition(RegattaAndRaceIdentifier currentPreLiveRace,
             RegattaAndRaceIdentifier currentLiveRace, RootNodeState goingTo, RootNodeState comingFrom) {
-        // block transitions, until the afterLiveRaceLoop is finished
-        if (comingFrom == RootNodeState.AFTER_LIVE) {
-            if (afterRaceFinished) {
-                afterRaceFinished = false;
-            } else {
-                return true;
-            }
+        // veto transitions, if in AFTER_LIVe and it did not finish yet
+        if (comingFrom == RootNodeState.AFTER_LIVE && !afterRaceFinished) {
+            return true;
         }
         getClientFactory().getAutoPlayCtxSignalError().updateLiveRace(currentPreLiveRace, currentLiveRace);
         switch (goingTo) {
@@ -66,6 +62,7 @@ public class RootNodeSixtyInch extends RootNodeBase {
             break;
         case AFTER_LIVE:
             transitionTo(afterLiveRaceLoop);
+            afterRaceFinished = false;
             break;
         }
         return false;
