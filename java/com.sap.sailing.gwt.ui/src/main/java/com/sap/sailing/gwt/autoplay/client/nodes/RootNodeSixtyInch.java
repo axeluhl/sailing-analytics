@@ -42,7 +42,7 @@ public class RootNodeSixtyInch extends RootNodeBase {
 
     protected boolean processStateTransition(RegattaAndRaceIdentifier currentPreLiveRace,
             RegattaAndRaceIdentifier currentLiveRace, RootNodeState goingTo, RootNodeState comingFrom) {
-        // veto transitions, if in AFTER_LIVe and it did not finish yet
+        // veto transitions, if in AFTER_LIVE and it did not finish yet
         if (comingFrom == RootNodeState.AFTER_LIVE && !afterRaceFinished) {
             return true;
         }
