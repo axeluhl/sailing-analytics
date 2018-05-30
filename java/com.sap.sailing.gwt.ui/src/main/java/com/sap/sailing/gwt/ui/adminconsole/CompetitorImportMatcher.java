@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sse.common.Util;
 
 /**
@@ -37,7 +38,9 @@ public class CompetitorImportMatcher {
 
     private boolean isEqual(CompetitorDescriptor competitorDescriptor, CompetitorDTO existingCompetitor) {
         return Util.equalsWithNull(competitorDescriptor.getName(), existingCompetitor.getName(), /* ignoreCase */ true)
-                && Util.equalsWithNull(removeSpaces(competitorDescriptor.getSailNumber()), removeSpaces(existingCompetitor.getSailID()), /* ignoreCase */ true)
+                && (!existingCompetitor.hasBoat() ||
+                        Util.equalsWithNull(removeSpaces(competitorDescriptor.getSailNumber()),
+                                            removeSpaces(((CompetitorWithBoatDTO) existingCompetitor).getSailID()), /* ignoreCase */ true))
                 && compareCountryCode(competitorDescriptor, existingCompetitor);
     }
     

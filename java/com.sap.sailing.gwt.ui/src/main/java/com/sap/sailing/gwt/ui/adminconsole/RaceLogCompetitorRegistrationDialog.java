@@ -11,12 +11,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.CompetitorAndBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -142,14 +144,18 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
      */
     private Map<String, Set<CompetitorDTO>> findCompetitorsFromTheSameRaceColumn(final List<FleetDTO> fleets) {
         final Map<String, Set<CompetitorDTO>> result = new HashMap<>();
-        final Map<String, ParallelExecutionCallback<Collection<CompetitorDTO>>> callbacksForFleetNames = new HashMap<>();
+        final Map<String, ParallelExecutionCallback<Collection<CompetitorAndBoatDTO>>> callbacksForFleetNames = new HashMap<>();
         for (FleetDTO fleetDTO : fleets) {
             final String curFleetName = fleetDTO.getName();
             if (!curFleetName.equals(fleetName)) {
-                callbacksForFleetNames.put(curFleetName, new ParallelExecutionCallback<Collection<CompetitorDTO>>() {
+                callbacksForFleetNames.put(curFleetName, new ParallelExecutionCallback<Collection<CompetitorAndBoatDTO>>() {
                     @Override
-                    public void onSuccess(Collection<CompetitorDTO> competitorRegistrationsForRace) {
-                        result.put(curFleetName, new HashSet<>(competitorRegistrationsForRace));
+                    public void onSuccess(Collection<CompetitorAndBoatDTO> competitorRegistrationsForRace) {
+                        final Set<CompetitorDTO> competitorsInRace = new HashSet<>();
+                        for (final CompetitorAndBoatDTO cAndB : competitorRegistrationsForRace) {
+                            competitorsInRace.add(cAndB.getCompetitor());
+                        }
+                        result.put(curFleetName, competitorsInRace);
                         super.onSuccess(competitorRegistrationsForRace);
                     }
                 });
@@ -168,7 +174,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                     errorReporter.reportError("Could not load already registered competitors: " + t.getMessage());
                 }
             };
-            for (final Entry<String, ParallelExecutionCallback<Collection<CompetitorDTO>>> fleetNameAndCallback : callbacksForFleetNames
+            for (final Entry<String, ParallelExecutionCallback<Collection<CompetitorAndBoatDTO>>> fleetNameAndCallback : callbacksForFleetNames
                     .entrySet()) {
                 sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName,
                         fleetNameAndCallback.getKey(), fleetNameAndCallback.getValue());
@@ -196,10 +202,24 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
 
     private void getRegisteredCompetitors(AsyncCallback<Collection<CompetitorDTO>> callback) {
         if (competitorRegistrationsPanel.showOnlyCompetitorsOfLog()) {
-            sailingService.getCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName, callback);
+            sailingService.getCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName, extractCompetitorDTOFromCompetitorAndBoatDTO(callback));
         } else {
-            sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName, fleetName, callback);
+            sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName, fleetName, extractCompetitorDTOFromCompetitorAndBoatDTO(callback));
         }
+    }
+    
+    private AsyncCallback<Collection<CompetitorAndBoatDTO>> extractCompetitorDTOFromCompetitorAndBoatDTO(final AsyncCallback<Collection<CompetitorDTO>> callback) {
+        return new AsyncCallback<Collection<CompetitorAndBoatDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure(caught);
+            }
+
+            @Override
+            public void onSuccess(Collection<CompetitorAndBoatDTO> result) {
+                callback.onSuccess(result.stream().map(competitorAndBoat->competitorAndBoat.getCompetitor()).collect(Collectors.toSet()));
+            }
+        };
     }
     
     private void setupCompetitorRegistationsOnRaceCheckbox() {

@@ -10,7 +10,7 @@ import com.google.gwt.core.client.ScriptInjector;
  *
  */
 public final class Highcharts {
-    public static LegacyResources LEGACY = GWT.create(LegacyResources.class);
+    public static HighChartsRessource HIGHCHARTS_RESSOURCES = GWT.create(HighChartsRessource.class);
 
     private static boolean isInjected = false;
     private static boolean isMoreInjected = false;
@@ -24,8 +24,8 @@ public final class Highcharts {
      */
     public static void ensureInjected() {
         if (!isInjected) {
-            ScriptInjector.fromString(LEGACY.highcharts().getText()).setWindow(ScriptInjector.TOP_WINDOW).inject();
-            ScriptInjector.fromString(LEGACY.highchartsThemeGrid().getText()).setWindow(ScriptInjector.TOP_WINDOW)
+            ScriptInjector.fromString(HIGHCHARTS_RESSOURCES.highcharts().getText()).setWindow(ScriptInjector.TOP_WINDOW).inject();
+            ScriptInjector.fromString(HIGHCHARTS_RESSOURCES.highchartsThemeGrid().getText()).setWindow(ScriptInjector.TOP_WINDOW)
                     .inject();
             isInjected = true;
         }
@@ -37,7 +37,7 @@ public final class Highcharts {
     public static void ensureInjectedWithMore() {
         ensureInjected();
         if (!isMoreInjected) {
-            ScriptInjector.fromString(LEGACY.highchartsMore().getText()).setWindow(ScriptInjector.TOP_WINDOW).inject();
+            ScriptInjector.fromString(HIGHCHARTS_RESSOURCES.highchartsMore().getText()).setWindow(ScriptInjector.TOP_WINDOW).inject();
             isMoreInjected = true;
         }
     }
@@ -49,7 +49,7 @@ public final class Highcharts {
     public static void ensureInjectedWithExport() {
         ensureInjectedWithMore();
         if (!isExportInjected) {
-            ScriptInjector.fromString(LEGACY.highchartsModuleExport().getText()).setWindow(ScriptInjector.TOP_WINDOW)
+            ScriptInjector.fromString(HIGHCHARTS_RESSOURCES.highchartsModuleExport().getText()).setWindow(ScriptInjector.TOP_WINDOW)
                     .inject();
             isExportInjected = true;
         }

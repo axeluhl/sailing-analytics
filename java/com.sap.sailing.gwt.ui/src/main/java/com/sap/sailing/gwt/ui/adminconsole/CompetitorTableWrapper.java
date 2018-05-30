@@ -8,9 +8,7 @@ import java.util.List;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
@@ -20,10 +18,13 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.CellPreviewEvent;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
+import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -42,7 +43,10 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  * The selected competitors can be obtained from the {@link #getSelectionModel() selection model}. The competitor
  * set can also be updated to that of a leaderboard by using {@link #refreshCompetitorList(String)}, providing the
  * leaderboard name as parameter. The competitors currently in the table (regardless of the current filter settings)
- * are returned by {@link #getAllCompetitors()}.
+ * are returned by {@link #getAllCompetitors()}.<p>
+ * 
+ * The table shows columns for boat data such as the boat class and the sail number; those columns will be populated
+ * only for {@link CompetitorDTO} objects with are also instance of {@link CompetitorWithBoatDTO}.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -52,15 +56,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
     private final boolean filterCompetitorsWithBoat;
     private final boolean filterCompetitorsWithoutBoat;
-    
-    private static final Template TEMPLATE = GWT.create(Template.class);
-    
-    interface Template extends SafeHtmlTemplates {
-        @SafeHtmlTemplates.Template("<div style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:{1}px;height:{2}px;background-image:url({0})'></div>")
-        SafeHtml image(String imageUri,int width, int height);
-        @SafeHtmlTemplates.Template("<div title='{3}' style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:{1}px;height:{2}px;background-image:url({0})'></div>")
-        SafeHtml imageWithTitle(String imageUri,int width, int height,String title);
-    }
     
     public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
@@ -88,9 +83,10 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         };
         competitorNameColumn.setSortable(true);
         competitorColumnListHandler.setComparator(competitorNameColumn, new Comparator<CompetitorDTO>() {
+            private final NaturalComparator comparator = new NaturalComparator(/*case sensitive*/ false);
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                return o1.getName().compareTo(o2.getName());
+                return comparator.compare(o1.getName(), o2.getName());
             }
         });
 
@@ -112,7 +108,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         TextColumn<CompetitorDTO> boatClassColumn = new TextColumn<CompetitorDTO>() {
             @Override
             public String getValue(CompetitorDTO competitor) {
-                return competitor.getBoatClass() != null ? competitor.getBoatClass().getName() : "";
+                return competitor.hasBoat() && ((CompetitorWithBoatDTO) competitor).getBoatClass() != null ? ((CompetitorWithBoatDTO) competitor).getBoatClass().getName() : "";
             }
         };
         boatClassColumn.setSortable(true);
@@ -120,8 +116,8 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             private final NaturalComparator comparator = new NaturalComparator(/* caseSensitive */ false);
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                BoatDTO boat1 = o1.getBoat();
-                BoatDTO boat2 = o2.getBoat();
+                BoatDTO boat1 = o1.hasBoat() ? ((CompetitorWithBoatDTO) o1).getBoat() : null;
+                BoatDTO boat2 = o2.hasBoat() ? ((CompetitorWithBoatDTO) o2).getBoat() : null;
                 if (boat1 == null && boat2 == null) {
                     return 0;
                 } else if (boat1 != null && boat2 == null) { 
@@ -140,7 +136,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
                 final String flagImageURL = competitor.getFlagImageURL();
                 if (flagImageURL != null && !flagImageURL.isEmpty()) {
-                    sb.append(TEMPLATE.imageWithTitle(flagImageURL, 18 ,12,competitor.getName()));
+                    sb.append(FlagImageRenderer.imageWithTitle(flagImageURL, competitor.getName()));
                     sb.appendHtmlConstant("&nbsp;");
                 } else {
                     final ImageResource flagImageResource;
@@ -150,31 +146,35 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                         flagImageResource = FlagImageResolverImpl.get().getFlagImageResource(twoLetterIsoCountryCode);
                     }
                     if (flagImageResource != null) {
-                        sb.append(TEMPLATE.imageWithTitle(flagImageResource.getSafeUri().asString(), 18 ,12,competitor.getName()));
+                        sb.append(FlagImageRenderer.imageWithTitle(flagImageResource.getSafeUri().asString() ,competitor.getName()));
                         sb.appendHtmlConstant("&nbsp;");
                     }
                 }
                 return sb.toSafeHtml();
             }
         };
+        flagImageColumn.setSortable(true);
+        competitorColumnListHandler.setComparator(flagImageColumn, new Comparator<CompetitorDTO>() {
+            private final NaturalComparator comparator = new NaturalComparator(/* case sensitive */ false);
+            @Override
+            public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+                return comparator.compare(o1.getThreeLetterIocCountryCode(), o2.getThreeLetterIocCountryCode());
+            }
+        });
 
         TextColumn<CompetitorDTO> sailIdColumn = new TextColumn<CompetitorDTO>() {
             @Override
             public String getValue(CompetitorDTO competitor) {
-                if (competitor.getBoat() != null) {
-                    return competitor.getBoat().getSailId();
-                }
-                return "";
+                return competitor.hasBoat() ? ((CompetitorWithBoatDTO) competitor).getSailID() : "";
             }
         };
-
         sailIdColumn.setSortable(true);
         competitorColumnListHandler.setComparator(sailIdColumn, new Comparator<CompetitorDTO>() {
             private final NaturalComparator comparator = new NaturalComparator(/* case sensitive */ false);
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                BoatDTO boat1 = o1.getBoat();
-                BoatDTO boat2 = o2.getBoat();
+                BoatDTO boat1 = o1.hasBoat() ? ((CompetitorWithBoatDTO) o1).getBoat() : null;
+                BoatDTO boat2 = o2.hasBoat() ? ((CompetitorWithBoatDTO) o2).getBoat() : null;
                 if (boat1 == null && boat2 == null) {
                     return 0;
                 } else if (boat1 != null && boat2 == null) { 
@@ -286,7 +286,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                                         o2.getTimeOnDistanceAllowancePerNauticalMile());
                     }
         });
-
         
         filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(stringMessages.filterCompetitors()),
                 new ArrayList<CompetitorDTO>(), table, dataProvider) {
@@ -297,30 +296,31 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 string.add(t.getShortName());
                 string.add(t.getIdAsString());
                 string.add(t.getSearchTag());
-                if (t.getBoatClass() != null) {
-                    string.add(t.getBoatClass().getName());
-                }
-                if (t.getSailID() != null) {
-                    string.add(t.getSailID());
+                if (t.hasBoat()) {
+                    string.add(((CompetitorWithBoatDTO) t).getBoatClass().getName());
+                    string.add(((CompetitorWithBoatDTO) t).getSailID());
                 }
                 return string;
             }
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         
-        //CompetitorTableEditFeatures
+        // CompetitorTableEditFeatures
         ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = new ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell>(
                 new CompetitorConfigImagesBarCell(stringMessages));
         competitorActionColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
             @Override
             public void update(int index, final CompetitorDTO competitor, String value) {
                 if (CompetitorConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    if (competitor.getBoat() != null) {
-                        String boatClass = null;
-                        if (competitor.getBoat() != null && competitor.getBoat().getBoatClass() != null) {
-                            boatClass = competitor.getBoat().getBoatClass().getName();
-                        }
-                        openEditCompetitorWithBoatDialog(competitor, boatClass);
+                    final String boatClassName;
+                    if (competitor.hasBoat()) {
+                        BoatClassDTO boatClass = ((CompetitorWithBoatDTO) competitor).getBoatClass();
+                        boatClassName = boatClass != null ? boatClass.getName() : null;
+                    } else {
+                        boatClassName = null;
+                    }
+                    if (boatClassName != null) {
+                        openEditCompetitorWithBoatDialog((CompetitorWithBoatDTO) competitor, boatClassName);
                     } else {
                         openEditCompetitorWithoutBoatDialog(competitor);
                     }
@@ -398,19 +398,19 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         filterField.updateAll(result);
     }
 
-    void openEditCompetitorWithBoatDialog(final CompetitorDTO originalCompetitor, String boatClass) {
+    void openEditCompetitorWithBoatDialog(final CompetitorWithBoatDTO originalCompetitor, String boatClassName) {
         final CompetitorWithBoatEditDialog dialog = new CompetitorWithBoatEditDialog(stringMessages, 
-                originalCompetitor, new DialogCallback<CompetitorDTO>() {
+                originalCompetitor, new DialogCallback<CompetitorWithBoatDTO>() {
             @Override
-            public void ok(final CompetitorDTO competitor) {
-                sailingService.addOrUpdateCompetitorWithBoat(competitor, new AsyncCallback<CompetitorDTO>() {
+            public void ok(final CompetitorWithBoatDTO competitor) {
+                sailingService.addOrUpdateCompetitorWithBoat(competitor, new AsyncCallback<CompetitorWithBoatDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to update competitor with boat: " + caught.getMessage());
                     }
 
                     @Override
-                    public void onSuccess(CompetitorDTO updatedCompetitor) {
+                    public void onSuccess(CompetitorWithBoatDTO updatedCompetitor) {
                         //only reload selected competitors reloading with refreshCompetitorList(leaderboardName)
                         //would not work in case the list is not based on a leaderboard e.g. AbstractCompetitorRegistrationDialog
                         int editedCompetitorIndex = getFilterField().indexOf(originalCompetitor);
@@ -429,12 +429,12 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             @Override
             public void cancel() {
             }
-        },  boatClass);
+        },  boatClassName);
         dialog.show();
     }
 
     void openEditCompetitorWithoutBoatDialog(final CompetitorDTO originalCompetitor) {
-        final CompetitorEditDialog dialog = CompetitorEditDialog.create(stringMessages, originalCompetitor, new DialogCallback<CompetitorDTO>() {
+        final CompetitorEditDialog<CompetitorDTO> dialog = CompetitorEditDialog.create(stringMessages, originalCompetitor, new DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(final CompetitorDTO competitor) {
                 sailingService.addOrUpdateCompetitorWithoutBoat(competitor, new AsyncCallback<CompetitorDTO>() {
@@ -468,7 +468,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
     }
 
     protected void allowUpdate(final Iterable<CompetitorDTO> competitors) {
-        List<CompetitorDTO> serializableSingletonList = new ArrayList<CompetitorDTO>();
+        List<CompetitorDTO> serializableSingletonList = new ArrayList<>();
         Util.addAll(competitors, serializableSingletonList);
         sailingService.allowCompetitorResetToDefaults(serializableSingletonList, new AsyncCallback<Void>() {
             @Override

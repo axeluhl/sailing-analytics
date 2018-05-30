@@ -6,11 +6,12 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 
 /**
  * Captures a collection of score corrections to apply to a leaderboard. The leaderboard is identified by name,
- * and so are the race columns. The competitors are identified by their {@link CompetitorDTO#idAsString ID}.
+ * and so are the race columns. The competitors are identified by their {@link CompetitorWithBoatDTO#idAsString ID}.
  * 
  * @author Axel Uhl (D043530)
  *

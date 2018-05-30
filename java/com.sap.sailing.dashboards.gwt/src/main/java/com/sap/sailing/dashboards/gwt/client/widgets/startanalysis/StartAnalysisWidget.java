@@ -238,7 +238,6 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
     private void initCompetitorSelectionPopupAndAddCompetitorSelectionListener() {
         competitorSelectionPopup = new CompetitorSelectionPopup();
         competitorSelectionPopup.addListener(new CompetitorSelectionListener() {
-
             @Override
             public void didClickOKWithSelectedCompetitor(CompetitorDTO competitor) {
                 if (competitor != null) {

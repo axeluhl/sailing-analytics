@@ -56,10 +56,8 @@ public class CompetitorNationalityFilterUIFactory extends AbstractCompetitorText
     @Override
     public FilterWithUI<CompetitorDTO> createFilterFromUI() {
         CompetitorNationalityFilter result = null;
-
         if(valueTextBox != null && operatorSelectionListBox != null) {
             result = new CompetitorNationalityFilter();
-
             TextOperator.Operators op = TextOperator.Operators.valueOf(operatorSelectionListBox.getValue(operatorSelectionListBox.getSelectedIndex()));
             TextOperator textOperator = new TextOperator(op);
             result.setOperator(textOperator);

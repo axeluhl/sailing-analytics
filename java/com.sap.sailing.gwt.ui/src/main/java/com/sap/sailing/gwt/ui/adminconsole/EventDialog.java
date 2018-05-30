@@ -96,7 +96,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             // remark: startDate == null and endDate == null is valid
             if (startDate != null && endDate != null) {
                 if (startDate.after(endDate)) {
-                    datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate(); 
+                    datesErrorMessage = stringMessages.startDateMustBeforeEndDate(); 
                 }
             } else if ((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
                 datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();

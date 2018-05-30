@@ -14,7 +14,6 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -62,7 +61,7 @@ public class StoreAndLoadBoatsTest extends AbstractMongoDBTest {
         DynamicBoat boat = (DynamicBoat) new BoatImpl("id12345", boatName1, boatClass505, sailID1); 
         mongoObjectFactory.storeBoat(boat);
         
-        Collection<Boat> allBoats= domainObjectFactory.loadAllBoats();
+        Collection<DynamicBoat> allBoats = domainObjectFactory.loadAllBoats();
         assertEquals(1, Util.size(allBoats));
         DynamicBoat loadedBoat = (DynamicBoat) allBoats.iterator().next();
         assertEquals(sailID1, loadedBoat.getSailID());

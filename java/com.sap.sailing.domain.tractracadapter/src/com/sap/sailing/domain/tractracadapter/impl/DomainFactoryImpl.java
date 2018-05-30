@@ -29,7 +29,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -258,7 +258,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Competitor resolveCompetitor(ICompetitor competitor) {
-        return baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitor.getId());
+        return baseDomainFactory.getCompetitorAndBoatStore().getExistingCompetitorById(competitor.getId());
     }
 
     @Override
@@ -296,7 +296,7 @@ public class DomainFactoryImpl implements DomainFactory {
     private CompetitorWithBoat getOrCreateCompetitorWithBoat(final UUID competitorId,
             final String nationalityAsString, final String name, final String shortName, float timeOnTimeFactor,
             float timeOnDistanceAllowanceInSecondsPerNauticalMile, String searchTag, String competitorClassName, String sailId) {
-        CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
+        CompetitorAndBoatStore competitorStore = baseDomainFactory.getCompetitorAndBoatStore();
         CompetitorWithBoat domainCompetitor = competitorStore.getExistingCompetitorWithBoatById(competitorId);
         if (domainCompetitor == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(domainCompetitor)) {
             BoatClass boatClass = getOrCreateBoatClass(competitorClassName);
@@ -310,7 +310,8 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             // TODO bug2822: if only boat is to be updated then this would currently fail here; consider competitorStore.isBoatToUpdateDuringGetOrCreate(...)
             DynamicTeam team = createTeam(name, nationality, competitorId);
-            DynamicBoat boat = (DynamicBoat) competitorStore.getOrCreateBoat(UUID.randomUUID(), null /* no boat name available */, boatClass, sailId, /* color */ null);
+            DynamicBoat boat = (DynamicBoat) competitorStore.getOrCreateBoat(domainCompetitor == null ? UUID.randomUUID() : domainCompetitor.getBoat().getId(),
+                    null /* no boat name available */, boatClass, sailId, /* color */ null);
             domainCompetitor = competitorStore.getOrCreateCompetitorWithBoat(competitorId, name, shortName, null /* displayColor */,
                     null /* email */, null /* flagImag */, team, (double) timeOnTimeFactor,
                     new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag, (DynamicBoat) boat);
@@ -321,7 +322,7 @@ public class DomainFactoryImpl implements DomainFactory {
     private Competitor getOrCreateCompetitor(final UUID competitorId, final String nationalityAsString, 
             final String name, final String shortName, float timeOnTimeFactor,
             float timeOnDistanceAllowanceInSecondsPerNauticalMile, String searchTag) {
-        CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
+        CompetitorAndBoatStore competitorStore = baseDomainFactory.getCompetitorAndBoatStore();
         Competitor domainCompetitor = competitorStore.getExistingCompetitorById(competitorId);
         if (domainCompetitor == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(domainCompetitor)) {
             Nationality nationality;
@@ -341,10 +342,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     public Boat getOrCreateBoat(Serializable boatId, String boatName, BoatClass boatClass, String sailId, Color boatColor) {
-        CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
+        CompetitorAndBoatStore competitorStore = baseDomainFactory.getCompetitorAndBoatStore();
         Boat domainBoat = competitorStore.getExistingBoatById(boatId);
         if (domainBoat == null) {
-            domainBoat = baseDomainFactory.getCompetitorStore().getOrCreateBoat(boatId, boatName, boatClass, sailId, boatColor);
+            domainBoat = baseDomainFactory.getCompetitorAndBoatStore().getOrCreateBoat(boatId, boatName, boatClass, sailId, boatColor);
         }
         return domainBoat;
     }
@@ -610,6 +611,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     addTracTracUpdateHandlers(tracTracUpdateURI, tracTracEventUuid, tracTracUsername, tracTracPassword,
                             raceDefinition, trackedRace, tractracRace);
                     raceCache.put(raceId, raceDefinition);
+                    // the following unblocks waiters in DomainFactory.getAndWaitForRaceDefinition(...)
                     raceCache.notifyAll();
                 } else {
                     final String reasonForNotAddingRaceToRegatta = "Not adding race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta()
@@ -708,7 +710,7 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Map<Competitor, Boat> getOrCreateCompetitorsAndTheirBoats(DynamicTrackedRegatta trackedRegatta, LeaderboardGroupResolver leaderboardGroupResolver,
             IRace race, BoatClass defaultBoatClass) {
-        final CompetitorStore competitorAndBoatStore = baseDomainFactory.getCompetitorStore();
+        final CompetitorAndBoatStore competitorAndBoatStore = baseDomainFactory.getCompetitorAndBoatStore();
         final Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         Regatta regatta = trackedRegatta.getRegatta();
         LeaderboardGroup leaderboardGroup = leaderboardGroupResolver.resolveLeaderboardGroupByRegattaName(regatta.getName());

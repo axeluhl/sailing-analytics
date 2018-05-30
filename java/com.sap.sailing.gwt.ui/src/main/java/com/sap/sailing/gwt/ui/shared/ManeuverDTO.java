@@ -19,7 +19,9 @@ public class ManeuverDTO implements IsSerializable {
 
     public Position position;
 
-    public Date timepoint;
+    public Date timePoint;
+
+    public Date timePointBefore;
 
     public SpeedWithBearingDTO speedWithBearingBefore;
 
@@ -39,19 +41,18 @@ public class ManeuverDTO implements IsSerializable {
 
     public NauticalSide markPassingSide;
 
-    public ManeuverDTO() {
-    }
+    public ManeuverDTO() {}
 
-    public ManeuverDTO(ManeuverType type, Tack newTack, Position position, Date timepoint,
+    public ManeuverDTO(ManeuverType type, Tack newTack, Position position, Date timePoint, Date timePointBefore,
             SpeedWithBearingDTO speedWithBearingBefore, SpeedWithBearingDTO speedWithBearingAfter,
             double directionChangeInDegrees, Double maneuverLossInMeters, double maxTurningRateInDegreesPerSecond,
             double avgTurningRateInDegreesPerSecond, double lowestSpeedInKnots, Date markPassingTimePoint,
             NauticalSide markPassingSide) {
-        super();
         this.type = type;
         this.newTack = newTack;
         this.position = position;
-        this.timepoint = timepoint;
+        this.timePoint = timePoint;
+        this.timePointBefore = timePointBefore;
         this.speedWithBearingBefore = speedWithBearingBefore;
         this.speedWithBearingAfter = speedWithBearingAfter;
         this.directionChangeInDegrees = directionChangeInDegrees;
@@ -67,8 +68,9 @@ public class ManeuverDTO implements IsSerializable {
         SpeedWithBearingDTO before = this.speedWithBearingBefore;
         SpeedWithBearingDTO after = this.speedWithBearingAfter;
 
-        String timeAndManeuver = DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(this.timepoint) + ": "
-                + this.type.name();
+        final DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL);
+        String timeAndManeuver = dateTimeFormat.format(this.timePoint) + ": " + this.type.name();
+        String timePointBefore = " (started: " + dateTimeFormat.format(this.timePointBefore) + ")";
         String directionChange = stringMessages.directionChange() + ": "
                 + ((int) Math.round(this.directionChangeInDegrees)) + " " + stringMessages.degreesShort() + " ("
                 + ((int) Math.round(before.bearingInDegrees)) + " " + stringMessages.degreesShort() + " -> "
@@ -96,8 +98,8 @@ public class ManeuverDTO implements IsSerializable {
                                 : this.markPassingSide == NauticalSide.PORT ? stringMessages.portSide()
                                         : stringMessages.starboardSide(),
                         DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(this.markPassingTimePoint));
-        String maneuverTitle = timeAndManeuver + "; " + directionChange + "; " + speedChange + "; " + maxTurningRate
-                + "; " + avgTurningRate + "; " + lowestSpeed + maneuverLoss + markPassing;
+        String maneuverTitle = timeAndManeuver + timePointBefore + "; " + directionChange + "; " + speedChange + "; "
+                + maxTurningRate + "; " + avgTurningRate + "; " + lowestSpeed + maneuverLoss + markPassing;
         return maneuverTitle;
     }
 }

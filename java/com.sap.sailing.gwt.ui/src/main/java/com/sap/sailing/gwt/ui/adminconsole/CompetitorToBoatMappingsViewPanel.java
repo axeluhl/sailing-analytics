@@ -30,6 +30,7 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
     private final String raceColumnName;
     private final String fleetName;
     private final SailingServiceAsync sailingService;
+    private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     
     private final RefreshableSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
@@ -38,16 +39,14 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
             final ErrorReporter errorReporter, final String leaderboardName, final String raceColumnName, final String fleetName) {
         super();
         this.sailingService = sailingService;
+        this.stringMessages = stringMessages;
         this.leaderboardName = leaderboardName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
         this.errorReporter = errorReporter;
-
         this.competitorTable = new CompactCompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
         this.boatTable = new CompactBoatTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
-        
         refreshableCompetitorSelectionModel = competitorTable.getSelectionModel();
-
         refreshableCompetitorSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
                 // If the selection on the competitorTable changes,
@@ -56,31 +55,24 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
                 competitorSelectionChanged();
             }
         });
-
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
-        
         CaptionPanel competitorsPanel = new CaptionPanel(stringMessages.competitors());
         competitorsPanel.ensureDebugId("CompetitorsSection");
         competitorsPanel.setContentWidget(this.competitorTable.asWidget());
-
         CaptionPanel boatsPanel = new CaptionPanel(stringMessages.boats());
         boatsPanel.ensureDebugId("BoatsSection");
         boatsPanel.setContentWidget(this.boatTable.asWidget());
-        
         HorizontalPanel buttonPanel = new HorizontalPanel();
         buttonPanel.setSpacing(5);
-        
         mainPanel.add(buttonPanel);
-        
-        Grid grid = new Grid(1,2);
+        Grid grid = new Grid(1, 2);
         grid.setWidget(0, 0, competitorsPanel);
         grid.setWidget(0, 1, boatsPanel);
         grid.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
         grid.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
         mainPanel.add(grid);
-        
         competitorTable.refreshCompetitorListFromRace(leaderboardName, raceColumnName, fleetName);
         boatTable.refreshBoatListFromRace(leaderboardName, raceColumnName, fleetName);
     }
@@ -104,9 +96,7 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
                         new AsyncCallback<BoatDTO>() {
                             @Override
                             public void onFailure(Throwable t) {
-                                errorReporter.reportError("Error trying to determine boat linked to competitor "
-                                        + raceColumnName + " in leaderboard " + leaderboardName + ": "
-                                        + t.getMessage());
+                                errorReporter.reportError(stringMessages.errorTryingToDetermineBoatLinkedToCompetitor(raceColumnName, leaderboardName, t.getMessage()));
                             }
                             
                             @Override

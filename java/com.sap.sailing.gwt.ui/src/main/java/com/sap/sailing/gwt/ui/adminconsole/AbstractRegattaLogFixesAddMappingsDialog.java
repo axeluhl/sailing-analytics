@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -37,7 +38,7 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
     private final BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>> boatTable;
 
     private TrackFileImportDeviceIdentifierDTO deviceToSelect;
-    private CompetitorDTO compToSelect;
+    private CompetitorWithBoatDTO compToSelect;
     private MarkDTO markToSelect;
     private BoatDTO boatToSelect;
     private boolean inInstableTransitionState = false;
@@ -157,8 +158,8 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
         if (!inInstableTransitionState) {
             deviceIdTable.setMappedObjectForSelectedDevice(mappedTo);
 
-            if (mappedTo instanceof CompetitorDTO) {
-                compToSelect = (CompetitorDTO) mappedTo;
+            if (mappedTo instanceof CompetitorWithBoatDTO) {
+                compToSelect = (CompetitorWithBoatDTO) mappedTo;
                 boatToSelect = null;
                 markToSelect = null;
             } else if (mappedTo instanceof BoatDTO) {
@@ -184,8 +185,8 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
 
             if (deviceId != null) {
                 final MappableToDevice mappedTo = deviceIdTable.getMappedObjectForDeviceId(deviceId);
-                if (mappedTo instanceof CompetitorDTO) {
-                    compToSelect = (CompetitorDTO) mappedTo;
+                if (mappedTo instanceof CompetitorWithBoatDTO) {
+                    compToSelect = (CompetitorWithBoatDTO) mappedTo;
                 } else if (mappedTo instanceof BoatDTO) {
                     boatToSelect = (BoatDTO) mappedTo;
                 } else if (mappedTo instanceof MarkDTO) {

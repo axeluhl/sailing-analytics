@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.QuickRanksDTOProvider.QuickRanksListener;
@@ -22,7 +23,7 @@ import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
  * <p>
  * 
  * Competitor positions are expected to be explicitly announced by calling
- * {@link #updatePosition(CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegType, long)} in case new position data is
+ * {@link #updatePosition(CompetitorWithBoatDTO, GPSFixDTOWithSpeedWindTackAndLegType, long)} in case new position data is
  * known.
  * 
  * @author Axel Uhl (d043530)
@@ -56,7 +57,8 @@ public class CompetitorInfoOverlays implements QuickRanksListener {
         this.raceMap = raceMap;
     }
     
-    public CompetitorInfoOverlay createCompetitorInfoOverlay(int zIndex, final CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegType gpsFixDTO, Integer rank, long timeForPositionTransitionMillis) {
+    public CompetitorInfoOverlay createCompetitorInfoOverlay(int zIndex, final CompetitorDTO competitorDTO,
+            GPSFixDTOWithSpeedWindTackAndLegType gpsFixDTO, Integer rank, long timeForPositionTransitionMillis) {
         CompetitorInfoOverlay result = new CompetitorInfoOverlay(raceMap.getMap(), zIndex,
                 raceMap.getCompetitorSelection().getColor(competitorDTO, raceMap.getRaceIdentifier()),
                 /* info text */ "", raceMap.getCoordinateSystem());
@@ -71,7 +73,7 @@ public class CompetitorInfoOverlays implements QuickRanksListener {
      * Removes the {@link CompetitorInfoOverlay} for the competitor specified as {@code competitorDTO} from the map and
      * from this structure.
      */
-    public void remove(final CompetitorDTO competitorDTO) {
+    public void remove(final CompetitorWithBoatDTO competitorDTO) {
         remove(competitorDTO.getIdAsString());
     }
     

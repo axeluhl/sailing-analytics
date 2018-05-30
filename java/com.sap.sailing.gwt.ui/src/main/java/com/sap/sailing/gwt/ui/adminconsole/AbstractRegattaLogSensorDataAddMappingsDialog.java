@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -34,7 +35,7 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
     private final StringMessages stringMessages;
 
     private TrackFileImportDeviceIdentifierDTO deviceToSelect;
-    private CompetitorDTO compToSelect;
+    private CompetitorWithBoatDTO compToSelect;
     private BoatDTO boatToSelect;
     private boolean inInstableTransitionState = false;
 
@@ -174,8 +175,8 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
         if (!inInstableTransitionState) {
             deviceIdTable.setMappedObjectForSelectedDevice(mappedTo);
 
-            if (mappedTo instanceof CompetitorDTO) {
-                compToSelect = (CompetitorDTO) mappedTo;
+            if (mappedTo instanceof CompetitorWithBoatDTO) {
+                compToSelect = (CompetitorWithBoatDTO) mappedTo;
                 boatToSelect = null;
             } else if (mappedTo instanceof BoatDTO) {
                 compToSelect = null;
@@ -194,8 +195,8 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
 
             if (deviceId != null) {
                 final MappableToDevice mappedTo = deviceIdTable.getMappedObjectForDeviceId(deviceId);
-                if (mappedTo instanceof CompetitorDTO) {
-                    compToSelect = (CompetitorDTO) mappedTo;
+                if (mappedTo instanceof CompetitorWithBoatDTO) {
+                    compToSelect = (CompetitorWithBoatDTO) mappedTo;
                 } else if (mappedTo instanceof BoatDTO) {
                     boatToSelect = (BoatDTO) mappedTo;
                 }

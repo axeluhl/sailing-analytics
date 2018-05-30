@@ -79,12 +79,12 @@ public class TrackedRaceWithGPSFixStoreContentsReplicationTest extends AbstractS
         final DomainFactory masterDomainFactory = testSetUp.getMaster().getBaseDomainFactory();
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */true);
         BoatClass boatClass470 = DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true);
-        competitor = masterDomainFactory.getCompetitorStore().getOrCreateCompetitor("GER 61", "Tina Lutz", "TL", Color.RED, "someone@nowhere.de", null, new TeamImpl("Tina Lutz + Susann Beucke",
+        competitor = masterDomainFactory.getCompetitorAndBoatStore().getOrCreateCompetitor("GER 61", "Tina Lutz", "TL", Color.RED, "someone@nowhere.de", null, new TeamImpl("Tina Lutz + Susann Beucke",
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null),
                 new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null) }),
                 new PersonImpl("Rigo de Mas", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
-        Boat boat = masterDomainFactory.getCompetitorStore().getOrCreateBoat("boat", "GER 61", boatClass470, "GER 61", null);
+        Boat boat = masterDomainFactory.getCompetitorAndBoatStore().getOrCreateBoat("boat", "GER 61", boatClass470, "GER 61", null);
         final String baseEventName = "Test Event";
         AddDefaultRegatta addEventOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, 
                 /*startDate*/ null, /*endDate*/ null, UUID.randomUUID());

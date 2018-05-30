@@ -467,7 +467,14 @@ class CheckInRequestManager: NSObject {
     }
 
     fileprivate func responseObjectToString(responseObject: Any?) -> String {
-        return (responseObject as? String) ?? "response object is empty or cannot be casted"
+        if (responseObject == nil) {
+            return "response is empty"
+        } else if let responseString = responseObject as? String {
+            return responseString
+        } else if let responseDictionary = responseObject as? Dictionary<String, Any> {
+            return responseDictionary.description
+        }
+        return "response cannot be casted"
     }
 
 }

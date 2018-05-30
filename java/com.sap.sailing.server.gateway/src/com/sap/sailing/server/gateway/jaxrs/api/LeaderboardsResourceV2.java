@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -42,7 +43,6 @@ import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @Path("/v2/leaderboards")
 public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
@@ -56,8 +56,6 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             @QueryParam("time") String time, @QueryParam("timeasmillis") Long timeasmillis,
             @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount) {
         Response response;
-
-        TimePoint requestTimePoint = MillisecondsTimePoint.now();     
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
             response = Response.status(Status.NOT_FOUND)
@@ -76,13 +74,10 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 if (timePoint != null || resultState == ResultStates.Live) {
                     jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount, raceColumnNames, raceDetails);
                 } else {
-                    jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint,
-                            maxCompetitorsCount);
+                    jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount);
                 }
-
                 StringWriter sw = new StringWriter();
                 jsonLeaderboard.writeJSONString(sw);
-
                 String json = sw.getBuffer().toString();
                 response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
@@ -90,11 +85,11 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                         .type(MediaType.TEXT_PLAIN).build();
             }
         }
-
         return response;
     }
 
-    private JSONObject getLeaderboardJson(Leaderboard leaderboard,
+    @Override
+    protected JSONObject getLeaderboardJson(Leaderboard leaderboard,
             TimePoint resultTimePoint, ResultStates resultState, Integer maxCompetitorsCount,
             List<String> raceColumnNames, List<String> raceDetailNames)
             throws NoWindException, InterruptedException, ExecutionException {
@@ -105,7 +100,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 false, getService(), getService().getBaseDomainFactory(),
                 /* fillTotalPointsUncorrected */false);
         JSONObject jsonLeaderboard = new JSONObject();
-        writeCommonLeaderboardData(jsonLeaderboard, leaderboardDTO, resultState, maxCompetitorsCount);
+        writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, leaderboardDTO.getTimePoint(), maxCompetitorsCount);
         Map<String, Map<String, Map<CompetitorDTO, Integer>>> competitorRanksPerRaceColumnsAndFleets = new HashMap<>();
         for (String raceColumnName : raceColumnsToShow) {
             List<CompetitorDTO> competitorsFromBestToWorst = leaderboardDTO.getCompetitorsFromBestToWorst(raceColumnName);
@@ -136,6 +131,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             }
             JSONObject jsonCompetitor = new JSONObject();
             writeCompetitorBaseData(jsonCompetitor, competitor, leaderboardDTO);
+            BoatDTO rowBoatDTO = leaderboardRowDTO.boat;
+            if (rowBoatDTO != null) {
+                JSONObject jsonBoat = new JSONObject();
+                writeBoatData(jsonBoat, rowBoatDTO);
+                jsonCompetitor.put("boat", jsonBoat);
+            }
             jsonCompetitor.put("rank", competitorCounter);
             jsonCompetitor.put("carriedPoints", leaderboardRowDTO.carriedPoints);
             jsonCompetitor.put("netPoints", leaderboardRowDTO.netPoints);
@@ -147,6 +148,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 JSONObject jsonEntry = new JSONObject();
                 jsonRaceColumns.put(raceColumnName, jsonEntry);
                 LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
+                BoatDTO entryBoatDTO = leaderboardEntry.boat;
+                if (entryBoatDTO != null) {
+                    JSONObject jsonBoat = new JSONObject();
+                    writeBoatData(jsonBoat, entryBoatDTO);
+                    jsonEntry.put("boat", jsonBoat);
+                }
                 final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
                 jsonEntry.put("fleet", fleetOfCompetitor == null ? "" : fleetOfCompetitor.getName());
                 jsonEntry.put("totalPoints", leaderboardEntry.totalPoints);
@@ -225,7 +232,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, 
-                DetailType.CURRENT_LEG };
+                DetailType.RACE_CURRENT_LEG };
     }
 
     private DetailType[] getAvailableRaceDetailColumnTypes() {
@@ -236,7 +243,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, 
                 DetailType.NUMBER_OF_MANEUVERS,
-                DetailType.CURRENT_LEG };
+                DetailType.RACE_CURRENT_LEG };
     }
 
     private Pair<String, Object> getValueForRaceDetailType(DetailType type, LeaderboardEntryDTO entry, LegEntryDTO currentLegEntry) {
@@ -299,7 +306,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 }
                 value = numberOfManeuvers;
                 break;
-            case CURRENT_LEG:
+            case RACE_CURRENT_LEG:
                 name = "currentLeg";
                 int currentLegNumber = entry.getOneBasedCurrentLegNumber();
                 if (currentLegNumber > 0) {

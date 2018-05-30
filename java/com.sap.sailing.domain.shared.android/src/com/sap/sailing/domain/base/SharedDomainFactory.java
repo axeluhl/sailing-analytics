@@ -82,9 +82,9 @@ public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
     BoatClass getOrCreateBoatClass(String name);
 
     /**
-     * Gets the {@link CompetitorStore} of this {@link SharedDomainFactory}.
+     * Gets the {@link CompetitorAndBoatStore} of this {@link SharedDomainFactory}.
      */
-    CompetitorStore getCompetitorStore();
+    CompetitorAndBoatStore getCompetitorAndBoatStore();
    
     /**
      * If a {@link CourseArea} with the given id already exists, it is returned. Otherwise a new {@link CourseArea} 
@@ -113,4 +113,6 @@ public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
     RaceLogResolver getRaceLogResolver();
 
     Mark getOrCreateMark(String name, MarkType markType);
+
+    Mark getOrCreateMark(Serializable id, String name, MarkType markType);
 }

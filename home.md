@@ -90,6 +90,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 * [[Onboarding|wiki/howto/onboarding]]
 * [[Importing Sessions from Expedition|wiki/howto/expeditionimport]]
+* [[Checking our DBs for a user record by e-mail|wiki/howto/privacy]]
 
 ### Development
 

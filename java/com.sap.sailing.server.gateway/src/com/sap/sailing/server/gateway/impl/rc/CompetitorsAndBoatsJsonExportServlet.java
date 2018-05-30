@@ -59,17 +59,13 @@ public class CompetitorsAndBoatsJsonExportServlet extends AbstractJsonHttpServle
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such fleet found.");
             return;
         }
-
         CompetitorAndBoatJsonSerializer competitorsAndBoatsSerializer = CompetitorAndBoatJsonSerializer.create();
-
         JSONArray result = new JSONArray();
         for (Competitor competitor : leaderboard.getCompetitors(raceColumn, fleet)) {
             Boat boat = leaderboard.getBoatOfCompetitor(competitor, raceColumn, fleet);
-            
             JSONObject serializeCompetitorAndBoat = competitorsAndBoatsSerializer.serialize(new Pair<Competitor, Boat>(competitor, boat));
             result.add(serializeCompetitorAndBoat);
         }
-        
         setJsonResponseHeader(response);
         result.writeJSONString(response.getWriter());
     }

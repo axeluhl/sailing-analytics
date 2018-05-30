@@ -76,19 +76,20 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.AbstractTrackedRaceDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurveWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurvesWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DefaultWindTrackJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DetailedBoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DistanceJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverMainCurveWithEstimationDataJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.ManeuverWindJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuversJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkPassingsJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
@@ -183,15 +184,14 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}")
     public Response getRegatta(@PathParam("regattaname") String regattaName) {
         Response response;
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
             SeriesJsonSerializer seriesJsonSerializer = new SeriesJsonSerializer(new FleetJsonSerializer(
                     new ColorJsonSerializer()));
-            JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, null);
+            JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, null, null);
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
-
             String json = serializedRegatta.toJSONString();
             response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
@@ -210,16 +210,16 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/entries")
     public Response getEntries(@PathParam("regattaname") String regattaName) {
         Response response;
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
             NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
+            BoatJsonSerializer boatJsonSerializer = new BoatJsonSerializer(new BoatClassJsonSerializer());
             CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
-                    new PersonJsonSerializer(nationalityJsonSerializer)));
-            JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(null, competitorJsonSerializer);
+                    new PersonJsonSerializer(nationalityJsonSerializer)), boatJsonSerializer);
+            JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(null, competitorJsonSerializer, boatJsonSerializer);
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
-
             String json = serializedRegatta.toJSONString();
             response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
@@ -246,10 +246,9 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
-                CompetitorWithBoatJsonSerializer competitorJsonSerializer = CompetitorWithBoatJsonSerializer.create();
-                JsonSerializer<RaceDefinition> raceEntriesSerializer = new RaceEntriesJsonSerializer(competitorJsonSerializer);
+                CompetitorAndBoatJsonSerializer competitorAndBoatJsonSerializer = CompetitorAndBoatJsonSerializer.create();
+                JsonSerializer<RaceDefinition> raceEntriesSerializer = new RaceEntriesJsonSerializer(competitorAndBoatJsonSerializer);
                 JSONObject serializedRaceEntries = raceEntriesSerializer.serialize(race);
-    
                 String json = serializedRaceEntries.toJSONString();
                 response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
@@ -296,7 +295,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 competitorId = competitorIdAsString;
             }
 
-            final Competitor competitor = getService().getCompetitorStore().getExistingCompetitorById(competitorId);
+            final Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
             if (competitor == null) {
                 response = getBadCompetitorIdResponse(competitorId);
             } else {
@@ -329,7 +328,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             final Boat boat = new BoatImpl(UUID.randomUUID(), user.getName(),
                     getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true),
                     sailId);
-            final CompetitorWithBoat competitor = getService().getCompetitorStore().getOrCreateCompetitorWithBoat(UUID.randomUUID(),
+            final CompetitorWithBoat competitor = getService().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(UUID.randomUUID(),
                     user.getFullName() == null ? user.getName() : user.getFullName(), /* shortName */ null,
                     /* displayColor */ null, user.getEmail(), /* flagImageURI */ null,
                     new TeamImpl(user.getName(), Collections.singleton(new PersonImpl(user.getFullName() == null ? user.getName() : user.getFullName(),
@@ -339,7 +338,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
                     searchTag, (DynamicBoat) boat);
             regatta.registerCompetitor(competitor);
-            response = Response.ok(CompetitorWithBoatJsonSerializer.create().serialize(competitor).toJSONString()).
+            response = Response.ok(CompetitorJsonSerializer.create().serialize(competitor).toJSONString()).
                     header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
@@ -364,7 +363,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 competitorId = competitorIdAsString;
             }
 
-            final Competitor competitor = getService().getCompetitorStore().getExistingCompetitorById(competitorId);
+            final Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
             if (competitor == null) {
                 response = getBadCompetitorIdResponse(competitorId);
             } else {
@@ -1014,7 +1013,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .build();
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-                ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(CompetitorWithBoatJsonSerializer.create(),
+                ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(CompetitorAndBoatJsonSerializer.create(),
                         new ManeuverJsonSerializer(new GPSFixJsonSerializer(), new DistanceJsonSerializer()));
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
@@ -1044,11 +1043,11 @@ public class RegattasResource extends AbstractSailingServerResource {
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 CompleteManeuverCurvesWithEstimationDataJsonSerializer serializer = new CompleteManeuverCurvesWithEstimationDataJsonSerializer(
-                        new BoatClassJsonSerializer(),
+                        new DetailedBoatClassJsonSerializer(),
                         new CompleteManeuverCurveWithEstimationDataJsonSerializer(
                                 new ManeuverMainCurveWithEstimationDataJsonSerializer(),
                                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer(),
-                                new ManeuverWindJsonSerializer()));
+                                new WindJsonSerializer(new PositionJsonSerializer()), new PositionJsonSerializer()));
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
                 return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
@@ -1373,7 +1372,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response avgSpeedPerCompetitorAndLegType(@PathParam("regattaname") String regattaName) {
         Response response;
         
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1388,7 +1387,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response avgSpeedPerCompetitorAndLegType(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1408,7 +1407,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response sumDistancePerCompetitorAndLegType(@PathParam("regattaname") String regattaName) {
         Response response;
         
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1423,7 +1422,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response sumDistancePerCompetitorAndLegType(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1443,7 +1442,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response sumManeuversPerCompetitor(@PathParam("regattaname") String regattaName) {
         Response response;
         
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1458,7 +1457,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response sumManeuversPerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1478,7 +1477,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response avgSpeedPerCompetitor(@PathParam("regattaname") String regattaName) {
         Response response;
         
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1492,7 +1491,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR)
     public Response avgSpeedPerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1511,7 +1510,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/datamining/"+ SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR)
     public Response sumDistancePerCompetitor(@PathParam("regattaname") String regattaName) {
         Response response;
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1525,7 +1524,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR)
     public Response sumDistancePerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1546,7 +1545,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             @QueryParam("numberofraces") Integer numberOfRaces, @QueryParam("prefix") String prefix,
             @QueryParam("toseries") String toSeries) {
         final Response response;
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1579,7 +1578,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             @QueryParam("racecolumn") String raceColumnName) {
         SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
         final Response response;
-        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {

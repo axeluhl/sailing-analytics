@@ -16,6 +16,7 @@ import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
+import com.sap.sse.util.impl.UUIDHelper;
 
 public class DeviceAndSessionIdentifierWithGPSFixesDeserializer
 implements JsonDeserializer<Util.Triple<DeviceIdentifier, Serializable, List<GPSFix>>> {
@@ -41,7 +42,7 @@ implements JsonDeserializer<Util.Triple<DeviceIdentifier, Serializable, List<GPS
 
         Object sessionObject = object.get(FIELD_SESSION_UUID);
         Serializable sessionId = sessionObject == null ?
-                null : Helpers.tryUuidConversion(((Serializable) sessionObject));
+                null : UUIDHelper.tryUuidConversion(((Serializable) sessionObject));
 
         JSONArray fixesJson = Helpers.getNestedArraySafe(object, FIELD_FIXES);
         List<GPSFix> fixes = new ArrayList<GPSFix>();

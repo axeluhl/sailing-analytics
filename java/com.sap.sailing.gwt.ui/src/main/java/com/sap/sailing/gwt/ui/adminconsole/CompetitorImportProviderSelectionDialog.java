@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
@@ -234,7 +234,7 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
      * @param competitorDescriptors
      *            imported competitor descriptors {@link CompetitorDescriptor}
      * @param competitors
-     *            existing competitors from {@link CompetitorStore}
+     *            existing competitors from {@link CompetitorAndBoatStore}
      * @author Alexander Tatarinovich
      *
      */

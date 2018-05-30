@@ -12,7 +12,6 @@ import java.util.function.Consumer;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
@@ -25,6 +24,8 @@ import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
@@ -143,12 +144,12 @@ public interface DomainObjectFactory {
      * Loads all competitors (with and without embedded boats) and resolves them via the domain factory.
      * Returns a collection of {@link Competitor} or {@link CompetitorWithBoat} objects. 
      */
-    Collection<Competitor> loadAllCompetitors();
+    Collection<DynamicCompetitor> loadAllCompetitors();
 
     /**
      * Loads all boats and resolves them via the domain factory.
      */
-    Collection<Boat> loadAllBoats();
+    Collection<DynamicBoat> loadAllBoats();
 
     DomainFactory getBaseDomainFactory();
 

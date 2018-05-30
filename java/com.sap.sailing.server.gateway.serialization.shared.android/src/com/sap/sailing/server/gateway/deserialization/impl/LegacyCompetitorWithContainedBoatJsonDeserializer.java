@@ -21,6 +21,7 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerialize
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.util.impl.UUIDHelper;
 
 public class LegacyCompetitorWithContainedBoatJsonDeserializer implements JsonDeserializer<CompetitorWithBoat> {
     protected final CompetitorFactory competitorWithBoatFactory;
@@ -52,7 +53,7 @@ public class LegacyCompetitorWithContainedBoatJsonDeserializer implements JsonDe
                 Constructor<?> constructorFromString = idClass.getConstructor(String.class);
                 competitorId = (Serializable) constructorFromString.newInstance(competitorId.toString());
             } else if (UUID.class.isAssignableFrom(idClass)) {
-                competitorId = Helpers.tryUuidConversion(competitorId);
+                competitorId = UUIDHelper.tryUuidConversion(competitorId);
             }
             String name = (String) object.get(CompetitorJsonConstants.FIELD_NAME);
             String shortName = (String) object.get(CompetitorJsonConstants.FIELD_SHORT_NAME);
@@ -85,13 +86,10 @@ public class LegacyCompetitorWithContainedBoatJsonDeserializer implements JsonDe
             if (boatJsonDeserializer != null && object.get(CompetitorJsonConstants.FIELD_BOAT) != null) {
                 boat = boatJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
                         CompetitorJsonConstants.FIELD_BOAT));
-                String sailID = (String) object.get(CompetitorJsonConstants.FIELD_SAIL_ID);
-                boat.setSailId(sailID);
             }
             final Double timeOnTimeFactor = (Double) object.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR);
             final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = (Double) object
                     .get(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
-            
             CompetitorWithBoat competitorWithBoat = new CompetitorWithBoatImpl(competitorId, name, shortName, displayColor, email,
                     flagImageURI, team, timeOnTimeFactor,
                     timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null : 

@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -16,6 +18,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -86,11 +89,14 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
             competitorsFilterSets = createAndAddDefaultCompetitorsFilter();
             storeCompetitorsFilterSets(competitorsFilterSets);
         }
-        
         filter = new AbstractListFilter<CompetitorDTO>() {
             @Override
             public Iterable<String> getStrings(CompetitorDTO competitor) {
-                return Arrays.asList(competitor.getName().toLowerCase(), competitor.getSailID().toLowerCase());
+                final List<String> result = new ArrayList<>(Arrays.asList(competitor.getName().toLowerCase(), competitor.getShortName()));
+                if (competitor.hasBoat()) {
+                    result.add(((CompetitorWithBoatDTO) competitor).getSailID().toLowerCase());
+                }
+                return result;
             }
         };
         settingsButton = new Button();
@@ -165,8 +171,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         if (competitorSelectionProvider.getCompetitorsFilterSet() == null || !Util.contains(competitorSelectionProvider.getCompetitorsFilterSet().getFilters(), this)) {
             FilterSet<CompetitorDTO, Filter<CompetitorDTO>> newFilterSetWithThis = new FilterSet<>(getName());
             if (competitorSelectionProvider.getCompetitorsFilterSet() != null) {
-                for (Filter<CompetitorDTO> oldFilter : competitorSelectionProvider.getCompetitorsFilterSet()
-                        .getFilters()) {
+                for (Filter<CompetitorDTO> oldFilter : competitorSelectionProvider.getCompetitorsFilterSet().getFilters()) {
                     newFilterSetWithThis.addFilter(oldFilter);
                 }
             }
@@ -242,7 +247,6 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         SelectedCompetitorsFilter selectedCompetitorsFilter = new SelectedCompetitorsFilter();
         selectedCompetitorsFilter.setCompetitorSelectionProvider(competitorSelectionProvider);
         selectedCompetitorsFilterSet.addFilter(selectedCompetitorsFilter);
-        
         filterSet.addFilterSet(0, selectedCompetitorsFilterSet);
     }
     
@@ -330,14 +334,12 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
     
     private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {
         CompetitorsFilterSets filterSets = new CompetitorsFilterSets();
-        
         // 1. selected competitors filter
         insertSelectedCompetitorsFilter(filterSets);
-        
         // 2. Top 30 competitors by race rank
         int maxRaceRank = 30;
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNRaceRankCompetitorsFilterSet = 
-                new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.topNCompetitorsByRaceRank(maxRaceRank));
+                new FilterSet<>(stringMessages.topNCompetitorsByRaceRank(maxRaceRank));
         CompetitorRaceRankFilter raceRankFilter = new CompetitorRaceRankFilter();
         raceRankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
         raceRankFilter.setValue(maxRaceRank);
@@ -347,7 +349,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         // 3. Top 30 competitors by total rank
         int maxTotalRank = 30;
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNTotalRankCompetitorsFilterSet =
-                new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.topNCompetitorsByTotalRank(maxTotalRank));
+                new FilterSet<>(stringMessages.topNCompetitorsByTotalRank(maxTotalRank));
         CompetitorTotalRankFilter totalRankFilter = new CompetitorTotalRankFilter();
         totalRankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
         totalRankFilter.setValue(50);

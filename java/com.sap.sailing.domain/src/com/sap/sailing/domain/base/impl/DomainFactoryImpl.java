@@ -12,7 +12,8 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -27,8 +28,9 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorAndBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
@@ -82,10 +84,10 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
      * Uses a transient competitor and boat store
      */
     public DomainFactoryImpl(RaceLogResolver raceLogResolver) {
-        super(new TransientCompetitorStoreImpl(), raceLogResolver);
+        super(new TransientCompetitorAndBoatStoreImpl(), raceLogResolver);
     }
     
-    public DomainFactoryImpl(CompetitorStore competitorStore, RaceLogResolver raceLogResolver) {
+    public DomainFactoryImpl(CompetitorAndBoatStore competitorStore, RaceLogResolver raceLogResolver) {
         super(competitorStore, raceLogResolver);
     }
 
@@ -147,22 +149,22 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public CompetitorDTO convertToCompetitorDTO(Competitor competitor, Boat boat) {
-        return competitorAndBoatStore.convertToCompetitorWithBoatDTO(competitor, boat);
+    public CompetitorAndBoatDTO convertToCompetitorAndBoatDTO(Competitor competitor, Boat boat) {
+        return new CompetitorAndBoatDTO(competitorAndBoatStore.convertToCompetitorDTO(competitor), competitorAndBoatStore.convertToBoatDTO(boat));
     }
 
     @Override
-    public CompetitorDTO convertToCompetitorWithOptionalBoatDTO(Competitor competitor) {
+    public CompetitorDTO convertToCompetitorDTO(Competitor competitor) {
         return competitorAndBoatStore.convertToCompetitorWithOptionalBoatDTO(competitor);
     }
 
     @Override
-    public CompetitorWithoutBoatDTO convertToCompetitorDTO(Competitor competitor) {
-        return competitorAndBoatStore.convertToCompetitorDTO(competitor);
+    public CompetitorWithBoatDTO convertToCompetitorWithBoatDTO(CompetitorWithBoat competitor) {
+        return competitorAndBoatStore.convertToCompetitorWithBoatDTO(competitor);
     }
 
     @Override
-    public Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats) {
+    public Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, ? extends Boat> competitorsAndBoats) {
         return competitorAndBoatStore.convertToCompetitorAndBoatDTOs(competitorsAndBoats);
     }
 
@@ -235,7 +237,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             }
             if (leaderOrWinner != null) {
                 statisticsDTO.hasLeaderOrWinnerData = true;
-                statisticsDTO.leaderOrWinner = convertToCompetitorDTO(leaderOrWinner, leaderOrWinnerBoat);
+                statisticsDTO.leaderOrWinner = convertToCompetitorAndBoatDTO(leaderOrWinner, leaderOrWinnerBoat);
                 GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(leaderOrWinner);
                 if (track != null) {
                     statisticsDTO.averageGPSDataSampleInterval = track.getAverageIntervalBetweenRawFixes();
@@ -259,23 +261,25 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         // media data
         if (mediaTracks != null) {
             for (MediaTrack track : mediaTracks) {
-                switch (track.mimeType.mediaType) {
-                case audio:
-                    statisticsDTO.hasAudioData = true;
-                    statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1
-                            : statisticsDTO.audioTracksCount++;
-                    break;
-                case video:
-                    statisticsDTO.hasVideoData = true;
-                    statisticsDTO.videoTracksCount = statisticsDTO.videoTracksCount == null ? 1
-                            : statisticsDTO.videoTracksCount++;
-                    break;
-                case image: // TODO should this add to an image count?
-                    break;
-                case unknown: // TODO should this add to an "unknown media" count? Probably not
-                    break;
-                default:
-                    break;
+                if (track.mimeType != null) {
+                    switch (track.mimeType.mediaType) {
+                    case audio:
+                        statisticsDTO.hasAudioData = true;
+                        statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1
+                                : statisticsDTO.audioTracksCount++;
+                        break;
+                    case video:
+                        statisticsDTO.hasVideoData = true;
+                        statisticsDTO.videoTracksCount = statisticsDTO.videoTracksCount == null ? 1
+                                : statisticsDTO.videoTracksCount++;
+                        break;
+                    case image: // TODO should this add to an image count?
+                        break;
+                    case unknown: // TODO should this add to an "unknown media" count? Probably not
+                        break;
+                    default:
+                        break;
+                    }
                 }
             }
         }
@@ -369,27 +373,27 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public List<CompetitorDTO> getCompetitorDTOList(Map<Competitor, Boat> competitors) {
-        List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
+    public List<CompetitorAndBoatDTO> getCompetitorDTOList(Map<Competitor, Boat> competitors) {
+        List<CompetitorAndBoatDTO> result = new ArrayList<>();
         for (Entry<Competitor, Boat> competitorAndBoatEntry : competitors.entrySet()) {
-            result.add(convertToCompetitorDTO(competitorAndBoatEntry.getKey(), competitorAndBoatEntry.getValue()));
+            result.add(convertToCompetitorAndBoatDTO(competitorAndBoatEntry.getKey(), competitorAndBoatEntry.getValue()));
         }
         return result;
     }
 
     @Override
     public List<CompetitorDTO> getCompetitorDTOList(Iterable<Competitor> competitors) {
-        List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
+        List<CompetitorDTO> result = new ArrayList<>();
         for (Competitor competitor : competitors) {
-            result.add(convertToCompetitorWithOptionalBoatDTO(competitor));
+            result.add(convertToCompetitorDTO(competitor));
         }
         return result;
     }
     
-    public List<CompetitorDTO> getCompetitorDTOList(List<Pair<Competitor, Boat>> competitors) {
-        List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
+    public List<CompetitorAndBoatDTO> getCompetitorDTOList(List<Pair<Competitor, Boat>> competitors) {
+        List<CompetitorAndBoatDTO> result = new ArrayList<>();
         for (Pair<Competitor, Boat> competitorAndBoat : competitors) {
-            result.add(convertToCompetitorDTO(competitorAndBoat.getA(), competitorAndBoat.getB()));
+            result.add(convertToCompetitorAndBoatDTO(competitorAndBoat.getA(), competitorAndBoat.getB()));
         }
         return result;
     }

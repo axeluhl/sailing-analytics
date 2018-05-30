@@ -119,7 +119,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                 defaultRaceMapSettings.isShowSelectedCompetitorsInfo(), defaultRaceMapSettings.isShowWindStreamletColors(),
                 defaultRaceMapSettings.isShowWindStreamletOverlay(), defaultRaceMapSettings.isShowSimulationOverlay(),
                 defaultRaceMapSettings.isShowMapControls(), defaultRaceMapSettings.getManeuverTypesToShow(),
-                defaultRaceMapSettings.isShowDouglasPeuckerPoints(), true);
+                defaultRaceMapSettings.isShowDouglasPeuckerPoints(), true,
+                defaultRaceMapSettings.getStartCountDownFontSizeScaling());
         
         sailingService.getRaceIdentifier(regattaLikeName, raceColumnName, fleetName, new AsyncCallback<RegattaAndRaceIdentifier>() {
             @Override
@@ -202,9 +203,9 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndBoats);
         final RaceCompetitorSelectionProvider competitorSelection;
         if (showCompetitors) {
-            competitorSelection = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
+            competitorSelection = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider, competitorsAndBoats);
         } else {
-            competitorSelection = createEmptyFilterCompetitorModel(colorProvider); // show no competitors
+            competitorSelection = createEmptyFilterCompetitorModel(colorProvider, competitorsAndBoats); // show no competitors
         }
         final RaceMap raceMap = new RaceMap(null, null, new RaceMapLifecycle(getStringMessages()), raceMapSettings,
                 sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
@@ -232,8 +233,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         timer.setTime(timer.getTime().getTime()-1000l);
     }  
 
-    private RaceCompetitorSelectionProvider createEmptyFilterCompetitorModel(CompetitorColorProvider colorProvider) {
-        final RaceCompetitorSelectionModel result = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
+    private RaceCompetitorSelectionProvider createEmptyFilterCompetitorModel(CompetitorColorProvider colorProvider, Map<CompetitorDTO, BoatDTO> competitorsAndBoats) {
+        final RaceCompetitorSelectionModel result = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider, competitorsAndBoats);
         final FilterSet<CompetitorDTO, Filter<CompetitorDTO>> filterSet = result.getOrCreateCompetitorsFilterSet("Empty");
         filterSet.addFilter(new Filter<CompetitorDTO>() {
             @Override public boolean matches(CompetitorDTO object) { return false; }

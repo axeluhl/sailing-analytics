@@ -1,32 +1,60 @@
 package com.sap.sailing.domain.common.dto;
 
+import java.io.Serializable;
+
+import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
+import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
+
 /**
- * Equality and hash code are based on the {@link #getIdAsString() ID}, the {@link #getSailID() sail number}, the
- * {@link #getBoatClass() boat class} (whose equality and hash code, in turn, depends on its name) and the
- * {@link #getThreeLetterIocCountryCode() IOC country code}. Note that the three latter properties are subject
- * to change for a competitor while the ID remains unchanged.
- * 
- * @author Axel Uhl (d043530)
- * 
+ * Equality and hash code are based on the {@link #getIdAsString() ID} and all contained attributes like name, shortName, email, etc.
  */
-public interface CompetitorDTO extends CompetitorWithoutBoatDTO {
-    // TODO bug2822: Should we remove this?
-    String getSailID();
+public interface CompetitorDTO extends Serializable, MappableToDevice {
+    
+    String getTwoLetterIsoCountryCode();
+
+    String getThreeLetterIocCountryCode();
+
+    String getCountryName();
+
+    String getIdAsString();
+
+    String getSearchTag();
 
     /**
-     * Returns a derived short information about a competitor depending on the information available
-     * If we have a short name set on the competitor this name will be returned.
-     * If no short name exist but a boat the either the sailId or the boat name will returned.
-     * If all these attributes have no value null is returned.   
+     * If the {@code searchTag} is not contained in {@link #getSearchTag()}, appends it to the search tag, separated by a space character 
+     */
+    void addToSearchTag(String searchTag);
+    
+    String getName();
+
+    String getShortName();
+
+    /**
+     * Returns a derived short information about a competitor depending on the information available. If we have a
+     * {@link #getShortName() short name} set on the competitor this name will be returned. If no short name exist but a
+     * {@link CompetitorWithBoatDTO#getBoat() boat} then either the sailId or the boat name will returned. If all these
+     * attributes have no value, a three-letter acronym is constructed from the name by using the first two and the last letter
+     * of the competitor's {@link #getName() name} unless it's empty in which case an empty string is returned.
      */
     String getShortInfo();
 
-    BoatDTO getBoat();
+    Color getColor();
+    
+    String getEmail();
+    
+    boolean hasEmail();
 
-    void setBoat(BoatDTO boat);
+    String getFlagImageURL();
 
-    // TODO bug2822: Should we remove this?
-    BoatClassDTO getBoatClass();
+    String getImageURL();
+
+    Double getTimeOnTimeFactor();
+    
+    Duration getTimeOnDistanceAllowancePerNauticalMile();
+    
+    boolean hasBoat();
+
 
     /**
      * A regular instance will simply return this object. A compacted version may compute the result by looking it up

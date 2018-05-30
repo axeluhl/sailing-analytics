@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -61,7 +63,7 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
         final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
                 /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, /* raceDetailsToShow */ null,
                 /* overallDetailsToShow */ null, /* delayBetweenAutoAdvancesInMilliseconds */ null,
-                /* showAddedScores */ false, /* showCompetitorShortNameColumn */ false,
+                /* showAddedScores */ false, /* showCompetitorShortNameColumn */ true,
                 /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ false,
                 /* showCompetitorBoatInfoColumn */ false, /* showRaceRankColumn */ true);
 
@@ -70,11 +72,11 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
         timer = new com.sap.sse.gwt.client.player.Timer(PlayModes.Live,
                 PlayStates.Paused,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
-        leaderboardPanel = new SingleRaceLeaderboardPanel(null,null,sailingService, new AsyncActionsExecutor(), leaderboardSettings,
+        leaderboardPanel = new SingleRaceLeaderboardPanel(null, null, sailingService, new AsyncActionsExecutor(), leaderboardSettings,
                 true, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(true),
-                FlagImageResolverImpl.get());
+                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
 
         
         int competitorCount = getPlace().getStatistic().getCompetitors();

@@ -8,6 +8,7 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SortingOrder;
@@ -21,8 +22,8 @@ import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettingsDialogComponent;
-import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -66,11 +67,12 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
             CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
-            boolean enableSyncScroller,LeaderBoardStyle style, FlagImageResolver flagImageResolver) {
+            boolean enableSyncScroller,LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
                 timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails,
                 competitorSearchTextBox, showSelectionCheckbox, optionalRaceTimesInfoProvider, autoExpandLastRaceColumn,
-                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller,style, flagImageResolver);
+                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller, style,
+                flagImageResolver, availableDetailTypes);
         assert preSelectedRace != null;
         this.preSelectedRace = preSelectedRace;
         this.showRaceRankColumn = settings.isShowRaceRankColumn();
@@ -134,10 +136,9 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
             }
         }
         if (singleRaceColumn != null) {
-            for (CompetitorDTO competitor: leaderboard.competitors) {
+            for (CompetitorDTO competitor : leaderboard.competitors) {
                 BoatDTO boatOfCompetitor = leaderboard.getBoatOfCompetitor(singleRaceColumn.getRaceColumnName(), competitor);
                 raceCompetitorSelection.setBoat(competitor, boatOfCompetitor);
-                
                 LeaderboardRowDTO leaderboardRowDTO = leaderboard.rows.get(competitor);
                 leaderboardRowDTO.boat = boatOfCompetitor; 
             }
@@ -248,7 +249,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     public Map<CompetitorDTO, LeaderboardRowDTO> getRowsToDisplay() {
         Map<CompetitorDTO, LeaderboardRowDTO> result;
         Iterable<CompetitorDTO> allFilteredCompetitors = competitorSelectionProvider.getFilteredCompetitors();
-        result = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
+        result = new HashMap<>();
         for (CompetitorDTO competitorInPreSelectedRace : getCompetitors(preSelectedRace)) {
             if (Util.contains(allFilteredCompetitors, competitorInPreSelectedRace)) {
                 result.put(competitorInPreSelectedRace, leaderboard.rows.get(competitorInPreSelectedRace));
@@ -260,7 +261,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     @Override
     public SettingsDialogComponent<SingleRaceLeaderboardSettings> getSettingsDialogComponent(
             SingleRaceLeaderboardSettings useTheseSettings) {
-        return new SingleRaceLeaderboardSettingsDialogComponent(useTheseSettings, stringMessages);
+        return new SingleRaceLeaderboardSettingsDialogComponent(useTheseSettings, stringMessages, availableDetailTypes);
     }
 
     @Override
@@ -332,4 +333,5 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
         super.updateSettings(newSettings);
         showRaceRankColumn = newSettings.isShowRaceRankColumn();
     }
+
 }

@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -80,7 +79,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
         // competitorsFromBestToWorst then would not contain those competitors that don't have a score
         // assigned yet.
         final LeaderboardRowDTO competitorRow = getLeaderboard().rows.get(competitorDTO);
-        LinkedHashSet<CompetitorDTO> competitorsRankedInColumn = new LinkedHashSet<CompetitorDTO>();
+        LinkedHashSet<CompetitorDTO> competitorsRankedInColumn = new LinkedHashSet<>();
         if (theRaceColumnDTOThatContainsCompetitorRace != null && competitorRow != null) {
             LeaderboardEntryDTO entryDTO = competitorRow.fieldsByRaceColumnName
                     .get(theRaceColumnDTOThatContainsCompetitorRace.getName());
@@ -97,9 +96,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
                 }
             }
             raceRank = 0;
-            for (Iterator<CompetitorDTO> competitorIter = competitorsRankedInColumn.iterator(); competitorIter
-                    .hasNext();) {
-                CompetitorDTO competitor = competitorIter.next();
+            for (CompetitorDTO competitor : competitorsRankedInColumn) {
                 LeaderboardEntryDTO entryDTOIterated = getLeaderboard().rows.get(competitor).fieldsByRaceColumnName
                         .get(theRaceColumnDTOThatContainsCompetitorRace.getName());
                 // the competitor counts for the selected race if the fleet matches or is unknown

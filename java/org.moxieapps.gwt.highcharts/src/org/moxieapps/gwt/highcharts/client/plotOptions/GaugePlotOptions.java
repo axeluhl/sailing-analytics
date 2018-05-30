@@ -29,7 +29,7 @@ package org.moxieapps.gwt.highcharts.client.plotOptions;
  * @author cskowron@moxiegroup.com (Cory Skowronek)
  * @since 1.6.0
  */
-public class GaugePlotOptions extends PlotOptions<GaugePlotOptions> {
+public class GaugePlotOptions extends BaseGaugePlotOptions<GaugePlotOptions> {
 
     /**
      * Convenience method for setting the "dial" option for gauge charts.  Equivalent to:

@@ -63,13 +63,17 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
      */
     private boolean hasOverallDetails;
 
+    @Deprecated
     LeaderboardDTO() {} // for serialization
 
     /**
      * @param uuidGenerator used to provide the {@link #id ID} for this object (see also {@link #getId()}) and for any clones produced
      * from it by the {@link #clone()} operation.
      */
-    public LeaderboardDTO(Date timepoint, Date timePointOfLastCorrectionsValidity, String comment, ScoringSchemeType scoringScheme, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator, boolean hasOverallDetails) {
+    public LeaderboardDTO(Date timepoint, Date timePointOfLastCorrectionsValidity, String comment,
+            ScoringSchemeType scoringScheme, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator,
+            boolean hasOverallDetails, BoatClassDTO boatClass) {
+        super(boatClass);
         initCollections();
         id = uuidGenerator.generateRandomUUID();
         this.timePoint = timepoint;
@@ -82,10 +86,11 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
 
     private void initCollections() {
         competitorOrderingPerRaceColumnName = new HashMap<String, List<CompetitorDTO>>();
-        this.suppressedCompetitors = new ArrayList<CompetitorDTO>();
+        this.suppressedCompetitors = new ArrayList<>();
     }
     
-    protected LeaderboardDTO(String id) {
+    protected LeaderboardDTO(String id, BoatClassDTO boatClass) {
+        super(boatClass);
         initCollections();
         this.id = id;
     }
@@ -135,7 +140,7 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
         return result;
     }
 
-    public void setBoatOfCompetitor(CompetitorDTO competitor, BoatDTO boat) {
+    public void setBoatOfCompetitor(CompetitorWithBoatDTO competitor, BoatDTO boat) {
         if (rows != null && this.canBoatsOfCompetitorsChangePerRace == false) {
             LeaderboardRowDTO leaderboardRowDTO = rows.get(competitor);
             if (leaderboardRowDTO != null) {
@@ -144,7 +149,7 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
         }
     }
 
-    public void setBoatOfCompetitorForRace(String raceColumnName, CompetitorDTO competitor, BoatDTO boat) {
+    public void setBoatOfCompetitorForRace(String raceColumnName, CompetitorWithBoatDTO competitor, BoatDTO boat) {
         if (rows != null && this.canBoatsOfCompetitorsChangePerRace == true) {
             LeaderboardRowDTO leaderboardRow = rows.get(competitor);
             if (leaderboardRow != null) {

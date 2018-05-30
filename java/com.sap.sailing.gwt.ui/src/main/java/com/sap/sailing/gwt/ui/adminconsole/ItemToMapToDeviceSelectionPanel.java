@@ -46,8 +46,7 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 if (competitorTable.getSelectionModel().getSelectedSet().size() == 1) {
-                    CompetitorDTO selectedCompetitor = competitorTable.getSelectionModel().getSelectedSet().iterator()
-                            .next();
+                    CompetitorDTO selectedCompetitor = competitorTable.getSelectionModel().getSelectedSet().iterator().next();
                     ItemToMapToDeviceSelectionPanel.this.selected = selectedCompetitor;
                     deselectAll(boatTable.getSelectionModel(), boatTable.getDataProvider().getList());
                     deselectAll(markTable.getSelectionModel(), markTable.getDataProvider().getList());

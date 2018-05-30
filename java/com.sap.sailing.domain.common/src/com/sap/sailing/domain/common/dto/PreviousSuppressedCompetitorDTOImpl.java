@@ -12,6 +12,7 @@ import com.sap.sse.common.Util;
 public class PreviousSuppressedCompetitorDTOImpl extends PreviousCompetitorDTOImpl {
     private static final long serialVersionUID = -4879238928633525593L;
 
+    @Deprecated
     PreviousSuppressedCompetitorDTOImpl() {
         super();
     }
