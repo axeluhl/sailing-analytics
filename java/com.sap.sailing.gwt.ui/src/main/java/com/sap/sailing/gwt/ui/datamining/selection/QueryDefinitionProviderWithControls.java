@@ -154,6 +154,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
         filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(parent, context, session,
                 stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
+//        filterSelectionProvider = new HierarchicalDimensionListFilterSelectionProvider(parent, context, session,
+//                stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
         filterSelectionProvider.addSelectionChangedListener(providerListener);
         filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
         

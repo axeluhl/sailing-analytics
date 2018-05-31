@@ -43,7 +43,7 @@ public class FilterableSelectionTable<ContentType extends Serializable> {
         
         allData = new ArrayList<ContentType>();
         
-        FilterTableResources tableRes = GWT.create(FilterTableResources.class);
+        DataMiningCellTableResources tableRes = GWT.create(DataMiningCellTableResources.class);
         table = new BaseCelltable<>(Integer.MAX_VALUE, tableRes);
         table.setWidth("100%");
         table.setAutoHeaderRefreshDisabled(true);

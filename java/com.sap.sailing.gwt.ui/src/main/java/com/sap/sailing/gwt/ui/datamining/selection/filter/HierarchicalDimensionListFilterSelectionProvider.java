@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
@@ -14,12 +16,17 @@ import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.dom.client.TableCellElement;
+import com.google.gwt.dom.client.TableRowElement;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.cellview.client.RowHoverEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -27,7 +34,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
-import com.google.gwt.view.client.DefaultSelectionEventManager.CheckboxEventTranslator;
+import com.google.gwt.view.client.DefaultSelectionEventManager.EventTranslator;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -39,12 +46,14 @@ import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionPresenter;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.PlainFilterSelectionPresenter;
+import com.sap.sailing.gwt.ui.datamining.selection.filter.DataMiningDataGridResources.DataMiningDataGridStyle;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCellTableBuilder;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
@@ -106,13 +115,13 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
             }
         };
 
-        FilterDimensionsListResources filterDimensionsListResources = GWT.create(FilterDimensionsListResources.class);
-        filterDimensionsList = new DataGrid<DimensionWithContext>(Integer.MAX_VALUE, filterDimensionsListResources);
+        DataMiningDataGridResources resources = GWT.create(DataMiningDataGridResources.class);
+        filterDimensionsList = new DataGrid<DimensionWithContext>(Integer.MAX_VALUE, resources);
         filterDimensionsList.setAutoHeaderRefreshDisabled(true);
         filterDimensionsList.setAutoFooterRefreshDisabled(true);
         filterDimensionsList.addColumn(checkboxColumn);
         filterDimensionsList.addColumn(dimensionColumn);
-        filterDimensionsList.setTableBuilder(new FilterDimensionsListBuilder(filterDimensionsList));
+        filterDimensionsList.setTableBuilder(new FilterDimensionsListBuilder(filterDimensionsList, resources.dataGridStyle()));
         filterDimensionsList.setSelectionModel(filterDimensionSelectionModel, DefaultSelectionEventManager.createCustomManager(new CustomCheckboxEventTranslator()));
         availableFilterDimensions.addDataDisplay(filterDimensionsList);
         
@@ -154,13 +163,34 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
             if (!isAwaitingReload && retrieverChain != null) {
                 updateFilterDimensions();
             } else if (!isAwaitingReload) {
-                availableFilterDimensions.getList().clear();
+                clearContent();
             }
         }
     }
     
     private void updateFilterDimensions() {
-        // TODO Auto-generated method stub
+        clearContent();
+        dataMiningService.getReducedDimensionsMappedByLevelFor(retrieverChain, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<ReducedDimensionsDTO>() {
+            @Override
+            public void onSuccess(ReducedDimensionsDTO result) {
+                List<DimensionWithContext> dimensionsWithContext = availableFilterDimensions.getList();
+                for (Entry<DataRetrieverLevelDTO, HashSet<FunctionDTO>> entry : result.getReducedDimensions().entrySet()) {
+                    DataRetrieverLevelDTO retrieverlevel = entry.getKey();
+                    for (FunctionDTO dimension : entry.getValue()) {
+                        dimensionsWithContext.add(new DimensionWithContext(dimension, retrieverlevel));
+                    }
+                }
+                dimensionsWithContext.sort(null);
+            }
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error fetching the dimensions of the retriever chain from the server: " + caught.getMessage());
+            }
+        });
+    }
+
+    private void clearContent() {
+        availableFilterDimensions.getList().clear();
     }
     
     private void selectedFilterDimensionsChanged(SelectionChangeEvent event) {
@@ -256,15 +286,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         return "HierarchicalDimensionListFilterSelectionProvider";
     }
     
-    private interface FilterDimensionsListResources extends DataGrid.Resources {
-
-        @Source({ CellTable.Style.DEFAULT_CSS, "FilterTable.css" })
-        FilterDimensionsListStyle cellTableStyle();
-
-        interface FilterDimensionsListStyle extends DataGrid.Style {
-        }
-    }
-    
     private static class DimensionWithContext implements Comparable<DimensionWithContext> {
 
         private final FunctionDTO dimension;
@@ -334,36 +355,72 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     
     private class FilterDimensionsListBuilder extends BaseCellTableBuilder<DimensionWithContext> {
         
-        private final String headerStyle;
+        private final static String SUB_HEADER_ATTRIBUTE = "subheader";
         
-        private DataRetrieverLevelDTO currentLevel;
-        private int dimensionIndex;
+        private final String headerStyle;
+        private final String subHeaderStyle;
+        private final String spacedSubHeaderStyle;
+        private final String firstColumnStyle;
+        private final String hoveredRowStyle;
+        private final String hoveredRowCellStyle;
 
-        public FilterDimensionsListBuilder(AbstractCellTable<DimensionWithContext> cellTable) {
+        public FilterDimensionsListBuilder(AbstractCellTable<DimensionWithContext> cellTable, DataMiningDataGridStyle style) {
             super(cellTable);
-            headerStyle = cellTable.getResources().style().header();
+            headerStyle = style.dataGridHeader();
+            subHeaderStyle = style.dataGridSubHeader();
+            firstColumnStyle = style.dataGridFirstColumn();
+            spacedSubHeaderStyle = style.spacedSubHeader();
+            hoveredRowStyle = style.dataGridHoveredRow();
+            hoveredRowCellStyle = style.dataGridHoveredRowCell();
+            
+            cellTable.addRowHoverHandler(new RowHoverEvent.Handler() {
+                @Override
+                public void onRowHover(RowHoverEvent event) {
+                    TableRowElement tr = event.getHoveringRow();
+                    if (!tr.getAttribute(SUB_HEADER_ATTRIBUTE).isEmpty()) {
+                        tr.removeClassName(hoveredRowStyle);
+                        NodeList<TableCellElement> cells = tr.getCells();
+                        for (int i = 0; i < cells.getLength(); i++) {
+                            cells.getItem(i).removeClassName(hoveredRowCellStyle);
+                        }
+                    }
+                }
+            });
         }
         
         @Override
         public void buildRowImpl(DimensionWithContext rowValue, int absRowIndex) {
-            if (!Objects.equals(currentLevel, rowValue.getRetrieverLevel())) {
-                currentLevel = rowValue.getRetrieverLevel();
-                dimensionIndex = 0;
-                TableRowBuilder levelRowBuilder = startRow();
-                TableCellBuilder levelCellBuilder = levelRowBuilder.startTD();
-                levelCellBuilder.colSpan(this.cellTable.getColumnCount()).className(headerStyle);
-                levelCellBuilder.text(currentLevel.getRetrievedDataType().getDisplayName());
-                levelCellBuilder.endTD();
-                levelRowBuilder.endTR();
+            DataRetrieverLevelDTO valueLevel = rowValue.getRetrieverLevel();
+            DataRetrieverLevelDTO previousLevel = null;
+            if (absRowIndex > 0) {
+                previousLevel = availableFilterDimensions.getList().get(absRowIndex - 1).getRetrieverLevel();
             }
             
-            super.buildRowImpl(rowValue, dimensionIndex);
-            dimensionIndex++;
+            if (!Objects.equals(previousLevel, valueLevel)) {
+                StringBuilder styleBuilder = new StringBuilder();
+                styleBuilder.append(subHeaderStyle).append(" ").append(headerStyle);
+                if (absRowIndex != 0) {
+                    styleBuilder.append(" ").append(spacedSubHeaderStyle);
+                }
+                String style = styleBuilder.toString();
+
+                String subHeaderText = valueLevel.getRetrievedDataType().getDisplayName();
+                TableRowBuilder subHeaderBuilder = startRow().attribute(SUB_HEADER_ATTRIBUTE, subHeaderText);
+                // Additional cell to fix the checkbox column size
+                subHeaderBuilder.startTD().className(style + " " + firstColumnStyle).endTD();
+                // Actual header cell
+                TableCellBuilder headerCellBuilder = subHeaderBuilder.startTD();
+                headerCellBuilder.colSpan(this.cellTable.getColumnCount() - 1).className(style);
+                headerCellBuilder.text(subHeaderText);
+                headerCellBuilder.endTD();
+                subHeaderBuilder.endTR();
+            }
+            
+            super.buildRowImpl(rowValue, absRowIndex);
         }
-        
     }
     
-    private class CustomCheckboxEventTranslator extends CheckboxEventTranslator<DimensionWithContext> {
+    private class CustomCheckboxEventTranslator implements EventTranslator<DimensionWithContext> {
         
         @Override
         public boolean clearCurrentSelection(CellPreviewEvent<DimensionWithContext> event) {
@@ -372,6 +429,8 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
 
         @Override
         public SelectAction translateSelectionEvent(CellPreviewEvent<DimensionWithContext> event) {
+            // FIXME Ignore Clicks on retriever level headers
+            
             NativeEvent nativeEvent = event.getNativeEvent();
             if (BrowserEvents.CLICK.equals(nativeEvent.getType())) {
                 if (nativeEvent.getCtrlKey()) {
