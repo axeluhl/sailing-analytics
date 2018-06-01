@@ -152,7 +152,7 @@ public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSett
     }
     
     @Override
-    public boolean isAwatingReload() {
+    public boolean isAwaitingReload() {
         return isAwaitingReload;
     }
     

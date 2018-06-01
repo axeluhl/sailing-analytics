@@ -80,7 +80,7 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
     }
     
     @Override
-    public boolean isAwatingReload() {
+    public boolean isAwaitingReload() {
         return isAwaitingReload;
     }
     

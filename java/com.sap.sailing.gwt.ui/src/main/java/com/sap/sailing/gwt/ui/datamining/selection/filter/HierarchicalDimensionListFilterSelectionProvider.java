@@ -56,6 +56,8 @@ import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCellTableBuilder;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
+import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -74,9 +76,11 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     private boolean blockDataUpdates;
     private DataRetrieverChainDefinitionDTO retrieverChain;
     private final MultiSelectionModel<DimensionWithContext> filterDimensionSelectionModel;
-    private final ListDataProvider<DimensionWithContext> availableFilterDimensions;
+    private final List<DimensionWithContext> allFilterDimensions;
+    private final ListDataProvider<DimensionWithContext> filteredFilterDimensions;
     
     private final DockLayoutPanel mainPanel;
+    private final AbstractFilterablePanel<DimensionWithContext> filterFilterDimensionsPanel;
     private final DataGrid<DimensionWithContext> filterDimensionsList;
     private final Column<DimensionWithContext, Boolean> checkboxColumn;
     private final FilterSelectionPresenter selectionPresenter;
@@ -100,7 +104,8 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         retrieverChain = null;
         filterDimensionSelectionModel = new MultiSelectionModel<>();
         filterDimensionSelectionModel.addSelectionChangeHandler(e -> selectedFilterDimensionsChanged(e));
-        availableFilterDimensions = new ListDataProvider<>();
+        allFilterDimensions = new ArrayList<>();
+        filteredFilterDimensions = new ListDataProvider<>();
         
         checkboxColumn = new Column<DimensionWithContext, Boolean>(new CheckboxCell(true, false)) {
             @Override
@@ -123,10 +128,21 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         filterDimensionsList.addColumn(dimensionColumn);
         filterDimensionsList.setTableBuilder(new FilterDimensionsListBuilder(filterDimensionsList, resources.dataGridStyle()));
         filterDimensionsList.setSelectionModel(filterDimensionSelectionModel, DefaultSelectionEventManager.createCustomManager(new CustomCheckboxEventTranslator()));
-        availableFilterDimensions.addDataDisplay(filterDimensionsList);
+        filteredFilterDimensions.addDataDisplay(filterDimensionsList);
+        
+        filterFilterDimensionsPanel = new LabeledAbstractFilterablePanel<DimensionWithContext>(
+            new Label(stringMessages.search()), null, filterDimensionsList, filteredFilterDimensions)
+        {
+            @Override
+            public Iterable<String> getSearchableStrings(DimensionWithContext dimension) {
+                return dimension.getMatchingStrings();
+            }
+        };
+        filterFilterDimensionsPanel.setWidth("100%");
+        filterFilterDimensionsPanel.getTextBox().setWidth("100%");
         
         DockLayoutPanel filterDimensionsSelectionPanel = new DockLayoutPanel(Unit.PX);
-        filterDimensionsSelectionPanel.addNorth(new Label(stringMessages.filterBy()), 45); // TODO Add dimension search box
+        filterDimensionsSelectionPanel.addNorth(filterFilterDimensionsPanel, 45);
         filterDimensionsSelectionPanel.add(filterDimensionsList);
         
         selectionPresenter = new PlainFilterSelectionPresenter(this, context, stringMessages, retrieverChainProvider, this);
@@ -145,7 +161,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     }
     
     @Override
-    public boolean isAwatingReload() {
+    public boolean isAwaitingReload() {
         return isAwaitingReload;
     }
     
@@ -173,14 +189,14 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         dataMiningService.getReducedDimensionsMappedByLevelFor(retrieverChain, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<ReducedDimensionsDTO>() {
             @Override
             public void onSuccess(ReducedDimensionsDTO result) {
-                List<DimensionWithContext> dimensionsWithContext = availableFilterDimensions.getList();
                 for (Entry<DataRetrieverLevelDTO, HashSet<FunctionDTO>> entry : result.getReducedDimensions().entrySet()) {
                     DataRetrieverLevelDTO retrieverlevel = entry.getKey();
                     for (FunctionDTO dimension : entry.getValue()) {
-                        dimensionsWithContext.add(new DimensionWithContext(dimension, retrieverlevel));
+                        allFilterDimensions.add(new DimensionWithContext(dimension, retrieverlevel));
                     }
                 }
-                dimensionsWithContext.sort(null);
+                allFilterDimensions.sort(null);
+                filterFilterDimensionsPanel.updateAll(allFilterDimensions);
             }
             @Override
             public void onFailure(Throwable caught) {
@@ -190,7 +206,10 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     }
 
     private void clearContent() {
-        availableFilterDimensions.getList().clear();
+        allFilterDimensions.clear();
+        filteredFilterDimensions.getList().clear();
+        filterFilterDimensionsPanel.getTextBox().setText(null);
+        filterFilterDimensionsPanel.removeAll();
     }
     
     private void selectedFilterDimensionsChanged(SelectionChangeEvent event) {
@@ -211,8 +230,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     
     @Override
     public void clearSelection() {
-        // TODO Auto-generated method stub
-        
+        filterDimensionSelectionModel.clear();
     }
 
     @Override
@@ -393,7 +411,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
             DataRetrieverLevelDTO valueLevel = rowValue.getRetrieverLevel();
             DataRetrieverLevelDTO previousLevel = null;
             if (absRowIndex > 0) {
-                previousLevel = availableFilterDimensions.getList().get(absRowIndex - 1).getRetrieverLevel();
+                previousLevel = filteredFilterDimensions.getList().get(absRowIndex - 1).getRetrieverLevel();
             }
             
             if (!Objects.equals(previousLevel, valueLevel)) {

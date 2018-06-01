@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.WithControls;
 import com.sap.sailing.gwt.ui.datamining.developer.PredefinedQueryRunner;
 import com.sap.sailing.gwt.ui.datamining.developer.QueryDefinitionViewer;
+import com.sap.sailing.gwt.ui.datamining.selection.filter.HierarchicalDimensionListFilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.selection.filter.ListRetrieverChainFilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.settings.AdvancedDataMiningSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.AdvancedDataMiningSettingsDialogComponent;
@@ -152,10 +153,10 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         filterSplitPanel.addSouth(groupingProvider.getEntryWidget(), footerPanelHeight);
         filterSplitPanel.addEast(queryDefinitionViewer.getEntryWidget(), 600);
         filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
-        filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(parent, context, session,
-                stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
-//        filterSelectionProvider = new HierarchicalDimensionListFilterSelectionProvider(parent, context, session,
+//        filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(parent, context, session,
 //                stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
+        filterSelectionProvider = new HierarchicalDimensionListFilterSelectionProvider(parent, context, session,
+                stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
         filterSelectionProvider.addSelectionChangedListener(providerListener);
         filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
         
@@ -264,9 +265,9 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     }
     
     @Override
-    public boolean isAwatingReload() {
+    public boolean isAwaitingReload() {
         for (DataMiningComponentProvider<?> provider : providers) {
-            if (provider.isAwatingReload()) {
+            if (provider.isAwaitingReload()) {
                 return true;
             }
         }
@@ -392,7 +393,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
         @Override
         public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
-            if (isAwatingReload()) {
+            if (isAwaitingReload()) {
                 groupingProvider.dataRetrieverChainDefinitionChanged(newDataRetrieverChainDefinition);
                 groupingProvider.reloadComponents();
                 
@@ -405,28 +406,28 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
         @Override
         public void aggregatorDefinitionChanged(AggregationProcessorDefinitionDTO newAggregatorDefinition) {
-            if (!isAwatingReload()) {
+            if (!isAwaitingReload()) {
                 notifyQueryDefinitionChanged();
             }
         }
 
         @Override
         public void extractionFunctionChanged(FunctionDTO extractionFunction) {
-            if (!isAwatingReload()) {
+            if (!isAwaitingReload()) {
                 notifyQueryDefinitionChanged();
             }
         }
 
         @Override
         public void groupingChanged() {
-            if (!isAwatingReload()) {
+            if (!isAwaitingReload()) {
                 notifyQueryDefinitionChanged();
             }
         }
 
         @Override
         public void selectionChanged() {
-            if (!isAwatingReload()) {
+            if (!isAwaitingReload()) {
                 notifyQueryDefinitionChanged();
             }
         }

@@ -104,7 +104,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
     }
     
     @Override
-    public boolean isAwatingReload() {
+    public boolean isAwaitingReload() {
         return isAwaitingReload;
     }
     

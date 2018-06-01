@@ -15,7 +15,7 @@ public interface DataMiningComponentProvider<SettingsType extends Settings> exte
      * @return <code>true</code>, if the provider is reloading its components
      *         or is waiting for the {@link #reloadComponents()} call.
      */
-    public boolean isAwatingReload();
+    public boolean isAwaitingReload();
     
     public void reloadComponents();
     

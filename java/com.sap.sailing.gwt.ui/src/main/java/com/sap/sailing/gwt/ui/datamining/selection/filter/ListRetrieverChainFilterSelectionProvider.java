@@ -133,7 +133,7 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
     }
     
     @Override
-    public boolean isAwatingReload() {
+    public boolean isAwaitingReload() {
         return isAwaitingReload;
     }
     
