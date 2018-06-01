@@ -205,7 +205,7 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
         return retrieverChainProvider.getRetrieverSettings();
     }
     
-    void retrieverLevelFilterSelectionChanged(RetrieverLevelFilterSelectionProvider retrieverLevelFilterSelectionProvider, DimensionFilterSelectionProvider dimensionFilterSelectionProvider) {
+    void retrieverLevelFilterSelectionChanged(RetrieverLevelFilterSelectionProvider retrieverLevelFilterSelectionProvider, ChooseableDimensionFilterSelectionProvider dimensionFilterSelectionProvider) {
         if (!blockDataUpdates) {
             updateFilterSelectionProviders(retrieverLevelFilterSelectionProvider.getRetrieverLevel(),
                                            dimensionFilterSelectionProvider.getSelectedDimension());

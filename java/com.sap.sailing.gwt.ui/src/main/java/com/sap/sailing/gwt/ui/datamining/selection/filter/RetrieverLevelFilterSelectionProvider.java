@@ -40,7 +40,7 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
     private final Collection<FunctionDTO> availableDimensions;
     
     private final HorizontalPanel mainPanel;
-    private final Collection<DimensionFilterSelectionProvider> dimensionSelectionProviders;
+    private final Collection<ChooseableDimensionFilterSelectionProvider> dimensionSelectionProviders;
 
     public RetrieverLevelFilterSelectionProvider(Component<?> parent, ComponentContext<?> context,
             DataMiningSession session,
@@ -68,7 +68,7 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
     }
 
     private void initializeDimensionSelectionProviders() {
-        DimensionFilterSelectionProvider dimensionFilter = createDimensionSelectionProvider();
+        ChooseableDimensionFilterSelectionProvider dimensionFilter = createDimensionSelectionProvider();
         List<FunctionDTO> availableDimensionsList = new ArrayList<>(availableDimensions);
         Collections.sort(availableDimensionsList);
         dimensionFilter.setAvailableDimensions(availableDimensionsList);
@@ -83,12 +83,12 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
         addDimensionSelectionProvider(createDimensionSelectionProvider());
     }
 
-    private DimensionFilterSelectionProvider createDimensionSelectionProvider() {
-        DimensionFilterSelectionProvider dimensionFilter = new DimensionFilterSelectionProvider(dataMiningService, errorReporter, session, this);
+    private ChooseableDimensionFilterSelectionProvider createDimensionSelectionProvider() {
+        ChooseableDimensionFilterSelectionProvider dimensionFilter = new ChooseableDimensionFilterSelectionProvider(dataMiningService, errorReporter, session, this);
         return dimensionFilter;
     }
     
-    private void addDimensionSelectionProvider(DimensionFilterSelectionProvider dimensionFilter) {
+    private void addDimensionSelectionProvider(ChooseableDimensionFilterSelectionProvider dimensionFilter) {
         dimensionSelectionProviders.add(dimensionFilter);
         dimensionFilter.getEntryWidget().getElement().getStyle().setDisplay(Display.INLINE);
         mainPanel.add(dimensionFilter.getEntryWidget());
@@ -98,7 +98,7 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
         return availableDimensions.size() - getSelectedDimensions().size() > 1;
     }
     
-    void removeDimensionFilter(DimensionFilterSelectionProvider dimensionFilter) {
+    void removeDimensionFilter(ChooseableDimensionFilterSelectionProvider dimensionFilter) {
         dimensionFilter.clearSelection(); // Notifies the listeners, if values were selected
         dimensionSelectionProviders.remove(dimensionFilter);
         mainPanel.remove(dimensionFilter.getEntryWidget());
@@ -107,7 +107,7 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
     void updateAvailableDimensions() {
         Collection<FunctionDTO> remainingDimensionsBase = new ArrayList<FunctionDTO>(availableDimensions);
         remainingDimensionsBase.removeAll(getSelectedDimensions());
-        for (DimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
+        for (ChooseableDimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
             List<FunctionDTO> remainingDimensions = new ArrayList<>(remainingDimensionsBase);
             FunctionDTO selectedDimension = dimensionFilter.getSelectedDimension();
             if (selectedDimension != null) {
@@ -125,7 +125,7 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
     
     private Collection<FunctionDTO> getSelectedDimensions() {
         Collection<FunctionDTO> selectedDimensions = new ArrayList<>();
-        for (DimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
+        for (ChooseableDimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
             FunctionDTO selectedDimension = dimensionFilter.getSelectedDimension();
             if (selectedDimension != null) {
                 selectedDimensions.add(selectedDimension);
@@ -142,9 +142,9 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
         updateAvailableData(exceptForDimension, dimensionSelectionProviders.iterator());
     }
     
-    void updateAvailableData(final FunctionDTO exceptForDimension, final Iterator<DimensionFilterSelectionProvider> selectionProviderIterator) {
+    void updateAvailableData(final FunctionDTO exceptForDimension, final Iterator<ChooseableDimensionFilterSelectionProvider> selectionProviderIterator) {
         if (selectionProviderIterator.hasNext()) {
-            DimensionFilterSelectionProvider selectionProvider = selectionProviderIterator.next();
+            ChooseableDimensionFilterSelectionProvider selectionProvider = selectionProviderIterator.next();
             FunctionDTO selectedDimension = selectionProvider.getSelectedDimension();
             if (selectedDimension != null && !selectedDimension.equals(exceptForDimension)) {
                 selectionProvider.fetchAndUpdateAvailableData(selectionProviderIterator);
@@ -157,7 +157,7 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
         }
     }
 
-    void dimensionFilterSelectionChanged(DimensionFilterSelectionProvider dimensionFilterSelectionProvider) {
+    void dimensionFilterSelectionChanged(ChooseableDimensionFilterSelectionProvider dimensionFilterSelectionProvider) {
         retrieverChainSelectionProvider.retrieverLevelFilterSelectionChanged(this, dimensionFilterSelectionProvider);
     }
 
@@ -171,7 +171,7 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
 
     public Map<FunctionDTO, HashSet<? extends Serializable>> getFilterSelection() {
         HashMap<FunctionDTO, HashSet<? extends Serializable>> filterSelection = new HashMap<>();
-        for (DimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
+        for (ChooseableDimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
             HashSet<? extends Serializable> dimensionFilterSelection = dimensionFilter.getSelection();
             if (!dimensionFilterSelection.isEmpty()) {
                 filterSelection.put(dimensionFilter.getSelectedDimension(), dimensionFilterSelection);
@@ -182,15 +182,15 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
 
     /**
      * If there is already a filter set for {@code dimension}, replace its value selection by the {@code values}
-     * provided. Otherwise, set the last (expectedly non-selected) {@link DimensionFilterSelectionProvider} to
+     * provided. Otherwise, set the last (expectedly non-selected) {@link ChooseableDimensionFilterSelectionProvider} to
      * {@code dimension} and set its filter values to {@code values}.
      * <p>
      * 
      * <em>Precondition:</em> {@link #hasDimension(FunctionDTO) hasDimension(dimension)}{@code == true}
      */
     public void addFilter(FunctionDTO dimension, Set<? extends Serializable> values) {
-        DimensionFilterSelectionProvider dimensionFilter = null;
-        for (final DimensionFilterSelectionProvider dimensionSelectionProvider : dimensionSelectionProviders) {
+        ChooseableDimensionFilterSelectionProvider dimensionFilter = null;
+        for (final ChooseableDimensionFilterSelectionProvider dimensionSelectionProvider : dimensionSelectionProviders) {
             dimensionFilter = dimensionSelectionProvider;
             if (Util.equalsWithNull(dimensionSelectionProvider.getSelectedDimension(), dimension)) {
                 break;
@@ -206,7 +206,7 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
         if (dimensionFilter.getSelectedDimension() == null) {
             // dimension not yet filtered for; use the last empty dimension filter box, set dimension and define filter values: 
             dimensionFilter.setSelectedDimensionAndValues(dimension, values);
-            final DimensionFilterSelectionProvider newDimensionFilter = createDimensionSelectionProvider();
+            final ChooseableDimensionFilterSelectionProvider newDimensionFilter = createDimensionSelectionProvider();
             addDimensionSelectionProvider(newDimensionFilter);
             updateAvailableDimensions();
         } else {
@@ -221,7 +221,7 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
         List<FunctionDTO> sortedDimensions = new ArrayList<>(filterSelection.keySet());
         Collections.sort(sortedDimensions);
         for (FunctionDTO functionDTO : sortedDimensions) {
-            DimensionFilterSelectionProvider dimensionFilter = createDimensionSelectionProvider();
+            ChooseableDimensionFilterSelectionProvider dimensionFilter = createDimensionSelectionProvider();
             addDimensionSelectionProvider(dimensionFilter);
             updateAvailableDimensions();
             dimensionFilter.setSelectedDimensionAndValues(functionDTO, filterSelection.get(functionDTO));
@@ -230,7 +230,7 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
 
     public void clearSelection() {
         mainPanel.clear();
-        for (DimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
+        for (ChooseableDimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
             dimensionFilter.clearSelection();
         }
         dimensionSelectionProviders.clear();

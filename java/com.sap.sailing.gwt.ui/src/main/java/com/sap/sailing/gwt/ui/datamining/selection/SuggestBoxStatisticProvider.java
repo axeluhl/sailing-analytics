@@ -126,8 +126,6 @@ public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSett
         aggregatorListBox = createAggregatorListBox();
         aggregatorListBox.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
         mainPanel.add(aggregatorListBox);
-        
-        updateContent();
     }
 
     private ValueListBox<AggregationProcessorDefinitionDTO> createAggregatorListBox() {

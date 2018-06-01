@@ -47,6 +47,8 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
         super(parent, context);
         this.filterSelectionProvider = filterSelectionProvider;
         this.filterSelectionProvider.addSelectionChangedListener(this);
+        // TODO Is listening to the retriever chain really necessary? Shouldn't the filter selection change
+        // if the filter selection provider is affected by a changing retriever chain?
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
 
         Label currentSelectionLabel = new Label(stringMessages.currentFilterSelection());
