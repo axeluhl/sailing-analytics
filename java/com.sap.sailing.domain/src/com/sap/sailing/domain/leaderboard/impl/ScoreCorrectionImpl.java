@@ -106,7 +106,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     protected void notifyListeners(Competitor competitor, RaceColumn raceColumn,
             MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
         for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
-            listener.maxPointsReasonChanced(competitor, raceColumn, oldMaxPointsReason, newMaxPointsReason);
+            listener.maxPointsReasonChanged(competitor, raceColumn, oldMaxPointsReason, newMaxPointsReason);
         }
     }
 

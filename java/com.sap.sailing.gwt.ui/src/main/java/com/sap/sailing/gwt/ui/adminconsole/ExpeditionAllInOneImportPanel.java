@@ -10,6 +10,7 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -99,7 +100,10 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
             regattaNamePanel.setVisible(true);
             boatClassPanel.setVisible(false);
         });
-
+        final CheckBox importStartData = new CheckBox(stringMessages.importStartData());
+        importStartData.setValue(true);
+        importStartData.setName(ExpeditionAllInOneConstants.REQUEST_PARAMETER_IMPORT_START_DATA);
+        importModePanel.add(importStartData);
         regattaNamePanel.setSpacing(5);
         final Label regattaNameLabel = new Label(stringMessages.regattaName() + ":");
         regattaNamePanel.add(regattaNameLabel);
@@ -151,10 +155,10 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
             if (response == null) {
                 Window.alert(StringMessages.INSTANCE.unexpectedErrorDuringFileImport());
             } else if (response.hasEventId()) {
-                
                 new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
-                        response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getRaceEntries(), response.getGpsDeviceIds(),
-                        response.getSensorDeviceIds(), response.getSensorFixImporterType(), sailingService,
+                        response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getRaceEntries(),
+                        response.getGpsDeviceIds(), response.getSensorDeviceIds(), response.getSensorFixImporterType(),
+                        response.getStartTimes(), sailingService,
                         errorReporter, stringMessages);
                 regattaRefresher.fillRegattas();
             } else {

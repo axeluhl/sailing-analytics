@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -50,11 +51,13 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final String sensorImporterType;
     private List<Triple<String, String, String>> raceEntries;
     private String regattaName;
+    @SuppressWarnings("unused") // the following could become useful in order to show the start times used for a split
+    private Iterable<TimePoint> startTimes;
 
     public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName,
             String leaderboardGroupName, List<Triple<String,  String, String>> raceEntries,
             List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
-            final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+            Iterable<TimePoint> startTimes, final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
         this.leaderboardGroupName = leaderboardGroupName;
         this.sensorImporterType = sensorImporterType;
@@ -63,7 +66,8 @@ public class ExpeditionAllInOneAfterImportHandler {
         this.stringMessages = stringMessages;
         this.raceEntries = raceEntries;
         this.regattaName = regattaName;
-                
+        this.startTimes = startTimes;
+        // TODO from the start times, suggest the user to split the session into one session per start, with start tracking at n minutes before start
         sailingService.getEventById(eventId, false, new DataLoadingCallback<EventDTO>() {
             @Override
             public void onSuccess(EventDTO result) {

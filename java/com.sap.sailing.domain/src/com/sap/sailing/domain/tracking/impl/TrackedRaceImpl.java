@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -549,7 +550,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     markPassingCalculator.stop();
                 }
                 }
-            }, /* Not relevant For replication */ Optional.empty());
+            }, /* Not relevant For replication */ Optional.empty(), /* synchronous */ false);
         } else {
             markPassingCalculator = null;
         }
@@ -919,7 +920,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * monitor for {@link #updateStartOfRaceCacheFields()}; has to be serializable, therefore {@link String}
      * and not {@link Object}.
      */
-    private final String updateStartOfRaceCacheFieldsMonitor = "";
+    private final String updateStartOfRaceCacheFieldsMonitor = ""+new Random().nextDouble();
     protected void updateStartOfRaceCacheFields() {
         synchronized (updateStartOfRaceCacheFieldsMonitor) {
             TimePoint newStartTime = null;

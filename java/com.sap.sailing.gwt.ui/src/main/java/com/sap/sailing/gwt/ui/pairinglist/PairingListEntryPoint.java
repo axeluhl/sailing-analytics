@@ -171,6 +171,13 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 			frame.print();
 		}, 100);
     }-*/;
+    
+    private HTML getNoPairingListAvailableLabel() {
+        final HTML label = new HTML(
+                "<h2>" + stringMessages.noPairingListAvailable() + "</h2>");
+        label.getElement().getStyle().setColor(Color.BLACK.toString());
+        return label;
+    }
 
     private HTML getNoPairingListAvailableLabel() {
         final HTML label = new HTML("<h2>" + stringMessages.noPairingListAvailable() + "</h2>");

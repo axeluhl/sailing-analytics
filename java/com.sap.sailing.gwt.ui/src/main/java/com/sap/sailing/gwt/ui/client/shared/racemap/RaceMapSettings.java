@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.Hel
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.common.settings.generic.DoubleSetting;
 import com.sap.sse.common.settings.generic.EnumSetSetting;
 import com.sap.sse.common.settings.generic.IntegerSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
@@ -71,6 +72,12 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     
     private BooleanSetting showEstimatedDuration;
     
+    /**
+     * The factor by which the start count down shown at one side of the start line shall be scaled compared to the
+     * other small info overlays such as the course geometry. Defaults to 1.0.
+     */
+    private DoubleSetting startCountDownFontSizeScaling;
+    
     @Override
     protected void addChildSettings() {
         showMapControls = new BooleanSetting(PARAM_SHOW_MAPCONTROLS, this, true);
@@ -89,6 +96,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         maneuverTypesToShow = new EnumSetSetting<>("maneuverTypesToShow", this, getDefaultManeuvers(), ManeuverType::valueOf);
         showDouglasPeuckerPoints = new BooleanSetting("showDouglasPeuckerPoints", this, false);
         showEstimatedDuration = new BooleanSetting("showEstimatedDuration", this, false);
+        startCountDownFontSizeScaling = new DoubleSetting("startCountDownFontSizeScaling", this, 1.0);
     }
 
     public RaceMapSettings() {
@@ -99,7 +107,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
             Distance buoyZoneRadius, Boolean showOnlySelectedCompetitors, Boolean showSelectedCompetitorsInfo,
             Boolean showWindStreamletColors, Boolean showWindStreamletOverlay, Boolean showSimulationOverlay,
             Boolean showMapControls, Collection<ManeuverType> maneuverTypesToShow, Boolean showDouglasPeuckerPoints,
-            Boolean showEstimatedDuration) {
+            Boolean showEstimatedDuration, Double startCountDownFontSizeScaling) {
         this.zoomSettings.init(zoomSettings);
         this.helpLinesSettings.init(helpLinesSettings);
         this.transparentHoverlines.setValue(transparentHoverlines);
@@ -116,6 +124,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         this.maneuverTypesToShow.setValues(maneuverTypesToShow);
         this.showDouglasPeuckerPoints.setValue(showDouglasPeuckerPoints);
         this.showEstimatedDuration.setValue(showEstimatedDuration);
+        this.startCountDownFontSizeScaling.setValue(startCountDownFontSizeScaling);
     }
 
     public static RaceMapSettings getDefaultWithShowMapControls(boolean showMapControlls) {
@@ -145,7 +154,8 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 /* showMapControls */ showMapControls,
                 /* maneuverTypesToShow */ getDefaultManeuvers(),
                 /* showDouglasPeuckerPoints */ false,
-                /* showEstimatedDuration*/ false);
+                /* showEstimatedDuration*/ false,
+                /* startCountDownFontSizeScaling */ 1.0);
     }
     
     private static Set<HelpLineTypes> createHelpLineSettings(boolean showCourseGeometry) {
@@ -186,7 +196,8 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
              /* showMapControls */ settings.isShowMapControls(),
              /* maneuverTypesToShow */ settings.getManeuverTypesToShow(),
              /* showDouglasPeuckerPoints */ settings.isShowDouglasPeuckerPoints(),
-             /* showEstimatedDuration */ settings.isShowEstimatedDuration());
+             /* showEstimatedDuration */ settings.isShowEstimatedDuration(),
+             /* startCountDownFontSizeScaling */ settings.getStartCountDownFontSizeScaling());
     }
 
     /**
@@ -256,6 +267,10 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         return buoyZoneRadius.isDefaultValue();
     }
     
+    public double getStartCountDownFontSizeScaling() {
+        return startCountDownFontSizeScaling.getValue();
+    }
+    
     public static RaceMapSettings createSettingsWithNewBuoyZoneRadius(RaceMapSettings settings, Distance newDefaultBuoyZoneRadius) {
         final RaceMapSettings newRaceMapSettings = new RaceMapSettings(
                 settings.getZoomSettings(), settings.getHelpLinesSettings(),
@@ -268,7 +283,8 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 settings.isShowWindStreamletOverlay(),
                 settings.isShowSimulationOverlay(), settings.isShowMapControls(),
                 settings.getManeuverTypesToShow(),
-                settings.isShowDouglasPeuckerPoints(),settings.isShowEstimatedDuration());
+                settings.isShowDouglasPeuckerPoints(),settings.isShowEstimatedDuration(),
+                settings.getStartCountDownFontSizeScaling());
         return newRaceMapSettings;
     }
 
