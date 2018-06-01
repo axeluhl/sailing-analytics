@@ -77,38 +77,33 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
                                     result.getRaceColumnNames(), new AsyncCallback<List<String>>() {
                                         @Override
                                         public void onFailure(Throwable caught) {
-                                            contentPanel.add(getNoPairingListAvailableLabel());
+                                            HTML lbl = new HTML(
+                                                    "<h2>" + stringMessages.noPairingListAvailable() + "</h2>");
+                                            lbl.getElement().getStyle().setColor(Color.BLACK.toString());
+                                            contentPanel.add(lbl);
                                         }
 
                                         @Override
                                         public void onSuccess(List<String> raceDisplayNames) {
-                                            if (raceDisplayNames.size() > 0) {
-                                                Button btn = new Button(getStringMessages().print());
-                                                contentPanel.add(btn);
-                                                Widget pairingListPanel = createPairingListPanel(result,
-                                                        raceDisplayNames);
-                                                contentPanel.add(pairingListPanel);
-                                                btn.addClickHandler(new ClickHandler() {
-                                                    @Override
-                                                    public void onClick(ClickEvent event) {
-                                                        printPairingListGrid(
-                                                                "<div class='printHeader'><img src='images/home/logo-small@2x.png' />"
-                                                                        + "<b class='title'>"
-                                                                        + SafeHtmlUtils
-                                                                                .fromString(pairingListContextDefinition
-                                                                                        .getLeaderboardName())
-                                                                                .asString()
-                                                                        + "</b></div>" + pairingListPanel.asWidget()
-                                                                                .getElement().getInnerHTML());
-                                                    }
-                                                });
+                                            Button btn = new Button(getStringMessages().print());
+                                            contentPanel.add(btn);
+                                            Widget pairingListPanel = createPairingListPanel(result, raceDisplayNames);
+                                            contentPanel.add(pairingListPanel);
+                                            btn.addClickHandler(new ClickHandler() {
+                                                @Override
+                                                public void onClick(ClickEvent event) {
+                                                    printPairingListGrid(
+                                                            "<div class='printHeader'><img src='images/home/logo-small@2x.png' />"
+                                                                    + "<b class='title'>"
+                                                                    + SafeHtmlUtils.fromString(pairingListContextDefinition.getLeaderboardName())
+                                                                            .asString()
+                                                                    + "</b></div>" + pairingListPanel.asWidget().getElement().getInnerHTML());
+                                                }
+                                            });
 
-                                            } else {
-                                                contentPanel.add(getNoPairingListAvailableLabel());
-                                            }
                                         }
-                                    });
 
+                                    });
                         }
                     }
 
@@ -126,8 +121,8 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
     }
 
     private Widget createPairingListPanel(PairingListDTO pairingListDTO, final List<String> raceDisplayNames) {
-        final Widget pairingListPanel = new PairingListPreviewDialog(pairingListDTO, raceDisplayNames, stringMessages,
-                pairingListContextDefinition.getLeaderboardName()).getPairingListGrid();
+        final Widget pairingListPanel = new PairingListPreviewDialog(pairingListDTO, raceDisplayNames, stringMessages, pairingListContextDefinition.getLeaderboardName()).
+                getPairingListGrid();
         pairingListPanel.getElement().getStyle().setProperty("marginTop", "15px");
         return pairingListPanel;
     }
@@ -171,13 +166,6 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 			frame.print();
 		}, 100);
     }-*/;
-    
-    private HTML getNoPairingListAvailableLabel() {
-        final HTML label = new HTML(
-                "<h2>" + stringMessages.noPairingListAvailable() + "</h2>");
-        label.getElement().getStyle().setColor(Color.BLACK.toString());
-        return label;
-    }
 
     private HTML getNoPairingListAvailableLabel() {
         final HTML label = new HTML("<h2>" + stringMessages.noPairingListAvailable() + "</h2>");
