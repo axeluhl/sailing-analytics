@@ -12,6 +12,8 @@ public interface DataMiningDataGridResources extends DataGrid.Resources {
         String dataGridSubHeader();
         
         String spacedSubHeader();
+
+        String subHeaderLabel();
         
     }
 }

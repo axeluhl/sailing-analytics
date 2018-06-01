@@ -215,9 +215,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     private void clearContent() {
         allFilterDimensions.clear();
         filteredFilterDimensions.getList().clear();
-        // FIXME This doesn't reset the filter -----------------
-        filterFilterDimensionsPanel.getTextBox().setText(null);
-        // -----------------------------------------------------
+//        filterFilterDimensionsPanel.clearTextBox();
         filterFilterDimensionsPanel.removeAll();
     }
     
@@ -430,6 +428,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         private final String headerStyle;
         private final String subHeaderStyle;
         private final String spacedSubHeaderStyle;
+        private final String subHeaderLabelStyle;
         private final String firstColumnStyle;
         private final String hoveredRowStyle;
         private final String hoveredRowCellStyle;
@@ -442,6 +441,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
             spacedSubHeaderStyle = style.spacedSubHeader();
             hoveredRowStyle = style.dataGridHoveredRow();
             hoveredRowCellStyle = style.dataGridHoveredRowCell();
+            subHeaderLabelStyle = style.subHeaderLabel();
             
             cellTable.addRowHoverHandler(new RowHoverEvent.Handler() {
                 @Override
@@ -481,7 +481,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
                 // Actual header cell
                 TableCellBuilder headerCellBuilder = subHeaderBuilder.startTD();
                 headerCellBuilder.colSpan(this.cellTable.getColumnCount() - 1).className(style);
-                headerCellBuilder.text(subHeaderText);
+                headerCellBuilder.startDiv().className(subHeaderLabelStyle).text(subHeaderText).endDiv();
                 headerCellBuilder.endTD();
                 subHeaderBuilder.endTR();
             }
