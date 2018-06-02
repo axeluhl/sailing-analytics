@@ -17,15 +17,11 @@
     background-color: #eee;
 }
 
-.subHeaderLabel {
+.dataGridSubHeaderLabel {
 	position: relative;
 	left: -20px;
 }
 
-.dataGridSubHeader:hover {
-    border-bottom: 2px solid #6f7277;
-}
-
-.spacedSubHeader {
+.dataGridSpacedSubHeader {
 	padding-top: 1em;
 }

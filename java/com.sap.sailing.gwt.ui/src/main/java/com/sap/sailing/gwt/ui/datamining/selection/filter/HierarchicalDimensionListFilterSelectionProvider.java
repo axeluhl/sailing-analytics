@@ -29,7 +29,6 @@ import com.google.gwt.user.cellview.client.RowHoverEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -38,7 +37,6 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.EventTranslator;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
@@ -46,7 +44,9 @@ import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionPresenter;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.PlainFilterSelectionPresenter;
-import com.sap.sailing.gwt.ui.datamining.selection.filter.DataMiningDataGridResources.DataMiningDataGridStyle;
+import com.sap.sailing.gwt.ui.datamining.resources.DataMiningDataGridResources;
+import com.sap.sailing.gwt.ui.datamining.resources.DataMiningDataGridResources.DataMiningDataGridStyle;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -56,6 +56,8 @@ import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCellTableBuilder;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
@@ -74,7 +76,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     private boolean isAwaitingReload;
     private boolean blockDataUpdates;
     private DataRetrieverChainDefinitionDTO retrieverChain;
-    private final MultiSelectionModel<DimensionWithContext> filterDimensionSelectionModel;
+    private final RefreshableMultiSelectionModel<DimensionWithContext> filterDimensionSelectionModel;
     private final List<DimensionWithContext> allFilterDimensions;
     private final ListDataProvider<DimensionWithContext> filteredFilterDimensions;
     
@@ -84,7 +86,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     private final DataGrid<DimensionWithContext> filterDimensionsList;
     private final Column<DimensionWithContext, Boolean> checkboxColumn;
     
-    private final HorizontalPanel dimensionFilterSelectionProvidersPanel;
+    private final DockLayoutPanel dimensionFilterSelectionProvidersPanel;
     private final Map<DimensionWithContext, DimensionFilterSelectionProvider> dimensionFilterSelectionProviders;
     
     private final FilterSelectionPresenter filterSelectionPresenter;
@@ -105,32 +107,14 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         isAwaitingReload = false;
         blockDataUpdates = false;
         retrieverChain = null;
-        filterDimensionSelectionModel = new MultiSelectionModel<>();
-        filterDimensionSelectionModel.addSelectionChangeHandler(e -> selectedFilterDimensionsChanged());
         allFilterDimensions = new ArrayList<>();
         filteredFilterDimensions = new ListDataProvider<>();
-        
-        checkboxColumn = new Column<DimensionWithContext, Boolean>(new CheckboxCell(true, false)) {
-            @Override
-            public Boolean getValue(DimensionWithContext object) {
-                return filterDimensionSelectionModel.isSelected(object);
-            }
-        };
-        TextColumn<DimensionWithContext> dimensionColumn = new TextColumn<DimensionWithContext>() {
-            @Override
-            public String getValue(DimensionWithContext object) {
-                return object.getDimension().getDisplayName();
-            }
-        };
 
         DataMiningDataGridResources resources = GWT.create(DataMiningDataGridResources.class);
-        filterDimensionsList = new DataGrid<DimensionWithContext>(Integer.MAX_VALUE, resources);
+        filterDimensionsList = new DataGrid<>(Integer.MAX_VALUE, resources);
         filterDimensionsList.setAutoHeaderRefreshDisabled(true);
         filterDimensionsList.setAutoFooterRefreshDisabled(true);
-        filterDimensionsList.addColumn(checkboxColumn);
-        filterDimensionsList.addColumn(dimensionColumn);
         filterDimensionsList.setTableBuilder(new FilterDimensionsListBuilder(filterDimensionsList, resources.dataGridStyle()));
-        filterDimensionsList.setSelectionModel(filterDimensionSelectionModel, DefaultSelectionEventManager.createCustomManager(new CustomCheckboxEventTranslator()));
         filteredFilterDimensions.addDataDisplay(filterDimensionsList);
         
         filterFilterDimensionsPanel = new LabeledAbstractFilterablePanel<DimensionWithContext>(
@@ -141,25 +125,56 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
                 return dimension.getMatchingStrings();
             }
         };
+        filterFilterDimensionsPanel.addStyleName("filterFilterDimensionsPanel");
+        filterFilterDimensionsPanel.setSpacing(2);
         filterFilterDimensionsPanel.setWidth("100%");
+        filterFilterDimensionsPanel.setHeight("100%");
         filterFilterDimensionsPanel.getTextBox().setWidth("100%");
         
+        filterDimensionSelectionModel = new RefreshableMultiSelectionModel<>(new EntityIdentityComparator<DimensionWithContext>() {
+            @Override
+            public boolean representSameEntity(DimensionWithContext d1, DimensionWithContext d2) {
+                return Util.equalsWithNull(d1, d2);
+            }
+            @Override
+            public int hashCode(DimensionWithContext t) {
+                return t == null ? 0 : t.hashCode();
+            }
+        }, filterFilterDimensionsPanel.getAllListDataProvider());
+        filterDimensionSelectionModel.addSelectionChangeHandler(e -> selectedFilterDimensionsChanged());
+        filterDimensionsList.setSelectionModel(filterDimensionSelectionModel, DefaultSelectionEventManager.createCustomManager(new CustomCheckboxEventTranslator()));
+        
+        checkboxColumn = new Column<DimensionWithContext, Boolean>(new CheckboxCell(true, false)) {
+            @Override
+            public Boolean getValue(DimensionWithContext object) {
+                return filterDimensionSelectionModel.isSelected(object);
+            }
+        };
+        filterDimensionsList.addColumn(checkboxColumn);
+        TextColumn<DimensionWithContext> dimensionColumn = new TextColumn<DimensionWithContext>() {
+            @Override
+            public String getValue(DimensionWithContext object) {
+                return object.getDimension().getDisplayName();
+            }
+        };
+        filterDimensionsList.addColumn(dimensionColumn);
+        
         DockLayoutPanel filterDimensionsSelectionPanel = new DockLayoutPanel(Unit.PX);
-        filterDimensionsSelectionPanel.addNorth(filterFilterDimensionsPanel, 45);
+        filterDimensionsSelectionPanel.addNorth(filterFilterDimensionsPanel, 40);
         filterDimensionsSelectionPanel.add(filterDimensionsList);
         
-        dimensionFilterSelectionProvidersPanel = new HorizontalPanel();
         dimensionFilterSelectionProviders = new HashMap<>();
-        ScrollPanel dimensionFilterSelectionProvidersScrollPanel = new ScrollPanel(dimensionFilterSelectionProvidersPanel);
+        dimensionFilterSelectionProvidersPanel = new DockLayoutPanel(Unit.PX);
+        dimensionFilterSelectionProvidersPanel.addStyleName("dimensionFilterSelectionTablesContainer");
         
         filterSelectionPresenter = new PlainFilterSelectionPresenter(this, context, stringMessages, retrieverChainProvider, this);
         filterSelectionPresenterContainer = new ScrollPanel(filterSelectionPresenter.getEntryWidget());
         
         mainPanel = new DockLayoutPanel(Unit.PX);
         mainPanel.addSouth(filterSelectionPresenterContainer, 100);
-        mainPanel.addWest(filterDimensionsSelectionPanel, 300);
-        mainPanel.add(dimensionFilterSelectionProvidersScrollPanel);
         mainPanel.setWidgetHidden(filterSelectionPresenterContainer, true);
+        mainPanel.addWest(filterDimensionsSelectionPanel, 300);
+        mainPanel.add(dimensionFilterSelectionProvidersPanel);
     }
     
     @Override
@@ -215,7 +230,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     private void clearContent() {
         allFilterDimensions.clear();
         filteredFilterDimensions.getList().clear();
-//        filterFilterDimensionsPanel.clearTextBox();
         filterFilterDimensionsPanel.removeAll();
     }
     
@@ -233,7 +247,8 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
                 if (selectionProvider != null) {
                     selectionProvider.clearSelection();
                     dimensionFilterSelectionProviders.remove(dimension);
-                    selectionProvider.getEntryWidget().removeFromParent();
+                    dimensionFilterSelectionProvidersPanel.remove(selectionProvider.getEntryWidget());
+                    dimensionFilterSelectionProvidersPanel.animate(0); // Schedule Layout
                 }
             }
         }
@@ -241,7 +256,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         List<DimensionWithContext> orderedSelectedDimensions = new ArrayList<>(selectedDimensions);
         orderedSelectedDimensions.sort(null);
         for (DimensionWithContext dimension : dimensionsToAdd) {
-            int index = orderedSelectedDimensions.indexOf(dimension);
             DimensionFilterSelectionProvider selectionProvider = new DimensionFilterSelectionProvider(this, getComponentContext(),
                     dataMiningService, errorReporter, session, retrieverChainProvider, this, dimension.getRetrieverLevel(), dimension.getDimension());
             selectionProvider.addListener(() -> {
@@ -250,7 +264,11 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
                 notifyListeners();
             });
             dimensionFilterSelectionProviders.put(dimension, selectionProvider);
-            dimensionFilterSelectionProvidersPanel.insert(selectionProvider.getEntryWidget(), index);
+
+            int nextIndex = orderedSelectedDimensions.indexOf(dimension) + 1;
+            DimensionWithContext nextDimension = nextIndex < orderedSelectedDimensions.size() ? orderedSelectedDimensions.get(nextIndex) : null;
+            Widget beforeWidget = nextDimension != null ? dimensionFilterSelectionProviders.get(nextDimension).getEntryWidget() : null;
+            dimensionFilterSelectionProvidersPanel.insertWest(selectionProvider.getEntryWidget(), 250, beforeWidget);
         }
     }
     
@@ -284,7 +302,9 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     
     @Override
     public void clearSelection() {
-        filterDimensionSelectionModel.clear();
+        for (DimensionFilterSelectionProvider selectionProvider : dimensionFilterSelectionProviders.values()) {
+            selectionProvider.clearSelection();
+        }
     }
 
     @Override
@@ -438,10 +458,10 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
             headerStyle = style.dataGridHeader();
             subHeaderStyle = style.dataGridSubHeader();
             firstColumnStyle = style.dataGridFirstColumn();
-            spacedSubHeaderStyle = style.spacedSubHeader();
+            spacedSubHeaderStyle = style.dataGridSpacedSubHeader();
             hoveredRowStyle = style.dataGridHoveredRow();
             hoveredRowCellStyle = style.dataGridHoveredRowCell();
-            subHeaderLabelStyle = style.subHeaderLabel();
+            subHeaderLabelStyle = style.dataGridSubHeaderLabel();
             
             cellTable.addRowHoverHandler(new RowHoverEvent.Handler() {
                 @Override

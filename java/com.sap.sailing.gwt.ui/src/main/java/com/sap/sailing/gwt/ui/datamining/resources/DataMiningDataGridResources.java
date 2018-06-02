@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.datamining.selection.filter;
+package com.sap.sailing.gwt.ui.datamining.resources;
 
 import com.google.gwt.user.cellview.client.DataGrid;
 
@@ -11,9 +11,9 @@ public interface DataMiningDataGridResources extends DataGrid.Resources {
         
         String dataGridSubHeader();
         
-        String spacedSubHeader();
+        String dataGridSpacedSubHeader();
 
-        String subHeaderLabel();
+        String dataGridSubHeaderLabel();
         
     }
 }

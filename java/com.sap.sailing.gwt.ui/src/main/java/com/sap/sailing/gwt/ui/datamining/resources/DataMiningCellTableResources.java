@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.datamining.selection.filter;
+package com.sap.sailing.gwt.ui.datamining.resources;
 
 import com.google.gwt.user.cellview.client.CellTable;
 

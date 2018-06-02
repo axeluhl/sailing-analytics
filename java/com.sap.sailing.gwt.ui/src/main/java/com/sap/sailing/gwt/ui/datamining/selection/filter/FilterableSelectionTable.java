@@ -23,6 +23,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
+import com.sap.sailing.gwt.ui.datamining.resources.DataMiningCellTableResources;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 
@@ -120,8 +121,8 @@ public class FilterableSelectionTable<ContentType extends Serializable> {
             }
         };
         filterPanel.setSpacing(2);
-        filterPanel.setWidth("95%");
-        filterPanel.getTextBox().setWidth("95%");
+        filterPanel.setWidth("100%");
+        filterPanel.getTextBox().setWidth("100%");
         filterPanel.setVisible(false);
         
         mainPanel = new FlowPanel();
