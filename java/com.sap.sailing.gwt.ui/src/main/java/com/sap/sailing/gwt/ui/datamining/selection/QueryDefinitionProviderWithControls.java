@@ -93,10 +93,13 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         queryDefinitionViewerToggleButton = new ToggleButton(getStringMessages().viewQueryDefinition(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), !queryDefinitionViewerToggleButton.getValue());
+                boolean active = queryDefinitionViewerToggleButton.isDown();
+                filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), !active);
+                queryDefinitionViewer.setActive(active);
             }
         });
         queryDefinitionViewer = new QueryDefinitionViewer(parent, context, getStringMessages());
+        queryDefinitionViewer.setActive(false);
         addQueryDefinitionChangedListener(queryDefinitionViewer);
         predefinedQueryRunner = new PredefinedQueryRunner(parent, context, session, getStringMessages(),
                 dataMiningService, errorReporter, resultsPresenter);
@@ -346,11 +349,14 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             settings.setDeveloperOptions(newSettings.isDeveloperOptions());
             if (settings.isDeveloperOptions()) {
                 addControl(queryDefinitionViewerToggleButton);
-                filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), !queryDefinitionViewerToggleButton.getValue());
+                boolean queryDefinitionViewerActive = queryDefinitionViewerToggleButton.isDown();
+                filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), !queryDefinitionViewerActive);
+                queryDefinitionViewer.setActive(queryDefinitionViewerActive);
                 addControl(predefinedQueryRunner.getEntryWidget());
             } else {
                 removeControl(queryDefinitionViewerToggleButton);
                 filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
+                queryDefinitionViewer.setActive(false);
                 removeControl(predefinedQueryRunner.getEntryWidget());
             }
         }

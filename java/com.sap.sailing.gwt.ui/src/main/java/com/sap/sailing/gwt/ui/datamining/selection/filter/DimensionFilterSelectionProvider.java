@@ -162,7 +162,6 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
         contentContainer.setWidgetTopBottom(busyIndicator, 10, Unit.PX, 10, Unit.PX);
         contentContainer.setWidgetLeftRight(busyIndicator, 10, Unit.PX, 10, Unit.PX);
         
-        // TODO Layout of the header and filter panel
         mainPanel = new DockLayoutPanel(Unit.PX);
         mainPanel.addNorth(createHeaderPanel(), 40);
         mainPanel.addNorth(filterPanel, 35);
