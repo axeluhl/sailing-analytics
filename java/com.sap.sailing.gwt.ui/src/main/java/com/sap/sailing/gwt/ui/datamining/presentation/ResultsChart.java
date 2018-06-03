@@ -28,15 +28,15 @@ import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.charts.ChartToCsvExporter;
 import com.sap.sailing.gwt.ui.client.shared.controls.SimpleObjectRenderer;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.settings.Settings;
@@ -160,6 +160,17 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         super(parent, context, stringMessages);
         this.showErrorBars = showErrorBars;
         this.drillDownCallback = drillDownCallback;
+        
+        chartPanel = new SimpleLayoutPanel() {
+            @Override
+            public void onResize() {
+                chart.setSizeToMatchContainer();
+                chart.redraw();
+            }
+        };
+        chart = createChart();
+        chartPanel.setWidget(chart);
+        
         sortByPanel = new HorizontalPanel();
         sortByPanel.setSpacing(5);
         sortByPanel.add(new Label(stringMessages.sortBy() + ":"));
@@ -169,12 +180,9 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
                 return object.toString();
             }
         });
-        keyComparatorListBox.addValueChangeHandler(new ValueChangeHandler<Comparator<GroupKey>>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Comparator<GroupKey>> event) {
-                resetChartSeries();
-                showResultData();
-            }
+        keyComparatorListBox.addValueChangeHandler(e -> {
+            resetChartSeries();
+            showResultData();
         });
         sortByPanel.add(keyComparatorListBox);
         sortByPanel.setVisible(false);
@@ -187,25 +195,17 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         decimalsPanel.add(decimalsListBox);
         decimalsListBox.setValue(0);
         decimalsListBox.setAcceptableValues(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
-        decimalsListBox.addValueChangeHandler(new ValueChangeHandler<Integer>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Integer> event) {
-                updateChartLabels();
-                resetChartSeries();
-                showResultData();
-            }
+        decimalsListBox.addValueChangeHandler(e -> {
+            updateChartLabels();
+            resetChartSeries();
+            showResultData();
         });
         addControl(decimalsPanel);
         
-        chartPanel = new SimpleLayoutPanel() {
-            @Override
-            public void onResize() {
-                chart.setSizeToMatchContainer();
-                chart.redraw();
-            }
-        };
-        chart = createChart();
-        chartPanel.setWidget(chart);
+        ChartToCsvExporter csvExporter = new ChartToCsvExporter(stringMessages);
+        Button exportButton = new Button(stringMessages.csvExport());
+        exportButton.addClickHandler(e -> csvExporter.exportChartAsCsvToClipboard(chart));
+        addControl(exportButton);
         
         seriesMappedByGroupKey = new HashMap<>();
         errorSeriesMappedByGroupKey = new HashMap<>();

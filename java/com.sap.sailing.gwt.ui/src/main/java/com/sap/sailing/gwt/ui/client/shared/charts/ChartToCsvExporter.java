@@ -39,8 +39,13 @@ public class ChartToCsvExporter {
         if (chartToExport != null && chartToExport.getSeries().length > 0) {
             StringBuilder csvStr = new StringBuilder("Series name");
             for (Point point : chartToExport.getSeries()[0].getPoints()) {
+                String name = point.getName();
                 csvStr.append(';');
-                csvStr.append(point.getX());
+                if (name != null && !name.isEmpty()) {
+                    csvStr.append(name);
+                } else {
+                    csvStr.append(point.getX());
+                }
             }
             csvStr.append("\r\n");
             for (Series series : chartToExport.getSeries()) {
