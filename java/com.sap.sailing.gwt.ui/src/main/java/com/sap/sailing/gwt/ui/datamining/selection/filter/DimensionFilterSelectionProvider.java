@@ -78,6 +78,7 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
     
     private final DataRetrieverLevelDTO retrieverLevel;
     private final FunctionDTO dimension;
+    private Iterable<? extends Serializable> selectionToBeApplied;
     
     private final DockLayoutPanel mainPanel;
     private final AbstractFilterablePanel<Serializable> filterPanel;
@@ -229,6 +230,10 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
                         busyIndicator.setBusy(false);
                         filterPanel.updateAll(content);
                         contentContainer.add(dataGrid);
+                        if (selectionToBeApplied != null) {
+                            internalSetSelection(selectionToBeApplied);
+                            selectionToBeApplied = null;
+                        }
                     }
                     @Override
                     protected void handleFailure(Throwable caught) {
@@ -243,6 +248,21 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
 
     public HashSet<? extends Serializable> getSelection() {
         return new HashSet<>(selectionModel.getSelectedSet());
+    }
+    
+    public void setSelection(Iterable<? extends Serializable> items) {
+        if (busyIndicator.isBusy()) {
+            selectionToBeApplied = items;
+        } else {
+            internalSetSelection(items);
+        }
+    }
+
+    private void internalSetSelection(Iterable<? extends Serializable> items) {
+        clearSelection();
+        for (Serializable item : items) {
+            selectionModel.setSelected(item, true);
+        }
     }
 
     public void clearSelection() {

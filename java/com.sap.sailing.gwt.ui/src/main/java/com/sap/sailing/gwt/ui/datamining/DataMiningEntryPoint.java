@@ -61,17 +61,15 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null,
                         getStringMessages());
                 ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(/* parent */ null, /* context */ null,
-                        /* delegate drillDownCallback */ groupKey -> {
-                            queryDefinitionProviderWithControls.drillDown(groupKey, /* onSuccessCallback */ ()->queryRunner.runQuery());
-                        }, getStringMessages());
+                        /* delegate drillDownCallback */ groupKey -> queryDefinitionProviderWithControls.drillDown(groupKey, /* onSuccessCallback */ queryRunner::runQuery),
+                        getStringMessages());
                 DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
                 queryDefinitionProviderWithControls =
                         new QueryDefinitionProviderWithControls(null, null, session, getStringMessages(),
                                 dataMiningService, DataMiningEntryPoint.this, settingsControl, resultsPresenter);
                 queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
                 selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
-                queryRunner = new SimpleQueryRunner(null, null, session, getStringMessages(),
-                        dataMiningService,
+                queryRunner = new SimpleQueryRunner(null, null, session, getStringMessages(), dataMiningService,
                         DataMiningEntryPoint.this, queryDefinitionProviderWithControls, resultsPresenter);
                 queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
                 /* Running queries automatically when they've been changed is currently unnecessary, if not even counterproductive.

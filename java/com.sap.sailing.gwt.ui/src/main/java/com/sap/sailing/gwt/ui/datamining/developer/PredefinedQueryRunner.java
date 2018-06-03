@@ -45,9 +45,8 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
     private final Button runButton;
 
     public PredefinedQueryRunner(Component<?> parent, ComponentContext<?> context, DataMiningSession session,
-            StringMessages stringMessages,
-                                 DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-                                 ResultsPresenter<?> resultsPresenter) {
+            StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+            ResultsPresenter<?> resultsPresenter) {
         super(parent, context);
         this.session = session;
         this.stringMessages = stringMessages;
@@ -149,7 +148,7 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
                 resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
             }
             @Override
-                    public void onSuccess(QueryResultDTO<Serializable> result) {
+            public void onSuccess(QueryResultDTO<Serializable> result) {
                 resultsPresenter.showResult(result);
             }
         });

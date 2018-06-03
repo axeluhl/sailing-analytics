@@ -14,6 +14,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
@@ -255,6 +256,15 @@ public class QueryDefinitionParser {
         }
         if (value instanceof Enum) {
             return value.getClass().getName()+".valueOf(\""+((Enum<?>) value).name()+"\")";
+        }
+        if (value instanceof ClusterDTO) {
+            ClusterDTO cluster = (ClusterDTO) value;
+            StringBuilder builder = new StringBuilder();
+            builder.append("new ").append(ClusterDTO.class.getSimpleName()).append("(")
+                       .append("\"").append(cluster.getSignifier()).append("\"").append(", ")
+                       .append("\"").append(cluster.getLocalizedName()).append("\"")
+                   .append(")");
+            return builder.toString();
         }
         throw new IllegalArgumentException("Can't create literal for values of type " + value.getClass().getName());
     }
