@@ -34,6 +34,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.EventTranslator;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
@@ -135,7 +136,7 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
                 return e == null ? 0 : elementAsString(e).hashCode();
             }
         }, filterPanel.getAllListDataProvider());
-        selectionModel.addSelectionChangeHandler(e -> notifyListeners());
+        selectionModel.addSelectionChangeHandler(this::selectionChanged);
         dataGrid.setSelectionModel(selectionModel, DefaultSelectionEventManager.createCustomManager(new CustomCheckboxEventTranslator()));
         
         checkboxColumn = new Column<Serializable, Boolean>(new CheckboxCell(true, false)) {
@@ -168,7 +169,7 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
         mainPanel.setWidgetHidden(filterPanel, true);
         mainPanel.add(contentContainer);
         
-        updateContent();
+        updateContent(null);
     }
 
     private Widget createHeaderPanel() {
@@ -200,7 +201,7 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
         return headerPanel;
     }
 
-    private void updateContent() {
+    public void updateContent(Runnable callback) {
         HashMap<DataRetrieverLevelDTO,SerializableSettings> retrieverSettings = retrieverChainProvider.getRetrieverSettings();
         HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = filterSelectionProvider.getSelection();
         if (filterSelection.containsKey(retrieverLevel)) {
@@ -233,6 +234,9 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
                             internalSetSelection(selectionToBeApplied);
                             selectionToBeApplied = null;
                         }
+                        if (callback != null) {
+                            callback.run();
+                        }
                     }
                     @Override
                     protected void handleFailure(Throwable caught) {
@@ -243,6 +247,10 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
     
     private String elementAsString(Object element) {
         return element.toString();
+    }
+    
+    private void selectionChanged(SelectionChangeEvent event) {
+        notifyListeners();
     }
 
     public HashSet<? extends Serializable> getSelection() {

@@ -6,11 +6,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
@@ -81,7 +83,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     private final Set<FilterSelectionChangedListener> listeners;
 
     private boolean isAwaitingReload;
-    private boolean blockDataUpdates;
     private DataRetrieverChainDefinitionDTO retrieverChain;
     private ReducedDimensionsDTO reducedDimensions;
     private final List<DimensionWithContext> allFilterDimensions;
@@ -96,6 +97,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     
     private final DockLayoutPanel dimensionFilterSelectionProvidersPanel;
     private final Map<DimensionWithContext, DimensionFilterSelectionProvider> dimensionFilterSelectionProviders;
+    private boolean updateInProgress;
     
     private final FilterSelectionPresenter filterSelectionPresenter;
     private final ScrollPanel filterSelectionPresenterContainer;
@@ -113,7 +115,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         
         listeners = new HashSet<>();
         isAwaitingReload = false;
-        blockDataUpdates = false;
         retrieverChain = null;
         allFilterDimensions = new ArrayList<>();
         filteredFilterDimensions = new ListDataProvider<>();
@@ -298,7 +299,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     private DimensionFilterSelectionProvider addDimensionFilterSelectionProvider(DimensionWithContext dimension) {
         DimensionFilterSelectionProvider selectionProvider = new DimensionFilterSelectionProvider(this, getComponentContext(),
                 dataMiningService, errorReporter, session, retrieverChainProvider, this, dimension.getRetrieverLevel(), dimension.getDimension());
-        selectionProvider.addListener(this::filterSelectionChanged);
+        selectionProvider.addListener(() -> filterSelectionChanged(dimension));
         dimensionFilterSelectionProviders.put(dimension, selectionProvider);
 
         DimensionWithContext nextDimension = null;
@@ -324,9 +325,40 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         }
     }
     
-    private void filterSelectionChanged() {
-        mainPanel.setWidgetHidden(filterSelectionPresenterContainer, getSelection().isEmpty());
-        notifyListeners();
+    private void filterSelectionChanged(DimensionWithContext changedDimension) {
+        if (!updateInProgress) {
+            updateInProgress = true;
+            int levelToStartWith = changedDimension.getRetrieverLevel().getLevel();
+            List<DimensionWithContext> dimensionsToUpdate = dimensionFilterSelectionProviders.keySet()
+                .stream().filter(d -> d.getRetrieverLevel().getLevel() >= levelToStartWith)
+                .collect(Collectors.toList());
+            updateDimensionFilterSelectionProviders(dimensionsToUpdate.iterator(), changedDimension);
+        }
+    }
+
+    private void updateDimensionFilterSelectionProviders(Iterator<DimensionWithContext> dimensionIterator, DimensionWithContext exceptDimension) {
+        // FIXME Doesn't work for two dimensions in the same level, when both have values selected that aren't filtered out by each other.
+        if (dimensionIterator.hasNext()) {
+            DimensionWithContext dimension = dimensionIterator.next();
+            if (dimension.equals(exceptDimension)) {
+                updateDimensionFilterSelectionProviders(dimensionIterator, exceptDimension);
+            } else {
+                DimensionFilterSelectionProvider selectionProvider = dimensionFilterSelectionProviders.get(dimension);
+                HashSet<? extends Serializable> selectionBefore = selectionProvider.getSelection();
+                selectionProvider.updateContent(() -> {
+                    boolean selectionChanged = !selectionBefore.equals(selectionProvider.getSelection());
+                    if (selectionChanged) {
+                        updateInProgress = false;
+                        filterSelectionChanged(dimension);
+                    } else {
+                        updateDimensionFilterSelectionProviders(dimensionIterator, exceptDimension);
+                    }
+                });
+            }
+        } else {
+            updateInProgress = false;
+            notifyListeners();
+        }
     }
 
     @Override
@@ -364,6 +396,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     }
     
     private void notifyListeners() {
+        mainPanel.setWidgetHidden(filterSelectionPresenterContainer, getSelection().isEmpty());
         for (FilterSelectionChangedListener listener : listeners) {
             listener.selectionChanged();
         }

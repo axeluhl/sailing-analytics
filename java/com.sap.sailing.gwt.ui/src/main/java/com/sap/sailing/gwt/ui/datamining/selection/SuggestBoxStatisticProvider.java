@@ -219,6 +219,7 @@ public class SuggestBoxStatisticProvider extends AbstractComponent<CompositeSett
             }
             extractionFunctionSuggestBox.setSelectableValues(availableExtractionFunctions);
             
+            // TODO Do not pre-select the first element. The other UI components have to able to handle "empty content"
             ExtractionFunctionWithContext currentValue = extractionFunctionSuggestBox.getExtractionFunction();
             ExtractionFunctionWithContext valueToBeSelected = availableExtractionFunctions.contains(currentValue) ? currentValue: Util.first(availableExtractionFunctions);
             extractionFunctionSuggestBox.getValueBox().setValue(valueToBeSelected.getDisplayString(), false);
