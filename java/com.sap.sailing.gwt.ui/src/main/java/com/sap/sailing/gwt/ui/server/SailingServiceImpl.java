@@ -7259,10 +7259,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public PairingListTemplateDTO calculatePairingListTemplate(final int flightCount, final int groupCount,
-            final int competitorCount, final int flightMultiplier) {
+            final int competitorCount, final int flightMultiplier, final int tolerance) {
         PairingListTemplate template = getService().createPairingListTemplate(flightCount, groupCount, competitorCount, 
-                flightMultiplier);
-        return new PairingListTemplateDTO(flightCount, groupCount, competitorCount, flightMultiplier, 
+                flightMultiplier, tolerance);
+        return new PairingListTemplateDTO(flightCount, groupCount, competitorCount, flightMultiplier, tolerance,
                 template.getPairingListTemplate(), template.getQuality());
     }
     
@@ -7280,7 +7280,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         PairingListTemplate pairingListTemplate = new PairingListTemplateImpl(templateDTO.getPairingListTemplate(),
-                templateDTO.getCompetitorCount(), templateDTO.getFlightMultiplier());
+                templateDTO.getCompetitorCount(), templateDTO.getFlightMultiplier(), templateDTO.getTolerance());
         PairingList<RaceColumn, Fleet, Competitor, Boat> pairingList = getService()
                 .getPairingListFromTemplate(pairingListTemplate, leaderboardName, selectedRaces);
         List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();

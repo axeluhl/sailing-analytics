@@ -127,6 +127,8 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         }
         dto.setSelectedFlightNames(selectedFlightNames);
         dto.setFlightCount(selectedFlightNames.size());
+        // TODO get tolerance from ui component
+        dto.setTolerance(3);
         return dto;
     }
 

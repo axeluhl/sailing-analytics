@@ -10,6 +10,7 @@ public class PairingListTemplateDTO implements Serializable {
     private int groupCount = 0;
     private int competitorCount = 0;
     private int flightMultiplier = 0;
+    private int tolerance = 0;
     private int[][] pairingListTemplate;
     private double quality;
     
@@ -18,27 +19,28 @@ public class PairingListTemplateDTO implements Serializable {
     public PairingListTemplateDTO() { }
     
     public PairingListTemplateDTO(int competitorCount, int flightMultiplier) {
-        this(0, 0, competitorCount, flightMultiplier, null, 0.0, /* selected flight names */ null);
+        this(0, 0, competitorCount, flightMultiplier, 0, null, 0.0, /* selected flight names */ null);
     }
     
     public PairingListTemplateDTO(int competitorCount, int flightMultiplier, int[][] pairingListTemplate, double quality) {
-        this(0, 0, competitorCount, flightMultiplier, pairingListTemplate, quality, /* selected flight names */ null);
+        this(0, 0, competitorCount, flightMultiplier, 0, pairingListTemplate, quality, /* selected flight names */ null);
     }
     
     public PairingListTemplateDTO(int competitorCount, int[][] pairingListTemplate, double quality) {
-        this(0, 0, competitorCount, 0, pairingListTemplate, quality, /* selected flight names */ null);
+        this(0, 0, competitorCount, 0, 0, pairingListTemplate, quality, /* selected flight names */ null);
     }
     
-    public PairingListTemplateDTO(int flightCount, int groupCount, int competitorCount, int flightMultiplier, int[][] pairingListTemplate, double quality) {
-        this(flightCount, groupCount, competitorCount, flightMultiplier, pairingListTemplate, quality, /* selected flight names */ null);
+    public PairingListTemplateDTO(int flightCount, int groupCount, int competitorCount, int flightMultiplier, int tolerance, int[][] pairingListTemplate, double quality) {
+        this(flightCount, groupCount, competitorCount, flightMultiplier, tolerance, pairingListTemplate, quality, /* selected flight names */ null);
     }
     
-    public PairingListTemplateDTO(int flightCount, int groupCount, int competitorCount, int flightMultiplier,
+    public PairingListTemplateDTO(int flightCount, int groupCount, int competitorCount, int flightMultiplier, int tolerance,
             int[][] pairingListTemplate, double quality, Iterable<String> selectedFlightNames) {
         this.flightCount = flightCount;
         this.groupCount = groupCount;
         this.competitorCount = competitorCount;
         this.flightMultiplier = flightMultiplier;
+        this.tolerance = tolerance;
         this.quality = quality;
         this.pairingListTemplate = pairingListTemplate;
         this.selectedFlightNames = selectedFlightNames;
@@ -54,6 +56,10 @@ public class PairingListTemplateDTO implements Serializable {
     
     public void setFlightMultiplier(int flightMultiplier) {
         this.flightMultiplier = flightMultiplier;
+    }
+    
+    public void setTolerance(int tolerance) {
+        this.tolerance = tolerance;
     }
     
     public void setSelectedFlightNames(Iterable<String> selectedFlightNames) {
@@ -82,6 +88,10 @@ public class PairingListTemplateDTO implements Serializable {
     
     public int getFlightMultiplier() {
         return flightMultiplier;
+    }
+    
+    public int getTolerance() {
+        return tolerance;
     }
     
     public Iterable<String> getSelectedFlightNames() {

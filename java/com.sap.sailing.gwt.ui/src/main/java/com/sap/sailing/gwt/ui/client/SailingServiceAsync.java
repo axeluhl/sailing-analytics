@@ -927,7 +927,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      *            returns a {@link PairingListTemplateDTO}
      */
     void calculatePairingListTemplate(final int flightCount, final int groupCount, final int competitorCount,
-            final int flightMultiplier, AsyncCallback<PairingListTemplateDTO> callback);
+            final int flightMultiplier, final int tolerance, AsyncCallback<PairingListTemplateDTO> callback);
 
     /**
      * Creates a {@link PairingListDTO} in which the competitors will be matched to a {@link PairingList} based on the

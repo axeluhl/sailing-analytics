@@ -1067,7 +1067,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 BusyDialog busyDialog = new BusyDialog();
                 busyDialog.show();
                 sailingService.calculatePairingListTemplate(editedObject.getFlightCount(), editedObject.getGroupCount(),
-                        editedObject.getCompetitorCount(), editedObject.getFlightMultiplier(), 
+                        editedObject.getCompetitorCount(), editedObject.getFlightMultiplier(), editedObject.getTolerance(), 
                         new AsyncCallback<PairingListTemplateDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
