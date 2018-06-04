@@ -19,8 +19,8 @@ public interface AutoPlayClientFactory extends SailingClientFactory {
     SailingDispatchSystem getDispatch();
 
     /**
-     * Required to determine if the ctx is properly populated from either the StartNode, or the url. If not go to StartNode 
+     * Required to determine if the ctx is properly populated from either the StartNode, or the url. If not go to
+     * StartNode.
      */
     boolean isConfigured();
-
 }

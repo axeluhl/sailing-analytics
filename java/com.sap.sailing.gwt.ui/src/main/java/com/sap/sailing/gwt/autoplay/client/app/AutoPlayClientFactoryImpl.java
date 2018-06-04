@@ -64,7 +64,8 @@ public class AutoPlayClientFactoryImpl extends AutoPlayClientFactoryBase {
 
     @Override
     /**
-     * The context can be unconfigured, if a direct place url is used. In this case a round trip via the startview that can parse the url parameter configuration is required.
+     * The context can be uninitialized, if a direct place url is used. In this case a round trip via the startview that
+     * can parse the url parameter configuration is required.
      */
     public boolean isConfigured() {
         return currentContext != null && currentContext.getEvent() != null;
