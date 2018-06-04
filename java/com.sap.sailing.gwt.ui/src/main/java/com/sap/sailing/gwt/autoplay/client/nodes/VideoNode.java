@@ -33,7 +33,7 @@ public class VideoNode extends FiresPlaceNode {
         if (videos.size() == 0) {
             lastPlayed = -1;
             currentVideo = null;
-            //break the stacktrace, to ensure that if all nodes (not properly configured event ect. return 0, we do not cause stackoverflows)
+            // prevents switching to the next node while this node is being initialized. This prevents stack overflows in case multiple nodes do this.
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                 @Override
                 public void execute() {
