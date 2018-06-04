@@ -20,9 +20,9 @@ public class PreLiveRaceWithRacemapNode extends FiresPlaceNode {
 
     public void onStart() {
         AutoplayHelper.create(cf.getSailingService(), cf.getErrorReporter(),
-                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(),
-                cf.getAutoPlayCtx().getContextDefinition().getEventId(), cf.getAutoPlayCtx().getEvent(),
-                cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtx().getPreLiveRace(),
+                cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName(),
+                cf.getAutoPlayCtxSignalError().getContextDefinition().getEventId(), cf.getAutoPlayCtxSignalError().getEvent(),
+                cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtxSignalError().getPreLiveRace(),
                 new AsyncCallback<RVWrapper>() {
 
                     @Override
@@ -40,11 +40,11 @@ public class PreLiveRaceWithRacemapNode extends FiresPlaceNode {
                         place.setRaceMap(result.raceboardPerspective, result.csel, result.raceboardTimer,
                                 result.creationTimeProvider);
                         // add later with settings here
-                        place.setURL(cf.getAutoPlayCtx().getEvent().getOfficialWebsiteURL());
+                        place.setURL(cf.getAutoPlayCtxSignalError().getEvent().getOfficialWebsiteURL());
                         setPlaceToGo(place);
                         getBus().fireEvent(
-                                new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getPreLiveRace().getRegattaName(),
-                                        cf.getAutoPlayCtx().getPreLiveRace().getRaceName()));
+                                new AutoPlayHeaderEvent(cf.getAutoPlayCtxSignalError().getPreLiveRace().getRegattaName(),
+                                        cf.getAutoPlayCtxSignalError().getPreLiveRace().getRaceName()));
                         firePlaceChangeAndStartTimer();
                     }
                 });

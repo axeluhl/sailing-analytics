@@ -12,8 +12,6 @@
 		width: 100%;
 	}
 	</ui:style>
-	<rf:ResizableFlowPanel styleName="{res.style.slideBackground}">
-		<rf:ResizableFlowPanel ui:field="leaderBoardHolder"
-			styleName="{style.fullscreen}" />
+	<rf:ResizableFlowPanel styleName="{res.style.slideBackground}" ui:field="leaderBoardHolder">
 	</rf:ResizableFlowPanel>
 </ui:UiBinder> 
