@@ -4248,7 +4248,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     @Override
     public PairingListTemplate createPairingListTemplate(final int flightsCount, final int groupsCount, 
-            final int competitorsCount, final int flightMultiplier) {
+            final int competitorsCount, final int flightMultiplier, final int tolerance) {
         PairingListTemplate template = pairingListTemplateFactory
                 .createPairingListTemplate(new PairingFrameProvider() {
                     @Override
@@ -4265,7 +4265,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     public int getCompetitorsCount() {
                         return competitorsCount;
                     }
-                }, flightMultiplier);
+                }, flightMultiplier, tolerance);
         return template;
     }
     

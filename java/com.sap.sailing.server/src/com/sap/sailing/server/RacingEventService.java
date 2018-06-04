@@ -828,7 +828,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return calculated {@link PairingListTemplate}
      */
     PairingListTemplate createPairingListTemplate(final int flightsCount, final int groupsCount,
-            final int competitorsCount, final int flightMultiplier);
+            final int competitorsCount, final int flightMultiplier, final int tolerance);
     
     /**
      * Matches the competitors of a leaderboard to the {@link PairingList}
