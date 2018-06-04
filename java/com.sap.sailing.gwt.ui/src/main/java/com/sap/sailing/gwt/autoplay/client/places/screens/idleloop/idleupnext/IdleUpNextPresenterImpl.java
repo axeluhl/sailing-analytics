@@ -1,11 +1,12 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import com.google.gwt.core.shared.GWT;
+import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -13,16 +14,15 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.common.client.DateUtil;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpNextPlace>
         implements IdleUpNextView.IdleUpNextPresenter {
-    private static final int IMAGE_SWITCH_DELAY = 10000;
     private static final int SHOW_RACES_STARTED = 1000 * 60 * 30;
     private IdleUpNextView view;
-    private Timer updateImage;
     private Timer updateData;
 
     public IdleUpNextPresenterImpl(IdleUpNextPlace place, AutoPlayClientFactory clientFactory,
@@ -35,13 +35,6 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
     public void startConfigured(AcceptsOneWidget panel) {
         updateEventImage();
         view.startingWith(this, panel);
-        updateImage = new Timer() {
-
-            @Override
-            public void run() {
-                updateEventImage();
-            }
-        };
 
         updateData = new Timer() {
 
@@ -50,7 +43,6 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
                 updateData();
             }
         };
-        updateImage.scheduleRepeating(IMAGE_SWITCH_DELAY);
         updateData.scheduleRepeating(1000);
 
         updateData();
@@ -80,29 +72,25 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
     @Override
     public void onStop() {
         super.onStop();
-        updateImage.cancel();
         updateData.cancel();
     }
 
     protected void updateEventImage() {
-        if (getClientFactory().getAutoPlayCtx() == null || getClientFactory().getAutoPlayCtx().getEvent() == null) {
-            return;
-        }
-        List<ImageDTO> teaserHighlight = new ArrayList<>();
-        List<ImageDTO> bigScreenImages = new ArrayList<>();
+        List<SafeUri> teaserHighlight = new ArrayList<>();
+        List<SafeUri> bigScreenImages = new ArrayList<>();
         for (ImageDTO imageDTO : getSlideCtx().getEvent().getImages()) {
-            if (imageDTO.getTags().contains(MediaTagConstants.BIGSCREEN)) {
-                bigScreenImages.add(imageDTO);
-            } else if (imageDTO.getTags().contains(MediaTagConstants.TEASER)) {
-                teaserHighlight.add(imageDTO);
-            } else if (imageDTO.getTags().contains(MediaTagConstants.HIGHLIGHT)) {
-                teaserHighlight.add(imageDTO);
+            final List<String> tags = imageDTO.getTags();
+            if (tags.contains(MediaTagConstants.BIGSCREEN)) {
+                bigScreenImages.add(UriUtils.fromString(imageDTO.getSourceRef()));
+            } else if (tags.contains(MediaTagConstants.TEASER) || tags.contains(MediaTagConstants.HIGHLIGHT)) {
+                teaserHighlight.add(UriUtils.fromString(imageDTO.getSourceRef()));
             }
         }
-        List<ImageDTO> usedImages;
+        List<SafeUri> usedImages;
         if (bigScreenImages.isEmpty()) {
             if (teaserHighlight.isEmpty()) {
-                usedImages = getSlideCtx().getEvent().getImages();
+                usedImages = Collections
+                        .singletonList(SharedHomeResources.INSTANCE.defaultStageEventTeaserImage().getSafeUri());
             } else {
                 usedImages = teaserHighlight;
             }
@@ -116,11 +104,10 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
                 Random r = new Random();
                 selected = r.nextInt(usedImages.size());
             }
-            GWT.log("Selecting " + (selected+1) + " from " + usedImages.size());
-            ImageDTO imageToUseDTO = usedImages.get(selected);
+            SafeUri imageToUseDTO = usedImages.get(selected);
             if (imageToUseDTO != null) {
                 final StringBuilder thumbnailUrlBuilder = new StringBuilder("url('");
-                thumbnailUrlBuilder.append(UriUtils.fromString(imageToUseDTO.getSourceRef()).asString());
+                thumbnailUrlBuilder.append(imageToUseDTO.asString());
                 thumbnailUrlBuilder.append("')");
                 view.setBackgroudImage(thumbnailUrlBuilder.toString());
             }

@@ -45,10 +45,8 @@ public abstract class AutoPlayClientFactoryBase
 
     @Override
     public SailingServiceAsync getSailingService() {
-        if (getAutoPlayCtx() != null && 
-                getAutoPlayCtx().getContextDefinition() != null && 
-                getAutoPlayCtx().getContextDefinition().getLeaderboardName() != null) {
-            return getSailingService( ()->getAutoPlayCtx().getContextDefinition().getLeaderboardName());
+        if (isConfigured()) {
+            return getSailingService(() -> getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName());
         } 
         return sailingService;
     }

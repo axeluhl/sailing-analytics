@@ -62,7 +62,7 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
                             if (newSettings != null) {
                                 serializer.deserializeSettingsMapFromCurrentLocation(newSettings);
                             }
-                            startRootNode(apcd, newSettings);
+                            startRootNode(apcd, newSettings, event);
                         }
 
                     });
@@ -115,9 +115,10 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
     }
 
     @Override
-    public void startRootNode(AutoPlayContextDefinition ctxDef, PerspectiveCompositeSettings<?> settings) {
+    public void startRootNode(AutoPlayContextDefinition ctxDef, PerspectiveCompositeSettings<?> settings,
+            EventDTO initialEventData) {
         AutoPlayConfiguration autoPlayConfiguration = ctxDef.getType().getConfig();
-        autoPlayConfiguration.startRootNode(clientFactory, ctxDef, settings);
+        autoPlayConfiguration.startRootNode(clientFactory, ctxDef, settings, initialEventData);
     }
 
     @Override

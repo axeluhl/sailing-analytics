@@ -1,5 +1,7 @@
 package com.sap.sse.mail;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import javax.mail.MessagingException;
@@ -11,11 +13,14 @@ import com.sap.sse.common.impl.NamedImpl;
 
 public class SerializableMultipartSupplier extends NamedImpl implements Supplier<Multipart>, Named {
     private static final long serialVersionUID = 4316486727705670702L;
-    private final SerializableMimeBodyPartSupplier[] bodyPartSuppliers;
+    private final List<SerializableMimeBodyPartSupplier> bodyPartSuppliers = new ArrayList<>();
 
-    public SerializableMultipartSupplier(String name, SerializableMimeBodyPartSupplier... partSuppliers) {
-        super(name);
-        this.bodyPartSuppliers = partSuppliers;
+    public SerializableMultipartSupplier(final String subtype) {
+        super(subtype);
+    }
+
+    public void addBodyPart(final SerializableMimeBodyPartSupplier bodyPartSupplier) {
+        this.bodyPartSuppliers.add(bodyPartSupplier);
     }
 
     @Override

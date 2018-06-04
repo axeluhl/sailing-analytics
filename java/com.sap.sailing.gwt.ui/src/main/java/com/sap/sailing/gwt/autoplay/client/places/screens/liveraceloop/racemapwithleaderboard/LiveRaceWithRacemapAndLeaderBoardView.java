@@ -22,4 +22,6 @@ public interface LiveRaceWithRacemapAndLeaderBoardView {
     void onStop();
 
     void setStatistic(String windSpeed, Distance distance, long timeSinceStart);
+
+    void ensureMapVisibility();
 }
