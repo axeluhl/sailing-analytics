@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.SixtyInchLeaderBoardStyle;
+import com.sap.sailing.gwt.ui.leaderboard.SixtyInchLeaderboardStyle;
 import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -75,7 +75,7 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
         leaderboardPanel = new SingleRaceLeaderboardPanel(null, null, sailingService, new AsyncActionsExecutor(), leaderboardSettings,
                 false, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
-                false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(true),
+                false, null, false, null, false, true, false, false, false, new SixtyInchLeaderboardStyle(true),
                 FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
 
         

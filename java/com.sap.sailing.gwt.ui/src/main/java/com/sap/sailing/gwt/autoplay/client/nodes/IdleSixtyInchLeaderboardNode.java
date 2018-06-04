@@ -12,7 +12,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
-import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleSixtyInchLeaderBoardPlace;
+import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleSixtyInchLeaderboardPlace;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -21,22 +21,22 @@ import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.SixtyInchLeaderBoardStyle;
+import com.sap.sailing.gwt.ui.leaderboard.SixtyInchLeaderboardStyle;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode {
-    private static final Logger logger = Logger.getLogger(IdleSixtyInchLeaderBoardNode.class.getName());
+public class IdleSixtyInchLeaderboardNode extends FiresPlaceNode {
+    private static final Logger logger = Logger.getLogger(IdleSixtyInchLeaderboardNode.class.getName());
     private final AutoPlayClientFactory cf;
     private Timer timer;
     private boolean overallLeaderBoard;
     private Consumer<Integer> durationConsumer;
 
-    public IdleSixtyInchLeaderBoardNode(AutoPlayClientFactory cf, boolean overallLeaderBoard) {
-        super(IdleSixtyInchLeaderBoardNode.class.getName());
+    public IdleSixtyInchLeaderboardNode(AutoPlayClientFactory cf, boolean overallLeaderBoard) {
+        super(IdleSixtyInchLeaderboardNode.class.getName());
         this.cf = cf;
         this.overallLeaderBoard = overallLeaderBoard;
     }
@@ -96,10 +96,10 @@ public class IdleSixtyInchLeaderBoardNode extends FiresPlaceNode {
         MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null, null, cf.getSailingService(),
                 new AsyncActionsExecutor(), leaderboardSettings, false, provider, timer, null, leaderboardName,
                 cf.getErrorReporter(), StringMessages.INSTANCE, false, null, false, null, false, true, false, false,
-                false, new SixtyInchLeaderBoardStyle(true), FlagImageResolverImpl.get(),
+                false, new SixtyInchLeaderboardStyle(true), FlagImageResolverImpl.get(),
                 Arrays.asList(DetailType.values()));
 
-        IdleSixtyInchLeaderBoardPlace place = new IdleSixtyInchLeaderBoardPlace(leaderboardPanel, provider,
+        IdleSixtyInchLeaderboardPlace place = new IdleSixtyInchLeaderboardPlace(leaderboardPanel, provider,
                 durationConsumer);
         setPlaceToGo(place);
         firePlaceChangeAndStartTimer();

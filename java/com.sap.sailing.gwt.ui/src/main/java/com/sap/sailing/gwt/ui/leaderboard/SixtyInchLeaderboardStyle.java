@@ -20,7 +20,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWit
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel.LeaderBoardStyle;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 
-public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
+public class SixtyInchLeaderboardStyle implements LeaderBoardStyle {
     private static final LeaderboardResources resources = GWT.create(LeaderboardResources.class);
     private static final ComponentResources componentResources = GWT.create(ComponentResources.class);
     private static final LeaderboardTableResourcesSixty tableResources = GWT
@@ -35,7 +35,7 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
     
     private boolean showRaceColumns;
     
-    public SixtyInchLeaderBoardStyle(boolean showRaceColumns) {
+    public SixtyInchLeaderboardStyle(boolean showRaceColumns) {
         this.showRaceColumns = showRaceColumns;
     }
 

@@ -2,5 +2,5 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leade
 
 import com.google.gwt.place.shared.Place;
 
-public abstract class AbstractPreRaceLeaderBoardWithImagePlace extends Place {
+public abstract class AbstractPreRaceLeaderboardWithImagePlace extends Place {
 }

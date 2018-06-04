@@ -16,20 +16,20 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 
-public class IdleSixtyInchLeaderBoardPresenterImpl extends AutoPlayPresenterConfigured<IdleSixtyInchLeaderBoardPlace>
-        implements IdleSixtyInchLeaderBoardView.Slide7Presenter {
+public class IdleSixtyInchLeaderboardPresenterImpl extends AutoPlayPresenterConfigured<IdleSixtyInchLeaderboardPlace>
+        implements IdleSixtyInchLeaderboardView.Slide7Presenter {
     private static final int SWITCH_COMPETITOR_DELAY = 2000;
     private static final int WAIT_FOR_POPULATION_DELAY = 10000;
-    private static final Logger LOGGER = Logger.getLogger(IdleSixtyInchLeaderBoardPresenterImpl.class.getName());
-    private IdleSixtyInchLeaderBoardView view;
+    private static final Logger LOGGER = Logger.getLogger(IdleSixtyInchLeaderboardPresenterImpl.class.getName());
+    private IdleSixtyInchLeaderboardView view;
     private int selected = -1;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
     private MultiRaceLeaderboardPanel leaderboardPanel;
     private Timer selectionTimer;
     private int emptyTries;
 
-    public IdleSixtyInchLeaderBoardPresenterImpl(IdleSixtyInchLeaderBoardPlace place, AutoPlayClientFactory clientFactory,
-            IdleSixtyInchLeaderBoardView lifeRaceWithRacemapViewImpl) {
+    public IdleSixtyInchLeaderboardPresenterImpl(IdleSixtyInchLeaderboardPlace place, AutoPlayClientFactory clientFactory,
+            IdleSixtyInchLeaderboardView lifeRaceWithRacemapViewImpl) {
         super(place, clientFactory);
         this.view = lifeRaceWithRacemapViewImpl;
         selectionTimer = new Timer() {

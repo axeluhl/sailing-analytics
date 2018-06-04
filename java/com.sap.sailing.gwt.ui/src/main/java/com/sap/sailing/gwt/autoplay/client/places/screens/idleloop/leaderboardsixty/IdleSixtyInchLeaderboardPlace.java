@@ -7,16 +7,16 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 
-public class IdleSixtyInchLeaderBoardPlace extends Place {
-    public static class Tokenizer implements PlaceTokenizer<IdleSixtyInchLeaderBoardPlace> {
+public class IdleSixtyInchLeaderboardPlace extends Place {
+    public static class Tokenizer implements PlaceTokenizer<IdleSixtyInchLeaderboardPlace> {
         @Override
-        public String getToken(IdleSixtyInchLeaderBoardPlace place) {
+        public String getToken(IdleSixtyInchLeaderboardPlace place) {
             return "";
         }
 
         @Override
-        public IdleSixtyInchLeaderBoardPlace getPlace(String token) {
-            return new IdleSixtyInchLeaderBoardPlace();
+        public IdleSixtyInchLeaderboardPlace getPlace(String token) {
+            return new IdleSixtyInchLeaderboardPlace();
         }
     }
 
@@ -24,10 +24,10 @@ public class IdleSixtyInchLeaderBoardPlace extends Place {
     private CompetitorSelectionProvider competitorSelectionProvider;
     private Consumer<Integer> durationConsumer;
 
-    public IdleSixtyInchLeaderBoardPlace() {
+    public IdleSixtyInchLeaderboardPlace() {
     }
 
-    public IdleSixtyInchLeaderBoardPlace(MultiRaceLeaderboardPanel leaderboardPanel,
+    public IdleSixtyInchLeaderboardPlace(MultiRaceLeaderboardPanel leaderboardPanel,
             CompetitorSelectionProvider competitorSelectionProvider, Consumer<Integer> durationConsumer) {
         this.leaderboardPanel = leaderboardPanel;
         this.competitorSelectionProvider = competitorSelectionProvider;
