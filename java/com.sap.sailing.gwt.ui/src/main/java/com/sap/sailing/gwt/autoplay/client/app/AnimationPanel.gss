@@ -18,7 +18,7 @@
     left: 0;
     height: 100%;
     width: 33.3333333%;
-    -webkit-transition: left 6s;
+    -webkit-transition: left 2s;
     -webkit-backface-visibility: hidden;
     transition: left 2s;
 }
@@ -33,7 +33,7 @@
 }
 
 .current {
-    left: 33.3333333%
+    left: 33.3333333%;
 }
 
 .next {

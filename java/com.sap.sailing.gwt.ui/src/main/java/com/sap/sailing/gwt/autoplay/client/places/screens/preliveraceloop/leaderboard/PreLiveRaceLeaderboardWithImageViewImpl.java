@@ -15,11 +15,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
-public class PreLiveRaceLeaderBoardWithImageViewImpl extends ResizeComposite implements PreLeaderboardWithImageView {
+public class PreLiveRaceLeaderboardWithImageViewImpl extends ResizeComposite implements PreLeaderboardWithImageView {
     private static IdleLeaderBoardWithFlagsViewImplUiBinder uiBinder = GWT
             .create(IdleLeaderBoardWithFlagsViewImplUiBinder.class);
 
-    interface IdleLeaderBoardWithFlagsViewImplUiBinder extends UiBinder<Widget, PreLiveRaceLeaderBoardWithImageViewImpl> {
+    interface IdleLeaderBoardWithFlagsViewImplUiBinder extends UiBinder<Widget, PreLiveRaceLeaderboardWithImageViewImpl> {
     }
 
     @UiField
@@ -46,7 +46,7 @@ public class PreLiveRaceLeaderBoardWithImageViewImpl extends ResizeComposite imp
         String getImageUrl(CompetitorDTO marked);
     }
 
-    public PreLiveRaceLeaderBoardWithImageViewImpl(ImageProvider provider) {
+    public PreLiveRaceLeaderboardWithImageViewImpl(ImageProvider provider) {
         initWidget(uiBinder.createAndBindUi(this));
         this.provider = provider;
     }
