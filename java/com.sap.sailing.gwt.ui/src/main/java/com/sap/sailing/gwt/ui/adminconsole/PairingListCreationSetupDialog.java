@@ -120,7 +120,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
     @Override
     protected PairingListTemplateDTO getResult() {
         PairingListTemplateDTO dto = new PairingListTemplateDTO(this.competitorCountTextBox.getValue(),
-                this.flightMultiplierTextBox.getValue());
+                this.flightMultiplierTextBox.getValue(), this.boatChangeFactorListBox.getSelectedIndex());
         if (Util.size(this.getCheckedSelectedCheckBoxes()) > 0) {
             String seriesName = Util.get(this.getCheckedSelectedCheckBoxes(), 0).getText();
             dto.setGroupCount(
@@ -255,8 +255,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
     
     private void updateBoatChangeFactorSelection(final int fleetCount) {
         this.boatChangeFactorListBox.clear();
-        IntStream.range(1, getCompetitorCountInput() / fleetCount)
-        .forEach(i -> {
+        IntStream.range(0, (getCompetitorCountInput() / fleetCount) + 1).forEach(i -> {
             this.boatChangeFactorListBox.addItem(String.valueOf(i));
         });
     }

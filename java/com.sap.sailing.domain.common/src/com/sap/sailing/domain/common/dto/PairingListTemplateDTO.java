@@ -18,8 +18,8 @@ public class PairingListTemplateDTO implements Serializable {
     
     public PairingListTemplateDTO() { }
     
-    public PairingListTemplateDTO(int competitorCount, int flightMultiplier) {
-        this(0, 0, competitorCount, flightMultiplier, 0, null, 0.0, /* selected flight names */ null);
+    public PairingListTemplateDTO(int competitorCount, int flightMultiplier, int tolerance) {
+        this(0, 0, competitorCount, flightMultiplier, tolerance, null, 0.0, /* selected flight names */ null);
     }
     
     public PairingListTemplateDTO(int competitorCount, int flightMultiplier, int[][] pairingListTemplate, double quality) {
