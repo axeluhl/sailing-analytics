@@ -244,6 +244,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pairingLists();
     String pairingListCreationInfo();
     String setCompetitors();
+    String setBoatChangeFactor();
     String seriesHint();
     String amountOfFlightRepeats();
     String insertIntoRegatta();

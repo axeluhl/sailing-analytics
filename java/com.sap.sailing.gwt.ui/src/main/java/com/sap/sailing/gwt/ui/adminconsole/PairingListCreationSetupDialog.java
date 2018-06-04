@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -10,6 +11,7 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -27,6 +29,8 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
     private final CheckBox flightMultiplierCheckBox;
     private Iterable<CheckBox> selectedSeriesCheckboxes;
 
+    private ListBox boatChangeFactorListBox;
+
     protected static class PairingListParameterValidator extends AbstractPairingListParameterValidator {
         public PairingListParameterValidator(StringMessages stringMessages) {
             super(stringMessages);
@@ -40,6 +44,9 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
                 new PairingListParameterValidator(stringMessages), callback);
 
         this.competitorCountTextBox = createIntegerBox(leaderboardDTO.competitorsCount, 2);
+        this.competitorCountTextBox.addValueChangeHandler(evt -> {
+            updateBoatChangeFactorSelection(leaderboardDTO.getRaceList().get(0).getFleets().size());
+        });
         this.competitorCountTextBox.ensureDebugId("CompetitorCountBox");
         this.flightMultiplierTextBox = createIntegerBox(1, 2);
         this.flightMultiplierTextBox.setEnabled(false);
@@ -48,6 +55,9 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         this.flightMultiplierCheckBox.setTitle(this.stringMessages.multiplierInfo());
         this.flightMultiplierCheckBox.ensureDebugId("FlightMultiplierCheckBox");
         this.ensureDebugId("PairingListCreationSetupDialog");
+        this.boatChangeFactorListBox = new ListBox();
+        this.boatChangeFactorListBox.setVisibleItemCount(1);
+        updateBoatChangeFactorSelection(leaderboardDTO.getRaceList().get(0).getFleets().size());
 
         this.flightMultiplierCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -90,16 +100,18 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         infoScrollPanel.setPixelSize((Window.getClientWidth() / 3), 150);
         infoScrollPanel.add(new Label(stringMessages.pairingListCreationInfo()));
         infoPanel.add(infoScrollPanel);
-        Grid formGrid = new Grid(Util.size(selectedSeriesCheckboxes) + 2, 2);
+        Grid formGrid = new Grid(Util.size(selectedSeriesCheckboxes) + 3, 2);
         panel.add(formGrid);
         formGrid.setWidget(0, 0, new Label(stringMessages.setCompetitors()));
         formGrid.setWidget(0, 1, this.competitorCountTextBox);
         formGrid.setWidget(1, 0, this.flightMultiplierCheckBox);
         formGrid.setWidget(1, 1, this.flightMultiplierTextBox);
-        formGrid.setWidget(2, 0, new Label(stringMessages.seriesHint()));
+        formGrid.setWidget(2, 0, new Label(stringMessages.setBoatChangeFactor()));
+        formGrid.setWidget(2, 1, boatChangeFactorListBox);
+        formGrid.setWidget(3, 0, new Label(stringMessages.seriesHint()));
         int count = 0;
         for (CheckBox current : selectedSeriesCheckboxes) {
-            formGrid.setWidget(2 + count, 1, current);
+            formGrid.setWidget(3 + count, 1, current);
             count++;
         }
         return panel;
@@ -236,6 +248,22 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
             for (CheckBox box : selectedSeriesCheckboxes) {
                 box.setEnabled(enabled);
             }
+        }
+    }
+    
+    private void updateBoatChangeFactorSelection(final int fleetCount) {
+        this.boatChangeFactorListBox.clear();
+        IntStream.range(1, getCompetitorCountInput() / fleetCount)
+        .forEach(i -> {
+            this.boatChangeFactorListBox.addItem(String.valueOf(i));
+        });
+    }
+    
+    private int getCompetitorCountInput() {
+        try {
+            return Integer.parseInt(competitorCountTextBox.getText());
+        } catch (NumberFormatException e) {
+            return 0;
         }
     }
 
