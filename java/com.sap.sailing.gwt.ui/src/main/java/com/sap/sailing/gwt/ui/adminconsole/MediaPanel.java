@@ -39,6 +39,7 @@ import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
+import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiRenameDialog;
 import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiVideoDialog;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
@@ -58,7 +59,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -82,7 +83,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     private CellTable<MediaTrack> mediaTracksTable;
     private ListDataProvider<MediaTrack> mediaTrackListDataProvider = new ListDataProvider<MediaTrack>();
     private Date latestDate;
-    private RefreshableSingleSelectionModel<MediaTrack> refreshableSelectionModel;
+    private RefreshableMultiSelectionModel<MediaTrack> refreshableSelectionModel;
 
     public MediaPanel(Set<RegattasDisplayer> regattasDisplayers, SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, MediaServiceAsync mediaService, ErrorReporter errorReporter,
@@ -131,6 +132,27 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         });
         buttonAndFilterPanel.add(multiVideo);
         
+        
+        Button multiVideoRename = new Button("i18n rename videos");
+        multiVideoRename.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Set<MediaTrack> selected = refreshableSelectionModel.getSelectedSet();
+                if (selected.isEmpty()) {
+                    Window.alert("i18n select mediatracks first");
+                } else {
+                    new MultiRenameDialog(mediaService, stringMessages, selected, errorReporter,
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    loadMediaTracks();
+                                }
+                            }).center();
+                }
+            }
+        });
+        buttonAndFilterPanel.add(multiVideoRename);
+        
         add(buttonAndFilterPanel);
         
         Label lblFilterRaces = new Label(stringMessages.filterMediaByName() + ":");
@@ -170,6 +192,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
 
             @Override
             public void onSuccess(Iterable<MediaTrack> allMediaTracks) {
+                mediaTrackListDataProvider.getList().clear();
                 Util.addAll(allMediaTracks, mediaTrackListDataProvider.getList());
                 filterableMediaTracks.updateAll(mediaTrackListDataProvider.getList());
                 mediaTrackListDataProvider.refresh();
@@ -192,7 +215,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         mediaTracksTable.addColumnSortHandler(sortHandler);
 
         // Add a selection model so we can select cells.
-        refreshableSelectionModel = new RefreshableSingleSelectionModel<>(new EntityIdentityComparator<MediaTrack>() {
+        refreshableSelectionModel = new RefreshableMultiSelectionModel<>(new EntityIdentityComparator<MediaTrack>() {
             @Override
             public boolean representSameEntity(MediaTrack dto1, MediaTrack dto2) {
                 return dto1.dbId.equals(dto2.dbId);
