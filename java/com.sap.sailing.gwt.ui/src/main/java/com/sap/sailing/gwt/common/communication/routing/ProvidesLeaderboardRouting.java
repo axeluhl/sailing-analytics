@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.common.communication.routing;
 
-import com.google.gwt.http.client.URL;
 import com.sap.sse.gwt.client.ServiceRoutingProvider;
 
 /**
@@ -14,7 +13,7 @@ public interface ProvidesLeaderboardRouting extends ServiceRoutingProvider {
     default String routingSuffixPath() {
         return new StringBuilder()
                 .append(LEADERBOARDNAME_PREFIX)
-                .append(URL.encodePathSegment(getLeaderboardName()))
+                .append(getLeaderboardName().replace(' ', '_'))
                 .toString();
     }
 }
