@@ -20,9 +20,13 @@ import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
  * The enum {@link ShardingType} lists the known sharding types. Each sharding type defines a prefix that will
  * be used to identify the sharding type from the request, as implemented in  {@link #identifyAndSetShardingConstraint(String)}.
  * 
+<<<<<<< HEAD
  * By calling {@link #setShardingConstraint(ShardingType, String)} it is possible to directly set a thread constraint. 
  * This is useful in background computing code, as in {@link LiveLeaderboardUpdater} 
  *  
+=======
+ * By calling {@link #setShardingConstraint(ShardingType, String)} it is possible to directly set a thread constraint. This is useful in background computing code, as in {@link LiveLeaderboardUpdater} 
+>>>>>>> 9ad3cfea6d8259a9a87f3ae0c711a63fe32124d7
  *  
  */
 public class ShardingContext {
