@@ -22,14 +22,14 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.SixtyInchLeaderBoardStyle;
+import com.sap.sailing.gwt.ui.leaderboard.SixtyInchLeaderboardStyle;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class PreLiveRaceLeaderBoardWithImagePresenterImpl
-        extends AutoPlayPresenterConfigured<AbstractPreRaceLeaderBoardWithImagePlace>
+public class PreLiveRaceLeaderboardWithImagePresenterImpl
+        extends AutoPlayPresenterConfigured<AbstractPreRaceLeaderboardWithImagePlace>
         implements PreLeaderboardWithImageView.Slide1Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private int selected = -1;
@@ -40,7 +40,7 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
     private com.sap.sse.gwt.client.player.Timer timer;
 
-    public PreLiveRaceLeaderBoardWithImagePresenterImpl(AbstractPreRaceLeaderBoardWithImagePlace place,
+    public PreLiveRaceLeaderboardWithImagePresenterImpl(AbstractPreRaceLeaderboardWithImagePlace place,
             AutoPlayClientFactory clientFactory, PreLeaderboardWithImageView slide1ViewImpl) {
         super(place, clientFactory);
         this.view = slide1ViewImpl;
@@ -111,9 +111,9 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardPanel = new SingleRaceLeaderboardPanel(null,null,sailingService, new AsyncActionsExecutor(),
-                leaderboardSettings, true, liveRace, competitorSelectionProvider, timer, null,
+                leaderboardSettings, false, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
-                false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(false),
+                false, null, false, null, false, true, false, false, false, new SixtyInchLeaderboardStyle(false),
                 FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
         view.setLeaderBoard(leaderboardPanel);
         selectionTimer.schedule(AnimationPanel.DELAY + AnimationPanel.ANIMATION_DURATION);

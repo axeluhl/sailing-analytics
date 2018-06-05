@@ -87,7 +87,12 @@ public interface TrackedRegatta extends Serializable {
 
     /**
      * Listener will be notified when {@link #addTrackedRace(TrackedRace)} is called and upon registration for each
-     * tracked race already known. Therefore, the listener won't miss any tracked race.
+     * tracked race already known. Therefore, the listener won't miss any tracked race.<br>
+     * 
+     * Events for synchronous listeners are processed in the calling thread. This implies that implementations must not
+     * block for events triggered only by other callbacks to implementations of this interface, or else they risk a
+     * deadlock. For example, trying a blocking wait for another {@link TrackedRace} to appear is a bad idea because the
+     * appearance of that other race may have to be signalled by a {@link #raceAdded(TrackedRace)} callback.
      * 
      * @param listener
      *            the listener to add

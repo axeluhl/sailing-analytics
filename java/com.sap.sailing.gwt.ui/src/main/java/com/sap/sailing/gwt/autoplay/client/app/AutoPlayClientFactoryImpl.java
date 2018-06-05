@@ -50,7 +50,7 @@ public class AutoPlayClientFactoryImpl extends AutoPlayClientFactoryBase {
     }
 
     @Override
-    public AutoPlayContext getAutoPlayCtx() {
+    public AutoPlayContext getAutoPlayCtxSignalError() {
         if (currentContext == null) {
             getEventBus().fireEvent(new AutoPlayFailureEvent("No autoplay context found"));
         }
@@ -60,6 +60,15 @@ public class AutoPlayClientFactoryImpl extends AutoPlayClientFactoryBase {
     @Override
     public SailingDispatchSystem getDispatch() {
         return dispatch;
+    }
+
+    @Override
+    /**
+     * The context can be uninitialized, if a direct place url is used. In this case a round trip via the startview that
+     * can parse the url parameter configuration is required.
+     */
+    public boolean isConfigured() {
+        return currentContext != null && currentContext.getEvent() != null;
     }
 
 }

@@ -9,7 +9,7 @@ import com.sap.sse.security.ui.client.UserService;
 
 public abstract class AutoPlayConfiguration {
     public abstract void startRootNode(AutoPlayClientFactory cf, AutoPlayContextDefinition context,
-            PerspectiveCompositeSettings<?> settings);
+            PerspectiveCompositeSettings<?> settings, EventDTO initialEventData);
 
     /**
      * This method should be pure/standalone, it is not allowed to make any guesses on fields written by startRootNode,
