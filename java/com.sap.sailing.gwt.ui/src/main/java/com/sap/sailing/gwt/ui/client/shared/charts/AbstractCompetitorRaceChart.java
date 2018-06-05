@@ -148,7 +148,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      * Attention: We can't reuse the old chart when the detail changes because HighChart does not support the inverting of the Y-Axis  
      */
     private Chart createChart() {
-
         Chart chart = new Chart().setZoomType(BaseChart.ZoomType.X)
                 .setPersistent(true)
                 .setReflow(false)
@@ -163,11 +162,10 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 .setBorderWidth(0)
                 .setBorderRadius(0)
                 .setPlotBorderWidth(0)
-                .setCredits(new Credits().setEnabled(false))
-                .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()));
+                .setCredits(new Credits().setEnabled(false));
         chart.setStyleName(chartsCss.chartStyle());
         ChartUtil.useCheckboxesToShowAndHide(chart);
-
+        
         if (allowTimeAdjust) {
             chart.setClickEventHandler(new ChartClickEventHandler() {
                 @Override
@@ -183,16 +181,15 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             });
         }
 
-        if (hasSecondYAxis()) {
-            chart.getYAxis(0).setStartOnTick(false).setShowFirstLabel(false);
-            chart.getYAxis(1).setStartOnTick(false).setShowFirstLabel(false).setOpposite(true);
-        } else {
-            chart.getYAxis(0).setStartOnTick(false).setShowFirstLabel(false);
-            chart.setLinePlotOptions(new LinePlotOptions()
-                    .setLineWidth(LINE_WIDTH)
-                    .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
-                    .setShadow(false).setHoverStateLineWidth(LINE_WIDTH));
+        if (compactChart) {
+            chart.setSpacingLeft(10).setSpacingRight(10).setSpacingTop(20).setOption("legend/margin", 2);
         }
+        
+        chart.getYAxis(0).setStartOnTick(false).setShowFirstLabel(false);
+        chart.setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH)
+                .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
+                .setShadow(false).setHoverStateLineWidth(LINE_WIDTH));
+            
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(60 * 1000); // 1 minute
         chart.getXAxis().setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
             @Override
@@ -519,15 +516,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
                 @Override
                 public void execute() {
-                    // Workaround for a highcharts bug: Set a chart title, overwrite the title,
-                    // switch chart to invisible and visible again -> the old title appears
-                    if (compactChart) {
-                        applyCompactTitle(chartTitleFromDetailTypes());
-                    } else {
-                        chart.setTitle(hasSecondYAxis() ? null : new ChartTitle().setText(chartTitleFromDetailTypes()),
-                                null);
-                    }
-
                     chart.setSizeToMatchContainer();
                     // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox
                     // positions
@@ -540,29 +528,12 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
     }
 
-    private void applyCompactTitle(String title) {
-        chart.setSpacingLeft(10).setSpacingRight(10).setSpacingTop(20).setOption("legend/margin", 2)
-                .setChartSubtitle(null).getXAxis().setAxisTitleText(null);
-        chart.setTitle(hasSecondYAxis() ? null : new ChartTitle().setText(title).setOption("floating",true), null);
-        chart.redraw();
-    }
-
     private int yAxisIndex(DetailType seriesDetailType) {
         if (selectedSecondDetailType != null && seriesDetailType == selectedSecondDetailType) {
             return 1;
         } else {
             return 0;
         }
-    }
-
-    private String chartTitleFromDetailTypes() {
-        StringBuilder titleBuilder = new StringBuilder();
-        titleBuilder.append(DetailTypeFormatter.format(selectedFirstDetailType));
-        if (selectedSecondDetailType != null) {
-            titleBuilder.append("/");
-            titleBuilder.append(DetailTypeFormatter.format(selectedSecondDetailType));
-        }
-        return titleBuilder.toString();
     }
 
     /**
@@ -579,7 +550,13 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     public String getLocalizedShortName() {
-        return chartTitleFromDetailTypes();
+        StringBuilder titleBuilder = new StringBuilder();
+        titleBuilder.append(DetailTypeFormatter.format(selectedFirstDetailType));
+        if (selectedSecondDetailType != null) {
+            titleBuilder.append("/");
+            titleBuilder.append(DetailTypeFormatter.format(selectedSecondDetailType));
+        }
+        return titleBuilder.toString();
     }
 
     public Widget getEntryWidget() {
@@ -648,32 +625,43 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             this.selectedFirstDetailType = newSelectedFirstDetailType;
             this.selectedSecondDetailType = newSelectedSecondDetailType;
             
-            chart.getYAxis(0).setReversed(isY0AxisReversed());
-            chart.getYAxis(1).setReversed(isY1AxisReversed());
+            chart.getYAxis(0).setReversed(isYAxisReversed(selectedFirstDetailType));
+            chart.getYAxis(1).setReversed(isYAxisReversed(selectedSecondDetailType));
             
             final String unitY0 = DetailTypeFormatter.getUnit(getSelectedFirstDetailType());
             final String labelY0 = unitY0.isEmpty() ? "" : "[" + unitY0 + "]";
             final String unitY1 = hasSecondYAxis() ? DetailTypeFormatter.getUnit(getSelectedSecondDetailType()) : null;
             final String labelY1 = hasSecondYAxis() ? (unitY1.isEmpty() ? "" : "[" + unitY1 + "]") : null;
 
-            if (compactChart) {
-                applyCompactTitle(chartTitleFromDetailTypes());
+            final ChartTitle title;
+            final ChartSubtitle subtitle;
+            //titles are only shown on single axis charts
+            if (hasSecondYAxis()) {
+                title = new ChartTitle().setText("");
+                subtitle = new ChartSubtitle().setText("");
             } else {
-                chart.setTitle(hasSecondYAxis() ? null : new ChartTitle().setText(chartTitleFromDetailTypes()), null);
+                //in compactmode, do not use subtitle, make title floating
+                title = new ChartTitle().setText(DetailTypeFormatter.format(selectedFirstDetailType))
+                        .setOption("floating", compactChart);
+                subtitle = new ChartSubtitle().setText(compactChart ? "" : stringMessages.clickAndDragToZoomIn());
             }
+            //and sync native part
+            chart.setTitle(title, subtitle);
+            
+            chart.getYAxis(0).setOpposite(false)
+            .setGridLineWidth(1)
+            .setMinorGridLineWidth(0).setMinorGridLineColor("transparent");
+            
+            chart.getYAxis(1).setOpposite(true)
+            .setGridLineWidth(1)
+            .setGridLineDashStyle(DashStyle.LONG_DASH)
+            .setMinorGridLineWidth(0).setMinorGridLineColor("transparent")
+            .setMinorTickIntervalAuto();
+            
             if (hasSecondYAxis()) {
                 chart.getYAxis(0).setAxisTitleText(DetailTypeFormatter.format(selectedFirstDetailType) + " " + labelY0);
                 chart.getYAxis(1)
                         .setAxisTitleText(DetailTypeFormatter.format(selectedSecondDetailType) + " " + labelY1);
-                chart.getYAxis(0).setOpposite(false)
-                .setGridLineWidth(1)
-                .setMinorGridLineWidth(0).setMinorGridLineColor("transparent");
-                
-                chart.getYAxis(1).setOpposite(true)
-                .setGridLineWidth(1)
-                .setGridLineDashStyle(DashStyle.LONG_DASH)
-                .setMinorGridLineWidth(0).setMinorGridLineColor("transparent")
-                .setMinorTickIntervalAuto();
             } else {
                 chart.getYAxis(0).setAxisTitleText(labelY0);
                 chart.getYAxis(1).setAxisTitle(null);
@@ -709,6 +697,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 }
             }));
         }
+        if (hasDetailTypeChanged) {
+            chart.redraw();
+        }
         return hasDetailTypeChanged;
     }
     
@@ -724,14 +715,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     
     private boolean hasSecondYAxis() {
         return selectedSecondDetailType != null;
-    }
-
-    private boolean isY0AxisReversed() {
-        return isYAxisReversed(selectedFirstDetailType);
-    }
-
-    private boolean isY1AxisReversed() {
-        return isYAxisReversed(selectedSecondDetailType);
     }
 
     private boolean isYAxisReversed(DetailType detailType) {
