@@ -7263,7 +7263,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         PairingListTemplate template = getService().createPairingListTemplate(flightCount, groupCount, competitorCount, 
                 flightMultiplier, tolerance);
         return new PairingListTemplateDTO(flightCount, groupCount, competitorCount, flightMultiplier, tolerance,
-                template.getPairingListTemplate(), template.getQuality());
+                template.getBoatChanges(),template.getPairingListTemplate(), template.getQuality(),template.getAssignmentQuality());
     }
     
     @Override

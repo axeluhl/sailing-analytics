@@ -18,8 +18,8 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
 	private final Random random = new Random();
 	private final int[][] pairingListTemplate;
-	private final double standardDev;
-	private final int flightMultiplier, tolerance;
+	private final double standardDev,assignmentQuality;
+	private final int flightMultiplier, tolerance,boatchanges;
 	private final int dummies;
 	private final ExecutorService executorService = ThreadPoolUtil.INSTANCE
 			.getDefaultBackgroundTaskThreadPoolExecutor();
@@ -57,6 +57,12 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 				this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
 						new int[pairingFrameProvider.getCompetitorsCount()
 								+ dummies][pairingFrameProvider.getCompetitorsCount() + dummies]));
+				this.assignmentQuality = this.calcStandardDev(getAssignmentAssociations(this.pairingListTemplate,
+						new int[pairingFrameProvider.getCompetitorsCount()][pairingFrameProvider.getCompetitorsCount()
+								/ pairingFrameProvider.getGroupsCount()]));
+				this.boatchanges = this.getBoatchangesFromPairinglist(this.pairingListTemplate,
+						pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
+						pairingFrameProvider.getCompetitorsCount());
 				this.resetDummies(pairingListTemplate, pairingFrameProvider.getCompetitorsCount() + dummies);
 			} else {
 				this.pairingListTemplate = this.createPairingListTemplate(
@@ -65,6 +71,12 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 				this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
 						new int[pairingFrameProvider.getCompetitorsCount()
 								+ dummies][pairingFrameProvider.getCompetitorsCount() + dummies]));
+				this.assignmentQuality = this.calcStandardDev(getAssignmentAssociations(this.pairingListTemplate,
+						new int[pairingFrameProvider.getCompetitorsCount()][pairingFrameProvider.getCompetitorsCount()
+								/ pairingFrameProvider.getGroupsCount()]));
+				this.boatchanges = this.getBoatchangesFromPairinglist(this.pairingListTemplate,
+						pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
+						pairingFrameProvider.getCompetitorsCount()) * flightMultiplier + flightMultiplier*(this.getMatches(this.pairingListTemplate[pairingListTemplate.length-1], this.pairingListTemplate[0]));
 				this.resetDummies(pairingListTemplate, pairingFrameProvider.getCompetitorsCount() + dummies);
 			}
 		} else {
@@ -96,6 +108,11 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
 		this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
 				new int[competitorsCount + this.dummies][competitorsCount + this.dummies]));
+		this.assignmentQuality = this.calcStandardDev(getAssignmentAssociations(template,
+				new int[competitorsCount][competitorsCount
+						/ groupCount]));
+		this.boatchanges = this.getBoatchangesFromPairinglist(template,
+				template.length/groupCount, groupCount, competitorsCount);
 		this.resetDummies(this.pairingListTemplate, competitorsCount + this.dummies);
 		this.iterations = 100000;
 		this.flightMultiplier = flightMultiplier;
@@ -105,6 +122,15 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 	@Override
 	public double getQuality() {
 		return this.standardDev;
+	}
+	
+	@Override
+	public double getAssignmentQuality(){
+		return this.assignmentQuality;
+	}
+	@Override
+	public int getBoatChanges(){
+		return this.boatchanges;
 	}
 
     @Override
@@ -854,5 +880,17 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 			}
 		}
 		return bestPLT;
+	}
+
+	protected int getBoatchangesFromPairinglist(int[][] pairinglist, int flightcount, int groupcount,
+			int competitorcount) {
+		int sumOfBoatchanges = 0;
+		for (int groupindex = groupcount-1; groupindex < flightcount * groupcount; groupindex += groupcount) {
+			if (groupindex + 1 < pairinglist.length) {
+				sumOfBoatchanges += ((competitorcount/groupcount)
+						- this.getMatches(pairinglist[groupindex], pairinglist[groupindex + 1]));
+			}
+		}
+		return sumOfBoatchanges;
 	}
 }

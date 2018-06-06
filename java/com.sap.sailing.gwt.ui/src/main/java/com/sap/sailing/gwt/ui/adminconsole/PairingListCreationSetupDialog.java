@@ -140,7 +140,7 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         dto.setSelectedFlightNames(selectedFlightNames);
         dto.setFlightCount(selectedFlightNames.size());
         // TODO get tolerance from ui component
-        dto.setTolerance(3);
+        dto.setTolerance(Integer.parseInt(boatChangeFactorListBox.getSelectedValue()));
         return dto;
     }
 

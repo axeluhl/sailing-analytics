@@ -87,7 +87,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
 
         CaptionPanel dataPanel = new CaptionPanel();
         dataPanel.setCaptionText(stringMessages.parameters());
-        Grid formGrid = new Grid(6, 2);
+        Grid formGrid = new Grid(8, 2);
         dataPanel.add(formGrid);
         Label flights = new Label(String.valueOf(this.template.getFlightCount()));
         flights.ensureDebugId("FlightCountLabel");
@@ -116,10 +116,15 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         });
         formGrid.setWidget(4, 0, qualityPanel);
         formGrid.setWidget(4, 1, new Label(String.valueOf(Math.floor(this.template.getQuality() * 1000) / 1000)));
+        //TODO Stringmessages
+        formGrid.setWidget(5, 0, new Label("Boat Assignment Quality"));
+        formGrid.setWidget(5, 1, new Label(String.valueOf(Math.floor(this.template.getBoatAssignmentQuality()*1000) / 1000)));
+        formGrid.setWidget(6, 0, new Label("Boat Changes"));
+        formGrid.setWidget(6, 1, new Label(String.valueOf(template.getBoatChanges())));
         if (this.template.getFlightMultiplier() > 1) {
             Label flightMultiplierLabel = new Label(String.valueOf(this.template.getFlightMultiplier()));
-            formGrid.setWidget(5, 0, new Label(stringMessages.amountOfFlightRepeats()));
-            formGrid.setWidget(5, 1, flightMultiplierLabel);
+            formGrid.setWidget(7, 0, new Label(stringMessages.amountOfFlightRepeats()));
+            formGrid.setWidget(7, 1, flightMultiplierLabel);
             flightMultiplierLabel.ensureDebugId("FlightMultiplierCountLabel");
         }
         formGrid.setCellSpacing(10);
