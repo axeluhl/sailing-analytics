@@ -212,9 +212,15 @@ public class LiveLeaderboardUpdater implements Runnable {
 
     private synchronized void start() {
         running = true;
-        thread = new Thread(this, "LiveLeaderboardUpdater for leaderboard "+getLeaderboard().getName());
-        thread.setDaemon(true);
-        thread.start();
+        try {
+            thread = new Thread(this, "LiveLeaderboardUpdater for leaderboard "+getLeaderboard().getName());
+            thread.setDaemon(true);
+            thread.start();
+        } catch (Exception e) {
+            running = false;
+            logger.log(Level.SEVERE, "Error creating LiveLeaderboardUpdater thread for leadedrboard "+getLeaderboard().getName(), e);
+            throw e;
+        }
     }
 
     /**
