@@ -88,7 +88,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     }
 
     public LegIdentifier getLegIdentifier() {
-        return new LegIdentifierImpl(raceIdentifier, String.valueOf(raceLeg));
+        return new LegIdentifierImpl(raceIdentifier, raceLeg);
     }
     
     public long getVersion() {
@@ -331,7 +331,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     }
     
     public void simulate(int leg) {
-        LegIdentifier legIdentifier = new LegIdentifierImpl(raceIdentifier, String.valueOf(leg));
+        LegIdentifier legIdentifier = new LegIdentifierImpl(raceIdentifier, leg);
         GetSimulationAction getSimulation = new GetSimulationAction(sailingService, legIdentifier);
         asyncActionsExecutor.execute(getSimulation, GET_SIMULATION_CATEGORY,
                 new MarkedAsyncCallback<>(new AsyncCallback<SimulatorResultsDTO>() {

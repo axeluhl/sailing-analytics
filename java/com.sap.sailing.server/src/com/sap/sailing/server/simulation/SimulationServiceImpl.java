@@ -95,6 +95,15 @@ public class SimulationServiceImpl implements SimulationService {
         }
     }
 
+    /**
+     * When a {@link TrackedRace} is removed from its {@link TrackedRegatta}, all {@link #cache} entries that still
+     * exist for that race will be removed. Since a {@link LegChangeListener} will have made all necessary removals
+     * when the race's course changes, we can assume that cache entries may remain only for legs that still exist in
+     * the tracked race.
+     * 
+     * @author Axel Uhl (d043530)
+     *
+     */
     private class SimulationRaceListener implements RaceListener {
         @Override
         public void raceAdded(TrackedRace trackedRace) {
@@ -102,7 +111,7 @@ public class SimulationServiceImpl implements SimulationService {
 
         @Override
         public void raceRemoved(TrackedRace trackedRace) {
-            RaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+            RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
             LegChangeListener listener = legListeners.get(raceIdentifier); 
             if (listener != null) {
                 trackedRace.removeListener(listener);
@@ -110,11 +119,8 @@ public class SimulationServiceImpl implements SimulationService {
             int legNumber = 1;
             Iterator<TrackedLeg> iterator = trackedRace.getTrackedLegs().iterator(); 
             while (iterator.hasNext()) {
-                LegIdentifier key = new LegIdentifierImpl((RegattaAndRaceIdentifier)raceIdentifier, ""+legNumber);
-                SimulationResults entry = cache.get(key, false);
-                if (entry != null) {
-                    cache.remove(key);
-                }
+                LegIdentifier key = new LegIdentifierImpl(raceIdentifier, legNumber);
+                cache.remove(key);
                 legNumber++;
                 iterator.next();
             }
@@ -169,7 +175,7 @@ public class SimulationServiceImpl implements SimulationService {
         protected void defaultAction() {
             if ((!this.covered) && (legIdentifier != null)) {
                 this.covered = true;
-                LegIdentifier tmpLegIdentifier = new LegIdentifierImpl(legIdentifier.getRaceIdentifier(), legIdentifier.getLegName());
+                LegIdentifier tmpLegIdentifier = new LegIdentifierImpl(legIdentifier.getRaceIdentifier(), legIdentifier.getOneBasedLegIndex());
                 scheduler.schedule(() -> triggerUpdate(tmpLegIdentifier), WAIT_MILLIS, TimeUnit.MILLISECONDS);
             }
         }
@@ -268,13 +274,13 @@ public class SimulationServiceImpl implements SimulationService {
 
         @Override
         public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
-            // relevant for simulation: update legs influenced waypoint
+            // relevant for simulation: legs with indices starting at zeroBasedIndex are affected and need to have their simulation results removed from the cache
             // TODO: update influenced legs; "live" update current leg
         }
 
         @Override
         public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-            // relevant for simulation: update legs influenced waypoint
+            // relevant for simulation: legs with indices starting at zeroBasedIndex are affected and need to have their simulation results removed from the cache
             // TODO: update influenced legs; "live" update current leg
         }
 
@@ -346,7 +352,7 @@ public class SimulationServiceImpl implements SimulationService {
         TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
         if (trackedRace != null) {
             boolean isLive = trackedRace.isLive(simulationStartTime);
-            int legNumber = legIdentifier.getLegNumber();
+            int legNumber = legIdentifier.getOneBasedLegIndex();
             Course raceCourse = trackedRace.getRace().getCourse();
             Leg leg = raceCourse.getLegs().get(legNumber);
             // get previous mark or start line as start-position

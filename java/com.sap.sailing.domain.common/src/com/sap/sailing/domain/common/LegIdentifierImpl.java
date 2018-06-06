@@ -3,14 +3,14 @@ package com.sap.sailing.domain.common;
 public class LegIdentifierImpl extends RegattaNameAndRaceName implements LegIdentifier {
     private static final long serialVersionUID = 3599904513673776450L;
     private RegattaAndRaceIdentifier raceIdentifier = null;
-    private String legName;
+    private int oneBasedLegIndex;
 
     LegIdentifierImpl() {}
     
-    public LegIdentifierImpl(RegattaAndRaceIdentifier raceIdentifier, String legName) {
+    public LegIdentifierImpl(RegattaAndRaceIdentifier raceIdentifier, int oneBasedLegIndex) {
         super(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
         this.raceIdentifier = raceIdentifier;
-        this.legName = legName;
+        this.oneBasedLegIndex = oneBasedLegIndex;
     }
 
     @Override
@@ -19,25 +19,21 @@ public class LegIdentifierImpl extends RegattaNameAndRaceName implements LegIden
     }
 
     @Override
-    public String getLegName() {
-        return legName;
-    }
-
-    @Override
-    public int getLegNumber() {
-        return Integer.parseInt(legName)-1;
+    public int getOneBasedLegIndex() {
+        return oneBasedLegIndex;
     }
 
     @Override
     public String toString() {
-        return getRegattaName() + "/" + getRaceName() + "/" + getLegName();
+        return getRegattaName() + "/" + getRaceName() + "/ leg " + getOneBasedLegIndex();
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((legName == null) ? 0 : legName.hashCode());
+        result = prime * result + ((raceIdentifier == null) ? 0 : raceIdentifier.hashCode());
+        result = prime * result + oneBasedLegIndex;
         return result;
     }
 
@@ -50,12 +46,13 @@ public class LegIdentifierImpl extends RegattaNameAndRaceName implements LegIden
         if (getClass() != obj.getClass())
             return false;
         LegIdentifierImpl other = (LegIdentifierImpl) obj;
-        if (legName == null) {
-            if (other.legName != null)
+        if (raceIdentifier == null) {
+            if (other.raceIdentifier != null)
                 return false;
-        } else if (!legName.equals(other.legName))
+        } else if (!raceIdentifier.equals(other.raceIdentifier))
+            return false;
+        if (oneBasedLegIndex != other.oneBasedLegIndex)
             return false;
         return true;
     }
-
 }

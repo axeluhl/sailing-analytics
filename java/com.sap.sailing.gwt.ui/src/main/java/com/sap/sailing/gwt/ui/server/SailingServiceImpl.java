@@ -1695,7 +1695,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             rcDTO.coursePositions.waypointPositions = new ArrayList<Position>();
             rcDTO.coursePositions.waypointPositions.add(simulationResults.getStartPosition());
             rcDTO.coursePositions.waypointPositions.add(simulationResults.getEndPosition());
-            result = new SimulatorResultsDTO(simulationResults.getVersion().asMillis(), legIdentifier.getLegNumber()+1, simulationResults.getStartTime(), simulationResults.getTimeStep(),
+            result = new SimulatorResultsDTO(simulationResults.getVersion().asMillis(), legIdentifier.getOneBasedLegIndex(), simulationResults.getStartTime(), simulationResults.getTimeStep(),
                     simulationResults.getLegDuration(), rcDTO, pathDTOs, null, null);
             }
         return result;
