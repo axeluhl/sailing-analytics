@@ -57,13 +57,13 @@ public class MultiRenameDialog extends DialogBox {
     private TextBox replacePartIn;
     private TextBox replacePartOut;
 
-    public MultiRenameDialog(MediaServiceAsync mediaService,
-            StringMessages stringMessages, Set<MediaTrack> selected, ErrorReporter errorReporter, Runnable afterLinking) {
+    public MultiRenameDialog(MediaServiceAsync mediaService, StringMessages stringMessages, Set<MediaTrack> selected,
+            ErrorReporter errorReporter, Runnable afterLinking) {
         this.stringMessages = stringMessages;
         setGlassEnabled(true);
 
         FlowPanel mainContent = new FlowPanel();
-        //placeholder for description if required
+        // placeholder for description if required
         Label descriptionLabel = new Label("");
         descriptionLabel.getElement().getStyle().setPadding(0.5, Unit.EM);
         mainContent.add(descriptionLabel);
@@ -75,7 +75,7 @@ public class MultiRenameDialog extends DialogBox {
         replacePartOut = new TextBox();
         replacePartOut.setText("http://replace_me_with_baseurl/");
         mainContent.add(replacePartOut);
-        
+
         replacePartOut.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
@@ -83,7 +83,7 @@ public class MultiRenameDialog extends DialogBox {
             }
         });
         replacePartOut.addKeyUpHandler(new KeyUpHandler() {
-            
+
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 updateUI();
@@ -95,7 +95,7 @@ public class MultiRenameDialog extends DialogBox {
                 updateUI();
             }
         });
-        
+
         FlowPanel buttonPanel = new FlowPanel();
         DockPanel dockPanel = new DockPanel();
         add(dockPanel);
@@ -122,16 +122,16 @@ public class MultiRenameDialog extends DialogBox {
             @Override
             public void onClick(ClickEvent event) {
                 hide();
-                for(MediaTrack track:mediaTrackRenameMap) {
+                for (MediaTrack track : mediaTrackRenameMap) {
                     String newUrl = getPatchedUrl(track);
                     track.url = newUrl;
                     mediaService.updateUrl(track, new AsyncCallback<Void>() {
-                        
+
                         @Override
                         public void onSuccess(Void result) {
                             afterLinking.run();
                         }
-                        
+
                         @Override
                         public void onFailure(Throwable caught) {
                             Window.alert(stringMessages.multiUrlChangeCannotSave());
@@ -146,7 +146,7 @@ public class MultiRenameDialog extends DialogBox {
         dockPanel.add(buttonPanel, DockPanel.SOUTH);
 
         mediaTrackRenameMap = new ArrayList<>(selected);
-        
+
         replacePartIn.setText(maxPrefixForAll());
         updateUI();
     }
@@ -198,13 +198,12 @@ public class MultiRenameDialog extends DialogBox {
 
             Label name = new Label(remoteFile.title);
             dataTable.setWidget(y, TITLE_COLUMN, name);
-            
+
             Anchor link = new Anchor(remoteFile.url);
             link.setHref(remoteFile.url);
             link.setTarget("_blank");
             dataTable.setWidget(y, URL_COLUMN, link);
 
-            
             String newUrl = getPatchedUrl(remoteFile);
             Anchor linknew = new Anchor(newUrl);
             linknew.setHref(newUrl);
