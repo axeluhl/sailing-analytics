@@ -21,7 +21,6 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.datamining.AbstractSailingResultsPresenter;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;

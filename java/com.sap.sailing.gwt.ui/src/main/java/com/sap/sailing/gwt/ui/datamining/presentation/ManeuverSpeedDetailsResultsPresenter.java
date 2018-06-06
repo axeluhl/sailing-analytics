@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsAggregation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartToCsvExporter;
-import com.sap.sailing.gwt.ui.datamining.AbstractSailingResultsPresenter;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.GroupKey;

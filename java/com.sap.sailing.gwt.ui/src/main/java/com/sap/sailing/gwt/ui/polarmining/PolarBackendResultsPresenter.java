@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartToCsvExporter;
-import com.sap.sailing.gwt.ui.datamining.AbstractSailingResultsPresenter;
+import com.sap.sailing.gwt.ui.datamining.presentation.AbstractSailingResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
 import com.sap.sailing.polars.datamining.shared.PolarBackendData;
 import com.sap.sse.common.settings.Settings;

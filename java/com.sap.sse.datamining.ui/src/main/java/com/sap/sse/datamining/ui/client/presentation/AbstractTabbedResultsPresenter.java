@@ -189,8 +189,10 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
     }
 
     /**
-     * Register an {@link ResultsPresenter} to handle the retrieved {@link resultType}. Each {@link resultType} can only
-     * be registered once. Multiple registrations will cause an {@link IllegalStateException}.
+     * Register a {@link ResultsPresenter} to handle the retrieved {@link resultType}. Each {@link resultType} can only
+     * be registered once. Multiple registrations will cause an {@link IllegalStateException}. When
+     * {@link #showResult(QueryResultDTO)} executes it checks whether the {@link resultType} was registered before and
+     * triggers the corresponding {@link ResultsPresenter}.
      * 
      * @param resultType
      *            of the datamining query.
