@@ -223,35 +223,37 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
 
     protected void notifyListeners(SailMasterMessage message) {
-        try {
-            switch (message.getType()) {
-            case RPD:
-                notifyListenersRPD(message);
-                break;
-            case RAC:
-                notifyListenersRAC(message);
-                break;
-            case CCG:
-                notifyListenersCCG(message);
-                break;
-            case STL:
-                notifyListenersSTL(message);
-                break;
-            case CAM:
-                notifyListenersCAM(message);
-                break;
-            case TMD:
-                notifyListenersTMD(message);
-                break;
-            case WND:
-                notifyListenersWND(message);
-                break;
-            default:
-                // ignore all other messages because there are no notification patterns for those
+        if (message.getType() != null) {
+            try {
+                switch (message.getType()) {
+                case RPD:
+                    notifyListenersRPD(message);
+                    break;
+                case RAC:
+                    notifyListenersRAC(message);
+                    break;
+                case CCG:
+                    notifyListenersCCG(message);
+                    break;
+                case STL:
+                    notifyListenersSTL(message);
+                    break;
+                case CAM:
+                    notifyListenersCAM(message);
+                    break;
+                case TMD:
+                    notifyListenersTMD(message);
+                    break;
+                case WND:
+                    notifyListenersWND(message);
+                    break;
+                default:
+                    // ignore all other messages because there are no notification patterns for those
+                }
+            } catch (Exception e) {
+                // broken messages are ignored
+                logger.log(Level.WARNING, "Exception caught during parsing of message '" + message.getMessage() + "' : " + e.getMessage(), e);
             }
-        } catch (Exception e) {
-            // broken messages are ignored
-            logger.log(Level.WARNING, "Exception caught during parsing of message '" + message.getMessage() + "' : " + e.getMessage(), e);
         }
     }
     
