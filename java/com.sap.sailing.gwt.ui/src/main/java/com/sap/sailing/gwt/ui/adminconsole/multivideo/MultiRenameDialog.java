@@ -63,14 +63,15 @@ public class MultiRenameDialog extends DialogBox {
         setGlassEnabled(true);
 
         FlowPanel mainContent = new FlowPanel();
-        Label descriptionLabel = new Label("i18n select tracks to rename, ensure that replace and with are properly filled, then execute");
+        //placeholder for description if required
+        Label descriptionLabel = new Label("");
         descriptionLabel.getElement().getStyle().setPadding(0.5, Unit.EM);
         mainContent.add(descriptionLabel);
 
-        mainContent.add(new Label("replace "));
+        mainContent.add(new Label(stringMessages.multiUrlChangeFind()));
         replacePartIn = new TextBox();
         mainContent.add(replacePartIn);
-        mainContent.add(new Label(" with "));
+        mainContent.add(new Label(stringMessages.multiUrlChangeReplace()));
         replacePartOut = new TextBox();
         replacePartOut.setText("http://replace_me_with_baseurl/");
         mainContent.add(replacePartOut);
@@ -115,7 +116,7 @@ public class MultiRenameDialog extends DialogBox {
             }
         });
 
-        doSaveButton = new Button(stringMessages.addMediaTrack());
+        doSaveButton = new Button(stringMessages.multiUrlChangeSave());
         doSaveButton.addClickHandler(new ClickHandler() {
 
             @Override
@@ -133,7 +134,7 @@ public class MultiRenameDialog extends DialogBox {
                         
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert("Some error occured during saving!");
+                            Window.alert(stringMessages.multiUrlChangeCannotSave());
                         }
                     });
                 }
@@ -183,6 +184,7 @@ public class MultiRenameDialog extends DialogBox {
         dataTable.clear();
         dataTable.setWidget(y, TITLE_COLUMN, new Label(stringMessages.title()));
         dataTable.setWidget(y, URL_COLUMN, new Label(stringMessages.url()));
+        dataTable.setWidget(y, URL_COLUMN, new Label(stringMessages.multiUrlChangeNewURL()));
         dataTable.setWidget(y, DURATION_COLUMN, new Label(stringMessages.duration()));
         dataTable.setWidget(y, STARTTIME_COLUMN, new Label(stringMessages.startTime()));
         dataTable.setWidget(y, MIMETYPE_COLUMN, new Label(stringMessages.mimeType()));

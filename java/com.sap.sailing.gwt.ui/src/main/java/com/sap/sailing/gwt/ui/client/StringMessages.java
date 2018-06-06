@@ -2184,4 +2184,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String multiVideoDoNoAdd();
     String multiVideoOffsetInput();
     String multiVideoDescription();
+    String multiUrlChangeMediaTrack();
+    String multiUrlChangeReplace();
+    String multiUrlChangeFind();
+    String multiUrlChangeCannotSave();
+    String multiUrlChangeSave();
+    String multiUrlChangeNewURL();
 }
