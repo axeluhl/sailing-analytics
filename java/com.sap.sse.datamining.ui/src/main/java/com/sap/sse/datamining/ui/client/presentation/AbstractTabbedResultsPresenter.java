@@ -32,6 +32,7 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
     protected final ScrolledTabLayoutPanel tabPanel;
     protected final Map<Widget, ResultsPresenter<?>> presentersMappedByHeader;
     protected final DrillDownCallback drillDownCallback;
+    protected final Map<String, ResultsPresenter<Settings>> registeredResultPresenterMap;
 
     public AbstractTabbedResultsPresenter(Component<?> parent, ComponentContext<?> context,
             DrillDownCallback drillDownCallback) {
@@ -41,6 +42,7 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
         tabPanel.setAnimationDuration(0);
         tabPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
         presentersMappedByHeader = new HashMap<>();
+        registeredResultPresenterMap = new HashMap<>();
 
         addNewTabTab();
         addTabAndFocus(new MultiResultsPresenter(this, context, drillDownCallback));
@@ -184,5 +186,51 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
     @Override
     public String getId() {
         return "TabbedResultsPresenter";
+    }
+
+    /**
+     * Register an {@link ResultsPresenter} to handle the retrieved {@link resultType}. Each {@link resultType} can only
+     * be registered once. Multiple registrations will cause an {@link IllegalStateException}.
+     * 
+     * @param resultType
+     *            of the datamining query.
+     * @param resultPresenter
+     *            which shall be used to handle the datamaining query result.
+     * 
+     * @throws IllegalStateException
+     *             if the {@link resultType} is already registered.
+     */
+    protected void registerResultPresenter(Class<?> resultType, ResultsPresenter<Settings> resultPresenter)
+            throws IllegalStateException {
+        if (!registeredResultPresenterMap.containsKey(resultType)) {
+            String className = resultType.getName();
+            registeredResultPresenterMap.put(className, resultPresenter);
+        } else {
+            throw new IllegalStateException(
+                    "Multiple registration for result type key: " + resultType.toString() + "not allowed.");
+        }
+    }
+
+    @Override
+    public void showResult(QueryResultDTO<?> result) {
+        try {
+            if (result != null) {
+                if (registeredResultPresenterMap.containsKey(result.getResultType())) {
+                    CloseableTabHeader oldHeader = getSelectedHeader();
+                    addTabAndFocus(registeredResultPresenterMap.get(result.getResultType()));
+                    removeTab(oldHeader);
+                } else {
+                    if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
+                        CloseableTabHeader oldHeader = getSelectedHeader();
+                        addTabAndFocus(new MultiResultsPresenter(this, getComponentContext(), drillDownCallback));
+                        removeTab(oldHeader);
+                    }
+                    getSelectedHeader().setText(result.getResultSignifier());
+                }
+            }
+
+        } finally {
+            getSelectedPresenter().showResult(result);
+        }
     }
 }

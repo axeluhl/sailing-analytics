@@ -21,25 +21,25 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.datamining.AbstractSailingResultsPresenter;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.PairWithStats;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
-import com.sap.sse.datamining.ui.client.presentation.AbstractResultsPresenter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class NumberPairResultsPresenter extends AbstractResultsPresenter<Settings> {
+public class NumberPairResultsPresenter extends AbstractSailingResultsPresenter<Settings> {
     private QueryResultDTO<?> result;
     private final SimpleLayoutPanel chartPanel;
     private final Chart chart;
     private final Map<GroupKey, Series> seriesMappedByGroupKey;
 
     public NumberPairResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
-        super(parent, context);
+        super(parent, context, stringMessages);
         seriesMappedByGroupKey = new HashMap<>();
         chartPanel = new SimpleLayoutPanel() {
             @Override
