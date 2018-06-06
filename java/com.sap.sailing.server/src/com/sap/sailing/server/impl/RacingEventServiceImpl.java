@@ -761,8 +761,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         operationExecutionListeners = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
-        final ScheduledExecutorService simulatorExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
-        // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
+        final ScheduledExecutorService simulatorExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Simulator Background Executor");
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
         this.raceLogReplicator = new RaceLogReplicatorAndNotifier(this);
         this.regattaLogReplicator = new RegattaLogReplicator(this);

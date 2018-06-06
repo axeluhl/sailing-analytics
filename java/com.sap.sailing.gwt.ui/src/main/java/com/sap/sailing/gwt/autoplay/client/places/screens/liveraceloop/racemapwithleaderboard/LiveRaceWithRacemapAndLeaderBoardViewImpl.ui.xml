@@ -6,7 +6,7 @@
 	<ui:style>
 	.left {
 		top: 0px;
-		bottom: 80px;
+		bottom: 0px;
 		position: absolute;
 		display: inline-block;
 		width: 35%;

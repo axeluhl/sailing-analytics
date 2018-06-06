@@ -220,7 +220,6 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         // GPS data
         statisticsDTO.hasGPSData = trackedRace.hasGPSData();
         Competitor leaderOrWinner = null;
-        Boat leaderOrWinnerBoat = null;
         TimePoint now = MillisecondsTimePoint.now();
         try {
             if (trackedRace.isLive(now)) {
@@ -230,12 +229,12 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
                     Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
                     if (fleetOfCompetitor != null && fleetOfCompetitor.equals(fleet)) {
                         leaderOrWinner = competitor;
-                        leaderOrWinnerBoat = trackedRace.getBoatOfCompetitor(leaderOrWinner);
                         break;
                     }
                 }
             }
             if (leaderOrWinner != null) {
+                final Boat leaderOrWinnerBoat = trackedRace.getBoatOfCompetitor(leaderOrWinner);
                 statisticsDTO.hasLeaderOrWinnerData = true;
                 statisticsDTO.leaderOrWinner = convertToCompetitorAndBoatDTO(leaderOrWinner, leaderOrWinnerBoat);
                 GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(leaderOrWinner);

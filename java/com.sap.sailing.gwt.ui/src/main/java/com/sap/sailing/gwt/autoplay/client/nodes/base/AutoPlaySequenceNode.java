@@ -53,14 +53,12 @@ public class AutoPlaySequenceNode extends BaseCompositeNode {
 
     @Override
     public void onStart() {
-        log("Start sequence");
         currentPos = -1;
         gotoNext();
     }
 
     @Override
     public void onStop() {
-        log("Stop sequence ");
         super.onStop();
         for (AutoPlayNode autoPlayNode : nodes) {
             autoPlayNode.stop();
