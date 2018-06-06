@@ -36,11 +36,11 @@ import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
- * This class allows to add multiple videos at once, by crawling index sites of a given url, and using the metadata of
- * mp4 files to fill starttime and duration. Additionally it allows to add the new mediatracks directly to the races
- * that are overlapping.
+ * This dialog allows to change multiple urls for mediatracks at once. It will determine the longest common prefix, that
+ * all mediatracks share. This is very usefull if a lot of videos are migrated to another server, eg. local hosted to s3
+ * hosted.
  */
-public class MultiRenameDialog extends DialogBox {
+public class MultiURLChangeDialog extends DialogBox {
     private static final String EMPTY_TEXT = "";
     private static final int TITLE_COLUMN = 0;
     private static final int URL_COLUMN = 1;
@@ -57,7 +57,7 @@ public class MultiRenameDialog extends DialogBox {
     private TextBox replacePartIn;
     private TextBox replacePartOut;
 
-    public MultiRenameDialog(MediaServiceAsync mediaService, StringMessages stringMessages, Set<MediaTrack> selected,
+    public MultiURLChangeDialog(MediaServiceAsync mediaService, StringMessages stringMessages, Set<MediaTrack> selected,
             ErrorReporter errorReporter, Runnable afterLinking) {
         this.stringMessages = stringMessages;
         setGlassEnabled(true);
@@ -112,7 +112,7 @@ public class MultiRenameDialog extends DialogBox {
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                MultiRenameDialog.this.hide();
+                MultiURLChangeDialog.this.hide();
             }
         });
 

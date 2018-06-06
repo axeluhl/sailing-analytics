@@ -41,7 +41,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
-import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiRenameDialog;
+import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiURLChangeDialog;
 import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiVideoDialog;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
@@ -141,7 +141,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                 if (selected.isEmpty()) {
                     Window.alert(stringMessages.noSelection());
                 } else {
-                    new MultiRenameDialog(mediaService, stringMessages, selected, errorReporter,
+                    new MultiURLChangeDialog(mediaService, stringMessages, selected, errorReporter,
                             new Runnable() {
                                 @Override
                                 public void run() {
