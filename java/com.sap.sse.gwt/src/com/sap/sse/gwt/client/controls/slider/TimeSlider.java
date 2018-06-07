@@ -302,6 +302,7 @@ public class TimeSlider extends SliderBar {
                     // Position the marker and make it visible
                     overlayElem.getStyle().setVisibility(Visibility.HIDDEN);
                     overlayElem.getStyle().setProperty("display", "");
+                    overlayElem.setTitle(overlay.info);
                     double markerStartLinePosition = (overlay.start - minValue) * lineWidth / getTotalRange();
                     double end = overlay.end;
                     if (maxValue < overlay.end) {
@@ -333,11 +334,13 @@ public class TimeSlider extends SliderBar {
         public final Double start;
         public final Double end;
         public final boolean running;
-        public BarOverlay(Double start, Double end, boolean running) {
+        public final String info;
+        public BarOverlay(Double start, Double end, boolean running, String info) {
             super();
             this.start = start;
             this.end = end;
             this.running = running;
+            this.info = info;
         }
     }
 }

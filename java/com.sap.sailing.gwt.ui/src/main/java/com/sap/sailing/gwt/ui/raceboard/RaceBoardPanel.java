@@ -459,7 +459,7 @@ public class RaceBoardPanel
             } else {
                 end = endTp.asMillis();
             }
-            overlays.add(new BarOverlay(start, end, playing.contains(track)));
+            overlays.add(new BarOverlay(start, end, playing.contains(track), track.title));
         }
         racetimePanel.setBarOverlays(overlays);
     }
