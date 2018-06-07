@@ -89,7 +89,8 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 	// Used to convert a TemplateDTO to PairingListTemplate
 	public PairingListTemplateImpl(int[][] template, int competitorsCount, int flightMultiplier, int tolerance) {
 		this.pairingListTemplate = template;
-		int groupCount = (int) (competitorsCount / this.pairingListTemplate[0].length + 1);
+		int groupCount = (int) (competitorsCount / this.pairingListTemplate[0].length);
+		if(groupCount!=(competitorsCount / this.pairingListTemplate[0].length))groupCount++;
 		this.dummies = groupCount - (competitorsCount % groupCount);
 		int dummyIndex = 0;
 
