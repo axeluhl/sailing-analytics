@@ -315,7 +315,7 @@ public class TimeSlider extends SliderBar {
                     overlayElem.getStyle().setTop(30 + mediaTrack, Unit.PX);
                     overlayElem.getStyle().setBackgroundColor(overlay.running ? "#FF0000" : "#CCCCCC");
                     overlayElem.getStyle().setVisibility(Visibility.VISIBLE);
-                    trackHeight += trackHeight + 1;
+                    mediaTrack += trackHeight + 1;
                 }
 
                 // Hide unused markers
