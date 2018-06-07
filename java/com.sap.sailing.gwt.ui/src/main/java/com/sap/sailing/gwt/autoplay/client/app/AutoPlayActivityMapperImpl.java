@@ -16,9 +16,9 @@ import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext.Id
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard.LeaderboardPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard.LeaderboardPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard.LeaderboardViewImpl;
-import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleOverallLeaderBoardPlace;
-import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleOverallLeaderBoardPresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleOverallLeaderBoardViewImpl;
+import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleSixtyInchLeaderboardPlace;
+import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleSixtyInchLeaderboardPresenterImpl;
+import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleSixtyInchLeaderboardViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.video.VideoPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.video.VideoPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.video.VideoViewImpl;
@@ -35,10 +35,10 @@ import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.compet
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors.PreRaceCompetitorsImagePlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors.PreRaceCompetitorsPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors.PreRaceCompetitorsViewImpl;
-import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLiveRaceLeaderBoardWithImagePresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLiveRaceLeaderBoardWithImageViewImpl;
-import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreRaceLeaderBoardWithCompetitorPlace;
-import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreRaceLeaderBoardWithFlagPlace;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLiveRaceLeaderboardWithImagePresenterImpl;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLiveRaceLeaderboardWithImageViewImpl;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreRaceLeaderboardWithCompetitorPlace;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreRaceLeaderboardWithFlagPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.PreRaceRacemapPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.PreRaceRacemapPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.PreRaceRacemapViewImpl;
@@ -64,13 +64,13 @@ public class AutoPlayActivityMapperImpl implements ActivityMapper {
         } else if (place instanceof LeaderboardPlace) {
             return new LeaderboardPresenterImpl((LeaderboardPlace) place, clientFactory, new LeaderboardViewImpl());
         }
-        if (place instanceof PreRaceLeaderBoardWithCompetitorPlace) {
-            return new PreLiveRaceLeaderBoardWithImagePresenterImpl((PreRaceLeaderBoardWithCompetitorPlace) place,
-                    clientFactory, new PreLiveRaceLeaderBoardWithImageViewImpl(new CompetitorImageProvider()));
+        if (place instanceof PreRaceLeaderboardWithCompetitorPlace) {
+            return new PreLiveRaceLeaderboardWithImagePresenterImpl((PreRaceLeaderboardWithCompetitorPlace) place,
+                    clientFactory, new PreLiveRaceLeaderboardWithImageViewImpl(new CompetitorImageProvider()));
         }
-        if (place instanceof PreRaceLeaderBoardWithFlagPlace) {
-            return new PreLiveRaceLeaderBoardWithImagePresenterImpl((PreRaceLeaderBoardWithFlagPlace) place,
-                    clientFactory, new PreLiveRaceLeaderBoardWithImageViewImpl(new FlagImageProvider()));
+        if (place instanceof PreRaceLeaderboardWithFlagPlace) {
+            return new PreLiveRaceLeaderboardWithImagePresenterImpl((PreRaceLeaderboardWithFlagPlace) place,
+                    clientFactory, new PreLiveRaceLeaderboardWithImageViewImpl(new FlagImageProvider()));
         }
         if (place instanceof IdleUpNextPlace) {
             return new IdleUpNextPresenterImpl((IdleUpNextPlace) place, clientFactory, new IdleNextUpViewImpl());
@@ -105,9 +105,9 @@ public class AutoPlayActivityMapperImpl implements ActivityMapper {
             return new RaceEndWithBoatsPresenterImpl((RaceEndWithCompetitorFlagsPlace) place, clientFactory,
                     new RaceEndWithBoatsViewImpl(new FlagImageProvider()));
         }
-        if (place instanceof IdleOverallLeaderBoardPlace) {
-            return new IdleOverallLeaderBoardPresenterImpl((IdleOverallLeaderBoardPlace) place, clientFactory,
-                    new IdleOverallLeaderBoardViewImpl());
+        if (place instanceof IdleSixtyInchLeaderboardPlace) {
+            return new IdleSixtyInchLeaderboardPresenterImpl((IdleSixtyInchLeaderboardPlace) place, clientFactory,
+                    new IdleSixtyInchLeaderboardViewImpl());
         }
         return null;
     }

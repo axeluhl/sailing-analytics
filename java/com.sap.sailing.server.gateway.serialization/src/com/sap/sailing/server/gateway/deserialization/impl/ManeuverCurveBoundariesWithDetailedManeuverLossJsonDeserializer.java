@@ -2,13 +2,13 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.maneuverdetection.ManeuverCurveBoundariesWithDetailedManeuverLoss;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverCurveBoundariesWithDetailedManeuverLossImpl;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverCurveBoundariesWithDetailedManeuverLossJsonSerializer;
+import com.sap.sse.common.Distance;
 
 /**
  * 

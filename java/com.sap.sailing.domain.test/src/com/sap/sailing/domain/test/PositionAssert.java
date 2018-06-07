@@ -5,13 +5,13 @@ import static org.junit.Assert.fail;
 
 import java.util.Set;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 
 /**
  * Contains equality assertions for "compact" fixes, allowing for deltas to be specified, assuming

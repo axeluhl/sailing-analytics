@@ -3,6 +3,8 @@ package com.sap.sailing.domain.common;
 import java.io.Serializable;
 import java.util.Comparator;
 
+import com.sap.sse.common.Distance;
+
 /**
  * Used to define a populated place in the world.<br />
  * Used by {@link ReverseGeocoder}.
