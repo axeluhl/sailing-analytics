@@ -23,13 +23,10 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
@@ -41,7 +38,10 @@ import com.sap.sailing.polars.windestimation.ScalableBearingAndScalableDouble;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.util.kmeans.Cluster;
 
 /**

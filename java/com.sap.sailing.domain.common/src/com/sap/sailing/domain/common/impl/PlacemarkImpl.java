@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sse.common.CountryCodeFactory;
+import com.sap.sse.common.Distance;
 
 /**
  * Used to define a populated place in the world.<br />

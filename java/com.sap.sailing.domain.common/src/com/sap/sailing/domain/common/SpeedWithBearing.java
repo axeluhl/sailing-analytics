@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common;
 
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.annotations.Statistic;
 

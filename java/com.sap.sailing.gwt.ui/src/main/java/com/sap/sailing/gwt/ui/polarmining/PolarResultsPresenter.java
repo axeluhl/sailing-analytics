@@ -31,7 +31,7 @@ import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartToCsvExporter;
-import com.sap.sailing.gwt.ui.datamining.presentation.AbstractResultsPresenter;
+import com.sap.sailing.gwt.ui.datamining.presentation.AbstractSailingResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
 import com.sap.sailing.polars.datamining.shared.PolarAggregation;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
@@ -46,20 +46,22 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 /**
  * Allows presentation of {@link PolarAggregation} data.
  * 
- * </br></br>
+ * </br>
+ * </br>
  * 
  * Contains a polar chart on the left displaying the actual polar diagram and two histograms on the right. The upper
  * histogram shows datacount over angle and the second one shows datacount over windrange upon clicking a point in the
  * polar chart.
  * 
- * </br></br>
+ * </br>
+ * </br>
  * 
  * Used in conjunction with the datamining framework.
  * 
  * @author D054528 (Frederik Petersen)
  *
  */
-public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
+public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Settings> {
 
     private final DockLayoutPanel dockLayoutPanel;
 
@@ -265,7 +267,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
 
     @Override
     public String getLocalizedShortName() {
-        return getStringMessages().polarResultsPresenter();
+        return stringMessages.polarResultsPresenter();
     }
 
     @Override
