@@ -2,7 +2,7 @@ package com.sap.sailing.domain.common.confidence;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.common.Distance;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 

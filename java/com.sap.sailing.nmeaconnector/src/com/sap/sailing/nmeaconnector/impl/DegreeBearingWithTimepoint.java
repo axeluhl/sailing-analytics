@@ -1,8 +1,8 @@
 package com.sap.sailing.nmeaconnector.impl;
 
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.nmeaconnector.TimedBearing;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class DegreeBearingWithTimepoint extends DegreeBearingImpl implements TimedBearing {
     private static final long serialVersionUID = 8704478920647067862L;

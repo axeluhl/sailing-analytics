@@ -6,10 +6,10 @@ import java.text.ParseException;
 import com.sap.sailing.declination.impl.DeclinationImporter;
 import com.sap.sailing.declination.impl.DeclinationServiceImpl;
 import com.sap.sailing.declination.impl.NOAAImporter;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 
 public interface DeclinationService {
