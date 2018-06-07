@@ -1,11 +1,11 @@
 package com.sap.sailing.domain.tracking;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * Represents the entering and exiting time point of a maneuver curve with corresponding speeds and courses.

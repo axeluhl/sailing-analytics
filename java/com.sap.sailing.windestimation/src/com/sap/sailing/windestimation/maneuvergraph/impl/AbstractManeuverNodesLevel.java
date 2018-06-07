@@ -1,9 +1,9 @@
 package com.sap.sailing.windestimation.maneuvergraph.impl;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
 import com.sap.sailing.windestimation.maneuvergraph.ManeuverNodesLevel;
+import com.sap.sse.common.Bearing;
 
 /**
  * 

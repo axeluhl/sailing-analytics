@@ -5,9 +5,9 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.sap.sailing.datamining.shared.FoilingSegmentsDataMiningSettings;
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Speed;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 
 public final class FoilingSegmentsDataMiningSettings_CustomFieldSerializer extends CustomFieldSerializer<FoilingSegmentsDataMiningSettings> {
     @Override

@@ -1,12 +1,12 @@
 package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
 import com.sap.sailing.domain.base.impl.MarkImpl;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class PositionedMarkImpl extends MarkImpl implements PositionedMark {
     private static final long serialVersionUID = -7903960088124343841L;

@@ -27,7 +27,6 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
@@ -40,6 +39,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sse.InvalidDateException;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;

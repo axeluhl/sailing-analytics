@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sse.common.Bearing;
 
 public abstract class AbstractSpeedWithBearingImpl extends AbstractSpeedWithAbstractBearingImpl implements SpeedWithBearing {
     private static final long serialVersionUID = -8594305027333573010L;

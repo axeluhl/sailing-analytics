@@ -17,7 +17,6 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.util.JSON;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -27,6 +26,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.ManeuverCurveWithUnst
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverMainCurveWithEstimationDataJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**

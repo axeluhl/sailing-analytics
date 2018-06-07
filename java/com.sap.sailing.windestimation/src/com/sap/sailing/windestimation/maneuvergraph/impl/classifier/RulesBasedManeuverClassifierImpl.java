@@ -4,12 +4,12 @@ import java.util.Arrays;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.maneuvergraph.CoarseGrainedManeuverType;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Util.Pair;
 
 /**

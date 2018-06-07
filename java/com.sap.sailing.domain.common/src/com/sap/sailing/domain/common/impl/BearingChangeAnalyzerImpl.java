@@ -1,7 +1,8 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.BearingChangeAnalyzer;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class BearingChangeAnalyzerImpl implements BearingChangeAnalyzer {
 
