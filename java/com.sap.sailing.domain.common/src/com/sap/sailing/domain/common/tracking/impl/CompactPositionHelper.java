@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.common.tracking.impl;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 
 /**
  * A utility class that "compact" fix implementations such as {@link VeryCompactGPSFixImpl} etc. can use

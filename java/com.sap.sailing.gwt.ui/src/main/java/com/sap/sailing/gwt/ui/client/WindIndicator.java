@@ -6,8 +6,8 @@ import com.google.gwt.canvas.dom.client.Context2d.LineCap;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * WindIndicator Widget allows visualizing the wind direction and other wind related information.

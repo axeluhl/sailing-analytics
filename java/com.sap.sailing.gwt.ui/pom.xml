@@ -116,6 +116,12 @@
       <version>${project.version}</version>
       <classifier>sources</classifier>
     </dependency>
+    <dependency>
+    	<groupId>com.sap.sailing</groupId>
+    	<artifactId>com.sap.sse.datamining.ui</artifactId>
+    	<version>${project.version}</version>
+    	<classifier>sources</classifier>
+    </dependency>
   </dependencies>
 
   <build>

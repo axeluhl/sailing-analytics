@@ -31,7 +31,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class NumberPairResultsPresenter extends AbstractResultsPresenter<Settings> {
+public class NumberPairResultsPresenter extends AbstractSailingResultsPresenter<Settings> {
     private QueryResultDTO<?> result;
     private final SimpleLayoutPanel chartPanel;
     private final Chart chart;
@@ -61,7 +61,7 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
                 .setBorderColor(new Color("#F0AB00"))
                 .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
-                .setChartTitle(new ChartTitle().setText(getStringMessages().dataMiningResult()));
+                .setChartTitle(new ChartTitle().setText(getDataMiningStringMessages().dataMiningResult()));
         chart.setExporting(new Exporting().setEnabled(false));
         chart.getXAxis().setAllowDecimals(false);
         chart.getYAxis().setAxisTitleText("");
@@ -127,7 +127,7 @@ public class NumberPairResultsPresenter extends AbstractResultsPresenter<Setting
 
     @Override
     public String getLocalizedShortName() {
-        return getStringMessages().numberPairResultsPresenter();
+        return getDataMiningStringMessages().numberPairResultsPresenter();
     }
 
     @Override
