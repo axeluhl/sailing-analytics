@@ -32,8 +32,16 @@ public class TimeSlider extends SliderBar {
     
     private final int TICKCOUNT = 10;
 
+    private List<BarOverlay> overlays;
+    
+    /**
+     * The elements used to display additional markers on the slider bar.
+     */
+    private List<Element> overLayElements = new ArrayList<Element>();
+
     public TimeSlider() {
         calculatedTimeTicks = new ArrayList<TickPosition>();
+        overlays = new ArrayList<>();
         isZoomed = false;
     }
     
@@ -260,6 +268,76 @@ public class TimeSlider extends SliderBar {
     @Override
     public void onResize() {
         visibleLabelsInterval = (TICKCOUNT / Math.max(getOffsetWidth() / 35, 1)) + 1;
+        drawBarOverlays();
         super.onResize();
+    }
+    
+    public void setBarOverlays(Iterable<BarOverlay> overlays) {
+        this.overlays.clear();
+        Util.addAll(overlays, this.overlays);
+    }
+
+    private void drawBarOverlays() {
+        if (isAttached() && isMinMaxInitialized()) {
+            int numOverlays = overlays.size();
+            // Draw the markers
+            int lineWidth = lineElement.getOffsetWidth();
+            if (numOverlays > 0) {
+                // Create the markers or make them visible
+                int mediaTrack = 0;
+                int trackHeight = 4;
+                for (int i = 0; i < numOverlays; i++) {
+                    BarOverlay overlay = overlays.get(i);
+                    Element overlayElem = null;
+                    if (i < overLayElements.size()) {
+                        overlayElem = overLayElements.get(i);
+                    } else { // Create the new markes
+                        overlayElem = DOM.createDiv();
+                        overlayElem.getStyle().setPosition(Position.ABSOLUTE);
+                        overlayElem.getStyle().setDisplay(Display.NONE);
+                        // ensure we are rendered behind the other markers!
+                        DOM.insertChild(getElement(), overlayElem, 0);
+                        overLayElements.add(overlayElem);
+                    }
+                    // Position the marker and make it visible
+                    overlayElem.getStyle().setVisibility(Visibility.HIDDEN);
+                    overlayElem.getStyle().setProperty("display", "");
+                    double markerStartLinePosition = (overlay.start - minValue) * lineWidth / getTotalRange();
+                    double end = overlay.end;
+                    if (maxValue < overlay.end) {
+                        end = maxValue;
+                    }
+                    double markerEndLinePosition = (maxValue - end) * lineWidth / getTotalRange();
+                    overlayElem.getStyle().setLeft(markerStartLinePosition + lineLeftOffset, Unit.PX);
+                    overlayElem.getStyle().setRight(markerEndLinePosition, Unit.PX);
+                    overlayElem.getStyle().setHeight(trackHeight, Unit.PX);
+                    overlayElem.getStyle().setTop(30 + mediaTrack, Unit.PX);
+                    overlayElem.getStyle().setBackgroundColor(overlay.running ? "#FF0000" : "#CCCCCC");
+                    overlayElem.getStyle().setVisibility(Visibility.VISIBLE);
+                    trackHeight += trackHeight + 1;
+                }
+
+                // Hide unused markers
+                for (int i = numOverlays; i < overLayElements.size(); i++) {
+                    overLayElements.get(i).getStyle().setDisplay(Display.NONE);
+                }
+            } else { // Hide all markers
+                for (Element elem : overLayElements) {
+                    elem.getStyle().setDisplay(Display.NONE);
+                }
+            }
+        }
+    }
+
+    public static class BarOverlay {
+        public final Double start;
+        public final Double end;
+        public final boolean running;
+        public BarOverlay(Double start, Double end, boolean running) {
+            super();
+            this.start = start;
+            this.end = end;
+            this.running = running;
+        }
     }
 }
