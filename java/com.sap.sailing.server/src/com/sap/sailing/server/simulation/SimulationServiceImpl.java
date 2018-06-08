@@ -146,33 +146,17 @@ public class SimulationServiceImpl implements SimulationService {
     private class LegChangeListener extends AbstractRaceChangeListener {
         private final TrackedRace trackedRace;
         private LegIdentifier legIdentifier;
-        private final ScheduledExecutorService scheduler;
         private boolean covered;
 
-        public LegChangeListener(TrackedRace trackedRace, ScheduledExecutorService scheduler) {
+        public LegChangeListener(TrackedRace trackedRace) {
             this.trackedRace = trackedRace;
             this.legIdentifier = null;
-            this.scheduler = scheduler;
             this.covered = false;
         }
 
-        public boolean isLive() {
-            return trackedRace.isLive(MillisecondsTimePoint.now());
-        }
-        
-        public void setLegIdentifier(LegIdentifier legIdentifier) {
-            if (this.legIdentifier != null) {
-                if (!this.legIdentifier.equals(legIdentifier)) {
-                    this.legIdentifier = legIdentifier;
-                    this.covered = false;
-                }
-            } else {
-                this.legIdentifier = legIdentifier;
-            }
-        }
-        
         @Override
         protected void defaultAction() {
+            removeCacheEntriesAndTriggerRecalculationIfStillHot(0, trackedRace.getRace().getCourse().getNumberOfWaypoints());
             if ((!this.covered) && (legIdentifier != null)) {
                 this.covered = true;
                 LegIdentifier tmpLegIdentifier = new LegIdentifierImpl(legIdentifier.getRaceIdentifier(), legIdentifier.getOneBasedLegIndex());
@@ -225,29 +209,24 @@ public class SimulationServiceImpl implements SimulationService {
         @Override
         public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
             // relevant for simulation
-            if (this.isLive()) {
-                defaultAction();
-            }
+            defaultAction();
         }
 
         @Override
         public void windDataReceived(Wind wind, WindSource windSource) {
             // relevant for simulation: update legs influenced by wind
-            // TODO: update influenced legs; "live" update current leg
             defaultAction();
         }
 
         @Override
         public void windDataRemoved(Wind wind, WindSource windSource) {
             // relevant for simulation: update legs influenced by wind
-            // TODO: update influenced legs; "live" update current leg
             defaultAction();
         }
 
         @Override
         public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
             // relevant for simulation: update legs influenced by wind
-            // TODO: update influenced legs; "live" update current leg
             defaultAction();
         }
 
@@ -275,15 +254,27 @@ public class SimulationServiceImpl implements SimulationService {
         @Override
         public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
             // relevant for simulation: legs with indices starting at zeroBasedIndex are affected and need to have their simulation results removed from the cache
-            // TODO: update influenced legs; "live" update current leg
+            final int numberOfWaypoints = trackedRace.getRace().getCourse().getNumberOfWaypoints();
+            removeCacheEntriesAndTriggerRecalculationIfStillHot(zeroBasedIndex, numberOfWaypoints);
         }
 
         @Override
         public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
             // relevant for simulation: legs with indices starting at zeroBasedIndex are affected and need to have their simulation results removed from the cache
-            // TODO: update influenced legs; "live" update current leg
+            final int numberOfWaypoints = trackedRace.getRace().getCourse().getNumberOfWaypoints();
+            removeCacheEntriesAndTriggerRecalculationIfStillHot(zeroBasedIndex, numberOfWaypoints);
         }
 
+        private void removeCacheEntriesAndTriggerRecalculationIfStillHot(final int fromZeroBasedLegIndex, final int toZeroBasedLegIndexExclusive) {
+            for (int i=fromZeroBasedLegIndex; i<toZeroBasedLegIndexExclusive; i++) {
+                final LegIdentifierImpl key = new LegIdentifierImpl(trackedRace.getRaceIdentifier(), i+1);
+                removeCacheEntryAndTriggerRecalculationIfStillHot(key);
+            }
+        }
+        
+        private void removeCacheEntryAndTriggerRecalculationIfStillHot(final LegIdentifierImpl key) {
+            cache.remove(key);
+        }
     }
 
     @Override
@@ -309,17 +300,9 @@ public class SimulationServiceImpl implements SimulationService {
             if (!legListeners.containsKey(legIdentifier.getRaceIdentifier())) {
                 TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
                 if (trackedRace != null) {
-                    LegChangeListener listener = new LegChangeListener(trackedRace, scheduler);
-                    if (listener.isLive()) {
-                        listener.setLegIdentifier(legIdentifier);
-                    }
+                    LegChangeListener listener = new LegChangeListener(trackedRace);
                     legListeners.put(legIdentifier.getRaceIdentifier(), listener);
                     trackedRace.addListener(listener);
-                }
-            } else {
-                LegChangeListener listener = legListeners.get(legIdentifier.getRaceIdentifier());
-                if (listener.isLive()) {
-                    listener.setLegIdentifier(legIdentifier);
                 }
             }
             logger.info("Simulation Get: Update Triggered: \"" + legIdentifier.toString() + "\"");
@@ -345,7 +328,7 @@ public class SimulationServiceImpl implements SimulationService {
         return line;
     }
 
-    public SimulationResults computeSimulationResults(LegIdentifier legIdentifier) throws InterruptedException,
+    private SimulationResults computeSimulationResults(LegIdentifier legIdentifier) throws InterruptedException,
             ExecutionException {
         TimePoint simulationStartTime = MillisecondsTimePoint.now();
         SimulationResults result = null;
@@ -383,7 +366,7 @@ public class SimulationServiceImpl implements SimulationService {
             if (markPassing != null) {
                 endTimePoint = markPassing.getTimePoint();
             }
-            long legDuration = 0;
+            long legDuration = 0; // FIXME the startTimePoint and endTimePoint may originate from different competitors; their difference therefore may not be any real time spent by any single competitor in that leg
             if ((startTimePoint != null) && (endTimePoint != null)) {
                 legDuration = endTimePoint.asMillis() - startTimePoint.asMillis();
             }
