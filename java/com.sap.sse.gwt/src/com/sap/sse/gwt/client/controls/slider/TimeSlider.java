@@ -1,7 +1,10 @@
 package com.sap.sse.gwt.client.controls.slider;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
@@ -284,8 +287,8 @@ public class TimeSlider extends SliderBar {
             int lineWidth = lineElement.getOffsetWidth();
             if (numOverlays > 0) {
                 // Create the markers or make them visible
-                int mediaTrack = 0;
                 int trackHeight = 4;
+                Map<BarOverlay,Integer> knownLevels = new HashMap<>();
                 for (int i = 0; i < numOverlays; i++) {
                     BarOverlay overlay = overlays.get(i);
                     Element overlayElem = null;
@@ -312,10 +315,11 @@ public class TimeSlider extends SliderBar {
                     overlayElem.getStyle().setLeft(markerStartLinePosition + lineLeftOffset, Unit.PX);
                     overlayElem.getStyle().setRight(markerEndLinePosition, Unit.PX);
                     overlayElem.getStyle().setHeight(trackHeight, Unit.PX);
-                    overlayElem.getStyle().setTop(30 + mediaTrack, Unit.PX);
+                    int level = determineBestLevel(overlay.start, overlay.end, knownLevels);
+                    knownLevels.put(overlay, level);
+                    overlayElem.getStyle().setTop(32 + level * (trackHeight + 1), Unit.PX);
                     overlayElem.getStyle().setBackgroundColor(overlay.running ? "#FF0000" : "#CCCCCC");
                     overlayElem.getStyle().setVisibility(Visibility.VISIBLE);
-                    mediaTrack += trackHeight + 1;
                 }
 
                 // Hide unused markers
@@ -328,6 +332,24 @@ public class TimeSlider extends SliderBar {
                 }
             }
         }
+    }
+
+    private int determineBestLevel(Double start, Double end, Map<BarOverlay, Integer> knownHeights) {
+        nextheight: for (int testLevel = 0; testLevel < Integer.MAX_VALUE; testLevel++) {
+            for(Entry<BarOverlay, Integer> possibleCollision:knownHeights.entrySet()) {
+                if(possibleCollision.getValue() == testLevel) {
+                    //starts before or at end
+                    if(possibleCollision.getKey().start <= end) {
+                        if(possibleCollision.getKey().end >= start) {
+                            //ends  after start, we have a collision
+                            continue nextheight;
+                        }
+                    }
+                }
+            }
+            return testLevel;
+        }
+        return 0;
     }
 
     public static class BarOverlay {
