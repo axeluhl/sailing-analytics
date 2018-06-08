@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.common;
 
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 

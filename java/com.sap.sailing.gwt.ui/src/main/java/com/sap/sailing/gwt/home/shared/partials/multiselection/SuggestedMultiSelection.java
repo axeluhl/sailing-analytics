@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
-import com.sap.sailing.gwt.common.client.suggestion.AbstractSuggestOracle;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractAsyncSuggestBoxFilter;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractFilterWidget;
@@ -23,6 +22,7 @@ import com.sap.sailing.gwt.home.shared.partials.filter.AbstractSuggestBoxFilter;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider.SuggestionItemsCallback;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.suggestion.AbstractSuggestOracle;
 
 public final class SuggestedMultiSelection<T> extends Composite implements SuggestedMultiSelectionDataProvider.Display<T> {
 

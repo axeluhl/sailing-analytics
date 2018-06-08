@@ -28,12 +28,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.common.AbstractBearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
@@ -53,8 +49,12 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.TrackerType;
+import com.sap.sse.common.AbstractBearing;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.impl.UUIDHelper;
 
@@ -223,35 +223,37 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
 
     protected void notifyListeners(SailMasterMessage message) {
-        try {
-            switch (message.getType()) {
-            case RPD:
-                notifyListenersRPD(message);
-                break;
-            case RAC:
-                notifyListenersRAC(message);
-                break;
-            case CCG:
-                notifyListenersCCG(message);
-                break;
-            case STL:
-                notifyListenersSTL(message);
-                break;
-            case CAM:
-                notifyListenersCAM(message);
-                break;
-            case TMD:
-                notifyListenersTMD(message);
-                break;
-            case WND:
-                notifyListenersWND(message);
-                break;
-            default:
-                // ignore all other messages because there are no notification patterns for those
+        if (message.getType() != null) {
+            try {
+                switch (message.getType()) {
+                case RPD:
+                    notifyListenersRPD(message);
+                    break;
+                case RAC:
+                    notifyListenersRAC(message);
+                    break;
+                case CCG:
+                    notifyListenersCCG(message);
+                    break;
+                case STL:
+                    notifyListenersSTL(message);
+                    break;
+                case CAM:
+                    notifyListenersCAM(message);
+                    break;
+                case TMD:
+                    notifyListenersTMD(message);
+                    break;
+                case WND:
+                    notifyListenersWND(message);
+                    break;
+                default:
+                    // ignore all other messages because there are no notification patterns for those
+                }
+            } catch (Exception e) {
+                // broken messages are ignored
+                logger.log(Level.WARNING, "Exception caught during parsing of message '" + message.getMessage() + "' : " + e.getMessage(), e);
             }
-        } catch (Exception e) {
-            // broken messages are ignored
-            logger.log(Level.WARNING, "Exception caught during parsing of message '" + message.getMessage() + "' : " + e.getMessage(), e);
         }
     }
     

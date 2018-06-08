@@ -16,9 +16,9 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
