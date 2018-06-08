@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.home.shared.partials.filter;
 
-import com.sap.sailing.gwt.common.client.suggestion.AbstractSuggestOracle;
-import com.sap.sailing.gwt.common.client.suggestion.CustomSuggestBox;
-import com.sap.sailing.gwt.common.client.suggestion.CustomSuggestBox.SuggestionSelectionHandler;
+import com.sap.sse.gwt.client.suggestion.AbstractSuggestOracle;
+import com.sap.sse.gwt.client.suggestion.CustomSuggestBox;
+import com.sap.sse.gwt.client.suggestion.CustomSuggestBox.SuggestionSelectionHandler;
 
 public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFilter<T, C> {
     

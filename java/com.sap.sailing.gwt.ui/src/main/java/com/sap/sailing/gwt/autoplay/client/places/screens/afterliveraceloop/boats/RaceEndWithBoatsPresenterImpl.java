@@ -6,7 +6,6 @@ import java.util.List;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -23,7 +22,8 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.SixtyInchLeaderBoardStyle;
+import com.sap.sailing.gwt.ui.leaderboard.SixtyInchLeaderboardStyle;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -73,9 +73,9 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
                 PlayStates.Paused,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardPanel = new SingleRaceLeaderboardPanel(null, null, sailingService, new AsyncActionsExecutor(), leaderboardSettings,
-                true, liveRace, competitorSelectionProvider, timer, null,
+                false, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
-                false, null, false, null, false, true, false, false, false, new SixtyInchLeaderBoardStyle(true),
+                false, null, false, null, false, true, false, false, false, new SixtyInchLeaderboardStyle(true),
                 FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
 
         

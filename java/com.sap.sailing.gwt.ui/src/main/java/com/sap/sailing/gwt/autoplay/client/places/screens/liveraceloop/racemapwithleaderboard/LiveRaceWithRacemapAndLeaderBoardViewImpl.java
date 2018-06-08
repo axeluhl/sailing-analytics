@@ -8,11 +8,11 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
+import com.sap.sse.common.Distance;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
 public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite implements LiveRaceWithRacemapAndLeaderBoardView {
@@ -37,9 +37,11 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
     @UiField
     Label statisticProperty3;
     
-    private NumberFormat compactFormat = NumberFormat.getFormat("#.0");
+    private NumberFormat compactFormat = NumberFormat.getFormat("0.0");
 
     private RaceMap rawRaceMap;
+
+    private SingleRaceLeaderboardPanel leaderboardPanel;
 
     interface LifeRaceWithRacemapViewImplUiBinder extends UiBinder<Widget, LiveRaceWithRacemapAndLeaderBoardViewImpl> {
     }
@@ -61,7 +63,7 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
 
     @Override
     public void scrollLeaderBoardToTop() {
-        leaderBoardHolder.getElement().setScrollTop(0);
+        leaderboardPanel.getHeaderWidget().getElement().setScrollTop(0);
     }
 
     @Override
@@ -74,30 +76,39 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
         panel.setWidget(this);
         rawRaceMap = raceMap;
         racemap.add(raceMap);
+        this.leaderboardPanel = leaderboardPanel;
         leaderBoardHolder.add(leaderboardPanel);
     }
 
     @Override
     public void setStatistic(String windinfo, Distance distance, long duration) {
         statisticProperty1.setText(StringMessages.INSTANCE.windSpeed());
-        if(windinfo == null || windinfo.isEmpty()){
+        if (windinfo == null || windinfo.isEmpty()) {
             statisticValue1.setText(StringMessages.INSTANCE.noDataFound());
-        }else{
+        } else {
             statisticValue1.setText(windinfo);
         }
 
         statisticProperty2.setText(StringMessages.INSTANCE.distance());
-        if(distance == null){
+        if (distance == null) {
+            statisticValue2.setText(StringMessages.INSTANCE.noDataFound());
+        } else {
             statisticValue2
-            .setText(StringMessages.INSTANCE.noDataFound());
-        }else{
-            statisticValue2
-            .setText(compactFormat.format(distance.getSeaMiles()) + " " + StringMessages.INSTANCE.seaMiles());
+                    .setText(compactFormat.format(distance.getSeaMiles()) + " " + StringMessages.INSTANCE.seaMiles());
         }
 
         statisticProperty3.setText(StringMessages.INSTANCE.durationPlain());
-        statisticValue3.setText(compactFormat.format(duration/1000f/60f) + " " + StringMessages.INSTANCE.minutes());
+        statisticValue3.setText(compactFormat.format(duration / 1000f / 60f) + " " + StringMessages.INSTANCE.minutes());
     }
+
+
+    @Override
+    public native void ensureMapVisibility() /*-{
+        try {
+            $wnd.dispatchEvent(new Event("resize"));
+        } catch (error) {
+        }
+    }-*/;
 
 }
 

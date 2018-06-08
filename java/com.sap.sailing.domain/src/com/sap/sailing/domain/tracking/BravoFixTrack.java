@@ -2,10 +2,10 @@ package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;

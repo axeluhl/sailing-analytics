@@ -12,8 +12,8 @@ import org.xml.sax.SAXException;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.impl.DeclinationImporter;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
