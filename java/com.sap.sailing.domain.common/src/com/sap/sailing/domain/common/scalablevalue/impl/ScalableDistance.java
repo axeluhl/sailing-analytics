@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.common.scalablevalue.impl;
 
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;
 

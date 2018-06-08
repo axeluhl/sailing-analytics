@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 
 public class WindImpl extends KnotSpeedWithBearingImpl implements Wind {
