@@ -37,7 +37,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
  * This dialog allows to change multiple urls for mediatracks at once. It will determine the longest common prefix, that
- * all mediatracks share. This is very usefull if a lot of videos are migrated to another server, eg. local hosted to s3
+ * all mediatracks share. This is very useful if a lot of videos are migrated to another server, eg. local hosted to s3
  * hosted.
  */
 public class MultiURLChangeDialog extends DialogBox {
@@ -64,15 +64,17 @@ public class MultiURLChangeDialog extends DialogBox {
 
         FlowPanel mainContent = new FlowPanel();
         // placeholder for description if required
-        Label descriptionLabel = new Label("");
+        Label descriptionLabel = new Label(this.stringMessages.multiUrlChangeExplain());
         descriptionLabel.getElement().getStyle().setPadding(0.5, Unit.EM);
         mainContent.add(descriptionLabel);
-
+        
         mainContent.add(new Label(stringMessages.multiUrlChangeFind()));
         replacePartIn = new TextBox();
+        replacePartIn.getElement().getStyle().setWidth(25, Unit.PCT);
         mainContent.add(replacePartIn);
         mainContent.add(new Label(stringMessages.multiUrlChangeReplace()));
         replacePartOut = new TextBox();
+        replacePartOut.getElement().getStyle().setWidth(25, Unit.PCT);
         replacePartOut.setText("http://replace_me_with_baseurl/");
         mainContent.add(replacePartOut);
 
@@ -147,7 +149,11 @@ public class MultiURLChangeDialog extends DialogBox {
 
         mediaTrackRenameMap = new ArrayList<>(selected);
 
-        replacePartIn.setText(maxPrefixForAll());
+        final String maxPrefixForAll = maxPrefixForAll();
+        if (maxPrefixForAll.length() == 0) {
+            Window.alert(this.stringMessages.multiUrlNoPrefixWarning());
+        }
+        replacePartIn.setText(maxPrefixForAll);
         updateUI();
     }
 
@@ -184,7 +190,7 @@ public class MultiURLChangeDialog extends DialogBox {
         dataTable.clear();
         dataTable.setWidget(y, TITLE_COLUMN, new Label(stringMessages.title()));
         dataTable.setWidget(y, URL_COLUMN, new Label(stringMessages.url()));
-        dataTable.setWidget(y, URL_COLUMN, new Label(stringMessages.multiUrlChangeNewURL()));
+        dataTable.setWidget(y, URL_COLUMN_NEW, new Label(stringMessages.multiUrlChangeNewURL()));
         dataTable.setWidget(y, DURATION_COLUMN, new Label(stringMessages.duration()));
         dataTable.setWidget(y, STARTTIME_COLUMN, new Label(stringMessages.startTime()));
         dataTable.setWidget(y, MIMETYPE_COLUMN, new Label(stringMessages.mimeType()));

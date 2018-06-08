@@ -2190,4 +2190,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String multiUrlChangeCannotSave();
     String multiUrlChangeSave();
     String multiUrlChangeNewURL();
+    String multiUrlNoPrefixWarning();
+    String multiUrlChangeExplain();
 }
