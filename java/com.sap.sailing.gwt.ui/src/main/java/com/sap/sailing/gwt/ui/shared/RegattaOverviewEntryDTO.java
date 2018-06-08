@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.Distance;
+import com.sap.sse.common.Distance;
 
 public class RegattaOverviewEntryDTO implements IsSerializable {
     public String courseAreaIdAsString;

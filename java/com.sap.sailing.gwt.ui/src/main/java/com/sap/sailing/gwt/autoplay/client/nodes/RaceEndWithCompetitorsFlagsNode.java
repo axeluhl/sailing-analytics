@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
-import com.google.gwt.core.client.GWT;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
@@ -12,6 +14,7 @@ import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatis
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class RaceEndWithCompetitorsFlagsNode extends FiresPlaceNode {
+    protected static final Logger LOGGER = Logger.getLogger(RaceEndWithCompetitorsFlagsNode.class.getName());
     private final AutoPlayClientFactory cf;
 
     public RaceEndWithCompetitorsFlagsNode(AutoPlayClientFactory cf) {
@@ -22,7 +25,7 @@ public class RaceEndWithCompetitorsFlagsNode extends FiresPlaceNode {
     public void onStart() {
         RaceEndWithCompetitorFlagsPlace place = new RaceEndWithCompetitorFlagsPlace();
 
-        RegattaAndRaceIdentifier lastRace = cf.getAutoPlayCtx().getLastRace();
+        RegattaAndRaceIdentifier lastRace = cf.getAutoPlayCtxSignalError().getLastRace();
         place.setLifeRace(lastRace);
         setPlaceToGo(place);
 
@@ -31,8 +34,7 @@ public class RaceEndWithCompetitorsFlagsNode extends FiresPlaceNode {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        GWT.log("error getting data! " + caught.getMessage());
-                        caught.printStackTrace();
+                        LOGGER.log(Level.WARNING, "Could not get statistics" , caught);
                     }
 
                     @Override

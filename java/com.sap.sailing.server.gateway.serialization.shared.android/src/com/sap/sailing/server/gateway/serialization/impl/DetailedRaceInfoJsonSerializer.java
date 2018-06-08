@@ -55,7 +55,7 @@ public class DetailedRaceInfoJsonSerializer
         } else {
             leaderboardDisplayName = leaderboardDisplayNameJson.toString();
         }
-        final Object eventNameJson = object.get(FIELD_EVENT_TYPE);
+        final Object eventNameJson = object.get(FIELD_EVENT_NAME);
         final String eventName;
         if (eventNameJson == null) {
             eventName = null;

@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveOwnSettings;
@@ -9,6 +12,7 @@ import com.sap.sailing.gwt.autoplay.client.nodes.base.RootNodeBase;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.RootNodeState;
 
 public class RootNodeClassic extends RootNodeBase {
+    private static final Logger LOGGER = Logger.getLogger(RootNodeClassic.class.getName());
     private final AutoPlayNode idle;
     private final AutoPlayNode live;
     private final IdlePreEventNode preEvent;
@@ -22,7 +26,7 @@ public class RootNodeClassic extends RootNodeBase {
 
     protected boolean processStateTransition(RegattaAndRaceIdentifier currentPreLiveRace,
             RegattaAndRaceIdentifier currentLiveRace, RootNodeState goingTo, RootNodeState comingFrom) {
-        getClientFactory().getAutoPlayCtx().updateLiveRace(currentPreLiveRace, currentLiveRace);
+        getClientFactory().getAutoPlayCtxSignalError().updateLiveRace(currentPreLiveRace, currentLiveRace);
         switch (goingTo) {
         case PRE_EVENT:
             transitionTo(preEvent);
@@ -41,28 +45,25 @@ public class RootNodeClassic extends RootNodeBase {
 
     protected void processFailure(FailureEvent event) {
         AutoPlayClientFactory cf = getClientFactory();
-        if (cf.getAutoPlayCtx() == null || //
-                cf.getAutoPlayCtx().getContextDefinition() == null || //
-                cf.getAutoPlayCtx().getEvent() == null //
-        ) {
+        if (!cf.isConfigured()) {
             backToConfig();
             return;
         }
         if (event.getCaught() != null) {
-            event.getCaught().printStackTrace();
+            LOGGER.log(Level.WARNING, "error hook called", event.getCaught());
         }
         transitionTo(idle);
     }
 
     @Override
     protected long getSwitchBeforeRaceStartInMillis() {
-        AutoplayPerspectiveOwnSettings ownSettings = getClientFactory().getAutoPlayCtx().getAutoplaySettings().getPerspectiveOwnSettings();
+        AutoplayPerspectiveOwnSettings ownSettings = getClientFactory().getAutoPlayCtxSignalError().getAutoplaySettings().getPerspectiveOwnSettings();
         return ownSettings.getTimeToSwitchBeforeRaceStartInSeconds() * 1000;
     }
 
     @Override
     protected long getWaitTimeAfterRaceEndInMillis() {
-        AutoplayPerspectiveOwnSettings ownSettings = getClientFactory().getAutoPlayCtx().getAutoplaySettings().getPerspectiveOwnSettings();
+        AutoplayPerspectiveOwnSettings ownSettings = getClientFactory().getAutoPlayCtxSignalError().getAutoplaySettings().getPerspectiveOwnSettings();
         return ownSettings.getWaitTimeAfterRaceEndInSeconds() * 1000;
     }
 

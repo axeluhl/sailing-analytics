@@ -73,6 +73,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         mimeTypeListBox.addItem(MimeType.aac.name());
         mimeTypeListBox.addItem(MimeType.mp4.name());
         mimeTypeListBox.addItem(MimeType.mp4panorama.name());
+        mimeTypeListBox.addItem(MimeType.mp4panoramaflip.name());
         mimeTypeListBox.addItem(MimeType.ogg.name());
         mimeTypeListBox.addItem(MimeType.ogv.name());
         mimeTypeListBox.addItem(MimeType.qt.name());

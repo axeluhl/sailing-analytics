@@ -19,8 +19,8 @@ import org.xml.sax.SAXException;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * Imports magnetic declination data for earth from NOAA (http://www.ngdc.noaa.gov)

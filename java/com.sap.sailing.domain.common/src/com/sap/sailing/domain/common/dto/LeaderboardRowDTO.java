@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
-import com.sap.sailing.domain.common.Distance;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 
 /**
