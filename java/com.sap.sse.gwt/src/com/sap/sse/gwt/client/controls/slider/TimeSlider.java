@@ -335,21 +335,27 @@ public class TimeSlider extends SliderBar {
     }
 
     private int determineBestLevel(Double start, Double end, Map<BarOverlay, Integer> knownHeights) {
-        nextheight: for (int testLevel = 0; testLevel < Integer.MAX_VALUE; testLevel++) {
+        int bestCollisionLevel = 0;
+        int bestCollisionCount = Integer.MAX_VALUE;
+        for (int testLevel = 0; testLevel < 5; testLevel++) {
+            int collisionCount = 0;
             for(Entry<BarOverlay, Integer> possibleCollision:knownHeights.entrySet()) {
                 if(possibleCollision.getValue() == testLevel) {
                     //starts before or at end
                     if(possibleCollision.getKey().start <= end) {
                         if(possibleCollision.getKey().end >= start) {
                             //ends  after start, we have a collision
-                            continue nextheight;
+                            collisionCount++;
                         }
                     }
                 }
             }
-            return testLevel;
+            if(collisionCount < bestCollisionCount) {
+                bestCollisionLevel = testLevel;
+                bestCollisionCount = collisionCount;
+            }
         }
-        return 0;
+        return bestCollisionLevel;
     }
 
     public static class BarOverlay {
