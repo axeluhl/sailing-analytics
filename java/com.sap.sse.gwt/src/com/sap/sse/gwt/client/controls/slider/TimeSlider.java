@@ -312,7 +312,7 @@ public class TimeSlider extends SliderBar {
                         end = maxValue;
                     }
                     double markerEndLinePosition = (maxValue - end) * lineWidth / getTotalRange();
-                    overlayElem.getStyle().setLeft(markerStartLinePosition + lineLeftOffset, Unit.PX);
+                    overlayElem.getStyle().setLeft(Math.max(0, markerStartLinePosition + lineLeftOffset), Unit.PX);
                     overlayElem.getStyle().setRight(markerEndLinePosition, Unit.PX);
                     overlayElem.getStyle().setHeight(trackHeight, Unit.PX);
                     int level = determineBestLevel(overlay.start, overlay.end, knownLevels);
