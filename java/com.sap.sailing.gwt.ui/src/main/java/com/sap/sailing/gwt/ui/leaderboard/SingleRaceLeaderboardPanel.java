@@ -130,7 +130,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
         final RaceCompetitorSelectionProvider raceCompetitorSelection = (RaceCompetitorSelectionProvider) competitorSelectionProvider;
         RaceColumnDTO singleRaceColumn = null;
         for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-            if (leaderboard.raceIsTracked(raceColumn.getRaceColumnName())) {
+            if (leaderboard.raceIsTracked(raceColumn.getRaceColumnName()) && raceColumn.hasTrackedRace(preSelectedRace)) {
                 singleRaceColumn = raceColumn;
                 break;
             }
