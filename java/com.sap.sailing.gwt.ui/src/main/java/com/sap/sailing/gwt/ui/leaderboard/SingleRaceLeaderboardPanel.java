@@ -129,7 +129,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     protected void updateCompetitors(LeaderboardDTO leaderboard) {
         final RaceCompetitorSelectionProvider raceCompetitorSelection = (RaceCompetitorSelectionProvider) competitorSelectionProvider;
         RaceColumnDTO singleRaceColumn = null;
-        for (RaceColumnDTO raceColumn: leaderboard.getRaceList()) {
+        for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
             if (leaderboard.raceIsTracked(raceColumn.getRaceColumnName())) {
                 singleRaceColumn = raceColumn;
                 break;
