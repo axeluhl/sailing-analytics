@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.sap.sailing.domain.common.dto.ExpeditionAllInOneConstants;
@@ -16,7 +15,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
 
     public static final ExpeditionDataImportResponse parse(String json) {
-        GWT.debugger();
         return AbstractDataImportResponse.parse(json, "ExpeditionDataImportResponse");
     }
 
