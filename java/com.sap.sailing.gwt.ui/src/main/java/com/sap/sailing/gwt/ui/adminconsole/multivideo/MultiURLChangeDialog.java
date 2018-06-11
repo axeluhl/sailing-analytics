@@ -65,7 +65,6 @@ public class MultiURLChangeDialog extends DialogBox {
         FlowPanel mainContent = new FlowPanel();
         // placeholder for description if required
         Label descriptionLabel = new Label(this.stringMessages.multiUrlChangeExplain());
-        descriptionLabel.getElement().getStyle().setPadding(0.5, Unit.EM);
         mainContent.add(descriptionLabel);
         
         mainContent.add(new Label(stringMessages.multiUrlChangeFind()));
