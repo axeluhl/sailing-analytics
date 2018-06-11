@@ -204,8 +204,8 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
      */
     protected void registerResultPresenter(Class<?> resultType, ResultsPresenter<Settings> resultPresenter)
             throws IllegalStateException {
-        if (!registeredResultPresenterMap.containsKey(resultType)) {
-            String className = resultType.getName();
+        String className = resultType.getName();
+        if (!registeredResultPresenterMap.containsKey(className)) {
             registeredResultPresenterMap.put(className, resultPresenter);
         } else {
             throw new IllegalStateException(
