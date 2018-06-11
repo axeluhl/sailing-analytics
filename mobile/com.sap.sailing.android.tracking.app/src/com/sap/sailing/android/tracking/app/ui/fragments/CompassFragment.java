@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
-import com.sap.sailing.domain.common.Bearing;
+import com.sap.sse.common.Bearing;
 
 public class CompassFragment extends BaseFragment {
 

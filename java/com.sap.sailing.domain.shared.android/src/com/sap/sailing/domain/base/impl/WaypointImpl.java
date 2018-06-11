@@ -6,8 +6,8 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sse.common.Bearing;
 
 public class WaypointImpl implements Waypoint {
     private static final long serialVersionUID = 1600863368078653897L;

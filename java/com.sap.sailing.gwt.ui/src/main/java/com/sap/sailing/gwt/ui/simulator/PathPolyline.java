@@ -18,7 +18,6 @@ import com.google.gwt.maps.client.overlays.PolylineOptions;
 import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewMethods;
 import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnDrawHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RadianPosition;
@@ -32,6 +31,7 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.TwoDPoint;
 import com.sap.sailing.gwt.ui.simulator.racemap.TwoDSegment;
 import com.sap.sailing.gwt.ui.simulator.racemap.TwoDVector;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
