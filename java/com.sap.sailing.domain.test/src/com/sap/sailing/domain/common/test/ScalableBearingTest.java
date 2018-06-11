@@ -4,9 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class ScalableBearingTest {
     @Test

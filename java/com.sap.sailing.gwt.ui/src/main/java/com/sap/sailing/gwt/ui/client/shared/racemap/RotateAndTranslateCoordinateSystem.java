@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import com.google.gwt.maps.client.base.LatLng;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * Translates and rotates a coordinate space. The translation is specified by providing the position

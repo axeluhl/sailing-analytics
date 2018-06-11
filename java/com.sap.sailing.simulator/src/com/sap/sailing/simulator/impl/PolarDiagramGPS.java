@@ -9,15 +9,15 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class PolarDiagramGPS extends PolarDiagramBase {
 

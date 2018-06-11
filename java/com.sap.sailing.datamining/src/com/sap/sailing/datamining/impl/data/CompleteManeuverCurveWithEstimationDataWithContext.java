@@ -3,16 +3,16 @@ package com.sap.sailing.datamining.impl.data;
 import com.sap.sailing.datamining.data.HasCompleteManeuverCurveWithEstimationDataContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.shared.ManeuverSettings;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.HasDetailedManeuverLoss;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
 /**

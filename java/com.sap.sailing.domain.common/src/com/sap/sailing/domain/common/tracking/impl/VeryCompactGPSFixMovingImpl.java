@@ -3,13 +3,13 @@ package com.sap.sailing.domain.common.tracking.impl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.AbstractPosition;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.AbstractSpeedWithAbstractBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sse.common.AbstractBearing;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 
 /**
