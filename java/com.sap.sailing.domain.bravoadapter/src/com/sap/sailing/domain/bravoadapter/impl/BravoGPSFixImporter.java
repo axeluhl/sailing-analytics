@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.sensordata.BravoExtendedSensorDataMetadata;
@@ -19,6 +18,7 @@ import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.server.gateway.windimport.bravo.FunnyDegreeConverter;
 import com.sap.sailing.server.trackfiles.impl.BravoExtendedDataImporterImpl;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class BravoGPSFixImporter implements GPSFixImporter {
     @Override

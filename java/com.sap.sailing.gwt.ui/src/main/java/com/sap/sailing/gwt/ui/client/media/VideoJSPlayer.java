@@ -320,8 +320,10 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
 
     public void disposeIf2D() {
         if (!panorama) {
-            disposeNative();
-            player = null;
+            if (player != null) {
+                disposeNative();
+                player = null;
+            }
         }
     }
 

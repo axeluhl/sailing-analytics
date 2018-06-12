@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.BoatHullType;
-import com.sap.sailing.domain.common.Distance;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Named;

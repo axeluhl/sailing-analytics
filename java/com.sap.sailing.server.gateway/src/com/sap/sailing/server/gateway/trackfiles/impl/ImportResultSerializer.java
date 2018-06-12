@@ -7,8 +7,9 @@ import java.util.stream.StreamSupport;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.ErrorImportDTO;
-import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.TrackImportDTO;
+import com.sap.sailing.domain.common.dto.ImportConstants;
+import com.sap.sailing.server.gateway.trackfiles.impl.ImportResult.ErrorImportDTO;
+import com.sap.sailing.server.gateway.trackfiles.impl.ImportResult.TrackImportDTO;
 import com.sap.sse.common.Util.Triple;
 
 /**
@@ -16,10 +17,10 @@ import com.sap.sse.common.Util.Triple;
  */
 class ImportResultSerializer {
 
-    static JSONObject serializeImportResult(ImportResultDTO result) {
+    static JSONObject serializeImportResult(ImportResult result) {
         final JSONObject json = new JSONObject();
-        json.put("errors", serializeErrorList(result.getErrorList()));
-        json.put("uploads", serializeTrackList(result.getImportResult()));
+        json.put(ImportConstants.ERRORS, serializeErrorList(result.getErrorList()));
+        json.put(ImportConstants.UPLOADS, serializeTrackList(result.getImportResult()));
         return json;
     }
 
@@ -43,19 +44,19 @@ class ImportResultSerializer {
 
     private static JSONObject serializeRaceEntry(Triple<String, String, String> entry) {
         final JSONObject json = new JSONObject();
-        json.put("raceName", entry.getA());
-        json.put("raceColumnName", entry.getB());
-        json.put("fleetName", entry.getC());
+        json.put(ImportConstants.RACE_NAME, entry.getA());
+        json.put(ImportConstants.RACE_COLUMN_NAME, entry.getB());
+        json.put(ImportConstants.FLEET_NAME, entry.getC());
         return json;
     }
 
     private static JSONObject serializeError(ErrorImportDTO error) {
         final JSONObject json = new JSONObject();
-        json.put("filename", error.getFilename());
-        json.put("requestedImporter", error.getRequestedImporter());
-        json.put("exUUID", error.getExUUID());
-        json.put("className", error.getName());
-        json.put("message", error.getMessage());
+        json.put(ImportConstants.FILENAME, error.getFilename());
+        json.put(ImportConstants.REQUESTED_IMPORTER, error.getRequestedImporter());
+        json.put(ImportConstants.EX_UUID, error.getExUUID());
+        json.put(ImportConstants.CLASS_NAME, error.getName());
+        json.put(ImportConstants.MESSAGE, error.getMessage());
         return json;
     }
 
