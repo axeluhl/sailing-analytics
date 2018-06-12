@@ -34,6 +34,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.EventTranslator;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
@@ -44,7 +45,6 @@ import com.sap.sailing.gwt.ui.datamining.execution.ManagedDataMiningQueryCallbac
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleManagedDataMiningQueriesCounter;
 import com.sap.sailing.gwt.ui.datamining.resources.DataMiningDataGridResources;
 import com.sap.sailing.gwt.ui.datamining.resources.DataMiningResources;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -54,8 +54,6 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
@@ -79,7 +77,7 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
     
     private final DataRetrieverLevelDTO retrieverLevel;
     private final FunctionDTO dimension;
-    private Iterable<? extends Serializable> selectionToBeApplied;
+    private final Set<Serializable> selectionToBeApplied;
     
     private final DockLayoutPanel mainPanel;
     private final AbstractFilterablePanel<Serializable> filterPanel;
@@ -87,7 +85,7 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
     private final SimpleBusyIndicator busyIndicator;
 
     private final ListDataProvider<Serializable> filteredData;
-    private final RefreshableMultiSelectionModel<Serializable> selectionModel;
+    private final MultiSelectionModel<Serializable> selectionModel;
     private final DataGrid<Serializable> dataGrid;
     private final Column<Serializable, Boolean> checkboxColumn;
 
@@ -105,6 +103,7 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
 
         counter = new SimpleManagedDataMiningQueriesCounter();
         listeners = new HashSet<>();
+        selectionToBeApplied = new HashSet<>();
 
         DataMiningDataGridResources dataGridResources = GWT.create(DataMiningDataGridResources.class);
         dataGrid = new DataGrid<>(Integer.MAX_VALUE, dataGridResources);
@@ -124,18 +123,7 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
         filterPanel.getTextBox().setWidth("100%");
         filterPanel.getAllListDataProvider().addDataDisplay(dataGrid);
         
-        selectionModel = new RefreshableMultiSelectionModel<>(new EntityIdentityComparator<Serializable>() {
-            @Override
-            public boolean representSameEntity(Serializable e1, Serializable e2) {
-                String e1String = e1 == null ? null : elementAsString(e1);
-                String e2String = e2 == null ? null : elementAsString(e2);
-                return Util.equalsWithNull(e1String, e2String);
-            }
-            @Override
-            public int hashCode(Serializable e) {
-                return e == null ? 0 : elementAsString(e).hashCode();
-            }
-        }, filterPanel.getAllListDataProvider());
+        selectionModel = new MultiSelectionModel<>(this::elementAsString);
         selectionModel.addSelectionChangeHandler(this::selectionChanged);
         dataGrid.setSelectionModel(selectionModel, DefaultSelectionEventManager.createCustomManager(new CustomCheckboxEventTranslator()));
         
@@ -230,10 +218,10 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
                         busyIndicator.setBusy(false);
                         filterPanel.updateAll(content);
                         contentContainer.add(dataGrid);
-                        if (selectionToBeApplied != null) {
-                            internalSetSelection(selectionToBeApplied);
-                            selectionToBeApplied = null;
-                        }
+                        
+                        internalSetSelection(!selectionToBeApplied.isEmpty() ? selectionToBeApplied : selectionModel.getSelectedSet());
+                        selectionToBeApplied.clear();
+                        
                         if (callback != null) {
                             callback.run();
                         }
@@ -258,17 +246,25 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
     }
     
     public void setSelection(Iterable<? extends Serializable> items) {
-        if (busyIndicator.isBusy()) {
-            selectionToBeApplied = items;
-        } else {
-            internalSetSelection(items);
+        selectionToBeApplied.clear();
+        for (Serializable item : items) {
+            selectionToBeApplied.add(item);
+        }
+        
+        if (!busyIndicator.isBusy()) {
+            internalSetSelection(selectionToBeApplied);
+            selectionToBeApplied.clear();
         }
     }
 
-    private void internalSetSelection(Iterable<? extends Serializable> items) {
+    private void internalSetSelection(Set<? extends Serializable> selection) {
         clearSelection();
-        for (Serializable item : items) {
-            selectionModel.setSelected(item, true);
+        if (!selection.isEmpty()) {
+            for (Serializable item : filterPanel.getAll()) {
+                if (selection.contains(item)) {
+                    selectionModel.setSelected(item, true);
+                }
+            }
         }
     }
 

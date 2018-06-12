@@ -337,7 +337,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     }
 
     private void updateDimensionFilterSelectionProviders(Iterator<DimensionWithContext> dimensionIterator, DimensionWithContext exceptDimension) {
-        // FIXME Doesn't work for two dimensions in the same level, when both have values selected that aren't filtered out by each other.
         if (dimensionIterator.hasNext()) {
             DimensionWithContext dimension = dimensionIterator.next();
             if (dimension.equals(exceptDimension)) {
