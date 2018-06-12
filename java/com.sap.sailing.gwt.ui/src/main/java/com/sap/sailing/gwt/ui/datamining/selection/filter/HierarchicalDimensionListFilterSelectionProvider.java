@@ -40,6 +40,8 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.EventTranslator;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
@@ -49,7 +51,6 @@ import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.PlainFilterSelectionPresenter;
 import com.sap.sailing.gwt.ui.datamining.resources.DataMiningDataGridResources;
 import com.sap.sailing.gwt.ui.datamining.resources.DataMiningDataGridResources.DataMiningDataGridStyle;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -59,8 +60,6 @@ import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCellTableBuilder;
-import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
@@ -91,7 +90,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     private final DockLayoutPanel mainPanel;
     
     private final AbstractFilterablePanel<DimensionWithContext> filterFilterDimensionsPanel;
-    private final RefreshableMultiSelectionModel<DimensionWithContext> filterDimensionSelectionModel;
+    private final MultiSelectionModel<DimensionWithContext> filterDimensionSelectionModel;
     private final DataGrid<DimensionWithContext> filterDimensionsList;
     private final Column<DimensionWithContext, Boolean> checkboxColumn;
     
@@ -140,17 +139,8 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         filterFilterDimensionsPanel.setHeight("100%");
         filterFilterDimensionsPanel.getTextBox().setWidth("100%");
         
-        filterDimensionSelectionModel = new RefreshableMultiSelectionModel<>(new EntityIdentityComparator<DimensionWithContext>() {
-            @Override
-            public boolean representSameEntity(DimensionWithContext d1, DimensionWithContext d2) {
-                return Util.equalsWithNull(d1, d2);
-            }
-            @Override
-            public int hashCode(DimensionWithContext t) {
-                return t == null ? 0 : t.hashCode();
-            }
-        }, filterFilterDimensionsPanel.getAllListDataProvider());
-        filterDimensionSelectionModel.addSelectionChangeHandler(e -> selectedFilterDimensionsChanged());
+        filterDimensionSelectionModel = new MultiSelectionModel<>();
+        filterDimensionSelectionModel.addSelectionChangeHandler(this::selectedFilterDimensionsChanged);
         filterDimensionsList.setSelectionModel(filterDimensionSelectionModel, DefaultSelectionEventManager.createCustomManager(new CustomCheckboxEventTranslator()));
         
         checkboxColumn = new Column<DimensionWithContext, Boolean>(new CheckboxCell(true, false)) {
@@ -240,7 +230,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     private void clearContent() {
         reducedDimensions = null;
         allFilterDimensions.clear();
-        filteredFilterDimensions.getList().clear();
+        filterDimensionSelectionModel.clear();
         filterFilterDimensionsPanel.removeAll();
     }
     
@@ -281,7 +271,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         selectionProvider.setSelection(items);
     }
     
-    private void selectedFilterDimensionsChanged() {
+    private void selectedFilterDimensionsChanged(SelectionChangeEvent event) {
         Iterable<DimensionWithContext> displayedDimensions = new HashSet<>(dimensionFilterSelectionProviders.keySet());
         for (DimensionWithContext displayedDimension : displayedDimensions) {
             if (!filterDimensionSelectionModel.isSelected(displayedDimension)) {
