@@ -36,7 +36,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * @author D069712 (Vladislav Chumak)
  *
  */
-public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresenter<Settings> {
+public class ManeuverSpeedDetailsResultsPresenter extends AbstractSailingResultsPresenter<Settings> {
 
     private final DockLayoutPanel dockLayoutPanel;
 
@@ -216,7 +216,7 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
 
     @Override
     public String getLocalizedShortName() {
-        return getStringMessages().maneuverSpeedDetailsResultsPresenter();
+        return stringMessages.maneuverSpeedDetailsResultsPresenter();
     }
 
     @Override

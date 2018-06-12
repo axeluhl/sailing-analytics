@@ -20,7 +20,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
@@ -71,6 +70,7 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -220,7 +220,6 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         // GPS data
         statisticsDTO.hasGPSData = trackedRace.hasGPSData();
         Competitor leaderOrWinner = null;
-        Boat leaderOrWinnerBoat = null;
         TimePoint now = MillisecondsTimePoint.now();
         try {
             if (trackedRace.isLive(now)) {
@@ -230,12 +229,12 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
                     Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
                     if (fleetOfCompetitor != null && fleetOfCompetitor.equals(fleet)) {
                         leaderOrWinner = competitor;
-                        leaderOrWinnerBoat = trackedRace.getBoatOfCompetitor(leaderOrWinner);
                         break;
                     }
                 }
             }
             if (leaderOrWinner != null) {
+                final Boat leaderOrWinnerBoat = trackedRace.getBoatOfCompetitor(leaderOrWinner);
                 statisticsDTO.hasLeaderOrWinnerData = true;
                 statisticsDTO.leaderOrWinner = convertToCompetitorAndBoatDTO(leaderOrWinner, leaderOrWinnerBoat);
                 GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(leaderOrWinner);

@@ -15,7 +15,7 @@ public class IdlePreEventNode extends FiresPlaceNode {
 
     @Override
     public void onStart() {
-        String eventName = cf.getAutoPlayCtx().getEvent().getName();
+        String eventName = cf.getAutoPlayCtxSignalError().getEvent().getName();
         getBus().fireEvent(new AutoPlayHeaderEvent(eventName, ""));
         setPlaceToGo(new IdlePreEventPlace());
         firePlaceChangeAndStartTimer();

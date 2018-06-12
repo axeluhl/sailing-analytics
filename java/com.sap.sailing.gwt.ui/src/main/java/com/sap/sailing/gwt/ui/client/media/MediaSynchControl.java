@@ -129,6 +129,7 @@ public class MediaSynchControl implements EditFlag {
         saveButton = new Button("Save", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                preview();
                 save();
             }
         });

@@ -7,7 +7,6 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -17,6 +16,7 @@ import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
 
 /**

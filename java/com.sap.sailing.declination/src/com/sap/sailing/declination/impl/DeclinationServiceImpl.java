@@ -9,9 +9,9 @@ import java.util.Map;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 
 public class DeclinationServiceImpl implements DeclinationService {

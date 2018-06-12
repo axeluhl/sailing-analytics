@@ -6,8 +6,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.NauticalSide;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.tracking.impl.CourseChangeCalculator;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class CourseChangeCalculatorTest {
     private CourseChangeCalculator ccc;
