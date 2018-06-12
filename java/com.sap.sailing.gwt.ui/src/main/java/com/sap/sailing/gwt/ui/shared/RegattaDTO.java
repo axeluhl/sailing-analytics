@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -18,6 +17,7 @@ import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util.Pair;
 
 public class RegattaDTO extends NamedDTO {

@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -14,6 +13,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 
 /**

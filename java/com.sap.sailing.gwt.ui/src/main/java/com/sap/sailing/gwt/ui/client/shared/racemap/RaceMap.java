@@ -72,9 +72,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Bounds;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
@@ -85,7 +83,6 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
@@ -135,7 +132,9 @@ import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
 import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -144,6 +143,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.impl.TimeRangeImpl;
@@ -728,7 +728,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
               RaceMap.this.managedInfoWindow = new ManagedInfoWindow(map);
           }
         };
-        LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
+        LoadApi.go(onLoad, loadLibraries, sensor, GoogleMapAPIKey.V3_PARAMS); 
     }
 
     /**
@@ -2020,21 +2020,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 boatOverlay.draw();
             }
         }
-
         return usedExistingCanvas;
     }
 
     private DisplayMode displayHighlighted(CompetitorDTO competitorDTO) {
         boolean competitorisSelected = competitorSelection.isSelected(competitorDTO);
-        if(!settings.isShowOnlySelectedCompetitors()){
-            if(competitorisSelected){
+        if (!settings.isShowOnlySelectedCompetitors()) {
+            if (competitorisSelected) {
                 return DisplayMode.SELECTED;
-            }
-            else{
-                if(isSomeOtherCompetitorSelected()){
+            } else {
+                if (isSomeOtherCompetitorSelected()) {
                     return DisplayMode.NOT_SELECTED;
-                }
-                else{
+                } else {
                     return DisplayMode.DEFAULT;
                 }
             }

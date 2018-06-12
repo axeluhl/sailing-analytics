@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;

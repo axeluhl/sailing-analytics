@@ -19,8 +19,8 @@ import com.sap.sailing.datamining.test.util.OpenFunctionManager;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.common.Moving;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.Speed;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 

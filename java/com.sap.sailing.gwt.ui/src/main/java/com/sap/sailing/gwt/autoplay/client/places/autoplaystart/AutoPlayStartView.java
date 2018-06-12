@@ -11,7 +11,7 @@ import com.sap.sse.security.ui.client.UserService;
 public interface AutoPlayStartView {
     public interface Presenter {
         void startRootNode(AutoPlayContextDefinition ctxDef,
-                PerspectiveCompositeSettings<?> settings);
+                PerspectiveCompositeSettings<?> settings, EventDTO initialEventData);
         void handleLocaleChange(String selectedLocale);
         UserService getUserService();
     }
