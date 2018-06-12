@@ -19,6 +19,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
 import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style.Unit;
@@ -68,6 +69,8 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class HierarchicalDimensionListFilterSelectionProvider extends AbstractComponent<SerializableSettings> implements FilterSelectionProvider {
+    
+    private final static String DimensionListSubheaderAttribute = "subheader";
     
     private static final Unit LayoutUnit = Unit.PX;
     private static final double SelectionPresenterHeight = 100;
@@ -512,8 +515,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     
     private class FilterDimensionsListBuilder extends BaseCellTableBuilder<DimensionWithContext> {
         
-        private final static String SUB_HEADER_ATTRIBUTE = "subheader";
-        
         private final String headerStyle;
         private final String subHeaderStyle;
         private final String spacedSubHeaderStyle;
@@ -536,7 +537,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
                 @Override
                 public void onRowHover(RowHoverEvent event) {
                     TableRowElement tr = event.getHoveringRow();
-                    if (!tr.getAttribute(SUB_HEADER_ATTRIBUTE).isEmpty()) {
+                    if (tr.hasAttribute(DimensionListSubheaderAttribute)) {
                         tr.removeClassName(hoveredRowStyle);
                         NodeList<TableCellElement> cells = tr.getCells();
                         for (int i = 0; i < cells.getLength(); i++) {
@@ -564,7 +565,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
                 String style = styleBuilder.toString();
 
                 String subHeaderText = valueLevel.getRetrievedDataType().getDisplayName();
-                TableRowBuilder subHeaderBuilder = startRow().attribute(SUB_HEADER_ATTRIBUTE, subHeaderText);
+                TableRowBuilder subHeaderBuilder = startRow().attribute(DimensionListSubheaderAttribute, subHeaderText);
                 // Additional cell to fix the checkbox column size
                 subHeaderBuilder.startTD().className(style + " " + firstColumnStyle).endTD();
                 // Actual header cell
@@ -588,10 +589,16 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
 
         @Override
         public SelectAction translateSelectionEvent(CellPreviewEvent<DimensionWithContext> event) {
-            // FIXME Ignore Clicks on retriever level headers
-            
             NativeEvent nativeEvent = event.getNativeEvent();
             if (BrowserEvents.CLICK.equals(nativeEvent.getType())) {
+                Element targetRow = Element.as(nativeEvent.getEventTarget());
+                while (!TableRowElement.is(targetRow) && targetRow != null) {
+                    targetRow = targetRow.getParentElement();
+                }
+                if (targetRow != null && targetRow.hasAttribute(DimensionListSubheaderAttribute)) {
+                    return SelectAction.IGNORE;
+                }
+                
                 if (nativeEvent.getCtrlKey()) {
                     DimensionWithContext value = event.getValue();
                     filterDimensionSelectionModel.setSelected(value, !filterDimensionSelectionModel.isSelected(value));
