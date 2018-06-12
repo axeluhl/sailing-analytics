@@ -990,19 +990,50 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             SpeedWithBearingStepsIterable speedWithBearingSteps, TimePoint timePoint) {
         List<SpeedWithBearingStep> stepsBefore = new ArrayList<>();
         List<SpeedWithBearingStep> stepsAfter = new ArrayList<>();
+        SpeedWithBearingStep lastEntry = null;
         for (SpeedWithBearingStep entry : speedWithBearingSteps) {
             if (!entry.getTimePoint().after(timePoint)) {
-                if (stepsBefore.isEmpty()) {
-                    // First bearing step supposed to have 0 as course change as
-                    // it does not have any previous steps with bearings to compute bearing difference.
-                    // If the condition is not met, the existing code which uses ManeuverBearingStep class will break.
-                    entry = new SpeedWithBearingStepImpl(entry.getTimePoint(), entry.getSpeedWithBearing(), 0.0, 0.0);
-                }
                 stepsBefore.add(entry);
             }
             if (!entry.getTimePoint().before(timePoint)) {
                 if (stepsAfter.isEmpty()) {
-                    entry = new SpeedWithBearingStepImpl(entry.getTimePoint(), entry.getSpeedWithBearing(), 0.0, 0.0);
+                    // First step supposed to have 0 as course change as it does not have any previous steps to compute
+                    // bearing difference. If the condition is not met, the existing code which uses
+                    // SpeedWithBearingStepsIterable class will break.
+                    if (lastEntry != null && lastEntry.getTimePoint().before(timePoint)) {
+                        // If there is not any step located at the splitting time point, we need to retrieve the
+                        // interpolated speed with bearing at time point in order to produce boundary step for both step
+                        // sets at time point. If we will not do it, the course change between the steps split by
+                        // splitting time point will be lost.
+                        SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(timePoint);
+                        if (speedWithBearing != null) {
+                            double courseChangeAngleInDegrees = lastEntry.getSpeedWithBearing().getBearing()
+                                    .getDifferenceTo(speedWithBearing.getBearing(),
+                                            new DegreeBearingImpl(lastEntry.getCourseChangeInDegrees()))
+                                    .getDegrees();
+                            double turningRateInDegreesPerSecond = Math.abs(
+                                    courseChangeAngleInDegrees / lastEntry.getTimePoint().until(timePoint).asSeconds());
+                            SpeedWithBearingStep lastStepBefore = new SpeedWithBearingStepImpl(timePoint,
+                                    speedWithBearing, courseChangeAngleInDegrees, turningRateInDegreesPerSecond);
+                            stepsBefore.add(lastStepBefore);
+                            SpeedWithBearingStep firstStepAfter = new SpeedWithBearingStepImpl(timePoint,
+                                    speedWithBearing, 0.0, 0.0);
+                            stepsAfter.add(firstStepAfter);
+                            courseChangeAngleInDegrees = firstStepAfter.getSpeedWithBearing().getBearing()
+                                    .getDifferenceTo(speedWithBearing.getBearing(),
+                                            new DegreeBearingImpl(firstStepAfter.getCourseChangeInDegrees()))
+                                    .getDegrees();
+                            turningRateInDegreesPerSecond = Math.abs(
+                                    courseChangeAngleInDegrees / timePoint.until(entry.getTimePoint()).asSeconds());
+                            entry = new SpeedWithBearingStepImpl(entry.getTimePoint(), entry.getSpeedWithBearing(),
+                                    courseChangeAngleInDegrees, turningRateInDegreesPerSecond);
+                        }
+
+                    }
+                    if (stepsAfter.isEmpty()) {
+                        entry = new SpeedWithBearingStepImpl(entry.getTimePoint(), entry.getSpeedWithBearing(), 0.0,
+                                0.0);
+                    }
                 }
                 stepsAfter.add(entry);
             }
