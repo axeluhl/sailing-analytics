@@ -10,7 +10,7 @@ public abstract class AbstractMediaSelectionControl implements MediaPlayerManage
 
     public AbstractMediaSelectionControl(MediaPlayerManager mediaPlayerManager, StringMessages stringMessages) {
         this.mediaPlayerManager = mediaPlayerManager;
-        this.mediaPlayerManager.setPlayerChangeListener(this);
+        this.mediaPlayerManager.addPlayerChangeListener(this);
         this.stringMessages = stringMessages;
     }
 

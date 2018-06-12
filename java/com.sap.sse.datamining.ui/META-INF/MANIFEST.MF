@@ -20,3 +20,4 @@ Export-Package: com.sap.sse.datamining.ui.client,
  com.sap.sse.datamining.ui.client.selection.filter,
  com.sap.sse.datamining.ui.client.settings
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: com.sap.sse.datamining.ui

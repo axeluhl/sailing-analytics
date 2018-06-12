@@ -27,7 +27,7 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        ImportResultDTO importResult = new ImportResultDTO(logger);
+        ImportResult importResult = new ImportResult(logger);
         boolean enableDownsampler = false;
         try {
             String importerName = null;
