@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.common.tracking;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 
 /**
  * Extended version of {@link BravoFix} that provides access to more measures found in the extended data format.

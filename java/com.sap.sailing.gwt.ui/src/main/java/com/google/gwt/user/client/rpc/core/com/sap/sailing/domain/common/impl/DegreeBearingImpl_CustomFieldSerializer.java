@@ -6,6 +6,7 @@ import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
+@SuppressWarnings("deprecation")
 public class DegreeBearingImpl_CustomFieldSerializer extends CustomFieldSerializer<DegreeBearingImpl> {
 
     @Override

@@ -8,7 +8,6 @@ import java.util.ListIterator;
 import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -17,6 +16,7 @@ import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;

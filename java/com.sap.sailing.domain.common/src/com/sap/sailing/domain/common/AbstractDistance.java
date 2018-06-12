@@ -2,7 +2,9 @@ package com.sap.sailing.domain.common;
 
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 
 public abstract class AbstractDistance implements Distance {
 

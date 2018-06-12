@@ -6,12 +6,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
@@ -20,7 +17,10 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PositionTest {
