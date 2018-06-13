@@ -25,7 +25,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.controls.ScrolledTabLayoutPanel;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningComponent<Settings>
+public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings>
         implements ResultsPresenter<Settings> {
 
     protected static final DataMiningResources resources = GWT.create(DataMiningResources.class);
@@ -34,7 +34,7 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
     protected final DrillDownCallback drillDownCallback;
     protected final Map<String, ResultsPresenter<Settings>> registeredResultPresenterMap;
 
-    public AbstractTabbedResultsPresenter(Component<?> parent, ComponentContext<?> context,
+    public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context,
             DrillDownCallback drillDownCallback) {
         super(parent, context);
         this.drillDownCallback = drillDownCallback;
@@ -58,7 +58,7 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
             public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
                 if (event.getItem() == tabPanel.getWidgetCount() - 1) {
                     event.cancel();
-                    addTabAndFocus(new MultiResultsPresenter(AbstractTabbedResultsPresenter.this, getComponentContext(),
+                    addTabAndFocus(new MultiResultsPresenter(TabbedResultsPresenter.this, getComponentContext(),
                             drillDownCallback));
                 }
             }
@@ -204,8 +204,10 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
      */
     protected void registerResultPresenter(Class<?> resultType, ResultsPresenter<Settings> resultPresenter)
             throws IllegalStateException {
-        if (!registeredResultPresenterMap.containsKey(resultType)) {
-            String className = resultType.getName();
+
+        String className = resultType.getName();
+
+        if (!registeredResultPresenterMap.containsKey(className)) {
             registeredResultPresenterMap.put(className, resultPresenter);
         } else {
             throw new IllegalStateException(
