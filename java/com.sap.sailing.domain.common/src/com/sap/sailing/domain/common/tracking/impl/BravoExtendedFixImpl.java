@@ -1,15 +1,15 @@
 package com.sap.sailing.domain.common.tracking.impl;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Mile;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.sensordata.BravoExtendedSensorDataMetadata;
 import com.sap.sailing.domain.common.sensordata.ColumnMetadata;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * Implementation of {@link BravoExtendedFix}. {@link BravoExtendedFix} adds more measures compared to {@link BravoFix}.

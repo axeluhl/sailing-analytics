@@ -3,7 +3,7 @@ package com.sap.sailing.polars.mining;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import com.sap.sailing.domain.common.Bearing;
+import com.sap.sse.common.Bearing;
 
 public class BearingComparator implements Comparator<Bearing>, Serializable {
 

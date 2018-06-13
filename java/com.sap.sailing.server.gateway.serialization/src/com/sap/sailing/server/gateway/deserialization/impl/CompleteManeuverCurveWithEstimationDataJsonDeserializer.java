@@ -2,10 +2,8 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.ManeuverMainCurveWithEstimationData;
@@ -13,6 +11,8 @@ import com.sap.sailing.domain.maneuverdetection.impl.CompleteManeuverCurveWithEs
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurveWithEstimationDataJsonSerializer;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * 

@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.maneuverdetection.impl;
 
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sse.common.Distance;
 
 /**
  * 

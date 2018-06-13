@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.DoublePair;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Util;
 
 /**

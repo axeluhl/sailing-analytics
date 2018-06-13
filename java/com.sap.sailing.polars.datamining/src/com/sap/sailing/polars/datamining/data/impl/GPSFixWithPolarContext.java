@@ -2,7 +2,6 @@ package com.sap.sailing.polars.datamining.data.impl;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -11,6 +10,7 @@ import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
 import com.sap.sailing.polars.datamining.data.HasGPSFixPolarContext;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarStatistic;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.data.Cluster;

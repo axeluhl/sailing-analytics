@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.core.client.Scheduler;
@@ -29,7 +30,6 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -40,6 +40,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPointLinkFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
@@ -59,6 +60,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerLifecycle;
+import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager.PlayerChangeListener;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerSettings;
 import com.sap.sailing.gwt.ui.client.media.PopupPositionProvider;
@@ -85,12 +87,15 @@ import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.controls.slider.TimeSlider.BarOverlay;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
@@ -415,6 +420,15 @@ public class RaceBoardPanel
                 errorReporter, userAgent, this, mediaPlayerSettings);
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent,
                 componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel, maneuverTablePanel);
+        
+        mediaPlayerManagerComponent.addPlayerChangeListener(new PlayerChangeListener() {
+            
+            @Override
+            public void notifyStateChange() {
+                updateRaceTimePanelOverlay();
+            }
+        });
+        
         for (Component<? extends Settings> component : componentsForSideBySideViewer) {
             addChildComponent(component);
         }
@@ -433,6 +447,23 @@ public class RaceBoardPanel
         }
     }
     
+    protected void updateRaceTimePanelOverlay() {
+        ArrayList<BarOverlay> overlays = new ArrayList<BarOverlay>();
+        Set<MediaTrack> playing = mediaPlayerManagerComponent.getPlayingVideoTracks();
+        for (MediaTrack track : mediaPlayerManagerComponent.getAssignedMediaTracks()) {
+            double start = track.startTime.asMillis();
+            TimePoint endTp = track.deriveEndTime();
+            double end;
+            if (endTp == null) {
+                end = Double.MAX_VALUE;
+            } else {
+                end = endTp.asMillis();
+            }
+            overlays.add(new BarOverlay(start, end, playing.contains(track), track.title));
+        }
+        racetimePanel.setBarOverlays(overlays);
+    }
+
     private void setupUserManagementControlPanel(UserService userService) {
         mainCss.ensureInjected();
         final FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
