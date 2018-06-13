@@ -3,11 +3,15 @@ package com.sap.sailing.gwt.ui.client.media;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -93,8 +97,38 @@ public class VideoFloatingContainer extends AbstractVideoContainer implements Vi
         });
 
         show();
+
+        // hook into the click events but relay them also
+        // Event.sinkEvents(dialogBox.getElement(), Event.ONCLICK);
+        EventListener originalListener = Event.getEventListener(dialogBox.getElement());
+        Event.setEventListener(dialogBox.getElement(), new EventListener() {
+            @Override
+            public void onBrowserEvent(Event event) {
+                if(event.getTypeInt() == Event.ONMOUSEDOWN || event.getTypeInt() == Event.ONTOUCHSTART) {
+                    moveToTop();
+                }
+                originalListener.onBrowserEvent(event);
+            }
+        });
+        
+        moveToTop();
     }
 
+    // z index less z ordering logic
+    public void moveToTop() {
+        Element self = dialogBox.getElement();
+        Element parent = self.getParentElement();
+        Node lastChild = parent.getLastChild();
+        if (lastChild instanceof Element) {
+            Element lastElement = (Element) lastChild;
+            if (lastElement != self) {
+                // we are already attached, so we will be only moved without getting events relating to attachment and
+                // visibility status
+                parent.appendChild(self);
+            }
+        }
+    }
+    
     @Override
     void show() {
         dialogBox.show();
