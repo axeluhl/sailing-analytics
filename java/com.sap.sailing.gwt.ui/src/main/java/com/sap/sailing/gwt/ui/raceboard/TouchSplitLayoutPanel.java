@@ -812,7 +812,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      * @param size the size of the panel. Always provide the visible size even when hidden is true.
      */
     public void setWidgetVisibility(Widget widget, Component<?> associatedComponentToWidget,
-            final boolean hidden, final int size) {
+            final boolean hidden, final int size, boolean keepOldSizeIfExisting) {
         super.setWidgetHidden(widget, hidden);
         final Splitter splitter = getAssociatedSplitter(widget);
         if (splitter != null) {
@@ -833,7 +833,11 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                         associatedComponentToWidget.setVisible(true);
                     }
                 }
-                splitter.setAssociatedWidgetSize((layoutData.oldSize > 0 ? layoutData.oldSize : size), /* defer */false);
+                double effectiveSize = size;
+                if (keepOldSizeIfExisting && layoutData.oldSize > 0) {
+                    effectiveSize = layoutData.oldSize;
+                }
+                splitter.setAssociatedWidgetSize(effectiveSize, /* defer */false);
                 splitter.setDraggerVisible(!hidden);
                 splitter.setVisible(!hidden);
                 splitter.getToggleButton().removeStyleDependentName("Closed");

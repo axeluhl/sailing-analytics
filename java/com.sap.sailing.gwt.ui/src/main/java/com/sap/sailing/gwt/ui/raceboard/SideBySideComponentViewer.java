@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -260,18 +261,18 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                     savedSplitPosition = Math.min(savedSplitPosition, leftScrollPanel.getOffsetWidth());
                 }
                 splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /* hidden */true,
-                        savedSplitPosition);
+                        savedSplitPosition, false);
             }
         } else if (leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard and the map are visible
-            splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /* hidden */false, savedSplitPosition);
+            splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /* hidden */false, savedSplitPosition, false);
         } else if (!leftComponent.isVisible() && !rightComponent.isVisible()) {
         }
 
         for (Component<?> component : components) {
             final boolean isComponentVisible = component.isVisible();
             splitLayoutPanel.setWidgetVisibility(component.getEntryWidget(), component, !isComponentVisible,
-                    DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT);
+                    DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT, true);
         }
         splitLayoutPanel.forceLayout();
     }
@@ -297,8 +298,11 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         // TODO: The information provided by width is wrong
         // need to find a way to get the correct information
         if (!layoutForLeftComponentForcedOnce) {
+            GWT.log("Initial layout force");
             savedSplitPosition = MIN_LEADERBOARD_WIDTH;
             forceLayout();
+        } else {
+            savedSplitPosition = width;
         }
         layoutForLeftComponentForcedOnce = true;
     }
@@ -363,5 +367,9 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         if (leftScrollPanelSplitter != null) {
             leftScrollPanelSplitter.getToggleButton().setVisible(visible);
         }
+    }
+    
+    public ScrollPanel getLeftScrollPanel() {
+        return leftScrollPanel;
     }
 }
