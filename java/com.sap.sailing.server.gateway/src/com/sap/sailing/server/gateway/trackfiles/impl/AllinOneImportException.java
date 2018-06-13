@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.ErrorImportDTO;
+import com.sap.sailing.server.gateway.trackfiles.impl.ImportResult.ErrorImportDTO;
 
 public class AllinOneImportException extends Exception {
     private static final long serialVersionUID = 1L;
