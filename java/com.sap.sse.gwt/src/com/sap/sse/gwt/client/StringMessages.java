@@ -86,5 +86,4 @@ public interface StringMessages extends Messages {
     String centralAngleInRadian();
     String centralAngleInDegree();   
     String clearSelection();
-
 }
