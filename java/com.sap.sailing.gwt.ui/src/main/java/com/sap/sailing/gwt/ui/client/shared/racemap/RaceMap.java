@@ -728,7 +728,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
               RaceMap.this.managedInfoWindow = new ManagedInfoWindow(map);
           }
         };
-        LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
+        LoadApi.go(onLoad, loadLibraries, sensor, GoogleMapAPIKey.V3_PARAMS); 
     }
 
     /**
@@ -2020,21 +2020,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 boatOverlay.draw();
             }
         }
-
         return usedExistingCanvas;
     }
 
     private DisplayMode displayHighlighted(CompetitorDTO competitorDTO) {
         boolean competitorisSelected = competitorSelection.isSelected(competitorDTO);
-        if(!settings.isShowOnlySelectedCompetitors()){
-            if(competitorisSelected){
+        if (!settings.isShowOnlySelectedCompetitors()) {
+            if (competitorisSelected) {
                 return DisplayMode.SELECTED;
-            }
-            else{
-                if(isSomeOtherCompetitorSelected()){
+            } else {
+                if (isSomeOtherCompetitorSelected()) {
                     return DisplayMode.NOT_SELECTED;
-                }
-                else{
+                } else {
                     return DisplayMode.DEFAULT;
                 }
             }

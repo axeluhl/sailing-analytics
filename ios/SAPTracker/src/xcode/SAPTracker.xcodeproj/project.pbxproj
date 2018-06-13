@@ -1690,9 +1690,8 @@
 				TargetAttributes = {
 					7F83F14F19F154F000C53328 = {
 						CreatedOnToolsVersion = 6.0.1;
-						DevelopmentTeam = RRE8EFVCE3;
 						LastSwiftMigration = 0820;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 					7F83F16419F154F000C53328 = {
 						CreatedOnToolsVersion = 6.0.1;
@@ -2298,6 +2297,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = SAPTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -2320,6 +2320,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = SAPTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;

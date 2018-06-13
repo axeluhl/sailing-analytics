@@ -34,7 +34,6 @@ import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
-import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.CompleteManeuverCurveImpl;
@@ -439,7 +438,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      */
     private Bearing getRelativeBearingToNextMark(TimePoint timePoint, Bearing boatCourse) {
         Bearing result = null;
-        TrackedLeg legAfter = trackedRace.getCurrentLeg(timePoint);
+        TrackedLegOfCompetitor legAfter = trackedRace.getTrackedLeg(competitor, timePoint);
         if (legAfter != null && legAfter.getLeg().getTo() != null) {
             Position nextMarkPosition = trackedRace.getApproximatePosition(legAfter.getLeg().getTo(), timePoint);
             Position maneuverEndPosition = track.getEstimatedPosition(timePoint, false);

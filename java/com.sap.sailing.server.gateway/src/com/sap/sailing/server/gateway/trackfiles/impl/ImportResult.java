@@ -11,7 +11,7 @@ import com.sap.sse.common.TimeRange;
 /**
  * Convenience class that wraps the json objects used to render json result objects
  */
-class ImportResultDTO {
+class ImportResult {
 
     private final List<ErrorImportDTO> errorList = new CopyOnWriteArrayList<>();
     private final List<TrackImportDTO> importResult = new CopyOnWriteArrayList<>();
@@ -88,7 +88,7 @@ class ImportResultDTO {
 
     }
 
-    ImportResultDTO(Logger logger) {
+    ImportResult(Logger logger) {
         this.logger = logger;
     }
 
