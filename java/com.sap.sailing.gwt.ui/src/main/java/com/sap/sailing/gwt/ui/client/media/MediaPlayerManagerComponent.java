@@ -85,7 +85,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     private MediaPlayerSettings settings;
     private final MediaPlayerLifecycle mediaPlayerLifecycle;
 
-    private PlayerChangeListener playerChangeListener;
+    private List<PlayerChangeListener> playerChangeListener = new ArrayList<>();
 
     public MediaPlayerManagerComponent(Component<?> parent, ComponentContext<?> context,
             MediaPlayerLifecycle mediaPlayerLifecycle,
@@ -341,8 +341,9 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     private void notifyStateChange() {
-        if (playerChangeListener != null) {
-            playerChangeListener.notifyStateChange();
+        for(PlayerChangeListener listener:playerChangeListener) {
+            listener.notifyStateChange();
+            
         }
     }
 
@@ -675,8 +676,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     @Override
-    public void setPlayerChangeListener(PlayerChangeListener playerChangeListener) {
-        this.playerChangeListener = playerChangeListener;
+    public void addPlayerChangeListener(PlayerChangeListener playerChangeListener) {
+        this.playerChangeListener.add(playerChangeListener);
 
     }
 

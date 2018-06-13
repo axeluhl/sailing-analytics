@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.polars;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Speed;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 
 public class NoPolarDataAvailableException extends Exception {
 

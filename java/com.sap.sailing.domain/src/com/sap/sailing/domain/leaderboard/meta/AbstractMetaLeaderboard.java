@@ -77,7 +77,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         }
 
         @Override
-        public void maxPointsReasonChanced(Competitor competitor, RaceColumn raceColumn,
+        public void maxPointsReasonChanged(Competitor competitor, RaceColumn raceColumn,
                 MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
             getScoreCorrection().notifyListeners(competitor, raceColumn, oldMaxPointsReason, newMaxPointsReason);
         }

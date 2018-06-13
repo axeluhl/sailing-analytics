@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
-import com.google.gwt.core.client.GWT;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
@@ -13,6 +15,7 @@ import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatis
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticDTO;
 
 public class LiveRaceWithRacemapNode extends FiresPlaceNode {
+    private static final Logger LOGGER = Logger.getLogger(LiveRaceWithRacemapNode.class.getName()); 
     private final AutoPlayClientFactory cf;
     protected LiveRaceWithRacemapAndLeaderBoardPlace place;
     private Timer updateTimer;
@@ -34,8 +37,8 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
     public void onStart() {
         place = new LiveRaceWithRacemapAndLeaderBoardPlace();
         AutoplayHelper.create(cf.getSailingService(), cf.getErrorReporter(),
-                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), cf.getAutoPlayCtx().getContextDefinition().getEventId(),
-                cf.getAutoPlayCtx().getEvent(), cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtx().getLiveRace(),
+                cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName(), cf.getAutoPlayCtxSignalError().getContextDefinition().getEventId(),
+                cf.getAutoPlayCtxSignalError().getEvent(), cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtxSignalError().getLiveRace(),
                 new AsyncCallback<RVWrapper>() {
 
                     @Override
@@ -52,8 +55,8 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
                         place.setRaceMap(result.raceboardPerspective, result.csel,result.raceboardTimer,result.creationTimeProvider);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
-                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getLiveRace().getRegattaName(),
-                                cf.getAutoPlayCtx().getLiveRace().getRaceName()));
+                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtxSignalError().getLiveRace().getRegattaName(),
+                                cf.getAutoPlayCtxSignalError().getLiveRace().getRaceName()));
                     }
                 });
         
@@ -63,13 +66,12 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
 
             @Override
             public void run() {
-                cf.getDispatch().execute(new GetSixtyInchStatisticAction(cf.getAutoPlayCtx().getLiveRace().getRaceName(), cf.getAutoPlayCtx().getLiveRace().getRegattaName()),
+                cf.getDispatch().execute(new GetSixtyInchStatisticAction(cf.getAutoPlayCtxSignalError().getLiveRace().getRaceName(), cf.getAutoPlayCtxSignalError().getLiveRace().getRegattaName()),
                         new AsyncCallback<GetSixtyInchStatisticDTO>() {
 
                             @Override
                             public void onFailure(Throwable caught) {
-                                GWT.log("error getting data! " + caught.getMessage());
-                                caught.printStackTrace();
+                                LOGGER.log(Level.WARNING, "error getting statistics", caught);
                             }
 
                             @Override

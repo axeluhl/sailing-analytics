@@ -243,7 +243,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
             this.reverse = reverse;
             this.associatedComponent = associatedComponent;
             this.hasToggleButtonsAssociated = false;
-            this.splitterToggleButton = new Button(target.getTitle());
+            this.splitterToggleButton = new Button(associatedComponent.getLocalizedShortName());
         }
 
         public Component<?> getAssociatedComponent() {

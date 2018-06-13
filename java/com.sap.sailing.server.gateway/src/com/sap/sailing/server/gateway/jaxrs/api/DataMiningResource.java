@@ -21,10 +21,10 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.datamining.SailingPredefinedQueries;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.RestServletContainer;
 import com.sap.sailing.server.gateway.serialization.NotJsonSerializableException;
+import com.sap.sse.common.Distance;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.StatisticQueryDefinition;

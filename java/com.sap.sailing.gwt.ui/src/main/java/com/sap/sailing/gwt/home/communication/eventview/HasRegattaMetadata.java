@@ -11,6 +11,11 @@ public interface HasRegattaMetadata {
         
         private final LabelType stateMarker;
 
+        private RegattaState() {
+            // For GWT serialization only
+            stateMarker = null;
+        }
+        
         private RegattaState(LabelType stateMarker) {
             this.stateMarker = stateMarker;
         }

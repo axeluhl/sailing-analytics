@@ -13,17 +13,22 @@
 	
 	<inherits name='com.sap.sailing.gwt.common.AuthenticationCommon'/>
   	
+  	<!-- module containing datamining features -->
+    <inherits name="com.sap.sse.datamining.SSEDataMining"/>
+  	
 	<!-- Other module inherits -->
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
+	<!-- 
 	<inherits name="com.sap.sse.datamining.DataMiningDomain" />
 	<inherits name="com.sap.sse.datamining.DataMiningAnnotations" />
+	 -->
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
 	<inherits name="com.sap.sailing.datamining.DataMiningSailingDomain" />
 	<inherits name="com.sap.sailing.polars.datamining.DataMiningPolars" />
-        <inherits name="com.sap.sailing.ExpeditionConnectorCommon" />
+    <inherits name="com.sap.sailing.ExpeditionConnectorCommon" />
 	
     <!-- module containing locale configuration -->
     <inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />

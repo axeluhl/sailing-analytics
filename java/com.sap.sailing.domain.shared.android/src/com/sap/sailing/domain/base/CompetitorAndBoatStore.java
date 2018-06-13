@@ -131,18 +131,6 @@ public interface CompetitorAndBoatStore extends CompetitorFactory, BoatFactory {
     void removeCompetitorUpdateListener(CompetitorUpdateListener listener);
     
     /**
-     * Updates the competitor with {@link Competitor#getId() ID} <code>id</code> by setting the name, sail ID and nationality to
-     * the values provided. Doing so will not fire any events nor will it replicate this change from a master to any replicas.
-     * The calling client has to make sure that the changes applied will reach replicas and all other interested clients. It will
-     * be sufficient to ensure that subsequent DTOs produced from the competitor modified will reflect the changes.<p>
-     * 
-     * If no competitor with the ID requested is found, the call is a no-op, doing nothing, not even throwing an exception.
-     */
-    CompetitorWithBoat updateCompetitorWithBoat(String idAsString, String newName, String newShortName, Color newDisplayColor, String newEmail,
-            Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
-            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat);
-    
-    /**
      * If a valid boat is returned and the caller has information available that could be used to update the boat,
      * the caller must check the result of {@link #isBoatToUpdateDuringGetOrCreate(Competitor)}, and if <code>true</code>,
      * must call {@link #getOrCreateBoat(..)} to cause an update of the boat's values.

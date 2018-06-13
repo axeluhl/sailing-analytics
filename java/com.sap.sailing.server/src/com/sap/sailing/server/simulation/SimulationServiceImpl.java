@@ -122,12 +122,26 @@ public class SimulationServiceImpl implements SimulationService {
         }
     }
     
+    /**
+     * A stateful listener whose {@link #legIdentifier} may change over time, updated to the most recent request. When
+     * changes to the race are received that are considered relevant for the simulation results, a cache update will be
+     * triggered {@link SimulationServiceImpl#WAIT_MILLIS} milliseconds after the change event. To avoid redundant
+     * triggers, more updates received before the wait period expires are ignored as long as they are for the same leg.<p>
+     * 
+     * TODO the {@link #covered} and {@link #legIdentifier} fields with the stateful design and the dependence on {@link #isLive}
+     * seem a bit "smelly." The {@link #legIdentifier} field is updated only in "live" mode when a simulator result is requested.
+     * It therefore remains at the last leg for which a result was requested while the race was in live mode. This doesn't
+     * necessarily have to be the race's last leg. When updates strike---such as a mark moving---then the simulation results
+     * for all of the race's legs at least need to be invalidated. The way the implementation looks right now it seems that
+     * results for legs that were requested earlier will not be updated because {@link #legIdentifier} does not point to them.
+     * And since {@link #legIdentifier} is no more updated for non-live races, updates to older leg simulation results will
+     * never happen...
+     */
     private class LegChangeListener extends AbstractRaceChangeListener {
         private final TrackedRace trackedRace;
         private LegIdentifier legIdentifier;
         private final ScheduledExecutorService scheduler;
         private boolean covered;
-        
 
         public LegChangeListener(TrackedRace trackedRace, ScheduledExecutorService scheduler) {
             this.trackedRace = trackedRace;
@@ -153,7 +167,7 @@ public class SimulationServiceImpl implements SimulationService {
         
         @Override
         protected void defaultAction() {
-            if ((!this.covered)&&(legIdentifier!=null)) {
+            if ((!this.covered) && (legIdentifier != null)) {
                 this.covered = true;
                 LegIdentifier tmpLegIdentifier = new LegIdentifierImpl(legIdentifier.getRaceIdentifier(), legIdentifier.getLegName());
                 scheduler.schedule(() -> triggerUpdate(tmpLegIdentifier), WAIT_MILLIS, TimeUnit.MILLISECONDS);
@@ -284,7 +298,7 @@ public class SimulationServiceImpl implements SimulationService {
                 DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
                 SimulationRaceListener raceListener = new SimulationRaceListener(); 
                 raceListeners.put(legIdentifier.getRegattaName(), raceListener);
-                trackedRegatta.addRaceListener(raceListener, /* Not replicated */ Optional.empty());
+                trackedRegatta.addRaceListener(raceListener, /* Not replicated */ Optional.empty(), /* synchronous */ false);
             }
             if (!legListeners.containsKey(legIdentifier.getRaceIdentifier())) {
                 TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
