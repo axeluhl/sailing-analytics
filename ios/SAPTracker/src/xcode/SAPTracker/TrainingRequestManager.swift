@@ -19,12 +19,12 @@ class TrainingRequestManager: NSObject {
     fileprivate let basePathString = "/sailingserver/api/v1"
     
     let baseURLString: String
-    let manager: AFHTTPRequestOperationManager
+    let manager: AFHTTPSessionManager
     let sessionManager: AFURLSessionManager
     
     init(baseURLString: String = "") {
         self.baseURLString = baseURLString
-        manager = AFHTTPRequestOperationManager(baseURL: URL(string: baseURLString))
+        manager = AFHTTPSessionManager(baseURL: URL(string: baseURLString))
         manager.requestSerializer = AFHTTPRequestSerializer()
         manager.requestSerializer.timeoutInterval = Application.RequestTimeout
         manager.responseSerializer = AFHTTPResponseSerializer()
