@@ -1410,7 +1410,8 @@ public class CandidateFinderImpl implements CandidateFinder {
      * @param markPositionCache
      *            a mark position cache for this finder's {@link #race} for time point {@code t}
      * @return the marks of a waypoint with two marks in the order port, starboard (when approaching the waypoint from
-     *         the direction of the waypoint beforehand.
+     *         the direction of the waypoint beforehand, or {@code (null, null)} in case the direction cannot be determined,
+     *         e.g., because the waypoint with passing instructions "Line" is the only waypoint in the course.
      */
     private Util.Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w, MarkPositionAtTimePointCache markPositionCache) {
         assert t.equals(markPositionCache.getTimePoint());
@@ -1428,7 +1429,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
         final List<Leg> legs = race.getRace().getCourse().getLegs();
         final int indexOfWaypoint = race.getRace().getCourse().getIndexOfWaypoint(w);
-        if (indexOfWaypoint < 0) {
+        if (indexOfWaypoint < 0 || legs.isEmpty()) {
             return new Util.Pair<Mark, Mark>(null, null);
         }
         final boolean isStartLine = indexOfWaypoint == 0;

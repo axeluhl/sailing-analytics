@@ -8,6 +8,9 @@ All flags that cannot be created are named in such a matter, that they should no
 The flags can all be obtained using the FlagImageResolver <br>
 They are stored in the folder ./git/java/com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/client/images/flags/
 
+After cloneing the git, it is necessary to copy the overlays provided into the overlay folder. 
+This will replace the shiny overlays for 64bit with a 1px black border overlay
+
 ##Execution
 
 Executing the script with the sh interpreter should <br>
