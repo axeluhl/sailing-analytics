@@ -15,12 +15,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.hardware.GeomagneticField;
 import android.location.Location;
 import android.location.LocationListener;
@@ -33,12 +31,12 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
+import com.sap.sailing.android.shared.util.NotificationHelper;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
@@ -64,7 +62,6 @@ public class TrackingService extends Service implements LocationListener {
     private static final int GREAT_DISTANCE = 10;
     private static final int NO_DISTANCE = 0;
 
-    private NotificationManager notificationManager;
     private AppPreferences prefs;
 
     private GPSQualityListener gpsQualityListener;
@@ -127,7 +124,6 @@ public class TrackingService extends Service implements LocationListener {
         locationsQueuedBasedOnSendingInterval = new LinkedHashMap<>();
         prefs = new AppPreferences(this);
 
-        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     }
 
@@ -342,7 +338,7 @@ public class TrackingService extends Service implements LocationListener {
     @Override
     public void onDestroy() {
         stopTracking();
-        notificationManager.cancel(NOTIFICATION_ID);
+        stopForeground(false);
         Toast.makeText(this, R.string.tracker_stopped, Toast.LENGTH_SHORT).show();
     }
 
@@ -387,16 +383,15 @@ public class TrackingService extends Service implements LocationListener {
      private void showNotification() {
          Intent intent = new Intent(this, TrackingActivity.class);
          intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-         PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
-         Notification notification = new NotificationCompat.Builder(this)
-             .setContentTitle(getText(R.string.app_name))
-             .setContentText(getString(R.string.tracking_notification_text, event.name))
-             .setContentIntent(pi)
-             .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-             .setSmallIcon(R.drawable.ic_directions_boat)
-             .setOngoing(true)
-             .build();
-         notificationManager.notify(NOTIFICATION_ID, notification);
+         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+         Notification notification = NotificationHelper.getNotification(
+             this,
+             getText(R.string.app_name),
+             getString(R.string.tracking_notification_text, event.name),
+             pendingIntent
+         );
+         startForeground(NotificationHelper.getNotificationId(), notification);
      }
 
     public void registerGPSQualityListener(GPSQualityListener listener) {
