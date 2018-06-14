@@ -56,8 +56,9 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider<AdvancedDataMiningSettings>
         implements WithControls {
 
-    private static final double headerPanelHeight = 45;
-    private static final double footerPanelHeight = 50;
+    private static final double HeaderPanelHeight = 45;
+    private static final double FooterPanelHeight = 50;
+    private static final int SplitterSize = 10;
 
     private final DockLayoutPanel mainPanel;
     private final FlowPanel controlsPanel;
@@ -136,24 +137,22 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                                                                 errorReporter, statisticProvider);
         groupingProvider.addGroupingChangedListener(providerListener);
 
-//      filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(parent, context, session,
-//              stringMessages, dataMiningService, errorReporter, statisticProvider);
         filterSelectionProvider = new HierarchicalDimensionListFilterSelectionProvider(
                 parent, context, session, getDataMiningStringMessages(), dataMiningService, errorReporter, statisticProvider);
         filterSelectionProvider.addSelectionChangedListener(providerListener);
         
-        filterSplitPanel = new SplitLayoutPanel(15);
-        filterSplitPanel.addSouth(groupingProvider.getEntryWidget(), footerPanelHeight);
+        filterSplitPanel = new SplitLayoutPanel(SplitterSize);
+        filterSplitPanel.addSouth(groupingProvider.getEntryWidget(), FooterPanelHeight);
         filterSplitPanel.addEast(queryDefinitionViewer.getEntryWidget(), 600);
         filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
         filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
 
-        SplitLayoutPanel headerPanel = new SplitLayoutPanel(15);
+        SplitLayoutPanel headerPanel = new SplitLayoutPanel(SplitterSize);
         headerPanel.addWest(statisticProvider.getEntryWidget(), 800);
         headerPanel.add(controlsPanel);
         
         mainPanel = new DockLayoutPanel(Unit.PX);
-        mainPanel.addNorth(headerPanel, headerPanelHeight);
+        mainPanel.addNorth(headerPanel, HeaderPanelHeight);
         mainPanel.add(filterSplitPanel);
 
         // Storing the different component providers in a list

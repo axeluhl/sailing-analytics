@@ -270,3 +270,26 @@ input.magnifier {
 .dimensionFilterSelectionTable {
 	border-top: 2px solid #6f7277;
 }
+
+.gwt-SplitLayoutPanel-VDragger {
+    background: #fff url(images/thumb_horz.png) center center no-repeat;
+    width: 100% !important;
+    height: 100% !important;
+    left: 0 !important;
+    top: 0 !important;
+    border: none;
+    border-radius: 0px;
+    opacity: 1;
+}
+
+.gwt-SplitLayoutPanel-HDragger {
+    background: #fff url(images/thumb_vertical.png) center center no-repeat;
+    width: 100% !important;
+    height: 100% !important;
+    left: 0 !important;
+    top: 0 !important;
+    border: none;
+    border-radius: 0px;
+    margin: 0px;
+    opacity: 1;
+}
