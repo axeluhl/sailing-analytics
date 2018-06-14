@@ -129,7 +129,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         filteredFilterDimensions.addDataDisplay(filterDimensionsList);
         
         filterFilterDimensionsPanel = new LabeledAbstractFilterablePanel<DimensionWithContext>(
-            new Label(stringMessages.search()), null, filterDimensionsList, filteredFilterDimensions)
+            new Label(stringMessages.filter()), null, filterDimensionsList, filteredFilterDimensions)
         {
             @Override
             public Iterable<String> getSearchableStrings(DimensionWithContext dimension) {
@@ -137,6 +137,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
             }
         };
         filterFilterDimensionsPanel.addStyleName("filterFilterDimensionsPanel");
+        filterFilterDimensionsPanel.addStyleName("dataMiningMarginLeft");
         filterFilterDimensionsPanel.setSpacing(2);
         filterFilterDimensionsPanel.setWidth("100%");
         filterFilterDimensionsPanel.setHeight("100%");
@@ -168,9 +169,12 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         dimensionFilterSelectionProviders = new HashMap<>();
         dimensionFilterSelectionProvidersPanel = new DockLayoutPanel(LayoutUnit);
         dimensionFilterSelectionProvidersPanel.addStyleName("dimensionFilterSelectionTablesContainer");
+        dimensionFilterSelectionProvidersPanel.addStyleName("dataMiningBorderLeft");
         
         filterSelectionPresenter = new PlainFilterSelectionPresenter(this, context, stringMessages, retrieverChainProvider, this);
+        filterSelectionPresenter.getEntryWidget().addStyleName("dataMiningMarginLeft");
         filterSelectionPresenterContainer = new ScrollPanel(filterSelectionPresenter.getEntryWidget());
+        filterSelectionPresenterContainer.addStyleName("dataMiningBorderTop");
         
         mainPanel = new DockLayoutPanel(LayoutUnit);
         mainPanel.addSouth(filterSelectionPresenterContainer, SelectionPresenterHeight);

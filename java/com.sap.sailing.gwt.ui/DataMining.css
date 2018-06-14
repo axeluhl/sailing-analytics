@@ -29,7 +29,7 @@ html {
 
 
 body {
-	background: url(images/spectatorview-bg.png) no-repeat left top #ebebeb;
+	background: #eee;
 	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	line-height: 1;
 	font-size: 14px;
@@ -150,11 +150,6 @@ input.magnifier {
 	z-index: 2000;
 }
 
-.mainPanel {
-	width: 100%;
-	margin-left: 13px;
-}
-
 .errorLabel {
 	color: #FF0000;
 }
@@ -221,12 +216,21 @@ input.magnifier {
 	top: 9px;
 }
 
+.groupingProvider {
+    padding: 3px 0px;
+}
+
 .groupingProviderElement {
 	margin: 2px;
+	display: inline-block;
+}
+
+.statisticProvider {
+    padding: 5px 0px 0px 0px;
 }
 
 .statisticProviderElement {
-	margin: 10px 2px 2px 2px;
+	margin: 2px;
 	display: inline-block;
 }
 
@@ -254,7 +258,6 @@ input.magnifier {
 
 .dimensionFilterSelectionTablesContainer {
 	overflow-x: auto;
-    border-left: 2px solid #6f7277;
 }
 
 .dimensionFilterSelectionHeader {
@@ -267,8 +270,17 @@ input.magnifier {
   text-shadow: #ddf 1px 1px 0;
 }
 
-.dimensionFilterSelectionTable {
-	border-top: 2px solid #6f7277;
+.dataMiningBorderTop {
+    border-top: 2px solid #6f7277;
+}
+.dataMiningBorderLeft {
+    border-left: 2px solid #6f7277;
+}
+.dataMiningBorderBottom {
+    border-border: 2px solid #6f7277;
+}
+.dataMiningBorderRight {
+    border-right: 2px solid #6f7277;
 }
 
 .gwt-SplitLayoutPanel-VDragger {
@@ -292,4 +304,14 @@ input.magnifier {
     border-radius: 0px;
     margin: 0px;
     opacity: 1;
+}
+
+.dataMiningMarginBase {
+    margin: 0px 5px;
+}
+.dataMiningMarginLeft {
+    margin-left: 5px;
+}
+.dataMiningMarginRight {
+    margin-right: 5px;
 }

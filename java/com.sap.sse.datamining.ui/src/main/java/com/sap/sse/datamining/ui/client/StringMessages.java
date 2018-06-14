@@ -62,5 +62,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String csvExport();
     String search();
     String csvCopiedToClipboard();
+    String filter();
     
 }

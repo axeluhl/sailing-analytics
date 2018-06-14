@@ -109,7 +109,7 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
         dataGrid = new DataGrid<>(Integer.MAX_VALUE, dataGridResources);
         dataGrid.setAutoHeaderRefreshDisabled(true);
         dataGrid.setAutoFooterRefreshDisabled(true);
-        dataGrid.addStyleName("dimensionFilterSelectionTable");
+        dataGrid.addStyleName("dataMiningBorderTop");
         
         filteredData = new ListDataProvider<Serializable>(this::elementAsString);
         filterPanel = new AbstractFilterablePanel<Serializable>(null, dataGrid, filteredData) {

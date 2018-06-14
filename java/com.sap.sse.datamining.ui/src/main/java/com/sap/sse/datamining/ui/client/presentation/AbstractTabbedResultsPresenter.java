@@ -40,7 +40,6 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
         this.drillDownCallback = drillDownCallback;
         tabPanel = new ScrolledTabLayoutPanel(30, Unit.PX, resources.arrowLeftIcon(), resources.arrowRightIcon());
         tabPanel.setAnimationDuration(0);
-        tabPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
         presentersMappedByHeader = new HashMap<>();
         registeredResultPresenterMap = new HashMap<>();
 

@@ -101,10 +101,11 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                     }
                 });
         queryDefinitionViewer = new QueryDefinitionViewer(parent, context, getDataMiningStringMessages());
+        queryDefinitionViewer.getEntryWidget().addStyleName("dataMiningMarginRight");
         queryDefinitionViewer.setActive(false);
         addQueryDefinitionChangedListener(queryDefinitionViewer);
         predefinedQueryRunner = new PredefinedQueryRunner(parent, context, session, getDataMiningStringMessages(),
-                dataMiningService, errorReporter, resultsPresenter);
+                                                          dataMiningService, errorReporter, resultsPresenter);
 
         Button clearSelectionButton = new Button(getDataMiningStringMessages().clearSelection());
         clearSelectionButton.addClickHandler(new ClickHandler() {
@@ -131,15 +132,18 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
         statisticProvider = new SuggestBoxStatisticProvider(parent, context, dataMiningService,
                                                             errorReporter, settingsControl, settingsManager);
+        statisticProvider.getEntryWidget().addStyleName("statisticProvider");
         statisticProvider.addStatisticChangedListener(providerListener);
         
         groupingProvider = new MultiDimensionalGroupingProvider(parent, context, dataMiningService,
                                                                 errorReporter, statisticProvider);
         groupingProvider.addGroupingChangedListener(providerListener);
+        groupingProvider.getEntryWidget().addStyleName("dataMiningMarginBase");
 
         filterSelectionProvider = new HierarchicalDimensionListFilterSelectionProvider(
                 parent, context, session, getDataMiningStringMessages(), dataMiningService, errorReporter, statisticProvider);
         filterSelectionProvider.addSelectionChangedListener(providerListener);
+        filterSelectionProvider.getEntryWidget().addStyleName("dataMiningBorderTop");
         
         filterSplitPanel = new SplitLayoutPanel(SplitterSize);
         filterSplitPanel.addSouth(groupingProvider.getEntryWidget(), FooterPanelHeight);
@@ -148,6 +152,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
 
         SplitLayoutPanel headerPanel = new SplitLayoutPanel(SplitterSize);
+        headerPanel.addStyleName("dataMiningMarginBase");
         headerPanel.addWest(statisticProvider.getEntryWidget(), 800);
         headerPanel.add(controlsPanel);
         
