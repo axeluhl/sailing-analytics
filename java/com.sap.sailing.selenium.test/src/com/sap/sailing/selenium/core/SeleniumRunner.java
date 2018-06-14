@@ -176,6 +176,7 @@ public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
                 DesiredCapabilities capabilities = new DesiredCapabilities(capabilityDefinitions);
                 Constructor<WebDriver> constructor = clazz.getConstructor(Capabilities.class);
                 WebDriver driver = constructor.newInstance(capabilities);
+                driver.manage().window().maximize();
                 
                 File screenshots = resolveScreenshotFolder();
                 
