@@ -12,5 +12,5 @@
 <stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit4"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value=""/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sailing.selenium.test"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea -Dselenium.test.environment.configuration=local-test-environment.xml -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dgwt.codesvr=127.0.0.1:9997 -Dwebdriver.firefox.profile=Selenium"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea -Dselenium.test.environment.configuration=local-test-environment.xml -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dgwt.codesvr=127.0.0.1:9876"/>
 </launchConfiguration>
