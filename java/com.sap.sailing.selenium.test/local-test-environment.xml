@@ -94,8 +94,10 @@
   <driver-definition class="org.openqa.selenium.chrome.ChromeDriver">
   </driver-definition>
   -->
-  <!--
-  <driver-definition class="org.openqa.selenium.ie.InternetExplorerDriver">
-  </driver-definition>
-  -->
+  <!-- <driver-definition class="org.openqa.selenium.ie.InternetExplorerDriver">
+  </driver-definition> -->
+  <!-- <driver-definition class="com.sap.sailing.selenium.core.HeadlessFirefoxDriver">
+  </driver-definition> -->
+  <!-- <driver-definition class="com.sap.sailing.selenium.core.HeadlessChromeDriver">
+  </driver-definition> -->
 </test-environment>
