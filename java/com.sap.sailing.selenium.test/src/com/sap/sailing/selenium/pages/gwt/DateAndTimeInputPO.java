@@ -9,7 +9,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
-import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 
 public class DateAndTimeInputPO extends PageArea {
@@ -20,15 +19,14 @@ public class DateAndTimeInputPO extends PageArea {
     private static final DateFormat ISO_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private static final DateFormat ISO_TIME_FORMAT_MINUTES = new SimpleDateFormat("HH:mm");
     private static final DateFormat ISO_TIME_FORMAT_SECONDS = new SimpleDateFormat("HH:mm:ss");
+    private static final DateFormat ISO_DATE_TIME_FORMAT_MINUTES = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+    private static final DateFormat ISO_DATE_TIME_FORMAT_SECONDS = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-    @FindBy(how = BySeleniumId.class, using = "dateInput")
-    private WebElement dateInput;
-
-    @FindBy(how = BySeleniumId.class, using = "timeInput")
-    private WebElement timeInput;
+    private final WebElement element;
 
     private DateAndTimeInputPO(WebDriver driver, WebElement element) {
         super(driver, element);
+        this.element = element;
     }
 
     /**
@@ -43,17 +41,22 @@ public class DateAndTimeInputPO extends PageArea {
      * @see WebElement#sendKeys(CharSequence...)
      */
     public void setValue(Date date, boolean enterSeconds) {
-        // TODO implement variant for browsers using datetime-local instead of two fields
-        if (isFieldOfType(dateInput, "date")) {
-            this.setValueNative(dateInput, date, ISO_DATE_FORMAT);
+        if (isFieldOfType(element, "datetime-local")) {
+            this.setValueNative(element, date, enterSeconds ? ISO_DATE_TIME_FORMAT_SECONDS : ISO_DATE_TIME_FORMAT_MINUTES);
         } else {
-            this.setValue(dateInput, date, DATE_FORMAT);
-        }
-        
-        if (isFieldOfType(timeInput, "time")) {
-            this.setValueNative(timeInput, date, enterSeconds ? ISO_TIME_FORMAT_SECONDS : ISO_TIME_FORMAT_MINUTES);
-        } else {
-            this.setValue(timeInput, date, enterSeconds ? TIME_FORMAT_SECONDS : TIME_FORMAT_MINUTES);
+            final WebElement dateInput = element.findElement(new BySeleniumId("dateInput"));
+            final WebElement timeInput = element.findElement(new BySeleniumId("timeInput"));
+            if (isFieldOfType(dateInput, "date")) {
+                this.setValueNative(dateInput, date, ISO_DATE_FORMAT);
+            } else {
+                this.setValue(dateInput, date, DATE_FORMAT);
+            }
+            
+            if (isFieldOfType(timeInput, "time")) {
+                this.setValueNative(timeInput, date, enterSeconds ? ISO_TIME_FORMAT_SECONDS : ISO_TIME_FORMAT_MINUTES);
+            } else {
+                this.setValue(timeInput, date, enterSeconds ? TIME_FORMAT_SECONDS : TIME_FORMAT_MINUTES);
+            }
         }
     }
     
