@@ -71,11 +71,9 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
             @Override
             public Widget get() {
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null);
-                ResultsPresenter<?> resultsPresenter = new TabbedSailingResultsPresenter(/* parent */ null,
-                        /* context */ null, /* delegate drillDownCallback */ groupKey -> {
-                            queryDefinitionProviderWithControls.drillDown(groupKey,
-                                    /* onSuccessCallback */ () -> queryRunner.runQuery());
-                        }, getStringMessages());
+                ResultsPresenter<?> resultsPresenter = new TabbedSailingResultsPresenter(/*parent*/ null, /*context*/ null, 
+                        /*drillDownCallback*/ groupKey -> queryDefinitionProviderWithControls.drillDown(groupKey, queryRunner::runQuery),
+                        getStringMessages());
                 DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
                 queryDefinitionProviderWithControls = new QueryDefinitionProviderWithControls(null, null, session,
                         dataMiningService, DataMiningEntryPoint.this, settingsControl, settingsManager,

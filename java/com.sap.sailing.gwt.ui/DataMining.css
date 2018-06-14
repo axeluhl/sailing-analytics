@@ -247,3 +247,26 @@ input.magnifier {
 	max-height: 700px;
 	overflow-y: scroll;
 }
+
+.filterFilterDimensionsPanel {
+	background: #eee;
+}
+
+.dimensionFilterSelectionTablesContainer {
+	overflow-x: auto;
+    border-left: 2px solid #6f7277;
+}
+
+.dimensionFilterSelectionHeader {
+    background: #eee;
+    padding-top: 5px;
+}
+
+.dimensionFilterSelectionHeader .gwt-Label {
+  color: #4b4a4a;
+  text-shadow: #ddf 1px 1px 0;
+}
+
+.dimensionFilterSelectionTable {
+	border-top: 2px solid #6f7277;
+}
