@@ -150,7 +150,7 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
                     }
 
                     @Override
-                    public void onSuccess(QueryResultDTO<Serializable> result) {
+            public void onSuccess(QueryResultDTO<Serializable> result) {
                         resultsPresenter.showResult(result);
                     }
                 });

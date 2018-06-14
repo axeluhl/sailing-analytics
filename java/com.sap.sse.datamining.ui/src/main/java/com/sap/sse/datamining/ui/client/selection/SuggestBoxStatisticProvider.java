@@ -116,14 +116,12 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         });
         extractionFunctionSuggestBox.setLimit(Integer.MAX_VALUE);
         extractionFunctionSuggestBox.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
-        extractionFunctionSuggestBox.setWidth("70%");
+        extractionFunctionSuggestBox.setWidth("540px");
         mainPanel.add(extractionFunctionSuggestBox);
 
         aggregatorListBox = createAggregatorListBox();
         aggregatorListBox.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
         mainPanel.add(aggregatorListBox);
-
-        updateContent();
     }
 
     private ValueListBox<AggregationProcessorDefinitionDTO> createAggregatorListBox() {
@@ -149,7 +147,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     }
 
     @Override
-    public boolean isAwatingReload() {
+    public boolean isAwaitingReload() {
         return isAwaitingReload;
     }
 
@@ -224,6 +222,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             }
             extractionFunctionSuggestBox.setSelectableValues(availableExtractionFunctions);
 
+            // TODO Do not pre-select the first element. The other UI components have to able to handle "empty content"
             ExtractionFunctionWithContext currentValue = extractionFunctionSuggestBox.getExtractionFunction();
             ExtractionFunctionWithContext valueToBeSelected = availableExtractionFunctions.contains(currentValue)
                     ? currentValue : Util.first(availableExtractionFunctions);

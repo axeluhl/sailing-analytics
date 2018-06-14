@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -20,6 +21,7 @@ import com.sap.sse.datamining.ui.client.developer.QueryDefinitionParser.TypeToCo
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.gwt.shared.TextExporter;
 
 public class QueryDefinitionViewer extends ComponentWithoutSettings implements QueryDefinitionChangedListener {
     
@@ -36,6 +38,7 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
     private final RadioButton useStringLiteralsRadioButton;
     
     private StatisticQueryDefinitionDTO currentDefinition;
+    private boolean active;
 
     public QueryDefinitionViewer(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context);
@@ -75,10 +78,12 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
             public void onClick(ClickEvent event) {
                 switch (contentPanel.getSelectedIndex()) {
                 case 0:
-                    copyToClipboard(queryDefinitionParser.parseToDetailsAsText(currentDefinition));
+                    TextExporter.exportToClipboard(queryDefinitionParser.parseToDetailsAsText(currentDefinition));
+                    Window.alert(stringMessages.copiedToClipboard());
                     break;
                 case 1:
-                    copyToClipboard(queryDefinitionParser.parseToCodeAsText(currentDefinition, getTypeStrategy()));
+                    TextExporter.exportToClipboard(queryDefinitionParser.parseToCodeAsText(currentDefinition, getTypeStrategy()));
+                    Window.alert(stringMessages.copiedToClipboard());
                     break;
                 }
             }
@@ -99,15 +104,14 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
         dockPanel.add(contentPanel);
     }
     
-    public static native void copyToClipboard(String text) /*-{
-		window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
-    }-*/;
     
     @Override
     public void queryDefinitionChanged(StatisticQueryDefinitionDTO newQueryDefinition) {
         currentDefinition = newQueryDefinition;
-        updateDetails();
-        updateCode();
+        if (active) {
+            updateDetails();
+            updateCode();
+        }
     }
 
     private void updateDetails() {
@@ -126,6 +130,18 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
             return TypeToCodeStrategy.STRING_LITERALS;
         }
         return TypeToCodeStrategy.CLASS_GET_NAME;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        if (active && this.active != active) {
+            updateDetails();
+            updateCode();
+        }
+        this.active = active;
     }
 
     @Override
