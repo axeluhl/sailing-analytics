@@ -23,7 +23,9 @@ public class HeadlessFirefoxDriver extends FirefoxDriver {
     private static FirefoxOptions constructFirefoxOptions(Capabilities desiredCapabilities) {
         final FirefoxOptions firefoxOptions = new FirefoxOptions(Objects.requireNonNull(desiredCapabilities, "No capabilities seen"));
         FirefoxBinary firefoxBinary = new FirefoxBinary();
-        firefoxBinary.addCommandLineOptions("-headless");
+        // Window size is currently being ignored in headless mode
+        // Documentation says it should work: https://developer.mozilla.org/en-US/Firefox/Headless_mode
+        firefoxBinary.addCommandLineOptions("-headless"/*, "--window-size=1920,1080"*/);
         firefoxOptions.setBinary(firefoxBinary);
         return firefoxOptions;
     }
