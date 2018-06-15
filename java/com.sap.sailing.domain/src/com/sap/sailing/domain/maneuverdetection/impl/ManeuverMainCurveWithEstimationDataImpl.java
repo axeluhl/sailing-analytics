@@ -1,10 +1,10 @@
 package com.sap.sailing.domain.maneuverdetection.impl;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.maneuverdetection.ManeuverMainCurveWithEstimationData;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 
 /**

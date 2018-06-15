@@ -20,29 +20,31 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.charts.ChartToCsvExporter;
-import com.sap.sailing.gwt.ui.datamining.presentation.AbstractResultsPresenter;
+import com.sap.sailing.gwt.ui.datamining.presentation.AbstractSailingResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
 import com.sap.sailing.polars.datamining.shared.PolarBackendData;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.ui.client.ChartToCsvExporter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
- * Is able to present {@link PolarBackendData}.</br> Has one polar chart showing the perAngle regression data and two
- * x-y-linecharts that show speed and angle over windspeed regressions.
+ * Is able to present {@link PolarBackendData}.</br>
+ * Has one polar chart showing the perAngle regression data and two x-y-linecharts that show speed and angle over
+ * windspeed regressions.
  * 
- * </br></br>
+ * </br>
+ * </br>
  * Used in conjunction with the datamining framework.
  * 
  * @author D054528 (Frederik Petersen)
  *
  */
-public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Settings> {
+public class PolarBackendResultsPresenter extends AbstractSailingResultsPresenter<Settings> {
 
     private final DockLayoutPanel dockLayoutPanel;
 
@@ -86,7 +88,7 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
         dockLayoutPanel.addWest(polarChartWrapperPanel, 40);
         dockLayoutPanel.addEast(speedAndAngleChart, 60);
 
-        ChartToCsvExporter chartToCsvExporter = new ChartToCsvExporter(stringMessages);
+        ChartToCsvExporter chartToCsvExporter = new ChartToCsvExporter(stringMessages.csvCopiedToClipboard());
 
         Button exportStatisticsCurveToCsvButton = new Button(stringMessages.exportStatisticsCurveToCsv(),
                 new ClickHandler() {
@@ -196,7 +198,7 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
 
     @Override
     public String getLocalizedShortName() {
-        return getStringMessages().polarResultsPresenter();
+        return stringMessages.polarResultsPresenter();
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.configs.impl;
 
 import java.util.Arrays;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,39 +29,27 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
     
     @Override
     public void startRootNode(AutoPlayClientFactory cf, AutoPlayContextDefinition context,
-            PerspectiveCompositeSettings<?> settings) {
-        final UUID eventUUID = context.getEventId();
-        AsyncCallback<EventDTO> getEventByIdAsyncCallback = new AsyncCallback<EventDTO>() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public void onSuccess(final EventDTO event) {
-                cf.getSailingService().getAvailableDetailTypesForLeaderboard(context.getLeaderboardName(), new AsyncCallback<Iterable<DetailType>>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        logger.log(Level.WARNING, "Could not load detailtypes for leaderboard", caught);
-                    }
-
-                    @Override
-                    public void onSuccess(Iterable<DetailType> result) {
-                        StrippedLeaderboardDTO leaderBoardDTO = AutoplayHelper.getSelectedLeaderboard(event,
-                                context.getLeaderboardName());
-                        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderBoardDTO, cf.getUserService(), result);
-                        cf.setAutoPlayContext(new AutoPlayContextImpl(autoplayLifecycle,
-                                (PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>) settings,
-                                AutoPlayClassicConfiguration.this, context));
-                        // start sixty inch slide loop nodes...
-                        RootNodeClassic root = new RootNodeClassic(cf);
-                        root.start(cf.getEventBus());
-                    }
-                });
-            }
-
+            PerspectiveCompositeSettings<?> settings, EventDTO initialEventData) {
+        cf.getSailingService().getAvailableDetailTypesForLeaderboard(context.getLeaderboardName(), new AsyncCallback<Iterable<DetailType>>() {
             @Override
             public void onFailure(Throwable caught) {
-                logger.log(Level.WARNING, "Could not load eventById", caught);
+                logger.log(Level.WARNING, "Could not load detailtypes for leaderboard", caught);
             }
-        };
-        cf.getSailingService().getEventById(eventUUID, true, getEventByIdAsyncCallback);
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public void onSuccess(Iterable<DetailType> result) {
+                StrippedLeaderboardDTO leaderBoardDTO = AutoplayHelper.getSelectedLeaderboard(initialEventData,
+                        context.getLeaderboardName());
+                AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderBoardDTO, cf.getUserService(), result);
+                cf.setAutoPlayContext(new AutoPlayContextImpl(autoplayLifecycle,
+                        (PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>) settings,
+                        AutoPlayClassicConfiguration.this, context, initialEventData));
+                // start sixty inch slide loop nodes...
+                RootNodeClassic root = new RootNodeClassic(cf);
+                root.start(cf.getEventBus());
+            }
+        });
     }
 
     @Override

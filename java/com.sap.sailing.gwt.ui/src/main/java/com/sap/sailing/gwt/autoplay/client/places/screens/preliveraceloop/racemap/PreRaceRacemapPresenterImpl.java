@@ -1,8 +1,9 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap;
 
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -26,6 +27,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<PreRaceRacemapPlace>
         implements PreRaceRacemapView.Slide7Presenter {
+    protected static final Logger LOGGER = Logger.getLogger(PreRaceRacemapPresenterImpl.class.getName());
     private PreRaceRacemapView view;
     private Timer updateStatistics;
     private GetSixtyInchStatisticDTO lastStatisticResult;
@@ -126,8 +128,7 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
                 new AsyncCallback<GetSixtyInchStatisticDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        GWT.log("error getting data! " + caught.getMessage());
-                        caught.printStackTrace();
+                        LOGGER.log(Level.WARNING, "error getting statistics", caught.getCause());
                     }
 
                     @Override

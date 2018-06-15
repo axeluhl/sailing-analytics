@@ -38,8 +38,8 @@ import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Speed;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 import com.viewpagerindicator.CirclePageIndicator;
 
 public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener {

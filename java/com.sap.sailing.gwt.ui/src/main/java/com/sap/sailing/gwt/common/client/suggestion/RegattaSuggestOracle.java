@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.client.suggestion.AbstractListSuggestOracle;
 
 public class RegattaSuggestOracle extends AbstractListSuggestOracle<RegattaDTO> implements RegattasDisplayer {
     public RegattaSuggestOracle() {

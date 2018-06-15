@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.Timer;
 
 public class AutoPlayLoopNode extends BaseCompositeNode {
@@ -29,24 +28,24 @@ public class AutoPlayLoopNode extends BaseCompositeNode {
 
     @Override
     protected void transitionTo(AutoPlayNode nextNode) {
-        super.transitionTo(nextNode);
         if (!isStopped()) {
-            if (nextNode instanceof ProvidesDuration) {
-                ProvidesDuration nodeWithDuration = (ProvidesDuration) nextNode;
-                nodeWithDuration.setDurationConsumer(new Consumer<Integer>() {
-                    @Override
-                    public void accept(Integer durationInSeconds) {
-                        GWT.log("Got duration published: " + durationInSeconds);
+            // default loop transition, might be overridden by hook
+            transitionTimer.schedule(loopTimePerNodeInSeconds * 1000);
+            nextNode.customDurationHook(new Consumer<Integer>() {
+                @Override
+                public void accept(Integer durationInSeconds) {
+                    if (!isStopped()) {
                         if (durationInSeconds == 0) {
+                            //the node just told us that it is not required and we should switch asap
+                            transitionTimer.cancel();
                             gotoNext();
                         } else {
                             transitionTimer.schedule(durationInSeconds * 1000);
                         }
                     }
-                });
-            } else {
-                transitionTimer.schedule(loopTimePerNodeInSeconds * 1000);
-            }
+                }
+            });
+            super.transitionTo(nextNode);
         }
     }
 

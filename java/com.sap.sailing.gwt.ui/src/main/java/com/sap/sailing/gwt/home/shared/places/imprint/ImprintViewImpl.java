@@ -16,12 +16,15 @@ import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.places.imprint.data.ComponentData;
 import com.sap.sailing.gwt.home.shared.places.imprint.data.LicenseData;
 
 public class ImprintViewImpl extends Composite implements ImprintView {
+    private static final String GOOGLE_LEGAL = "Google Maps Service (\"GM Service\"). If the Cloud Service accesses the GM Service through a Google Maps API, Customer's use of the GM Service is subject to Google's Terms of Service, which are set forth at http://www.google.com/intl/en/policies/terms/. If Customer does not  accept  the Google  Terms  of  Service,  including,  but  not  limited  to,  all  limitations  and  restrictions therein, Customer may not use the GM Service in the Cloud Service. Use of the GM Service in or through the Cloud Service will constitute Customer's acceptance of Google's Terms of  Service.  Customer's  usage  of  the GM  Service  in  or  through the Cloud Service  can  be  terminated  by  SAP  without  reason  at  any  time  and SAP will not be required  to  provide  an  equivalent service via another provider.";
+
     private static SponsoringPageViewUiBinder uiBinder = GWT.create(SponsoringPageViewUiBinder.class);
 
     interface SponsoringPageViewUiBinder extends UiBinder<Widget, ImprintViewImpl> {
@@ -41,6 +44,8 @@ public class ImprintViewImpl extends Composite implements ImprintView {
     DivElement acknowledgmentUi;
     @UiField
     DivElement licenseTextUi;
+    @UiField 
+    Label googleLegal;
 
     public ImprintViewImpl() {
         super();
@@ -73,6 +78,8 @@ public class ImprintViewImpl extends Composite implements ImprintView {
                 }
           }
         });
+        
+        googleLegal.setText(GOOGLE_LEGAL);
     }
 
     @Override
