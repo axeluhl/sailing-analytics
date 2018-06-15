@@ -35,4 +35,9 @@ public interface MediaService extends RemoteService {
      * Obtains a MediaTrack for the given literal url, if one exists, {@code null} otherwise 
      */
     MediaTrack getMediaTrackByUrl(String url);
+    
+    /**
+     * Obtains metadata from the youtube api
+     */
+    VideoMetadataDTO checkYoutubeMetadata(String url);
 }
