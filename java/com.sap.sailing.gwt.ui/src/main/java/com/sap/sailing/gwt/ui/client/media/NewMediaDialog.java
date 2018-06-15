@@ -254,6 +254,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
             @Override
             public void onFailure(Throwable caught) {
+                infoLabel.setWidget(new Label(caught.getMessage()));
             }
 
             @Override
@@ -263,7 +264,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                     mediaTrack.title = result.getMessage();
                     refreshUI();
                 } else {
-                    
+                    infoLabel.setWidget(new Label(result.getMessage()));
                 }
             }
         });
