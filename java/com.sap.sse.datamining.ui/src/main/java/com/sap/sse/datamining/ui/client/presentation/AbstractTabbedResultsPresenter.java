@@ -9,8 +9,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
 import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -49,7 +48,9 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
 
     private void addNewTabTab() {
         Label widget = new Label("This should never be shown");
-        Image header = new Image(resources.plusIcon());
+        FlowPanel header = new FlowPanel();
+        header.addStyleName("resultsPresenterTabHeader");
+        header.add(new Image(resources.plusIcon()));
         tabPanel.add(widget, header);
         // This is necessary to stop the selection of this pseudo tab
         tabPanel.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
@@ -155,13 +156,14 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
         return "tabbedResultsPresenters";
     }
 
-    public class CloseableTabHeader extends HorizontalPanel {
+    public class CloseableTabHeader extends FlowPanel {
 
-        private final HTML label;
+        private final Label label;
 
         public CloseableTabHeader() {
-            label = new HTML(getDataMiningStringMessages().empty());
-            label.getElement().getStyle().setMarginRight(5, Unit.PX);
+            this.addStyleName("resultsPresenterTabHeader");
+            
+            label = new Label(getDataMiningStringMessages().empty());
             this.add(label);
             Image closeImage = new Image(resources.closeIcon());
             closeImage.addClickHandler(new ClickHandler() {

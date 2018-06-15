@@ -137,7 +137,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
             }
         };
         filterFilterDimensionsPanel.addStyleName("filterFilterDimensionsPanel");
-        filterFilterDimensionsPanel.addStyleName("dataMiningMarginLeft");
         filterFilterDimensionsPanel.setSpacing(2);
         filterFilterDimensionsPanel.setWidth("100%");
         filterFilterDimensionsPanel.setHeight("100%");

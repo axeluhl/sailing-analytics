@@ -242,6 +242,10 @@ input.magnifier {
 	margin: 2px;
 }
 
+.queryProviderElementLabel {
+    margin-left: 0px;
+}
+
 .queryDefinitionViewerContent {
 	background-color: white;
 	padding: 5px;
@@ -254,6 +258,7 @@ input.magnifier {
 
 .filterFilterDimensionsPanel {
 	background: #eee;
+	padding-left: 5px;
 }
 
 .dimensionFilterSelectionTablesContainer {
@@ -314,4 +319,10 @@ input.magnifier {
 }
 .dataMiningMarginRight {
     margin-right: 5px;
+}
+
+.resultsPresenterTabHeader * {
+    display: inline-block;
+    margin: 0px 3px;
+    vertical-align: bottom;
 }

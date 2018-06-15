@@ -65,6 +65,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
         mainPanel.addStyleName("groupingProvider");
         Label groupByLabel = new Label(this.getDataMiningStringMessages().groupBy());
         groupByLabel.addStyleName(GROUPING_PROVIDER_ELEMENT_STYLE);
+        groupByLabel.addStyleName("queryProviderElementLabel");
         mainPanel.add(groupByLabel);
 
         ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
