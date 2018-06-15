@@ -19,7 +19,6 @@ public class SearchView extends FrameLayout {
     private ImageView mSearchIcon;
     private EditText mEditText;
     private SearchTextWatcher mWatcher;
-    private boolean mSmallEdit = false;
     private boolean mCollapsed = true;
 
     public SearchView(Context context) {
@@ -82,8 +81,6 @@ public class SearchView extends FrameLayout {
     }
 
     public void isEditSmall(boolean smallEdit) {
-        mSmallEdit = smallEdit;
-
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mEditText.getLayoutParams();
         if (params != null) {
             int width = getResources().getDimensionPixelSize(R.dimen.search_view_size);
