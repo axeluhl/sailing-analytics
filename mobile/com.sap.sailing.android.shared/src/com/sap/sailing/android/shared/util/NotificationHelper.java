@@ -29,18 +29,18 @@ public class NotificationHelper {
 
 
     public static Notification getNotification(Context context, CharSequence customTitle, String content, PendingIntent intent) {
-        return getNotification(context, customTitle, content, null, Notification.COLOR_DEFAULT);
+        return getNotification(context, customTitle, content, intent, Notification.COLOR_DEFAULT);
     }
 
     public static Notification getNotification(Context context, CharSequence customTitle, String content, PendingIntent intent, int color) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                .setContentText(content)
-                .setContentTitle(customTitle)
-                .setLargeIcon(largeIcon)
-                .setSmallIcon(smallIcon)
-                .setOngoing(true)
-                .setColor(color)
-                .setPriority(Notification.PRIORITY_HIGH);
+            .setContentText(content)
+            .setContentTitle(customTitle)
+            .setLargeIcon(largeIcon)
+            .setSmallIcon(smallIcon)
+            .setOngoing(true)
+            .setColor(color)
+            .setPriority(Notification.PRIORITY_HIGH);
 
         if (intent != null) {
             builder.setContentIntent(intent);
