@@ -570,6 +570,14 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         @SuppressWarnings("unchecked")
         public ExtractionFunctionSuggestBox() {
             super(new AbstractListSuggestOracle<ExtractionFunctionWithContext>() {
+                @Override
+                protected Iterable<String> getKeywordStrings(Iterable<String> queryTokens) {
+                    String filterText = Util.first(queryTokens);
+                    if (filterText == null) {
+                        return queryTokens;
+                    }
+                    return Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(filterText);
+                }
 
                 @Override
                 protected Iterable<String> getMatchingStrings(ExtractionFunctionWithContext value) {
