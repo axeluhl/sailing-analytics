@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -65,6 +64,10 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private final TextBox hostnameTextbox;
     private final IntegerBox portIntegerbox;
     private final List<SwissTimingRaceRecordDTO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDTO>();
+    private final String manage2sailBaseAPIUrl = "http://manage2sail.com/api/public/links/event/";
+    private final String manage2sailAPIaccessToken = "?accesstoken=bDAv8CwsTM94ujZ";
+    private final String manage2sailUrlAppendix = "&mediaType=json&includeRaces=true";
+    private final String eventIdPattern = "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}";
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService,
             ErrorReporter errorReporter,
@@ -111,19 +114,23 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         connectionsGrid.setWidget(0, 1, previousConfigurationsComboBox);
         
         eventIdBox = new TextBox();
-        eventIdBox.getElement().getStyle().setWidth(20, Unit.EM);
+        eventIdBox.getElement().getStyle().setWidth(30, Unit.EM);
+        eventIdBox.setTitle("Event ID or a url that contains the event Id from Manage2Sail");
         connectionsGrid.setWidget(1, 0, new Label("Manage2Sail Event-ID:"));
         connectionsGrid.setWidget(1, 1, eventIdBox);
-        
         eventIdBox.addChangeHandler(event -> {
             if (eventIdBox.getValue() != "") {
-                jsonUrlBox.setValue("http://manage2sail.com/api/public/links/event/" + eventIdBox.getValue()
-                        + "?accesstoken=bDAv8CwsTM94ujZ&mediaType=json&includeRaces=true");
+                createUrlFromEventId(eventIdBox.getValue());
             }
         });
 
         connectionsGrid.setWidget(2, 0, new Label("Manage2Sail Event-URL (json):"));
         connectionsGrid.setWidget(2, 1, jsonUrlBox);
+        jsonUrlBox.addChangeHandler(event -> {
+            if (jsonUrlBox.getValue() != "") {
+                createEventIdFromUrl(jsonUrlBox.getValue());
+            }
+        });
 
         hostnameTextbox = new TextBox();
         portIntegerbox = new IntegerBox();
@@ -330,6 +337,32 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         useInternalMarkPassingAlgorithmCheckbox.getValue());
             }
         });
+    }
+
+    /**
+     * This function tries to create a valid JsonUrl for any input given that matches the pattern of an event Id from
+     * M2S. If there is an event id detected the Json Url gets updated and the event Id textbox is filled with the
+     * detected event Id. The ID pattern is defined in {@link eventIdPattern}.
+     * 
+     */
+    private void createUrlFromEventId(String eventIdTextbox) {
+        if (eventIdTextbox.matches(".*" + eventIdPattern + ".*")) {
+            final String inferredEventId = eventIdTextbox.replaceFirst(".*(" + eventIdPattern + ").*", "$1");
+            jsonUrlBox.setValue(
+                    manage2sailBaseAPIUrl + inferredEventId + manage2sailAPIaccessToken + manage2sailUrlAppendix);
+            eventIdBox.setValue(inferredEventId);
+        }
+    }
+
+    /**
+     * Similar to {@link #createUrlFromEventId()} this function tries to extract a M2S event Id by looking at the given
+     * url in the Json Url Textbox.
+     */
+    private void createEventIdFromUrl(String jsonUrlTextBox) {
+        if (jsonUrlTextBox.matches("http://manage2sail.com/.*" + eventIdPattern + ".*")) {
+            final String inferredEventId = jsonUrlTextBox.replaceFirst(".*(" + eventIdPattern + ").*", "$1");
+            eventIdBox.setValue(inferredEventId);
+        }
     }
 
     private ListHandler<SwissTimingRaceRecordDTO> getRaceTableColumnSortHandler(List<SwissTimingRaceRecordDTO> raceRecords,
