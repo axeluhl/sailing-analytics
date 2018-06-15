@@ -596,7 +596,6 @@ public class RaceBoardPanel
     
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-        leaderboardAndMapViewer.setLeftComponentWidth(leaderboardAndMapViewer.getLeftScrollPanel().getOffsetWidth());
         if (editMarkPassingPanel != null) {
             editMarkPassingPanel.setLeaderboard(leaderboard);
         }

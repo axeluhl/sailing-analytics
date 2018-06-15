@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -77,8 +76,6 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     private LayoutPanel mainPanel;
 
     private TouchSplitLayoutPanel splitLayoutPanel;
-    private int savedSplitPosition = -1;
-    private boolean layoutForLeftComponentForcedOnce = false;
 
     public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> rightComponentP,
             final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components,
@@ -133,18 +130,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         this.leftScrollPanel = new ScrollPanel();
         this.leftScrollPanel.add(leftComponentP.getEntryWidget());
         this.leftScrollPanel.setTitle(leftComponentP.getEntryWidget().getTitle());
-        this.mainPanel = new LayoutPanel() {
-            @Override
-            public void onResize() {
-                int leftWidth = leftScrollPanel.getOffsetWidth();
-                // The left scroll panel is potentially resized to ensure it is not too wide when the screen gets narrower,
-                // e.g. when resizing browser window or changing mobile device orientation. An offset of 40px is used, so
-                // the panels size slider and its toggle button is always accessable if it is open.
-                savedSplitPosition = Math.min(leftWidth > 0 ? leftWidth : savedSplitPosition, Window.getClientWidth() - 40);
-                splitLayoutPanel.setWidgetSize(leftScrollPanel, savedSplitPosition);
-                super.onResize();
-            }
-        };
+        this.mainPanel = new LayoutPanel();
         this.mainPanel.setSize("100%", "100%");
         this.mainPanel.getElement().getStyle().setMarginTop(-12, Unit.PX);
         this.mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
@@ -155,8 +141,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         initializeComponents();
 
         // initialize the leaderboard component
-        savedSplitPosition = MIN_LEADERBOARD_WIDTH;
-        splitLayoutPanel.insert(leftScrollPanel, leftComponent, Direction.WEST, savedSplitPosition);
+        splitLayoutPanel.insert(leftScrollPanel, leftComponent, Direction.WEST, MIN_LEADERBOARD_WIDTH);
 
         // create a panel that will contain the horizontal toggle buttons
         ResizableAbsolutePanel panelForMapAndHorizontalToggleButtons = new ResizableAbsolutePanel();
@@ -257,22 +242,19 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         if (!leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard is not visible, but the map is
             if (isWidgetInSplitPanel(leftScrollPanel)) {
-                if (leftScrollPanel.getOffsetWidth() > 0) {
-                    savedSplitPosition = Math.min(savedSplitPosition, leftScrollPanel.getOffsetWidth());
-                }
                 splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /* hidden */true,
-                        savedSplitPosition, false);
+                        MIN_LEADERBOARD_WIDTH);
             }
         } else if (leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard and the map are visible
-            splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /* hidden */false, savedSplitPosition, false);
+            splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /* hidden */false, MIN_LEADERBOARD_WIDTH);
         } else if (!leftComponent.isVisible() && !rightComponent.isVisible()) {
         }
 
         for (Component<?> component : components) {
             final boolean isComponentVisible = component.isVisible();
             splitLayoutPanel.setWidgetVisibility(component.getEntryWidget(), component, !isComponentVisible,
-                    DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT, true);
+                    DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT);
         }
         splitLayoutPanel.forceLayout();
     }
@@ -292,19 +274,6 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
 
     public String getViewerName() {
         return "";
-    }
-
-    public void setLeftComponentWidth(int width) {
-        // TODO: The information provided by width is wrong
-        // need to find a way to get the correct information
-        if (!layoutForLeftComponentForcedOnce) {
-            GWT.log("Initial layout force");
-            savedSplitPosition = MIN_LEADERBOARD_WIDTH;
-            forceLayout();
-        } else {
-            savedSplitPosition = width;
-        }
-        layoutForLeftComponentForcedOnce = true;
     }
 
     @Override

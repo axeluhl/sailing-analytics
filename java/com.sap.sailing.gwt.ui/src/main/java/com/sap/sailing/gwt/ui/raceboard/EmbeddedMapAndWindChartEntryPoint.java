@@ -249,7 +249,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         if (windChart != null) {
             windChart.setVisible(true);
             p.insert(windChart.getEntryWidget(), windChart, Direction.SOUTH, DEFAULT_WIND_CHART_HEIGHT);
-            p.setWidgetVisibility(windChart.getEntryWidget(), windChart, /* hidden */ false, DEFAULT_WIND_CHART_HEIGHT, true);
+            p.setWidgetVisibility(windChart.getEntryWidget(), windChart, /* hidden */ false, DEFAULT_WIND_CHART_HEIGHT);
         }
         p.insert(raceMap.getEntryWidget(), raceMap, Direction.CENTER, 400);
         p.addStyleName("dockLayoutPanel");
