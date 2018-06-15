@@ -234,6 +234,14 @@ input.magnifier {
 	display: inline-block;
 }
 
+.statisticSuggestBoxPopup {
+    z-index: 2;
+}
+.statisticSuggestBoxPopup .suggestPopupContent {
+    max-height: 700px;
+    overflow-y: scroll;
+}
+
 .definitionProviderControls {
 	margin: 2px;
 }
@@ -249,11 +257,6 @@ input.magnifier {
 .queryDefinitionViewerContent {
 	background-color: white;
 	padding: 5px;
-}
-
-.statisticSuggestBoxPopup .suggestPopupContent {
-	max-height: 700px;
-	overflow-y: scroll;
 }
 
 .filterFilterDimensionsPanel {
