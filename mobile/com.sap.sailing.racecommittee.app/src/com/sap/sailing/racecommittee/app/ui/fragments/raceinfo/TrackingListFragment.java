@@ -202,6 +202,7 @@ public class TrackingListFragment extends BaseFragment
         SearchView searchView = ViewHelper.get(layout, R.id.competitor_search);
         if (searchView != null) {
             searchView.setSearchTextWatcher(this);
+            searchView.isEditSmall(true);
         }
         View sortByButton = ViewHelper.get(layout, R.id.competitor_sort);
         if (sortByButton != null) {
