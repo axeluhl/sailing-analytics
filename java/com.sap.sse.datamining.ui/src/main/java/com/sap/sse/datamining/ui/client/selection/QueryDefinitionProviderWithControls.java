@@ -189,11 +189,15 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         final Collection<FunctionDTO> dimensionsToGroupBy = groupingProvider.getDimensionsToGroupBy();
         if (!dimensionsToGroupBy.isEmpty()) {
             final FunctionDTO firstDimension = dimensionsToGroupBy.iterator().next();
-            filterSelectionProvider.setHighestRetrieverLevelWithFilterDimension(firstDimension,
-                    (Serializable) groupKeyForSingleDimension.getValue());
             if (dimensionsToGroupBy.size() == 1) {
-                letUserSelectADifferentFirstDimension(onSuccessCallback);
+                letUserSelectADifferentFirstDimension(() -> {
+                    filterSelectionProvider.setHighestRetrieverLevelWithFilterDimension(firstDimension,
+                            (Serializable) groupKeyForSingleDimension.getValue());
+                    onSuccessCallback.run();
+                });
             } else {
+                filterSelectionProvider.setHighestRetrieverLevelWithFilterDimension(firstDimension,
+                        (Serializable) groupKeyForSingleDimension.getValue());
                 groupingProvider.removeDimensionToGroupBy(firstDimension);
                 onSuccessCallback.run();
             }
