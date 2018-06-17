@@ -1175,7 +1175,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
             lockForRead();
             FixType firstFix = getLastFixAtOrBefore(fromTimePoint);
             TimePoint currentTimePoint = firstFix == null ? fromTimePoint : firstFix.getTimePoint();
-            for (Iterator<FixType> iterator = getFixesIterator(currentTimePoint, true); iterator
+            for (Iterator<FixType> iterator = getFixesIterator(currentTimePoint, false); iterator
                     .hasNext(); currentTimePoint = iterator.next().getTimePoint()) {
                 SpeedWithBearing estimatedSpeed = getEstimatedSpeed(currentTimePoint);
                 if (estimatedSpeed != null) {
