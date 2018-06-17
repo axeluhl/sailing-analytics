@@ -100,6 +100,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         Label label = new Label(getDataMiningStringMessages().calculateThe());
         label.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
         label.addStyleName("queryProviderElementLabel");
+        label.addStyleName("emphasizedLabel");
         mainPanel.add(label);
 
         availableExtractionFunctions = new ArrayList<>();
