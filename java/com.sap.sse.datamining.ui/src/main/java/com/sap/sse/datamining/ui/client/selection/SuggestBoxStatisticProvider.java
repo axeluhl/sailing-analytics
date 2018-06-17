@@ -606,6 +606,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         public void setExtractionFunction(ExtractionFunctionWithContext extractionFunction) {
             if (!Objects.equals(this.extractionFunction, extractionFunction)) {
                 this.extractionFunction = extractionFunction;
+                this.setFocus(false);
                 onValueChange();
             }
         }
