@@ -18,7 +18,6 @@ import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
-import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.NodeList;
@@ -525,6 +524,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         private final String firstColumnStyle;
         private final String hoveredRowStyle;
         private final String hoveredRowCellStyle;
+        private final String clearFocus;
 
         public FilterDimensionsListBuilder(AbstractCellTable<DimensionWithContext> cellTable, DataMiningDataGridStyle style) {
             super(cellTable);
@@ -535,6 +535,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
             hoveredRowStyle = style.dataGridHoveredRow();
             hoveredRowCellStyle = style.dataGridHoveredRowCell();
             subHeaderLabelStyle = style.dataGridSubHeaderLabel();
+            clearFocus = style.dataGridClearFocus();
             
             cellTable.addRowHoverHandler(new RowHoverEvent.Handler() {
                 @Override
@@ -561,14 +562,15 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
             
             if (!Objects.equals(previousLevel, valueLevel)) {
                 StringBuilder styleBuilder = new StringBuilder();
-                styleBuilder.append(subHeaderStyle).append(" ").append(headerStyle);
+                styleBuilder.append(subHeaderStyle).append(" ").append(headerStyle)
+                            .append(" ").append(clearFocus);
                 if (absRowIndex != 0) {
                     styleBuilder.append(" ").append(spacedSubHeaderStyle);
                 }
                 String style = styleBuilder.toString();
 
                 String subHeaderText = valueLevel.getRetrievedDataType().getDisplayName();
-                TableRowBuilder subHeaderBuilder = startRow().attribute(DimensionListSubheaderAttribute, subHeaderText);
+                TableRowBuilder subHeaderBuilder = startRow().className(clearFocus).attribute(DimensionListSubheaderAttribute, subHeaderText);
                 // Additional cell to fix the checkbox column size
                 subHeaderBuilder.startTD().className(style + " " + firstColumnStyle).endTD();
                 // Actual header cell
@@ -587,35 +589,24 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         
         @Override
         public boolean clearCurrentSelection(CellPreviewEvent<DimensionWithContext> event) {
-            return !isCheckboxColumn(event.getColumn());
+            return false;
         }
 
         @Override
         public SelectAction translateSelectionEvent(CellPreviewEvent<DimensionWithContext> event) {
+            SelectAction action = SelectAction.TOGGLE;
+            
             NativeEvent nativeEvent = event.getNativeEvent();
-            if (BrowserEvents.CLICK.equals(nativeEvent.getType())) {
+//            if (BrowserEvents.CLICK.equals(nativeEvent.getType())) {
                 Element targetRow = Element.as(nativeEvent.getEventTarget());
                 while (!TableRowElement.is(targetRow) && targetRow != null) {
                     targetRow = targetRow.getParentElement();
                 }
                 if (targetRow != null && targetRow.hasAttribute(DimensionListSubheaderAttribute)) {
-                    return SelectAction.IGNORE;
+                    action = SelectAction.IGNORE;
                 }
-                
-                if (nativeEvent.getCtrlKey()) {
-                    DimensionWithContext value = event.getValue();
-                    filterDimensionSelectionModel.setSelected(value, !filterDimensionSelectionModel.isSelected(value));
-                    return SelectAction.IGNORE;
-                }
-                if (!filterDimensionSelectionModel.getSelectedSet().isEmpty() && !isCheckboxColumn(event.getColumn())) {
-                    return SelectAction.DEFAULT;
-                }
-            }
-            return SelectAction.TOGGLE;
-        }
-
-        private boolean isCheckboxColumn(int columnIndex) {
-            return columnIndex == filterDimensionsList.getColumnIndex(checkboxColumn);
+//            }
+            return action;
         }
         
     }
