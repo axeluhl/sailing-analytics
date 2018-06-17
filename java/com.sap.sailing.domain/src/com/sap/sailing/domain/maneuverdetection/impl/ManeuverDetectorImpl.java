@@ -534,7 +534,13 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                     }
                 }
                 if (latestRawFixTimePoint != null) {
-                    return new TrackTimeInfo(earliestTrackRecord, latestTrackRecord, latestRawFixTimePoint);
+                    if(!earliestTrackRecord.equals(latestTrackRecord)) {
+                        return new TrackTimeInfo(earliestTrackRecord, latestTrackRecord, latestRawFixTimePoint);
+                    }
+                    GPSFixMoving firstRawFix = track.getFirstRawFix();
+                    if(firstRawFix != null) {
+                        return new TrackTimeInfo(firstRawFix.getTimePoint(), latestRawFixTimePoint, latestRawFixTimePoint);
+                    }
                 }
             }
         }
