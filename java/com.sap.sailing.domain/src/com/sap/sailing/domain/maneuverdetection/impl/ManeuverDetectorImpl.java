@@ -73,13 +73,6 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
     private static final double MIN_ANGULAR_VELOCITY_FOR_MAIN_CURVE_BOUNDARIES_IN_DEGREES_PER_SECOND = 0.2;
 
     /**
-     * Defines the course change limit toward opposite direction related to the direction of maneuver main curve. If
-     * speed maxima or stable bearing analysis produce a curve extension which exceeds this limit, the extension gets
-     * rejected.
-     */
-    private static final double MAX_COURSE_CHANGE_TOWARD_MANEUVER_OPPOSITE_DIRECTION_FOR_CURVE_EXTENSION_IN_DEGREES = 15.0;
-
-    /**
      * Tracked race whose tracks are being processed for maneuver detection.
      */
     protected final TrackedRace trackedRace;
@@ -1387,25 +1380,11 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         if (isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, maneuverStart)) {
             maneuverStart = null;
         }
-        TimePoint stableBearingAnalysisUntil = maneuverStart == null ? maneuverMainCurveDetails.getTimePointBefore()
-                : maneuverStart.getExtensionTimePoint();
+        // Stable course analysis is considered as not necessary for preparation phase of maneuver because no
+        // oversteering is usually performed before maneuver
         Speed lowestSpeed = maneuverStart == null ? null : maneuverStart.getLowestSpeedWithinExtensionArea();
         double courseChangeSinceManeuverMainCurveInDegrees = maneuverStart == null ? 0
                 : maneuverStart.getCourseChangeInDegreesWithinExtensionArea();
-        stepsToAnalyze = getSpeedWithBearingStepsWithinTimeRange(stepsToAnalyze, earliestTimePointForSpeedTrendAnalysis,
-                stableBearingAnalysisUntil);
-        ManeuverCurveBoundaryExtension stableBearingExtension = findStableBearingWithMaxAbsCourseChangeSpeed(
-                stepsToAnalyze, true, MAX_ABS_COURSE_CHANGE_IN_DEGREES_PER_SECOND_FOR_STABLE_BEARING_ANALYSIS);
-        if (stableBearingExtension != null
-                && !isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, stableBearingExtension)) {
-            maneuverStart = stableBearingExtension;
-            courseChangeSinceManeuverMainCurveInDegrees += stableBearingExtension
-                    .getCourseChangeInDegreesWithinExtensionArea();
-            if (lowestSpeed == null
-                    || lowestSpeed.compareTo(stableBearingExtension.getLowestSpeedWithinExtensionArea()) > 0) {
-                lowestSpeed = stableBearingExtension.getLowestSpeedWithinExtensionArea();
-            }
-        }
         return maneuverStart != null
                 ? new ManeuverCurveBoundaryExtension(maneuverStart.getExtensionTimePoint(),
                         maneuverStart.getSpeedWithBearingAtExtensionTimePoint(),
@@ -1422,10 +1401,8 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         if (curveBoundaryExtension == null) {
             return false;
         }
-        return curveBoundaryExtension.getCourseChangeInDegreesWithinExtensionArea()
-                * maneuverMainCurveDetails.getDirectionChangeInDegrees() < 0
-                && Math.abs(curveBoundaryExtension
-                        .getCourseChangeInDegreesWithinExtensionArea()) > MAX_COURSE_CHANGE_TOWARD_MANEUVER_OPPOSITE_DIRECTION_FOR_CURVE_EXTENSION_IN_DEGREES;
+        return Math.abs(curveBoundaryExtension.getCourseChangeInDegreesWithinExtensionArea()) > Math
+                .abs(curveBoundaryExtension.getCourseChangeInDegreesWithinExtensionArea()) / 2.0;
     }
 
     /**
