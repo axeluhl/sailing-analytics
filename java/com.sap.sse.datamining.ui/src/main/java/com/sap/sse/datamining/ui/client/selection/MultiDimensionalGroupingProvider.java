@@ -77,7 +77,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
     }
 
     @Override
-    public boolean isAwatingReload() {
+    public boolean isAwaitingReload() {
         return isAwaitingReload;
     }
 
