@@ -61,7 +61,6 @@ import com.sap.sse.datamining.ui.client.resources.DataMiningDataGridResources.Da
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCellTableBuilder;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
-import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -120,6 +119,11 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         allFilterDimensions = new ArrayList<>();
         filteredFilterDimensions = new ListDataProvider<>();
 
+        Label filterDimensionsSelectionTitleLabel = new Label(stringMessages.selectDimensionsToFilterBy());
+        filterDimensionsSelectionTitleLabel.addStyleName("emphasizedLabel");
+        filterDimensionsSelectionTitleLabel.addStyleName("dataMiningMarginLeft");
+        filterDimensionsSelectionTitleLabel.addStyleName("filterDimensionsTitleLabel");
+
         DataMiningDataGridResources resources = GWT.create(DataMiningDataGridResources.class);
         filterDimensionsList = new DataGrid<>(Integer.MAX_VALUE, resources);
         filterDimensionsList.setAutoHeaderRefreshDisabled(true);
@@ -127,8 +131,8 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         filterDimensionsList.setTableBuilder(new FilterDimensionsListBuilder(filterDimensionsList, resources.dataGridStyle()));
         filteredFilterDimensions.addDataDisplay(filterDimensionsList);
         
-        filterFilterDimensionsPanel = new LabeledAbstractFilterablePanel<DimensionWithContext>(
-            new Label(stringMessages.filter()), null, filterDimensionsList, filteredFilterDimensions)
+        filterFilterDimensionsPanel = new AbstractFilterablePanel<DimensionWithContext>(
+            null, filterDimensionsList, filteredFilterDimensions)
         {
             @Override
             public Iterable<String> getSearchableStrings(DimensionWithContext dimension) {
@@ -140,6 +144,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         filterFilterDimensionsPanel.setWidth("100%");
         filterFilterDimensionsPanel.setHeight("100%");
         filterFilterDimensionsPanel.getTextBox().setWidth("100%");
+        filterFilterDimensionsPanel.getTextBox().getElement().setPropertyString("placeholder", stringMessages.filterShownDimensions());
         
         filterDimensionSelectionModel = new MultiSelectionModel<>();
         filterDimensionSelectionModel.addSelectionChangeHandler(this::selectedFilterDimensionsChanged);
@@ -161,6 +166,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         filterDimensionsList.addColumn(dimensionColumn);
         
         DockLayoutPanel filterDimensionsSelectionPanel = new DockLayoutPanel(LayoutUnit);
+        filterDimensionsSelectionPanel.addNorth(filterDimensionsSelectionTitleLabel, 20);
         filterDimensionsSelectionPanel.addNorth(filterFilterDimensionsPanel, DimensionSelectionHeaderHeight);
         filterDimensionsSelectionPanel.add(filterDimensionsList);
         

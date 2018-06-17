@@ -259,9 +259,12 @@ input.magnifier {
 	padding: 5px;
 }
 
+.filterDimensionsTitleLabel {
+    padding-top: 5px;
+}
+
 .filterFilterDimensionsPanel {
 	background: #eee;
-	padding-left: 5px;
 }
 
 .dimensionFilterSelectionTablesContainer {
@@ -328,4 +331,8 @@ input.magnifier {
     display: inline-block;
     margin: 0px 3px;
     vertical-align: bottom;
+}
+
+.emphasizedLabel {
+    font-weight: 600;
 }
