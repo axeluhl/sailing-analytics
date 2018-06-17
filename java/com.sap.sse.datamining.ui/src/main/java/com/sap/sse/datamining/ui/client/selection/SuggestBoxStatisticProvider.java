@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -115,6 +116,13 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         extractionFunctionSuggestBox.getValueBox().addFocusHandler(e -> {
             extractionFunctionSuggestBox.getValueBox().selectAll();
             extractionFunctionSuggestBox.showSuggestionList();
+        });
+        extractionFunctionSuggestBox.getValueBox().addKeyUpHandler(e -> {
+            int keyCode = e.getNativeEvent().getKeyCode();
+            if (keyCode == KeyCodes.KEY_ESCAPE) {
+                extractionFunctionSuggestBox.hideSuggestionList();
+                extractionFunctionSuggestBox.setFocus(false);
+            }
         });
         extractionFunctionSuggestBox.setLimit(Integer.MAX_VALUE);
         extractionFunctionSuggestBox.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
@@ -224,7 +232,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             }
             extractionFunctionSuggestBox.setSelectableValues(availableExtractionFunctions);
 
-            // TODO Do not pre-select the first element. The other UI components have to able to handle "empty content"
+            // TODO Do not pre-select the first element. The other UI components have to be able to handle "empty content"
             ExtractionFunctionWithContext currentValue = extractionFunctionSuggestBox.getExtractionFunction();
             ExtractionFunctionWithContext valueToBeSelected = availableExtractionFunctions.contains(currentValue)
                     ? currentValue : Util.first(availableExtractionFunctions);
@@ -566,6 +574,8 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     private abstract class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFunctionWithContext> {
 
         private final AbstractListSuggestOracle<ExtractionFunctionWithContext> suggestOracle;
+        private final ScrollableSuggestionDisplay display;
+        
         private ExtractionFunctionWithContext extractionFunction;
 
         @SuppressWarnings("unchecked")
@@ -596,7 +606,13 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
                 }
             }, new ScrollableSuggestionDisplay());
             suggestOracle = (AbstractListSuggestOracle<ExtractionFunctionWithContext>) getSuggestOracle();
+            display = (ScrollableSuggestionDisplay) getSuggestionDisplay();
             addSuggestionSelectionHandler(this::setExtractionFunction);
+        }
+        
+        @Override
+        public void hideSuggestionList() {
+            display.hideSuggestions();
         }
 
         public void setSelectableValues(Collection<ExtractionFunctionWithContext> selectableValues) {

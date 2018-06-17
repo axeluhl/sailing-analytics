@@ -603,15 +603,13 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
             SelectAction action = SelectAction.TOGGLE;
             
             NativeEvent nativeEvent = event.getNativeEvent();
-//            if (BrowserEvents.CLICK.equals(nativeEvent.getType())) {
-                Element targetRow = Element.as(nativeEvent.getEventTarget());
-                while (!TableRowElement.is(targetRow) && targetRow != null) {
-                    targetRow = targetRow.getParentElement();
-                }
-                if (targetRow != null && targetRow.hasAttribute(DimensionListSubheaderAttribute)) {
-                    action = SelectAction.IGNORE;
-                }
-//            }
+            Element targetRow = Element.as(nativeEvent.getEventTarget());
+            while (!TableRowElement.is(targetRow) && targetRow != null) {
+                targetRow = targetRow.getParentElement();
+            }
+            if (targetRow != null && targetRow.hasAttribute(DimensionListSubheaderAttribute)) {
+                action = SelectAction.IGNORE;
+            }
             return action;
         }
         
