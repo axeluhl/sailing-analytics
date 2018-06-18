@@ -10,6 +10,7 @@
   <inherits name='com.google.gwt.user.User'/>
 
   <!-- Other module inherits                                      -->
+  <inherits name='com.sap.sse.datamining.SSEDataMining'/>
 
   <!-- Specify the paths for translatable code                    -->
   <source path='client'/>
