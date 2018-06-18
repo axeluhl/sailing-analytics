@@ -203,7 +203,7 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
      * @throws IllegalStateException
      *             if the {@link resultType} is already registered.
      */
-    public void registerResultPresenter(Class<?> resultType, ResultsPresenter<Settings> resultPresenter)
+    public void registerResultsPresenter(Class<?> resultType, ResultsPresenter<Settings> resultPresenter)
             throws IllegalStateException {
         String className = resultType.getName();
         if (!registeredResultPresenterMap.containsKey(className)) {

@@ -13,7 +13,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
  * Dummy class for testing the
- * {@link TabbedResultsPresenter#registerResultPresenter(Class, com.sap.sse.datamining.ui.client.ResultsPresenter)}
+ * {@link TabbedResultsPresenter#registerResultsPresenter(Class, com.sap.sse.datamining.ui.client.ResultsPresenter)}
  * method. Therefore its {@link #showResult(QueryResultDTO)} method is overridden and simply stores a reference of this
  * presenter instance.
  * 

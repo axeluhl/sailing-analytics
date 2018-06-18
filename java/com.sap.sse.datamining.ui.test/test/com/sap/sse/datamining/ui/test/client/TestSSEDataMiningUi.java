@@ -13,6 +13,8 @@ import com.sap.sse.datamining.ui.test.client.presentation.DummyResultsPresenter;
 
 /**
  * GWT JUnit tests must extend GWTTestCase.
+ * 
+ * @author D064866
  */
 public class TestSSEDataMiningUi extends GWTTestCase {
 
@@ -24,15 +26,15 @@ public class TestSSEDataMiningUi extends GWTTestCase {
     }
 
     /**
-     * Tests the mechanism {@link TabbedResultsPresenter#registerResultPresenter(Class, ResultsPresenter)}.
+     * Tests the mechanism {@link TabbedResultsPresenter#registerResultsPresenter(Class, ResultsPresenter)}.
      */
     public void testAvoidDuplicateResultTypeRegistration() {
         TabbedResultsPresenter presenter = new TabbedResultsPresenter(null, null, null);
 
-        presenter.registerResultPresenter(String.class, new PlainResultsPresenter(null, null));
-        presenter.registerResultPresenter(Double.class, new MultiResultsPresenter(null, null, null));
+        presenter.registerResultsPresenter(String.class, new PlainResultsPresenter(null, null));
+        presenter.registerResultsPresenter(Double.class, new MultiResultsPresenter(null, null, null));
         try {
-            presenter.registerResultPresenter(String.class, new ResultsChart(null, null, true, null));
+            presenter.registerResultsPresenter(String.class, new ResultsChart(null, null, true, null));
             fail();
         } catch (IllegalStateException e) {
             assertTrue(true);
@@ -49,8 +51,8 @@ public class TestSSEDataMiningUi extends GWTTestCase {
         DummyResultsPresenter stringResultsPresenter = new DummyResultsPresenter(executedPresenter);
         DummyResultsPresenter doubleResultsPresenter = new DummyResultsPresenter(executedPresenter);
 
-        presenter.registerResultPresenter(String.class, stringResultsPresenter);
-        presenter.registerResultPresenter(Double.class, doubleResultsPresenter);
+        presenter.registerResultsPresenter(String.class, stringResultsPresenter);
+        presenter.registerResultsPresenter(Double.class, doubleResultsPresenter);
 
         presenter.showResult(new DummyQueryResultDTO<>(String.class));
         assertTrue(executedPresenter.size() == 1);

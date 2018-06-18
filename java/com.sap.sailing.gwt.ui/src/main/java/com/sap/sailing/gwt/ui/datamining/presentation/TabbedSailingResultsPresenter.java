@@ -19,16 +19,16 @@ public class TabbedSailingResultsPresenter extends TabbedResultsPresenter {
             DrillDownCallback drillDownCallback, StringMessages stringMessages) {
         super(parent, context, drillDownCallback);
 
-        registerResultPresenter(PolarAggregation.class,
+        registerResultsPresenter(PolarAggregation.class,
                 new PolarResultsPresenter(TabbedSailingResultsPresenter.this, getComponentContext(), stringMessages));
 
-        registerResultPresenter(PolarBackendData.class, new PolarBackendResultsPresenter(
+        registerResultsPresenter(PolarBackendData.class, new PolarBackendResultsPresenter(
                 TabbedSailingResultsPresenter.this, getComponentContext(), stringMessages));
 
-        registerResultPresenter(ManeuverSpeedDetailsAggregation.class, new ManeuverSpeedDetailsResultsPresenter(
+        registerResultsPresenter(ManeuverSpeedDetailsAggregation.class, new ManeuverSpeedDetailsResultsPresenter(
                 TabbedSailingResultsPresenter.this, getComponentContext(), stringMessages));
 
-        registerResultPresenter(PairWithStats.class, new NumberPairResultsPresenter(TabbedSailingResultsPresenter.this,
+        registerResultsPresenter(PairWithStats.class, new NumberPairResultsPresenter(TabbedSailingResultsPresenter.this,
                 getComponentContext(), stringMessages));
     }
 }
