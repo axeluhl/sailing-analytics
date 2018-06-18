@@ -86,20 +86,16 @@ public class NumberPairResultsPresenter extends AbstractSailingResultsPresenter<
     protected void internalShowResults(QueryResultDTO<?> res) {
         result = res;
         createAndAddSeriesToChart();
-        
         for (Entry<GroupKey, ?> resultEntry : result.getResults().entrySet()) {
             @SuppressWarnings("unchecked")
             PairWithStats<Number> value = (PairWithStats<Number>) resultEntry.getValue();
-            
-            if(value.getIndividualPairs() != null) {
-                for(Pair<Number, Number> pair : value.getIndividualPairs()) { 
+            if (value.getIndividualPairs() != null) {
+                for (Pair<Number, Number> pair : value.getIndividualPairs()) {
                     createAndAddPoint(resultEntry.getKey(), pair.getA(), pair.getB());
                 }
-            }
-            else {
+            } else {
                 createAndAddPoint(resultEntry.getKey(), value.getAverage().getA(), value.getAverage().getB());
             }
-
         }
         chart.getXAxis().setAxisTitleText(result.getResultSignifier());
     }

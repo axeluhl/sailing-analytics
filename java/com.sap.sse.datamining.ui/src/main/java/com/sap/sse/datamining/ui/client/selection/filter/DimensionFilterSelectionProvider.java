@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.NativeEvent;
@@ -109,7 +110,7 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
         dataGrid = new DataGrid<>(Integer.MAX_VALUE, dataGridResources);
         dataGrid.setAutoHeaderRefreshDisabled(true);
         dataGrid.setAutoFooterRefreshDisabled(true);
-        dataGrid.addStyleName("dimensionFilterSelectionTable");
+        dataGrid.addStyleName("dataMiningBorderTop");
         
         filteredData = new ListDataProvider<Serializable>(this::elementAsString);
         filterPanel = new AbstractFilterablePanel<Serializable>(null, dataGrid, filteredData) {
@@ -177,6 +178,12 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
         toggleFilterButton.addClickHandler(e -> {
             boolean enabled = toggleFilterButton.isDown();
             mainPanel.setWidgetHidden(filterPanel, !enabled);
+            if (enabled) {
+                Scheduler.get().scheduleDeferred(() -> {
+                    filterPanel.getTextBox().setFocus(true);
+                    filterPanel.getTextBox().selectAll();
+                });
+            }
 
             ListDataProvider<Serializable> oldProvider = enabled ? filterPanel.getAllListDataProvider(): filteredData;
             ListDataProvider<Serializable> newProvider = enabled ? filteredData : filterPanel.getAllListDataProvider();
