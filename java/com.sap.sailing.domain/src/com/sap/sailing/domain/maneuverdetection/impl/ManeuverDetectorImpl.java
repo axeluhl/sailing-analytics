@@ -1408,7 +1408,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
             return false;
         }
         return Math.abs(curveBoundaryExtension.getCourseChangeInDegreesWithinExtensionArea()) > Math
-                .abs(curveBoundaryExtension.getCourseChangeInDegreesWithinExtensionArea()) / 2.0;
+                .abs(curveBoundaryExtension.getCourseChangeInDegreesWithinExtensionArea()) / 3.0;
     }
 
     /**
