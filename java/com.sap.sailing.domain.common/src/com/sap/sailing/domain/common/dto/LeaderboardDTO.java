@@ -127,13 +127,13 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
         if (rows != null) { 
             LeaderboardRowDTO leaderboardRow = rows.get(competitor);
             if (leaderboardRow != null) {
-                if (this.canBoatsOfCompetitorsChangePerRace == false) {
-                    result = leaderboardRow.boat;
-                } else {
+                if (this.canBoatsOfCompetitorsChangePerRace) {
                     LeaderboardEntryDTO leaderboardEntry = leaderboardRow.fieldsByRaceColumnName.get(raceColumnName);
                     if (leaderboardEntry != null) {
                         result = leaderboardEntry.boat;
                     }
+                } else {
+                    result = leaderboardRow.boat;
                 }
             }
         }

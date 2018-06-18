@@ -13,18 +13,14 @@ import java.util.stream.Collectors;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.BearingChangeAnalyzer;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
@@ -39,7 +35,6 @@ import com.sap.sailing.domain.tracking.ManeuverLoss;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStepsIterable;
-import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.CompleteManeuverCurveImpl;
@@ -47,10 +42,14 @@ import com.sap.sailing.domain.tracking.impl.ManeuverCurveBoundariesImpl;
 import com.sap.sailing.domain.tracking.impl.ManeuverWithMainCurveBoundariesImpl;
 import com.sap.sailing.domain.tracking.impl.ManeuverWithStableSpeedAndCourseBoundariesImpl;
 import com.sap.sailing.domain.tracking.impl.SpeedWithBearingStepImpl;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -207,6 +206,9 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         ManeuverMainCurveDetailsWithBearingSteps mainCurveDetails = computeManeuverMainCurveDetails(
                 maneuverCurve.getMainCurveBoundaries().getTimePointBefore(),
                 maneuver.getMainCurveBoundaries().getTimePointAfter(), maneuver.getToSide());
+        if (mainCurveDetails == null) {
+            return maneuverCurve;
+        }
         ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries = new ManeuverCurveBoundariesImpl(
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore(),
                 maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter(),
@@ -437,7 +439,7 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
      */
     private Bearing getRelativeBearingToNextMark(TimePoint timePoint, Bearing boatCourse) {
         Bearing result = null;
-        TrackedLeg legAfter = trackedRace.getCurrentLeg(timePoint);
+        TrackedLegOfCompetitor legAfter = trackedRace.getTrackedLeg(competitor, timePoint);
         if (legAfter != null && legAfter.getLeg().getTo() != null) {
             Position nextMarkPosition = trackedRace.getApproximatePosition(legAfter.getLeg().getTo(), timePoint);
             Position maneuverEndPosition = track.getEstimatedPosition(timePoint, false);
@@ -1637,8 +1639,11 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         double maxCourseChangeInDegrees = 0;
         double currentCourseChangeInDegrees = 0;
         double maxTurningRateInDegreesPerSecond = 0;
+        double maxTurningRateInDegreesPerSecondCandidate = 0;
         Speed lowestSpeed = null;
+        Speed lowestSpeedCandidate = null;
         TimePoint maneuverTimePoint = null;
+        TimePoint maneuverTimePointCandidate = null;
         TimePoint previousTimePoint = null;
         // Refine the time point before and after maneuver by checking whether the total course changed before maneuver
         // time point may be increased or kept unchanged if we cut off bearing steps one by one from the left and right.
@@ -1647,9 +1652,51 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
         TimePoint refinedTimePointAfterManeuver = null;
         SpeedWithBearing refinedSpeedWithBearingAfterManeuver = null;
         boolean turningRateMinimumReachedAtMainCurveBeginning = false;
+        ManeuverMainCurveDetailsWithBearingSteps bestBoundariesBeforeReset = null;
         for (SpeedWithBearingStep entry : bearingStepsToAnalyze) {
             currentCourseChangeInDegrees += entry.getCourseChangeInDegrees();
             TimePoint timePoint = entry.getTimePoint();
+            // If the direction sign does not match, or the turning rate at the beginning of the curve is nearly
+            // zero => cut the bearing step from the left
+            if (0 >= currentCourseChangeInDegrees * totalCourseChangeSignum
+                    || !turningRateMinimumReachedAtMainCurveBeginning && entry
+                            .getTurningRateInDegreesPerSecond() < MIN_ANGULAR_VELOCITY_FOR_MAIN_CURVE_BOUNDARIES_IN_DEGREES_PER_SECOND) {
+                // remember the section before timePointBefore reset, because it might be better than the following
+                // section
+                if (maxCourseChangeInDegrees
+                        * totalCourseChangeSignum >= MIN_ANGULAR_VELOCITY_FOR_MAIN_CURVE_BOUNDARIES_IN_DEGREES_PER_SECOND
+                        && (bestBoundariesBeforeReset == null || bestBoundariesBeforeReset.getDirectionChangeInDegrees()
+                                * totalCourseChangeSignum < maxCourseChangeInDegrees)) {
+                    bestBoundariesBeforeReset = new ManeuverMainCurveDetailsWithBearingSteps(
+                            refinedTimePointBeforeManeuver, refinedTimePointAfterManeuver, maneuverTimePoint,
+                            refinedSpeedWithBearingBeforeManeuver, refinedSpeedWithBearingAfterManeuver,
+                            maxCourseChangeInDegrees, maxTurningRateInDegreesPerSecond, lowestSpeed, null);
+                }
+                currentCourseChangeInDegrees = 0;
+                maxCourseChangeInDegrees = 0;
+                refinedTimePointBeforeManeuver = timePoint;
+                refinedSpeedWithBearingBeforeManeuver = entry.getSpeedWithBearing();
+                refinedTimePointAfterManeuver = null;
+                refinedSpeedWithBearingAfterManeuver = null;
+                turningRateMinimumReachedAtMainCurveBeginning = false;
+                maneuverTimePoint = maneuverTimePointCandidate = null;
+                maxTurningRateInDegreesPerSecond = maxTurningRateInDegreesPerSecondCandidate = 0;
+                lowestSpeed = lowestSpeedCandidate = entry.getSpeedWithBearing();
+            } else {
+                turningRateMinimumReachedAtMainCurveBeginning = true;
+            }
+            if (lowestSpeedCandidate == null || lowestSpeedCandidate.compareTo(entry.getSpeedWithBearing()) > 0) {
+                lowestSpeedCandidate = entry.getSpeedWithBearing();
+            }
+            // Check whether the course change is performed in the target direction of maneuver. If yes, consider
+            // the step to locate the maneuver time point with the highest turning rate within main curve.
+            if (0 < currentCourseChangeInDegrees * totalCourseChangeSignum) {
+                if (maxTurningRateInDegreesPerSecondCandidate < entry.getTurningRateInDegreesPerSecond()) {
+                    maxTurningRateInDegreesPerSecondCandidate = entry.getTurningRateInDegreesPerSecond();
+                    Duration durationFromPreviousStep = previousTimePoint.until(timePoint);
+                    maneuverTimePointCandidate = previousTimePoint.plus(durationFromPreviousStep.divide(2.0));
+                }
+            }
             // Check whether the totalCourseChange gets notably better with the added course change of current bearing
             // step, considering the target sign of the course change
             if (maxCourseChangeInDegrees * totalCourseChangeSignum < currentCourseChangeInDegrees
@@ -1658,38 +1705,24 @@ public class ManeuverDetectorImpl implements ManeuverDetector {
                 maxCourseChangeInDegrees = currentCourseChangeInDegrees;
                 refinedTimePointAfterManeuver = timePoint;
                 refinedSpeedWithBearingAfterManeuver = entry.getSpeedWithBearing();
-            }
-            // Check whether the course change is performed in the target direction of maneuver. If yes, consider
-            // the step to locate the maneuver time point with the highest turning rate within main curve.
-            if (0 < currentCourseChangeInDegrees * totalCourseChangeSignum) {
-                if (maxTurningRateInDegreesPerSecond < entry.getTurningRateInDegreesPerSecond()) {
-                    maxTurningRateInDegreesPerSecond = entry.getTurningRateInDegreesPerSecond();
-                    Duration durationFromPreviousStep = previousTimePoint.until(timePoint);
-                    maneuverTimePoint = previousTimePoint.plus(durationFromPreviousStep.divide(2.0));
-                }
-            }
-            if (lowestSpeed == null || lowestSpeed.compareTo(entry.getSpeedWithBearing()) > 0) {
-                lowestSpeed = entry.getSpeedWithBearing();
-            }
-            // If the direction sign does not match, or the turning rate at the beginning of the curve is nearly
-            // zero => cut the bearing step from the left
-            if (0 >= currentCourseChangeInDegrees * totalCourseChangeSignum
-                    || !turningRateMinimumReachedAtMainCurveBeginning && entry
-                            .getTurningRateInDegreesPerSecond() < MIN_ANGULAR_VELOCITY_FOR_MAIN_CURVE_BOUNDARIES_IN_DEGREES_PER_SECOND) {
-                currentCourseChangeInDegrees = 0;
-                maxCourseChangeInDegrees = 0;
-                refinedTimePointBeforeManeuver = timePoint;
-                refinedSpeedWithBearingBeforeManeuver = entry.getSpeedWithBearing();
-                refinedTimePointAfterManeuver = null;
-                refinedSpeedWithBearingAfterManeuver = null;
-                turningRateMinimumReachedAtMainCurveBeginning = false;
-                maneuverTimePoint = null;
-                maxTurningRateInDegreesPerSecond = 0;
-                lowestSpeed = entry.getSpeedWithBearing();
-            } else {
-                turningRateMinimumReachedAtMainCurveBeginning = true;
+                maxTurningRateInDegreesPerSecond = maxTurningRateInDegreesPerSecondCandidate;
+                maneuverTimePoint = maneuverTimePointCandidate;
+                lowestSpeed = lowestSpeedCandidate;
             }
             previousTimePoint = timePoint;
+        }
+        // check if the course change of the current section is higher than of the best section which has been
+        // previously reset
+        if (bestBoundariesBeforeReset != null && bestBoundariesBeforeReset.getDirectionChangeInDegrees()
+                * totalCourseChangeSignum >= maxCourseChangeInDegrees * totalCourseChangeSignum) {
+            refinedTimePointBeforeManeuver = bestBoundariesBeforeReset.getTimePointBefore();
+            refinedTimePointAfterManeuver = bestBoundariesBeforeReset.getTimePointAfter();
+            refinedSpeedWithBearingBeforeManeuver = bestBoundariesBeforeReset.getSpeedWithBearingBefore();
+            refinedSpeedWithBearingAfterManeuver = bestBoundariesBeforeReset.getSpeedWithBearingAfter();
+            maneuverTimePoint = bestBoundariesBeforeReset.getTimePoint();
+            maxCourseChangeInDegrees = bestBoundariesBeforeReset.getDirectionChangeInDegrees();
+            maxTurningRateInDegreesPerSecond = bestBoundariesBeforeReset.getMaxTurningRateInDegreesPerSecond();
+            lowestSpeed = bestBoundariesBeforeReset.getLowestSpeed();
         }
         if (refinedTimePointBeforeManeuver == null) {
             // Should not occur, if bearingStepsToAnalyze.size() > 0 and first BearingStep.getCourseChangeInDegrees() ==

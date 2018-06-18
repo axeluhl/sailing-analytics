@@ -101,7 +101,7 @@ public class TestAutoPlay extends AbstractSeleniumTest {
             e1.printStackTrace();
         }
         String nextUpText = autoplayPage.getText();
-        assertEquals("There are currently no further planned races", nextUpText);
+        assertEquals("There are no further races starting soon", nextUpText);
     }
 
     @Test

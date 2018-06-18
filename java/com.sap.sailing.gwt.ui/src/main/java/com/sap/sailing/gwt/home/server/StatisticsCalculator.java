@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.home.server;
 
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.gwt.home.communication.event.statistics.EventStatisticsDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
