@@ -1,7 +1,12 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.ws.rs.Consumes;
@@ -22,6 +27,9 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCours
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
@@ -36,6 +44,7 @@ import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
@@ -46,6 +55,7 @@ import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -181,6 +191,64 @@ public class MarkRessource extends AbstractSailingServerResource {
                 getService().getServerAuthor(), raceLog.getCurrentPassId(), course, CourseDesignerMode.ADMIN_CONSOLE);
         raceLog.add(event);
         return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+    }
+
+    @POST
+    @Path("/addCompetitorToRace")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces("application/json;charset=UTF-8")
+    public Response addCompetitorToRace(String json) throws DoesNotHaveRegattaLogException, NotFoundException,
+            ParseException, JsonDeserializationException, CompetitorRegistrationOnRaceLogDisabledException {
+        // SecurityUtils.getSubject().checkPermission(Permission.MANAGE_COURSE_LAYOUT.getStringPermission(Mode.CREATE));
+        Object requestBody = JSONValue.parseWithException(json);
+        JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
+
+        String leaderboardName = (String) requestObject.get("leaderboardName");
+        String raceColumnName = (String) requestObject.get("raceColumnName");
+        String fleetName = (String) requestObject.get("fleetName");
+
+        JSONArray competitorsRaw = (JSONArray) requestObject.get("competitors");
+        Map<Competitor, Boat> competitorsToRegister = new HashMap<>();
+        for (int i = 0; i < competitorsRaw.size(); i++) {
+            JSONObject competitorRaw = (JSONObject) competitorsRaw.get(i);
+            String competitorId = (String) competitorRaw.get("competitorId");
+            String boatId = (String) competitorRaw.get("boatId");
+            Competitor competitor = getService().getCompetitorAndBoatStore()
+                    .getExistingCompetitorByIdAsString(competitorId);
+            Boat boat = getService().getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatId);
+            competitorsToRegister.put(competitor, boat);
+        }
+        RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
+        Fleet fleet = getFleetByName(raceColumn, fleetName);
+        Map<Competitor, Boat> competitorsRegisteredInRaceLog = new HashMap<>();
+        for (final Entry<Competitor, Boat> e : raceColumn.getCompetitorsRegisteredInRacelog(fleet).entrySet()) {
+            competitorsRegisteredInRaceLog.put((CompetitorWithBoat) e.getKey(), e.getValue());
+        }
+        final Iterable<Competitor> competitorSetToRemove = filterCompetitorDuplicates(competitorsToRegister,
+                competitorsRegisteredInRaceLog);
+        raceColumn.deregisterCompetitors(competitorSetToRemove, fleet);
+        // we assume that the competitors id of type Competitor here, so we need to find the corresponding boat
+        for (Entry<Competitor, Boat> competitorToRegister : competitorsToRegister.entrySet()) {
+            raceColumn.registerCompetitor(competitorToRegister.getKey(), competitorToRegister.getValue(), fleet);
+        }
+        return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+    }
+    
+    private Iterable<Competitor> filterCompetitorDuplicates(
+            Map<Competitor, Boat> competitorToBoatMappingsToRegister,
+            Map<Competitor, Boat> competitorToBoatMappingsRegistered) {
+        final Set<Competitor> competitorsToUnregister = new HashSet<>();
+        Util.addAll(competitorToBoatMappingsRegistered.keySet(), competitorsToUnregister);
+        for (final Entry<Competitor, Boat> e : competitorToBoatMappingsRegistered.entrySet()) {
+            Competitor competitor = e.getKey();
+            if (competitorToBoatMappingsToRegister.get(competitor) == e.getValue()) {
+                // User wants to map competitor to boat, and that mapping already exists; neither add nor remove this
+                // registration but leave as is:
+                competitorToBoatMappingsToRegister.remove(competitor);
+                competitorsToUnregister.remove(competitor);
+            }
+        }
+        return competitorsToUnregister;
     }
 
     private RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName)
