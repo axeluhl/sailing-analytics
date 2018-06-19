@@ -125,7 +125,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
                 /* venueNameParam */ randomName, /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null,
                 /* officialWebsiteURLParam */ null, /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
                 /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "false",
-                /* boatClassNameParam */ null, /* numberOfRacesParam */ null);
+                /* boatClassNameParam */ null, /* numberOfRacesParam */ null, false);
     }
 
     private Response createEvent() throws ParseException, NotFoundException, NumberFormatException, IOException,
@@ -135,7 +135,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
                 /* venueNameParam */ randomName, /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null,
                 /* officialWebsiteURLParam */ null, /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
                 /* createLeaderboardGroupParam */ "false", /* createRegattaParam */ "false",
-                /* boatClassNameParam */ null, /* numberOfRacesParam */ null);
+                /* boatClassNameParam */ null, /* numberOfRacesParam */ null, false);
     }
 
     private Response createEventAtLocation(Position location) throws ParseException, NotFoundException,
@@ -146,7 +146,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
                 /* venueLng */ "" + location.getLngDeg(), /* isPublicParam */ null, /* officialWebsiteURLParam */ null,
                 /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
                 /* createLeaderboardGroupParam */ "false", /* createRegattaParam */ "false",
-                /* boatClassNameParam */ null, /* numberOfRacesParam */ null);
+                /* boatClassNameParam */ null, /* numberOfRacesParam */ null, false);
     }
 
     private Response createEventWithLeaderboardGroupAndRegatta() throws ParseException, NotFoundException,
@@ -156,7 +156,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
                 /* venueNameParam */ randomName, /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null,
                 /* officialWebsiteURLParam */ null, /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
                 /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "true",
-                /* boatClassNameParam */ "A_CAT", /* numberOfRacesParam */ null);
+                /* boatClassNameParam */ "A_CAT", /* numberOfRacesParam */ null, false);
     }
     
     private Response getLeaderboard(String name) {
