@@ -58,7 +58,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
         DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> callback = new DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>() {
             @Override
             public void ok(PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> editedObject) {
-                settingsCallback.newSettings(editedObject);
+                settingsCallback.newSettings(editedObject, getUrlWithSettings(apcd, editedObject, leaderboard, userService));
             }
 
             @Override
@@ -74,10 +74,21 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
     }
 
     @Override
-    public void loadSettingsDefault(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard,
+    public void loadSettingsDefault(EventDTO selectedEvent, AutoPlayContextDefinition apcd, StrippedLeaderboardDTO leaderboard,
             UserService userService, OnSettingsCallback settingsCallback) {
         AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, userService, Arrays.asList(DetailType.values()));
-        settingsCallback.newSettings(autoplayLifecycle.createDefaultSettings());
+        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> defaultSettings = autoplayLifecycle.createDefaultSettings();
+        settingsCallback.newSettings(defaultSettings, getUrlWithSettings(apcd, defaultSettings, leaderboard, userService));
     }
+    
+    private String getUrlWithSettings(AutoPlayContextDefinition apcd,
+            PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings, StrippedLeaderboardDTO leaderboard,
+            UserService userService) {
+        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, userService,
+                Arrays.asList(DetailType.values()));
+        LinkWithSettingsGenerator<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> settingsGenerator = new LinkWithSettingsGenerator<>(
+                Window.Location.getPath(), autoplayLifecycle::createDefaultSettings, apcd);
 
+        return settingsGenerator.createUrl(settings);
+    }
 }
