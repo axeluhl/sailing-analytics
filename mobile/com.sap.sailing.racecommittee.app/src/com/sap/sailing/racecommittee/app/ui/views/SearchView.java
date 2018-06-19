@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.views;
 
+import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.racecommittee.app.R;
+
 import android.content.Context;
 import android.text.Editable;
 import android.util.AttributeSet;
@@ -9,16 +12,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-
-import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.racecommittee.app.R;
+import android.widget.LinearLayout;
 
 public class SearchView extends FrameLayout {
 
     private ImageView mSearchIcon;
     private EditText mEditText;
     private SearchTextWatcher mWatcher;
-
     private boolean mCollapsed = true;
 
     public SearchView(Context context) {
@@ -32,9 +32,14 @@ public class SearchView extends FrameLayout {
     public SearchView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        View layout = LayoutInflater.from(context).inflate(R.layout.search_view, this, false);
+        LayoutInflater.from(context).inflate(R.layout.search_view, this);
+    }
 
-        mEditText = (EditText) layout.findViewById(R.id.search_input);
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+
+        mEditText = (EditText) findViewById(R.id.search_input);
         if (mEditText != null) {
             mEditText.setVisibility(getResources().getBoolean(R.bool.penalty_search_open) ? VISIBLE : GONE);
             mEditText.addTextChangedListener(new android.text.TextWatcher() {
@@ -56,11 +61,11 @@ public class SearchView extends FrameLayout {
                 }
             });
         }
-        mSearchIcon = (ImageView) layout.findViewById(R.id.search_icon);
+        mSearchIcon = (ImageView) findViewById(R.id.search_icon);
         if (mSearchIcon != null && getResources().getBoolean(R.bool.penalty_search_open)) {
             mSearchIcon.setImageDrawable(BitmapHelper.getAttrDrawable(getContext(), R.attr.clear_24dp));
         }
-        View searchButton = layout.findViewById(R.id.search_button);
+        View searchButton = findViewById(R.id.search_button);
         if (searchButton != null) {
             searchButton.setOnClickListener(new OnClickListener() {
                 @Override
@@ -69,12 +74,23 @@ public class SearchView extends FrameLayout {
                 }
             });
         }
-
-        addView(layout);
     }
 
     public void setSearchTextWatcher(SearchTextWatcher watcher) {
         mWatcher = watcher;
+    }
+
+    public void isEditSmall(boolean smallEdit) {
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mEditText.getLayoutParams();
+        if (params != null) {
+            int width = getResources().getDimensionPixelSize(R.dimen.search_view_size);
+            if (smallEdit) {
+                width -= mSearchIcon.getWidth();
+            }
+            params.width = width;
+            mEditText.setLayoutParams(params);
+            mEditText.invalidate();
+        }
     }
 
     private void onClickButton(boolean startOpen) {

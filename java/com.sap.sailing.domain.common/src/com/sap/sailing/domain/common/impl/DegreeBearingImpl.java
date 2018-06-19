@@ -4,6 +4,7 @@ import java.io.ObjectStreamException;
 
 import com.sap.sse.common.AbstractBearing;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.settings.GwtIncompatible;
 
 /**
  * This class is marked as deprecated because it was refactored to {@link com.sap.sse.common.impl.DegreeBearingImpl}
@@ -13,10 +14,11 @@ import com.sap.sse.common.Bearing;
  * object. Deserialization of this class now points to the refactored {@link com.sap.sse.common.impl.DegreeBearingImpl}.
  * 
  * 
- * @author Maximilian Groß (D064866)
+ * @author Maximilian Groï¿½ (D064866)
  *
  */
 @Deprecated
+@GwtIncompatible
 public class DegreeBearingImpl extends AbstractBearing implements Bearing {
     private static final long serialVersionUID = -8045400378221073451L;
     private final double bearingDeg;
