@@ -134,7 +134,8 @@ public class EventsResource extends AbstractSailingServerResource {
             @FormParam("createleaderboardgroup") String createLeaderboardGroupParam,
             @FormParam("createregatta") String createRegattaParam,
             @FormParam("boatclassname") String boatClassNameParam,
-            @FormParam("numberofraces") String numberOfRacesParam) throws ParseException, NotFoundException,
+            @FormParam("numberofraces") String numberOfRacesParam,
+            @FormParam("canBoatsOfCompetitorsChangePerRace") boolean canBoatsOfCompetitorsChangePerRace) throws ParseException, NotFoundException,
             NumberFormatException, IOException, org.json.simple.parser.ParseException, InvalidDateException {
         if (enforceSecurityChecks) {
             SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Mode.CREATE));
@@ -147,7 +148,7 @@ public class EventsResource extends AbstractSailingServerResource {
                     startDateAsMillis, endDateParam, endDateAsMillis, venueNameParam,
                     /* venue latitude */ venueLat, /* venue longitude */ venueLng, isPublicParam, officialWebsiteURLParam,
                     baseURLParam, leaderboardGroupIdsListParam, createLeaderboardGroupParam, createRegattaParam,
-                    boatClassNameParam, numberOfRacesParam);
+                    boatClassNameParam, numberOfRacesParam, canBoatsOfCompetitorsChangePerRace);
             final JSONObject jsonResponse = new JSONObject();
             jsonResponse.put("eventid", eventAndLeaderboardGroupAndLeaderboard.getA().getId().toString());
             jsonResponse.put("eventname", eventAndLeaderboardGroupAndLeaderboard.getA().getName());
@@ -334,7 +335,7 @@ public class EventsResource extends AbstractSailingServerResource {
     
     private RegattaLeaderboard validateAndCreateRegatta(String regattaNameParam, String boatClassNameParam, String scoringSchemeParam,
             UUID courseAreaId, String buoyZoneRadiusInHullLengthsParam, String useStartTimeInterferenceParam, String controlTrackingFromStartAndFinishTimesParam,
-            String rankingMetricParam, List<Integer> leaderboardDiscardThresholdsParam, String numberOfRacesParam)
+            String rankingMetricParam, List<Integer> leaderboardDiscardThresholdsParam, String numberOfRacesParam, boolean canBoatsOfCompetitorsChangePerRace)
             throws ParseException, NotFoundException {
         boolean controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimesParam == null ? false : Boolean.parseBoolean(controlTrackingFromStartAndFinishTimesParam);
         boolean useStartTimeInterference = useStartTimeInterferenceParam == null ? true : Boolean.parseBoolean(useStartTimeInterferenceParam);
@@ -354,7 +355,6 @@ public class EventsResource extends AbstractSailingServerResource {
         RegattaCreationParametersDTO regattaCreationParametersDTO = new RegattaCreationParametersDTO(
                 createDefaultSeriesCreationParameters(regattaName, numberOfRaces));
         UUID regattaId = UUID.randomUUID();
-        boolean canBoatsOfCompetitorsChangePerRace = false;
         addRegatta(regattaName, canBoatsOfCompetitorsChangePerRace, controlTrackingFromStartAndFinishTimes, useStartTimeInterference,
                 buoyZoneRadiusInHullLengths, courseAreaId, boatClassName, /* startDate */ null, /* endDate */ null, scoringScheme,
                 rankingMetric, regattaId, regattaCreationParametersDTO, leaderboardDiscardThresholds, numberOfRaces);
@@ -366,6 +366,7 @@ public class EventsResource extends AbstractSailingServerResource {
     }
 
     /**
+     * @param canBoatsOfCompetitorsChangePerRace 
      * @return the event created as first component; if a leaderboard group was to be created, the leaderboard group
      *         created as the second component or {@code null} otherwise; the regatta leaderboard as the third component
      *         in case a regatta was to be created, or {@code null} otherwise
@@ -375,7 +376,7 @@ public class EventsResource extends AbstractSailingServerResource {
             String venueNameParam, String venueLat, String venueLng, String isPublicParam,
             String officialWebsiteURLParam, String baseURLParam, List<String> leaderboardGroupIdsListParam,
             String createLeaderboardGroupParam, String createRegattaParam, String boatClassName,
-            String numberOfRacesParam) throws ParseException, NotFoundException, NumberFormatException, IOException,
+            String numberOfRacesParam, boolean canBoatsOfCompetitorsChangePerRace) throws ParseException, NotFoundException, NumberFormatException, IOException,
             org.json.simple.parser.ParseException, InvalidDateException {
         boolean isPublic = isPublicParam == null ? false : Boolean.parseBoolean(isPublicParam);
         boolean createRegatta = createRegattaParam == null ? true : Boolean.parseBoolean(createRegattaParam);
@@ -413,7 +414,7 @@ public class EventsResource extends AbstractSailingServerResource {
                     /* scoringSchemeParam */ null, courseArea.getId(), /* buoyZoneRadiusInHullLengthsParam */ null,
                     /* useStartTimeInterferenceParam */ null, /* controlTrackingFromStartAndFinishTimesParam */ null,
                     /* rankingMetricParam */ null, /* leaderboardDiscardThresholdsParam */ null,
-                    numberOfRacesParam);
+                    numberOfRacesParam, canBoatsOfCompetitorsChangePerRace);
             if (leaderboardGroup != null) {
                 getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getName(), leaderboardGroup.getName(),
                         leaderboardGroup.getDescription(), leaderboardGroup.getDisplayName(),
