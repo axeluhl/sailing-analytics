@@ -5,9 +5,9 @@ import static com.sap.sailing.domain.common.SortingOrder.DESCENDING;
 import static com.sap.sailing.domain.common.SortingOrder.NONE;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 
 /**
  * Identifies details that can be requested from the racing service. Optionally, the details can specify a precision as
@@ -247,7 +247,7 @@ public enum DetailType implements Serializable {
      * usually only selectable, if it already has data.
      */
     public static Collection<DetailType> getAutoplayDetailTypesForChart() {
-        final Collection<DetailType> availableDetailsTypes = new ArrayList<>();
+        final Collection<DetailType> availableDetailsTypes = new LinkedHashSet<>();
         availableDetailsTypes.add(DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD);
         availableDetailsTypes.add(DetailType.LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         availableDetailsTypes.add(DetailType.LEG_DISTANCE_TRAVELED);
@@ -266,7 +266,7 @@ public enum DetailType implements Serializable {
     }
 
     public static Collection<DetailType> getRaceExpeditionDetailTypes() {
-        final Collection<DetailType> allowed = new ArrayList<>();
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(EXPEDITION_RACE_AWA);
         allowed.add(EXPEDITION_RACE_AWS);
         allowed.add(EXPEDITION_RACE_TWA);
@@ -310,14 +310,14 @@ public enum DetailType implements Serializable {
     }
 
     public static Collection<DetailType> getLegExtendedBravoDetailTypes() {
-        final Collection<DetailType> allowed = new ArrayList<>();
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS);
         allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DURATION_FOILED_IN_SECONDS);
         return allowed;
     }
 
     public static Collection<DetailType> getRaceExtendedBravoDetailTypes() {
-        final Collection<DetailType> allowed = new ArrayList<>();
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(DetailType.BRAVOEXTENDED_RACE_CURRENT_PORT_DAGGERBOARD_RAKE);
         allowed.add(DetailType.BRAVOEXTENDED_RACE_CURRENT_STBD_DAGGERBOARD_RAKE);
         allowed.add(DetailType.BRAVOEXTENDED_RACE_CURRENT_PORT_RUDDER_RAKE);
@@ -340,7 +340,7 @@ public enum DetailType implements Serializable {
     }
 
     public static Collection<DetailType> getRaceBravoDetailTypes() {
-        final Collection<DetailType> allowed = new ArrayList<>();
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(DetailType.BRAVO_RACE_HEEL_IN_DEGREES);
         allowed.add(DetailType.BRAVO_RACE_PITCH_IN_DEGREES);
         allowed.add(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
@@ -348,7 +348,7 @@ public enum DetailType implements Serializable {
     }
 
     public static Collection<DetailType> getLegBravoDetailTypes() {
-        final Collection<DetailType> allowed = new ArrayList<>();
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(DetailType.BRAVO_LEG_CURRENT_HEEL_IN_DEGREES);
         allowed.add(DetailType.BRAVO_LEG_CURRENT_PITCH_IN_DEGREES);
         allowed.add(DetailType.BRAVO_LEG_CURRENT_RIDE_HEIGHT_IN_METERS);
@@ -356,7 +356,7 @@ public enum DetailType implements Serializable {
     }
 
     public static Collection<DetailType> getAllRaceDetailTypes() {
-        final Collection<DetailType> allowed = new ArrayList<>();
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(RACE_GAP_TO_LEADER_IN_SECONDS);
         allowed.add(RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         allowed.add(RACE_DISTANCE_TRAVELED);
@@ -386,7 +386,7 @@ public enum DetailType implements Serializable {
      * @return
      */
     public static Collection<DetailType> getAllNonRestrictedDetailTypes() {
-        final Collection<DetailType> all = new ArrayList<>(Arrays.asList(values()));
+        final Collection<DetailType> all = new LinkedHashSet<>(Arrays.asList(values()));
         all.removeAll(getRaceBravoDetailTypes());
         all.removeAll(getLegBravoDetailTypes());
         all.removeAll(getRaceExtendedBravoDetailTypes());
@@ -397,7 +397,7 @@ public enum DetailType implements Serializable {
     }
 
     public static Collection<DetailType> getAvailableOverallDetailColumnTypes() {
-        final Collection<DetailType> allowed = new ArrayList<>();
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(REGATTA_RANK);
         allowed.add(OVERALL_TOTAL_DISTANCE_TRAVELED);
         allowed.add(OVERALL_TOTAL_AVERAGE_SPEED_OVER_GROUND);
@@ -413,14 +413,14 @@ public enum DetailType implements Serializable {
     }
 
     public static Collection<DetailType> getOverallBravoDetailTypes() {
-        final Collection<DetailType> allowed = new ArrayList<>();
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(OVERALL_TOTAL_DISTANCE_FOILED_IN_METERS);
         allowed.add(OVERALL_TOTAL_DURATION_FOILED_IN_SECONDS);
         return allowed;
     }
 
     public static Collection<DetailType> getLegDetailColumnTypes() {
-        final Collection<DetailType> allowed = new ArrayList<>();
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         allowed.add(LEG_DISTANCE_TRAVELED);
         allowed.add(LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START);
@@ -441,7 +441,7 @@ public enum DetailType implements Serializable {
     }
 
     public static Collection<DetailType> getRaceStartAnalysisColumnTypes() {
-        final Collection<DetailType> allowed = new ArrayList<>();
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START);
         allowed.add(RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START);
         allowed.add(DISTANCE_TO_START_AT_RACE_START);
@@ -454,7 +454,7 @@ public enum DetailType implements Serializable {
     }
 
     public static Collection<DetailType> getLegExpeditionDetailColumnTypes() {
-        final Collection<DetailType> allowed = new ArrayList<>();
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(EXPEDITION_LEG_AWA);
         allowed.add(EXPEDITION_LEG_AWS);
         allowed.add(EXPEDITION_LEG_TWA);
@@ -501,7 +501,7 @@ public enum DetailType implements Serializable {
      * Not yet implemented types can be added here, they will be hidden from any user under all circumstances
      */
     public static Collection<DetailType> getDisabledDetailColumTypes() {
-        final Collection<DetailType> disabled = new ArrayList<>();
+        final Collection<DetailType> disabled = new LinkedHashSet<>();
         disabled.add(EXPEDITION_LEG_TARG_TWA);
         disabled.add(EXPEDITION_LEG_VMG);
         disabled.add(EXPEDITION_LEG_VMG_TARG_VMG_DELTA);
@@ -537,7 +537,7 @@ public enum DetailType implements Serializable {
     }
 
     public static Collection<DetailType> getAllLegDetailColumnTypes() {
-        final Collection<DetailType> all = new ArrayList<>();
+        final Collection<DetailType> all = new LinkedHashSet<>();
         all.addAll(getLegDetailColumnTypes());
         all.addAll(getLegBravoDetailTypes());
         all.addAll(getLegExtendedBravoDetailTypes());
