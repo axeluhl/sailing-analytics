@@ -71,16 +71,13 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
             @Override
             public Widget get() {
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null);
-                ResultsPresenter<?> resultsPresenter = new TabbedSailingResultsPresenter(/* parent */ null,
-                        /* context */ null, /* delegate drillDownCallback */ groupKey -> {
-                            queryDefinitionProviderWithControls.drillDown(groupKey,
-                                    /* onSuccessCallback */ () -> queryRunner.runQuery());
-                        }, getStringMessages());
+                ResultsPresenter<?> resultsPresenter = new TabbedSailingResultsPresenter(/*parent*/ null, /*context*/ null, 
+                        /*drillDownCallback*/ groupKey -> queryDefinitionProviderWithControls.drillDown(groupKey, queryRunner::runQuery),
+                        getStringMessages());
                 DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
                 queryDefinitionProviderWithControls = new QueryDefinitionProviderWithControls(null, null, session,
                         dataMiningService, DataMiningEntryPoint.this, settingsControl, settingsManager,
                         resultsPresenter);
-                queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
                 selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
                 queryRunner = new SimpleQueryRunner(null, null, session, dataMiningService, DataMiningEntryPoint.this,
                         queryDefinitionProviderWithControls, resultsPresenter);
@@ -91,7 +88,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                  * automatic execution of queries. Re-enable this, when this functionality is desired again.
                  */
                 // settingsControl.addSettingsComponent(queryRunner);
-                SplitLayoutPanel splitPanel = new SplitLayoutPanel(15);
+                SplitLayoutPanel splitPanel = new SplitLayoutPanel(10);
                 splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
                 splitPanel.add(selectionDockPanel);
                 return splitPanel;

@@ -9,23 +9,22 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
 import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
-import com.sap.sse.datamining.ui.client.DataMiningResources;
 import com.sap.sse.datamining.ui.client.ResultsPresenter;
 import com.sap.sse.datamining.ui.client.presentation.ResultsChart.DrillDownCallback;
+import com.sap.sse.datamining.ui.client.resources.DataMiningResources;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.controls.ScrolledTabLayoutPanel;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningComponent<Settings>
+public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings>
         implements ResultsPresenter<Settings> {
 
     protected static final DataMiningResources resources = GWT.create(DataMiningResources.class);
@@ -34,13 +33,12 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
     protected final DrillDownCallback drillDownCallback;
     protected final Map<String, ResultsPresenter<Settings>> registeredResultPresenterMap;
 
-    public AbstractTabbedResultsPresenter(Component<?> parent, ComponentContext<?> context,
+    public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context,
             DrillDownCallback drillDownCallback) {
         super(parent, context);
         this.drillDownCallback = drillDownCallback;
         tabPanel = new ScrolledTabLayoutPanel(30, Unit.PX, resources.arrowLeftIcon(), resources.arrowRightIcon());
         tabPanel.setAnimationDuration(0);
-        tabPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
         presentersMappedByHeader = new HashMap<>();
         registeredResultPresenterMap = new HashMap<>();
 
@@ -50,7 +48,9 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
 
     private void addNewTabTab() {
         Label widget = new Label("This should never be shown");
-        Image header = new Image(resources.plusIcon());
+        FlowPanel header = new FlowPanel();
+        header.addStyleName("resultsPresenterTabHeader");
+        header.add(new Image(resources.plusIcon()));
         tabPanel.add(widget, header);
         // This is necessary to stop the selection of this pseudo tab
         tabPanel.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
@@ -58,7 +58,7 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
             public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
                 if (event.getItem() == tabPanel.getWidgetCount() - 1) {
                     event.cancel();
-                    addTabAndFocus(new MultiResultsPresenter(AbstractTabbedResultsPresenter.this, getComponentContext(),
+                    addTabAndFocus(new MultiResultsPresenter(TabbedResultsPresenter.this, getComponentContext(),
                             drillDownCallback));
                 }
             }
@@ -156,13 +156,14 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
         return "tabbedResultsPresenters";
     }
 
-    public class CloseableTabHeader extends HorizontalPanel {
+    public class CloseableTabHeader extends FlowPanel {
 
-        private final HTML label;
+        private final Label label;
 
         public CloseableTabHeader() {
-            label = new HTML(getDataMiningStringMessages().empty());
-            label.getElement().getStyle().setMarginRight(5, Unit.PX);
+            this.addStyleName("resultsPresenterTabHeader");
+            
+            label = new Label(getDataMiningStringMessages().empty());
             this.add(label);
             Image closeImage = new Image(resources.closeIcon());
             closeImage.addClickHandler(new ClickHandler() {
@@ -202,7 +203,7 @@ public abstract class AbstractTabbedResultsPresenter extends AbstractDataMiningC
      * @throws IllegalStateException
      *             if the {@link resultType} is already registered.
      */
-    protected void registerResultPresenter(Class<?> resultType, ResultsPresenter<Settings> resultPresenter)
+    public void registerResultsPresenter(Class<?> resultType, ResultsPresenter<Settings> resultPresenter)
             throws IllegalStateException {
         String className = resultType.getName();
         if (!registeredResultPresenterMap.containsKey(className)) {

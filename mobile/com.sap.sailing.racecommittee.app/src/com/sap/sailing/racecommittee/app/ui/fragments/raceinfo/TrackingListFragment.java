@@ -44,6 +44,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorAndBoatAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorResultsList;
 import com.sap.sailing.racecommittee.app.ui.adapters.FinishListAdapter;
+import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorGoalPassingComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorNameComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorSailIdComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
@@ -95,6 +96,8 @@ public class TrackingListFragment extends BaseFragment
 
     private static final int SORT_SAIL_NUMBER = 0;
     private static final int SORT_NAME = 1;
+    private static final int SORT_GOAL = 2;
+    private static final int SORT_START = 3;
 
     private RecyclerViewDragDropManager mDragDropManager;
     private RecyclerViewSwipeManager mSwipeManager;
@@ -199,6 +202,7 @@ public class TrackingListFragment extends BaseFragment
         SearchView searchView = ViewHelper.get(layout, R.id.competitor_search);
         if (searchView != null) {
             searchView.setSearchTextWatcher(this);
+            searchView.isEditSmall(true);
         }
         View sortByButton = ViewHelper.get(layout, R.id.competitor_sort);
         if (sortByButton != null) {
@@ -228,6 +232,7 @@ public class TrackingListFragment extends BaseFragment
         mComparators = new ArrayList<>();
         mComparators.add(SORT_SAIL_NUMBER, new CompetitorSailIdComparator());
         mComparators.add(SORT_NAME, new CompetitorNameComparator());
+        mComparators.add(SORT_GOAL, new CompetitorGoalPassingComparator());
         mComparator = mComparators.get(SORT_SAIL_NUMBER);
         mFinishedData = initializeFinishList();
         mConfirmedData = new CompetitorResultsImpl();
@@ -295,9 +300,7 @@ public class TrackingListFragment extends BaseFragment
         Util.addAll(getRace().getCompetitorsAndBoats().entrySet(), mCompetitorData);
         mFilteredCompetitorData.clear();
         mFilteredCompetitorData.addAll(mCompetitorData);
-        sortCompetitors();
-        mCompetitorAdapter.notifyDataSetChanged();
-
+        loadLeaderboardResult();
         initLocalData();
     }
 
@@ -398,14 +401,15 @@ public class TrackingListFragment extends BaseFragment
             case R.id.by_name:
                 mComparator = mComparators.get(SORT_NAME);
                 break;
-
             case R.id.by_start:
+                mComparator = mComparators.get(SORT_START);
                 break;
-
             case R.id.by_goal:
-                loadLeaderboardResult();
+                mComparator = mComparators.get(SORT_GOAL);
                 break;
-
+            case R.id.by_boat:
+                mComparator = mComparators.get(SORT_SAIL_NUMBER);
+                break;
             default:
                 mComparator = mComparators.get(SORT_SAIL_NUMBER);
 
@@ -502,8 +506,12 @@ public class TrackingListFragment extends BaseFragment
 
                 @Override
                 public void onLoadSucceeded(LeaderboardResult data, boolean isCached) {
-                    if (isAdded()) {
-                        onLoadLeaderboardSucceeded(data);
+                    List<Util.Pair<Long, String>> sortByRank = data.getResult(getRace().getName());
+                    if (isAdded() && sortByRank != null) {
+                        CompetitorGoalPassingComparator comparator = (CompetitorGoalPassingComparator)mComparators.get(SORT_GOAL);
+                        comparator.updateWith(sortByRank);
+                        sortCompetitors();
+                        mCompetitorAdapter.notifyDataSetChanged();
                     }
                 }
             }));
@@ -520,27 +528,6 @@ public class TrackingListFragment extends BaseFragment
         sortCompetitors();
         deleteCompetitorsFromFinishedList(competitors);
         deleteCompetitorsFromCompetitorList();
-        mCompetitorAdapter.notifyDataSetChanged();
-    }
-
-    protected void onLoadLeaderboardSucceeded(LeaderboardResult data) {
-        final String raceName = getRace().getName();
-        List<Util.Pair<Long, String>> sortByRank = data.getResult(raceName);
-        List<Map.Entry<Competitor, Boat>> sortedList = new ArrayList<>();
-        if (sortByRank != null) {
-            for (Util.Pair<Long, String> item : sortByRank) {
-                for (Map.Entry<Competitor, Boat> competitor : mCompetitorData) {
-                    if (competitor.getKey().getId().toString().equals(item.getB())) {
-                        sortedList.add(competitor);
-                        break;
-                    }
-                }
-            }
-        }
-        mCompetitorData.clear();
-        mCompetitorData.addAll(sortedList);
-        mFilteredCompetitorData.clear();
-        mFilteredCompetitorData.addAll(sortedList);
         mCompetitorAdapter.notifyDataSetChanged();
     }
 
@@ -607,7 +594,7 @@ public class TrackingListFragment extends BaseFragment
     @Override
     public void onCompetitorClick(Competitor competitor) {
         moveCompetitorToFinishList(competitor);
-        for (Map.Entry<Competitor, Boat> entry : getRace().getCompetitorsAndBoats().entrySet()) {
+        for (Map.Entry<Competitor, Boat> entry : mFilteredCompetitorData) {
             if (entry.getKey().equals(competitor)) {
                 removeCompetitorFromList(entry);
                 break;
@@ -643,9 +630,15 @@ public class TrackingListFragment extends BaseFragment
     private void removeCompetitorFromList(Map.Entry<Competitor, Boat> entry) {
         mCompetitorData.remove(entry);
         int pos = mFilteredCompetitorData.indexOf(entry);
-        mFilteredCompetitorData.remove(entry);
-        sortCompetitors();
+        mFilteredCompetitorData.remove(pos);
         mCompetitorAdapter.notifyItemRemoved(pos);
+    }
+
+    private void addNewCompetitorToCompetitorList(Map.Entry<Competitor, Boat> entry) {
+        mCompetitorData.add(entry);
+        mFilteredCompetitorData.add(entry);
+        sortCompetitors();
+        mCompetitorAdapter.notifyItemInserted(mFilteredCompetitorData.indexOf(entry));
     }
 
     /**
@@ -719,13 +712,6 @@ public class TrackingListFragment extends BaseFragment
             .getCompetitorDisplayName(), newOneBasedRank, competitorToReplaceWithAdjustedPosition
             .getMaxPointsReason(), competitorToReplaceWithAdjustedPosition.getScore(), competitorToReplaceWithAdjustedPosition
             .getFinishingTime(), competitorToReplaceWithAdjustedPosition.getComment(), MergeState.OK);
-    }
-
-    private void addNewCompetitorToCompetitorList(Map.Entry<Competitor, Boat> entry) {
-        mCompetitorData.add(entry);
-        mFilteredCompetitorData.add(entry);
-        sortCompetitors();
-        mCompetitorAdapter.notifyItemInserted(mFilteredCompetitorData.indexOf(entry));
     }
 
     @Override
@@ -1140,6 +1126,8 @@ public class TrackingListFragment extends BaseFragment
             builder.setMessage(getString(R.string.refresh_message, string.toString()));
             builder.setPositiveButton(R.string.refresh_positive, null);
             builder.show();
+            // goal passing might have changed too, so update them
+            loadLeaderboardResult();
         }
     }
 
