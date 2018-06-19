@@ -85,12 +85,12 @@ class CheckInRequestManager: NSObject {
     }
     
     let baseURLString: String
-    let manager: AFHTTPRequestOperationManager
+    let manager: AFHTTPSessionManager
     let sessionManager: AFURLSessionManager
     
     init(baseURLString: String = "") {
         self.baseURLString = baseURLString
-        manager = AFHTTPRequestOperationManager(baseURL: URL(string: baseURLString))
+        manager = AFHTTPSessionManager(baseURL: URL(string: baseURLString))
         manager.requestSerializer = AFJSONRequestSerializer() as AFHTTPRequestSerializer
         manager.requestSerializer.timeoutInterval = Application.RequestTimeout
         manager.responseSerializer = AFJSONResponseSerializer() as AFHTTPResponseSerializer
@@ -111,6 +111,7 @@ class CheckInRequestManager: NSObject {
         manager.get(
             urlString,
             parameters: nil,
+            progress: nil,
             success: { (requestOperation, responseObject) in self.getEventSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.getEventFailure(error: error, failure: failure) }
         )
@@ -138,6 +139,7 @@ class CheckInRequestManager: NSObject {
         manager.get(
             urlString,
             parameters: nil,
+            progress: nil,
             success: { (requestOperation, responseObject) in self.getLeaderboardSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.getLeaderboardFailure(error: error, failure: failure) }
         )
@@ -165,6 +167,7 @@ class CheckInRequestManager: NSObject {
         manager.get(
             urlString,
             parameters: nil,
+            progress: nil,
             success: { (requestOperation, responseObject) in self.getBoatSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.getBoatFailure(error: error, failure: failure) }
         )
@@ -192,6 +195,7 @@ class CheckInRequestManager: NSObject {
         manager.get(
             urlString,
             parameters: nil,
+            progress: nil,
             success: { (requestOperation, responseObject) in self.getCompetitorSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.getCompetitorFailure(error: error, failure: failure) }
         )
@@ -221,6 +225,7 @@ class CheckInRequestManager: NSObject {
         manager.get(
             urlString,
             parameters: nil,
+            progress: nil,
             success: { (requestOperation, responseObject) in self.getMarkSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.getMarkFailure(error: error, failure: failure) }
         )
@@ -248,6 +253,7 @@ class CheckInRequestManager: NSObject {
         manager.get(
             urlString,
             parameters: nil,
+            progress: nil,
             success: { (requestOperation, responseObject) in self.getTeamSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.getTeamFailure(error: error, failure: failure) }
         )
@@ -301,6 +307,7 @@ class CheckInRequestManager: NSObject {
         manager.post(
             urlString,
             parameters: body,
+            progress: nil,
             success: { (requestOperation, responseObject) in self.postCheckInSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.postCheckInFailure(error: error, failure: failure) }
         )
@@ -340,6 +347,7 @@ class CheckInRequestManager: NSObject {
         manager.post(
             urlString,
             parameters: body,
+            progress: nil,
             success: { (requestOperation, responseObject) in self.postCheckOutSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.postCheckOutFailure(error: error, failure: failure) }
         )
@@ -381,6 +389,7 @@ class CheckInRequestManager: NSObject {
         manager.post(
             urlString,
             parameters: body,
+            progress: nil,
             success: { (requestOperation, responseObject) in self.postGPSFixesSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.postGPSFixesFailure(error: error, failure: failure) }
         )
