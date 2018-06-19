@@ -28,7 +28,6 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
@@ -37,7 +36,6 @@ import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
@@ -48,10 +46,8 @@ import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.impl.RGBColor;
 
 @Path("/v1/mark")
 public class MarkRessource extends AbstractSailingServerResource {
