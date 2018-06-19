@@ -54,31 +54,24 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 			if (flightMultiplier <= 1) {
 				this.pairingListTemplate = this.createPairingListTemplate(pairingFrameProvider.getFlightsCount(),
 						pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount() + dummies);
-				this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
-						new int[pairingFrameProvider.getCompetitorsCount()
-								+ dummies][pairingFrameProvider.getCompetitorsCount() + dummies]));
-				this.assignmentQuality = this.calcStandardDev(getAssignmentAssociations(this.pairingListTemplate,
-						new int[pairingFrameProvider.getCompetitorsCount()][pairingFrameProvider.getCompetitorsCount()
-								/ pairingFrameProvider.getGroupsCount()]));
 				this.boatchanges = this.getBoatchangesFromPairinglist(this.pairingListTemplate,
 						pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
 						pairingFrameProvider.getCompetitorsCount());
-				this.resetDummies(pairingListTemplate, pairingFrameProvider.getCompetitorsCount() + dummies);
 			} else {
 				this.pairingListTemplate = this.createPairingListTemplate(
 						pairingFrameProvider.getFlightsCount() / flightMultiplier,
 						pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount() + dummies);
-				this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
-						new int[pairingFrameProvider.getCompetitorsCount()
-								+ dummies][pairingFrameProvider.getCompetitorsCount() + dummies]));
-				this.assignmentQuality = this.calcStandardDev(getAssignmentAssociations(this.pairingListTemplate,
-						new int[pairingFrameProvider.getCompetitorsCount()][pairingFrameProvider.getCompetitorsCount()
-								/ pairingFrameProvider.getGroupsCount()]));
 				this.boatchanges = this.getBoatchangesFromPairinglist(this.pairingListTemplate,
 						pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
 						pairingFrameProvider.getCompetitorsCount()) * flightMultiplier + flightMultiplier*(this.getMatches(this.pairingListTemplate[pairingListTemplate.length-1], this.pairingListTemplate[0]));
-				this.resetDummies(pairingListTemplate, pairingFrameProvider.getCompetitorsCount() + dummies);
 			}
+			this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
+                                new int[pairingFrameProvider.getCompetitorsCount()
+                                                + dummies][pairingFrameProvider.getCompetitorsCount() + dummies]));
+                        this.assignmentQuality = this.calcStandardDev(getAssignmentAssociations(this.pairingListTemplate,
+                                new int[pairingFrameProvider.getCompetitorsCount() + dummies][(pairingFrameProvider.getCompetitorsCount() + dummies)
+                                                / pairingFrameProvider.getGroupsCount()]));
+                        this.resetDummies(pairingListTemplate, pairingFrameProvider.getCompetitorsCount() + dummies);
 		} else {
 			throw new IllegalArgumentException("Wrong arguments for creating a pairing list template: count of flights "
 					+ "has to be greater than 0; count of groups has to be greater than 1; count of competitors has to "
@@ -110,10 +103,10 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 		this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
 				new int[competitorsCount + this.dummies][competitorsCount + this.dummies]));
 		this.assignmentQuality = this.calcStandardDev(getAssignmentAssociations(template,
-				new int[competitorsCount][competitorsCount
+				new int[competitorsCount + this.dummies][(competitorsCount + this.dummies)
 						/ groupCount]));
 		this.boatchanges = this.getBoatchangesFromPairinglist(template,
-				template.length/groupCount, groupCount, competitorsCount);
+				template.length / groupCount, groupCount, competitorsCount);
 		this.resetDummies(this.pairingListTemplate, competitorsCount + this.dummies);
 		this.iterations = 100000;
 		this.flightMultiplier = flightMultiplier;
