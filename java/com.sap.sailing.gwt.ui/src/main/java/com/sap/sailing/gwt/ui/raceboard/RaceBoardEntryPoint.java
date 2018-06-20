@@ -116,7 +116,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                             public void onSuccess(Iterable<DetailType> chartAllowedTypes) {
                                 sailingService.getAvailableDetailTypesForLeaderboard(
                                         raceboardContextDefinition.getLeaderboardName(),
-                                        new AsyncCallback<Iterable<DetailType>>() {
+                                        raceboardData.getRace().getRaceIdentifier() , new AsyncCallback<Iterable<DetailType>>() {
                                             @Override
                                             public void onFailure(Throwable caught) {
                                                 reportError(

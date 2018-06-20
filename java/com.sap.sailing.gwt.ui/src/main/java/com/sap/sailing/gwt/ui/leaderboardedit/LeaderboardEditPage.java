@@ -44,7 +44,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
                         .deserializeFromCurrentLocation(new LeaderboardEditContextDefinition());
                 final String leaderboardName = settings.getLeaderboardName();
                 if (leaderboardNames.contains(leaderboardName)) {
-                    sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<Iterable<DetailType>>() {
+                    sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName, null, new AsyncCallback<Iterable<DetailType>>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
