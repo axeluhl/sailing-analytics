@@ -7440,7 +7440,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 for (Fleet fleet : race.getFleets()) {
                     TrackedRace trace = race.getTrackedRace(fleet);
                     if (raceIdentifierOrNull != null) {
-                        if (!raceIdentifierOrNull.getRaceName().equals(race.getName())) {
+                        if (!raceIdentifierOrNull.equals(race.getRaceIdentifier(fleet))) {
                             continue;
                         }
                     }
