@@ -17,6 +17,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -35,6 +37,7 @@ import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper;
+import com.sap.sailing.android.shared.util.NotificationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
@@ -334,6 +337,11 @@ public class LoginActivity extends BaseActivity
         if (!EulaHelper.with(this).isEulaAccepted()) {
             EulaHelper.with(this).showEulaDialog(R.style.AppTheme_AlertDialog);
         }
+
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+        int smallIcon = R.drawable.ic_boat_white_24dp;
+        CharSequence title = getText(R.string.app_name);
+        NotificationHelper.prepareNotificationWith(title, largeIcon, smallIcon);
     }
 
     @Override
