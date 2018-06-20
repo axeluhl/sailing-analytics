@@ -33,8 +33,26 @@ public enum ShardingType {
             return shardingInfo;
         }
         return new StringBuilder().append(prefix)
-                .append(shardingInfo.replace(' ', '_'))
+                .append(normalize(shardingInfo))
                 .toString();
+    }
+
+    private String normalize(String replace) {
+        char[] chars = replace.toCharArray();
+        StringBuilder answer = new StringBuilder();
+        for(int i = 0;i<chars.length;i++) {
+            char c = chars[i];
+            if (c > 47 && c < 58) { // digits
+                answer.append(c);
+            } else if (c > 64 && c < 91) { // uppercase letters
+                answer.append(c);
+            } else if (c > 69 && c < 123) { // lowercase letters
+                answer.append(c);
+            } else {
+                answer.append("_");
+            }
+        }
+        return answer.toString();
     }
 
     public String getPrefix() {
