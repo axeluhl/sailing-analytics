@@ -26,58 +26,81 @@ import com.sap.sse.security.ui.client.UserService;
 
 public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
     private static final Logger logger = Logger.getLogger(AutoPlayClassicConfiguration.class.getName());
-    
+
     @Override
     public void startRootNode(AutoPlayClientFactory cf, AutoPlayContextDefinition context,
             PerspectiveCompositeSettings<?> settings, EventDTO initialEventData) {
-        cf.getSailingService().getAvailableDetailTypesForLeaderboard(context.getLeaderboardName(), new AsyncCallback<Iterable<DetailType>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                logger.log(Level.WARNING, "Could not load detailtypes for leaderboard", caught);
-            }
+        cf.getSailingService().getAvailableDetailTypesForLeaderboard(context.getLeaderboardName(),
+                new AsyncCallback<Iterable<DetailType>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        logger.log(Level.WARNING, "Could not load detailtypes for leaderboard", caught);
+                    }
 
-            @SuppressWarnings("unchecked")
-            @Override
-            public void onSuccess(Iterable<DetailType> result) {
-                StrippedLeaderboardDTO leaderBoardDTO = AutoplayHelper.getSelectedLeaderboard(initialEventData,
-                        context.getLeaderboardName());
-                AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderBoardDTO, cf.getUserService(), result);
-                cf.setAutoPlayContext(new AutoPlayContextImpl(autoplayLifecycle,
-                        (PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>) settings,
-                        AutoPlayClassicConfiguration.this, context, initialEventData));
-                // start sixty inch slide loop nodes...
-                RootNodeClassic root = new RootNodeClassic(cf);
-                root.start(cf.getEventBus());
-            }
-        });
+                    @SuppressWarnings("unchecked")
+                    @Override
+                    public void onSuccess(Iterable<DetailType> result) {
+                        StrippedLeaderboardDTO leaderBoardDTO = AutoplayHelper.getSelectedLeaderboard(initialEventData,
+                                context.getLeaderboardName());
+                        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(
+                                leaderBoardDTO, cf.getUserService(), result);
+                        cf.setAutoPlayContext(new AutoPlayContextImpl(autoplayLifecycle,
+                                (PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>) settings,
+                                AutoPlayClassicConfiguration.this, context, initialEventData));
+                        // start sixty inch slide loop nodes...
+                        RootNodeClassic root = new RootNodeClassic(cf);
+                        root.start(cf.getEventBus());
+                    }
+                });
     }
 
     @Override
     public void openSettingsDialog(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard,
-            OnSettingsCallback settingsCallback, PerspectiveCompositeSettings<?> settings, AutoPlayContextDefinition apcd, UserService userService) {
+            OnSettingsCallback settingsCallback, PerspectiveCompositeSettings<?> settings,
+            AutoPlayContextDefinition apcd, UserService userService) {
         DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> callback = new DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>() {
             @Override
             public void ok(PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> editedObject) {
-                settingsCallback.newSettings(editedObject);
+                settingsCallback.newSettings(editedObject,
+                        getUrlWithSettings(apcd, editedObject, leaderboard, userService));
             }
 
             @Override
             public void cancel() {
             }
         };
-        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, userService, Arrays.asList(DetailType.values()));
-        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplayPerspectiveSettings = autoplayLifecycle
-                .createDefaultSettings();
-        LinkWithSettingsGenerator<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> settingsGenerator = new LinkWithSettingsGenerator<>(Window.Location.getPath(), autoplayLifecycle::createDefaultSettings, apcd);
-        new SettingsDialogForLinkSharing<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>(settingsGenerator,
-                autoplayLifecycle, autoplayPerspectiveSettings, StringMessages.INSTANCE, true, callback).show();
+        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, userService,
+                Arrays.asList(DetailType.values()));
+        @SuppressWarnings("unchecked")
+        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplayPerspectiveSettings = settings != null
+                ? (PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>) settings
+                : autoplayLifecycle.createDefaultSettings();
+        LinkWithSettingsGenerator<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> settingsGenerator = new LinkWithSettingsGenerator<>(
+                Window.Location.getPath(), autoplayLifecycle::createDefaultSettings, apcd);
+        new SettingsDialogForLinkSharing<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>(
+                settingsGenerator, autoplayLifecycle, autoplayPerspectiveSettings, StringMessages.INSTANCE, true,
+                callback).show();
     }
 
     @Override
-    public void loadSettingsDefault(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard,
-            UserService userService, OnSettingsCallback settingsCallback) {
-        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, userService, Arrays.asList(DetailType.values()));
-        settingsCallback.newSettings(autoplayLifecycle.createDefaultSettings());
+    public void loadSettingsDefault(EventDTO selectedEvent, AutoPlayContextDefinition apcd,
+            StrippedLeaderboardDTO leaderboard, UserService userService, OnSettingsCallback settingsCallback) {
+        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, userService,
+                Arrays.asList(DetailType.values()));
+        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> defaultSettings = autoplayLifecycle
+                .createDefaultSettings();
+        settingsCallback.newSettings(defaultSettings,
+                getUrlWithSettings(apcd, defaultSettings, leaderboard, userService));
     }
 
+    private String getUrlWithSettings(AutoPlayContextDefinition apcd,
+            PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings, StrippedLeaderboardDTO leaderboard,
+            UserService userService) {
+        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, userService,
+                Arrays.asList(DetailType.values()));
+        LinkWithSettingsGenerator<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> settingsGenerator = new LinkWithSettingsGenerator<>(
+                Window.Location.getPath(), autoplayLifecycle::createDefaultSettings, apcd);
+
+        return settingsGenerator.createUrl(settings);
+    }
 }
