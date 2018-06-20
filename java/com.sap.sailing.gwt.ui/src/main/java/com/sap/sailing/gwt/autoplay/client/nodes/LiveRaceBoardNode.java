@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
@@ -54,6 +55,8 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
     }
 
     public void onStart() {
+        raceboardTimer.setTime(MillisecondsTimePoint.now().asMillis());
+        raceboardTimer.play();
         raceTimesInfoProvider.addRaceIdentifier(cf.getAutoPlayCtxSignalError().getLifeOrPreLiveRace(), true);
 
         PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getAutoPlayCtxSignalError().getAutoplaySettings();
