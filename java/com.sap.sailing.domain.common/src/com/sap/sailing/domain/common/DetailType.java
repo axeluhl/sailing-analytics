@@ -310,13 +310,6 @@ public enum DetailType implements Serializable {
         return allowed;
     }
 
-    public static List<DetailType> getLegExtendedBravoDetailTypes() {
-        ArrayList<DetailType> allowed = new ArrayList<>();
-        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS);
-        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DURATION_FOILED_IN_SECONDS);
-        return allowed;
-    }
-
     public static List<DetailType> getRaceExtendedBravoDetailTypes() {
         ArrayList<DetailType> allowed = new ArrayList<>();
         allowed.add(DetailType.BRAVOEXTENDED_RACE_CURRENT_PORT_DAGGERBOARD_RAKE);
@@ -345,6 +338,8 @@ public enum DetailType implements Serializable {
         allowed.add(DetailType.BRAVO_RACE_HEEL_IN_DEGREES);
         allowed.add(DetailType.BRAVO_RACE_PITCH_IN_DEGREES);
         allowed.add(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
+        allowed.add(DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS);
+        allowed.add(DetailType.RACE_CURRENT_DURATION_FOILED_IN_SECONDS);
         return allowed;
     }
 
@@ -353,6 +348,8 @@ public enum DetailType implements Serializable {
         allowed.add(DetailType.BRAVO_LEG_CURRENT_HEEL_IN_DEGREES);
         allowed.add(DetailType.BRAVO_LEG_CURRENT_PITCH_IN_DEGREES);
         allowed.add(DetailType.BRAVO_LEG_CURRENT_RIDE_HEIGHT_IN_METERS);
+        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS);
+        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DURATION_FOILED_IN_SECONDS);
         return allowed;
     }
 
@@ -474,7 +471,6 @@ public enum DetailType implements Serializable {
         ArrayList<DetailType> all = new ArrayList<>();
         all.addAll(getLegDetailColumnTypes());
         all.addAll(getLegBravoDetailTypes());
-        all.addAll(getLegExtendedBravoDetailTypes());
         all.addAll(getLegExpeditionDetailColumnTypes());
         return all;
     }
