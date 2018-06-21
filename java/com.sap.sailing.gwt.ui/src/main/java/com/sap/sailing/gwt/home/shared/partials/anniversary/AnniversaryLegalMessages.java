@@ -26,8 +26,6 @@ public interface AnniversaryLegalMessages extends Messages{
     String anniversaryLegalNoticeSectionContestParagraph(int anniversary);
     String anniversaryLegalNoticeSectionCommunicationParagraphTitle();
     String anniversaryLegalNoticeSectionCommunicationParagraph();
-    String anniversaryLegalNoticeSectionCharitablyPurposeParagraphTitle();
-    String anniversaryLegalNoticeSectionCharitablyPurposeParagraph();
     String anniversaryLegalNoticeSectionPrizesParagraphTitle();
     String anniversaryLegalNoticeSectionPrizesParagraph(int anniversary);
     String anniversaryLegalNoticeSectionPersonalDataAndRightsToImagesParagraphTitle();
