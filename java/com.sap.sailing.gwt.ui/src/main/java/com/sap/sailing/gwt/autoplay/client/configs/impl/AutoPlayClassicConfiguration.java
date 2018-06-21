@@ -31,7 +31,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
     public void startRootNode(AutoPlayClientFactory cf, AutoPlayContextDefinition context,
             PerspectiveCompositeSettings<?> settings, EventDTO initialEventData) {
         cf.getSailingService().getAvailableDetailTypesForLeaderboard(context.getLeaderboardName(),
-                new AsyncCallback<Iterable<DetailType>>() {
+                null, new AsyncCallback<Iterable<DetailType>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         logger.log(Level.WARNING, "Could not load detailtypes for leaderboard", caught);

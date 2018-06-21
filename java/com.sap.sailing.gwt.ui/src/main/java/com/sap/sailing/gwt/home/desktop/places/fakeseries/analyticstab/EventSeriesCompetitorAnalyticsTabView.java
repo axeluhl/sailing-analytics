@@ -79,7 +79,7 @@ public class EventSeriesCompetitorAnalyticsTabView extends SharedLeaderboardEven
             };
             if (eventSeriesAnalyticsManager.getLeaderboardPanel() == null) {
                 eventSeriesAnalyticsManager.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
-                        new AsyncCallback<Iterable<DetailType>>() {
+                        null, new AsyncCallback<Iterable<DetailType>>() {
 
                             @Override
                             public void onSuccess(Iterable<DetailType> result) {
