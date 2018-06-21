@@ -306,10 +306,10 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
-import com.sap.sailing.domain.racelog.impl.GPSFixStoreImpl;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
+import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
@@ -522,8 +522,8 @@ import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
-import com.sap.sse.common.Speed;
 import com.sap.sse.common.PairingListCreationException;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
@@ -6993,7 +6993,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return new MarkTracksDTO(markTracks);
     }
     
-    private MarkTrackDTO getMarkTrack(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, String markIdAsString) {
+    private MarkTrackDTO getMarkTrack(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet,
+            String markIdAsString) {
         MarkDTO markDTO = null;
         Mark mark = null;
         for (final Mark currMark : raceColumn.getAvailableMarks(fleet)) {
@@ -7003,25 +7004,41 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             }
         }
-        
+
         if (markDTO != null) {
             final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
             final GPSFixTrack<Mark, ? extends GPSFix> markTrack;
             if (trackedRace != null) {
                 markTrack = trackedRace.getOrCreateTrack(mark);
             } else {
-                DynamicGPSFixTrackImpl<Mark> writeableMarkTrack = new DynamicGPSFixTrackImpl<Mark>(mark, BoatClass.APPROXIMATE_AVERAGE_MANEUVER_DURATION.asMillis());
+                DynamicGPSFixTrackImpl<Mark> writeableMarkTrack = new DynamicGPSFixTrackImpl<Mark>(mark,
+                        BoatClass.APPROXIMATE_AVERAGE_MANEUVER_DURATION.asMillis());
                 markTrack = writeableMarkTrack;
                 final RaceLog raceLog = raceColumn.getRaceLog(fleet);
                 final RegattaLog regattaLog = raceColumn.getRegattaLog();
                 final TrackingTimesFinder trackingTimesFinder = new TrackingTimesFinder(raceLog);
-                final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = trackingTimesFinder.analyze();
+                final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = trackingTimesFinder
+                        .analyze();
                 try {
-                    GPSFixStore gfs = new GPSFixStoreImpl(getService().getSensorFixStore());
-                    gfs.loadMarkTrack(writeableMarkTrack, regattaLog, mark,
-                            trackingTimes.getA().getTimePoint(), trackingTimes.getB().getTimePoint());
+                    SensorFixStore sensorFixStore = getService().getSensorFixStore();
+                    List<DeviceMappingWithRegattaLogEvent<Mark>> mappings = new RegattaLogDeviceMarkMappingFinder(
+                            regattaLog).analyze().get(mark);
+                    if (mappings != null) {
+                        for (DeviceMapping<Mark> mapping : mappings) {
+                            final TimePoint from = Util.getLatestOfTimePoints(trackingTimes.getA().getTimePoint(),
+                                    mapping.getTimeRange().from());
+                            final TimePoint to = Util.getEarliestOfTimePoints(trackingTimes.getB().getTimePoint(),
+                                    mapping.getTimeRange().to());
+                            sensorFixStore.<GPSFix> loadFixes(loadedFix -> writeableMarkTrack.add(loadedFix, true),
+                                    mapping.getDevice(), from, to, false, () -> {
+                                        return false;
+                                    }, progressIgnoringConsumer -> {
+                                    });
+                        }
+                    }
                 } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                    logger.info("Error trying to load mark track for mark "+mark+" from "+trackingTimes.getA()+" to "+trackingTimes.getB());
+                    logger.info("Error trying to load mark track for mark " + mark + " from " + trackingTimes.getA()
+                            + " to " + trackingTimes.getB());
                 }
             }
             Iterable<GPSFixDTO> gpsFixDTOTrack = convertToGPSFixDTOTrack(markTrack);
