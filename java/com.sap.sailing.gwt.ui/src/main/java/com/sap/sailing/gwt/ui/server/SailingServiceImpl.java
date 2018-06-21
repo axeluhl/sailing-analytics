@@ -5904,10 +5904,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Util.addAll(competitorToBoatMappingsRegistered.keySet(), competitorsToUnregister);
         for (final Entry<CompetitorType, Boat> e : competitorToBoatMappingsRegistered.entrySet()) {
             CompetitorType competitor = e.getKey();
-            if (competitorToBoatMappingsToRegister.get(competitor) == e.getValue()) {
-                // User wants to map competitor to boat, and that mapping already exists; neither add nor remove this registration but leave as is:
-                competitorToBoatMappingsToRegister.remove(competitor);
-                competitorsToUnregister.remove(competitor);
+            if (competitorToBoatMappingsToRegister.containsKey(competitor)) { // is competitor to be registered?
+                final Boat boatOfCompetitorToRegister = competitorToBoatMappingsToRegister.get(competitor);
+                final Boat boatOfRegisteredCompetitor = e.getValue();
+                if (boatOfCompetitorToRegister == boatOfRegisteredCompetitor) {
+                    // User wants to map competitor to boat, and that mapping already exists; neither add nor remove this registration but leave as is:
+                    competitorToBoatMappingsToRegister.remove(competitor);
+                    competitorsToUnregister.remove(competitor);
+                }
             }
         }
         return competitorsToUnregister;

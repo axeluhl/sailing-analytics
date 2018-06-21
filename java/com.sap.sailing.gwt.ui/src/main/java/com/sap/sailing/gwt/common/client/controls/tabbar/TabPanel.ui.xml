@@ -25,6 +25,7 @@
 	
 	.tabExtension {
 		float: right;
+		margin-top: .5em;
 	}
 	
 	.tabExtension > * {

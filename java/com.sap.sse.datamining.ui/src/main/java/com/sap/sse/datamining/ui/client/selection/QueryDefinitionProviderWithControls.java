@@ -56,8 +56,9 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider<AdvancedDataMiningSettings>
         implements WithControls {
 
-    private static final double headerPanelHeight = 45;
-    private static final double footerPanelHeight = 50;
+    private static final double HeaderPanelHeight = 45;
+    private static final double FooterPanelHeight = 50;
+    private static final int SplitterSize = 10;
 
     private final DockLayoutPanel mainPanel;
     private final FlowPanel controlsPanel;
@@ -100,10 +101,11 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                     }
                 });
         queryDefinitionViewer = new QueryDefinitionViewer(parent, context, getDataMiningStringMessages());
+        queryDefinitionViewer.getEntryWidget().addStyleName("dataMiningMarginRight");
         queryDefinitionViewer.setActive(false);
         addQueryDefinitionChangedListener(queryDefinitionViewer);
         predefinedQueryRunner = new PredefinedQueryRunner(parent, context, session, getDataMiningStringMessages(),
-                dataMiningService, errorReporter, resultsPresenter);
+                                                          dataMiningService, errorReporter, resultsPresenter);
 
         Button clearSelectionButton = new Button(getDataMiningStringMessages().clearSelection());
         clearSelectionButton.addClickHandler(new ClickHandler() {
@@ -130,30 +132,32 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
         statisticProvider = new SuggestBoxStatisticProvider(parent, context, dataMiningService,
                                                             errorReporter, settingsControl, settingsManager);
+        statisticProvider.getEntryWidget().addStyleName("statisticProvider");
         statisticProvider.addStatisticChangedListener(providerListener);
         
         groupingProvider = new MultiDimensionalGroupingProvider(parent, context, dataMiningService,
                                                                 errorReporter, statisticProvider);
         groupingProvider.addGroupingChangedListener(providerListener);
+        groupingProvider.getEntryWidget().addStyleName("dataMiningMarginBase");
 
-//      filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(parent, context, session,
-//              stringMessages, dataMiningService, errorReporter, statisticProvider);
         filterSelectionProvider = new HierarchicalDimensionListFilterSelectionProvider(
                 parent, context, session, getDataMiningStringMessages(), dataMiningService, errorReporter, statisticProvider);
         filterSelectionProvider.addSelectionChangedListener(providerListener);
+        filterSelectionProvider.getEntryWidget().addStyleName("dataMiningBorderTop");
         
-        filterSplitPanel = new SplitLayoutPanel(15);
-        filterSplitPanel.addSouth(groupingProvider.getEntryWidget(), footerPanelHeight);
+        filterSplitPanel = new SplitLayoutPanel(SplitterSize);
+        filterSplitPanel.addSouth(groupingProvider.getEntryWidget(), FooterPanelHeight);
         filterSplitPanel.addEast(queryDefinitionViewer.getEntryWidget(), 600);
         filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
         filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
 
-        SplitLayoutPanel headerPanel = new SplitLayoutPanel(15);
+        SplitLayoutPanel headerPanel = new SplitLayoutPanel(SplitterSize);
+        headerPanel.addStyleName("dataMiningMarginBase");
         headerPanel.addWest(statisticProvider.getEntryWidget(), 800);
         headerPanel.add(controlsPanel);
         
         mainPanel = new DockLayoutPanel(Unit.PX);
-        mainPanel.addNorth(headerPanel, headerPanelHeight);
+        mainPanel.addNorth(headerPanel, HeaderPanelHeight);
         mainPanel.add(filterSplitPanel);
 
         // Storing the different component providers in a list
@@ -185,11 +189,15 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         final Collection<FunctionDTO> dimensionsToGroupBy = groupingProvider.getDimensionsToGroupBy();
         if (!dimensionsToGroupBy.isEmpty()) {
             final FunctionDTO firstDimension = dimensionsToGroupBy.iterator().next();
-            filterSelectionProvider.setHighestRetrieverLevelWithFilterDimension(firstDimension,
-                    (Serializable) groupKeyForSingleDimension.getValue());
             if (dimensionsToGroupBy.size() == 1) {
-                letUserSelectADifferentFirstDimension(onSuccessCallback);
+                letUserSelectADifferentFirstDimension(() -> {
+                    filterSelectionProvider.setHighestRetrieverLevelWithFilterDimension(firstDimension,
+                            (Serializable) groupKeyForSingleDimension.getValue());
+                    onSuccessCallback.run();
+                });
             } else {
+                filterSelectionProvider.setHighestRetrieverLevelWithFilterDimension(firstDimension,
+                        (Serializable) groupKeyForSingleDimension.getValue());
                 groupingProvider.removeDimensionToGroupBy(firstDimension);
                 onSuccessCallback.run();
             }

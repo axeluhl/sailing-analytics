@@ -809,16 +809,18 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      * </p>
      * 
      * @param hidden set this to true if the panel should be hidden
-     * @param size the size of the panel. Always provide the visible size even when hidden is true.
+     * @param initialSize the size of the panel. only required to be valid if not hidden.
      */
     public void setWidgetVisibility(Widget widget, Component<?> associatedComponentToWidget,
-            final boolean hidden, final int size) {
+            final boolean hidden, final int initialSize) {
         super.setWidgetHidden(widget, hidden);
         final Splitter splitter = getAssociatedSplitter(widget);
         if (splitter != null) {
             LayoutData layoutData = (LayoutData) widget.getLayoutData();
             if (hidden) {
-                layoutData.oldSize = layoutData.size;
+                if(layoutData.size > 0) {
+                    layoutData.oldSize = layoutData.size;
+                }
                 widget.setVisible(false);
                 if (associatedComponentToWidget != null) {
                     if (associatedComponentToWidget.isVisible()) {
@@ -833,7 +835,16 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                         associatedComponentToWidget.setVisible(true);
                     }
                 }
-                splitter.setAssociatedWidgetSize((layoutData.oldSize > 0 ? layoutData.oldSize : size), /* defer */false);
+                if (layoutData.size <= 0) {
+                    //it is not yet sized
+                    if(layoutData.oldSize > 0) {
+                        //and we have a stored old size it had before minimizing it
+                        splitter.setAssociatedWidgetSize(layoutData.oldSize, /* defer */false);
+                    } else {
+                        //and we do not have any size yet, so use the default size
+                        splitter.setAssociatedWidgetSize(initialSize, /* defer */false);
+                    }
+                }
                 splitter.setDraggerVisible(!hidden);
                 splitter.setVisible(!hidden);
                 splitter.getToggleButton().removeStyleDependentName("Closed");

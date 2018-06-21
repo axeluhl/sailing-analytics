@@ -13,11 +13,10 @@ public class ManeuverTableSettings extends AbstractGenericSerializableSettings {
 
     private EnumSetSetting<ManeuverType> selectedManeuverTypes;
 
-    private Iterable<ManeuverType> defaultTypes = Arrays.asList(ManeuverType.values());
-
     @Override
     protected void addChildSettings() {
-        selectedManeuverTypes = new EnumSetSetting<>("selectedManeuverTypes", this, defaultTypes,
+        selectedManeuverTypes = new EnumSetSetting<>("selectedManeuverTypes", this,
+                Arrays.asList(ManeuverType.TACK, ManeuverType.JIBE, ManeuverType.PENALTY_CIRCLE),
                 ManeuverType::valueOf);
     }
 
@@ -25,9 +24,6 @@ public class ManeuverTableSettings extends AbstractGenericSerializableSettings {
      * The default settings
      */
     public ManeuverTableSettings() {
-        selectedManeuverTypes.addValue(ManeuverType.TACK);
-        selectedManeuverTypes.addValue(ManeuverType.JIBE);
-        selectedManeuverTypes.addValue(ManeuverType.PENALTY_CIRCLE);
     }
 
     public ManeuverTableSettings(Set<ManeuverType> selectedManeuverTypes) {
