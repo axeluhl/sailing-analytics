@@ -7030,9 +7030,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             final TimePoint to = Util.getEarliestOfTimePoints(trackingTimes.getB().getTimePoint(),
                                     mapping.getTimeRange().to());
                             sensorFixStore.<GPSFix> loadFixes(loadedFix -> writeableMarkTrack.add(loadedFix, true),
-                                    mapping.getDevice(), from, to, false, () -> {
-                                        return false;
-                                    }, progressIgnoringConsumer -> {
+                                    mapping.getDevice(), from, to, false, () -> false, progressIgnoringConsumer -> {
                                     });
                         }
                     }
