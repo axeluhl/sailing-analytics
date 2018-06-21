@@ -7,8 +7,8 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLiveRaceLeaderBoardWithImageViewImpl.ImageProvider;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLiveRaceLeaderboardWithImageViewImpl.ImageProvider;
 
 public class CompetitorViewImpl extends ResizeComposite {
     private static CompetitorViewImplUiBinder uiBinder = GWT.create(CompetitorViewImplUiBinder.class);
@@ -23,7 +23,7 @@ public class CompetitorViewImpl extends ResizeComposite {
     @UiField
     Label subline2;
 
-    public CompetitorViewImpl(ImageProvider provider, CompetitorDTO competitor) {
+    public CompetitorViewImpl(ImageProvider provider, CompetitorWithBoatDTO competitor) {
         initWidget(uiBinder.createAndBindUi(this));
         if (competitor.getBoat() != null && competitor.getBoat().getName() != null) {
             subline1.setText(competitor.getBoat().getName());

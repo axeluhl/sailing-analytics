@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -15,20 +16,21 @@ import com.sap.sailing.domain.base.LeaderboardBase;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -98,6 +100,8 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      */
     Iterable<Competitor> getAllCompetitors();
 
+    Iterable<Boat> getAllBoats();
+
     /**
      * Same as {@link #getAllCompetitors()}, only that additionally the method returns as a first element in a pair
      * which {@link RaceDefinition}s were used in order to fetch their {@link RaceDefinition#getCompetitors()} to
@@ -140,7 +144,12 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * It will, however, continue to be returned from {@link #getAllCompetitors()}.
      */
     void setSuppressed(Competitor competitor, boolean suppressed);
-    
+
+    /**
+     * Retrieves the boat of a given competitor for the specified raceColumn and fleet.
+     */
+    Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet);
+
     /**
      * Returns the first fleet found in the sequence of this leaderboard's {@link #getRaceColumns() race columns}'
      * {@link RaceColumn#getFleets() fleets} whose name equals <code>fleetName</code>. If no such fleet is found,
@@ -191,7 +200,8 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * exactly <i>n</i> races. Still, this method pretends such a time point would have existed, actually ignoring
      * the <i>times</i> at which a race took place but only looking at the resulting scores and discards.<p>
      * 
-     * When computing the net points sum after all columns up to and including the race column that is the key of the resulting
+     * When computing the ne
+     * t points sum after all columns up to and including the race column that is the key of the resulting
      * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
      * in the respective column just completed.
      * 

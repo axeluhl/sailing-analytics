@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -13,6 +14,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
@@ -23,6 +25,7 @@ import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderConte
 import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.windfinder.WindfinderControl;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -37,11 +40,15 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     static class AbstractEventViewLayout {
         @UiField(provided = true) EventHeader eventHeaderUi;
         @UiField Quickfinder quickFinderUi;
-        @UiField SimpleInfoBlock simpleInfoUi;
+        @UiField SimpleInfoBlock sailorInfoUi;
+        @UiField SimpleInfoBlock seriesNavigationoUi;
+        @UiField DivElement windfinderWrapperUi;
+        @UiField(provided = true) WindfinderControl windfinderUi;
         @UiField SimplePanel viewContentUi;
         
         private AbstractEventViewLayout(EventViewDTO event, String regattaName, PlaceNavigation<?> logoNavigation) {
             this.eventHeaderUi = new EventHeader(event, regattaName, logoNavigation);
+            this.windfinderUi = new WindfinderControl(SpotDTO::getCurrentlyMostAppropriateUrl);
         }
     }
 
@@ -121,13 +128,19 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     
     @Override
     public void setSailorInfos(String description, String buttonLabel, String url) {
-        layout.simpleInfoUi.setDescription(SafeHtmlUtils.fromString(description.replace("\n", " ")));
-        layout.simpleInfoUi.setAction(buttonLabel, url);
+        layout.sailorInfoUi.setDescription(SafeHtmlUtils.fromString(description.replace("\n", " ")));
+        layout.sailorInfoUi.setAction(buttonLabel, url);
     }
     
     @Override
+    public void setWindfinderNavigations(Iterable<SpotDTO> spotData) {
+        layout.windfinderWrapperUi.getStyle().clearDisplay();
+        layout.windfinderUi.setSpotData(spotData);
+    }
+
+    @Override
     public void setSeriesNavigation(String buttonLabel, PlaceNavigation<?> placeNavigation) {
-        layout.simpleInfoUi.setAction(buttonLabel, placeNavigation);
+        layout.seriesNavigationoUi.setAction(buttonLabel, placeNavigation);
     }
     
 }

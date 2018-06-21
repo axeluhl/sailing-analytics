@@ -14,6 +14,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -21,10 +22,11 @@ import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningConfirmedEventSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.impl.UUIDHelper;
 
 public abstract class RaceLogFinishPositioningEventDeserializer extends BaseRaceLogEventDeserializer {
     
-    public RaceLogFinishPositioningEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer) {
+    public RaceLogFinishPositioningEventDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer) {
         super(competitorDeserializer);
     }
 
@@ -46,7 +48,7 @@ public abstract class RaceLogFinishPositioningEventDeserializer extends BaseRace
         for (Object object : jsonPositionedCompetitors) {
             JSONObject jsonPositionedCompetitor = Helpers.toJSONObjectSafe(object);
             Serializable competitorId = (Serializable) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_COMPETITOR_ID);
-            competitorId = Helpers.tryUuidConversion(competitorId);
+            competitorId = UUIDHelper.tryUuidConversion(competitorId);
             final String competitorDisplayName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_COMPETITOR_NAME);
             final String maxPointsReasonName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON);
             final MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName);

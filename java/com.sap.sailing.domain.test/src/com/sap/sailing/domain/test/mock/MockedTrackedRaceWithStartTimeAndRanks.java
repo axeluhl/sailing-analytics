@@ -3,12 +3,16 @@ package com.sap.sailing.domain.test.mock;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
@@ -18,14 +22,13 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TargetTimeInfo;
@@ -61,8 +64,11 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -78,6 +84,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     private static final long serialVersionUID = 2708044935347796930L;
     private final TimePoint startTime;
     private final List<Competitor> competitorsFromBestToWorst;
+    private final Map<Competitor, Boat> competitorsAndBoats;
     private final Regatta regatta;
     private RaceDefinition race;
 
@@ -95,9 +102,15 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         this.startTime = startTime;
         // copies the list to make sure that later modifications to the list passed to this constructor don't affect the ranking produced by this race
         this.competitorsFromBestToWorst = new ArrayList<Competitor>(competitorsFromBestToWorst);
-        final List<Waypoint> waypoints = Collections.emptyList();
-        this.race = new RaceDefinitionImpl("Mocked Race", new CourseImpl("Mock Course", waypoints), /* boat class */ null,
-                competitorsFromBestToWorst);
+        BoatClass boatClass = new BoatClassImpl("49er", /* upwind start */ true);
+        competitorsAndBoats = new HashMap<>();
+        int i = 1;
+        for (Competitor c: competitorsFromBestToWorst) {
+            Boat b = new BoatImpl("Boat" + i++, c.getName(), boatClass, c.getName(), null);
+            competitorsAndBoats.put(c, b);
+        }
+        this.race = new RaceDefinitionImpl("Mocked Race", new CourseImpl("Mock Course", Collections.emptyList()), boatClass,
+                competitorsAndBoats);
     }
 
     @Override
@@ -710,6 +723,23 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
+    public Boat getBoatOfCompetitor(Competitor competitor) {
+        return competitorsAndBoats.get(competitor);
+    }
+    
+    @Override
+    public Competitor getCompetitorOfBoat(Boat boat) {
+        if (boat == null) {
+            return null;
+        }
+        for (Map.Entry<Competitor, Boat> competitorWithBoat : competitorsAndBoats.entrySet()) {
+            if (boat.equals(competitorWithBoat.getValue())) {
+                return competitorWithBoat.getKey();
+            }
+        }
+        return null;
+    }
+
     public Distance getEstimatedDistanceToComplete(TimePoint now) {
         return null;
     }

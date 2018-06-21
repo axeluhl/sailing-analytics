@@ -6,11 +6,11 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 
-public class PitchBearingRender extends MinMaxRenderer {
+public class PitchBearingRender extends MinMaxRenderer<LeaderboardRowDTO> {
 
     private double maxAbsDoubleValue = 0.5d;
 
-    public PitchBearingRender(HasStringAndDoubleValue valueProvider, Comparator<LeaderboardRowDTO> comparator) {
+    public PitchBearingRender(HasStringAndDoubleValue<LeaderboardRowDTO> valueProvider, Comparator<LeaderboardRowDTO> comparator) {
         super(valueProvider, comparator);
     }
     

@@ -13,6 +13,7 @@ import java.util.UUID;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -27,7 +28,6 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TrackedRaces;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
@@ -44,6 +44,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -75,7 +76,7 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
 
     @Test
     public void testRaceExecutionOrderProviderAttachDetachWithRaceColumn() {
-        trackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor> emptyList(),
+        trackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor,Boat> emptyMap(),
                 MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ false);
         flexibleLeaderboard = new FlexibleLeaderboardImpl(FLEXIBLELEADERBOARD,
                 new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }), new LowPoint(), null);
@@ -89,9 +90,9 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
     public void testWindInRegularIntervalWithPreviousRaceStillTracking() {
         final TimePoint startOfFirstRace = MillisecondsTimePoint.now();
         final TimePoint startOfSecondRace = startOfFirstRace.plus(Duration.ONE_MINUTE.times(5));
-        DynamicTrackedRaceImpl previousTrackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor> emptyList(), startOfFirstRace, /* useMarkPassingCalculator */ false);
+        DynamicTrackedRaceImpl previousTrackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor,Boat> emptyMap(), startOfFirstRace, /* useMarkPassingCalculator */ false);
         previousTrackedRace.setStartOfTrackingReceived(startOfFirstRace);
-        trackedRace = createTestTrackedRace(REGATTA, "TestRace2", BOATCLASS, Collections.<Competitor> emptyList(), startOfSecondRace, /* useMarkPassingCalculator */ false);
+        trackedRace = createTestTrackedRace(REGATTA, "TestRace2", BOATCLASS, Collections.<Competitor,Boat> emptyMap(), startOfSecondRace, /* useMarkPassingCalculator */ false);
         flexibleLeaderboard = new FlexibleLeaderboardImpl(FLEXIBLELEADERBOARD,
                 new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }), new LowPoint(), null);
         flexibleLeaderboard.addRace(previousTrackedRace, RACECOLUMN_FLEXIBLELEADERBOARD+"1", false);
@@ -107,10 +108,10 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         final TimePoint startOfFirstRace = MillisecondsTimePoint.now();
         final TimePoint endOfFirstRace = startOfFirstRace.plus(Duration.ONE_SECOND);
         final TimePoint startOfSecondRace = startOfFirstRace.plus(Duration.ONE_HOUR);
-        DynamicTrackedRaceImpl previousTrackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor> emptyList(), startOfFirstRace, /* useMarkPassingCalculator */ false);
+        DynamicTrackedRaceImpl previousTrackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor,Boat> emptyMap(), startOfFirstRace, /* useMarkPassingCalculator */ false);
         previousTrackedRace.setStartOfTrackingReceived(startOfFirstRace);
         previousTrackedRace.setEndOfTrackingReceived(endOfFirstRace); // a very short race...
-        trackedRace = createTestTrackedRace(REGATTA, "TestRace2", BOATCLASS, Collections.<Competitor> emptyList(), startOfSecondRace, /* useMarkPassingCalculator */ false);
+        trackedRace = createTestTrackedRace(REGATTA, "TestRace2", BOATCLASS, Collections.<Competitor,Boat> emptyMap(), startOfSecondRace, /* useMarkPassingCalculator */ false);
         flexibleLeaderboard = new FlexibleLeaderboardImpl(FLEXIBLELEADERBOARD,
                 new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }), new LowPoint(), null);
         flexibleLeaderboard.addRace(previousTrackedRace, RACECOLUMN_FLEXIBLELEADERBOARD+"1", false);
@@ -129,7 +130,7 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         final TimePoint startOfFirstRace = MillisecondsTimePoint.now();
         final TimePoint endOfFirstRace = startOfFirstRace.plus(Duration.ONE_SECOND);
         final TimePoint startOfSecondRace = startOfFirstRace.plus(Duration.ONE_HOUR);
-        trackedRace = createTestTrackedRace(REGATTA, "TestRace2", BOATCLASS, Collections.<Competitor> emptyList(), startOfSecondRace, /* useMarkPassingCalculator */ false);
+        trackedRace = createTestTrackedRace(REGATTA, "TestRace2", BOATCLASS, Collections.<Competitor,Boat> emptyMap(), startOfSecondRace, /* useMarkPassingCalculator */ false);
         flexibleLeaderboard = new FlexibleLeaderboardImpl(FLEXIBLELEADERBOARD,
                 new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }), new LowPoint(), null);
         flexibleLeaderboard.addRace(trackedRace, RACECOLUMN_FLEXIBLELEADERBOARD, false);
@@ -145,10 +146,10 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         final TimePoint startOfFirstRace = MillisecondsTimePoint.now();
         final TimePoint endOfFirstRace = startOfFirstRace.plus(Duration.ONE_SECOND);
         final TimePoint startOfSecondRace = startOfFirstRace.plus(TrackedRaceImpl.EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS.times(2));
-        DynamicTrackedRaceImpl previousTrackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor> emptyList(), startOfFirstRace, /* useMarkPassingCalculator */ false);
+        DynamicTrackedRaceImpl previousTrackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor,Boat> emptyMap(), startOfFirstRace, /* useMarkPassingCalculator */ false);
         previousTrackedRace.setStartOfTrackingReceived(startOfFirstRace);
         previousTrackedRace.setEndOfTrackingReceived(endOfFirstRace); // a very short race...
-        trackedRace = createTestTrackedRace(REGATTA, "TestRace2", BOATCLASS, Collections.<Competitor> emptyList(), startOfSecondRace, /* useMarkPassingCalculator */ false);
+        trackedRace = createTestTrackedRace(REGATTA, "TestRace2", BOATCLASS, Collections.<Competitor,Boat> emptyMap(), startOfSecondRace, /* useMarkPassingCalculator */ false);
         flexibleLeaderboard = new FlexibleLeaderboardImpl(FLEXIBLELEADERBOARD,
                 new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }), new LowPoint(), null);
         flexibleLeaderboard.addRace(previousTrackedRace, RACECOLUMN_FLEXIBLELEADERBOARD+"1", false);
@@ -166,10 +167,10 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         final TimePoint startOfFirstRace = MillisecondsTimePoint.now();
         final TimePoint endOfFirstRace = startOfFirstRace.plus(Duration.ONE_SECOND);
         final TimePoint startOfSecondRace = startOfFirstRace.plus(TrackedRaceImpl.EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS.divide(2));
-        DynamicTrackedRaceImpl previousTrackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor> emptyList(), startOfFirstRace, /* useMarkPassingCalculator */ false);
+        DynamicTrackedRaceImpl previousTrackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor,Boat> emptyMap(), startOfFirstRace, /* useMarkPassingCalculator */ false);
         previousTrackedRace.setStartOfTrackingReceived(startOfFirstRace);
         previousTrackedRace.setEndOfTrackingReceived(endOfFirstRace); // a very short race...
-        trackedRace = createTestTrackedRace(REGATTA, "TestRace2", BOATCLASS, Collections.<Competitor> emptyList(), startOfSecondRace, /* useMarkPassingCalculator */ false);
+        trackedRace = createTestTrackedRace(REGATTA, "TestRace2", BOATCLASS, Collections.<Competitor,Boat> emptyMap(), startOfSecondRace, /* useMarkPassingCalculator */ false);
         flexibleLeaderboard = new FlexibleLeaderboardImpl(FLEXIBLELEADERBOARD,
                 new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }), new LowPoint(), null);
         flexibleLeaderboard.addRace(previousTrackedRace, RACECOLUMN_FLEXIBLELEADERBOARD+"1", false);
@@ -214,7 +215,7 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
     }
 
     private void createTestSetupWithRegattaAndSeries(boolean linkSeriesToRegatta) {
-        trackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor> emptyList(),
+        trackedRace = createTestTrackedRace(REGATTA, RACE, BOATCLASS, Collections.<Competitor,Boat> emptyMap(),
                 MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ false);
         fleet = new FleetImpl(FLEET);
         Set<Fleet> fleets = new HashSet<>();
@@ -228,8 +229,8 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         raceColumnInSeries = series.addRaceColumn(RACECOLUMN_SERIES, null);
         ScoringScheme scoringScheme = new LowPoint();
         regatta = new RegattaImpl(RegattaImpl.getDefaultName(REGATTA, boatClass.getName()), boatClass,
-                /* startDate */null, /* endDate */null, seriesSet, false, scoringScheme, UUID.randomUUID(), null,
-                OneDesignRankingMetric::new);
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */null, /* endDate */null, 
+                seriesSet, false, scoringScheme, UUID.randomUUID(), null, OneDesignRankingMetric::new);
     }
     
     /**
@@ -285,7 +286,7 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
     }
 
     private DynamicTrackedRace createTrackedRace(final String name, final TimePoint startOfRace, final TimePoint endOfRace) {
-        DynamicTrackedRace trackedRace = createTestTrackedRace(REGATTA, name, BOATCLASS, Collections.<Competitor> emptyList(), startOfRace, /* useMarkPassingCalculator */ false);
+        DynamicTrackedRace trackedRace = createTestTrackedRace(REGATTA, name, BOATCLASS, Collections.<Competitor,Boat> emptyMap(), startOfRace, /* useMarkPassingCalculator */ false);
         trackedRace.setStartOfTrackingReceived(startOfRace);
         trackedRace.setEndOfTrackingReceived(endOfRace);
         return trackedRace;

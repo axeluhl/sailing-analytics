@@ -2,6 +2,8 @@ package com.sap.sailing.server.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,8 +17,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -25,6 +29,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -36,7 +41,6 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
@@ -59,6 +63,7 @@ import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBService;
 
@@ -85,16 +90,19 @@ public class RaceColumnReloadTest {
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */true);
         PersonImpl sailor = new PersonImpl("Sailor", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null);
         PersonImpl coach = new PersonImpl("Coach", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null);
-        Competitor comp = masterDomainFactory.getOrCreateCompetitor("GER 61", "Team", Color.RED, "noone@nowhere.de",
-                null, new TeamImpl("Team", Arrays.asList(sailor), coach), new BoatImpl("GER 61", boatClass, "GER 61"),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+        Boat boat = new BoatImpl("61", "GER 61", boatClass, "GER 61");
+        CompetitorWithBoat comp = masterDomainFactory.getOrCreateCompetitorWithBoat("GER 61", "Team", "T", Color.RED, "noone@nowhere.de",
+                null, new TeamImpl("Team", Arrays.asList(sailor), coach),
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, (DynamicBoat) boat);
         service.apply(new CreateFlexibleLeaderboard(leaderboardName, "Test", new int[] { 1, 2 }, new LowPoint(), null));
         raceColumn = service.apply(new AddColumnToLeaderboard("R1", leaderboardName, false));
 
         Regatta regatta = service.apply(new AddDefaultRegatta(RegattaImpl.getDefaultName("Test Event", boatClassName),
                 boatClassName, /* startDate */ null, /* endDate */ null, UUID.randomUUID()));
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
-        final RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, Arrays.asList(comp));
+        final Map<Competitor, Boat> compAndBoats = new HashMap<>();
+        compAndBoats.put(comp, comp.getBoat());
+        final RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, compAndBoats);
         service.apply(new AddRaceDefinition(new RegattaName(regatta.getName()), race));
         masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark1"),
                 /* passingInstruction */ null));

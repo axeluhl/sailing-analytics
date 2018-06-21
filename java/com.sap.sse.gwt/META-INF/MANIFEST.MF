@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Shared GWT Code
 Bundle-SymbolicName: com.sap.sse.gwt
+Automatic-Module-Name: com.sap.sse.gwt
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -46,8 +47,10 @@ Export-Package: com.google.gwt.user.client.rpc.core.java.util,
  com.sap.sse.gwt.client.replication,
  com.sap.sse.gwt.client.sapheader,
  com.sap.sse.gwt.client.shared.components,
+ com.sap.sse.gwt.client.shared.controls,
  com.sap.sse.gwt.client.shared.perspective,
  com.sap.sse.gwt.client.shared.settings,
+ com.sap.sse.gwt.client.suggestion,
  com.sap.sse.gwt.client.useragent,
  com.sap.sse.gwt.common,
  com.sap.sse.gwt.dispatch.client,

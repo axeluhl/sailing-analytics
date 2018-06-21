@@ -11,8 +11,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLiveRaceLeaderBoardWithImageViewImpl.ImageProvider;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLiveRaceLeaderboardWithImageViewImpl.ImageProvider;
 
 public class PreRaceCompetitorsViewImpl extends ResizeComposite implements PreRaceCompetitorsView {
     private static PreRaceCompetitorsViewImplUiBinder uiBinder = GWT.create(PreRaceCompetitorsViewImplUiBinder.class);
@@ -44,15 +44,15 @@ public class PreRaceCompetitorsViewImpl extends ResizeComposite implements PreRa
     }
 
     @Override
-    public void setCompetitors(List<CompetitorDTO> competitors) {
-        for (CompetitorDTO competitor : competitors) {
+    public void setCompetitors(List<CompetitorWithBoatDTO> competitors) {
+        for (CompetitorWithBoatDTO competitor : competitors) {
             Widget w = createCompetitorElement(competitor);
             competitorSlider.add(w);
         }
         competitorSlider.forceLayout();
     }
 
-    private Widget createCompetitorElement(CompetitorDTO competitor) {
+    private Widget createCompetitorElement(CompetitorWithBoatDTO competitor) {
         FlowPanel competitorPanel = new FlowPanel();
         competitorPanel.add(new CompetitorViewImpl(provider, competitor));
         return new Label(competitor.getName());

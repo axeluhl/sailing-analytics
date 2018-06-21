@@ -2,6 +2,7 @@ package com.sap.sse.gwt.client;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -24,6 +25,16 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
         errorDialogBox = createErrorDialog(); 
         persistentAlertLabel = new Label("");
         persistentAlertLabel.setStyleName("global-alert-message");
+    }
+    
+
+    @Override
+    public void reportError(String title, String message) {
+        errorDialogBox.setText(title);
+        serverResponseLabel.addStyleName("serverResponseLabelError"); //$NON-NLS-1$
+        serverResponseLabel.setHTML(SafeHtmlUtils.fromString(message).asString() + "<br><br>");
+        errorDialogBox.center();
+        dialogCloseButton.setFocus(true);
     }
     
     @Override

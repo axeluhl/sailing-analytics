@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -21,6 +20,7 @@ import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.server.trackfiles.impl.CompressedStreamsUtil;
 import com.sap.sailing.server.trackfiles.impl.ExpeditionExtendedDataImporterImpl;
 import com.sap.sailing.server.trackfiles.impl.ExpeditionImportFileHandler;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class ExpeditionGPSFixImporter implements GPSFixImporter {
     private static final String LAT_COLUMN_HEADING = ExpeditionExtendedDataImporterImpl.COL_NAME_LAT;
@@ -36,7 +36,6 @@ public class ExpeditionGPSFixImporter implements GPSFixImporter {
         final AtomicBoolean importedFixes = new AtomicBoolean(false);
         CompressedStreamsUtil.handlePotentiallyCompressedFiles(sourceName, inputStream,
                 new ExpeditionImportFileHandler() {
-
                     @Override
                     protected void handleExpeditionFile(String fileName, InputStream stream) throws IOException {
                         final BufferedReader br = new BufferedReader(new InputStreamReader(stream));

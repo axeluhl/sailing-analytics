@@ -28,9 +28,9 @@ public class Util {
     
         private transient int hashCode;
     
-        @SuppressWarnings("unused")
         // required for some serialization frameworks such as GWT RPC
-        private Pair() {
+        @Deprecated
+        protected Pair() {
         }
 
         public Pair(A a, B b) {
@@ -172,6 +172,28 @@ public class Util {
             }
         }
         return addTo;
+    }
+    
+    /**
+     * Retains all elements from <code>what</code> in <code>retainIn</code> and removes all others from
+     * {@code retainIn}.
+     * 
+     * @return <code>retainIn</code> for chained use.
+     * @throws NullPointerException in case {@code what} or {@code retainIn} are {@code null}
+     */
+    public static <T> Collection<T> retainAll(Iterable<? extends T> what, Collection<T> retainIn) {
+        if (what == null || retainIn == null) {
+            throw new NullPointerException();
+        } else {
+            if (what instanceof Collection) {
+                retainIn.retainAll((Collection<?>) what);
+            } else {
+                final Set<T> set = new HashSet<>(); // for quick contains
+                addAll(what, set);
+                retainIn.retainAll(set);
+            }
+            return retainIn;
+        }
     }
     
     /**
@@ -493,6 +515,15 @@ public class Util {
         return joinStrings(separator, Arrays.asList(strings));
     }
 
+    public static String join(String separator, Object... objects) {
+        final String[] strings = new String[objects.length];
+        int i=0;
+        for (Object o : objects) {
+            strings[i++] = o.toString();
+        }
+        return joinStrings(separator, Arrays.asList(strings));
+    }
+
     public static String joinStrings(String separator, Iterable<String> strings) {
         StringBuilder result = new StringBuilder();
         boolean first = true;
@@ -779,5 +810,52 @@ public class Util {
             return null;
         }
         return toStringOrNull.toString();
+    }
+    
+    /**
+     * Pads a numerical value with '0' characters up to a number of digits left and right of the decimal point. If the
+     * number of digits right of the decimal point is zero, no decimal point will be rendered in the result. The sum of
+     * digits requested must be greater than zero. Digits will appear left of the decimal point if required to represent
+     * the integer part of the {@code value}'s magnitude.
+     * 
+     * @param digitsLeftOfDecimal
+     *            a non-negative number; if zero,
+     * @param digitsRightOfDecimal
+     *            a non-negative number; if zero, no decimal point will appear at all
+     * @param round
+     *            whether or not the value shall be rounded to the number of decimals requested. If {@code false}, the
+     *            value will be displayed in a truncated form
+     */
+    public static String padPositiveValue(double value, int digitsLeftOfDecimal, int digitsRightOfDecimal, boolean round) {
+        assert value >= 0;
+        assert digitsLeftOfDecimal >= 0;
+        assert digitsRightOfDecimal >= 0;
+        final StringBuilder sb = new StringBuilder();
+        final double scalePow = Math.pow(10.0, digitsRightOfDecimal);
+        final double scaledValue = round?Math.round(value * scalePow):(value*scalePow);
+        double remainder = scaledValue;
+        if (digitsLeftOfDecimal==0 && scaledValue>=scalePow) {
+            sb.append(Math.round(remainder/scalePow));
+            remainder = remainder%scalePow;
+        }
+        for (int i=digitsLeftOfDecimal+digitsRightOfDecimal; i>0; i--) {
+            if (i==digitsRightOfDecimal) {
+                sb.append('.');
+            }
+            final double pow = Math.pow(10.0, i-1);
+            sb.append((int) (remainder/pow));
+            remainder = remainder % pow;
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Retains a copy of only the elements in {@link Iterable toFilter} that are contained in the specified
+     * {@link Iterable toRetain}. In other words, removes all elements of toFilter that are not contained in toRetain.
+     */
+    public static <T> Iterable<T> retainCopy(Iterable<T> toFilter, Iterable<T> toRetain) {
+        final List<T> returnValue = Util.asList(toFilter);
+        returnValue.retainAll(Util.asList(toRetain));
+        return returnValue;
     }
 }

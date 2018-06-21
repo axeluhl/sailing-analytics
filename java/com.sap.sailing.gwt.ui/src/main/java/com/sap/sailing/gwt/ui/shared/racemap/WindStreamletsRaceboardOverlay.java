@@ -266,18 +266,20 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
                         // confidences
                         for (Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
                             WindTrackInfoDTO windTrackForSource = windInfoForRace.windTrackInfoByWindSource.get(e.getKey());
-                            final WindTrackInfoDTO resultWindTrackInfoDTO = result.windTrackInfoByWindSource.get(e.getKey());
-                            windTrackForSource.resolutionOutsideOfWhichNoFixWillBeReturned = resultWindTrackInfoDTO.resolutionOutsideOfWhichNoFixWillBeReturned;
-                            if (windTrackForSource.windFixes == null) {
-                                windTrackForSource.windFixes = resultWindTrackInfoDTO.windFixes;
-                            } else {
-                                windTrackForSource.windFixes.addAll(resultWindTrackInfoDTO.windFixes);
-                            }
-                            if (resultWindTrackInfoDTO.maxWindConfidence > windTrackForSource.maxWindConfidence) {
-                                windTrackForSource.maxWindConfidence = resultWindTrackInfoDTO.maxWindConfidence;
-                            }
-                            if (resultWindTrackInfoDTO.minWindConfidence < windTrackForSource.minWindConfidence) {
-                                windTrackForSource.minWindConfidence = resultWindTrackInfoDTO.minWindConfidence;
+                            if (windTrackForSource != null) {
+                                final WindTrackInfoDTO resultWindTrackInfoDTO = result.windTrackInfoByWindSource.get(e.getKey());
+                                windTrackForSource.resolutionOutsideOfWhichNoFixWillBeReturned = resultWindTrackInfoDTO.resolutionOutsideOfWhichNoFixWillBeReturned;
+                                if (windTrackForSource.windFixes == null) {
+                                    windTrackForSource.windFixes = resultWindTrackInfoDTO.windFixes;
+                                } else {
+                                    windTrackForSource.windFixes.addAll(resultWindTrackInfoDTO.windFixes);
+                                }
+                                if (resultWindTrackInfoDTO.maxWindConfidence > windTrackForSource.maxWindConfidence) {
+                                    windTrackForSource.maxWindConfidence = resultWindTrackInfoDTO.maxWindConfidence;
+                                }
+                                if (resultWindTrackInfoDTO.minWindConfidence < windTrackForSource.minWindConfidence) {
+                                    windTrackForSource.minWindConfidence = resultWindTrackInfoDTO.minWindConfidence;
+                                }
                             }
                         }
                     }

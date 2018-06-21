@@ -8,8 +8,19 @@ public interface AutoPlayClientFactory extends SailingClientFactory {
 
     void setAutoPlayContext(AutoPlayContext configurationSixtyInch);
 
-    AutoPlayContext getAutoPlayCtx();
+    /**
+     * Will signal an error to the autoplay system if the context is not properly configured, this will lead to error
+     * recovery tries by restarting the player
+     * 
+     * @return
+     */
+    AutoPlayContext getAutoPlayCtxSignalError();
 
     SailingDispatchSystem getDispatch();
 
+    /**
+     * Required to determine if the ctx is properly populated from either the StartNode, or the url. If not go to
+     * StartNode.
+     */
+    boolean isConfigured();
 }

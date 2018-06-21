@@ -14,6 +14,7 @@ import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public abstract class AbstractManage2SailResultDocumentProvider {
     private final ResultUrlProvider resultUrlProvider;
@@ -26,7 +27,7 @@ public abstract class AbstractManage2SailResultDocumentProvider {
         List<ResultDocumentDescriptor> result = new ArrayList<>();
         Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
         for (URL url : resultUrlProvider.getUrls()) {
-            URLConnection eventResultConn = url.openConnection();
+            URLConnection eventResultConn = HttpUrlConnectionHelper.redirectConnection(url);
             EventResultDescriptor eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
             addResultsForEvent(result, eventResult);
         }
@@ -46,7 +47,7 @@ public abstract class AbstractManage2SailResultDocumentProvider {
                 if (acceptRegatta(regattaResult)) {
                     final URL resultUrl = getDocumentUrlForRegatta(regattaResult);
                     if (resultUrl != null) {
-                        URLConnection regattaResultConn = resultUrl.openConnection();
+                        URLConnection regattaResultConn = HttpUrlConnectionHelper.redirectConnection(resultUrl);
                         result.add(new ResultDocumentDescriptorImpl((InputStream) regattaResultConn.getContent(),
                                 resultUrl.toString(), regattaResult.getPublishedAt()==null?null:new MillisecondsTimePoint(regattaResult.getPublishedAt()),
                                 eventResult.getName(), regattaResult.getName(), boatClass, regattaResult

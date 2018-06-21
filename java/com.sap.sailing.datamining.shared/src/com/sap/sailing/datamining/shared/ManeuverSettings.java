@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.shared;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.settings.SerializableSettings;
 
 /**
@@ -11,9 +12,9 @@ public abstract class ManeuverSettings extends SerializableSettings {
 
     private static final long serialVersionUID = -393430331972342L;
 
-    public abstract Double getMinManeuverDuration();
+    public abstract Duration getMinManeuverDuration();
 
-    public abstract Double getMaxManeuverDuration();
+    public abstract Duration getMaxManeuverDuration();
 
     public abstract Double getMinManeuverEnteringSpeedInKnots();
 
@@ -30,7 +31,19 @@ public abstract class ManeuverSettings extends SerializableSettings {
     public abstract Double getMinManeuverExitingAbsTWA();
 
     public abstract Double getMaxManeuverExitingAbsTWA();
-    
+
+    public abstract Double getMinAbsCourseChangeInDegrees();
+
+    public abstract Double getMaxAbsCourseChangeInDegrees();
+
+    public abstract Duration getMinDurationFromPrecedingManeuver();
+
+    public abstract Duration getMaxDurationFromPrecedingManeuver();
+
+    public abstract Duration getMinDurationToFollowingManeuver();
+
+    public abstract Duration getMaxDurationToFollowingManeuver();
+
     public abstract boolean isMainCurveAnalysis();
 
 }

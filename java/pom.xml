@@ -87,6 +87,7 @@
         <module>com.sap.sse.gwt.adminconsole</module>
         <module>com.sap.sse.datamining</module>
         <module>com.sap.sse.datamining.shared</module>
+		<module>com.sap.sse.datamining.ui</module>
         <module>com.sap.sse.security</module>
         <module>com.sap.sse.security.ui</module>
         <module>com.sap.sse.security.userstore.mongodb</module>
@@ -108,6 +109,8 @@
         <module>com.sap.sailing.domain.expeditionadapter</module>
         <module>com.sap.sailing.domain.tractracadapter</module>
         <module>com.sap.sailing.domain.tractracadapter.persistence</module>
+        <module>com.sap.sailing.domain.windfinderadapter</module>
+        <module>com.sap.sailing.domain.windfinderadapter.test</module>
         <module>com.sap.sailing.domain.igtimiadapter</module>
         <module>com.sap.sailing.domain.igtimiadapter.persistence</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter</module>

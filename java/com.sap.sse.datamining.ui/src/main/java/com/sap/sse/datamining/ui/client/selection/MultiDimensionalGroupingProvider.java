@@ -1,0 +1,324 @@
+package com.sap.sse.datamining.ui.client.selection;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ValueListBox;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.settings.SerializableSettings;
+import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
+import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
+import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
+import com.sap.sse.datamining.ui.client.GroupingChangedListener;
+import com.sap.sse.datamining.ui.client.GroupingProvider;
+import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.controls.AbstractObjectRenderer;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+
+public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponent<SerializableSettings>
+        implements GroupingProvider {
+
+    private static final String GROUPING_PROVIDER_ELEMENT_STYLE = "groupingProviderElement";
+    private static final NaturalComparator NaturalComparator = new NaturalComparator();
+    private static final Comparator<FunctionDTO> DimensionComparator = (d1, d2) -> {
+        // Null values (to deselect the dimension) on top
+        if (d1 == null || d2 == null) {
+            if (d1 == d2) return 0;
+            if (d1 == null) return -1;
+            if (d2 == null) return 1;
+        }
+        return NaturalComparator.compare(d1.getDisplayName(), d2.getDisplayName());
+    };
+
+    private final DataMiningServiceAsync dataMiningService;
+    private final ErrorReporter errorReporter;
+    private final Set<GroupingChangedListener> listeners;
+
+    private final FlowPanel mainPanel;
+    private final List<ValueListBox<FunctionDTO>> dimensionToGroupByBoxes;
+
+    private boolean isAwaitingReload;
+    private DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition;
+    private final List<FunctionDTO> availableDimensions;
+
+    public MultiDimensionalGroupingProvider(Component<?> parent, ComponentContext<?> context,
+            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+            DataRetrieverChainDefinitionProvider retrieverChainProvider) {
+        super(parent, context);
+        this.dataMiningService = dataMiningService;
+        this.errorReporter = errorReporter;
+        listeners = new HashSet<GroupingChangedListener>();
+        currentRetrieverChainDefinition = null;
+        availableDimensions = new ArrayList<>();
+        isAwaitingReload = false;
+        dimensionToGroupByBoxes = new ArrayList<ValueListBox<FunctionDTO>>();
+
+        mainPanel = new FlowPanel();
+        mainPanel.addStyleName("groupingProvider");
+        Label groupByLabel = new Label(this.getDataMiningStringMessages().groupBy());
+        groupByLabel.addStyleName(GROUPING_PROVIDER_ELEMENT_STYLE);
+        groupByLabel.addStyleName("queryProviderElementLabel");
+        groupByLabel.addStyleName("emphasizedLabel");
+        mainPanel.add(groupByLabel);
+
+        ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
+        addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
+        retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
+    }
+
+    @Override
+    public void awaitReloadComponents() {
+        isAwaitingReload = true;
+    }
+
+    @Override
+    public boolean isAwaitingReload() {
+        return isAwaitingReload;
+    }
+
+    @Override
+    public void reloadComponents() {
+        isAwaitingReload = false;
+        updateAvailableDimensions();
+    }
+
+    @Override
+    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newRetrieverChainDefinition) {
+        if (!Objects.equals(currentRetrieverChainDefinition, newRetrieverChainDefinition)) {
+            currentRetrieverChainDefinition = newRetrieverChainDefinition;
+            if (!isAwaitingReload) {
+                updateAvailableDimensions();
+            }
+        }
+    }
+
+    private void updateAvailableDimensions() {
+        if (currentRetrieverChainDefinition != null) {
+            dataMiningService.getDimensionsFor(currentRetrieverChainDefinition,
+                    LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<HashSet<FunctionDTO>>() {
+                        @Override
+                        public void onSuccess(HashSet<FunctionDTO> dimensions) {
+                            clearAvailableDimensionsAndGroupByBoxes();
+                            for (FunctionDTO dimension : dimensions) {
+                                availableDimensions.add(dimension);
+                            }
+                            ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
+                            addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
+                            if (!availableDimensions.isEmpty()) {
+                                Collections.sort(availableDimensions, DimensionComparator);
+                                firstDimensionToGroupByBox.setValue(availableDimensions.iterator().next(), true);
+                            } else {
+                                notifyListeners();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(
+                                    "Error fetching the dimensions from the server: " + caught.getMessage());
+                        }
+                    });
+        } else {
+            clearAvailableDimensionsAndGroupByBoxes();
+            ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
+            addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
+        }
+    }
+
+    private void clearAvailableDimensionsAndGroupByBoxes() {
+        for (ValueListBox<FunctionDTO> dimensionToGroupByBox : dimensionToGroupByBoxes) {
+            mainPanel.remove(dimensionToGroupByBox);
+        }
+        dimensionToGroupByBoxes.clear();
+        availableDimensions.clear();
+    }
+
+    @Override
+    public Iterable<FunctionDTO> getAvailableDimensions() {
+        return Collections.unmodifiableList(availableDimensions);
+    }
+
+    @Override
+    public void setDimensionToGroupBy(int i, FunctionDTO dimensionToGroupBy) {
+        dimensionToGroupByBoxes.get(i).setValue(dimensionToGroupBy, /* fireEvents */ true);
+    }
+
+    private ValueListBox<FunctionDTO> createDimensionToGroupByBox() {
+        ValueListBox<FunctionDTO> dimensionToGroupByBox = createDimensionToGroupByBoxWithoutEventHandler();
+        dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<FunctionDTO>() {
+            private boolean firstChange = true;
+
+            @Override
+            public void onValueChange(ValueChangeEvent<FunctionDTO> event) {
+                if (firstChange && event.getValue() != null) {
+                    ValueListBox<FunctionDTO> newDimensionToGroupByBox = createDimensionToGroupByBox();
+                    addDimensionToGroupByBox(newDimensionToGroupByBox);
+                    firstChange = false;
+                } else if (event.getValue() == null) {
+                    Widget changedDimensionToGroupByBox = (Widget) event.getSource();
+                    mainPanel.remove(changedDimensionToGroupByBox);
+                    dimensionToGroupByBoxes.remove(changedDimensionToGroupByBox);
+                }
+                updateAcceptableValues();
+                notifyListeners();
+            }
+        });
+        return dimensionToGroupByBox;
+    }
+
+    @Override
+    public ValueListBox<FunctionDTO> createDimensionToGroupByBoxWithoutEventHandler() {
+        ValueListBox<FunctionDTO> dimensionToGroupByBox = new ValueListBox<FunctionDTO>(
+                new AbstractObjectRenderer<FunctionDTO>() {
+                    @Override
+                    protected String convertObjectToString(FunctionDTO function) {
+                        return function.getDisplayName();
+                    }
+
+                });
+        dimensionToGroupByBox.addStyleName(GROUPING_PROVIDER_ELEMENT_STYLE);
+        return dimensionToGroupByBox;
+    }
+
+    private void addDimensionToGroupByBoxAndUpdateAcceptableValues(ValueListBox<FunctionDTO> dimensionToGroupByBox) {
+        addDimensionToGroupByBox(dimensionToGroupByBox);
+        updateAcceptableValues();
+    }
+
+    private void addDimensionToGroupByBox(ValueListBox<FunctionDTO> dimensionToGroupByBox) {
+        mainPanel.add(dimensionToGroupByBox);
+        dimensionToGroupByBoxes.add(dimensionToGroupByBox);
+    }
+
+    private void updateAcceptableValues() {
+        for (ValueListBox<FunctionDTO> dimensionToGroupByBox : dimensionToGroupByBoxes) {
+            List<FunctionDTO> acceptableValues = new ArrayList<FunctionDTO>(availableDimensions);
+            acceptableValues.removeAll(getDimensionsToGroupBy());
+            if (dimensionToGroupByBox.getValue() != null) {
+                acceptableValues.add(dimensionToGroupByBox.getValue());
+            }
+            acceptableValues.add(null);
+            Collections.sort(acceptableValues, DimensionComparator);
+            dimensionToGroupByBox.setAcceptableValues(acceptableValues);
+        }
+    }
+
+    @Override
+    public Collection<FunctionDTO> getDimensionsToGroupBy() {
+        Collection<FunctionDTO> dimensionsToGroupBy = new ArrayList<>();
+        for (ValueListBox<FunctionDTO> dimensionListBox : dimensionToGroupByBoxes) {
+            if (dimensionListBox.getValue() != null) {
+                dimensionsToGroupBy.add(dimensionListBox.getValue());
+            }
+        }
+        return dimensionsToGroupBy;
+    }
+
+    @Override
+    public void removeDimensionToGroupBy(FunctionDTO dimension) {
+        for (final Iterator<ValueListBox<FunctionDTO>> i = dimensionToGroupByBoxes.iterator(); i.hasNext();) {
+            final ValueListBox<FunctionDTO> dimensionListBox = i.next();
+            if (Util.equalsWithNull(dimension, dimensionListBox.getValue())) {
+                i.remove();
+                mainPanel.remove(dimensionListBox);
+                updateAcceptableValues();
+                notifyListeners();
+            }
+        }
+    }
+
+    @Override
+    public String getCustomGrouperScriptText() {
+        return "";
+    }
+
+    @Override
+    public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
+        int index = 0;
+        for (FunctionDTO dimension : queryDefinition.getDimensionsToGroupBy()) {
+            dimensionToGroupByBoxes.get(index).setValue(dimension, true);
+            index++;
+        }
+    }
+
+    @Override
+    public void addGroupingChangedListener(GroupingChangedListener listener) {
+        listeners.add(listener);
+    }
+
+    private void notifyListeners() {
+        for (GroupingChangedListener listener : listeners) {
+            listener.groupingChanged();
+        }
+    }
+
+    @Override
+    public String getLocalizedShortName() {
+        return getDataMiningStringMessages().groupingProvider();
+    }
+
+    @Override
+    public Widget getEntryWidget() {
+        return mainPanel;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return mainPanel.isVisible();
+    }
+
+    @Override
+    public void setVisible(boolean visibility) {
+        mainPanel.setVisible(visibility);
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return false;
+    }
+
+    @Override
+    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(SerializableSettings settings) {
+        return null;
+    }
+
+    @Override
+    public void updateSettings(SerializableSettings newSettings) {
+        // no-op
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "multiDimensionalGroupingProvider";
+    }
+
+    @Override
+    public SerializableSettings getSettings() {
+        return null;
+    }
+
+    @Override
+    public String getId() {
+        return "MultiDimensionalGroupingProvider";
+    }
+}

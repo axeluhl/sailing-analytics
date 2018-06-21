@@ -57,7 +57,6 @@ class PositionMap<E> implements Cloneable {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public PositionMap<E> clone() {
         PositionMap<E> clone = null;
         try {
@@ -82,7 +81,6 @@ class PositionMap<E> implements Cloneable {
      * Gets the Object mapped from the specified key, or the specified Object
      * if no such mapping has been made.
      */
-    @SuppressWarnings("unchecked")
     public E get(int key, E valueIfKeyNotFound) {
         int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
@@ -255,7 +253,6 @@ class PositionMap<E> implements Cloneable {
      * the value from the <code>index</code>th key-value mapping that this
      * SparseArray stores.
      */
-    @SuppressWarnings("unchecked")
     public E valueAt(int index) {
         if (mGarbage) {
             gc();

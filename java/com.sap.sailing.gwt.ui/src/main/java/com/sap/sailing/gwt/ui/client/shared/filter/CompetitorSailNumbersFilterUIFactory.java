@@ -55,10 +55,8 @@ public class CompetitorSailNumbersFilterUIFactory extends AbstractCompetitorText
     @Override
     public FilterWithUI<CompetitorDTO> createFilterFromUI() {
         CompetitorSailNumbersFilter result = null;
-
-        if(valueTextBox != null && operatorSelectionListBox != null) {
+        if (valueTextBox != null && operatorSelectionListBox != null) {
             result = new CompetitorSailNumbersFilter();
-
             TextOperator.Operators op = TextOperator.Operators.valueOf(operatorSelectionListBox.getValue(operatorSelectionListBox.getSelectedIndex()));
             TextOperator textOperator = new TextOperator(op);
             result.setOperator(textOperator);

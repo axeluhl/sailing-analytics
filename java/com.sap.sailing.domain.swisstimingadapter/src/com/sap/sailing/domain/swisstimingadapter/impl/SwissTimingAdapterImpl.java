@@ -99,7 +99,6 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
                 teams.put(t.getTeamID(), t);
             }
         }
-
         for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
             if (o instanceof Event) {
                 Event event = (Event) o;
@@ -121,9 +120,7 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
                                                         person.getGivenName() + " " + person.getFamilyName(),
                                                         person.getNOC().name(), crewMember.getPosition().name()));
                                             }
-                                            Crew firstCrewMember = team.getCrew().get(0);
-                                            Person person = persons.get(firstCrewMember.getPersonID());
-                                            String nationality = person.getNOC().name();
+                                            String nationality = team.getNOC().name();
                                             CompetitorWithID competitor = new CompetitorWithID(team.getTeamID(),
                                                     boat.getSailNumber(), nationality, team.getTeamName(), crew);
                                             competitors.add(competitor);

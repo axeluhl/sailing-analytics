@@ -22,3 +22,4 @@ Export-Package: com.sap.sse.common,
  com.sap.sse.common.util
 Require-Bundle: com.sap.sse.datamining.annotations
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: com.sap.sse.common

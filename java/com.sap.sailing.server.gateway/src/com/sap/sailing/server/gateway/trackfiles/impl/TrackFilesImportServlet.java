@@ -41,7 +41,7 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        ImportResultDTO importResult = new ImportResultDTO(logger);
+        ImportResult importResult = new ImportResult(logger);
         try {
             String prefImporterType = null;
             List<Pair<String, FileItem>> files = new ArrayList<>();

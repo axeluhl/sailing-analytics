@@ -64,6 +64,7 @@ import com.google.gwt.maps.client.events.rightclick.RightClickMapHandler;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -73,7 +74,6 @@ import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.FixType;
 import com.sap.sailing.domain.common.Position;
@@ -124,7 +124,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     private Map<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>> marks;
     private MarkDTO selectedMark;
     private Map<MarkDTO, Polyline> polylines;
-    private final ListDataProvider<MarkDTO> markDataProvider;
     private SideBySideComponentViewer sideBySideComponentViewer;
     
     private FixPositionChooser currentFixPositionChooser;
@@ -145,8 +144,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         this.raceMap = raceMap;
         this.leaderboardPanel = leaderboardPanel;
         this.polylines = new HashMap<>();
-        this.markDataProvider = new ListDataProvider<>();
-        this.marksPanel = new MarksPanel(this, context, markDataProvider, stringMessages);
+        this.marksPanel = new MarksPanel(this, context, stringMessages);
         this.noMarkSelectedLabel = new Label(stringMessages.pleaseSelectAMark());
         this.noMarkSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         this.courseMarkClickHandlers = new ArrayList<>();
@@ -514,7 +512,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         Point[] points = markSeries.getPoints();
         if (points.length > index) {
             setRedPoint(points, index);
-            setSeriesPoints(markSeries, points);
+            setSeriesPoints(markSeries, points, /* manageZoom */ true);
         }
     }
     
@@ -523,7 +521,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
             Point[] points = getSeriesPoints(marks.get(selectedMark).keySet());
             if (points.length > index) {
                 setRedPoint(points, index);
-                setSeriesPoints(markSeries, points);
+                setSeriesPoints(markSeries, points, /* manageZoom */ true);
                 chart.redraw();
             }
         }
@@ -531,9 +529,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     
     public void resetPointColor(int index) {
         Point[] points = markSeries.getPoints();
-        if (points.length > index) {
+        if (points.length > index && selectedMark != null) {
             points[index].setMarker(new Marker().setFillColor(selectedMark.color==null?null:selectedMark.color.getAsHtml()));
-            setSeriesPoints(markSeries, points);
+            setSeriesPoints(markSeries, points, /* manageZoom */ true);
         }
     }
         
@@ -583,7 +581,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
                         @Override
                         public void onSuccess(Iterable<MarkDTO> marks) {
                             EditMarkPositionPanel.this.marks = new HashMap<>();
-                            List<MarkDTO> markList = new ArrayList<>();
                             for (MarkDTO mark : marks) {
                                 SortedMap<GPSFixDTO, FixOverlay> fixOverlayMap = new TreeMap<>(new Comparator<GPSFixDTO>() {
                                     @Override
@@ -592,9 +589,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
                                     }
                                 });
                                 EditMarkPositionPanel.this.marks.put(mark, fixOverlayMap);
-                                markList.add(mark);
                             }
-                            markDataProvider.setList(markList);
+                            marksPanel.updateMarks(marks);
                             onSelectionChange(null);
                             hideLoading();
                         }
@@ -700,15 +696,29 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     }
     
     private void setSeriesPoints(MarkDTO mark) {
-        setSeriesPoints(markSeries, getSeriesPoints(marks.get(mark).keySet()));
+        setSeriesPoints(markSeries, getSeriesPoints(marks.get(mark).keySet()), /* manageZoom */ true);
     }
     
     public void setSeriesPoints(Point[] points) {
-        setSeriesPoints(markSeries, points);
+        setSeriesPoints(markSeries, points, /* manageZoom */ true);
     }
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+        if(visible && !isVisible()){
+            sailingService.checkIfRaceIsTracked(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert(stringMessages.serverError());
+                }
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (Boolean.FALSE.equals(result)) {
+                        Window.alert(stringMessages.positionEditOnNonTrackingRace());
+                    }
+                }
+            });
+        }
         if (map == null) {
             map = raceMap.getMap();
             if (map != null) {
@@ -773,7 +783,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
 
     @Override
     public String getLocalizedShortName() {
-        return null;
+        return stringMessages.editMarkPositions();
     }
 
     @Override

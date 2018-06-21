@@ -23,5 +23,5 @@ public interface RaceLogEventData extends Serializable {
      * A {@link RaceLogEventData} might be associated with a list of competitors, which are somehow relevant for this
      * kind of event. An example is a list of competitors who are marked for an individual recall.
      */
-    List<Competitor> getInvolvedBoats();
+    <T extends Competitor> List<T> getInvolvedCompetitors();
 }

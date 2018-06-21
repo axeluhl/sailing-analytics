@@ -7,12 +7,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
@@ -28,9 +32,11 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
+import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
@@ -44,7 +50,6 @@ import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
@@ -65,6 +70,7 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -72,6 +78,7 @@ public abstract class TrackBasedTest {
     private DynamicTrackedRaceImpl trackedRace;
     
     final static Fleet regattaFleet = new FleetImpl("fleet name");
+    final static BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */true);
     
     protected DynamicTrackedRaceImpl getTrackedRace() {
         return trackedRace;
@@ -81,15 +88,26 @@ public abstract class TrackBasedTest {
         this.trackedRace = trackedRace;
     }
 
-    public static CompetitorImpl createCompetitor(String competitorName) {
-        return new CompetitorImpl(UUID.randomUUID(), competitorName, Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
+    @SafeVarargs
+    public static Map<Competitor,Boat> createCompetitorAndBoatsMap(CompetitorWithBoat... competitorsWithBoats) {
+        Map<Competitor,Boat> result = new LinkedHashMap<>(); 
+        for (CompetitorWithBoat competitorWithBoat: competitorsWithBoats) {
+            result.put(competitorWithBoat, competitorWithBoat.getBoat());
+        }
+        return result;
+    }
+
+    public static CompetitorWithBoat createCompetitorWithBoat(String competitorName) {
+        Competitor c = new CompetitorImpl(UUID.randomUUID(), competitorName, "HP", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                         new PersonImpl(competitorName, new NationalityImpl("GER"),
                         /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
-                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                new BoatClassImpl("505", /* typicallyStartsUpwind */true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                        /* dateOfBirth */null, "This is Rigo, the coach")), 
+                        /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        DynamicBoat b = new BoatImpl(c.getId(), competitorName + "'s boat", boatClass, null, null);
+        return new CompetitorWithBoatImpl(c, b);
     }
-    
+
     /**
      * For {@link #trackedRace}'s race course, creates a list of mark passings using the time points specified, in order
      * for the waypoints.
@@ -119,8 +137,8 @@ public abstract class TrackBasedTest {
      * @param useMarkPassingCalculator whether or not to use the internal mark passing calculator
      */
     public static DynamicTrackedRaceImpl createTestTrackedRace(String regattaName, String raceName, String boatClassName,
-            Iterable<Competitor> competitors, TimePoint timePointForFixes, boolean useMarkPassingCalculator) {
-        return createTestTrackedRace(regattaName, raceName, boatClassName, competitors, timePointForFixes, useMarkPassingCalculator,
+            Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes, boolean useMarkPassingCalculator) {
+        return createTestTrackedRace(regattaName, raceName, boatClassName, competitorsAndBoats, timePointForFixes, useMarkPassingCalculator,
                 mock(RaceLogResolver.class));
     }
     /**
@@ -139,10 +157,11 @@ public abstract class TrackBasedTest {
      * @param useMarkPassingCalculator whether or not to use the internal mark passing calculator
      */
     public static DynamicTrackedRaceImpl createTestTrackedRace(String regattaName, String raceName, String boatClassName,
-            Iterable<Competitor> competitors, TimePoint timePointForFixes, boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver) {
+            Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes, boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
-                RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
+                RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass,
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
         TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
@@ -157,7 +176,7 @@ public abstract class TrackBasedTest {
         waypoints.add(new WaypointImpl(windwardMark));
         waypoints.add(new WaypointImpl(leeGate));
         Course course = new CourseImpl(raceName, waypoints);
-        RaceDefinition race = new RaceDefinitionImpl(raceName, course, boatClass, competitors);
+        RaceDefinition race = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndBoats);
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
                 /* delayToLiveInMillis */ 0,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
@@ -192,7 +211,8 @@ public abstract class TrackBasedTest {
         TrackedRegattaRegistry trackedRegattaRegistry = mock(TrackedRegattaRegistry.class);
         Series series = new SeriesImpl("series name", isMedal, /* isFleetsCanRunInParallel */ true, regattaFleets, raceColumnNames, trackedRegattaRegistry);
         Iterable<? extends Series> regattaSeries = Collections.singleton(series);
-        return new RegattaImpl(regattaName, boatClass, startDate, endDate, regattaSeries, persistent, scoringScheme, regatteId , courseArea, OneDesignRankingMetric::new);
+        return new RegattaImpl(regattaName, boatClass, /* canBoatsOfCompetitorsChangePerRace */ true, 
+                startDate, endDate, regattaSeries, persistent, scoringScheme, regatteId , courseArea, OneDesignRankingMetric::new);
     }
 
     public static void assignRacesToRegattaLeaderboardColumns(RegattaLeaderboard leaderboard, Collection<RaceIdentifier> raceIdentifiers) {

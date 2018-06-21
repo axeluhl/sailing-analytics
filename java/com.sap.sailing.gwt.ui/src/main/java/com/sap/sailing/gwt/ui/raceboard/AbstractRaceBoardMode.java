@@ -200,17 +200,19 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
     protected void setTimerOrUseCustomStart(final TimePoint startPlayingAt) {
         final PlayModes playMode = getTimer().getPlayMode();
         TimePoint startPlayingAtOverride = null;
-        if (playMode != PlayModes.Live && getRaceTimesInfoForRace() != null
-                && getRaceTimesInfoForRace().getStartOfRace() != null) {
-            final Date startOfRace = getRaceTimesInfoForRace().getStartOfRace();
-            final RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = raceBoardPanel.getSettings()
-                    .getPerspectiveOwnSettings();
+        if (playMode != PlayModes.Live && getRaceTimesInfoForRace() != null) {
+            final RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = raceBoardPanel.getSettings().getPerspectiveOwnSettings();
             if (perspectiveOwnSettings != null) {
-                final Duration initialDurationAfterRaceStartInReplay = perspectiveOwnSettings
-                        .getInitialDurationAfterRaceStartInReplay();
+                final Duration initialDurationAfterRaceStartInReplay = perspectiveOwnSettings.getInitialDurationAfterRaceStartInReplay();
                 if (initialDurationAfterRaceStartInReplay != null) {
+                    final Date relativeTo;
+                    if (getRaceTimesInfoForRace().getStartOfRace() != null) {
+                        relativeTo = getRaceTimesInfoForRace().getStartOfRace();
+                    } else {
+                        relativeTo = getRaceTimesInfoForRace().getStartOfTracking();
+                    }
                     startPlayingAtOverride = new MillisecondsTimePoint(
-                            startOfRace.getTime() + initialDurationAfterRaceStartInReplay.asMillis());
+                            relativeTo.getTime() + initialDurationAfterRaceStartInReplay.asMillis());
                 }
             }
         }

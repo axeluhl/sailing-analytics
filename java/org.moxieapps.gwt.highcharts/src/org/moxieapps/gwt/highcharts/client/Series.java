@@ -148,6 +148,11 @@ public class Series extends Configurable<Series> {
          * @since 1.6.0
          */
         FUNNEL("funnel"),
+        /**
+         * @since 1.7.0
+         * Show the series as a heatmap
+         */
+        HEATMAP("heatmap"),
 
         /**
          * @since 1.6.0
@@ -166,14 +171,31 @@ public class Series extends Configurable<Series> {
         PIE("pie"),
 
         /**
+         * Show the series as a pyramid
+         */
+        PYRAMID("pyramid"),
+
+        /**
          * Show the series as a scatter plot
          */
         SCATTER("scatter"),
 
         /**
+         * Show the series as a solid gauge
+         * @since 1.7.0
+         */
+        SOLID_GAUGE("solidgauge"),
+
+        /**
          * Show the series as a sequence of lines that are rendered as a spline to appear as a smooth curve
          */
         SPLINE("spline"),
+
+        /**
+         * Show the series as a treemap
+         * @since 1.7.0
+         */
+        TREEMAP("treemap"),
 
         /**
          * Show the series as a waterfall
@@ -228,6 +250,20 @@ public class Series extends Configurable<Series> {
     }
 
     /**
+     * Convenience method for setting the 'colorByPoint' option of the series.  Equivalent to:
+     * <pre><code>
+     *     series.setOption("colorByPoint", true);
+     * </code></pre>
+     * When using automatic point colors pulled from the options.colors collection, this option determines
+     * whether the chart should receive one color per series or one color per point. Defaults to false.
+     * @param colorByPoint Whether the chart should receive one color per series or one color per point.
+     * @return  reference to this {@link org.moxieapps.gwt.highcharts.client.Series} instance for convenient method chaining.
+     */
+    public Series setColorByPoint(boolean colorByPoint) {
+        return this.setOption("colorByPoint", colorByPoint);
+    }
+
+    /**
      * Convenience method for setting the 'index' option of the series.  Equivalent to:
      * <pre><code>
      *     series.setOption("index", 1);
@@ -253,6 +289,7 @@ public class Series extends Configurable<Series> {
     public Series setLegendIndex(Number legendIndex) {
         return this.setOption("legendIndex", legendIndex);
     }
+
 
     /**
      * Convenience method for setting the 'name' option of the series.  Equivalent to:
@@ -332,6 +369,8 @@ public class Series extends Configurable<Series> {
         return this.setOption("/tooltip", toolTip != null ? toolTip.getOptions() : null);
     }
 
+    private Type type;
+
     /**
      * Sets the type of this series (which controls the way the series will be rendered), using
      * an enumeration type in order to ensure a correct value is passed.  This is equivalent to
@@ -345,7 +384,18 @@ public class Series extends Configurable<Series> {
      * @return A reference to this {@link org.moxieapps.gwt.highcharts.client.Series} instance for convenient method chaining.
      */
     public Series setType(Type type) {
+        this.type = type;
         return this.setOption("type", type != null ? type.toString() : null);
+    }
+
+    // Purposefully package scope, may return null
+    // @since 1.6.1
+    Type getType() {
+        if(this.type != null) {
+            return this.type;
+        } else {
+            return this.chart.defaultSeriesType;
+        }
     }
 
     /**
@@ -702,13 +752,18 @@ public class Series extends Configurable<Series> {
 
     private JavaScriptObject convertPointToJavaScriptObject(Point point) {
         final JSONObject options = point.getOptions() != null ? point.getOptions() : new JSONObject();
-        Chart.addPointScalarValues(point, options);
+        Chart.addPointScalarValues(point, options, getType());
         if (point.hasNativeProperties()) {
             Point.addPointNativeProperties(point, options);
         }
         if (chart != null) {
             chart.addPointId(point, options);
         }
+        return options.getJavaScriptObject();
+    }
+
+    private JavaScriptObject convertSeriesToJavaScriptObject(Series series) {
+        final JSONObject options = series.getOptions() != null ? series.getOptions() : new JSONObject();
         return options.getJavaScriptObject();
     }
 
@@ -811,7 +866,7 @@ public class Series extends Configurable<Series> {
         if (!isRendered() || chart.isPersistent()) {
             for (Number[] xyValue : values) {
                 if (xyValue.length == 5) {
-                    // For OHLC charts
+                    // For OHLC/Candlestick/Box charts
                     this.addPoint(xyValue[0], xyValue[1], xyValue[2], xyValue[3], xyValue[4]);
                 } else if (xyValue.length == 3) {
                     // For area range charts
@@ -831,26 +886,11 @@ public class Series extends Configurable<Series> {
                     JSONValue jsonValue;
                     if (point == null) {
                         jsonValue = JSONNull.getInstance();
-                    } else if (point.length == 5) {
-                        // For OHLC charts
+                    } else if (point.length > 0) {
                         JSONArray pointArray = new JSONArray();
-                        pointArray.set(0, BaseChart.convertNumberToJSONValue(point[0]));
-                        pointArray.set(1, BaseChart.convertNumberToJSONValue(point[1]));
-                        pointArray.set(2, BaseChart.convertNumberToJSONValue(point[2]));
-                        pointArray.set(3, BaseChart.convertNumberToJSONValue(point[3]));
-                        pointArray.set(4, BaseChart.convertNumberToJSONValue(point[4]));
-                        jsonValue = pointArray;
-                    } else if (point.length == 3) {
-                        // For Area Range charts
-                        JSONArray pointArray = new JSONArray();
-                        pointArray.set(0, BaseChart.convertNumberToJSONValue(point[0]));
-                        pointArray.set(1, BaseChart.convertNumberToJSONValue(point[1]));
-                        pointArray.set(2, BaseChart.convertNumberToJSONValue(point[2]));
-                        jsonValue = pointArray;
-                    } else if (point.length > 1) {
-                        JSONArray pointArray = new JSONArray();
-                        pointArray.set(0, BaseChart.convertNumberToJSONValue(point[0]));
-                        pointArray.set(1, BaseChart.convertNumberToJSONValue(point[1]));
+                        for (int j = 0; j < point.length; j++) {
+                            pointArray.set(j, BaseChart.convertNumberToJSONValue(point[j]));
+                        }
                         jsonValue = pointArray;
                     } else {
                         jsonValue = BaseChart.convertNumberToJSONValue(point[0]);
@@ -897,12 +937,29 @@ public class Series extends Configurable<Series> {
             if (nativeSeries != null) {
                 JSONArray jsonArray = new JSONArray();
                 for (int i = 0, pointsLength = points.length; i < pointsLength; i++) {
-                    jsonArray.set(i, chart.convertPointToJSON(points[i]));
+                    jsonArray.set(i, chart.convertPointToJSON(points[i], this.getType()));
                 }
                 nativeSetData(nativeSeries, jsonArray.getJavaScriptObject(), redraw);
             }
         }
 
+        return this;
+    }
+
+    /**
+     * Apply a new set of data to a series with the option to redraw the chart. Intended for use when asynchronously
+     * loading data into the chart.
+     * @param points A set of points represented as a JSONArray
+     * @param redraw Whether to redraw the chart after the series is altered. If doing more operations
+     *               on the chart, it is a good idea to set redraw to false and then call
+     *               {@link org.moxieapps.gwt.highcharts.client.Chart#redraw()} after.
+     * @return A reference to this {@link org.moxieapps.gwt.highcharts.client.Series} instance for convenient method chaining.
+     */
+    public Series setPoints(JSONArray points, boolean redraw) {
+        final JavaScriptObject nativeSeries = chart.get(this.id);
+        if (nativeSeries != null) {
+            nativeSetData(nativeSeries, points.getJavaScriptObject(), redraw);
+        }
         return this;
     }
 
@@ -995,7 +1052,7 @@ public class Series extends Configurable<Series> {
      * @since 1.3.0
      */
     public Series removePoint(Point point, boolean redraw, Animation animation) {
-        String id = point.getId();
+        String id = point.getId(false);
 
         // First, tell the point to remove itself from the underlying Highcharts instance
         point.remove(redraw, animation);
@@ -1007,7 +1064,7 @@ public class Series extends Configurable<Series> {
         if (id != null && points != null) {
             for (Iterator<Point> iterator = points.iterator(); iterator.hasNext(); ) {
                 Point existingPoint = iterator.next();
-                if (id.equals(existingPoint.getId())) {
+                if (id.equals(existingPoint.getId(false))) {
                     iterator.remove();
                 }
             }
@@ -1188,6 +1245,36 @@ public class Series extends Configurable<Series> {
         return this.rendered;
     }
 
+    /**
+     * Update the series with a new set of options, automatically redrawing the chart.
+     * @param seriesOptions New options that will be merged into the series' existing options.
+     * @return A reference to this {@link org.moxieapps.gwt.highcharts.client.Series} instance for convenient method chaining.
+     * @since 1.6.1
+     */
+    public Series update(Series seriesOptions) {
+        return this.update(seriesOptions, true);
+    }
+
+    /**
+     * Update the series with a new set of options. For a clean and precise handling of new options, all methods and
+     * elements from the series is removed, and it is initiated from scratch. Therefore, this method is more performance
+     * expensive than some other utility methods like setData or setVisible.
+     * @param seriesOptions New options that will be merged into the series' existing options.
+     * @param redraw Whether to redraw the chart after the series is altered. If doing more operations on the chart,
+     *               it is a good idea to set redraw to false and call chart.redraw() after.
+     * @return A reference to this {@link org.moxieapps.gwt.highcharts.client.Series} instance for convenient method chaining.
+     * @since 1.6.1
+     */
+    public Series update(Series seriesOptions, boolean redraw) {
+        final JavaScriptObject nativeSeries = this.getNativeSeries();
+        if (nativeSeries != null) {
+            nativeUpdateSeries(nativeSeries, convertSeriesToJavaScriptObject(seriesOptions), redraw);
+        } else {
+
+        }
+        return this;
+    }
+
     private static native JavaScriptObject nativeAddPoint(JavaScriptObject series, JavaScriptObject options, boolean redraw, boolean shift, JavaScriptObject animation) /*-{
         series.addPoint(options, redraw, shift, animation);
     }-*/;
@@ -1234,6 +1321,10 @@ public class Series extends Configurable<Series> {
 
     private static native boolean nativeIsVisible(JavaScriptObject series) /*-{
         return series.visible;
+    }-*/;
+
+    private static native void nativeUpdateSeries(JavaScriptObject series, JavaScriptObject options, boolean redraw) /*-{
+        series.update(options, redraw);
     }-*/;
 
     public void updateThreshold(String threshold) {

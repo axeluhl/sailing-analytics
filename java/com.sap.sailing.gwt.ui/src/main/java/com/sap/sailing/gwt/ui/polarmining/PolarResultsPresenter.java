@@ -30,8 +30,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.charts.ChartToCsvExporter;
-import com.sap.sailing.gwt.ui.datamining.presentation.AbstractResultsPresenter;
+import com.sap.sailing.gwt.ui.datamining.presentation.AbstractSailingResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
 import com.sap.sailing.polars.datamining.shared.PolarAggregation;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
@@ -39,6 +38,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.ui.client.ChartToCsvExporter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
@@ -46,20 +46,22 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 /**
  * Allows presentation of {@link PolarAggregation} data.
  * 
- * </br></br>
+ * </br>
+ * </br>
  * 
  * Contains a polar chart on the left displaying the actual polar diagram and two histograms on the right. The upper
  * histogram shows datacount over angle and the second one shows datacount over windrange upon clicking a point in the
  * polar chart.
  * 
- * </br></br>
+ * </br>
+ * </br>
  * 
  * Used in conjunction with the datamining framework.
  * 
  * @author D054528 (Frederik Petersen)
  *
  */
-public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
+public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Settings> {
 
     private final DockLayoutPanel dockLayoutPanel;
 
@@ -88,7 +90,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
         polarChartWrapperPanel.add(polarChart);
 
         dataCountHistogramChart = ChartFactory.createDataCountHistogramChart(
-                stringMessages.beatAngle() + " (" + stringMessages.degreesShort() + ")", stringMessages);
+                stringMessages.TWA() + " (" + stringMessages.degreesShort() + ")", stringMessages);
         dataCountPerAngleHistogramChart = ChartFactory.createDataCountHistogramChart(stringMessages.windSpeed(),
                 stringMessages);
         histogramChartsWrapperPanel = new DockLayoutPanel(Unit.PCT) {
@@ -107,7 +109,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
         dockLayoutPanel.addWest(polarChartWrapperPanel, 40);
         dockLayoutPanel.addEast(histogramChartsWrapperPanel, 60);
 
-        ChartToCsvExporter chartToCsvExporter = new ChartToCsvExporter(stringMessages);
+        ChartToCsvExporter chartToCsvExporter = new ChartToCsvExporter(stringMessages.csvCopiedToClipboard());
 
         Button exportStatisticsCurveToCsvButton = new Button(stringMessages.exportStatisticsCurveToCsv(),
                 new ClickHandler() {
@@ -265,7 +267,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
 
     @Override
     public String getLocalizedShortName() {
-        return getStringMessages().polarResultsPresenter();
+        return stringMessages.polarResultsPresenter();
     }
 
     @Override

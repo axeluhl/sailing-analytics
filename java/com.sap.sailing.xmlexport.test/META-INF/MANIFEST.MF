@@ -10,3 +10,4 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  com.sap.sse.common,
  com.sap.sailing.domain.test;bundle-version="1.0.0",
  com.tractrac.clientmodule;bundle-version="3.0.7"
+Automatic-Module-Name: com.sap.sailing.xmlexport.test

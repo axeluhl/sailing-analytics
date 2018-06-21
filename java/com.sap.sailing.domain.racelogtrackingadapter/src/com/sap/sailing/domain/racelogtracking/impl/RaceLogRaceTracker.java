@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,6 +36,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -295,16 +297,17 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             }
             throw new RaceNotCreatedException(String.format("Race for racelog (%s) has already been created", raceLog));
         }
-        Iterable<Competitor> competitors = raceColumn.getAllCompetitors(params.getFleet());
+        Map<Competitor, Boat> competitorsAndTheirBoats = raceColumn.getAllCompetitorsAndTheirBoats(params.getFleet());
         Serializable raceId = denoteEvent.getRaceId();
-        final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
+        final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndTheirBoats, raceId);
         Iterable<Sideline> sidelines = Collections.<Sideline> emptyList();
         // set race definition, so race is linked to leaderboard automatically
         trackedRegatta.getRegatta().addRace(raceDef);
         raceColumn.setRaceIdentifier(fleet, trackedRegatta.getRegatta().getRaceIdentifier(raceDef));
         trackedRace = trackedRegatta.createTrackedRace(raceDef, sidelines, windStore,
                 params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
-                boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver);
+                boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver,
+                /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
         notifyRaceCreationListeners();
         logger.info(String.format("Started tracking race-log race (%s)", raceLog));
         // this wakes up all waiting race handles
@@ -325,7 +328,13 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             @Override
             public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
                 try {
-                    trackedRegattaRegistry.removeRace(getRegatta(), getRace());
+                    final RaceDefinition race = getRace();
+                    for (final Fleet fleet : raceColumn.getFleets()) {
+                        if (race.equals(raceColumn.getRaceDefinition(fleet))) {
+                            trackedRegattaRegistry.removeRace(getRegatta(), race);
+                            break;
+                        }
+                    }
                 } catch (IOException | InterruptedException e) {
                     logger.log(Level.WARNING, "Error trying to remove smart phone / race log tracked race whose race column was deleted: "+
                             e.getMessage(), e);

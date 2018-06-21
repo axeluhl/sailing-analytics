@@ -36,9 +36,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
 
     @Override
     public final void onStart() {
-        if (cf.getAutoPlayCtx() == null || //
-                cf.getAutoPlayCtx().getContextDefinition() == null//
-        ) {
+        if (!cf.isConfigured()) {
             backToConfig();
             return;
         }
@@ -59,7 +57,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
     private void doCheck() {
         // start next update, to ensure it is done no matter any error cases
         checkTimer.schedule(UPDATE_STATE_TIMER);
-        final UUID eventUUID = cf.getAutoPlayCtx().getContextDefinition().getEventId();
+        final UUID eventUUID = cf.getAutoPlayCtxSignalError().getContextDefinition().getEventId();
         cf.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
 
             @Override
@@ -72,7 +70,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                     cf.getEventBus().fireEvent(hE);
                     firstTimeEventLoaded = false;
                 }
-                cf.getAutoPlayCtx().updateEvent(event);
+                cf.getAutoPlayCtxSignalError().updateEvent(event);
                 if (event.isFinished() || event.isRunning()) {
                     _doCheck();
                 } else {
@@ -90,12 +88,13 @@ public abstract class RootNodeBase extends BaseCompositeNode {
     }
 
     private void _doCheck() {
-        final RegattaAndRaceIdentifier currentPreLiveRace = cf.getAutoPlayCtx().getPreLiveRace();
-        final RegattaAndRaceIdentifier currentLiveRace = cf.getAutoPlayCtx().getLiveRace();
+        final RegattaAndRaceIdentifier currentPreLiveRace = cf.getAutoPlayCtxSignalError().getPreLiveRace();
+        final RegattaAndRaceIdentifier currentLiveRace = cf.getAutoPlayCtxSignalError().getLiveRace();
 
-        this.leaderBoardName = cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName();
-        AutoplayHelper.getLiveRace(cf.getSailingService(), cf.getErrorReporter(), cf.getAutoPlayCtx().getEvent(),
-                leaderBoardName, cf.getDispatch(), new AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>>() {
+        this.leaderBoardName = cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName();
+        AutoplayHelper.getLiveRace(cf.getSailingService(), cf.getErrorReporter(), cf.getAutoPlayCtxSignalError().getEvent(),
+                leaderBoardName, cf.getDispatch(), getWaitTimeAfterRaceEndInMillis(),
+                getSwitchBeforeRaceStartInMillis(), new AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>>() {
                     @Override
                     public void onSuccess(Pair<Long, RegattaAndRaceIdentifier> result) {
                         errorCount = 0;
@@ -105,11 +104,12 @@ public abstract class RootNodeBase extends BaseCompositeNode {
 
                             boolean comingFromLiveRace = currentLiveRace != null || currentPreLiveRace != null;
 
-                            log("No live race found, " + (!comingFromLiveRace ? "not " : "") + "coming from live race");
-
-                            setCurrentState(false, null,
-                                    comingFromLiveRace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE, currentState);
-
+                            if (comingFromLiveRace) {
+                                log("No live race found, coming from live race");
+                                setCurrentState(false, null, RootNodeState.AFTER_LIVE, currentState);
+                            } else {
+                                setCurrentState(false, null, RootNodeState.IDLE, currentState);
+                            }
                         } else {
 
                             final Long timeToRaceStartInMs = result.getA();
@@ -121,7 +121,6 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                                 log("Received different live race, hard switching to AFTER_LIVE race");
                                 setCurrentState(isPreLiveRace, loadedLiveRace, RootNodeState.AFTER_LIVE, currentState);
                             } else {
-
                                 log("New " + (isPreLiveRace ? "live " : "pre live") + " race found: " + loadedLiveRace
                                         + " starting in " + (timeToRaceStartInMs / 1000) + "s");
 
@@ -142,6 +141,10 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                 });
     }
 
+    protected abstract long getSwitchBeforeRaceStartInMillis();
+
+    protected abstract long getWaitTimeAfterRaceEndInMillis();
+
     private final void setCurrentState(boolean isPreLiveRace, RegattaAndRaceIdentifier liveRace, RootNodeState goingTo,
             RootNodeState comingFrom) {
         if (goingTo != comingFrom) {
@@ -156,8 +159,6 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                 log("Switching to state " + goingTo + " coming from " + comingFrom);
                 this.currentState = goingTo;
             }
-        } else {
-            log("Transition to same autoplay state, skipping");
         }
     }
 

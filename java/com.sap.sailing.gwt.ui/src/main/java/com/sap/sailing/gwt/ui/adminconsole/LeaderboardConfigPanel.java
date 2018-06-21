@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -32,11 +34,13 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -76,6 +80,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattasDisplayer,
 TrackedRaceChangedListener, LeaderboardsDisplayer {
+    private static final Logger logger = Logger.getLogger(LeaderboardConfigPanel.class.getName());
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     
     private final boolean showRaceDetails;
@@ -180,7 +185,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         };
         linkColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(linkColumn, new Comparator<StrippedLeaderboardDTO>() {
-
             @Override
             public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
                 boolean ascending = isSortedAscending();
@@ -208,13 +212,22 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         };
         leaderboardDisplayNameColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(leaderboardDisplayNameColumn, new Comparator<StrippedLeaderboardDTO>() {
-
             @Override
             public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
                 return new NaturalComparator().compare(o1.getDisplayName(), o2.getDisplayName());
             }
         });
-        
+
+        TextColumn<StrippedLeaderboardDTO> leaderboardCanBoatsOfCompetitorsChangePerRaceColumn = new TextColumn<StrippedLeaderboardDTO>() {
+            @Override
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
+                return leaderboard.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no();
+            }
+        };
+        leaderboardCanBoatsOfCompetitorsChangePerRaceColumn.setSortable(true);
+        leaderboardColumnListHandler.setComparator(leaderboardCanBoatsOfCompetitorsChangePerRaceColumn, (l1, l2)->
+            Boolean.valueOf(l1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(l2.canBoatsOfCompetitorsChangePerRace)));
+
         TextColumn<StrippedLeaderboardDTO> discardingOptionsColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
             public String getValue(StrippedLeaderboardDTO leaderboard) {
@@ -310,19 +323,29 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     Window.open(leaderboardEditingUrl, "_blank", null);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT_COMPETITORS.equals(value)) {
                     EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingService, leaderboardDTO.name, stringMessages, 
-                            errorReporter, new DialogCallback<List<CompetitorDTO>>() {
+                            errorReporter, new DialogCallback<List<CompetitorWithBoatDTO>>() {
                         @Override
                         public void cancel() {
                         }
 
                         @Override
-                        public void ok(final List<CompetitorDTO> result) {
+                        public void ok(final List<CompetitorWithBoatDTO> result) {
                         }
                     });
                     editCompetitorsDialog.show();
-
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
-                    openLeaderboardUrlConfigDialog(leaderboardDTO);
+                    sailingService.getAvailableDetailTypesForLeaderboard(leaderboardDTO.name, new AsyncCallback<Iterable<DetailType>>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            logger.log(Level.WARNING, "Could not load detailtypes for leaderboard", caught);
+                        }
+
+                        @Override
+                        public void onSuccess(Iterable<DetailType> result) {
+                            openLeaderboardUrlConfigDialog(leaderboardDTO, result);
+                        }
+                    });
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML.equals(value)) {
                     Window.open(UriUtils.fromString("/export/xml?domain=leaderboard&name=" + leaderboardDTO.name).asString(), "", null);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_OPEN_COACH_DASHBOARD.equals(value)) {
@@ -341,6 +364,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         leaderboardTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         leaderboardTable.addColumn(linkColumn, stringMessages.name());
         leaderboardTable.addColumn(leaderboardDisplayNameColumn, stringMessages.displayName());
+        leaderboardTable.addColumn(leaderboardCanBoatsOfCompetitorsChangePerRaceColumn, stringMessages.canBoatsChange());
         leaderboardTable.addColumn(discardingOptionsColumn, stringMessages.discarding());
         leaderboardTable.addColumn(leaderboardTypeColumn, stringMessages.type());
         leaderboardTable.addColumn(scoringSystemColumn, stringMessages.scoringSystem());
@@ -484,6 +508,8 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     setEndTime(object.getA(), object.getB());
                 } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG.equals(value)) {
                     showRaceLog(object.getA(), object.getB());
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS.equals(value)) {
+                    editCompetitorToBoatMappings(object.getA(), object.getB());
                 }
             }
         });
@@ -582,15 +608,16 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
      * checkbox for driving the {@link #LeaderboardUrlSettings.PARAM_EMBEDDED} field.
      * 
      * @param leaderboard
+     * @param availableDetailType 
      * 
      * @see LeaderboardEntryPoint#getUrl(String, LeaderboardSettings, boolean)
      */
-    private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard) {
+    private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard, Iterable<DetailType> availableDetailType) {
         final AbstractLeaderboardPerspectiveLifecycle lifeCycle;
         if (leaderboard.type.isMetaLeaderboard()) {
-            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringMessages, leaderboard);
+            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType);
         } else {
-            lifeCycle = new LeaderboardPerspectiveLifecycle(stringMessages, leaderboard);
+            lifeCycle = new LeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType);
         }
         final LeaderboardContextDefinition leaderboardContextSettings = new LeaderboardContextDefinition(leaderboard.name,
                 leaderboard.getDisplayName());
@@ -600,6 +627,16 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 linkWithSettingsGenerator, lifeCycle, stringMessages);
         dialog.ensureDebugId("LeaderboardPageUrlConfigurationDialog");
         dialog.show();
+    }
+
+    private void editCompetitorToBoatMappings(final RaceColumnDTO raceColumnDTO, final FleetDTO fleetDTO) {
+        final String selectedLeaderboardName = getSelectedLeaderboardName();
+        final String raceColumnName = raceColumnDTO.getName();
+        final String fleetName = fleetDTO.getName();
+        final String raceName = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName) ? raceColumnName : raceColumnName + ", " + fleetName;
+        ShowCompetitorToBoatMappingsDialog dialog = new ShowCompetitorToBoatMappingsDialog(sailingService, 
+                stringMessages, errorReporter, selectedLeaderboardName, raceColumnName, fleetName, raceName);
+        dialog.center();
     }
 
     private void setStartTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
@@ -1029,40 +1066,33 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             public void ok(PairingListTemplateDTO editedObject) {
                 BusyDialog busyDialog = new BusyDialog();
                 busyDialog.show();
-                try {
-                    sailingService.calculatePairingListTemplate(editedObject.getFlightCount(), editedObject.getGroupCount(),
-                            editedObject.getCompetitorCount(), editedObject.getFlightMultiplier(), 
-                            new AsyncCallback<PairingListTemplateDTO>() {
+                sailingService.calculatePairingListTemplate(editedObject.getFlightCount(), editedObject.getGroupCount(),
+                        editedObject.getCompetitorCount(), editedObject.getFlightMultiplier(), 
+                        new AsyncCallback<PairingListTemplateDTO>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                busyDialog.hide();
+                                errorReporter.reportError(stringMessages.errorCalculatingPairingListTemplate(caught.getMessage()));
+                            }
 
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    busyDialog.hide();
-                                    System.out.println(caught);
-                                }
-
-                                @Override
-                                public void onSuccess(PairingListTemplateDTO result) {
-                                    busyDialog.hide();
-                                    result.setSelectedFlightNames(editedObject.getSelectedFlightNames());
-                                    openPairingListCreationDialog(leaderboardDTO, result);
-                                }
-
-                            });
-                } catch (Exception exception) {
-                    // TODO show error somehow
-                }
+                            @Override
+                            public void onSuccess(PairingListTemplateDTO result) {
+                                busyDialog.hide();
+                                result.setSelectedFlightNames(editedObject.getSelectedFlightNames());
+                                openPairingListCreationDialog(leaderboardDTO, result);
+                            }
+                        });
             }
 
             @Override
             public void cancel() {
-                
             }
         });
         dialog.show();
     }
     
     private void openPairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO, PairingListTemplateDTO template) {
-        PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO, stringMessages, template, sailingService);
+        PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO, stringMessages, template, sailingService, errorReporter);
         dialog.show();
     }
     

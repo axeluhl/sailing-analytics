@@ -229,7 +229,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         trackedRacesPanel.add(trackedRacesListComposite);
         trackedRacesListComposite.addTrackedRaceChangeListener(this);
         trackedRaceListHandler = new SelectionChangeEvent.Handler() {
-        
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 Set<RaceDTO> selectedRaces = refreshableTrackedRaceSelectionModel.getSelectedSet();
@@ -261,19 +260,16 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 }
             }
 
-        private boolean hasLink(RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName) {
-            return selectedRaceColumnAndFleetName.getA()
-                    .getRaceIdentifier(selectedRaceColumnAndFleetName.getB()) != null;
-        }
-        
-        private boolean isLinkedToRace(RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName, RaceDTO selectedRace){
-            return selectedRaceColumnAndFleetName.getA().getRaceIdentifier(selectedRaceColumnAndFleetName.getB()).equals(selectedRace.getRaceIdentifier());
-        }
-        
+            private boolean hasLink(RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName) {
+                return selectedRaceColumnAndFleetName.getA()
+                        .getRaceIdentifier(selectedRaceColumnAndFleetName.getB()) != null;
+            }
+            
+            private boolean isLinkedToRace(RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName, RaceDTO selectedRace){
+                return selectedRaceColumnAndFleetName.getA().getRaceIdentifier(selectedRaceColumnAndFleetName.getB()).equals(selectedRace.getRaceIdentifier());
+            }
         };
-        
         trackedRaceListHandlerRegistration = refreshableTrackedRaceSelectionModel.addSelectionChangeHandler(trackedRaceListHandler);
-
         Button reloadAllRaceLogs = new Button(stringMessages.reloadAllRaceLogs());
         reloadAllRaceLogs.ensureDebugId("ReloadAllRaceLogsButton");
         reloadAllRaceLogs.addClickHandler(new ClickHandler() {
@@ -502,6 +498,10 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     protected String getSelectedLeaderboardName() {
         return getSelectedLeaderboard() != null ? getSelectedLeaderboard().name : null;
+    }
+
+    protected boolean canBoatsOfCompetitorsChangePerRace() {
+        return getSelectedLeaderboard() != null ? getSelectedLeaderboard().canBoatsOfCompetitorsChangePerRace: false;
     }
 
     protected abstract void leaderboardSelectionChanged();

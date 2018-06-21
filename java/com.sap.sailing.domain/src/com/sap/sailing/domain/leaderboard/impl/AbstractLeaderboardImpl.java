@@ -13,9 +13,13 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterBoatEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogBoatDeregistrator;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogBoatsInLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorDeregistrator;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -99,8 +103,18 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
 
     @Override
+    public Iterable<Boat> getAllBoats() {
+        return getOrCreateCompetitorsProvider().getAllBoats();
+    }
+
+    @Override
     public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {
         return getOrCreateCompetitorsProvider().getAllCompetitors(raceColumn, fleet);
+    }
+
+    @Override
+    public Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet) {
+        return raceColumn.getAllCompetitorsAndTheirBoats(fleet).get(competitor);
     }
 
     @Override
@@ -202,10 +216,10 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
                 regattaLog);
         return analyzer.analyze();
     }
-
+    
     @Override
     public void registerCompetitor(Competitor competitor) {
-        registerCompetitors(Collections.singleton(competitor));
+        registerCompetitors(Collections.singletonList(competitor));
     }
     
     @Override
@@ -213,12 +227,12 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         TimePoint now = MillisecondsTimePoint.now();
         
-        for (Competitor competitor : competitors) {
+        for (Competitor competitor: competitors) {
             regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(now, now, regattaLogEventAuthorForAbstractLeaderboard,
                     UUID.randomUUID(), competitor));
         }
     }
-    
+
     @Override
     public void deregisterCompetitor(Competitor competitor) {
         deregisterCompetitors(Collections.singleton(competitor));
@@ -230,4 +244,42 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         CompetitorDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new CompetitorDeregistrator<>(regattaLog, competitors, regattaLogEventAuthorForAbstractLeaderboard);
         deregisterer.deregister(deregisterer.analyze());
     }
+    
+    // boat functions
+    @Override
+    public Iterable<Boat> getBoatsRegisteredInRegattaLog() {
+        RegattaLog regattaLog = getRegattaLike().getRegattaLog();
+        RegattaLogBoatsInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new RegattaLogBoatsInLogAnalyzer<>(
+                regattaLog);
+        return analyzer.analyze();
+    }
+
+    @Override
+    public void registerBoat(Boat boat) {
+        registerBoats(Collections.singleton(boat));
+    }
+    
+    @Override
+    public void registerBoats(Iterable<Boat> boats) {
+        RegattaLog regattaLog = getRegattaLike().getRegattaLog();
+        TimePoint now = MillisecondsTimePoint.now();
+        
+        for (Boat boat : boats) {
+            regattaLog.add(new RegattaLogRegisterBoatEventImpl(now, now, regattaLogEventAuthorForAbstractLeaderboard,
+                    UUID.randomUUID(), boat));
+        }
+    }
+    
+    @Override
+    public void deregisterBoat(Boat boat) {
+        deregisterBoats(Collections.singleton(boat));
+    }
+    
+    @Override
+    public void deregisterBoats(Iterable<Boat> boats) {
+        RegattaLog regattaLog = getRegattaLike().getRegattaLog();
+        RegattaLogBoatDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new RegattaLogBoatDeregistrator<>(regattaLog, boats, regattaLogEventAuthorForAbstractLeaderboard);
+        deregisterer.deregister(deregisterer.analyze());
+    }
+
 }

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -107,7 +108,7 @@ public abstract class AbstractTrackedRegattaAndRaceObserver implements TrackedRe
                     RegattaListener.this.raceAdded(trackedRace);
                 }
             };
-            trackedRegatta.addRaceListener(raceListener);
+            trackedRegatta.addRaceListener(raceListener, /* Not replicated */ Optional.empty(), /* synchronous */ false);
         }
 
         public synchronized void raceRemoved(TrackedRace trackedRace) {

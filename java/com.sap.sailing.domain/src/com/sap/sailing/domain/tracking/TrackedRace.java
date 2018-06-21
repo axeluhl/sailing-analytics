@@ -13,6 +13,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProce
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
@@ -24,13 +25,10 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TargetTimeInfo;
@@ -56,8 +54,11 @@ import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.impl.NonCachingMarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -746,6 +747,10 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     
     Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
+    Boat getBoatOfCompetitor(Competitor competitor);
+    
+    Competitor getCompetitorOfBoat(Boat boat);
+    
     /**
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose
      * {@link #getRank(Competitor)} is 0 will be sorted "worst".
@@ -1075,6 +1080,34 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
         return getVelocityMadeGood(competitor, timePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
+    
+    /**
+     * Computes the angle between the competitors direction and the wind's "from" direction. The angle's direction is chosen such that
+     * it can be added to the boat's course over ground to arrive at the wind's {@link Wind#getFrom() "from"} direction. Example: wind
+     * from the north (0deg), boat's course over ground 90deg (moving east), then the bearing returned is -90deg.
+     */
+    default Bearing getTWA(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        Bearing twa = null;
+        final GPSFixTrack<Competitor, GPSFixMoving> sogTrack = this.getTrack(competitor);
+        if (sogTrack != null) {
+            SpeedWithBearing speedOverGround = sogTrack.getEstimatedSpeed(timePoint);
+            Wind wind = cache.getWind(this, competitor, timePoint);
+            if (wind != null && speedOverGround != null) {
+                final Bearing projectToDirection = wind.getFrom();
+                twa = speedOverGround.getBearing().getDifferenceTo(projectToDirection);
+            }
+        }
+        return twa;
+    }
+    
+    /**
+     * Same as {@link #getTWA}, only that additionally a cache is provided that can allow the method to use
+     * cached wind and leg type values.
+     */
+    default Bearing getTWA(Competitor competitor, TimePoint at){
+        return getTWA(competitor, at, new LeaderboardDTOCalculationReuseCache(at));
+    }
+    
     /**
      * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a cache that can
      * accelerate requests for wind directions, the leg type and the competitor's current leg's bearing.
@@ -1092,4 +1125,5 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      */
     SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode,
             WindLegTypeAndLegBearingCache cache);
+
 }

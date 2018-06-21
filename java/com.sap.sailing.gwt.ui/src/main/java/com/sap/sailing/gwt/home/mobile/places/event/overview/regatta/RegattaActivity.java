@@ -30,8 +30,10 @@ public class RegattaActivity extends AbstractEventActivity<RegattaOverviewPlace>
     @Override
     protected EventViewBase initView() {
         final AbstractEventOverview view = new RegattaOverviewImpl(this, flagImageResolver);
+        initSailorInfo(view);
         initSeriesNavigation(view);
         initQuickfinder(view, true);
+        initWindfinderNavigations(view);
         if (!isMultiRegattaEvent()) {
             initMedia(view);
         }

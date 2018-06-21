@@ -18,13 +18,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -53,6 +53,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private DoubleBox buoyZoneRadiusInMetersBox;
     private CheckBox transparentHoverlines;
     private IntegerBox hoverlineStrokeWeight;
+    private DoubleBox startCountDownFontSizeScalingBox;
     
     private boolean isSimulationEnabled;
     
@@ -244,6 +245,12 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         hoverlineStrokeWeightPanel.add(hoverlineStrokeWeight);
         vp.add(hoverlineStrokeWeightPanel);
         
+        HorizontalPanel startCountDownFontSizeScalingPanel = new HorizontalPanel();
+        Label startCountDownFontSizeScalingLabel = new Label(stringMessages.startCountDownFontSizeScaling() + ":");
+        startCountDownFontSizeScalingPanel.add(startCountDownFontSizeScalingLabel);
+        startCountDownFontSizeScalingBox = dialog.createDoubleBox(initialSettings.getStartCountDownFontSizeScaling(), 3);
+        startCountDownFontSizeScalingPanel.add(startCountDownFontSizeScalingBox);
+        vp.add(startCountDownFontSizeScalingPanel);
         return vp;
     }
     
@@ -288,17 +295,16 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         if (helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
             tailLengthInMilliseconds = tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue() * 1000l;
         }
-        
         Distance buoyZoneRadius = initialSettings.getBuoyZoneRadius();
         if (helpLinesSettings.isVisible(HelpLineTypes.BUOYZONE) && buoyZoneRadiusInMetersBox.getValue() != null) {
             buoyZoneRadius = new MeterDistance(buoyZoneRadiusInMetersBox.getValue());
         }
-        
         return new RaceMapSettings(zoomSettings, helpLinesSettings,
                 transparentHoverlines.getValue(), hoverlineStrokeWeight.getValue(), tailLengthInMilliseconds, windUpCheckbox.getValue(),
                 buoyZoneRadius, showOnlySelectedCompetitorsCheckBox.getValue(), showSelectedCompetitorsInfoCheckBox.getValue(),
                 showWindStreamletColorsCheckbox.getValue(), showWindStreamletOverlayCheckbox.getValue(), showSimulationOverlay,
-                initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue(),estimatedDuration);
+                initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue(),estimatedDuration,
+                startCountDownFontSizeScalingBox.getValue());
     }
     
     private RaceMapZoomSettings getZoomSettings() {

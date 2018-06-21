@@ -12,20 +12,23 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class AutoplaySettingsDialogComponent implements SettingsDialogComponent<AutoplayPerspectiveOwnSettings> {
-    private AutoplayPerspectiveOwnSettings initialSettings;
+    private final AutoplayPerspectiveOwnSettings initialSettings;
+    private final StringMessages stringMessages;
+    
     private CheckBox fullScreen;
     private CheckBox switchToLiveRaceAutomatically;
     private IntegerBox timeBeforeRaceStartInput;
+    private IntegerBox waitTimeAfterRaceEndInput;
 
     AutoplaySettingsDialogComponent(AutoplayPerspectiveOwnSettings settings) {
         this.initialSettings = settings;
+        
+        stringMessages = StringMessages.INSTANCE;
     }
 
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
-
-        StringMessages stringMessages = StringMessages.INSTANCE;
 
         fullScreen = dialog.createCheckbox(stringMessages.startBrowserFullscreen());
         fullScreen.setValue(initialSettings.isFullscreen());
@@ -38,8 +41,14 @@ public class AutoplaySettingsDialogComponent implements SettingsDialogComponent<
         Label timeBeforeRaceStartDescription = new Label(stringMessages.timeBeforeRaceStart());
         vp.add(timeBeforeRaceStartDescription);
         
-        timeBeforeRaceStartInput = dialog.createIntegerBox(initialSettings.getTimeToSwitchBeforeRaceStart(), 5);
+        timeBeforeRaceStartInput = dialog.createIntegerBox(initialSettings.getTimeToSwitchBeforeRaceStartInSeconds(), 5);
         vp.add(timeBeforeRaceStartInput);
+        
+        Label timeAfterRaceEndDescription = new Label(stringMessages.timeAfterRaceEnd());
+        vp.add(timeAfterRaceEndDescription);
+        
+        waitTimeAfterRaceEndInput = dialog.createIntegerBox(initialSettings.getWaitTimeAfterRaceEndInSeconds(), 5);
+        vp.add(waitTimeAfterRaceEndInput);
 
         return vp;
     }
@@ -47,7 +56,7 @@ public class AutoplaySettingsDialogComponent implements SettingsDialogComponent<
     @Override
     public AutoplayPerspectiveOwnSettings getResult() {
         return new AutoplayPerspectiveOwnSettings(fullScreen.getValue(), switchToLiveRaceAutomatically.getValue(),
-                timeBeforeRaceStartInput.getValue());
+                timeBeforeRaceStartInput.getValue(), waitTimeAfterRaceEndInput.getValue());
     }
 
     @Override
@@ -55,9 +64,9 @@ public class AutoplaySettingsDialogComponent implements SettingsDialogComponent<
         return new Validator<AutoplayPerspectiveOwnSettings>() {
             @Override
             public String getErrorMessage(AutoplayPerspectiveOwnSettings valueToValidate) {
-                if (valueToValidate.timeToSwitchBeforeRaceStart.getValue() < 0) {
-                    // TODO i18n
-                    return "negative delay";
+                if (valueToValidate.getTimeToSwitchBeforeRaceStartInSeconds() < 0
+                        || valueToValidate.getWaitTimeAfterRaceEndInSeconds() < 0) {
+                    return stringMessages.delaysMustNotBeNegative();
                 } else {
                     return null;
                 }

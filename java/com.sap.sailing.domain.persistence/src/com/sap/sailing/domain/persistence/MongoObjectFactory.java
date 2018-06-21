@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.mongodb.DB;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -122,9 +123,9 @@ public interface MongoObjectFactory {
     void storeRegattaForRaceID(String id, Regatta regatta);
 
     void removeRegattaForRaceID(String raceIDAsString, Regatta regatta);
-    
+
     /**
-     * Stores a competitor, including the team and boat. This should not be done for competitors for which
+     * Stores a competitor. This should not be done for competitors for which
      * the master data is supplied by other systems, such as TracTrac, but rather for smartphone tracking,
      * where this data is otherwise not recoverable.
      * @param competitor the competitor to store/update in the database
@@ -135,11 +136,29 @@ public interface MongoObjectFactory {
      * Like {@link #storeCompetitor(Competitor)}, but for a collection of competitors that are all
      * expected to be new, having a unique {@link Competitor#getId() ID}.
      */
-    void storeCompetitors(Iterable<Competitor> competitors);
+    void storeCompetitors(Iterable<? extends Competitor> competitors);
 
     void removeAllCompetitors();
 
     void removeCompetitor(Competitor competitor);
+    
+    /**
+     * Stores a boat. This should not be done for boats for which
+     * the master data is supplied by other systems, such as TracTrac, but rather for smartphone tracking,
+     * where this data is otherwise not recoverable.
+     * @param boat the boat to store/update in the database
+     */
+    void storeBoat(Boat boat);
+
+    /**
+     * Like {@link #storeBoat(Boat)}, but for a collection of boats that are all
+     * expected to be new, having a unique {@link Boat#getId() ID}.
+     */
+    void storeBoats(Iterable<? extends Boat> boats);
+
+    void removeAllBoats();
+
+    void removeBoat(Boat boat);
 
     DB getDatabase();
 

@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Shared result import APIs
 Bundle-SymbolicName: com.sap.sailing.resultimport
+Automatic-Module-Name: com.sap.sailing.resultimport
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.resultimport.Activator
 Bundle-Vendor: SAP

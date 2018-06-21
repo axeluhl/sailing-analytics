@@ -29,8 +29,8 @@ public class MultiRaceLeaderboardSettingsDialogComponent
     private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
 
     public MultiRaceLeaderboardSettingsDialogComponent(MultiRaceLeaderboardSettings initialSettings,
-            List<String> allRaceColumnNames, StringMessages stringMessages) {
-        super(initialSettings, stringMessages);
+            List<String> allRaceColumnNames, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShown) {
+        super(initialSettings, stringMessages, availableDetailTypes, canBoatInfoBeShown);
         this.activeRaceColumnSelectionStrategy = initialSettings.getActiveRaceColumnSelectionStrategy();
         this.raceAllRaceColumnNames = allRaceColumnNames;
         raceColumnCheckboxes = new LinkedHashMap<>();
@@ -38,17 +38,16 @@ public class MultiRaceLeaderboardSettingsDialogComponent
 
     @Override
     public MultiRaceLeaderboardSettings getResult() {
-        List<DetailType> maneuverDetailsToShow = getSelected(maneuverDetailCheckboxes);
-        List<DetailType> overallDetailsToShow = getSelected(overallDetailCheckboxes);
-        List<DetailType> raceDetailsToShow = getSelected(raceDetailCheckboxes);
-        List<DetailType> legDetailsToShow = getSelected(legDetailCheckboxes);
+        List<DetailType> maneuverDetailsToShow = getSelected(maneuverDetailCheckboxes, initialSettings.getManeuverDetailsToShow());
+        List<DetailType> overallDetailsToShow = getSelected(overallDetailCheckboxes, initialSettings.getOverallDetailsToShow());
+        List<DetailType> raceDetailsToShow = getSelected(raceDetailCheckboxes, initialSettings.getRaceDetailsToShow());
+        List<DetailType> legDetailsToShow = getSelected(legDetailCheckboxes, initialSettings.getLegDetailsToShow());
         List<String> namesOfRaceColumnsToShow = null;
         if (activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT) {
             namesOfRaceColumnsToShow = new ArrayList<String>();
             for (Map.Entry<String, CheckBox> entry : raceColumnCheckboxes.entrySet()) {
                 if (entry.getValue().getValue()) {
                     namesOfRaceColumnsToShow.add(entry.getKey());
-          
                 }
             }
         }
@@ -61,8 +60,8 @@ public class MultiRaceLeaderboardSettingsDialogComponent
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
                 activeRaceColumnSelectionStrategy,
                 /* showAddedScores */ showAddedScoresCheckBox.getValue().booleanValue(),
-                showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
-                isCompetitorNationalityColumnVisible.getValue());
+                showCompetitorShortNameColumnCheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
+                showCompetitorBoatInfoColumnCheckBox.getValue(), isCompetitorNationalityColumnVisible.getValue());
         return newSettings;
     }
 

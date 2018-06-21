@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -53,6 +54,7 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
@@ -67,8 +69,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -76,7 +76,6 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TargetTimeInfo;
@@ -146,8 +145,11 @@ import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
@@ -548,7 +550,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     markPassingCalculator.stop();
                 }
                 }
-            });
+            }, /* Not relevant For replication */ Optional.empty(), /* synchronous */ false);
         } else {
             markPassingCalculator = null;
         }
@@ -918,7 +920,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * monitor for {@link #updateStartOfRaceCacheFields()}; has to be serializable, therefore {@link String}
      * and not {@link Object}.
      */
-    private final String updateStartOfRaceCacheFieldsMonitor = "";
+    private final String updateStartOfRaceCacheFieldsMonitor = ""+new Random().nextDouble();
     protected void updateStartOfRaceCacheFields() {
         synchronized (updateStartOfRaceCacheFieldsMonitor) {
             TimePoint newStartTime = null;
@@ -1461,6 +1463,24 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
+    public Boat getBoatOfCompetitor(Competitor competitor) {
+        return getRace().getBoatOfCompetitor(competitor);
+    }
+    
+    @Override
+    public Competitor getCompetitorOfBoat(Boat boat) {
+        if (boat == null) {
+            return null;
+        }
+        for (Map.Entry<Competitor, Boat> competitorWithBoat : getRace().getCompetitorsAndTheirBoats().entrySet()) {
+            if (boat.equals(competitorWithBoat.getValue())) {
+                return competitorWithBoat.getKey();
+            }
+        }
+        return null;
+    }
+
+    @Override
     public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         return getCompetitorsFromBestToWorst(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
@@ -1888,7 +1908,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } finally {
             LockUtil.unlockAfterRead(getSerializationLock());
         }
-        if (!old.equals(this.windSourcesToExclude)) {
+        if (!old.equals(new HashSet<>(getWindSourcesToExclude()))) {
             clearAllCachesExceptManeuvers();
             triggerManeuverCacheRecalculationForAllCompetitors();
         }
@@ -2816,6 +2836,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     protected void setDelayToLiveInMillis(long delayToLiveInMillis) {
+        logger.info("Setting live delay for race "+getRace().getName()+" to "+delayToLiveInMillis+"ms");
         this.delayToLiveInMillis = delayToLiveInMillis;
     }
 

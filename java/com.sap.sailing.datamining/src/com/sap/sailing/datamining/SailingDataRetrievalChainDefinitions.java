@@ -10,7 +10,7 @@ import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasManeuverContext;
 import com.sap.sailing.datamining.data.HasManeuverSpeedDetailsContext;
-import com.sap.sailing.datamining.data.HasManeuverBoundariesContext;
+import com.sap.sailing.datamining.data.HasCompleteManeuverCurveWithEstimationDataContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
@@ -28,7 +28,7 @@ import com.sap.sailing.datamining.impl.components.LeaderboardGroupRetrievalProce
 import com.sap.sailing.datamining.impl.components.LeaderboardRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.ManeuverRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.ManeuverSpeedDetailsRetrievalProcessor;
-import com.sap.sailing.datamining.impl.components.ManeuverBoundariesRetrievalProcessor;
+import com.sap.sailing.datamining.impl.components.CompleteManeuverCurveWithEstimationDataRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.MarkPassingRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.RaceOfCompetitorRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedLegOfCompetitorRetrievalProcessor;
@@ -128,13 +128,13 @@ public class SailingDataRetrievalChainDefinitions {
                 "ManeuverSpeedDetails");
         dataRetrieverChainDefinitions.add(speedDetailsDataRetrieverChainDefinition);
         
-        DataRetrieverChainDefinition<RacingEventService, HasManeuverBoundariesContext> maneuverBoundariesRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
-                raceOfCompetitorRetrieverChainDefinition, HasManeuverBoundariesContext.class,
-                "ManeuverBoundariesRetrieverChain");
-        maneuverBoundariesRetrieverChainDefinition.endWith(RaceOfCompetitorRetrievalProcessor.class,
-                ManeuverBoundariesRetrievalProcessor.class, HasManeuverBoundariesContext.class,
-                "ManeuverBoundaries");
-        dataRetrieverChainDefinitions.add(maneuverBoundariesRetrieverChainDefinition);
+        DataRetrieverChainDefinition<RacingEventService, HasCompleteManeuverCurveWithEstimationDataContext> completeManeuverCurveWithEstimationDataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
+                raceOfCompetitorRetrieverChainDefinition, HasCompleteManeuverCurveWithEstimationDataContext.class,
+                "CompleteManeuverCurveWithEstimationDataRetrieverChain");
+        completeManeuverCurveWithEstimationDataRetrieverChainDefinition.endWith(RaceOfCompetitorRetrievalProcessor.class,
+                CompleteManeuverCurveWithEstimationDataRetrievalProcessor.class, HasCompleteManeuverCurveWithEstimationDataContext.class, ManeuverSettings.class, ManeuverSettingsImpl.createDefault(),
+                "CompleteManeuverCurveWithEstimationData");
+        dataRetrieverChainDefinitions.add(completeManeuverCurveWithEstimationDataRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasMarkPassingContext> markPassingRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 legOfCompetitorRetrieverChainDefinition, HasMarkPassingContext.class, "MarkPassingSailingDomainRetrieverChain");

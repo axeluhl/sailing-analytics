@@ -14,10 +14,10 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -127,7 +127,6 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
             @Override
             public SafeHtml getValue(CompetitorDescriptor competitor) {
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
-                ImageResourceRenderer renderer = new ImageResourceRenderer();
                 final CountryCode countryCode = competitor.getCountryCode();
                 final String twoLetterIsoCountryCode = countryCode == null ? null : countryCode.getTwoLetterISOCode();
                 final ImageResource flagImageResource;
@@ -137,7 +136,7 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
                     flagImageResource = FlagImageResolverImpl.get().getFlagImageResource(twoLetterIsoCountryCode);
                 }
                 if (flagImageResource != null) {
-                    sb.append(renderer.render(flagImageResource));
+                    sb.append(FlagImageRenderer.image(flagImageResource.getSafeUri().asString()));
                     sb.appendHtmlConstant("&nbsp;");
                 }
 

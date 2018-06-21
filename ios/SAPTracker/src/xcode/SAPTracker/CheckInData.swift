@@ -8,9 +8,10 @@
 
 import Foundation
 
-open class CheckInData: NSObject {
+class CheckInData: NSObject {
     
     fileprivate struct ItemNames {
+        static let BoatID = "boat_id"
         static let EventID = "event_id"
         static let LeaderboardName = "leaderboard_name"
         static let CompetitorID = "competitor_id"
@@ -18,6 +19,7 @@ open class CheckInData: NSObject {
     }
     
     public enum CheckInDataType {
+        case boat
         case competitor
         case mark
     }
@@ -25,12 +27,15 @@ open class CheckInData: NSObject {
     let serverURL: String
     let eventID: String
     let leaderboardName: String
+    let boatID: String?
     let competitorID: String?
     let markID: String?
+    let isTraining: Bool
     let type: CheckInDataType
 
     var eventData = EventData()
     var leaderboardData = LeaderboardData()
+    var boatData = BoatData()
     var competitorData = CompetitorData()
     var markData = MarkData()
     var teamImageURL: String?
@@ -38,13 +43,16 @@ open class CheckInData: NSObject {
     init(serverURL: String,
          eventID: String,
          leaderboardName: String,
-         competitorID: String)
+         competitorID: String,
+         isTraining: Bool)
     {
+        self.boatID = nil
         self.competitorID = competitorID
         self.eventID = eventID
         self.leaderboardName = leaderboardName
         self.markID = nil
         self.serverURL = serverURL
+        self.isTraining = isTraining
         self.type = CheckInDataType.competitor
         super.init()
     }
@@ -52,15 +60,45 @@ open class CheckInData: NSObject {
     init(serverURL: String,
          eventID: String,
          leaderboardName: String,
-         markID: String)
+         markID: String,
+         isTraining: Bool)
     {
+        self.boatID = nil
         self.competitorID = nil
         self.eventID = eventID
         self.leaderboardName = leaderboardName
         self.markID = markID
         self.serverURL = serverURL
+        self.isTraining = isTraining
         type = CheckInDataType.mark
         super.init()
+    }
+
+    init(serverURL: String,
+         eventID: String,
+         leaderboardName: String,
+         boatID: String,
+         isTraining: Bool)
+    {
+        self.boatID = boatID
+        self.competitorID = nil
+        self.eventID = eventID
+        self.leaderboardName = leaderboardName
+        self.markID = nil
+        self.serverURL = serverURL
+        self.isTraining = isTraining
+        type = CheckInDataType.boat
+        super.init()
+    }
+
+    convenience init(boatCheckIn: BoatCheckIn) {
+        self.init(
+            serverURL: boatCheckIn.serverURL,
+            eventID: boatCheckIn.event.eventID,
+            leaderboardName: boatCheckIn.leaderboard.name,
+            boatID: boatCheckIn.boatID,
+            isTraining: boatCheckIn.isTraining.boolValue
+        )
     }
 
     convenience init(competitorCheckIn: CompetitorCheckIn) {
@@ -68,7 +106,8 @@ open class CheckInData: NSObject {
             serverURL: competitorCheckIn.serverURL,
             eventID: competitorCheckIn.event.eventID,
             leaderboardName: competitorCheckIn.leaderboard.name,
-            competitorID: competitorCheckIn.competitorID
+            competitorID: competitorCheckIn.competitorID,
+            isTraining: competitorCheckIn.isTraining.boolValue
         )
     }
 
@@ -77,7 +116,8 @@ open class CheckInData: NSObject {
             serverURL: markCheckIn.serverURL,
             eventID: markCheckIn.event.eventID,
             leaderboardName: markCheckIn.leaderboard.name,
-            markID: markCheckIn.markID
+            markID: markCheckIn.markID,
+            isTraining: markCheckIn.isTraining.boolValue
         )
     }
 
@@ -100,14 +140,24 @@ open class CheckInData: NSObject {
                 serverURL: serverURL,
                 eventID: eventID,
                 leaderboardName: leaderboardName,
-                competitorID: competitorID
+                competitorID: competitorID,
+                isTraining: false
             )
         } else if let markID = CheckInData.queryItemValue(queryItems: queryItems, itemName: ItemNames.MarkID) {
             self.init(
                 serverURL: serverURL,
                 eventID: eventID,
                 leaderboardName: leaderboardName,
-                markID: markID
+                markID: markID,
+                isTraining: false
+            )
+        } else if let boatID = CheckInData.queryItemValue(queryItems: queryItems, itemName: ItemNames.BoatID) {
+            self.init(
+                serverURL: serverURL,
+                eventID: eventID,
+                leaderboardName: leaderboardName,
+                boatID: boatID,
+                isTraining: false
             )
         } else {
             logError(name: "\(#function)", error: "unknown check-in type")
@@ -123,7 +173,9 @@ open class CheckInData: NSObject {
     }
 
     convenience init?(checkIn: CheckIn) {
-        if let competitorCheckIn = checkIn as? CompetitorCheckIn {
+        if let boatCheckIn = checkIn as? BoatCheckIn {
+            self.init(boatCheckIn: boatCheckIn)
+        } else if let competitorCheckIn = checkIn as? CompetitorCheckIn {
             self.init(competitorCheckIn: competitorCheckIn)
         } else if let markCheckIn = checkIn as? MarkCheckIn {
             self.init(markCheckIn: markCheckIn)
@@ -132,7 +184,20 @@ open class CheckInData: NSObject {
             return nil
         }
     }
-
+    
+    convenience init?(createTrainingData: CreateTrainingData) {
+        guard let eventID = createTrainingData.createEventData?.eventID else { return nil }
+        guard let leaderboardName = createTrainingData.createEventData?.leaderboardName else { return nil }
+        guard let competitorID = createTrainingData.competitorID else { return nil }
+        self.init(
+            serverURL: createTrainingData.serverURL,
+            eventID: eventID,
+            leaderboardName: leaderboardName,
+            competitorID: competitorID,
+            isTraining: true
+        )
+    }
+    
     // MARK: - Helper
     
     class fileprivate func queryItemValue(queryItems: [URLQueryItem]?, itemName: String) -> String? {

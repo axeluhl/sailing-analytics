@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
@@ -47,7 +48,7 @@ public class TrackedRegattaTest {
     public void setUp() {
         regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
-                /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* canBoatsOfCompetitorsChangePerRace */ false, /* startDate */ null, /* endDate */null, null, null, "a", null));
     }
     
     @Test(expected = TimeoutException.class)
@@ -74,11 +75,11 @@ public class TrackedRegattaTest {
                     throw new RuntimeException(e);
                 }
             }
-        });
+        }, Optional.empty(), /* synchronous */ false);
         
         DynamicTrackedRace race1 = createRace("R1");
         Thread thread1 = new Thread(() -> {
-            regatta.addTrackedRace(race1);
+            regatta.addTrackedRace(race1, Optional.empty());
         });
         thread1.start();
         // This ensures, that the add event is being processed but is not finished because
@@ -88,7 +89,7 @@ public class TrackedRegattaTest {
         addPhaser.arriveAndAwaitAdvance();
         
         Thread thread2 = new Thread(() -> {
-            regatta.removeTrackedRace(race1);
+            regatta.removeTrackedRace(race1, Optional.empty());
         });
         thread2.start();
         // If the implementation ensures that the events are fired in order,
@@ -114,7 +115,7 @@ public class TrackedRegattaTest {
     }
     
     private DynamicTrackedRace createRace(String name) {
-        RaceDefinition race1 = new RaceDefinitionImpl(name, course, boatClass, Collections.emptyList());
+        RaceDefinition race1 = new RaceDefinitionImpl(name, course, boatClass, Collections.emptyMap());
         return new DynamicTrackedRaceImpl(regatta, race1, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
                 mock(RaceLogResolver.class));

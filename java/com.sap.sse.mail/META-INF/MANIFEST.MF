@@ -19,3 +19,4 @@ Require-Bundle: com.sap.sse.replication,
  com.sap.sse.operationaltransformation,
  com.sap.sse.common,
  com.sap.sse
+Automatic-Module-Name: com.sap.sse.mail

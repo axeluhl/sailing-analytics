@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.pairinglist.CompetitionFormat;
 import com.sap.sse.pairinglist.PairingFrameProvider;
 import com.sap.sse.pairinglist.PairingList;
@@ -100,7 +101,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
     @Override
     public <Flight, Group, Competitor, CompetitorAllocation> PairingList<Flight, Group, Competitor, CompetitorAllocation> createPairingList(
-            CompetitionFormat<Flight, Group, Competitor, CompetitorAllocation> competitionFormat) {
+            CompetitionFormat<Flight, Group, Competitor, CompetitorAllocation> competitionFormat) throws PairingListCreationException {
         return new PairingListImpl<>(this, competitionFormat);
     }
 
@@ -195,10 +196,14 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
     
     /**
-     * Divides the allSeeds array into parts with seed combinations that starts with the same seeds. If there are to less 
-     * flights this method cuts the off Seeds into 4000 parts to avoid to less Tasks.   
-     * @param equalSeeds number of equal seeds at the beginning of seed combinations which should be grouped. Attention: If this number is to big there will be very many little parts.
-     * @param allSeeds array with seed combinations, which should be divided
+     * Divides the allSeeds array into parts with seed combinations that starts with the same seeds. The parts
+     * are sized according to the thread pool size used so as to achieve reasonable concurrency. 
+     * 
+     * @param equalSeeds
+     *            number of equal seeds at the beginning of seed combinations which should be grouped. Attention: If
+     *            this number is to big there will be very many little parts.
+     * @param allSeeds
+     *            array with seed combinations, which should be divided
      * @return an Arraylist, that contains parts of allSeeds.
      */
     private ArrayList<int[][]> divideSeeds(int[][] allSeeds) {
@@ -217,8 +222,11 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     
     /**
      * Fast sorting algorithm to sort a huge amount of seeds in max <code>n*log(n)</code> time. Uses counting sort.
-     * @param allSeeds array of seeds, that should be sorted
-     * @param competitorCount highest value inside the complete array. Needed for counting sort.
+     * 
+     * @param allSeeds
+     *            array of seeds, that should be sorted
+     * @param competitorCount
+     *            highest value inside the complete array. Needed for counting sort.
      * @return sorted array with seed combinations
      */
     protected int[][] radixSort(int[][] allSeeds, int competitorCount) {
@@ -229,7 +237,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         return allSeeds;
     }
 
-    //TODO use comparator 
     private int[][] countSort(int[][] allSeeds, int i, int competitorCount) {
         int[][] output = new int[allSeeds.length][allSeeds[0].length];
         int[] count = new int[competitorCount];
@@ -239,7 +246,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         for (int z = 1; z < count.length; z++) {
             count[z] += count[z - 1];
         }
-        //TODO change to for each
         for (int z = allSeeds.length - 1; z >= 0; z--) {
             output[--count[allSeeds[z][i]]] = allSeeds[z];
         }
@@ -474,18 +480,21 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
 
     /**
-     * Switches competitors inside a group to improve competitor allocations.
-     * Method does not change the order of groups or flights. The standard deviation
-     * of team associations will not be influenced by this method. After executing the 
-     * method the assignment should be well distributed. 
+     * Switches competitors inside a group to improve competitor allocations. Method does not change the order of groups
+     * or flights. The standard deviation of team associations will not be influenced by this method. After executing
+     * the method the assignment should be well distributed.
      * 
-     * @param pairinglist current pairing list
-     * @param flights count of flights
-     * @param groups count of groups
-     * @param competitors count of competitors
+     * @param pairinglist
+     *            current pairing list
+     * @param flights
+     *            count of flights
+     * @param groups
+     *            count of groups
+     * @param competitors
+     *            count of competitors
      * @return improved pairing list template
      */
-    protected int[][] improveCompetitorAllocations(int[][] pairinglist, int flights, int groups, int competitors) {
+    protected int[][] improveCompetitorAllocations(final int[][] pairinglist, int flights, int groups, int competitors) {
         int[][] assignments = this.getAssignmentAssociations(pairinglist, new int[competitors][competitors / groups]);
         double neededAssigments = flights / (competitors / groups);
         double bestDev = Double.POSITIVE_INFINITY;
@@ -531,8 +540,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                         }
                     }
                 }
-                if (this.calcStandardDev(pairinglist) < bestDev) {
-                    bestDev = this.calcStandardDev(pairinglist);
+                final double standardDev = this.calcStandardDev(pairinglist);
+                if (standardDev < bestDev) {
+                    bestDev = standardDev;
                     bestPLT = pairinglist;
                 }
             }
@@ -541,13 +551,17 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
     
     /**
-     * Improves the Assignment changes between two flights by switching the groups inside a flight.
-     * Competitors and there assignment will not be changed.
-     * @param pairingList complete pairingListTemplate which needs to be improved
-     * @param flights number of flights which was used to generate the pairingListTemplate
-     * @param competitors number of competitors which was used to generate the pairingListTemplate
+     * Improves the Assignment changes between two flights by switching the groups inside a flight. Competitors and
+     * their assignment will not be changed.
      * 
-     * @return the improved pairingListTemplate
+     * @param pairingList
+     *            complete pairingListTemplate which needs to be improved; will be modified in place and then returned
+     * @param flights
+     *            number of flights which was used to generate the pairingListTemplate
+     * @param competitors
+     *            number of competitors which was used to generate the pairingListTemplate
+     * 
+     * @return the improved pairingListTemplate; identical to the {@code pairingList} parameter and returned only for convenience
      */
     private int[][] improveAssignmentChanges(int[][] pairingList, int flights, int competitors) {
         int boatChanges[] = new int[flights - 1];
@@ -564,10 +578,10 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     bestMatchesIndex = j;
                 }
             }
-            if (bestMatchesIndex > 0) {
+            if (bestMatchesIndex > 0) { // for ==0 nothing needs to be done; the group that matches the last group
+                // of the previous flight best is already the first in its flight
                 int[] temp = new int[pairingList[0].length];
                 System.arraycopy(pairingList[i * pairingList.length / flights], 0, temp, 0, temp.length);
-
                 System.arraycopy(pairingList[i * pairingList.length / flights + bestMatchesIndex], 0,
                         pairingList[i * pairingList.length / flights], 0, groupNext.length);
                 System.arraycopy(temp, 0, pairingList[i * pairingList.length / flights + bestMatchesIndex], 0,
@@ -645,7 +659,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      */
     private boolean contains(int[] arr, int value) {
         for (int i = 0; i < arr.length; i++) {
-                if (arr[i] == value) return true;
+            if (arr[i] == value) {
+                return true;
+            }
         }
         return false;
     }

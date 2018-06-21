@@ -80,7 +80,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts,
             RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode) {
         super(parent, context, timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible,
-                forcePaddingRightToAlignToCharts);
+                forcePaddingRightToAlignToCharts, userService);
         this.componentLifecycle = componentLifecycle;
         this.userService = userService;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
@@ -211,7 +211,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         timeSlider.setMaxValue(new Double(timeRangeProvider.getToTime().getTime()), false);
         timeSlider.setCurrentValue(new Double(timer.getTime().getTime()), true);
         timeSlider.clearMarkersAndLabelsAndTicks();
-        redrawAllMarkers(lastRaceTimesInfo);
+        if (lastRaceTimesInfo != null) {
+            redrawAllMarkers(lastRaceTimesInfo);
+        }
     }
 
     /**
@@ -334,7 +336,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 timer.setTime(newRaceTimesInfo.startOfRace.getTime() +
                         (initialTimeAfterRaceStartInReplayMode == null ? 0l : initialTimeAfterRaceStartInReplayMode.asMillis()));
             } else if (newRaceTimesInfo.startOfTracking != null) {
-                timer.setTime(newRaceTimesInfo.startOfTracking.getTime());
+                timer.setTime(newRaceTimesInfo.startOfTracking.getTime() +
+                        (initialTimeAfterRaceStartInReplayMode == null ? 0l : initialTimeAfterRaceStartInReplayMode.asMillis()));
             }
             break;
         }

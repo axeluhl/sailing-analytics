@@ -27,7 +27,7 @@ function trapCleanup() {
 function safeExit() {
   deleteTemp
   trap - INT TERM EXIT
-  exit
+  exit 77
 }
 
 function deleteTemp () {
@@ -46,10 +46,10 @@ args=()
 
 # Create temp directory with three random numbers and the process ID
 # in the name.  This directory is removed automatically at exit.
-tmpDir="./tmp.$RANDOM.$RANDOM.$RANDOM.$$/"
-(umask 000 && mkdir "${tmpDir}") || {
-  die "Could not create temporary directory! Exiting."
-}
+#tmpDir="/tmp/$RANDOM.$RANDOM.$RANDOM.$$/"
+#(umask 000 && mkdir "${tmpDir}") || {
+#  die "Could not create temporary directory! Exiting."
+#}
 
 # Logging (not used)
 # To never save a logfile change variable to '/dev/null'
@@ -60,28 +60,54 @@ logFile="$HOME/Library/Logs/${scriptBasename}.log"
 function mainScript() {
 echo -n
 
-if $tail; then
-  check_if_tmux_is_used
+local config_file=~/.aws-automation/config
+
+if is_exists ${config_file}; then
+  source "${config_file}"
 fi
 
-if $instance; then
+require_region
+
+local resource_file=./lib/resources-$region.sh
+local region_config_file=~/.aws-automation/config-$region
+
+if is_exists ${resource_file}; then
+  source "${resource_file}"
+fi
+
+if is_exists ${region_config_file}; then
+  source "${region_config_file}"
+fi
+
+init_resources
+
+if $force; then
+  error "--force option is currently not working."
+  safeExit
+fi
+
+if $instance_scenario; then
 	instance_start
-  if $associate_clb; then
-  	associate_clb_start
-  fi
-  if $associate_elastic_ip; then
-  	associate_elastic_ip_start
-  fi
-  if $associate_alb; then
-  	associate_alb_start
-  fi
-  confirm_reset_panes
 	safeExit
 fi
 
-if $tail ; then
-	tail_start
-  confirm_reset_panes
+if $shared_instance_scenario; then
+  shared_instance_start
+	safeExit
+fi
+
+if $master_instance_scenario; then
+  master_instance_start
+	safeExit
+fi
+
+if $replica_instance_scenario; then
+  replica_instance_start
+	safeExit
+fi
+
+if $associate_alb_scenario; then
+  associate_alb_start
 	safeExit
 fi
 
@@ -95,67 +121,36 @@ usage() {
 
  ${bold}Parameter:${reset}
   -r, --region                  AWS region (e.g. \"eu-west-2\" for London)
-  -t, --instance-type           Instance type (e.g. \"t2.medium\")
-  -k, --key-name                IAM keypair name (e.g. \"leonradeck-keypair\")
-  -i, --key-file                Path to keypair file
-  -s, --ssh-user                SSH user to connect to instance (e.g. \"root\")
-  -u, --user-username           Username of user to create
-  -q, --user-password           Password of user to create
-  -n, --instance-name           Name for instance (e.g. \"WC Santander 2017\")
-  -l, --instance-short-name     Short name for instance (e.g. subdomain \"wcs17\")
-  -a, --new-admin-password      New password for the admin user
-  -p, --public-dns-name         Dns name of instance (e.g. \"ec2-35-176...amazonaws.com\")
-  -f, --force                   Skip user input and use default variables
   -d, --debug                   Debug mode
+
+  // other parameters disabled for now
 
   ${bold}Scenarios:${reset}
   --instance                    Create instance
-  --associate-alb               Associate instance with existing application load balancer whos
-                                listener is defined in variables_aws.sh. Automatically
-                                create necessary target group and host name rule.
-                                Currently *.dummy.sapsailing.com is used for test purposes.
-  --associate-clb               Associate instance with new classic load balancer.
-  --asslociate-elastic-ip       Associate instance with new elastic ip.
-  --tail                        Tail logs from instance using tmux
+  --shared-instance             Create sub instance
+  --master-instance             Create master instance
+  --replica-instance            Create replica instance
+  --associate-alb               Associate instance with existing application load balancer.
 
   ${bold}Other:${reset}
-  --version                  Output version information and exit
+  --version                     Output version information and exit
 
 
   ${bold}Examples:${reset}
   Create instance:
   > ./aws-setup.sh --instance
 
-  Associate application load balancer:
-  > ./aws-setup.sh --instance --associate-alb
+  Create shared instance:
+  > ./aws-setup.sh --shared-instance
 
-  Associate instance with classic load balancer while
-  automatically tailing important log files (tmux required):
-  > ./aws-setup.sh --instance --associate-clb --tail
+  Associate instance with application load balancer:
+  > ./aws-setup.sh --associate-alb
 
-  Associate instance with elastic ip:
-  > ./aws-setup.sh --instance --associate-elastic-ip
+  Create master instance:
+  > ./aws-setup.sh --master-instance
 
-  Tail logfiles of running instance with dns name:
-  > ./aws-setup.sh --tail --public-dns-name ec2-x.compute.amazonaws.com
-
-  Create instance and use default values:
-  > ./aws-setup.sh --instance --force
-
-  Create instance and use default values except instance name
-  and instance short name:
-  > ./aws-setup.sh --instance --instance-name Test --instance-short-name t --force
-
-  Associate instance with classic load balancer by
-  passing all relevant parameters to script.
-  Also use debug mode.
-  > ./aws-setup.sh --region eu-west-2 --instance-type t2.medium
-  --key-name leonradeck-keypair --key-file /cygdrive/c/Users/d069485/
-  .ssh/leonradeck-keypair.pem --user-username test --user-password test
-  --instance-name \"WC Santander 2017\" --instance-short-name test
-  --new-admin-password admin -d --instance-with-load-balancer
-
-
+  Create replica instance:
+  > ./aws-setup.sh --replica-instance
 "
 }
 
@@ -200,11 +195,11 @@ unset options
 [[ $# -eq 0 ]] && set -- "--help"
 
 # Set default value of variable without parameter value to false
-associate_clb=false
-associate_alb=false
-associate_elastic_ip=false
-instance=false
-tail=false
+associate_alb_scenario=false
+instance_scenario=false
+shared_instance_scenario=false
+master_instance_scenario=false
+replica_instance_scenario=false
 
 # Read the options and set variables
 while [[ $1 = -?* ]]; do
@@ -216,19 +211,25 @@ while [[ $1 = -?* ]]; do
 	-k|--key-name) shift; key_name_param=${1} ;;
 	-i|--key-file) shift; key_file_param=${1} ;;
 	-s|--ssh-user) shift; ssh_user_param=${1} ;;
-	-u|--user-username) shift; user_username_param=${1} ;;
-	-q|--user-password) shift; user_password_param=${1} ;;
 	-n|--instance-name) shift; instance_name_param=${1} ;;
 	-l|--instance-short-name) shift; instance_short_name_param=${1} ;;
 	-a|--new-admin-password) shift; new_admin_password_param=${1} ;;
 	-p|--public-dns-name) shift; public_dns_name_param=${1} ;;
+  -b|--super-instance) shift; super_instance_param=${1} ;;
+  -m|--event-name) shift; event_name_param=${1} ;;
+  -x|--mongodb-host) shift; mongodb_host_param=${1} ;;
+  -y|--mongodb-port) shift; mongodb_name_param=${1} ;;
+  -z|--build) shift; build_version_param=${1} ;;
+  -w|--description) shift; description_param=${1} ;;
+  -c|--contact-person) shift; contact_person_param=${1} ;;
+  -e|--contact-email) shift; contact_email_param=${1} ;;
   -f|--force) force=true ;;
 	-d|--debug) debug=true ;;
-	--associate-clb) associate_clb=true ;;
-  --associate-alb) associate_alb=true ;;
-  --associate-elastic-ip) associate_elastic_ip=true ;;
-  --instance) instance=true ;;
-	--tail) tail=true ;;
+  --instance) instance_scenario=true ;;
+  --shared-instance) shared_instance_scenario=true ;;
+  --master-instance) master_instance_scenario=true ;;
+  --replica-instance) replica_instance_scenario=true ;;
+  --associate-alb) associate_alb_scenario=true ;;
     --endopts) shift; break ;;
     *) die "invalid option: '$1'." ;;
   esac
@@ -258,6 +259,9 @@ if ${strict}; then set -o nounset ; fi
 # Bash will remember & return the highest exitcode in a chain of pipes.
 # This way you can catch the error in case mysqldump fails in `mysqldump |gzip`, for example.
 set -o pipefail
+
+set -E
+trap '[ "$?" -ne 77 ] || exit 77' ERR
 
 # Invoke the checkDependenices function to test for Bash packages.  Uncomment if needed.
 # checkDependencies

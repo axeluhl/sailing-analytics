@@ -2,6 +2,9 @@ package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
 
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
+
 
 public interface Position extends Serializable {
     double getLatRad();
@@ -11,6 +14,16 @@ public interface Position extends Serializable {
     double getLatDeg();
 
     double getLngDeg();
+    
+    /**
+     * Generates a string representation of the form S03°45.235' E003°22.837'
+     */
+    String getAsDegreesAndDecimalMinutesWithCardinalPoints();
+    
+    /**
+     * Generates a string representation of the form (-3.7539166666, 3.3806166666)
+     */
+    String getAsSignedDecimalDegrees();
 
     /**
      * Central angle between this position and the other position, in radians

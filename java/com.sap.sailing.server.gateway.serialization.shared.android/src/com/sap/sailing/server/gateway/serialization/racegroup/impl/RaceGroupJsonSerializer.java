@@ -15,7 +15,8 @@ public class RaceGroupJsonSerializer extends ExtendableJsonSerializer<RaceGroup>
     public static final String FIELD_COURSE_AREA = "courseArea";
     public static final String FIELD_BOAT_CLASS = "boatClass";
     public static final String FIELD_REGATTA_CONFIGURATION = "procedures";
-    public static final Object FIELD_DISPLAY_NAME = "displayName";
+    public static final String FIELD_DISPLAY_NAME = "displayName";
+    public static final String FIELD_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE = "canBoatsOfCompetitorsChangePerRace";
 
     private final JsonSerializer<BoatClass> boatClassSerializer;
     private final JsonSerializer<CourseArea> courseAreaSerializer;
@@ -47,6 +48,7 @@ public class RaceGroupJsonSerializer extends ExtendableJsonSerializer<RaceGroup>
                     configurationSerializer.serialize(object.getRegattaConfiguration()));
         }
         result.put(FIELD_DISPLAY_NAME, object.getDisplayName());
+        result.put(FIELD_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE, object.canBoatsOfCompetitorsChangePerRace());
         return result;
     }
 

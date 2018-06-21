@@ -7,9 +7,7 @@ import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.data.HasBravoFixTrackContext;
 import com.sap.sailing.datamining.data.HasFoilingSegmentContext;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.BearingCluster;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -19,6 +17,8 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.data.Cluster;
@@ -107,7 +107,8 @@ public class FoilingSegmentWithContext implements HasFoilingSegmentContext {
     }
 
     private Bearing getAbsoluteTrueWindAngle(final TimePoint timePoint) throws NoWindException {
-        return getTrackedRace().getTrackedLeg(getCompetitor(), timePoint).getBeatAngle(timePoint).abs();
+        Bearing twa = getTrackedRace().getTWA(getCompetitor(), timePoint);
+        return twa == null ? null:twa.abs();
     }
 
     @Override

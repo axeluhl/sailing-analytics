@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sse.common.Color;
 
-public interface SharedDomainFactory extends CompetitorFactory {
+public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
 
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
@@ -82,9 +82,9 @@ public interface SharedDomainFactory extends CompetitorFactory {
     BoatClass getOrCreateBoatClass(String name);
 
     /**
-     * Gets the {@link CompetitorStore} of this {@link SharedDomainFactory}.
+     * Gets the {@link CompetitorAndBoatStore} of this {@link SharedDomainFactory}.
      */
-    CompetitorStore getCompetitorStore();
+    CompetitorAndBoatStore getCompetitorAndBoatStore();
    
     /**
      * If a {@link CourseArea} with the given id already exists, it is returned. Otherwise a new {@link CourseArea} 
@@ -113,4 +113,6 @@ public interface SharedDomainFactory extends CompetitorFactory {
     RaceLogResolver getRaceLogResolver();
 
     Mark getOrCreateMark(String name, MarkType markType);
+
+    Mark getOrCreateMark(Serializable id, String name, MarkType markType);
 }

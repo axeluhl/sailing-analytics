@@ -132,4 +132,6 @@
     <!-- photo -->
     <dimen name="photo_shutter_size">45dp</dimen>
 
+    <dimen name="search_view_size">125dp</dimen>
+
 </resources>

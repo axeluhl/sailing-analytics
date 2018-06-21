@@ -15,6 +15,33 @@ It contains also some files:
 
  - test.sh -> script that compiles the code in the src folder, creates the test.jar library and execute the code of the example.
  - Manifest.txt -> manifest used to create the test.jar file
+********************************************
+************* TracAPI 3.10.0 ***************
+********************************************
+This is a final version. It changes the implementation of the ISensorData interface, breaking the
+backward compatibility:
+
+Release date: 02/03/2018
+Build number: a0cbb8116ab0917334b9b323db6664671a05f79b
+
+ 1) Features
+
+ - Updating the interface ISensorData (Requested by Axel Uhl, 01/03/2018)
+
+
+********************************************
+************* TracAPI 3.9.0 ****************
+********************************************
+This is a final version. It changes the implementation of the ISensorData interface, breaking the
+backward compatibility:
+
+Release date: 01/03/2018
+Build number: 8fdd19ee81b3ccbfc2694963e8e398346eebde7a
+
+ 1) Features
+
+ - Updating the interface ISensorData (Requested by Axel Uhl and Jakob Odum, 22/11/2017)
+ - Support for https downloading MTBs (Requested by Axel Uhl, 07/01/2018)
 
 ********************************************
 ************* TracAPI 3.8.0 ****************

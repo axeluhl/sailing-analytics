@@ -18,16 +18,15 @@ import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
@@ -40,8 +39,10 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.ObscuringIterable;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -793,7 +794,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         Speed result = null;
         final Duration totalTimeSailed = this.getTotalTimeSailed(competitor, timePoint);
         final Distance totalDistanceSailed = this.getTotalDistanceTraveled(competitor, timePoint);
-        if (totalDistanceSailed != null && totalTimeSailed != null && !totalTimeSailed.equals(Distance.NULL)) {
+        if (totalDistanceSailed != null && totalTimeSailed != null && !totalTimeSailed.equals(Duration.NULL)) {
             result = totalDistanceSailed.inTime(totalTimeSailed);
         }
         return result;
@@ -908,8 +909,13 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
 
     @Override
     public BoatClass getBoatClass() {
-        return Util.getDominantObject(StreamSupport.stream(getCompetitors().spliterator(), /* parallel */ false).
-                map(c->c.getBoat().getBoatClass()).collect(Collectors.toList()));
+        Set<Boat> allBoats = new HashSet<>();
+        for (final RaceColumn raceColumn : getRaceColumns()) {
+            Map<Competitor, Boat> competitorsAndTheirBoats = raceColumn.getAllCompetitorsAndTheirBoats();
+            allBoats.addAll(competitorsAndTheirBoats.values());
+        }
+        return Util.getDominantObject(StreamSupport.stream(allBoats.spliterator(), /* parallel */ false).
+                map(b->b.getBoatClass()).collect(Collectors.toList()));
     }
 
 }

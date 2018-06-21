@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Dev
 Bundle-SymbolicName: com.google.gwt.servlet
+Automatic-Module-Name: com.google.gwt.servlet
 Bundle-Version: 2.8.2
 Bundle-Vendor: GOOGLE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

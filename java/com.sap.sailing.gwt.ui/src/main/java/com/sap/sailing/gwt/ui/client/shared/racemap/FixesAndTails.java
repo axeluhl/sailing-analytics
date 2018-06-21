@@ -17,6 +17,7 @@ import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sse.common.Util;
@@ -77,7 +78,7 @@ public class FixesAndTails {
 
     public FixesAndTails(CoordinateSystem coordinateSystem) {
         this.coordinateSystem = coordinateSystem;
-        fixes = new HashMap<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>();
+        fixes = new HashMap<>();
         tails = new HashMap<>();
         firstShownFix = new HashMap<>();
         lastShownFix = new HashMap<>();
@@ -211,9 +212,9 @@ public class FixesAndTails {
      * @param overlapsWithKnownFixes
      *            if for a competitor whose fixes are provided in <code>fixesForCompetitors</code> this holds
      *            <code>false</code>, any fixes previously stored for that competitor are removed, and the tail is
-     *            deleted from the map (see {@link #removeTail(CompetitorDTO)}); the new fixes are then added to the
+     *            deleted from the map (see {@link #removeTail(CompetitorWithBoatDTO)}); the new fixes are then added to the
      *            {@link #fixes} map, and a new tail will have to be constructed as needed (does not happen here). If
-     *            this map holds <code>true</code>, {@link #mergeFixes(CompetitorDTO, List, long)} is used to merge the
+     *            this map holds <code>true</code>, {@link #mergeFixes(CompetitorWithBoatDTO, List, long)} is used to merge the
      *            new fixes from <code>fixesForCompetitors</code> into the {@link #fixes} collection, and the tail is
      *            left unchanged. <b>NOTE:</b> When a non-overlapping set of fixes is updated (<code>false</code>), this
      *            map's record for the competitor is <b>UPDATED</b> to <code>true</code> after the tail deletion and
@@ -295,7 +296,7 @@ public class FixesAndTails {
      * one extrapolated fix is shown, avoiding jitter on the map as actual fixes are received that obsolete the
      * extrapolated ones.<p>
      * 
-     * Precondition: {@link #hasFixesFor(CompetitorDTO) hasFixesFor(competitorDTO)}<code>==true</code>
+     * Precondition: {@link #hasFixesFor(CompetitorWithBoatDTO) hasFixesFor(competitorDTO)}<code>==true</code>
      * @param mergeThis
      *            If this list contains an {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated extrapolated} fix, that fix must be the last in
      *            the list
@@ -431,8 +432,7 @@ public class FixesAndTails {
      *            the time in milliseconds after which to actually draw the tail update, or <code>-1</code> to perform
      *            the update immediately
      */
-    protected void updateTail(final  CompetitorDTO competitorDTO, final Date from,
-            final Date to, final int delayForTailChangeInMillis) {
+    protected void updateTail(final  CompetitorDTO competitorDTO, final Date from, final Date to, final int delayForTailChangeInMillis) {
         Timer delayedOrImmediateExecutor = new Timer() {
             @Override
             public void run() {
@@ -541,9 +541,9 @@ public class FixesAndTails {
     protected Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> computeFromAndTo(
             Date upTo, Iterable<CompetitorDTO> competitorsToShow, long effectiveTailLengthInMilliseconds) {
         Date tailstart = new Date(upTo.getTime() - effectiveTailLengthInMilliseconds);
-        Map<CompetitorDTO, Date> from = new HashMap<CompetitorDTO, Date>();
-        Map<CompetitorDTO, Date> to = new HashMap<CompetitorDTO, Date>();
-        Map<CompetitorDTO, Boolean> overlapWithKnownFixes = new HashMap<CompetitorDTO, Boolean>();
+        Map<CompetitorDTO, Date> from = new HashMap<>();
+        Map<CompetitorDTO, Date> to = new HashMap<>();
+        Map<CompetitorDTO, Boolean> overlapWithKnownFixes = new HashMap<>();
         
         for (CompetitorDTO competitor : competitorsToShow) {
             List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitor);
@@ -605,9 +605,9 @@ public class FixesAndTails {
 
     /**
      * Clears all tail data, removing them from the map and from this object's internal structures. GPS fixes remain
-     * cached. Immediately after this call, {@link #getTail(CompetitorDTO)} will return <code>null</code> for all
+     * cached. Immediately after this call, {@link #getTail(CompetitorWithBoatDTO)} will return <code>null</code> for all
      * competitors. Tails will need to be created (again) using
-     * {@link #createTailAndUpdateIndices(CompetitorDTO, Date, Date, TailFactory)}.
+     * {@link #createTailAndUpdateIndices(CompetitorWithBoatDTO, Date, Date, TailFactory)}.
      */
     protected void clearTails() {
         for (final Trigger<Polyline> tail : tails.values()) {

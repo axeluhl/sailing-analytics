@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -76,7 +77,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         }
 
         @Override
-        public void maxPointsReasonChanced(Competitor competitor, RaceColumn raceColumn,
+        public void maxPointsReasonChanged(Competitor competitor, RaceColumn raceColumn,
                 MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
             getScoreCorrection().notifyListeners(competitor, raceColumn, oldMaxPointsReason, newMaxPointsReason);
         }
@@ -142,6 +143,17 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
 
     @Override
+    public Iterable<Boat> getAllBoats() {
+        Set<Boat> boats = new HashSet<>();
+        for (Leaderboard leaderboard : getLeaderboards()) {
+            for (Boat boat: leaderboard.getAllBoats()) {
+                boats.add(boat);
+            }
+        }
+        return boats;
+    }
+
+    @Override
     public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
         Set<Competitor> competitors = new HashSet<Competitor>();
         Set<RaceDefinition> raceDefinitionsConsidered = new HashSet<>();
@@ -152,7 +164,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         }
         return new Pair<>(raceDefinitionsConsidered, competitors);
     }
-
+ 
     @Override
     public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {
         final Iterable<Competitor> result;
@@ -164,6 +176,11 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         return result;
     }
 
+    @Override
+    public Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet) {
+        return null;
+    }
+    
     @Override
     public Fleet getFleet(String fleetName) {
         return fleetName.equals(metaFleet.getName()) ? metaFleet : null;
