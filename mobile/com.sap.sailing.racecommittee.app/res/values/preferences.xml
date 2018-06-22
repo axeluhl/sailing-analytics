@@ -115,6 +115,9 @@
     <bool name="preference_allow_edit_race_factor_default">true</bool>
     <string name="preference_protest_time_duration_key">protestTimeDuration</string>
     <integer name="preference_protest_time_duration_default">90</integer>
+    <string name="preference_protest_time_duration_custom_key">protestTimeDurationCustom</string>
+    <string name="preference_protest_time_duration_custom_editable_key">protestTimeDurationCustomEditable</string>
+    <bool name="preference_protest_time_duration_custom_editable_default">true</bool>
 
     <string name="preference_allow_demo_key" translatable="false">allow_demo</string>
     <bool name="preference_allow_demo_default">false</bool>

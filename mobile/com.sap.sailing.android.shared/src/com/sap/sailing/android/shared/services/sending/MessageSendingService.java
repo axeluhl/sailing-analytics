@@ -13,6 +13,7 @@ import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
 import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
+import com.sap.sailing.android.shared.util.NotificationHelper;
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 
@@ -227,7 +228,15 @@ public class MessageSendingService extends Service implements MessageSendingList
         if (persistenceManager.areIntentsDelayed()) {
             handleDelayedMessages();
         }
+        startForeground(NotificationHelper.getNotificationId(), NotificationHelper.getNotification(this));
         ExLog.i(this, TAG, "Sending Service on Create.");
+    }
+
+    @Override
+    public void onDestroy() {
+        stopForeground(true);
+        ExLog.i(this, TAG, "Message Sending Service is being destroyed.");
+        super.onDestroy();
     }
 
     @Override
