@@ -752,7 +752,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
                 raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
                 raceMap.registerAllCourseMarkInfoWindowClickHandlers();
             }
-            EditMarkPositionPanel.super.setVisible(visible);
+            super.setVisible(visible);
         }
     }
 
