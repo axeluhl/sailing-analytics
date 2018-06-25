@@ -412,29 +412,27 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
                 }
                 
                 private void addDeleteItemAndShowPopup(boolean enableDelete) {
-                    if (enableDelete) {
-                        checkIfTracking(() -> {
-                            final MenuItem delete;
-                            if (enableDelete) {
-                                delete = new MenuItem(stringMessages.deleteFix(), new ScheduledCommand() {
-                                    @Override
-                                    public void execute() {
-                                        removeMarkFix(mark, fix);
-                                        popup.hide();
-                                    }
-                                });
-                            } else {
-                                delete = new MenuItem(stringMessages.deleteFix(), new ScheduledCommand() {
-                                    @Override
-                                    public void execute() {
-                                    }
-                                });
-                                delete.setEnabled(false);
-                                delete.setTitle(stringMessages.theDeletionOfThisFix());
+                    Runnable r = () -> {
+                        final MenuItem delete = new MenuItem(stringMessages.deleteFix(), new ScheduledCommand() {
+                            @Override
+                            public void execute() {
+                                if (enableDelete) {
+                                    removeMarkFix(mark, fix);
+                                    popup.hide();
+                                }
                             }
-                            menu.addItem(delete);
-                            popup.setWidget(menu);
                         });
+                        if (!enableDelete) {
+                            delete.setEnabled(false);
+                            delete.setTitle(stringMessages.theDeletionOfThisFix());
+                        }
+                        menu.addItem(delete);
+                        popup.setWidget(menu);
+                    };
+                    if (enableDelete) {
+                        checkIfTracking(r);
+                    } else {
+                        r.run();
                     }
                 }
             });
