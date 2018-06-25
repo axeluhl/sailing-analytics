@@ -37,6 +37,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.test.PositionAssert;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -57,7 +58,7 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp.ReplicationServiceTestImpl;
 
 /**
- * Runs the same tests as {@link TrackedRaceContentsReplicationTest}, but with a non-empty {@link GPSFixStore} that
+ * Runs the same tests as {@link TrackedRaceContentsReplicationTest}, but with a non-empty {@link SensorFixStore} that
  * has special serialization requirements.
  * 
  * @author Axel Uhl (d043530)
