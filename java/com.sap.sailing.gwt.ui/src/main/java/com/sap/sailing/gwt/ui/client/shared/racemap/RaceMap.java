@@ -611,8 +611,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel) {
-        boolean sensor = true;
-
         // load all the libs for use in the maps
         ArrayList<LoadLibrary> loadLibraries = new ArrayList<LoadApi.LoadLibrary>();
         loadLibraries.add(LoadLibrary.DRAWING);
@@ -728,7 +726,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
               RaceMap.this.managedInfoWindow = new ManagedInfoWindow(map);
           }
         };
-        LoadApi.go(onLoad, loadLibraries, sensor, GoogleMapAPIKey.V3_PARAMS); 
+        LoadApi.go(onLoad, loadLibraries, GoogleMapAPIKey.V3_PARAMS); 
     }
 
     /**
