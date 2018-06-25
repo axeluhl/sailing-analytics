@@ -64,7 +64,7 @@ import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp.Re
  * @author Axel Uhl (d043530)
  *
  */
-public class TrackedRaceWithGPSFixStoreContentsReplicationTest extends AbstractServerReplicationTest {
+public class TrackedRaceWithSensorFixStoreContentsReplicationTest extends AbstractServerReplicationTest {
     private Competitor competitor;
     private DynamicTrackedRace trackedRace;
     private RegattaNameAndRaceName raceIdentifier;
