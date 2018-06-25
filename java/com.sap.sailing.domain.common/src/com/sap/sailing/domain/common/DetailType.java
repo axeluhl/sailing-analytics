@@ -266,7 +266,7 @@ public enum DetailType implements Serializable {
     }
 
     public static Collection<DetailType> getRaceExpeditionDetailTypes() {
-        Collection<DetailType> allowed = new LinkedHashSet<>();
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(EXPEDITION_RACE_AWA);
         allowed.add(EXPEDITION_RACE_AWS);
         allowed.add(EXPEDITION_RACE_TWA);
