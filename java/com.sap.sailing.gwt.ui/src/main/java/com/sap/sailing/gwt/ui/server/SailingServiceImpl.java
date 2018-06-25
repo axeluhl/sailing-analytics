@@ -5440,6 +5440,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         dto.defaultRacingProcedureType = configuration.getDefaultRacingProcedureType();
         dto.defaultCourseDesignerMode = configuration.getDefaultCourseDesignerMode();
+        dto.defaultProtestTimeDuration = configuration.getDefaultProtestTimeDuration();
         
         if (configuration.getRRS26Configuration() != null) {
             dto.rrs26Configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RRS26ConfigurationDTO();
@@ -5497,6 +5498,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RegattaConfigurationImpl configuration = new RegattaConfigurationImpl();
         configuration.setDefaultRacingProcedureType(dto.defaultRacingProcedureType);
         configuration.setDefaultCourseDesignerMode(dto.defaultCourseDesignerMode);
+        configuration.setDefaultProtestTimeDuration(dto.defaultProtestTimeDuration);
         if (dto.rrs26Configuration != null) {
             RRS26ConfigurationImpl config = new RRS26ConfigurationImpl();
             applyGeneralRacingProcedureConfigProperties(dto.rrs26Configuration, config);
@@ -5926,10 +5928,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Util.addAll(competitorToBoatMappingsRegistered.keySet(), competitorsToUnregister);
         for (final Entry<CompetitorType, Boat> e : competitorToBoatMappingsRegistered.entrySet()) {
             CompetitorType competitor = e.getKey();
-            if (competitorToBoatMappingsToRegister.get(competitor) == e.getValue()) {
-                // User wants to map competitor to boat, and that mapping already exists; neither add nor remove this registration but leave as is:
-                competitorToBoatMappingsToRegister.remove(competitor);
-                competitorsToUnregister.remove(competitor);
+            if (competitorToBoatMappingsToRegister.containsKey(competitor)) { // is competitor to be registered?
+                final Boat boatOfCompetitorToRegister = competitorToBoatMappingsToRegister.get(competitor);
+                final Boat boatOfRegisteredCompetitor = e.getValue();
+                if (boatOfCompetitorToRegister == boatOfRegisteredCompetitor) {
+                    // User wants to map competitor to boat, and that mapping already exists; neither add nor remove this registration but leave as is:
+                    competitorToBoatMappingsToRegister.remove(competitor);
+                    competitorsToUnregister.remove(competitor);
+                }
             }
         }
         return competitorsToUnregister;
