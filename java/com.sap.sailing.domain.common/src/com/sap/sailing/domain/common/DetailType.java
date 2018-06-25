@@ -5,11 +5,9 @@ import static com.sap.sailing.domain.common.SortingOrder.DESCENDING;
 import static com.sap.sailing.domain.common.SortingOrder.NONE;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 
 /**
  * Identifies details that can be requested from the racing service. Optionally, the details can specify a precision as
@@ -267,8 +265,8 @@ public enum DetailType implements Serializable {
         return availableDetailsTypes;
     }
 
-    public static List<DetailType> getRaceExpeditionDetailTypes() {
-        ArrayList<DetailType> allowed = new ArrayList<>();
+    public static Collection<DetailType> getRaceExpeditionDetailTypes() {
+        Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(EXPEDITION_RACE_AWA);
         allowed.add(EXPEDITION_RACE_AWS);
         allowed.add(EXPEDITION_RACE_TWA);
