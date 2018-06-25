@@ -124,7 +124,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                 .createStoredSettingsLocatorForLeaderboard(leaderboardContextDefinition);
         sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName,
-                new AsyncCallback<Iterable<DetailType>>() {
+                null, new AsyncCallback<Iterable<DetailType>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         logger.log(Level.SEVERE, "Could not load detailtypes", caught);
@@ -175,7 +175,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                                         public void onSuccess(
                                                 PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
                                             sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName,
-                                                    new AsyncCallback<Iterable<DetailType>>() {
+                                                    null, new AsyncCallback<Iterable<DetailType>>() {
 
                                                         @Override
                                                         public void onFailure(Throwable caught) {

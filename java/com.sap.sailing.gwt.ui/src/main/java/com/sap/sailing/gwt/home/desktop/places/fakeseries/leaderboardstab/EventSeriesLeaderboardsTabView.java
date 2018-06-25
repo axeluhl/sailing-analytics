@@ -78,7 +78,7 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
                     .getAnalyticsManager();
 
             regattaAnalyticsManager.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
-                    new AsyncCallback<Iterable<DetailType>>() {
+                    null, new AsyncCallback<Iterable<DetailType>>() {
 
                         @Override
                         public void onSuccess(Iterable<DetailType> result) {
