@@ -7444,13 +7444,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             boolean hasExtendedBravoFixes = false;
             abort: for (RaceColumn race : leaderboard.getRaceColumns()) {
                 for (Fleet fleet : race.getFleets()) {
-                    TrackedRace trace = race.getTrackedRace(fleet);
-                    if (raceIdentifierOrNull != null) {
-                        if (!raceIdentifierOrNull.equals(race.getRaceIdentifier(fleet))) {
-                            continue;
-                        }
+                    if (raceIdentifierOrNull != null && !raceIdentifierOrNull.equals(race.getRaceIdentifier(fleet))) {
+                        continue;
                     }
                     
+                    final TrackedRace trace = race.getTrackedRace(fleet);
                     if (trace != null) {
                         final DynamicTrackedRace trackedRace = getService().getTrackedRace(trace.getRaceIdentifier());
                         if (trackedRace != null) {
