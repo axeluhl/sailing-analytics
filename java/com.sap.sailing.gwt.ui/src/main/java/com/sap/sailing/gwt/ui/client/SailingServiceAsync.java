@@ -985,5 +985,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      */
     void getWindFinderSpot(String spotId, AsyncCallback<SpotDTO> callback);
 
+    /**
+     * @see SailingService#checkIfRaceIsTracking(RegattaAndRaceIdentifier)
+     */
     void checkIfRaceIsTracking(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
 }

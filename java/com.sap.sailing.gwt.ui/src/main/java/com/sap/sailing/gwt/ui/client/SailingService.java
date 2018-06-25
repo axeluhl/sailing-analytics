@@ -778,5 +778,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     SliceRacePreperationDTO prepareForSlicingOfRace(RegattaAndRaceIdentifier raceIdentifier);
     
+    /**
+     * Checks if the given race is currently in state tracking or loading.
+     */
     Boolean checkIfRaceIsTracking(RegattaAndRaceIdentifier race);
 }
