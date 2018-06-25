@@ -7821,7 +7821,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Boolean checkIfRaceIsTracked(RegattaAndRaceIdentifier race) {
+    public Boolean checkIfRaceIsTracking(RegattaAndRaceIdentifier race) {
         boolean result = false;
         DynamicTrackedRace trace = getService().getTrackedRace(race);
         if (trace != null) {

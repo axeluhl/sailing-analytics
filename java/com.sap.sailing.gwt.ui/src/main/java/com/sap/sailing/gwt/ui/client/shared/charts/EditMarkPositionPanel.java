@@ -760,7 +760,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         if (nonTrackingWarningWasDisplayed) {
             continuation.run();
         } else {
-            sailingService.checkIfRaceIsTracked(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
+            sailingService.checkIfRaceIsTracking(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     Window.alert(stringMessages.serverError());
