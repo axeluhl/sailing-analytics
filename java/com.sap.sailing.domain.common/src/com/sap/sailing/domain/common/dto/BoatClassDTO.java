@@ -2,7 +2,7 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.common.Distance;
+import com.sap.sse.common.Distance;
 
 public class BoatClassDTO extends NamedDTO implements Serializable, Comparable<BoatClassDTO> {
     private static final long serialVersionUID = 1981789833769906676L;

@@ -9,7 +9,7 @@ public interface GroupKey extends Serializable, Comparable<GroupKey> {
     /**
      * @return a string representation of this group key.
      */
-    public String asString();
+    String asString();
     
     /**
      * Checks if this group key has at least one sub key. For example if the data was grouped
@@ -17,7 +17,7 @@ public interface GroupKey extends Serializable, Comparable<GroupKey> {
      * This means, that {@link #getKeys()} returns a {@link List} that contains at least two elements.
      * @return true, if this group key has at least one sub key
      */
-    public boolean hasSubKeys();
+    boolean hasSubKeys();
     
     /**
      * Returns the number of group keys represented by this key:
@@ -29,7 +29,7 @@ public interface GroupKey extends Serializable, Comparable<GroupKey> {
      * </ul>
      * @return the number of group keys represented by this key.
      */
-    public int size();
+    int size();
     
     /**
      * Returns a non-empty {@link List} of group keys that are represented by this key:
@@ -44,7 +44,7 @@ public interface GroupKey extends Serializable, Comparable<GroupKey> {
      * </ul>
      * @return the group keys that are represented by this key.
      */
-    public List<? extends GroupKey> getKeys();
+    List<? extends GroupKey> getKeys();
     
     //Enforce hash code and equals in all subclasses
     @Override

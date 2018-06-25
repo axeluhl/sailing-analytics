@@ -1,9 +1,9 @@
 package com.sap.sailing.datamining.shared;
 
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.tracking.BravoFix;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.settings.SerializableSettings;
 
 public class FoilingSegmentsDataMiningSettings extends SerializableSettings {

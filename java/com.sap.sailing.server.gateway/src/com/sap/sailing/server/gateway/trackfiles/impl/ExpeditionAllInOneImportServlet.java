@@ -141,16 +141,16 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
 
     private JSONObject toJSON(ImporterResult importerResult) {
         final JSONObject json = new JSONObject();
-        json.put("eventId", importerResult.eventId == null ? null : importerResult.eventId.toString());
-        json.put("leaderboardName", importerResult.leaderboardName);
-        json.put("leaderboardGroupName", importerResult.leaderboardGroupName);
-        json.put("regattaName", importerResult.regattaName);
-        json.put("raceNameRaceColumnNameFleetNameList", ImportResultSerializer.serializeRaceList(importerResult.raceNameRaceColumnNameFleetnameList));
-        json.put("errors", ImportResultSerializer.serializeErrorList(importerResult.errorList));
-        json.put("gpsDeviceIds", ImportResultSerializer.serializeTrackList(importerResult.importGpsFixData));
-        json.put("sensorDeviceIds", ImportResultSerializer.serializeTrackList(importerResult.importSensorFixData));
-        json.put("sensorFixImporterType", importerResult.sensorFixImporterType);
-        json.put(ExpeditionAllInOneConstants.START_TIMES, ImportResultSerializer.serializeIterable(importerResult.startData.getStartTimes(),
+        json.put(ExpeditionAllInOneConstants.RESPONSE_EVENT_ID, importerResult.eventId == null ? null : importerResult.eventId.toString());
+        json.put(ExpeditionAllInOneConstants.RESPONSE_LEADER_BOARD_NAME, importerResult.leaderboardName);
+        json.put(ExpeditionAllInOneConstants.RESPONSE_LEADER_BOARD_GROUP_NAME, importerResult.leaderboardGroupName);
+        json.put(ExpeditionAllInOneConstants.RESPONSE_REGATTA_NAME, importerResult.regattaName);
+        json.put(ExpeditionAllInOneConstants.RESPONSE_RACE_LIST, ImportResultSerializer.serializeRaceList(importerResult.raceNameRaceColumnNameFleetnameList));
+        json.put(ExpeditionAllInOneConstants.RESPONSE_ERRORS, ImportResultSerializer.serializeErrorList(importerResult.errorList));
+        json.put(ExpeditionAllInOneConstants.RESPONSE_GPS_DEVICE_IDS, ImportResultSerializer.serializeTrackList(importerResult.importGpsFixData));
+        json.put(ExpeditionAllInOneConstants.RESPONSE_SENSOR_DEVICE_IDS, ImportResultSerializer.serializeTrackList(importerResult.importSensorFixData));
+        json.put(ExpeditionAllInOneConstants.RESPONSE_SENSOR_FIX_IMPORTER_TYPE, importerResult.sensorFixImporterType);
+        json.put(ExpeditionAllInOneConstants.RESPONSE_START_TIMES, ImportResultSerializer.serializeIterable(importerResult.startData.getStartTimes(),
                 startTime->startTime.asMillis()));
         return json;
     }

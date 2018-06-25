@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sse.common.Bearing;
 
 public class CourseChangeCalculator {
     private static final double THRESHOLD_UP_TO_WHICH_TO_ACCEPT_DIRECTION_IN_DEGREES = 90;

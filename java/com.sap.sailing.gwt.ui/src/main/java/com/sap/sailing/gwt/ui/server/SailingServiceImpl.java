@@ -193,14 +193,12 @@ import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.SailingServerConfigurationImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegIdentifier;
@@ -228,7 +226,6 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsFor
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.ServiceException;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
@@ -259,7 +256,6 @@ import com.sap.sailing.domain.common.dto.RaceLogTrackingInfoDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
@@ -521,9 +517,12 @@ import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImporter;
 import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberFromSeries;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.CountryCode;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -534,6 +533,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.WithID;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.mail.MailException;
@@ -5174,7 +5174,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
             // new boat
             DynamicBoat boat = (DynamicBoat) addOrUpdateBoatInternal(competitor.getBoat());
-            
             result = getBaseDomainFactory().getOrCreateCompetitorWithBoat(competitorUUID, competitor.getName(), competitor.getShortName(),
                             competitor.getColor(), competitor.getEmail(), 
                             competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()), team,
@@ -5419,6 +5418,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         dto.defaultRacingProcedureType = configuration.getDefaultRacingProcedureType();
         dto.defaultCourseDesignerMode = configuration.getDefaultCourseDesignerMode();
+        dto.defaultProtestTimeDuration = configuration.getDefaultProtestTimeDuration();
         
         if (configuration.getRRS26Configuration() != null) {
             dto.rrs26Configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RRS26ConfigurationDTO();
@@ -5476,6 +5476,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RegattaConfigurationImpl configuration = new RegattaConfigurationImpl();
         configuration.setDefaultRacingProcedureType(dto.defaultRacingProcedureType);
         configuration.setDefaultCourseDesignerMode(dto.defaultCourseDesignerMode);
+        configuration.setDefaultProtestTimeDuration(dto.defaultProtestTimeDuration);
         if (dto.rrs26Configuration != null) {
             RRS26ConfigurationImpl config = new RRS26ConfigurationImpl();
             applyGeneralRacingProcedureConfigProperties(dto.rrs26Configuration, config);
@@ -5905,10 +5906,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Util.addAll(competitorToBoatMappingsRegistered.keySet(), competitorsToUnregister);
         for (final Entry<CompetitorType, Boat> e : competitorToBoatMappingsRegistered.entrySet()) {
             CompetitorType competitor = e.getKey();
-            if (competitorToBoatMappingsToRegister.get(competitor) == e.getValue()) {
-                // User wants to map competitor to boat, and that mapping already exists; neither add nor remove this registration but leave as is:
-                competitorToBoatMappingsToRegister.remove(competitor);
-                competitorsToUnregister.remove(competitor);
+            if (competitorToBoatMappingsToRegister.containsKey(competitor)) { // is competitor to be registered?
+                final Boat boatOfCompetitorToRegister = competitorToBoatMappingsToRegister.get(competitor);
+                final Boat boatOfRegisteredCompetitor = e.getValue();
+                if (boatOfCompetitorToRegister == boatOfRegisteredCompetitor) {
+                    // User wants to map competitor to boat, and that mapping already exists; neither add nor remove this registration but leave as is:
+                    competitorToBoatMappingsToRegister.remove(competitor);
+                    competitorsToUnregister.remove(competitor);
+                }
             }
         }
         return competitorsToUnregister;

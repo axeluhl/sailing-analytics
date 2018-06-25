@@ -2,9 +2,9 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.maneuverdetection.HasDetailedManeuverLoss;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
+import com.sap.sse.common.Distance;
 
 /**
  * 

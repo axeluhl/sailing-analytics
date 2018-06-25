@@ -6,10 +6,10 @@ import java.util.List;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
 

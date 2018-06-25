@@ -323,7 +323,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
             infoLabel.setWidget(new Label(mediaTrack.url));
         } else {
             infoLabelLabel.setText(stringMessages.mimeType() + ":");
-            if (mediaTrack.mimeType == MimeType.mp4 || mediaTrack.mimeType == MimeType.mp4panorama) {
+            if (mediaTrack.mimeType == MimeType.mp4 || mediaTrack.mimeType == MimeType.mp4panorama || mediaTrack.mimeType == MimeType.mp4panoramaflip) {
                 if (!remoteMp4WasStarted) {
                     processMp4(mediaTrack);
                 } else if (remoteMp4WasFinished) {
@@ -452,6 +452,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         ListBox mimeTypeListBox = createListBox(false);
         mimeTypeListBox.addItem(MimeType.mp4.name());
         mimeTypeListBox.addItem(MimeType.mp4panorama.name());
+        mimeTypeListBox.addItem(MimeType.mp4panoramaflip.name());
         mimeTypeListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {

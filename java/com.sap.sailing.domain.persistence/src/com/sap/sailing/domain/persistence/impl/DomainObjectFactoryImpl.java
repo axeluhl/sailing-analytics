@@ -186,7 +186,6 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.dto.EventType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
@@ -254,6 +253,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.AbstractColor;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
@@ -1541,8 +1541,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } else if (eventClass.equals(RaceLogPassChangeEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogPassChangeEvent(createdAt, author, logicalTimePoint, id, passId, competitors);
         } else if (eventClass.equals(RaceLogCourseDesignChangedEvent.class.getSimpleName())) {
-            resultEvent = loadRaceLogCourseDesignChangedEvent(createdAt, author, logicalTimePoint, id, passId, competitors,
-                    dbObject);
+            final Pair<RaceLogCourseDesignChangedEvent, Optional<DBObject>> resultPair = loadRaceLogCourseDesignChangedEvent(
+                    createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+            resultEvent = resultPair.getA();
+            dbObjectForUpdate = resultPair.getB();
         } else if (eventClass.equals(RaceLogFinishPositioningListChangedEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogFinishPositioningListChangedEvent(createdAt, author, logicalTimePoint, id, passId,
                     competitors, dbObject);
@@ -1815,17 +1817,21 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return new RaceLogPassChangeEventImpl(createdAt, logicalTimePoint, author, id, passId);
     }
 
-    private RaceLogCourseDesignChangedEvent loadRaceLogCourseDesignChangedEvent(TimePoint createdAt,
+    /**
+     * @return the second pair component has a DBObject in case migration was performed and the updated race log event's
+     *         DBObject representation shall be updated to the DB
+     */
+    private Pair<RaceLogCourseDesignChangedEvent, Optional<DBObject>> loadRaceLogCourseDesignChangedEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
             List<Competitor> competitors, DBObject dbObject) {
         String courseName = (String) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN_NAME.name());
-        CourseBase courseData = loadCourseData((BasicDBList) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()),
+        Pair<CourseBase, Boolean> courseData = loadCourseData((BasicDBList) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()),
                 courseName);
         final String courseDesignerModeName = (String) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGNER_MODE.name());
         final CourseDesignerMode courseDesignerMode = courseDesignerModeName == null ? null
                 : CourseDesignerMode.valueOf(courseDesignerModeName);
-        return new RaceLogCourseDesignChangedEventImpl(createdAt, logicalTimePoint, author, id, passId, courseData,
-                courseDesignerMode);
+        return new Pair<>(new RaceLogCourseDesignChangedEventImpl(createdAt, logicalTimePoint, author, id, passId, courseData.getA(),
+                courseDesignerMode), courseData.getB() ? /* migrated */ Optional.of(dbObject) : Optional.empty());
     }
 
     private RaceLogEvent loadRaceLogFixedMarkPassingEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
@@ -2313,9 +2319,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      * field is loaded, the value of PASSINGSIDE is used and then migrated to PASSINGINSTRUCTION. If the first or last
      * Waypoint has the PassingInstructions Gate, it is transfered to Line.
      * 
+     * @return the second component tells if migration was performed; in this case the {@code dbCourseList} passed has
+     *         been edited "in place" to describe the migration that has happened
      */
     @SuppressWarnings("deprecation") // Used to migrate from PASSINGSIDE to the new PASSINGINSTRUCTIONS
-    private CourseBase loadCourseData(BasicDBList dbCourseList, String courseName) {
+    private Pair<CourseBase, Boolean> loadCourseData(BasicDBList dbCourseList, String courseName) {
+        boolean migrated = false;
         if (courseName == null) {
             courseName = "Course";
         }
@@ -2338,25 +2347,31 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     }
                     dbObject.put(FieldNames.WAYPOINT_PASSINGINSTRUCTIONS.name(), waypointPassingInstruction);
                     dbObject.removeField(FieldNames.WAYPOINT_PASSINGSIDE.name());
+                    migrated = true;
                 }
             }
             if (waypointPassingInstruction != null) {
                 passingInstructions = PassingInstruction.valueOfIgnoringCase(waypointPassingInstruction);
             }
-            ControlPoint controlPoint = loadControlPoint((DBObject) dbObject.get(FieldNames.CONTROLPOINT.name()));
+            Pair<ControlPoint, Boolean> controlPoint = loadControlPoint((DBObject) dbObject.get(FieldNames.CONTROLPOINT.name()));
+            migrated = migrated || controlPoint.getB();
             if (passingInstructions == null) {
-                waypoint = new WaypointImpl(controlPoint);
+                waypoint = new WaypointImpl(controlPoint.getA());
             } else {
-                waypoint = new WaypointImpl(controlPoint, passingInstructions);
+                waypoint = new WaypointImpl(controlPoint.getA(), passingInstructions);
             }
             courseData.addWaypoint(i++, waypoint);
         }
-        return courseData;
+        return new Pair<>(courseData, migrated);
     }
 
-    private ControlPoint loadControlPoint(DBObject dbObject) {
+    /**
+     * @return second component tells whether migration was performed on {@code dbObject} in place
+     */
+    private Pair<ControlPoint, Boolean> loadControlPoint(DBObject dbObject) {
         String controlPointClass = (String) dbObject.get(FieldNames.CONTROLPOINT_CLASS.name());
         ControlPoint controlPoint = null;
+        boolean migrated = false;
         if (controlPointClass != null) {
             if (controlPointClass.equals(Mark.class.getSimpleName())) {
                 Mark mark = loadMark((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
@@ -2366,13 +2381,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         (DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
                 dbObject.put(FieldNames.CONTROLPOINT_CLASS.name(), ControlPointWithTwoMarks.class.getSimpleName());
                 controlPoint = cpwtm;
+                migrated = true;
             } else if (controlPointClass.equals(ControlPointWithTwoMarks.class.getSimpleName())) {
                 ControlPointWithTwoMarks cpwtm = loadControlPointWithTwoMarks(
                         (DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
                 controlPoint = cpwtm;
             }
         }
-        return controlPoint;
+        return new Pair<>(controlPoint, migrated);
     }
 
     /**

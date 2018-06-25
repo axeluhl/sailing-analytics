@@ -1,7 +1,7 @@
 package com.sap.sailing.polars.datamining.shared;
 
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sse.common.Speed;
 
 public interface PolarStatistic {
 

@@ -96,6 +96,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     private ImageView mListButton;
     private HeaderLayout mHeader;
     private StateChangeListener mStateChangeListener;
+    private SearchView mSearchView;
 
     public static PenaltyFragment newInstance() {
         Bundle args = new Bundle();
@@ -115,9 +116,9 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         mCompetitorResults = new CompetitorResultsList<>(new ArrayList<CompetitorResultEditableImpl>());
         mDraftData = new CompetitorResultsImpl();
         mConfirmedData = new CompetitorResultsImpl();
-        SearchView searchView = ViewHelper.get(layout, R.id.competitor_search);
-        if (searchView != null) {
-            searchView.setSearchTextWatcher(this);
+        mSearchView = ViewHelper.get(layout, R.id.competitor_search);
+        if (mSearchView != null) {
+            mSearchView.setSearchTextWatcher(this);
         }
         mHeader = ViewHelper.get(layout, R.id.header);
         mListButtonLayout = ViewHelper.get(layout, R.id.list_button_layout);
@@ -277,10 +278,14 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                     mListButtonLayout.setVisibility(View.VISIBLE);
                 }
                 break;
+
             default:
                 if (mListButtonLayout != null) {
                     mListButtonLayout.setVisibility(View.GONE);
                 }
+        }
+        if (mListButtonLayout != null) {
+            mSearchView.isEditSmall(mListButtonLayout.getVisibility() == View.VISIBLE);
         }
         initLocalData();
         loadCompetitors();

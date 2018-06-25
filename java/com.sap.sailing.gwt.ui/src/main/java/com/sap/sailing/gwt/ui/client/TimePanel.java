@@ -25,6 +25,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.controls.slider.SliderBar;
 import com.sap.sse.gwt.client.controls.slider.TimeSlider;
+import com.sap.sse.gwt.client.controls.slider.TimeSlider.BarOverlay;
 import com.sap.sse.gwt.client.player.PlayStateListener;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.TimeRangeChangeListener;
@@ -656,6 +657,10 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     @Override
     public String getId() {
         return "TimePanel";
+    }
+
+    public void setBarOverlays(Iterable<BarOverlay> overlays) {
+        timeSlider.setBarOverlays(overlays);
     }
 
 }

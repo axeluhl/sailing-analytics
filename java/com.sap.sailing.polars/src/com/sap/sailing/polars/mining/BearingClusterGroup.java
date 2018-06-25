@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
 import com.sap.sse.datamining.impl.data.ClusterWithLowerAndUpperBoundaries;

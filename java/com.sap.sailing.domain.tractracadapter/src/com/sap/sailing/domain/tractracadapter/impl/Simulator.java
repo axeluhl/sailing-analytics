@@ -71,7 +71,7 @@ public class Simulator {
                     stop(); // stop simulator when tracked race is removed from its regatta
                 }
             }
-        }, /* No replication handling necessary */ Optional.empty());
+        }, /* No replication handling necessary */ Optional.empty(), /* synchronous */ false);
         startWindPlayer();
     }
     

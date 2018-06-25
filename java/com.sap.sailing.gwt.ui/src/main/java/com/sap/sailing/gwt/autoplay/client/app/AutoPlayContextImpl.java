@@ -22,8 +22,9 @@ public class AutoPlayContextImpl implements AutoPlayContext {
 
     public AutoPlayContextImpl(AutoplayPerspectiveLifecycle autoplayLifecycle,
             PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplaySettings,
-            AutoPlayConfiguration configuration, AutoPlayContextDefinition contextDefinition) {
-        this(configuration, contextDefinition);
+            AutoPlayConfiguration configuration, AutoPlayContextDefinition contextDefinition,
+            EventDTO initialEventData) {
+        this(configuration, contextDefinition, initialEventData);
         if (autoplayLifecycle == null) {
             throw new IllegalStateException("No autoplayLifecycle in creation");
         }
@@ -34,7 +35,8 @@ public class AutoPlayContextImpl implements AutoPlayContext {
         this.autoplaySettings = autoplaySettings;
     }
 
-    public AutoPlayContextImpl(AutoPlayConfiguration configuration, AutoPlayContextDefinition contextDefinition) {
+    public AutoPlayContextImpl(AutoPlayConfiguration configuration, AutoPlayContextDefinition contextDefinition,
+            EventDTO initialEventData) {
         if (configuration == null) {
             throw new IllegalStateException("No configuration in creation");
         }
@@ -43,6 +45,7 @@ public class AutoPlayContextImpl implements AutoPlayContext {
         }
         this.configuration = configuration;
         this.contextDefinition = contextDefinition;
+        this.event = initialEventData;
     }
 
     @Override

@@ -24,7 +24,6 @@ public class VideoPresenterImpl extends AutoPlayPresenterConfigured<VideoPlace>
 
     @Override
     public void publishDuration(int durationInSeconds) {
-        
         getPlace().publishDuration(durationInSeconds);
     }
 }

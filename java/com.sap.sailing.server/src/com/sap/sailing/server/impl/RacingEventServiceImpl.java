@@ -113,7 +113,6 @@ import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
@@ -260,6 +259,7 @@ import com.sap.sailing.server.statistics.StatisticsCalculator;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.Renamable;
@@ -724,7 +724,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         competitor.getColor(), competitor.getEmail(), competitor.getFlagImage(), 
                         competitor.getTeam()==null?null:competitor.getTeam().getNationality(),
                         competitor.getTimeOnTimeFactor(),
-                        competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
+                        competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(),
+                        competitor.hasBoat() ? ((CompetitorWithBoat) competitor).getBoat().getId() : null));
             }
         });
         this.competitorAndBoatStore.addBoatUpdateListener(new BoatUpdateListener() {
@@ -760,8 +761,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         operationExecutionListeners = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
-        final ScheduledExecutorService simulatorExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
-        // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
+        final ScheduledExecutorService simulatorExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Simulator Background Executor");
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
         this.raceLogReplicator = new RaceLogReplicatorAndNotifier(this);
         this.regattaLogReplicator = new RegattaLogReplicator(this);
@@ -1772,7 +1772,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             DynamicTrackedRegatta trackedRegatta) {
         if (regattasObservedForDefaultLeaderboard.add(trackedRegatta)) {
             trackedRegatta.addRaceListener(new RaceAdditionListener(),
-                    Optional.of(this.getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()));
+                    /* ThreadLocalTransporter */ Optional.empty(), // registering for synchronous callbacks; no thread locals need to be transported
+                    /* register for synchronous execution in order to ensure that any replication-related effects happen before
+                     * any subsequent replication operations referring to a new race hit the outbound replication queue
+                     */ true);
         }
     }
 
@@ -1878,7 +1881,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
 
         @Override
-        public void maxPointsReasonChanced(Competitor competitor, RaceColumn raceColumn, MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
+        public void maxPointsReasonChanged(Competitor competitor, RaceColumn raceColumn, MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
             notifyForCompetitorIfNotAlreadyNotifiedRecently(competitor, raceColumn);
         }
 
@@ -2605,7 +2608,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 replicate(new TrackRegatta(regatta.getRegattaIdentifier()));
                 regattaTrackingCache.put(regatta, result);
                 ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(result);
-
                 trackedRegattaListener.regattaAdded(result);
             }
             return result;
@@ -2992,7 +2994,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             regatta.addRegattaListener(this);
             logoutput.append(String.format("%3s\n", regatta.toString()));
         }
-
         logger.info("Reading all events...");
         eventsById.putAll((Map<Serializable, Event>) ois.readObject());
         logoutput.append("\nReceived " + eventsById.size() + " NEW events\n");

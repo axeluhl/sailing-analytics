@@ -55,9 +55,11 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     private final Map<RaceDefinition, TrackedRace> trackedRaces;
     
     /**
-     * These are the {@link RaceListener RaceListeners} attached to this {@link TrackedRegatta}. For every
-     * {@link RaceListener} there is a {@link WorkQueue} to do all event related work for the specific listener. This
-     * ensures that e.g. events are received in order. The following cases need to be handles through this queue:
+     * These are the {@link RaceListener RaceListeners} attached to this {@link TrackedRegatta}. There are listeners
+     * registered for synchronous callback execution and such registered for asynchonous callback execution. For every
+     * {@link RaceListener} registered for asynchronous callback execution there is a {@link AsynchronousRunnableExecutor} to do all event
+     * related work for the specific listener. This ensures that e.g. events are received in order. The following cases
+     * need to be handled through this queue:
      * <ul>
      * <li>Firing events when adding/removing {@link TrackedRace} instances (see {@link #enqueEvent}). The list of
      * listeners to fire the event to need to be the list of listeners existing when enqueuing the event. This ensures
@@ -71,7 +73,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
      * to know when it is guaranteed that no more event will be fired to the listener.
      * </ul>
      */
-    private transient ConcurrentMap<RaceListener, WorkQueue> raceListeners;
+    private transient ConcurrentMap<RaceListener, RunnableExecutor> raceListeners;
     
     /**
      * Guards access to {@link #raceListeners}.
@@ -223,7 +225,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
                     }
                 }
             };
-            addRaceListener(listener, Optional.empty());
+            addRaceListener(listener, Optional.empty(), /* synchronous */ false);
             try {
                 synchronized (mutex) {
                     result = getExistingTrackedRace(race);
@@ -254,13 +256,14 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     }
 
     @Override
-    public void addRaceListener(RaceListener listener, Optional<ThreadLocalTransporter> threadLocalTransporter) {
+    public void addRaceListener(RaceListener listener, Optional<ThreadLocalTransporter> threadLocalTransporter, boolean synchronous) {
+        assert synchronous == false || !threadLocalTransporter.isPresent(); // transporting thread locals doesn't make sense for synchronous listeners
         lockTrackedRacesForRead();
         try {
             LockUtil.executeWithWriteLock(raceListenersLock, () -> {
                 // This prevents the creation of another WorkQueue if an already known listener is added a second time
                 raceListeners.computeIfAbsent(listener, listenerToAdd -> {
-                    final WorkQueue eventQueue = new WorkQueue();
+                    final RunnableExecutor eventQueue = synchronous ? new SynchronousRunnableExecutor() : new AsynchronousRunnableExecutor();
                     final List<TrackedRace> trackedRacesCopy = new ArrayList<>();
                     Util.addAll(getTrackedRaces(), trackedRacesCopy);
                     threadLocalTransporter.ifPresent(ThreadLocalTransporter::rememberThreadLocalStates);
@@ -284,7 +287,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         final CompletableFuture<Boolean> result = new CompletableFuture<Boolean>();
         lockTrackedRacesForRead();
         try {
-            final WorkQueue eventQueue = LockUtil.executeWithWriteLockAndResult(raceListenersLock,
+            final RunnableExecutor eventQueue = LockUtil.executeWithWriteLockAndResult(raceListenersLock,
                     () -> raceListeners.remove(listener));
             if (eventQueue != null) {
                 eventQueue.addWork(() -> {
