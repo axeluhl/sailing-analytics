@@ -715,45 +715,45 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     public void setVisible(boolean visible) {
         if (visible && !isVisible()) {
             checkIfTracking(() -> {});
-            if (map == null) {
-                map = raceMap.getMap();
-                if (map != null) {
-                    setMap(map);
-                }
-            }
-            if (visible) {
-                if (sideBySideComponentViewer != null) {
-                    sideBySideComponentViewer.setLeftComponent(marksPanel);
-                    sideBySideComponentViewer.setLeftComponentToggleButtonVisible(false);
-                }
-                for (final CourseMarkOverlay overlay : raceMap.getCourseMarkOverlays().values()) {
-                    courseMarkClickHandlers.add(overlay.addClickHandler(new ClickMapHandler() {
-                        @Override
-                        public void onEvent(ClickMapEvent event) {
-                            marksPanel.select(overlay.getMark());
-                        }
-                    }));
-                }
-                raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
-            } else {
-                if (currentFixPositionChooser != null) {
-                    currentFixPositionChooser.cancel();
-                    currentFixPositionChooser = null;
-                }
-                marksPanel.deselectMark();
-                selectedMark = null;
-                if (sideBySideComponentViewer != null) {
-                    sideBySideComponentViewer.setLeftComponent(leaderboardPanel);
-                    sideBySideComponentViewer.setLeftComponentToggleButtonVisible(true);
-                }
-                for (HandlerRegistration registration : courseMarkClickHandlers) {
-                    registration.removeHandler();
-                }
-                raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
-                raceMap.registerAllCourseMarkInfoWindowClickHandlers();
-            }
-            super.setVisible(visible);
         }
+        if (map == null) {
+            map = raceMap.getMap();
+            if (map != null) {
+                setMap(map);
+            }
+        }
+        if (visible) {
+            if (sideBySideComponentViewer != null) {
+                sideBySideComponentViewer.setLeftComponent(marksPanel);
+                sideBySideComponentViewer.setLeftComponentToggleButtonVisible(false);
+            }
+            for (final CourseMarkOverlay overlay : raceMap.getCourseMarkOverlays().values()) {
+                courseMarkClickHandlers.add(overlay.addClickHandler(new ClickMapHandler() {
+                    @Override
+                    public void onEvent(ClickMapEvent event) {
+                        marksPanel.select(overlay.getMark());
+                    }
+                }));
+            }
+            raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
+        } else {
+            if (currentFixPositionChooser != null) {
+                currentFixPositionChooser.cancel();
+                currentFixPositionChooser = null;
+            }
+            marksPanel.deselectMark();
+            selectedMark = null;
+            if (sideBySideComponentViewer != null) {
+                sideBySideComponentViewer.setLeftComponent(leaderboardPanel);
+                sideBySideComponentViewer.setLeftComponentToggleButtonVisible(true);
+            }
+            for (HandlerRegistration registration : courseMarkClickHandlers) {
+                registration.removeHandler();
+            }
+            raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
+            raceMap.registerAllCourseMarkInfoWindowClickHandlers();
+        }
+        super.setVisible(visible);
     }
 
     private void checkIfTracking(Runnable continuation) {
