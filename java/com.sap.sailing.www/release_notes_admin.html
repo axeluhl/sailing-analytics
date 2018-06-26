@@ -31,7 +31,7 @@
                             Saving now implicitly applies the changes.</li>
                         <li>The URLs of our GWT services are extended to include a leaderboard name if a call is context sensitive to a specific leaderboard.
                             This does not affect the functionality of any service but allows us to setup load balancing with leaderboard specific routing.
-                            The leaderboard names put into the URL are cleaned: Any character that isn't a letter or digit is replaced with an underscore character.
+                            The leaderboard names put into the URL are cleaned: Any character that isn't a latin upper/lowercase letter or digit is replaced with an underscore character.
                             Currently, the following leaderboard specific URLs are used:
                             <ul>
                                 <li>/gwt/service/sailing/leaderboard/[CLEANED-LEADERBOARD-NAME]</li>
