@@ -1182,6 +1182,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showUncorrectedTotalPoints();
     String setStartTimeReceived();
     String setStartTimeReceivedDescription();
+    String setStartTimeReceivedNotice();
     String lastScoreCorrectionsTime();
     String lastScoreCorrectionsComment();
     String setTimeToNow();
