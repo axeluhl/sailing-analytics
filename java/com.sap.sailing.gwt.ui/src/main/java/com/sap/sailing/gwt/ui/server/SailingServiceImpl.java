@@ -53,6 +53,10 @@ import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
@@ -278,6 +282,7 @@ import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Permission.Mode;
+import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -318,6 +323,7 @@ import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.sharding.ShardingContext;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
@@ -2539,6 +2545,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return results;
     }
+    
+    private void checkLeaderboardRouting(String leaderboardName) {
+        final String currentRequestUrl = getThreadLocalRequest().getRequestURL().toString();
+        if (!currentRequestUrl.contains("/leaderboard/")) {
+            logger.log(Level.WARNING, "Leaderboard routing stacktrace", new RuntimeException("Request without leaderboard routing information"));
+        } else {
+          if (currentRequestUrl.contains(leaderboardName)) {
+              logger.info("leaderboard access matches leaderboard url");
+          } else {
+              logger.info("leaderboard access to " + leaderboardName + " does not match request url " + currentRequestUrl);
+              logger.log(Level.SEVERE, "Leaderboard routing stacktrace", new RuntimeException("Request without leaderboard routing information"));
+          }
+        }
+    }
 
     /**
      * Creates a {@link LeaderboardDTO} for <code>leaderboard</code> and fills in the name, race master data
@@ -2549,6 +2569,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * If <code>withGeoLocationData</code> is <code>true</code> the geographical location of all races will be determined.
      */
     private StrippedLeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard, boolean withGeoLocationData, boolean withStatisticalData) {
+        checkLeaderboardRouting(leaderboard.getName());
+        
         StrippedLeaderboardDTO leaderboardDTO = new StrippedLeaderboardDTO(convertToBoatClassDTO(leaderboard.getBoatClass()));
         TimePoint startOfLatestRace = null;
         Long delayToLiveInMillisForLatestRace = null;
@@ -7850,5 +7872,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return result;
+    }
+
+    @Override
+    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+        ShardingType identifiedShardingType = null;
+        try {
+            if (req instanceof HttpServletRequest) {
+                identifiedShardingType = ShardingContext.identifyAndSetShardingConstraint(((HttpServletRequest) req).getPathInfo());
+            }
+            super.service(req, res);
+        } finally {
+            if (identifiedShardingType != null) {
+                ShardingContext.clearShardingConstraint(identifiedShardingType);
+            }
+        }
     }
 }

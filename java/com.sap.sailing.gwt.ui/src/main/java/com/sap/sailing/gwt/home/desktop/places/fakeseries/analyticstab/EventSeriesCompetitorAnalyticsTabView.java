@@ -78,7 +78,7 @@ public class EventSeriesCompetitorAnalyticsTabView extends SharedLeaderboardEven
                 }
             };
             if (eventSeriesAnalyticsManager.getLeaderboardPanel() == null) {
-                eventSeriesAnalyticsManager.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
+                eventSeriesAnalyticsManager.getAvailableDetailTypesForLeaderboard(leaderboardName,
                         null, new AsyncCallback<Iterable<DetailType>>() {
 
                             @Override

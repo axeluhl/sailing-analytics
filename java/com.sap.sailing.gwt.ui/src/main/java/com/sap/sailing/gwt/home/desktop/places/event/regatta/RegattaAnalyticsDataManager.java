@@ -6,6 +6,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSetti
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
@@ -31,16 +32,16 @@ public class RegattaAnalyticsDataManager {
     private final CompetitorSelectionModel competitorSelectionProvider;
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final ErrorReporter errorReporter;
-    private final SailingServiceAsync sailingService;
+    private final SailingClientFactory sailingCF;
     private final Timer timer;
     private final FlagImageResolver flagImageResolver;
     
-    public RegattaAnalyticsDataManager(final SailingServiceAsync sailingService,
+    public RegattaAnalyticsDataManager(final SailingClientFactory sailingCF,
             AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter,
             FlagImageResolver flagImageResolver) {
         this.flagImageResolver = flagImageResolver;
         this.competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */true);
-        this.sailingService = sailingService;
+        this.sailingCF = sailingCF;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.timer = timer;
         this.errorReporter = errorReporter;
@@ -53,6 +54,7 @@ public class RegattaAnalyticsDataManager {
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn, Iterable<DetailType> availableDetailTypes) {
         if (leaderboardPanel == null) {
+            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> leaderboardName);
             leaderboardPanel = new MultiRaceLeaderboardPanel(parent, context, sailingService,
                     asyncActionsExecutor,
                     leaderboardSettings,
@@ -68,6 +70,7 @@ public class RegattaAnalyticsDataManager {
 
     public MultiCompetitorLeaderboardChart createMultiCompetitorChart(String leaderboardName, DetailType chartDetailType) {
         if(multiCompetitorChart == null) {
+            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> leaderboardName);
             multiCompetitorChart = new MultiCompetitorLeaderboardChart(null, null, sailingService, asyncActionsExecutor,
                     leaderboardName, chartDetailType,
                     competitorSelectionProvider, timer, StringMessages.INSTANCE, false, errorReporter);
