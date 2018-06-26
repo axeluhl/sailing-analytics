@@ -54,14 +54,12 @@ public class ParallelGroupedNumberPairCollectingProcessor
 
             final Double doubleValueA = a == null ? null : a.doubleValue();
             final Double doubleValueB = b == null ? null : b.doubleValue();
-            
             if (doubleValueA != null && doubleValueB != null) {
-                if(aggregate == null) {
+                if (aggregate == null) {
                     aggregate = new HashSet<>();
                     aggregate.add(new Pair<>(doubleValueA, doubleValueB));
                     individualPairs.put(element.getKey(), aggregate);
-                }
-                else {
+                } else {
                     individualPairs.get(element.getKey()).add(new Pair<>(doubleValueA, doubleValueB));
                 }
             } 

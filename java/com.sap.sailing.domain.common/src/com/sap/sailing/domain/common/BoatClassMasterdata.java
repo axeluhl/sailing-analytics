@@ -31,6 +31,7 @@ public enum BoatClassMasterdata {
     CANOE_TAIFUN ("Canoe Taifun", true, 5.20, 1.32, BoatHullType.MONOHULL, false, "Taifun", "Taifun Kanu", "Kanu Taifun"),
     CONTENDER ("Contender", true, 4.88, 1.42, BoatHullType.MONOHULL, false),
     CC_30 ("C&C 30", true, 9.12, 3.25, BoatHullType.MONOHULL, true),
+    CLUB_SWAN_50 ("Club Swan 50", true, 16.74, 4.20, BoatHullType.MONOHULL, true, "ClubSwan50"),
     D_ONE ("D-One", true, 4.23, 2.31, BoatHullType.MONOHULL, true, "Devoti D-One", "DOne", "D_One"),
     DRAGON_INT ("Dragon Int.", true, 8.89, 1.96, BoatHullType.MONOHULL, true, "Drachen", "Dragon"),
     DELPHIA_24 ("Delphia 24", true, 7.70, 2.50, BoatHullType.MONOHULL, true, "Delphia 24 One Design", "Delphia 24 OD"),

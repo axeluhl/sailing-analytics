@@ -78,7 +78,6 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 queryDefinitionProviderWithControls = new QueryDefinitionProviderWithControls(null, null, session,
                         dataMiningService, DataMiningEntryPoint.this, settingsControl, settingsManager,
                         resultsPresenter);
-                queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
                 selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
                 queryRunner = new SimpleQueryRunner(null, null, session, dataMiningService, DataMiningEntryPoint.this,
                         queryDefinitionProviderWithControls, resultsPresenter);
@@ -89,7 +88,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                  * automatic execution of queries. Re-enable this, when this functionality is desired again.
                  */
                 // settingsControl.addSettingsComponent(queryRunner);
-                SplitLayoutPanel splitPanel = new SplitLayoutPanel(15);
+                SplitLayoutPanel splitPanel = new SplitLayoutPanel(10);
                 splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
                 splitPanel.add(selectionDockPanel);
                 return splitPanel;
