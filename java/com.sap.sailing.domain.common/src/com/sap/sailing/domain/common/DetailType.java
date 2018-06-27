@@ -309,14 +309,7 @@ public enum DetailType implements Serializable {
         return allowed;
     }
 
-    public static Collection<DetailType> getLegExtendedBravoDetailTypes() {
-        final Collection<DetailType> allowed = new LinkedHashSet<>();
-        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS);
-        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DURATION_FOILED_IN_SECONDS);
-        return allowed;
-    }
-
-    public static Collection<DetailType> getRaceExtendedBravoDetailTypes() {
+     public static Collection<DetailType> getRaceExtendedBravoDetailTypes() {
         final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(DetailType.BRAVOEXTENDED_RACE_CURRENT_PORT_DAGGERBOARD_RAKE);
         allowed.add(DetailType.BRAVOEXTENDED_RACE_CURRENT_STBD_DAGGERBOARD_RAKE);
@@ -344,6 +337,8 @@ public enum DetailType implements Serializable {
         allowed.add(DetailType.BRAVO_RACE_HEEL_IN_DEGREES);
         allowed.add(DetailType.BRAVO_RACE_PITCH_IN_DEGREES);
         allowed.add(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
+        allowed.add(DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS);
+        allowed.add(DetailType.RACE_CURRENT_DURATION_FOILED_IN_SECONDS);
         return allowed;
     }
 
@@ -352,6 +347,8 @@ public enum DetailType implements Serializable {
         allowed.add(DetailType.BRAVO_LEG_CURRENT_HEEL_IN_DEGREES);
         allowed.add(DetailType.BRAVO_LEG_CURRENT_PITCH_IN_DEGREES);
         allowed.add(DetailType.BRAVO_LEG_CURRENT_RIDE_HEIGHT_IN_METERS);
+        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS);
+        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DURATION_FOILED_IN_SECONDS);
         return allowed;
     }
 
@@ -540,7 +537,6 @@ public enum DetailType implements Serializable {
         final Collection<DetailType> all = new LinkedHashSet<>();
         all.addAll(getLegDetailColumnTypes());
         all.addAll(getLegBravoDetailTypes());
-        all.addAll(getLegExtendedBravoDetailTypes());
         all.addAll(getLegExpeditionDetailColumnTypes());
         return all;
     }
@@ -564,7 +560,6 @@ public enum DetailType implements Serializable {
                             return t;
                         }
                     }
-
                 }
             }
         }
