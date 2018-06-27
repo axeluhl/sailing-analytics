@@ -102,32 +102,14 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     @Override
     protected MediaTrack getResult() {
         mediaTrack.title = titleBox.getValue();
-        updateStartTimeFromUi();
-        updateDurationFromUi();
         connectMediaWithRace();
         return mediaTrack;
-    }
-
-    private void updateDurationFromUi() {
-        String duration = durationBox.getValue();
-        if (duration != null && !duration.trim().isEmpty()) {
-            mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(duration);
-        } else {
-            mediaTrack.duration = null;
-        }
     }
 
     protected void connectMediaWithRace() {
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         assignedRaces.add(this.raceIdentifier);
         mediaTrack.assignedRaces = assignedRaces;
-    }
-
-    protected void updateStartTimeFromUi() {
-        Date startTime = startTimeBox.getValue();
-        if (startTime != null && !startTime.equals("")) {
-            mediaTrack.startTime = new MillisecondsTimePoint(startTime);
-        }
     }
 
     //used for audio only tracks, using native mediaelement to determine time
@@ -240,7 +222,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         if (youtubeId != null) {
             mediaTrack.url = youtubeId;
             mediaTrack.mimeType = MimeType.youtube;
-            loadYoutubeMetadata(youtubeId);
+            loadYoutubeMetadata();
         } else {
             mediaTrack.url = url;
             loadMediaDuration();
@@ -297,61 +279,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         return lastPathSegment;
     }
 
-    private native void registerNativeMethods() /*-{
-        var that = this;
-        window.youtubeMetadataCallback = function(metadata) {
-            var title = metadata.entry.media$group.media$title.$t;
-            var duration = metadata.entry.media$group.yt$duration.seconds;
-            var description = metadata.entry.media$group.media$description.$t;
-            that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::youtubeMetadataCallback(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(title, duration, description);
-        }
-    }-*/;
-
-    /**
-     * Inspired by https://developers.google.com/web-toolkit/doc/latest/tutorial/Xsite
-     * 
-     * @param youtubeId
-     */
-    public native void loadYoutubeMetadata(String youtubeId) /*-{
-        var that = this;
-        //Create temporary script element.
-        window.youtubeMetadataCallbackScript = document.createElement("script");
-        window.youtubeMetadataCallbackScript.src = "http://gdata.youtube.com/feeds/api/videos/"
-                + youtubeId
-                + "?alt=json&orderby=published&format=6&callback=youtubeMetadataCallback";
-        document.body.appendChild(window.youtubeMetadataCallbackScript);
-
-        // Cancel meta data capturing after has 2-seconds timeout.
-        setTimeout(
-            function() {
-                //Remove temporary script element.
-                if (window != null && window.youtubeMetadataCallbackScript != null) {
-                    document.body.removeChild(window.youtubeMetadataCallbackScript);
-                    delete window.youtubeMetadataCallbackScript;
-                }
-                that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setBusy(Z)(false);
-            }, 2000);
-    }-*/;
-    
     public void setBusy(boolean busy) {
         busyIndicator.setBusy(busy);
-    }
-
-    public void youtubeMetadataCallback(String title, String durationInSeconds, String description) {
-        busyIndicator.setBusy(false);
-        mediaTrack.title = title;
-        try {
-            long duration = (long) Math.round(1000 * Double
-                    .valueOf(durationInSeconds));
-            if (duration > 0) {
-                mediaTrack.duration = new MillisecondsDurationImpl(duration);
-            } else {
-                mediaTrack.duration = null;
-            }
-        } catch (NumberFormatException ex) {
-            mediaTrack.duration = null;
-        }
-        refreshUI();
     }
 
     protected void refreshUI() {
