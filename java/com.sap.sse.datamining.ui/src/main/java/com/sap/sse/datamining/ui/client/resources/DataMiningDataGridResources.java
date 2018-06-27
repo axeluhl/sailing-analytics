@@ -14,6 +14,8 @@ public interface DataMiningDataGridResources extends DataGrid.Resources {
         String dataGridSpacedSubHeader();
 
         String dataGridSubHeaderLabel();
+
+        String dataGridClearFocus();
         
     }
 }

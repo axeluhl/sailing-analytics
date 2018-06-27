@@ -1,8 +1,17 @@
 package com.sap.sailing.gwt.home.server.servlets;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.common.sharding.ShardingType;
+import com.sap.sailing.domain.sharding.ShardingContext;
 import com.sap.sailing.domain.windfinder.WindFinderTrackerFactory;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.SailingDispatchContextImpl;
@@ -46,5 +55,20 @@ public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispa
                 eventNewsServiceTracker.getService(), securityServiceTracker.getService(),
                 userStoreTracker.getService(), trackedRaceStatisticsCacheTracker.getService(),
                 request.getClientLocaleName(), getThreadLocalRequest());
+    }
+    
+    @Override
+    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+        ShardingType identifiedShardingType = null;
+        try {
+            if (req instanceof HttpServletRequest) {
+                identifiedShardingType = ShardingContext.identifyAndSetShardingConstraint( ((HttpServletRequest) req).getPathInfo());
+            }
+            super.service(req, res);
+        } finally {
+            if (identifiedShardingType != null) {
+                ShardingContext.clearShardingConstraint(identifiedShardingType);
+            }
+        }
     }
 }

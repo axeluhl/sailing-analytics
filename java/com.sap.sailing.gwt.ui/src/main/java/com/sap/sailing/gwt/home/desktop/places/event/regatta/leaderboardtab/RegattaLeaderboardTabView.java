@@ -147,8 +147,8 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
     
     private void loadAvailableDetailTypes(final String leaderboardName, final AcceptsOneWidget contentArea,
             final Consumer<Iterable<DetailType>> callback) {
-        currentPresenter.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
-                new AsyncCallback<Iterable<DetailType>>() {
+        currentPresenter.getAvailableDetailTypesForLeaderboard(leaderboardName,
+                null, new AsyncCallback<Iterable<DetailType>>() {
 
                     @Override
                     public void onSuccess(Iterable<DetailType> result) {

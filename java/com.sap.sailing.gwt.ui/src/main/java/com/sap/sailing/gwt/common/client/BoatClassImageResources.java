@@ -396,6 +396,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource CC30Icon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/CLUBSWAN50.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource CLUBSWAN50Icon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/GP_26.png")
     @ImageOptions(preventInlining = true)
     ImageResource GP26Icon();

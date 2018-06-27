@@ -24,7 +24,7 @@ public class ManeuverTableLifecycle implements ComponentLifecycle<ManeuverTableS
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.wind();
+        return stringMessages.maneuverTable();
     }
 
     @Override
