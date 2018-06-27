@@ -115,20 +115,20 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         
         eventIdBox = new TextBox();
         eventIdBox.getElement().getStyle().setWidth(30, Unit.EM);
-        eventIdBox.setTitle("Event ID or a url that contains the event Id from Manage2Sail");
-        connectionsGrid.setWidget(1, 0, new Label("Manage2Sail Event-ID:"));
+        eventIdBox.setTitle(stringMessages.manage2SailEventIdBoxTooltip());
+        connectionsGrid.setWidget(1, 0, new Label(stringMessages.manage2SailEventIdBox() + ":"));
         connectionsGrid.setWidget(1, 1, eventIdBox);
         eventIdBox.addChangeHandler(event -> {
             if (eventIdBox.getValue() != "") {
-                createUrlFromEventId(eventIdBox.getValue());
+                updateUrlFromEventId(eventIdBox.getValue());
             }
         });
 
-        connectionsGrid.setWidget(2, 0, new Label("Manage2Sail Event-URL (json):"));
+        connectionsGrid.setWidget(2, 0, new Label(stringMessages.manage2SailEventURLBox() + ":"));
         connectionsGrid.setWidget(2, 1, jsonUrlBox);
         jsonUrlBox.addChangeHandler(event -> {
             if (jsonUrlBox.getValue() != "") {
-                createEventIdFromUrl(jsonUrlBox.getValue());
+                updateEventIdFromUrl(jsonUrlBox.getValue());
             }
         });
 
@@ -138,7 +138,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         connectionsGrid.setWidget(3, 0,  new Label(stringConstants.hostname() + ":"));
         connectionsGrid.setWidget(3, 1, hostnameTextbox);
         
-        connectionsGrid.setWidget(4, 0, new Label(stringConstants.port() + ":"));
+        connectionsGrid.setWidget(4, 0, new Label(stringMessages.manage2SailPort() + ":"));
         connectionsGrid.setWidget(4, 1, portIntegerbox);
 
         Button btnListRaces = new Button(stringConstants.listRaces());
@@ -343,9 +343,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
      * This function tries to create a valid JsonUrl for any input given that matches the pattern of an event Id from
      * M2S. If there is an event id detected the Json Url gets updated and the event Id textbox is filled with the
      * detected event Id. The ID pattern is defined in {@link eventIdPattern}.
-     * 
      */
-    private void createUrlFromEventId(String eventIdTextbox) {
+    private void updateUrlFromEventId(String eventIdTextbox) {
         if (eventIdTextbox.matches(".*" + eventIdPattern + ".*")) {
             final String inferredEventId = eventIdTextbox.replaceFirst(".*(" + eventIdPattern + ").*", "$1");
             jsonUrlBox.setValue(
@@ -358,7 +357,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
      * Similar to {@link #createUrlFromEventId()} this function tries to extract a M2S event Id by looking at the given
      * url in the Json Url Textbox.
      */
-    private void createEventIdFromUrl(String jsonUrlTextBox) {
+    private void updateEventIdFromUrl(String jsonUrlTextBox) {
         if (jsonUrlTextBox.matches("http://manage2sail.com/.*" + eventIdPattern + ".*")) {
             final String inferredEventId = jsonUrlTextBox.replaceFirst(".*(" + eventIdPattern + ").*", "$1");
             eventIdBox.setValue(inferredEventId);
