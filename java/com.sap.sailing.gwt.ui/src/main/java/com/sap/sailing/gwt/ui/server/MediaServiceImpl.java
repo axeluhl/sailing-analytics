@@ -56,7 +56,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
-    private String YOUTUBE_V3_API_KEY = "AIzaSyDYwPzLevXauI-kTSVXTLroLyHEONuF9Rw";
+    private String YOUTUBE_V3_API_KEY = "AIzaSyD1Se4tIkt-wglccbco3S7twaHiG20hR9E";
 
     private static final Logger logger = Logger.getLogger(MediaServiceImpl.class.getName());
 
@@ -365,6 +365,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
                     "https://www.googleapis.com/youtube/v3/videos?id=" + videoId + "&key=" + YOUTUBE_V3_API_KEY
                             + "&part=snippet,contentDetails&fields=items(snippet/title,contentDetails/duration)");
             URLConnection connection = apiURL.openConnection();
+            connection.setRequestProperty("Referer", "http://sapsailing.com/");
             connection.setConnectTimeout(METADATA_CONNECTION_TIMEOUT);
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
