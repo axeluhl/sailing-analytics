@@ -251,24 +251,26 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     }
 
     private void loadYoutubeMetadata() {
-        mediaService.checkYoutubeMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                infoLabel.setWidget(new Label(caught.getMessage()));
-            }
-
-            @Override
-            public void onSuccess(VideoMetadataDTO result) {
-                if (result.isDownloadable()) {
-                    mediaTrack.duration = result.getDuration();
-                    mediaTrack.title = result.getMessage();
-                    refreshUI();
-                } else {
-                    infoLabel.setWidget(new Label(result.getMessage()));
+        if(mediaTrack.url != null && !mediaTrack.url.isEmpty()) {
+            mediaService.checkYoutubeMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
+                
+                @Override
+                public void onFailure(Throwable caught) {
+                    infoLabel.setWidget(new Label(caught.getMessage()));
                 }
-            }
-        });
+                
+                @Override
+                public void onSuccess(VideoMetadataDTO result) {
+                    if (result.isDownloadable()) {
+                        mediaTrack.duration = result.getDuration();
+                        mediaTrack.title = result.getMessage();
+                        refreshUI();
+                    } else {
+                        infoLabel.setWidget(new Label(result.getMessage()));
+                    }
+                }
+            });
+        }
     }
 
     private String sliceBefore(String lastPathSegment, String slicer) {

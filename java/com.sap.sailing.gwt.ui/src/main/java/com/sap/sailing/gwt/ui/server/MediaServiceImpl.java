@@ -9,11 +9,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
@@ -56,7 +58,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
-    private String YOUTUBE_V3_API_KEY = "AIzaSyD1Se4tIkt-wglccbco3S7twaHiG20hR9E";
+    private String YOUTUBE_V3_API_KEY = "AIzaSyBzCJ9cxb9_PPzuYfrHIEdSRtR631b64Xs";
 
     private static final Logger logger = Logger.getLogger(MediaServiceImpl.class.getName());
 
@@ -355,35 +357,43 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
 
     @Override
-    public VideoMetadataDTO checkYoutubeMetadata(String videoId) {
+    public VideoMetadataDTO checkYoutubeMetadata(String videoId) throws UnsupportedEncodingException {
         ensureUserCanManageMedia();
         boolean canDownload = false;
         String message = "";
         Duration duration = null;
-        try {
-            URL apiURL = new URL(
-                    "https://www.googleapis.com/youtube/v3/videos?id=" + videoId + "&key=" + YOUTUBE_V3_API_KEY
-                            + "&part=snippet,contentDetails&fields=items(snippet/title,contentDetails/duration)");
-            URLConnection connection = apiURL.openConnection();
-            connection.setRequestProperty("Referer", "http://sapsailing.com/");
-            connection.setConnectTimeout(METADATA_CONNECTION_TIMEOUT);
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
-                String pageText = reader.lines().collect(Collectors.joining("\n"));
-                JSONObject jsonAnswer = new JSONObject(pageText);
-                final JSONObject item = jsonAnswer.getJSONArray("items").getJSONObject(0);
-                message = item.getJSONObject("snippet").getString("title");
-                String rawDuration = item.getJSONObject("contentDetails").getString("duration");
-                duration = new MillisecondsDurationImpl(java.time.Duration.parse(rawDuration).toMillis());
-                canDownload = true;
-            } catch (JSONException e) {
+        if (videoId.isEmpty()) {
+            message = "Empty id";
+        } else {
+            videoId = URLEncoder.encode(videoId, StandardCharsets.UTF_8.name());
+            try {
+                URL apiURL = new URL(
+                        "https://www.googleapis.com/youtube/v3/videos?id=" + videoId + "&key=" + YOUTUBE_V3_API_KEY
+                                + "&part=snippet,contentDetails&fields=items(snippet/title,contentDetails/duration)");
+                URLConnection connection = apiURL.openConnection();
+                connection.setRequestProperty("Referer", "http://mediaservice.sapsailing.com/");
+                connection.setConnectTimeout(METADATA_CONNECTION_TIMEOUT);
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+                    String pageText = reader.lines().collect(Collectors.joining("\n"));
+                    JSONObject jsonAnswer = new JSONObject(pageText);
+                    final JSONObject item = jsonAnswer.getJSONArray("items").getJSONObject(0);
+                    message = item.getJSONObject("snippet").getString("title");
+                    String rawDuration = item.getJSONObject("contentDetails").getString("duration");
+                    duration = new MillisecondsDurationImpl(java.time.Duration.parse(rawDuration).toMillis());
+                    canDownload = true;
+                } catch (JSONException e) {
+                    message = e.getMessage();
+                    logger.log(Level.WARNING, "Error in youtube metadata call", e);
+                }
+            } catch (IOException e) {
                 message = e.getMessage();
                 logger.log(Level.WARNING, "Error in youtube metadata call", e);
             }
-        } catch (IOException e) {
-            message = e.getMessage();
-            logger.log(Level.WARNING, "Error in youtube metadata call", e);
         }
+        //sanitize, as we inject it into an url with our api key!
+
+        
         return new VideoMetadataDTO(canDownload, duration, false, null, message);
     }
 }
