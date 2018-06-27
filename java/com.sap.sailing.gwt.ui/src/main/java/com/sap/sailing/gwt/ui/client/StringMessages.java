@@ -153,7 +153,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String legDetailsToShow();
     String columnMoveUp();
     String columnMoveDown();
-    String port();
     String raceStartTimeColumn();
     String showOnlySelectedCompetitors();
     String showSelectedCompetitorsInfo();
