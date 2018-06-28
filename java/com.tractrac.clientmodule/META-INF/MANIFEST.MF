@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: TracTrac Client module
 Bundle-SymbolicName: com.tractrac.clientmodule
-Bundle-Version: 3.10.0
+Bundle-Version: 3.10.1
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/TracAPI.jar
@@ -41,6 +41,7 @@ Export-Package: com.tractrac.asio.lib.api,
  com.tractrac.dataflow.lib.prov.stored.tcp.put,
  com.tractrac.dataflow.lib.spi,
  com.tractrac.dataflow.lib.spi.authentication,
+ com.tractrac.datatypes.lib.api.sensor,
  com.tractrac.model.lib.api,
  com.tractrac.model.lib.api.attachment,
  com.tractrac.model.lib.api.data,
@@ -59,10 +60,17 @@ Export-Package: com.tractrac.asio.lib.api,
  com.tractrac.model.lib.impl.spatial,
  com.tractrac.model.server.lib.api,
  com.tractrac.model.server.lib.api.cache,
+ com.tractrac.model.server.lib.api.commands,
  com.tractrac.model.server.lib.api.controlpassing,
+ com.tractrac.model.server.lib.api.devices,
+ com.tractrac.model.server.lib.api.gms,
+ com.tractrac.model.server.lib.api.loype,
+ com.tractrac.model.server.lib.api.notifier,
  com.tractrac.model.server.lib.api.position,
  com.tractrac.model.server.lib.api.raceobject,
  com.tractrac.model.server.lib.api.route,
+ com.tractrac.model.server.lib.api.sensor,
+ com.tractrac.model.server.lib.api.view,
  com.tractrac.osgi,
  com.tractrac.subscription.app.tracapi,
  com.tractrac.subscription.lib.api,
