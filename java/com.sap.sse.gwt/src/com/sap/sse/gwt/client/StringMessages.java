@@ -74,6 +74,7 @@ public interface StringMessages extends Messages {
     String groupMedianDescending();
     String choosePresentation();
     String shownDecimals();
+    String showDataLabels();
     String elements(long count);
     String resultsChart();
     String cantDisplayDataOfType(String resultType);
