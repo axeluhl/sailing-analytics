@@ -4,7 +4,6 @@ import java.util.Date;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -14,6 +13,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
 
 /**
  * A panel that has a race selection (inherited from {@link AbstractRaceManagementPanel}) and which adds a table
@@ -41,7 +41,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
 
                     @Override
                     public void onSuccess(Void result) {
-                        Window.setStatus(stringMessages.successfullyUpdatedCourse());
+                        Notification.info(stringMessages.successfullyUpdatedCourse());
                         refreshSelectedRaceData();
                     }
                 });

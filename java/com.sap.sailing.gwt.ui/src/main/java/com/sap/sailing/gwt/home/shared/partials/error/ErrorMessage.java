@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.Notification;
 
 public class ErrorMessage extends Composite {
 
@@ -42,7 +43,7 @@ public class ErrorMessage extends Composite {
         }
 
         this.errorMessageDetail.setInnerText(errorMessageDetail);
-        Window.setStatus(errorMessageDetail);
+        Notification.error(errorMessageDetail);
     }
     
     public void addReloadPageButtonStyleNames(String styleNames) {

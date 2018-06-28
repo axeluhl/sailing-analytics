@@ -67,6 +67,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -708,7 +709,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                     }
                     @Override
                     public void onSuccess(Void result) {
-                        Window.setStatus("Successfully unsuppressed competitor "+object.getName());
+                        Notification.info("Successfully unsuppressed competitor "+object.getName());
                         // force a reload of the entire editable leaderboard to hide the now suppressed competitor
                         loadCompleteLeaderboard(/* showProgress */ true);
                     }

@@ -15,7 +15,6 @@ import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.controls.ControlPosition;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.LegIdentifierImpl;
@@ -31,6 +30,7 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
+import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
@@ -338,8 +338,8 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                     @Override
                     public void onFailure(Throwable caught) {
                         // TODO: add corresponding message to string-messages
-                        // Window.setStatus(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
-                        Window.setStatus(GET_SIMULATION_CATEGORY);
+                        // Notification.error(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
+                        Notification.error(GET_SIMULATION_CATEGORY);
                     }
 
                     @Override

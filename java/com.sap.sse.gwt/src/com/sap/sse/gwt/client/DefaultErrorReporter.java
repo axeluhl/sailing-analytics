@@ -3,7 +3,6 @@ package com.sap.sse.gwt.client;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
@@ -49,7 +48,7 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
     @Override
     public void reportError(String message, boolean silentMode) {
         if (silentMode) {
-            Window.setStatus(message);
+            Notification.error(message);
         } else {
             reportError(message);
         }
