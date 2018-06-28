@@ -215,8 +215,8 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         addControl(decimalsPanel);
         
         HorizontalPanel showDataLabelsPanel = new HorizontalPanel();
-        decimalsPanel.setSpacing(5);
-        decimalsPanel.add(new Label(getDataMiningStringMessages().showDataLabels() + ":"));
+        showDataLabelsPanel.setSpacing(5);
+        showDataLabelsPanel.add(new Label(getDataMiningStringMessages().showDataLabels() + ":"));
         showDataLabels = new CheckBox();
         showDataLabelsPanel.add(showDataLabels);
         showDataLabels.setValue(true);
