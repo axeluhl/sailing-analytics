@@ -340,7 +340,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     }
 
     /**
-     * This function tries to create a valid JsonUrl for any input given that matches the pattern of an event Id from
+     * This function tries to infer a valid JsonUrl for any input given that matches the pattern of an event Id from
      * M2S. If there is an event id detected the Json Url gets updated and the event Id textbox is filled with the
      * detected event Id. The ID pattern is defined in {@link eventIdPattern}.
      */
@@ -354,8 +354,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     }
 
     /**
-     * Similar to {@link #createUrlFromEventId()} this function tries to extract a M2S event Id by looking at the given
-     * url in the Json Url Textbox.
+     * Similar to {@link #updateUrlFromEventId} this function tries to extract a M2S event Id by looking at the given
+     * url in the Json Url Textbox. The value of {@link eventIdBox} is then set to the event ID inferred from the Json Url.
      */
     private void updateEventIdFromUrl(String jsonUrlTextBox) {
         if (jsonUrlTextBox.matches("http://manage2sail.com/.*" + eventIdPattern + ".*")) {
