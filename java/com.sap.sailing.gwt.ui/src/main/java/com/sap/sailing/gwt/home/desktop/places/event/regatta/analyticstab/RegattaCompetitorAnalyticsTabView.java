@@ -99,7 +99,7 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
                 }
             };
             if (regattaAnalyticsManager.getLeaderboardPanel() == null) {
-                currentPresenter.getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
+                currentPresenter.getAvailableDetailTypesForLeaderboard(leaderboardName,
                         null, new AsyncCallback<Iterable<DetailType>>() {
 
                             @Override
