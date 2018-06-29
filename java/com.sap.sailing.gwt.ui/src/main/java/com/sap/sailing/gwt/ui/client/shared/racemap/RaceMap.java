@@ -65,6 +65,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -441,6 +442,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     /** Callback to set the visibility of the wind chart. */
     private final Consumer<WindSource> showWindChartForProvider;
     private ManagedInfoWindow managedInfoWindow;
+    
+    /** The Map where for each competitor and each maneuver is stored if it is visualized or not.*/
+    private Map<Triple<String, Date, ManeuverType>, Boolean> maneuverLossCheckBoxValueStore = new HashMap<>();
+    
+    /** The Map where the polylines for the specific maneuver are stored.*/
+    private Map<Triple<String, Date, ManeuverType>, Set<Polyline>> maneuverLossLinesMap = new HashMap<>();
+    
+    /** The Map where the info overlays for a maneuver loss visualization are stored.*/
+    private Map<Triple<String, Date, ManeuverType>, SmallTransparentInfoOverlay> maneuverLossInfoOverlayMap = new HashMap<>();
 
     private class AdvantageLineUpdater implements QuickRanksListener {
         @Override
@@ -1062,6 +1072,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (maneuverMarkers != null) {
                             removeAllManeuverMarkers();
                         }
+                        if (!maneuverLossLinesMap.isEmpty()) {
+                            removeManeuverLossLinesAndInfoOverlays();
+                        }
                         
                         if (requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown) {
                             updateCoordinateSystemFromSettings();
@@ -1625,12 +1638,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE))
                             && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
                     windwardStartLinePosition, firstMarkPosition, windwardStartLineMarkToFirstMarkLineInfoProvider,
-                    "grey");
+                    "grey", 1, 1.0);
             leewardStartLineMarkToFirstMarkLine = showOrRemoveOrUpdateLine(leewardStartLineMarkToFirstMarkLine, /* showLine */
                     (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE))
                             && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
                     leewardStartLinePosition, firstMarkPosition, leewardStartLineMarkToFirstMarkLineInfoProvider,
-                    "grey");
+                    "grey", 1, 1.0);
         }
     }
 
@@ -1688,7 +1701,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY) &&
                             (!startLineEqualsFinishLine(courseDTO) || showFinishLineBasedOnCurrentLeg));
             startLine = showOrRemoveOrUpdateLine(startLine, reallyShowStartLine,
-                    startLineLeftPosition, startLineRightPosition, startLineInfoProvider, "#ffffff");
+                    startLineLeftPosition, startLineRightPosition, startLineInfoProvider, "#ffffff", 1, 1.0);
             // draw the finish line
             final Position finishLineLeftPosition = numberOfFinishWaypointMarks == 0 ? null : courseDTO.getFinishMarkPositions().get(0);
             final Position finishLineRightPosition = numberOfFinishWaypointMarks < 2 ? null : courseDTO.getFinishMarkPositions().get(1);
@@ -1702,7 +1715,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 finishLineAdvantageText.delete(0, finishLineAdvantageText.length());
             }
             finishLine = showOrRemoveOrUpdateLine(finishLine, reallyShowFinishLine,
-                    finishLineLeftPosition, finishLineRightPosition, finishLineInfoProvider, FINISH_LINE_COLOR);
+                    finishLineLeftPosition, finishLineRightPosition, finishLineInfoProvider, FINISH_LINE_COLOR, 1, 1.0);
             // the control point pairs for which we already decided whether or not
             // to show a course middle line for; values tell whether to show the line and for which zero-based
             // start waypoint index to do so; when for an equal control point pair multiple decisions with different
@@ -1787,7 +1800,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 return sb.toString();
             }
         };
-        return showOrRemoveOrUpdateLine(lineToShowOrRemoveOrUpdate, showLine, position1DTO, position2DTO, lineInfoProvider, "#2268a0");
+        return showOrRemoveOrUpdateLine(lineToShowOrRemoveOrUpdate, showLine, position1DTO, position2DTO, lineInfoProvider, "#2268a0", 1, 1.0);
     }
 
     private interface LineInfoProvider {
@@ -1804,7 +1817,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      *         otherwise
      */
     private Polyline showOrRemoveOrUpdateLine(Polyline lineToShowOrRemoveOrUpdate, final boolean showLine,
-            final Position position1DTO, final Position position2DTO, final LineInfoProvider lineInfoProvider, String lineColorRGB) {
+            final Position position1DTO, final Position position2DTO, final LineInfoProvider lineInfoProvider,
+            String lineColorRGB, int strokeWeight, double strokeOpacity) {
         if (position1DTO != null && position2DTO != null) {
             if (showLine) {
                 LatLng courseMiddleLinePoint1 = coordinateSystem.toLatLng(position1DTO);
@@ -1815,8 +1829,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     options.setClickable(true);
                     options.setGeodesic(true);
                     options.setStrokeColor(lineColorRGB);
-                    options.setStrokeWeight(1);
-                    options.setStrokeOpacity(1.0);
+                    options.setStrokeWeight(strokeWeight);
+                    options.setStrokeOpacity(strokeOpacity);
                     pointsAsArray = MVCArray.newInstance();
                     lineToShowOrRemoveOrUpdate = Polyline.newInstance(options);
                     lineToShowOrRemoveOrUpdate.setPath(pointsAsArray);
@@ -2171,7 +2185,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return vPanel;
     }
 
-    private Widget getInfoWindowContent(ManeuverDTO maneuver) {
+    private Widget getInfoWindowContent(ManeuverDTO maneuver, CompetitorDTO competitor) {
         SpeedWithBearingDTO before = maneuver.speedWithBearingBefore;
         SpeedWithBearingDTO after = maneuver.speedWithBearingAfter;
         VerticalPanel vPanel = new VerticalPanel();
@@ -2200,9 +2214,27 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     NumberFormat.getDecimalFormat().format(maneuver.lowestSpeedInKnots) + " "
                             + stringMessages.knotsUnit()));
         }
-        if (maneuver.maneuverLossInMeters != null) {
-            vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverLoss(),
-                    numberFormatOneDecimal.format(maneuver.maneuverLossInMeters) + " " + stringMessages.metersUnit()));
+        if (maneuver.maneuverLoss != null) {
+            Widget maneuverLossWidget = createInfoWindowLabelAndValue(stringMessages.maneuverLoss(),
+                    numberFormatOneDecimal.format(maneuver.maneuverLossInMeters) + " " + stringMessages.metersUnit());
+            CheckBox maneuverLossLinesCheckBox = new CheckBox(stringMessages.show());
+            Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.timePoint,
+                    maneuver.type);
+            if (maneuverLossCheckBoxValueStore.isEmpty()) {
+                maneuverLossCheckBoxValueStore.put(t, false);
+            }
+            maneuverLossLinesCheckBox.setValue(maneuverLossCheckBoxValueStore.get(t));
+            maneuverLossLinesCheckBox.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    visualizeManeuverLoss(maneuver, maneuverLossLinesCheckBox.getValue(), competitor);
+                    maneuverLossCheckBoxValueStore.put(t, maneuverLossLinesCheckBox.getValue());
+                }
+            });
+            HorizontalPanel hPanel = new HorizontalPanel();
+            hPanel.add(maneuverLossWidget);
+            hPanel.add(maneuverLossLinesCheckBox);
+            vPanel.add(hPanel);
         }
         if (maneuver.markPassingTimePoint != null) {
             vPanel.add(
@@ -2410,14 +2442,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 List<ManeuverDTO> maneuversForCompetitor = maneuvers.get(competitorDTO);
                 for (ManeuverDTO maneuver : maneuversForCompetitor) {
                     if (settings.isShowManeuverType(maneuver.type)) {
-                        createAndAddMarkerOfManeuver(maneuver);
+                        createAndAddMarkerOfManeuver(maneuver, competitorDTO);
                     }
                 }
             }
         }
     }
 
-    private void createAndAddMarkerOfManeuver(ManeuverDTO maneuver) {
+    private void createAndAddMarkerOfManeuver(ManeuverDTO maneuver, CompetitorDTO competitor) {
         LatLng latLng = coordinateSystem.toLatLng(maneuver.position);
         Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndDirectionIndicatingColor
                 .get(new Pair<ManeuverType, ManeuverColor>(maneuver.type, ManeuverColor.getManeuverColor(maneuver)));
@@ -2428,7 +2460,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         marker.setTitle(ManeuverTypeFormatter.format(maneuver.type, stringMessages));
         marker.addClickHandler(event -> {
             LatLng where = getCoordinateSystem().toLatLng(maneuver.position);
-            Widget content = getInfoWindowContent(maneuver);
+            Widget content = getInfoWindowContent(maneuver, competitor);
             managedInfoWindow.openAtPosition(content, where);
         });
         maneuverMarkers.add(marker);
@@ -2638,6 +2670,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             if (!(timer.getPlayState() == PlayStates.Playing) && lastManeuverResult != null) {
                 removeAllManeuverMarkers();
                 showManeuvers(lastManeuverResult);
+                removeManeuverLossLinesAndInfoOverlays();
             }
         }
         if (newSettings.isShowDouglasPeuckerPoints() != settings.isShowDouglasPeuckerPoints()) {
@@ -3082,5 +3115,141 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     public RaceMapLifecycle getLifecycle() {
         return raceMapLifecycle;
+    }
+    final LineInfoProvider middleManeuverAngleLineInfoProvider = new LineInfoProvider() {
+    @Override
+    public String getLineInfo() {
+        return stringMessages.middleManeuverAngle();
+    }
+    };
+    final LineInfoProvider extrapolatedLineInfoProvider = new LineInfoProvider() {
+        @Override
+        public String getLineInfo() {
+            return stringMessages.extrapolatedManeuverStartPosition();
+        }
+    };
+    final LineInfoProvider projectedExtrapolatedLineInfoProvider = new LineInfoProvider() {
+        @Override
+        public String getLineInfo() {
+            return "";
+        }
+    };
+    final LineInfoProvider projectedManeuverEndLineInfoProvider = new LineInfoProvider() {
+        @Override
+        public String getLineInfo() {
+            return "";
+        }
+    };
+    final LineInfoProvider maneuverLossLineInfoProvider = new LineInfoProvider() {
+        @Override
+        public String getLineInfo() {
+            return stringMessages.maneuverLoss();
+        }
+    };
+
+    /**
+     * Visualizes the Maneuver Loss, creates the corresponding polylines and Info Overlays calling
+     * {@link #createManeuverLossLinesAndInfoOverlays(ManeuverDTO, CompetitorDTO)}. If called with
+     * showManeuverVisualization=false removes the polylines and infooverlays, if there are any.
+     */
+    private void visualizeManeuverLoss(ManeuverDTO maneuver, boolean showManeuverVisualization,
+            CompetitorDTO competitor) {
+        if (showManeuverVisualization == false) {
+            Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.timePoint,
+                    maneuver.type);
+            if (maneuverLossLinesMap.get(t) != null) {
+                for (Polyline p : maneuverLossLinesMap.get(t)) {
+                    p.setMap((MapWidget) null);
+                }
+            }
+            maneuverLossInfoOverlayMap.get(t).removeFromMap();
+        } else {
+            createManeuverLossLinesAndInfoOverlays(maneuver, competitor);
+        }
+    }
+
+    /**
+     * Removes the Polylines visualizing the ManeuverLoss and the SmallTransparentInfoOverlays attached to the
+     * Polylines. Also clears the CheckboxValueStore for maneuverLoss.
+     */
+    private void removeManeuverLossLinesAndInfoOverlays() {
+        if (!maneuverLossLinesMap.isEmpty()) {
+            for (Triple<String, Date, ManeuverType> t : maneuverLossLinesMap.keySet()) {
+                for (Polyline maneuverLossLine : maneuverLossLinesMap.get(t)) {
+                    maneuverLossLine.setMap((MapWidget) null);
+                }
+            }
+            maneuverLossLinesMap.clear();
+        }
+        if (!maneuverLossInfoOverlayMap.isEmpty()) {
+            for (Map.Entry<Triple<String, Date, ManeuverType>, SmallTransparentInfoOverlay> e : maneuverLossInfoOverlayMap
+                    .entrySet()) {
+                e.getValue().removeFromMap();
+            }
+            maneuverLossInfoOverlayMap.clear();
+        }
+        if (!maneuverLossCheckBoxValueStore.isEmpty()) {
+            maneuverLossCheckBoxValueStore.clear();
+        }
+    }
+
+    /**
+     * Creates the ManeuverLoss Lines as calculated in {@link ManeuverDetectorImpl#getManeuverLoss()} and draw
+     * SmallTransparentInfoOverlays attached to the Polylines visualizing the maneuver.
+     * 
+     */
+    private void createManeuverLossLinesAndInfoOverlays(ManeuverDTO maneuver, CompetitorDTO competitor) {
+        Set<Polyline> maneuverLossLines = new HashSet<>();
+        Bearing bearingBefore = new DegreeBearingImpl(maneuver.maneuverLoss.speedWithBearingBefore.bearingInDegrees);
+        Bearing middleManeuverAngle = new DegreeBearingImpl(maneuver.maneuverLoss.middleManeuverAngle);
+        Distance extrapolationOfManeuverStartPoint = new MeterDistance(
+                maneuver.maneuverLoss.speedWithBearingBefore.speedInKnots
+                        * maneuver.maneuverLoss.maneuverDuration.asHours() * 1852);
+        Position extrapolatedManeuverStartPosition = maneuver.maneuverLoss.maneuverStartPosition
+                .translateRhumb(bearingBefore, extrapolationOfManeuverStartPoint);
+        Position intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint = maneuver.maneuverLoss.maneuverStartPosition
+                .getIntersection(bearingBefore, maneuver.position, middleManeuverAngle);
+        Position projectedExtrapolatedManeuverStartPosition = extrapolatedManeuverStartPosition.projectToLineThrough(
+                intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
+        Position projectedManeuverEndPosition = maneuver.maneuverLoss.maneuverEndPosition.projectToLineThrough(
+                intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
+        String color = maneuver.maneuverLossInMeters > 0 ? color = "#FF0000" : "#00FF00";
+        maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true,
+                intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, projectedManeuverEndPosition,
+                middleManeuverAngleLineInfoProvider, "#ffffff", 1, 0.5));
+        maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, maneuver.maneuverLoss.maneuverStartPosition,
+                extrapolatedManeuverStartPosition, extrapolatedLineInfoProvider, "#ffffff", 1, 0.5));
+        maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, extrapolatedManeuverStartPosition,
+                projectedExtrapolatedManeuverStartPosition, projectedExtrapolatedLineInfoProvider, "#FFFF00", 1, 0.3));
+        maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, maneuver.maneuverLoss.maneuverEndPosition,
+                projectedManeuverEndPosition, projectedManeuverEndLineInfoProvider, "#FFFF00", 1, 0.3));
+        maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, projectedExtrapolatedManeuverStartPosition,
+                projectedManeuverEndPosition, maneuverLossLineInfoProvider, color, 2, 1.0));
+//        for (Polyline maneuverLossLine : maneuverLossLines) {
+//            PolylineOptions options = PolylineOptions.newInstance();
+//            options.setStrokeOpacity(0.5);
+//            maneuverLossLine.setOptions(options);
+//        }
+        Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.timePoint,
+                maneuver.type);
+        maneuverLossLinesMap.put(t, maneuverLossLines);
+        StringBuilder sb = new StringBuilder();
+        sb.append(stringMessages.maneuverLoss() + ": " + numberFormatOneDecimal.format(maneuver.maneuverLossInMeters)
+                + stringMessages.metersUnit() + '\n');
+        if (maneuver.type == ManeuverType.TACK) {
+            sb.append(stringMessages.tackAngle() + ": ");
+        } else if (maneuver.type == ManeuverType.JIBE) {
+            sb.append(stringMessages.jibeAngle() + ": ");
+        } else {
+            sb.append(stringMessages.maneuverAngle() + ": ");
+        }
+        sb.append(numberFormatOneDecimal.format(Math.abs(maneuver.directionChangeInDegrees))
+                + stringMessages.degreesUnit());
+        SmallTransparentInfoOverlay maneuverLossInfoOverlay = new SmallTransparentInfoOverlay((MapWidget) map,
+                RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, sb.toString(), coordinateSystem);
+        maneuverLossInfoOverlay.setPosition(projectedManeuverEndPosition.translateGreatCircle(middleManeuverAngle,
+                new MeterDistance(maneuver.maneuverLossInMeters / 2)), -1);
+        maneuverLossInfoOverlay.draw();
+        maneuverLossInfoOverlayMap.put(t, maneuverLossInfoOverlay);
     }
 }
