@@ -777,7 +777,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     protected abstract void setDefaultRaceColumnSelection(LS settings);
 
-    private void setValuesWithReferenceOrder(Iterable<DetailType> valuesToSet, List<DetailType> referenceOrder,
+    private void setValuesWithReferenceOrder(Iterable<DetailType> valuesToSet, Collection<DetailType> referenceOrder,
             List<DetailType> collectionToSetValuesTo) {
         collectionToSetValuesTo.clear();
         collectionToSetValuesTo.addAll(referenceOrder);

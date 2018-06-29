@@ -5,6 +5,28 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.android.shared.util.ScreenHelper;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -27,27 +49,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.android.shared.util.BroadcastManager;
-import com.sap.sailing.android.shared.util.ScreenHelper;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
-import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-import com.sap.sailing.racecommittee.app.utils.TimeUtils;
-import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.TimeRange;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.impl.TimeRangeImpl;
-
 public class ProtestTimeDialogFragment extends AttachedDialogFragment implements View.OnClickListener {
 
     protected final static int MOVE_DOWN = -1;
@@ -66,6 +67,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     private View mHome;
     private Button mChoose;
     private AppPreferences mPreferences;
+    private Integer mDuration = null;
 
     public ProtestTimeDialogFragment() {
         races = new ArrayList<>();
@@ -100,7 +102,6 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mPreferences = AppPreferences.on(getActivity());
         View layout = super.onCreateView(inflater, container, savedInstanceState);
         if (customView == null) {
             layout = inflater.inflate(R.layout.protest_time_fragment, container, false);
@@ -210,7 +211,6 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     }
 
     private View setupView() {
-        mPreferences = AppPreferences.on(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.protest_time_dialog, null);
         mRacesList = (ListView) view.findViewById(R.id.protest_time_races_list);
@@ -296,10 +296,20 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         }
         ReadonlyDataManager manager = DataManager.create(getActivity());
         ArrayList<String> raceIds = args.getStringArrayList(ARGS_RACE_IDS);
+        String raceGroup = null;
         if (raceIds != null) {
             for (String id : raceIds) {
-                races.add(manager.getDataStore().getRace(id));
+                ManagedRace managedRace = manager.getDataStore().getRace(id);
+                if (raceGroup == null) {
+                    raceGroup = managedRace.getRaceGroup().getName();
+                }
+                races.add(managedRace);
             }
+        }
+        if (raceGroup != null) {
+            mPreferences = AppPreferences.on(getActivity(), PreferenceHelper.getRegattaPrefFileName(raceGroup));
+        } else {
+            mPreferences = AppPreferences.on(getActivity());
         }
     }
 
@@ -309,7 +319,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         TimePoint startTime = TimeUtils.getTime(mTimePicker);
         TimePoint now = MillisecondsTimePoint.now();
         for (ManagedRace race : selectedRaces) {
-            Duration duration = Duration.ONE_MINUTE.times(AppPreferences.on(getActivity()).getProtestTimeDuration());
+            Duration duration = Duration.ONE_MINUTE.times(AppPreferences.on(getActivity()).getProtestTimeDurationInMinutes());
             TimeRange protestTime = new TimeRangeImpl(startTime, startTime.plus(duration));
             race.getState().setProtestTime(now, protestTime);
         }
@@ -391,13 +401,21 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     }
 
     private void updateProtestRange() {
-        int duration = mPreferences.getProtestTimeDuration();
+        if (mDuration == null) {
+            mDuration = mPreferences.getProtestTimeDurationInMinutes();
+            if (mPreferences.isDefaultProtestTimeCustomEditable()) {
+                int custom = mPreferences.getProtestTimeDurationInMinutesCustom();
+                if (custom >= 0) {
+                    mDuration = custom;
+                }
+            }
+        }
         if (mProtestDuration != null) {
-            mProtestDuration.setText(getString(R.string.protest_duration, duration));
+            mProtestDuration.setText(getString(R.string.protest_duration, mDuration));
         }
         if (mProtestEndTime != null) {
             TimePoint startTime = TimeUtils.getTime(mTimePicker);
-            TimePoint endTime = startTime.plus(Duration.ONE_MINUTE.times(duration));
+            TimePoint endTime = startTime.plus(Duration.ONE_MINUTE.times(mDuration));
             mProtestEndTime.setText(getString(R.string.protest_end_time, TimeUtils.formatTime(endTime)));
         }
     }
@@ -440,7 +458,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         public void onClick(View v) {
             FrameLayout layout = (FrameLayout) LayoutInflater.from(v.getContext()).inflate(R.layout.protest_duration, null);
             final EditText duration = (EditText) layout.findViewById(R.id.protest_duration);
-            duration.setText(String.valueOf(mPreferences.getProtestTimeDuration()));
+            duration.setText(String.valueOf(mDuration));
             duration.setSelection(duration.length());
             AlertDialog.Builder builder = new AlertDialog.Builder(new ContextWrapper(v.getContext()), R.style.AppTheme_AlertDialog);
             builder.setTitle(v.getContext().getString(R.string.protest_duration_dialog_title));
@@ -448,8 +466,10 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
             builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    int value = Integer.parseInt(duration.getText().toString());
-                    mPreferences.setProtestTimeDuration(value);
+                    mDuration = Integer.parseInt(duration.getText().toString());
+                    if (mPreferences.isDefaultProtestTimeCustomEditable()) {
+                        mPreferences.setDefaultProtestTimeDurationInMinutesCustom(mDuration);
+                    }
                     updateProtestRange();
                 }
             });
