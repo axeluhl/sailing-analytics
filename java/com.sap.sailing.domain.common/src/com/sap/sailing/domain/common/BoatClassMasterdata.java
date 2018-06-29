@@ -45,6 +45,7 @@ public enum BoatClassMasterdata {
     FARR_280 ("Farr 280", true, 8.72, 2.87, BoatHullType.MONOHULL, true, "F280", "F-280", "Farr-280"),
     FINN ("Finn", true, 4.50, 1.51, BoatHullType.MONOHULL, false),
     FLYING_DUTCHMAN ("Flying Dutchman", true, 6.10, 1.80, BoatHullType.MONOHULL, true, "FD"),
+    FLYING_JUNIOR ("Flying Junior", true, 4.03, 1.50, BoatHullType.MONOHULL, true, "FJ"),
     FLYING_PHANTOM ("Flying Phantom", true, 5.52, 3.00, BoatHullType.CATAMARAN, true),
     FOLKBOAT ("Folkboat", true, 7.68, 2.20, BoatHullType.MONOHULL, false, "Folke", "Folkeboot"),
     FUN ("FUN", true, 7.20, 2.45, BoatHullType.MONOHULL, true, "FUN O.D.", "FUN OD", "Open FUN"),
