@@ -64,6 +64,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
             return;
         }
 
+        
         createAndAddDetailPanel();
         createAndAddRegattaPanel(regattaOverviewContextDefinition);
         toggleDetailPanel(false);
@@ -88,7 +89,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     }
 
     private void createAndAddRegattaPanel(RegattaOverviewContextDefinition regattaOverviewContextDefinition) {
-        regattaPanel = new RegattaOverviewPanel(sailingService, getUserService(), this, getStringMessages(),
+        regattaPanel = new RegattaOverviewPanel(getSailingService(), getUserService(), this, getStringMessages(),
                 regattaOverviewContextDefinition);
 
         regattaPanel.addHandler(new EventDTOLoadedEvent.Handler() {

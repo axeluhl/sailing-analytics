@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList; 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -334,7 +334,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     });
                     editCompetitorsDialog.show();
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
-                    sailingService.getAvailableDetailTypesForLeaderboard(leaderboardDTO.name, new AsyncCallback<Iterable<DetailType>>() {
+                    sailingService.getAvailableDetailTypesForLeaderboard(leaderboardDTO.name, null, new AsyncCallback<Iterable<DetailType>>() {
 
                         @Override
                         public void onFailure(Throwable caught) {

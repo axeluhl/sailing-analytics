@@ -70,6 +70,7 @@
 	<servlet-mapping>
 		<servlet-name>SailingService</servlet-name>
 		<url-pattern>/service/sailing</url-pattern>
+		<url-pattern>/service/sailing/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -90,6 +91,7 @@
 	<servlet-mapping>
 		<servlet-name>sailingDispatch</servlet-name>
 		<url-pattern>/service/dispatch</url-pattern>
+		<url-pattern>/service/dispatch/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

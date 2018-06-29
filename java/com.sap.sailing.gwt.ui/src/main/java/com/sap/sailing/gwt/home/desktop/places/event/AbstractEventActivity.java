@@ -37,7 +37,6 @@ import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSett
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
@@ -82,10 +81,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         this.ctx = new EventContext(place.getCtx());
         this.timerForClientServerOffset = new Timer(PlayModes.Replay);
         this.clientFactory = clientFactory;
-    }
-
-    public SailingServiceAsync getSailingService() {
-        return clientFactory.getSailingService();
     }
     
     public SailingDispatchSystem getDispatch() {
