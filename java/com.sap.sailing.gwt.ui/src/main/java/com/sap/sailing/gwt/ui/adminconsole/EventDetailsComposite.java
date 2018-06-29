@@ -40,6 +40,7 @@ public class EventDetailsComposite extends Composite  {
     private final SimpleAnchorListComposite imageURLList;
     private final SimpleAnchorListComposite videoURLList;
     private final SimpleStringListComposite leaderboardGroupList;
+    private final SimpleStringListComposite windfinderSpotCollectionsList;
     
     private final CaptionPanel mainPanel;
 
@@ -71,7 +72,10 @@ public class EventDetailsComposite extends Composite  {
         courseAreaNamesList = createLabelAndValueListWidget(grid, currentRow++, stringMessages.courseAreas(), "CourseAreaValueList");
         imageURLList = createLabelAndAnchorListWidget(grid, currentRow++, stringMessages.images(), "ImageURLValueList");
         videoURLList = createLabelAndAnchorListWidget(grid, currentRow++, stringMessages.videos(), "VideoURLValueList");
-        leaderboardGroupList = createLabelAndValueListWidget(grid, currentRow++, stringMessages.leaderboardGroups(), "LeaderboardGroupValueList");
+        leaderboardGroupList = createLabelAndValueListWidget(grid, currentRow++, stringMessages.leaderboardGroups(),
+                "LeaderboardGroupValueList");
+        windfinderSpotCollectionsList = createLabelAndValueListWidget(grid, currentRow++,
+                stringMessages.windFinderSpotCollectionsList(), "WindFinderSpotCollectionsList");
         
         for(int i=0; i < rows; i++) {
             grid.getCellFormatter().setVerticalAlignment(i, 0, HasVerticalAlignment.ALIGN_TOP);
@@ -166,6 +170,11 @@ public class EventDetailsComposite extends Composite  {
                 leaderboardGroupNamesAsList.add(leaderboardGroupDTO.getName());
             }
             leaderboardGroupList.setValues(leaderboardGroupNamesAsList);
+            List<String> windfinderSpotCollectionsNamesAsList = new ArrayList<>();
+            for (String windfinderSpotCollection : event.getWindFinderReviewedSpotsCollectionIds()) {
+                windfinderSpotCollectionsNamesAsList.add(windfinderSpotCollection);
+            }
+            windfinderSpotCollectionsList.setValues(windfinderSpotCollectionsNamesAsList);
         }
     }
 
