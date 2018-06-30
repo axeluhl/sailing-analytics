@@ -26,17 +26,17 @@ class ManeuverTableData {
 
     ManeuverTableData(final CompetitorDTO competitor, final ManeuverDTO maneuver) {
         this.competitorName = competitor.getName();
-        this.timePoint = maneuver.timePoint;
-        this.timePointBefore = maneuver.timePointBefore;
-        this.maneuverType = maneuver.type;
-        this.speedBeforeInKnots = maneuver.speedWithBearingBefore.speedInKnots;
-        this.speedAfterInKnots = maneuver.speedWithBearingAfter.speedInKnots;
-        this.lowestSpeedInKnots = maneuver.lowestSpeedInKnots;
-        this.maneuverLoss = maneuver.maneuverLossInMeters;
-        this.directionChange = maneuver.directionChangeInDegrees;
-        this.maximumTurningRate = maneuver.maxTurningRateInDegreesPerSecond;
-        this.averageTurningRate = maneuver.avgTurningRateInDegreesPerSecond;
-        this.markPassing = maneuver.markPassingTimePoint != null && maneuver.markPassingSide != null;
+        this.timePoint = maneuver.getTimePoint();
+        this.timePointBefore = maneuver.getTimePointBefore();
+        this.maneuverType = maneuver.getType();
+        this.speedBeforeInKnots = maneuver.getSpeedWithBearingBefore().speedInKnots;
+        this.speedAfterInKnots = maneuver.getSpeedWithBearingAfter().speedInKnots;
+        this.lowestSpeedInKnots = maneuver.getLowestSpeedInKnots();
+        this.maneuverLoss = maneuver.getManeuverLossInMeters();
+        this.directionChange = maneuver.getDirectionChangeInDegrees();
+        this.maximumTurningRate = maneuver.getMaxTurningRateInDegreesPerSecond();
+        this.averageTurningRate = maneuver.getAvgTurningRateInDegreesPerSecond();
+        this.markPassing = maneuver.getMarkPassingTimePoint() != null && maneuver.getMarkPassingSide() != null;
     }
 
     public String getCompetitorName() {
