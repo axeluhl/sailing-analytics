@@ -50,12 +50,6 @@ public interface MarkPositionService {
     
     void getMarksInTrackedRace(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, AsyncCallback<Iterable<MarkDTO>> callback);
     
-    // Jonas Dann: I had no great idea for handling of massive amount of fixes. An exception is no real option. I
-    // think the fixes have to be thinned out somehow and maybe shown in more detail when zoomed in. The aggregation of
-    // fixes is in my eyes no option, because then you have to define behaviour when moving them.
-    // I had no remaining time to incorporate the thinned out variable in my code.
-    void getMarkTracks(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, AsyncCallback<MarkTracksDTO> callback);
-    
     void getMarkTrack(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, String markIdAsString, AsyncCallback<MarkTrackDTO> callback);
     
     /**

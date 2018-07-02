@@ -38,7 +38,7 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
         } else {
             groupName = groupParamValue;
             Window.setTitle(groupName);
-            sailingService.getLeaderboardGroupByName(groupName, false /*withGeoLocationData*/, new AsyncCallback<LeaderboardGroupDTO>() {
+            getSailingService().getLeaderboardGroupByName(groupName, false /*withGeoLocationData*/, new AsyncCallback<LeaderboardGroupDTO>() {
                 @Override
                 public void onFailure(Throwable t) {
                     reportError(getStringMessages().noLeaderboardGroupWithNameFound(groupName));
@@ -58,11 +58,11 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
             // DON'T DELETE -> the EventOverviewPanel will replace the LeaderboardGroupOverviewPanel later on
 //            EventOverviewPanel eventOverviewPanel = new EventOverviewPanel(sailingService, this, stringMessages, showRaceDetails);
 //            groupOverviewPanel.add( eventOverviewPanel);
-            LeaderboardGroupOverviewPanel leaderboardGroupOverviewPanel = new LeaderboardGroupOverviewPanel(sailingService, this, getStringMessages(), settings.isShowRaceDetails());
+            LeaderboardGroupOverviewPanel leaderboardGroupOverviewPanel = new LeaderboardGroupOverviewPanel(getSailingService(), this, getStringMessages(), settings.isShowRaceDetails());
             groupOverviewPanel.add(leaderboardGroupOverviewPanel);
             rootPanel.add(groupOverviewPanel);
         } else {
-            LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, getStringMessages(), this,
+            LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(getSailingService(), getStringMessages(), this,
                     groupName, settings.getViewMode(), embedded, settings.isShowRaceDetails(), settings.isCanReplayDuringLiveRaces(),
                     settings.isShowMapControls());
             groupAndFeedbackPanel.add(groupPanel);

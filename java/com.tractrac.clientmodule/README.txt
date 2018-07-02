@@ -15,6 +15,29 @@ It contains also some files:
 
  - test.sh -> script that compiles the code in the src folder, creates the test.jar library and execute the code of the example.
  - Manifest.txt -> manifest used to create the test.jar file
+
+********************************************
+************* TracAPI 3.10.1 ***************
+********************************************
+ This is a final version.It fixes bugs in the implementation and it adds a some features.
+ It keeps the backward compatibility.
+
+ Release date: 28/06/2018
+ Build number: 35a26e503339fff26fe984617e5190a18438e10b
+
+  1) Features
+
+  - Adding a method to retrieve positions by class id (Requested by Chris Terkelsen, 07/05/2018)
+
+  2) Bugs
+
+ - When the client is offline, if it tries to load a race it gets a RaceLoadingException. But then,
+ when the client is online again, it can't reuse the same race because it is in an internal wrong
+ status (Reported by Thomas Scott, 19/06/2018)
+ - The live delay is not propagated (sometimes). This feature has been reimplemented and now the
+ value is attached and send with the race object using the same approach used to transmit the race
+ start time or the tracking start time (Reported by Axel Uhl, 19/06/2018)
+
 ********************************************
 ************* TracAPI 3.10.0 ***************
 ********************************************
