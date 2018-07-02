@@ -299,7 +299,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         //raceTable.addColumn(raceIdColumn, stringConstants.id());
         raceTable.addColumn(raceStatusColumn, stringConstants.status());
         raceTable.addColumn(boatClassColumn, stringConstants.boatClass());
-        raceTable.addColumn(genderColumn, "Gender");
+        raceTable.addColumn(genderColumn, stringConstants.gender());
         raceTable.addColumn(raceStartTimeColumn, stringConstants.startTime());
 
         raceTable.setSelectionModel(selectionColumn.getSelectionModel(), selectionColumn.getSelectionManager());
