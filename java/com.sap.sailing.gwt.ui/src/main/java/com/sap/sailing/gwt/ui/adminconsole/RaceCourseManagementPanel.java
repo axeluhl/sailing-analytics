@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
  * A panel that has a race selection (inherited from {@link AbstractRaceManagementPanel}) and which adds a table
@@ -41,7 +42,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
 
                     @Override
                     public void onSuccess(Void result) {
-                        Notification.info(stringMessages.successfullyUpdatedCourse());
+                        Notification.notify(stringMessages.successfullyUpdatedCourse(), NotificationType.INFO);
                         refreshSelectedRaceData();
                     }
                 });

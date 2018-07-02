@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 public class DefaultErrorReporter<S extends StringMessages> implements ErrorReporter {
     private DialogBox errorDialogBox;
@@ -48,7 +49,7 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
     @Override
     public void reportError(String message, boolean silentMode) {
         if (silentMode) {
-            Notification.error(message);
+            Notification.notify(message, NotificationType.WARNING);
         } else {
             reportError(message);
         }

@@ -39,6 +39,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEn
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkScoreCorrectionDTO> {
@@ -433,7 +434,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                 @Override
                 public void onSuccess(Void result) {
                     leaderboardPanel.removeBusyTask();
-                    Notification.info(stringMessages.successfullyUpdatedScores());
+                    Notification.notify(stringMessages.successfullyUpdatedScores(), NotificationType.INFO);
                     leaderboardPanel.loadCompleteLeaderboard(/* showProgress */ true); // reload leaderboard contents to reflect changes
                 }
             });

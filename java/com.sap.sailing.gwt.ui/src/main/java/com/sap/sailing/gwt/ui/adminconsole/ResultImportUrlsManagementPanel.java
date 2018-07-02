@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.ui.client.TextfieldEntryDialog;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -163,7 +164,7 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
 
             @Override
             public void onSuccess(Void result) {
-                Notification.info(stringMessages.successfullyUpdatedResultImportUrls());
+                Notification.notify(stringMessages.successfullyUpdatedResultImportUrls(), NotificationType.INFO);
             }
         });
     }
@@ -198,7 +199,7 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
                     @Override
                     public void onSuccess(Void result) {
                         urlListBox.addItem(url);
-                        Notification.info(stringMessages.successfullyUpdatedResultImportUrls());
+                        Notification.notify(stringMessages.successfullyUpdatedResultImportUrls(), NotificationType.INFO);
                     }
                 });
             }

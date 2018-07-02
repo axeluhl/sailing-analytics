@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
 import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
@@ -339,7 +340,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                     public void onFailure(Throwable caught) {
                         // TODO: add corresponding message to string-messages
                         // Notification.error(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
-                        Notification.error(GET_SIMULATION_CATEGORY);
+                        Notification.notify(GET_SIMULATION_CATEGORY, NotificationType.WARNING);
                     }
 
                     @Override

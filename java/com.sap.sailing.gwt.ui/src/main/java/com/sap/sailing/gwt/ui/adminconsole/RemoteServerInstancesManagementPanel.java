@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
@@ -209,7 +210,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
             @Override
             public void onSuccess(Void result) {
                 refreshSailingServerList();
-                Notification.info(stringMessages.successfullyUpdatedSailingServers());
+                Notification.notify(stringMessages.successfullyUpdatedSailingServers(), NotificationType.INFO);
             }
         });
     }
@@ -230,8 +231,8 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
 
                     @Override
                     public void onSuccess(RemoteSailingServerReferenceDTO result) {
-                    	filteredServerTablePanel.add(result);
-                    	Notification.info(stringMessages.successfullyUpdatedSailingServers());
+                        filteredServerTablePanel.add(result);
+                        Notification.notify(stringMessages.successfullyUpdatedSailingServers(), NotificationType.INFO);
                     }
                 });
             }
