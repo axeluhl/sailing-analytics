@@ -50,12 +50,12 @@
         The chromedriver download is linked on the official selenium download page:
         https://www.seleniumhq.org/download/
      -->
-     <!--
+     
      <system-property>
         <name>webdriver.chrome.driver</name>
-        <value>/path/to/chromedriver.exe</value>
+        <value>/opt/chromedriver</value>
      </system-property>
-     -->
+     
      <!--
         You need geckodriver to be able to run Selenium tests on Firefox.
         This is the path to geckodriver, not Firefox.
@@ -91,16 +91,17 @@
     pages mentioned above.
   -->
   <!-- -->
+  <!--
   <driver-definition class="org.openqa.selenium.firefox.FirefoxDriver">
-     <!--
+     
      <capabilities>
         <capability>
           <name>version</name>
           <value>14.0.0</value>
         </capability>
      </capabilities>
-     -->
   </driver-definition>
+  -->
   <!-- TODO: should we use headless Firefox instead of Xvfb on Hudson? -->
   <!--
   <driver-definition class="com.sap.sailing.selenium.core.HeadlessFirefoxDriver">
@@ -110,8 +111,8 @@
   <!--
   <driver-definition class="org.openqa.selenium.chrome.ChromeDriver" />
   -->
-  <!--
+  
   <driver-definition class="com.sap.sailing.selenium.core.HeadlessChromeDriver">
   </driver-definition>
-  -->
+  
 </test-environment>
