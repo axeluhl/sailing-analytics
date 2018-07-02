@@ -619,15 +619,19 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 	 * @return the improved pairingListTemplate
 	 */
 	private int[][] improveAssignmentChanges(int[][] pairingList, int flights, int groups, int competitors) {
-		int[][] resultPLT =new int[flights*groups][competitors/groups];
+		int[][] resultPLT = new int[flights*groups][competitors/groups];
 		int counter = 0;
 		for(int i=0;i<flights/groups;i++ ){
 			for(int j=0;j<flights;j=j+competitors/groups){
 				for(int groupIndex=0;groupIndex<groups;groupIndex++){
+				    if(counter >= flights*groups) {
+				        break;
+				    } else {
 					System.arraycopy(pairingList[i+j+groupIndex], 0, resultPLT[counter], 0, pairingList[0].length);
 					counter++;
-				}
-			}
+                                    }
+                                }
+                        }
 		}
 		int boatChanges[] = new int[flights - 1];
 		for (int i = 1; i < flights; i++) {
