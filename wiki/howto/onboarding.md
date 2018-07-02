@@ -8,7 +8,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 
 #### Installations
 
-1. Eclipse (Eclipse IDE for Eclipse Committers, e.g. version 4.7.2 "Oxygen SR2"), http://www.eclipse.org
+1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.7.2 ["Oxygen SR2"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/oxygen2)), http://www.eclipse.org
 2. Eclipse Extensions
   * Install GWT Eclipse plugin for Eclipse (https://github.com/gwt-plugins/gwt-eclipse-plugin using http://storage.googleapis.com/gwt-eclipse-plugin/v3/release as the update site URL)
   * Install Eclipse debugger for GWT SuperDevMode (master version: http://p2.sapsailing.com/p2/sdbg; public release: http://sdbg.github.io/p2)

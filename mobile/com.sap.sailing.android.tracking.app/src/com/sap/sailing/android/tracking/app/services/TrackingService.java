@@ -67,10 +67,6 @@ public class TrackingService extends Service implements LocationListener {
     private GPSQualityListener gpsQualityListener;
     private final IBinder trackingBinder = new TrackingBinder();
 
-    // Unique Identification Number for the Notification.
-    // We use it on Notification start, and to cancel it.
-    private int NOTIFICATION_ID = R.string.tracker_started;
-
     public final static int UPDATE_INTERVAL_IN_MILLIS_DEFAULT = 1000;
     public final static String GPS_DISABLED_MESSAGE = "gpsDisabled";
     private float minLocationUpdateDistanceInMeters = 0f;
