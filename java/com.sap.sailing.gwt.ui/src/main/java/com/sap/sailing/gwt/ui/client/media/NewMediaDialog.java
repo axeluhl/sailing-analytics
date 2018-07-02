@@ -339,7 +339,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     /**
      * For a given url that points to an mp4 video, attempts are made to parse the header, to determine the actual
-     * starttime of the video and to check for a 360\B0 flag. The video will be analyzed by the backendserver, either via
+     * starttime of the video and to check for a 360° flag. The video will be analyzed by the backendserver, either via
      * direct download, or proxied by the client, if a video is only available locally. If the video header cannot be
      * read, default values are used instead.
      */
