@@ -4,10 +4,13 @@ import java.util.LinkedList;
 
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sse.common.Util.Pair;
@@ -16,9 +19,9 @@ import com.sap.sse.common.Util.Pair;
  * Utility class to show non obstuive warning / info messages using toast/snackbar
  */
 public class Notification {
-    private static final float FADE_OUT_PERCENT = 0.7f;
-    private static final float FADE_IN_PERCENT = 0.1f;
-    private static final int NOTIFICATION_TIME = 5000;
+    private static final int NOTIFICATION_TIME = 20000;
+    private static final double FADE_OUT_PERCENT = 0.98;
+    private static final double FADE_IN_PERCENT = 0.005;
 
     interface NotificationResources extends ClientBundle {
         @Source("notification.gss")
@@ -36,6 +39,7 @@ public class Notification {
     static {
         ress.css().ensureInjected();
         snackBar.addStyleName(ress.css().snackbar());
+        snackBar.getElement().getStyle().setCursor(Cursor.POINTER);
 
         notificationAnimation = new Animation() {
             @Override
@@ -68,8 +72,13 @@ public class Notification {
                 snackBar.getElement().getStyle().setVisibility(Visibility.HIDDEN);
                 checkQueue(true);
             }
+            
+            @Override
+            protected void onCancel() {
+                snackBar.getElement().getStyle().setVisibility(Visibility.HIDDEN);
+                checkQueue(true);
+            }
         };
-
     }
 
     private final static LinkedList<Pair<String, NotificationType>> QUEUE = new LinkedList<>();
@@ -103,9 +112,18 @@ public class Notification {
      * message TTL timer
      */
     private static void checkQueue(boolean onAnimationFinish) {
-        RootPanel.get().add(snackBar);
         if (!QUEUE.isEmpty()) {
             if (!notificationAnimation.isRunning() || onAnimationFinish) {
+                RootPanel.get().add(snackBar);
+                Event.sinkEvents(snackBar.getElement(), Event.ONCLICK);
+                Event.setEventListener(snackBar.getElement(), new EventListener() {
+                    @Override
+                    public void onBrowserEvent(Event event) {
+                        GWT.log("test");
+                        notificationAnimation.cancel();
+                    }
+                });
+                
                 Pair<String, NotificationType> notification = QUEUE.pop();
                 snackBar.getElement().getStyle().setColor(notification.getB().color);
                 snackBar.getElement().getStyle().setBackgroundColor(notification.getB().bgColor);
