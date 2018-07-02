@@ -71,7 +71,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> GWT -> GWT Settings -> Add...)
   * In "Window->Preferences->GWT->Errors/Warnings, set "Missing SDK" to "Ignore"
   * In "Window->Preferences->General->Editors->TextEditors" check Insert Spaces for Tabs 
-  * In "Window->Preferences->Web->HTML Files->Editor" indent using Spaces
+  * <del>In "Window->Preferences->Web->HTML Files->Editor" indent using Spaces</del>
   * In "Window->Preferences->General->Content Types" select on the right side CSS, now add in the lower file association list *.gss to get limited syntax highlighting and content assist in GSS files
   * Install Eclipse debugger for GWT SuperDevMode
   * Install Eclipse eGit (optional)
@@ -79,7 +79,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Check that the both JDKs are available (Windows->Preferences->Java->Installed JREs)
   * Check that JDK 1.7 has been matched to JavaSE-1.7 and that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
   * It is also possible to match the SAPJVM 7 or 8 to JavaSE-1.7 / JavaSE-1.8 (for profiling purposes)
-  * Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"
+  * <del>Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"</del>
   * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard "Git->Projects from Git" in Eclipse, and additionally make sure to scan for nested projects!)
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
