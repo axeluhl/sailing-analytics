@@ -396,6 +396,12 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                             getActivity().finish();
                         }
                     });
+                    builder.setNeutralButton(R.string.hello_call_error_neutral, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_ONBOARDING));
+                        }
+                    });
                     builder.setCancelable(false);
                     builder.show();
                 }

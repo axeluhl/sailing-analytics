@@ -31,6 +31,7 @@ Export-Package: com.sap.sailing.domain.base,
  com.sap.sailing.domain.trackimport,
  com.sap.sailing.domain.tracking,
  com.sap.sailing.domain.tracking.impl,
+ com.sap.sailing.domain.sharding,
  com.sap.sailing.domain.windfinder,
  com.sap.sailing.util,
  com.sap.sailing.util.impl;x-friends:="com.sap.sailing.server.replication,com.sap.sailing.domain.test"

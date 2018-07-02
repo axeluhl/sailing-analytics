@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.communication.event;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
@@ -24,7 +25,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
  * state} using a duration of <i>5 minutes</i> for currently running events.
  * </p>
  */
-public class GetRegattaWithProgressAction implements SailingAction<ResultWithTTL<RegattaWithProgressDTO>>, IsClientCacheable {
+public class GetRegattaWithProgressAction implements SailingAction<ResultWithTTL<RegattaWithProgressDTO>>, IsClientCacheable, ProvidesLeaderboardRouting {
 
     private UUID eventId;
     private String regattaId;
@@ -54,5 +55,10 @@ public class GetRegattaWithProgressAction implements SailingAction<ResultWithTTL
     @Override
     public void cacheInstanceKey(StringBuilder key) {
         key.append(eventId).append("_").append(regattaId);
+    }
+
+    @Override
+    public String getLeaderboardName() {
+        return regattaId;
     }
 }

@@ -1,18 +1,15 @@
 package com.sap.sailing.racecommittee.app.ui.comparators;
 
-import android.drm.DrmStore;
-
-import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sse.common.Util;
-
-import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sse.common.Util;
 
 public class CompetitorGoalPassingComparator  implements Comparator<Map.Entry<Competitor, Boat>> {
 
@@ -22,9 +19,8 @@ public class CompetitorGoalPassingComparator  implements Comparator<Map.Entry<Co
         this.ranking = new ConcurrentHashMap<>();
     }
 
-    public ConcurrentMap updateWith(List<Util.Pair<Long, String>> sortedList) {
-        ConcurrentMap result = new ConcurrentHashMap<>();
-
+    public ConcurrentMap<UUID, Integer> updateWith(List<Util.Pair<Long, String>> sortedList) {
+        ConcurrentMap<UUID, Integer> result = new ConcurrentHashMap<>();
         Integer index = 0;
         for (Util.Pair<Long, String> entry : sortedList) {
             result.put(UUID.fromString(entry.getB()), index);

@@ -5,12 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import android.os.Bundle;
-import android.preference.ListPreference;
-import android.preference.MultiSelectListPreference;
-import android.support.annotation.StringRes;
-import android.text.TextUtils;
-
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
@@ -18,6 +12,12 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
+
+import android.os.Bundle;
+import android.preference.ListPreference;
+import android.preference.MultiSelectListPreference;
+import android.support.annotation.StringRes;
+import android.text.TextUtils;
 
 /**
  * <p>
@@ -38,15 +38,6 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
         }
         addPreferencesFromResource(R.xml.preference_regatta_defaults);
 
-        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_rrs26_classflag_key));
-        bindPreferenceSummaryToSet(findPreference(R.string.preference_racing_procedure_rrs26_startmode_flags_key));
-        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_swc_classflag_key));
-        bindPreferenceSummaryToSet(findPreference(R.string.preference_racing_procedure_swc_startmode_flags_key));
-        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_gatestart_classflag_key));
-        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_ess_classflag_key));
-        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_basic_classflag_key));
-        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_league_classflag_key));
-
         setupGeneral();
         setupRRS26();
         setupSWC();
@@ -56,37 +47,47 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
         setupLeague();
     }
 
-    private void setupRRS26() {
-        setupStartmodeFlagsList(R.string.preference_racing_procedure_rrs26_startmode_flags_key);
-        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_rrs26_classflag_key));
-    }
-
-    private void setupSWC() {
-        setupStartmodeFlagsList(R.string.preference_racing_procedure_swc_startmode_flags_key);
-        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_swc_classflag_key));
-    }
-
-    private void setupGateStart() {
-        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_gatestart_classflag_key));
-    }
-
-    private void setupESS() {
-        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_ess_classflag_key));
-    }
-
-    private void setupBasic() {
-        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_basic_classflag_key));
-    }
-
-    private void setupLeague() {
-        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_league_classflag_key));
-    }
-
     private void setupGeneral() {
         setupRacingProcedureTypePreference();
         setupCourseDesignerTypePreference();
         setupDependentRacesPreference();
         setupProtestTimePreference();
+    }
+
+    private void setupRRS26() {
+        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_rrs26_classflag_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_rrs26_classflag_key));
+
+        setupStartmodeFlagsList(R.string.preference_racing_procedure_rrs26_startmode_flags_key);
+        bindPreferenceSummaryToSet(findPreference(R.string.preference_racing_procedure_rrs26_startmode_flags_key));
+    }
+
+    private void setupSWC() {
+        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_swc_classflag_key));
+        bindPreferenceSummaryToSet(findPreference(R.string.preference_racing_procedure_swc_startmode_flags_key));
+
+        setupStartmodeFlagsList(R.string.preference_racing_procedure_swc_startmode_flags_key);
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_swc_classflag_key));
+    }
+
+    private void setupGateStart() {
+        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_gatestart_classflag_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_gatestart_classflag_key));
+    }
+
+    private void setupESS() {
+        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_ess_classflag_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_ess_classflag_key));
+    }
+
+    private void setupBasic() {
+        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_basic_classflag_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_basic_classflag_key));
+    }
+
+    private void setupLeague() {
+        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_league_classflag_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_league_classflag_key));
     }
 
     private void setupRacingProcedureTypePreference() {

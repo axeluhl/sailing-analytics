@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.ui.adminconsole.PairingListPreviewDialog;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -25,19 +26,21 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
-public class PairingListEntryPoint extends AbstractSailingEntryPoint {
+public class PairingListEntryPoint extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
 
     private PairingListContextDefinition pairingListContextDefinition;
 
     private StringMessages stringMessages = StringMessages.INSTANCE;
     private StrippedLeaderboardDTO strippedLeaderboardDTO;
-
+    private String leaderboardName;
+    
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         pairingListContextDefinition = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new PairingListContextDefinition());
-        this.sailingService.getLeaderboard(pairingListContextDefinition.getLeaderboardName(),
+        leaderboardName = pairingListContextDefinition.getLeaderboardName();
+        getSailingService().getLeaderboard(leaderboardName,
                 new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -68,12 +71,12 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
         contentPanel.getElement().getStyle().setProperty("marginTop", "15px");
         contentPanel.getElement().getStyle().setProperty("marginBottom", "15px");
         scrollPanel.add(contentPanel);
-        sailingService.getPairingListFromRaceLogs(pairingListContextDefinition.getLeaderboardName(),
+        getSailingService().getPairingListFromRaceLogs(pairingListContextDefinition.getLeaderboardName(),
                 new AsyncCallback<PairingListDTO>() {
                     @Override
                     public void onSuccess(PairingListDTO result) {
                         if (strippedLeaderboardDTO != null) {
-                            sailingService.getRaceDisplayNamesFromLeaderboard(strippedLeaderboardDTO.getName(),
+                            getSailingService().getRaceDisplayNamesFromLeaderboard(strippedLeaderboardDTO.getName(),
                                     result.getRaceColumnNames(), new AsyncCallback<List<String>>() {
                                         @Override
                                         public void onFailure(Throwable caught) {
@@ -167,10 +170,8 @@ public class PairingListEntryPoint extends AbstractSailingEntryPoint {
 		}, 100);
     }-*/;
 
-    private HTML getNoPairingListAvailableLabel() {
-        final HTML label = new HTML("<h2>" + stringMessages.noPairingListAvailable() + "</h2>");
-        label.getElement().getStyle().setColor(Color.BLACK.toString());
-        return label;
+    @Override
+    public String getLeaderboardName() {
+        return leaderboardName;
     }
-
 }

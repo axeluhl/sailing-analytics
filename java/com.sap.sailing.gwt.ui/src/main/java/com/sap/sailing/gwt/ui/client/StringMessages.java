@@ -2077,4 +2077,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String multiUrlChangeNewURL();
     String multiUrlNoPrefixWarning();
     String multiUrlChangeExplain();
+    String lastEvent(String locationOrVenue);
+    String teaserOverallLinkToolTip();
+    String gender();
 }
