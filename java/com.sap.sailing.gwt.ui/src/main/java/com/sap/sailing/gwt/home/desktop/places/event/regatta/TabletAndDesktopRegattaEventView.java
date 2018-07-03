@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
@@ -72,7 +71,7 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
             tabPanelUi.addTabExtension(new SailorInfo(sailorsInfoURL));
         }
 
-        if(currentPresenter.getEventDTO().getType() == EventType.SERIES) {
+        if (currentPresenter.getEventDTO().getSeriesData() != null) {
             final PlaceNavigation<SeriesDefaultPlace> currentEventSeriesNavigation = currentPresenter.getCurrentEventSeriesNavigation();
             Anchor seriesAnchor = new Anchor(i18n.overallLeaderboardSelection());
             seriesAnchor.setHref(currentEventSeriesNavigation.getTargetUrl());

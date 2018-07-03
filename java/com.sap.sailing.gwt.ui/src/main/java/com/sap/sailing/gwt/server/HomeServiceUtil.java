@@ -388,13 +388,18 @@ public final class HomeServiceUtil {
         if(!(eventBase instanceof Event)) {
             return null;
         }
-        Event event = (Event) eventBase;
+        final Event event = (Event) eventBase;
+        String displayNameOfSingleAssociatedRegatta = null;
         for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
-            if(HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
-                return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
+            if (HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
+                if (displayNameOfSingleAssociatedRegatta != null) {
+                    // more than one Regatta is associated to the specific event
+                    return null;
+                }
+                displayNameOfSingleAssociatedRegatta = leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
             }
         }
-        return null;
+        return displayNameOfSingleAssociatedRegatta;
     }
     
     public static ImageDTO convertToImageDTO(ImageDescriptor image) {

@@ -8,10 +8,8 @@ import java.util.TreeSet;
 
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
-import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.HasLogo;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -19,9 +17,9 @@ import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     private TreeSet<RegattaMetadataDTO> regattas = new TreeSet<>();
-    private ArrayList<EventReferenceWithStateDTO> eventsOfSeries = new ArrayList<>();
     
-    private EventType type;
+    private boolean multiRegatta;
+    private SeriesReferenceWithEventsDTO seriesData;
     private boolean hasMedia;
     private boolean hasAnalytics;
     private String seriesName;
@@ -31,24 +29,8 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     private String description;
     private List<SpotDTO> allWindFinderSpotIdsUsedByEvent;
 
-    public EventType getType() {
-        return type;
-    }
-
-    public void setType(EventType type) {
-        this.type = type;
-    }
-
     public Collection<RegattaMetadataDTO> getRegattas() {
         return regattas;
-    }
-
-    public void addEventToSeries(EventReferenceWithStateDTO eventRef) {
-        eventsOfSeries.add(eventRef);
-    }
-
-    public List<EventReferenceWithStateDTO> getEventsOfSeriesSorted() {
-        return eventsOfSeries;
     }
 
     public String getVenueCountry() {
@@ -154,5 +136,21 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public SeriesReferenceWithEventsDTO getSeriesData() {
+        return seriesData;
+    }
+
+    public void setSeriesData(SeriesReferenceWithEventsDTO seriesData) {
+        this.seriesData = seriesData;
+    }
+    
+    public void setMultiRegatta(boolean multiRegatta) {
+        this.multiRegatta = multiRegatta;
+    }
+    
+    public boolean isMultiRegatta() {
+        return multiRegatta;
     }
 }

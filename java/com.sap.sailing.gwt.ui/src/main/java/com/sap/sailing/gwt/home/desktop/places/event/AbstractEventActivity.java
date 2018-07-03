@@ -10,7 +10,6 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.EventState;
@@ -241,7 +240,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         if (regattaId != null) {
             return regattaId;
         }
-        if (!eventDTO.getRegattas().isEmpty() && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES)) {
+        if (!eventDTO.getRegattas().isEmpty() && !eventDTO.isMultiRegatta()) {
             return eventDTO.getRegattas().iterator().next().getId();
         }
         return null;

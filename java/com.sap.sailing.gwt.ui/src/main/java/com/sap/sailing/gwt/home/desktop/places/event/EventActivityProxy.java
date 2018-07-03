@@ -6,7 +6,6 @@ import java.util.function.Function;
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.app.WithHeader;
@@ -74,14 +73,14 @@ public class EventActivityProxy extends AbstractEventActivityProxy<EventClientFa
     protected AbstractEventPlace verifyAndAdjustPlace(EventViewDTO event) {
         AbstractEventPlace adjustedPlace = super.verifyAndAdjustPlace(event);
         EventContext contextWithoutRegatta = new EventContext(adjustedPlace.getCtx()).withRegattaId(null);
-        if(adjustedPlace instanceof LatestNewsPlace) {
-            if(event.getType() == EventType.MULTI_REGATTA) {
+        if (adjustedPlace instanceof LatestNewsPlace) {
+            if (event.isMultiRegatta()) {
                 return new MultiregattaOverviewPlace(contextWithoutRegatta);
             }
             return new RegattaOverviewPlace(contextWithoutRegatta);
         }
-        
-        if(adjustedPlace instanceof MiniLeaderboardPlace) {
+
+        if (adjustedPlace instanceof MiniLeaderboardPlace) {
             return new RegattaLeaderboardPlace(adjustedPlace.getCtx());
         }
         return adjustedPlace;

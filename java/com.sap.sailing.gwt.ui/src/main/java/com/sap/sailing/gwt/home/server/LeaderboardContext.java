@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeade
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.MiniLeaderboardItemDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.home.communication.eventview.SeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil.RaceCallback;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
@@ -245,6 +246,13 @@ public class LeaderboardContext {
             for (final LeaderboardGroup lg : leaderboardGroups) {
                 regattaDTO.addLeaderboardGroupName(lg.getDisplayName() != null ? lg.getDisplayName() : lg.getName());
             }
+        } else {
+            final LeaderboardGroup singleLeaderboardGroup = leaderboardGroups.iterator().next();
+            if (singleLeaderboardGroup.hasOverallLeaderboard()) {
+                regattaDTO.setSeriesReference(new SeriesReferenceDTO(
+                        singleLeaderboardGroup.getDisplayName() != null ? singleLeaderboardGroup.getDisplayName()
+                                : singleLeaderboardGroup.getName(), singleLeaderboardGroup.getName()));
+            }
         }
         regattaDTO.setCompetitorsCount(HomeServiceUtil.calculateCompetitorsCount(leaderboard));
         regattaDTO.setRaceCount(calculateRaceCount(leaderboard));
@@ -298,5 +306,9 @@ public class LeaderboardContext {
             hasMultipleFleets = calculateHasMultipleFleets();
         }
         return hasMultipleFleets;
+    }
+    
+    public Iterable<LeaderboardGroup> getLeaderboardGroups() {
+        return leaderboardGroups;
     }
 }

@@ -1,24 +1,26 @@
 package com.sap.sailing.gwt.home.communication.event;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.common.client.EventWindFinderUtil;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.home.communication.eventview.SeriesReferenceWithEventsDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
 import com.sap.sailing.gwt.home.server.LeaderboardContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
-import com.sap.sailing.server.util.EventUtil;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -79,38 +81,54 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         }
         dto.setDescription(description);
 
-        final EventType eventType = EventUtil.getEventType(event);
-        dto.setType(eventType);
-        
-        final boolean isFakeSeries = eventType == EventType.SERIES;
+        final HashSet<RegattaMetadataDTO> regattasOfEvent = new HashSet<>();
+        final HashSet<LeaderboardGroup> relevantLeaderboardGroupsOfEvent = new HashSet<>();
         
         EventActionUtil.forLeaderboardsOfEvent(context, event, new LeaderboardCallback() {
             @Override
             public void doForLeaderboard(LeaderboardContext context) {
                 try {
-                    if(isFakeSeries && !context.isPartOfEvent()) {
-                        return;
+                    final Iterable<LeaderboardGroup> leaderboardGroupsForRegatta = context.getLeaderboardGroups();
+                    Util.addAll(leaderboardGroupsForRegatta, relevantLeaderboardGroupsOfEvent);
+                    if (Util.size(leaderboardGroupsForRegatta) == 1) {
+                        final LeaderboardGroup singleLeaderboardGroup = leaderboardGroupsForRegatta.iterator().next();
+                        if (singleLeaderboardGroup.hasOverallLeaderboard() && !context.isPartOfEvent()) {
+                            // Regatta is associated to LeaderboardGroup that forms a series.
+                            // In this case we only assume the Regatta to be part of the current event if the Regatta references the Event through the associated CourseArea.
+                            return;
+                        }
                     }
                     RegattaMetadataDTO regattaDTO = context.asRegattaMetadataDTO();
+                    regattasOfEvent.add(regattaDTO);
                     dto.getRegattas().add(regattaDTO);
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "Catched exception while reading data for leaderboard " + context.getLeaderboardName(), e);
                 }
             }
         });
+        dto.setMultiRegatta(regattasOfEvent.size() != 1);
         
-        if (isFakeSeries) {
-            LeaderboardGroup overallLeaderboardGroup = event.getLeaderboardGroups().iterator().next();
-            dto.setSeriesName(HomeServiceUtil.getLeaderboardDisplayName(overallLeaderboardGroup));
-            
-            for (Event eventInSeries : HomeServiceUtil.getEventsForSeriesInDescendingOrder(overallLeaderboardGroup,
-                    context.getRacingEventService())) {
-                String displayName = HomeServiceUtil.getLocation(eventInSeries, context.getRacingEventService());
-                if(displayName == null) {
-                    displayName = eventInSeries.getName();
+        if (relevantLeaderboardGroupsOfEvent.size() == 1) {
+            final LeaderboardGroup singleLeaderboardGroup = relevantLeaderboardGroupsOfEvent.iterator().next();
+            if (singleLeaderboardGroup.hasOverallLeaderboard()) {
+                // The event is part of one series and does not host any further Regattas
+                dto.setSeriesName(HomeServiceUtil.getLeaderboardDisplayName(singleLeaderboardGroup));
+                
+                final ArrayList<EventReferenceWithStateDTO> eventsOfSeries = new ArrayList<>();
+                for (Event eventInSeries : HomeServiceUtil.getEventsForSeriesInDescendingOrder(singleLeaderboardGroup,
+                        context.getRacingEventService())) {
+                    // TODO include regatta name if more than one regatta is part of the event and add values for every regatta
+                    String displayName = HomeServiceUtil.getLocation(eventInSeries, context.getRacingEventService());
+                    if(displayName == null) {
+                        displayName = eventInSeries.getName();
+                    }
+                    EventState eventState = HomeServiceUtil.calculateEventState(eventInSeries);
+                    eventsOfSeries.add(new EventReferenceWithStateDTO(eventInSeries.getId(), displayName, eventState));
                 }
-                EventState eventState = HomeServiceUtil.calculateEventState(eventInSeries);
-                dto.addEventToSeries(new EventReferenceWithStateDTO(eventInSeries.getId(), displayName, eventState));
+                dto.setSeriesData(new SeriesReferenceWithEventsDTO(
+                        singleLeaderboardGroup.getDisplayName() != null ? singleLeaderboardGroup.getDisplayName()
+                                : singleLeaderboardGroup.getName(),
+                        singleLeaderboardGroup.getName(), eventsOfSeries));
             }
         }
         return dto;

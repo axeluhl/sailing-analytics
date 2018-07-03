@@ -20,6 +20,7 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     private boolean flexibleLeaderboard;
     private RaceDataInfo raceDataInfo;
     private Distance buoyZoneRadius;
+    private SeriesReferenceDTO seriesReference;
     
     public RegattaMetadataDTO() {
     }
@@ -131,6 +132,13 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
 
     public void setBuoyZoneRadius(Distance buoyZoneRadius) {
         this.buoyZoneRadius = buoyZoneRadius;
+    }
+    
+    public SeriesReferenceDTO getSeriesReference() {
+        return seriesReference;
+    }
+    public void setSeriesReference(SeriesReferenceDTO seriesReference) {
+        this.seriesReference = seriesReference;
     }
 
     /**
