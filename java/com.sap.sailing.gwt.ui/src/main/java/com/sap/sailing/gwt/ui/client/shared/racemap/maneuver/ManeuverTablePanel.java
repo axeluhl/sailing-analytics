@@ -167,10 +167,11 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         initWidget(rootPanel);
         setVisible(false);
     }
-/**
- * Creates a sortable column with the absolute value.
- * Whereas {@link #createSortableMinMaxColumn()} creates a sortable column with signed values.
- */
+
+    /**
+     * Creates a sortable column with the absolute value. Whereas {@link #createSortableMinMaxColumn()} creates a
+     * sortable column with signed values.
+     */
     private SortableColumn<ManeuverTableData, String> createSortableAbsMinMaxColumn(
             Function<ManeuverTableData, Double> extractor, String title, String unit) {
         final SortableColumn<ManeuverTableData, String> col = new AbstractSortableColumnWithMinMax<ManeuverTableData, String>(
@@ -239,6 +240,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         col.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         return col;
     }
+    
     /**
      * Creates a sortable column with signed values. 
      */
@@ -313,7 +315,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
     private SortableColumn<ManeuverTableData, String> createManeuverTypeColumn() {
         return new SortableColumn<ManeuverTableData, String>(new TextCell(), SortingOrder.ASCENDING) {
-
             @Override
             public InvertibleComparator<ManeuverTableData> getComparator() {
                 return new InvertibleComparatorAdapter<ManeuverTableData>() {
@@ -343,7 +344,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 return o1.getTimePoint().compareTo(o2.getTimePoint());
             }
         };
-
         final SortableColumn<ManeuverTableData, Date> col = new SortableColumn<ManeuverTableData, Date>(
                 new DateCell(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG)), SortingOrder.ASCENDING) {
             @Override
@@ -371,7 +371,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 return -Boolean.compare(o1.isMarkPassing(), o2.isMarkPassing());
             }
         };
-
         final SortableColumn<ManeuverTableData, Boolean> column = new SortableColumn<ManeuverTableData, Boolean>(
                 new AbstractCell<Boolean>() {
                     @Override
@@ -406,9 +405,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 return o1.getCompetitorName().compareTo(o2.getCompetitorName());
             }
         };
-
         return new SortableColumn<ManeuverTableData, String>(new TextCell(), SortingOrder.ASCENDING) {
-
             @Override
             public InvertibleComparator<ManeuverTableData> getComparator() {
                 return comparator;
