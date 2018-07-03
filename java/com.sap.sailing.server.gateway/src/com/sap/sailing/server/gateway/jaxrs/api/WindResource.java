@@ -36,7 +36,7 @@ public class WindResource extends AbstractSailingServerResource {
     @Path("putWind")
     public Response putWind(String json) throws ParseException, JsonDeserializationException {
         SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Mode.UPDATE));
-        
+
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
         JSONArray windDatas = (JSONArray) requestObject.get("windData");
@@ -45,25 +45,28 @@ public class WindResource extends AbstractSailingServerResource {
         JSONArray raceNames = (JSONArray) requestObject.get("raceName");
 
         WindSourceType windSourceType = WindSourceType.valueOf((String) (String) requestObject.get("windSourceType"));
-        String windSourceId = (String) requestObject.get("windSourceId");
-
         JSONObject answer = new JSONObject();
-        for(Object raceName:raceNames) {
+        String windSourceId = (String) requestObject.get("windSourceId");
+        for (Object raceName : raceNames) {
             RegattaNameAndRaceName identifier = new RegattaNameAndRaceName(regattaName, (String) raceName);
-            DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);
-            WindSource windsource = new WindSourceWithAdditionalID(windSourceType, windSourceId);
-            
-            if (trackedRace != null) {
-                JSONArray subAnswer = new JSONArray();
-                for (int i = 0; i < windDatas.size(); i++) {
-                    JSONObject windData = Helpers.toJSONObjectSafe(windDatas.get(i));
-                    Wind data = deserializer.deserialize(windData);
-                    boolean success = trackedRace.recordWind(data, windsource);
-                    subAnswer.add(i, success);
+            if (windSourceType == WindSourceType.EXPEDITION || windSourceType == WindSourceType.WEB) {
+                DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);
+                WindSource windsource = new WindSourceWithAdditionalID(windSourceType, windSourceId);
+
+                if (trackedRace != null) {
+                    JSONArray subAnswer = new JSONArray();
+                    for (int i = 0; i < windDatas.size(); i++) {
+                        JSONObject windData = Helpers.toJSONObjectSafe(windDatas.get(i));
+                        Wind data = deserializer.deserialize(windData);
+                        boolean success = trackedRace.recordWind(data, windsource);
+                        subAnswer.add(i, success);
+                    }
+                    answer.put(identifier.getRaceName(), subAnswer);
+                } else {
+                    answer.put(identifier.getRaceName(), "Could not resolve traced race");
                 }
-                answer.put(identifier.getRaceName(), subAnswer);
             } else {
-                answer.put(identifier.getRaceName(),"Could not resolve traced race");
+                answer.put(identifier.getRaceName(), "Only Windsourcetypes expedition or web are allowed");
             }
         }
         return Response.ok(answer.toJSONString()).build();
