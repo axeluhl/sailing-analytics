@@ -128,6 +128,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.TOM_28_MAX.getDisplayName(), imageResources.Tom28MaxIcon());
         boatClassIconsMap.put(BoatClassMasterdata.TP52.getDisplayName(), imageResources.TP52Icon());
         boatClassIconsMap.put(BoatClassMasterdata.TRIAS.getDisplayName(), imageResources.TriasIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.VAURIEN.getDisplayName(), imageResources.VaurienIcon());
         boatClassIconsMap.put(BoatClassMasterdata.VENT_D_OUEST.getDisplayName(), imageResources.VentdOuestIcon());
         boatClassIconsMap.put(BoatClassMasterdata.VIPER_640.getDisplayName(), imageResources.Viper640Icon());
         boatClassIconsMap.put(BoatClassMasterdata.VX_ONE.getDisplayName(), imageResources.VXOneIcon());
