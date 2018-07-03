@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sse.common.Util.Pair;
 
 /**
- * Utility class to show non obstuive warning / info messages using toast/snackbar
+ * Utility class to show non obstructive warning / info messages using a small notification at the bottom of the page. Clicking the notification will hide it. It will autohide after some time.
  */
 public class Notification {
     private static final int NOTIFICATION_TIME = 20000;
