@@ -55,7 +55,13 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
             } else if (fileType.equals("image/png")) {
                 fileExtension = ".png";
             } else {
-                fileExtension = "";
+                String fileName = fileItem.getName();
+                int lastDot = fileName.lastIndexOf(".");
+                if (lastDot > 0) {
+                    fileExtension = fileName.substring(lastDot);
+                } else {
+                    fileExtension = "";
+                }
             }
             try {
                 if (fileItem.getSize() > 1024 * 1024 * MAX_SIZE_IN_MB) {
