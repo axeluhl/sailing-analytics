@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.settings.client.leaderboardedit.LeaderboardEditContextDefinition;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
@@ -29,22 +30,23 @@ import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
-public class LeaderboardEditPage extends AbstractSailingEntryPoint {
+public class LeaderboardEditPage extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
     private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());
+    private String leaderboardName;
     
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         
-        sailingService.getLeaderboardNames(new MarkedAsyncCallback<List<String>>(
+        final LeaderboardEditContextDefinition settings = new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new LeaderboardEditContextDefinition());
+        leaderboardName = settings.getLeaderboardName();
+        getSailingService().getLeaderboardNames(new MarkedAsyncCallback<List<String>>(
                 new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> leaderboardNames) {
-                final LeaderboardEditContextDefinition settings = new SettingsToUrlSerializer()
-                        .deserializeFromCurrentLocation(new LeaderboardEditContextDefinition());
-                final String leaderboardName = settings.getLeaderboardName();
                 if (leaderboardNames.contains(leaderboardName)) {
-                    sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<Iterable<DetailType>>() {
+                    getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, null, new AsyncCallback<Iterable<DetailType>>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -60,7 +62,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
                             authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
                                 @Override
                                 public Widget get() {
-                                    EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardName, null,
+                                    EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(getSailingService(), new AsyncActionsExecutor(), leaderboardName, null,
                                             LeaderboardEditPage.this, getStringMessages(), userAgent, result);
                                     leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
                                     return leaderboardPanel;
@@ -90,5 +92,10 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
 //        header.getElement().getStyle().setTop(0, Unit.PX);
         header.getElement().getStyle().setWidth(100, Unit.PCT);
         return header;
+    }
+
+    @Override
+    public String getLeaderboardName() {
+        return leaderboardName;
     }
 }
