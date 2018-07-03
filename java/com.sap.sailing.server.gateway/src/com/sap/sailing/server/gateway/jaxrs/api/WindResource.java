@@ -37,23 +37,29 @@ public class WindResource extends AbstractSailingServerResource {
         JSONArray windDatas = (JSONArray) requestObject.get("windData");
 
         String regattaName = (String) requestObject.get("regattaName");
-        String raceName = (String) requestObject.get("raceName");
+        JSONArray raceNames = (JSONArray) requestObject.get("raceName");
 
         WindSourceType windSourceType = WindSourceType.valueOf((String) (String) requestObject.get("windSourceType"));
         String windSourceId = (String) requestObject.get("windSourceId");
-        DynamicTrackedRace trackedRace = getService().getTrackedRace(new RegattaNameAndRaceName(regattaName, raceName));
-        WindSource windsource = new WindSourceWithAdditionalID(windSourceType, windSourceId);
 
-        JSONArray answer = new JSONArray();
-        if (trackedRace != null) {
-            for (int i = 0; i < windDatas.size(); i++) {
-                JSONObject windData = Helpers.toJSONObjectSafe(windDatas.get(i));
-                Wind data = deserializer.deserialize(windData);
-                boolean success = trackedRace.recordWind(data, windsource);
-                answer.add(i, success);
+        JSONObject answer = new JSONObject();
+        for(Object raceName:raceNames) {
+            RegattaNameAndRaceName identifier = new RegattaNameAndRaceName(regattaName, (String) raceName);
+            DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);
+            WindSource windsource = new WindSourceWithAdditionalID(windSourceType, windSourceId);
+            
+            if (trackedRace != null) {
+                JSONArray subAnswer = new JSONArray();
+                for (int i = 0; i < windDatas.size(); i++) {
+                    JSONObject windData = Helpers.toJSONObjectSafe(windDatas.get(i));
+                    Wind data = deserializer.deserialize(windData);
+                    boolean success = trackedRace.recordWind(data, windsource);
+                    subAnswer.add(i, success);
+                }
+                answer.put(identifier.getRaceName(), subAnswer);
+            } else {
+                answer.put(identifier.getRaceName(),"Could not resolve traced race");
             }
-        } else {
-            return Response.ok("{\"error\":\"Could not resolve race\"}").build();
         }
         return Response.ok(answer.toJSONString()).build();
     }
