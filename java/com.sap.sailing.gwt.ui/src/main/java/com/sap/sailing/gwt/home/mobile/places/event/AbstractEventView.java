@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -39,9 +40,11 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     static class AbstractEventViewLayout {
         @UiField(provided = true) EventHeader eventHeaderUi;
         @UiField Quickfinder quickFinderUi;
-        @UiField SimpleInfoBlock simpleInfoUi;
+        @UiField SimpleInfoBlock sailorInfoUi;
+        @UiField SimpleInfoBlock seriesNavigationoUi;
+        @UiField DivElement windfinderWrapperUi;
         @UiField(provided = true) WindfinderControl windfinderUi;
-        @UiField SimplePanel viewContentUi;;
+        @UiField SimplePanel viewContentUi;
         
         private AbstractEventViewLayout(EventViewDTO event, String regattaName, PlaceNavigation<?> logoNavigation) {
             this.eventHeaderUi = new EventHeader(event, regattaName, logoNavigation);
@@ -125,18 +128,19 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     
     @Override
     public void setSailorInfos(String description, String buttonLabel, String url) {
-        layout.simpleInfoUi.setDescription(SafeHtmlUtils.fromString(description.replace("\n", " ")));
-        layout.simpleInfoUi.setAction(buttonLabel, url);
+        layout.sailorInfoUi.setDescription(SafeHtmlUtils.fromString(description.replace("\n", " ")));
+        layout.sailorInfoUi.setAction(buttonLabel, url);
     }
     
     @Override
     public void setWindfinderNavigations(Iterable<SpotDTO> spotData) {
+        layout.windfinderWrapperUi.getStyle().clearDisplay();
         layout.windfinderUi.setSpotData(spotData);
     }
 
     @Override
     public void setSeriesNavigation(String buttonLabel, PlaceNavigation<?> placeNavigation) {
-        layout.simpleInfoUi.setAction(buttonLabel, placeNavigation);
+        layout.seriesNavigationoUi.setAction(buttonLabel, placeNavigation);
     }
     
 }

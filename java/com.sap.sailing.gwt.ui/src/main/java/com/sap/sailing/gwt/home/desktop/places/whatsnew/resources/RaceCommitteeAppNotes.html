@@ -4,6 +4,14 @@
 <div id="mainContent">
 	<h4 class="articleHeadline">What's New - SAP Sailing Race Manager</h4>
 	<div class="innerContent">
+		<h5 class="articleSubheadline">February 2018</h5>
+		<ul class="bulletList">
+			<li>The protest time is now configurable in the backend. An empty value means, the RCApp
+			    will take 90 minutes as default. If no time is set in the backend, the RCApp will save a
+			    custom duration as new default. A server side duration (device or regatta specific) will always
+			    be the default.</li>
+		</ul>
+
 		<h5 class="articleSubheadline">August 2017</h5>
 		<ul class="bulletList">
 			<li>The result list can now be edited without a finish time.</li>
@@ -22,6 +30,11 @@
 			    for the competitor is cleared, the rank is set to 0 and the penalty is
 			    set to "NONE" then the competitor will remain in the list, and this
 			    "empty" result will be sent to the server, clearing any previous score
+			    corrections that were sent to the server. This is the only way to
+			    "reset" an erroneous score correction entirely from the app, because
+			    swiping and thus removing the competitor from the list would leave the
+			    previous score correction unchanged on the server upon the next result
+			    publication.
 			</li>
 			<li>When entering and publishing partial results, updates will only be applied
 			    for those competitors for which a result has been entered. In particular,
@@ -29,12 +42,6 @@
 			    the devices haven't synchronized their states yet this will make sure that
 			    partial results entered on one device will not unnecessarily remove changes
 			    applied on another device.
-			</li>
-			    corrections that were sent to the server. This is the only way to
-			    "reset" an erroneous score correction entirely from the app, because
-			    swiping and thus removing the competitor from the list would leave the
-			    previous score correction unchanged on the server upon the next result
-			    publication.
 			</li>
 		</ul>
 

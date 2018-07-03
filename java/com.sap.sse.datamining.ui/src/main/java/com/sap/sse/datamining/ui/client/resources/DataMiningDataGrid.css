@@ -25,3 +25,7 @@
 .dataGridSpacedSubHeader {
 	padding-top: 1em;
 }
+
+.dataGridClearFocus *:focus {
+    outline: none;
+}
