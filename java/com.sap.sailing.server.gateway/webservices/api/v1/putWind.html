@@ -25,16 +25,14 @@
     </tr>
     <tr>
         <td>Mandatory parameters:</td>
-        <td>windData</td>
-        <td>regattaName</td>
-        <td>raceName</td>
-        <td>windSourceType</td>
-        <td>windSourceId</td>
+        <td>windData, regattaName, raceName, windSourceType, windSourceId</td>
     </tr>
     <tr>
         <td>Examples:</td>
         <td>
-            {"windData":[{"position":{"latitude_deg":1,"longitude_deg":1},"timepoint":1234,"direction":120}],"regattaName":"Cardiff","raceName":"R1","windSourceType":"WEB","windSourceId":"rest tracker id"}
+            Request: <br> {"windData":[{"position":{"latitude_deg":1,"longitude_deg":1},"timepoint":1234,"direction":120}],"regattaName":"Cardiff","raceName":"R1","windSourceType":"WEB","windSourceId":"rest tracker id"}
+            <br>
+            Answer: <br> {"R1":[true]}
         </td>
     </tr>
 </table>
