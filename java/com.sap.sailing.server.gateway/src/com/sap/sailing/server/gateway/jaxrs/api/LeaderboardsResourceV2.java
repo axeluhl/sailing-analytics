@@ -130,6 +130,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         }
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
+        jsonLeaderboard.put("ShardingLeaderboardName", ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboard.getName()));
         int competitorCounter = 1;
         // Remark: leaderboardDTO.competitors are ordered by total rank
         for (CompetitorDTO competitor : leaderboardDTO.competitors) {
