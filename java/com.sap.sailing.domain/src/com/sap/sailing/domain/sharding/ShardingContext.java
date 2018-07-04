@@ -99,7 +99,7 @@ public class ShardingContext {
     }
 
     public static void clearShardingConstraint(ShardingType type) {
-        ThreadLocal<String> shardingHolder = shardingMap.remove(type);
+        ThreadLocal<String> shardingHolder = shardingMap.get(type);
         if (shardingHolder != null) {
             shardingHolder.remove();
         }
@@ -113,7 +113,7 @@ public class ShardingContext {
         }
         String currentShardingInfo = shardingHolder.get();
         if (currentShardingInfo == null) {
-            shardingHolder.set(encodedShardingInfo);    
+            shardingHolder.set(encodedShardingInfo);
         } else if (!encodedShardingInfo.equals(currentShardingInfo)) {
             logger.log(Level.SEVERE, "Switching shard constraint for " + shardingType.name()+". Got <<" + encodedShardingInfo +">>, expeted <<"+ currentShardingInfo+">>", new RuntimeException());
         }
