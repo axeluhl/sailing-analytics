@@ -480,8 +480,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
 
             @Override
             public void onSuccess(Void result) {
-                // TODO: Success-Type
-                Notification.notify(stringMessages.successfullyAllowedCompetitorReset(competitors.toString()), NotificationType.INFO);
+                Notification.notify(stringMessages.successfullyAllowedCompetitorReset(competitors.toString()), NotificationType.SUCCESS);
             }
         });
     }

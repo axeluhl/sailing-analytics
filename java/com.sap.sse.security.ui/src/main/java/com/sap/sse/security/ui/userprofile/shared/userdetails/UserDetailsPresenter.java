@@ -108,7 +108,6 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
 
                     @Override
                     public void onSuccess(Void result) {
-                        // TODO: Success-Type
                         Notification.notify(i18n_sec.passwordSuccessfullyChanged(), NotificationType.SUCCESS);
                         view.clearPasswordFields();
                     }

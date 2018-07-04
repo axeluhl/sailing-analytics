@@ -757,8 +757,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
 
                     @Override
                     public void onSuccess(Void result) {
-                        // TODO: Success-Type
-                        Notification.notify(stringMessages.notificationRegattaConfigurationUpdatedUsingByMarks(), NotificationType.INFO);
+                        Notification.notify(stringMessages.notificationRegattaConfigurationUpdatedUsingByMarks(), NotificationType.SUCCESS);
                     }
                 }));
     }
@@ -950,8 +949,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
 
                             @Override
                             public void onSuccess(Void result) {
-                                // TODO: Success-Type
-                                Notification.notify(stringMessages.sendingMailsSuccessful(), NotificationType.INFO);
+                                Notification.notify(stringMessages.sendingMailsSuccessful(), NotificationType.SUCCESS);
                             }
                         });
             }

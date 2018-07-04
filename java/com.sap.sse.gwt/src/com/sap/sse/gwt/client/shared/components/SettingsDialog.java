@@ -88,8 +88,7 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
                             @Override
                             public void onSuccess() {
                                 setButtonSavingState(false, stringMessages);
-                                // TODO: Success-Type
-                                Notification.notify(stringMessages.settingsSavedMessage(), NotificationType.INFO);
+                                Notification.notify(stringMessages.settingsSavedMessage(), NotificationType.SUCCESS);
                             }
 
                             @Override
@@ -120,8 +119,7 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
                             public void onSuccess(SettingsType settings) {
                                 setButtonSavingState(false, stringMessages);
                                 setDialogComponent(component.getSettingsDialogComponent(settings));
-                                // TODO: Success-Type
-                                Notification.notify(stringMessages.settingsRemoved(), NotificationType.INFO);
+                                Notification.notify(stringMessages.settingsRemoved(), NotificationType.SUCCESS);
                             }
                         });
             }

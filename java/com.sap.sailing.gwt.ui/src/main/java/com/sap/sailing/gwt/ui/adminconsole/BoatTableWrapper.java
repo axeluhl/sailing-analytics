@@ -283,8 +283,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
 
             @Override
             public void onSuccess(Void result) {
-                // TODO: Success-Type
-                Notification.notify(stringMessages.successfullyAllowedBoatReset(boats.toString()), NotificationType.INFO);
+                Notification.notify(stringMessages.successfullyAllowedBoatReset(boats.toString()), NotificationType.SUCCESS);
             }
         });
     }

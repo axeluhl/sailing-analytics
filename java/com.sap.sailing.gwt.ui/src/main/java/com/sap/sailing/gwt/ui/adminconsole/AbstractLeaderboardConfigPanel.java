@@ -432,8 +432,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                     @Override
                     public void onSuccess(Void result) {
                         if (showAlerts) {
-                            // TODO: Success-Type
-                            Notification.notify(stringMessages.raceLogReloaded(), NotificationType.INFO);
+                            Notification.notify(stringMessages.raceLogReloaded(), NotificationType.SUCCESS);
                         }
                     }
                 }));

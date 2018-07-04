@@ -178,8 +178,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                         new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
-                                // TODO: Success-Type
-                                Notification.notify(stringMessages.successfullyFilledRaceLogsFromPairingList(), NotificationType.INFO);
+                                Notification.notify(stringMessages.successfullyFilledRaceLogsFromPairingList(), NotificationType.SUCCESS);
                             }
 
                             @Override

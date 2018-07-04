@@ -269,8 +269,7 @@ public class MasterDataImportPanel extends VerticalPanel {
                 buffer.append(regattaName + "\n");
             }
         }
-        // TODO: Success-Type
-        Notification.notify(buffer.toString(), NotificationType.INFO);
+        Notification.notify(buffer.toString(), NotificationType.SUCCESS);
 
     }
 

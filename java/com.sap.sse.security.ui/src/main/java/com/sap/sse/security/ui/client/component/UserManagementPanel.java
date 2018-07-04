@@ -82,8 +82,7 @@ public class UserManagementPanel extends DockPanel {
                             for (UserDeletedEventHandler userDeletedHandler : userDeletedHandlers) {
                                 userDeletedHandler.onUserDeleted(userToDelete);
                             }
-                            // TODO: Success-Type
-                            Notification.notify(result.getMessage(), NotificationType.INFO);
+                            Notification.notify(result.getMessage(), NotificationType.SUCCESS);
                         }
 
                         @Override

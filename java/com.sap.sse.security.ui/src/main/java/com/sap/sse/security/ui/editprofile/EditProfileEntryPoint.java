@@ -178,8 +178,7 @@ public class EditProfileEntryPoint implements EntryPoint {
 
                     @Override
                     public void onSuccess(Void result) {
-                        // TODO: Success-Type
-                        Notification.notify(stringMessages.passwordSuccessfullyChanged(), NotificationType.ERROR);
+                        Notification.notify(stringMessages.passwordSuccessfullyChanged(), NotificationType.SUCCESS);
                     }
                 });
             }

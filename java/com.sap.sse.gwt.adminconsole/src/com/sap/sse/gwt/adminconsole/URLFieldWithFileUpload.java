@@ -119,8 +119,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
                         uri = resultJson.get(0).isObject().get("file_uri").isString().stringValue();
                         setValue(uri, true);
                         removeButton.setEnabled(true);
-                        // TODO: Success-Type
-                        Notification.notify(stringMessages.uploadSuccessful(), NotificationType.INFO);
+                        Notification.notify(stringMessages.uploadSuccessful(), NotificationType.SUCCESS);
                     } else {
                         Notification.notify(stringMessages.fileUploadResult(resultJson.get(0).isObject().get("status").isString().stringValue(),
                                 resultJson.get(0).isObject().get("message").isString().stringValue()), NotificationType.ERROR);

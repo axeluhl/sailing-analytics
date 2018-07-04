@@ -48,8 +48,8 @@ public class EditEmailDialogWithDefaultCallback extends EditEmailDialog {
                                 if (callback != null) {
                                     callback.onSuccess(userData);
                                 }
-                                // TODO: Success-Type
-                                Notification.notify(stringMessages.successfullyUpdatedEmail(userData.getUsername(), userData.getEmail()), NotificationType.ERROR);
+                                        Notification.notify(stringMessages.successfullyUpdatedEmail(
+                                                userData.getUsername(), userData.getEmail()), NotificationType.SUCCESS);
                             }
                         }));
             }

@@ -134,8 +134,7 @@ public class SettingsPanel extends LayoutPanel {
 
                         @Override
                         public void onSuccess(Void result) {
-                            // TODO: Success-Type
-                            Notification.notify("Added url!", NotificationType.INFO);
+                            Notification.notify("Added url!", NotificationType.SUCCESS);
                         }
                     });
                     userManagementService.addSetting("URLS_AUTH_" + key.getText(), String.class.getName(), filter.getText(), new AsyncCallback<Void>() {
@@ -146,8 +145,7 @@ public class SettingsPanel extends LayoutPanel {
 
                         @Override
                         public void onSuccess(Void result) {
-                            // TODO: Success-Type
-                            Notification.notify("Added url filter!", NotificationType.INFO);
+                            Notification.notify("Added url filter!", NotificationType.SUCCESS);
                         }
                     });
                 }

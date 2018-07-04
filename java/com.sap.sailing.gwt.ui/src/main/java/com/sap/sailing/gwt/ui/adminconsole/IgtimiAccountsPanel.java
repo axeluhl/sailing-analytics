@@ -258,8 +258,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
                                 @Override
                                 public void onSuccess(Boolean result) {
                                     if (result) {
-                                        // TODO: Success-Type
-                                        Notification.notify(stringMessages.successfullyAuthorizedAccessToIgtimiUser(editedObject.geteMail()), NotificationType.INFO);
+                                        Notification.notify(stringMessages.successfullyAuthorizedAccessToIgtimiUser(editedObject.geteMail()), NotificationType.SUCCESS);
                                         updateAllAccounts(sailingService, filterAccountsPanel, stringMessages, errorReporter);
                                     } else {
                                         Notification.notify(stringMessages.couldNotAuthorizedAccessToIgtimiUser(editedObject.geteMail()), NotificationType.ERROR);

@@ -96,8 +96,7 @@ public class RegisterView extends Composite {
             @Override
             public void onSuccess(UserDTO result) {
                 if (result != null) {
-                    // TODO: Success-Type
-                    Notification.notify(stringMessages.signedUpSuccessfully(result.getName()), NotificationType.ERROR);
+                    Notification.notify(stringMessages.signedUpSuccessfully(result.getName()), NotificationType.SUCCESS);
                     closeWindow();
                 } else {
                     Notification.notify(stringMessages.unknownErrorCreatingUser(usernameTextBox.getText()), NotificationType.ERROR);

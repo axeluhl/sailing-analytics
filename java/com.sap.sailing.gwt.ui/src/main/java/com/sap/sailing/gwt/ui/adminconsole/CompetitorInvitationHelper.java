@@ -67,8 +67,7 @@ public class CompetitorInvitationHelper {
 
                             @Override
                             public void onSuccess(Void result) {
-                                // TODO: Success-Type
-                                Notification.notify(stringMessages.sendingMailsSuccessful(), NotificationType.INFO);
+                                Notification.notify(stringMessages.sendingMailsSuccessful(), NotificationType.SUCCESS);
                             }
                         });
             }

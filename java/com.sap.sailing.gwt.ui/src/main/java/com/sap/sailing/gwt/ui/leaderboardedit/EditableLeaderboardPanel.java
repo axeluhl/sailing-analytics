@@ -633,8 +633,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                     @Override
                     public void onSuccess(Void noarg) {
                         updateScoreCorrectionInformation(lastScoreCorrectionComment, lastScoreCorrectionTime);
-                        // TODO: Success-Type
-                        Notification.notify(stringMessages.successfullyUpdatedScores(), NotificationType.INFO);
+                        Notification.notify(stringMessages.successfullyUpdatedScores(), NotificationType.SUCCESS);
                     }
 
                     @Override

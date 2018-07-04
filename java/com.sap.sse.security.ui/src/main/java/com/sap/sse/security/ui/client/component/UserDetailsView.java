@@ -239,8 +239,7 @@ public class UserDetailsView extends FlowPanel {
 
                                                 @Override
                                                 public void onSuccess(Void result) {
-                                                    // TODO: Success-Type
-                                                    Notification.notify(stringMessages.passwordSuccessfullyChanged(), NotificationType.INFO);
+                                                    Notification.notify(stringMessages.passwordSuccessfullyChanged(), NotificationType.SUCCESS);
                                                 }
                                             }));
                                 }
