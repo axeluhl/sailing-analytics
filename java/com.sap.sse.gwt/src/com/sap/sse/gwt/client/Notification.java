@@ -19,7 +19,7 @@ import com.sap.sse.common.Util.Pair;
  * Utility class to show non obstructive warning / info messages using a small notification at the bottom of the page. Clicking the notification will hide it. It will autohide after some time.
  */
 public class Notification {
-    private static final int NOTIFICATION_TIME = 20000;
+    private static final int NOTIFICATION_TIME = 10000;
     private static final double FADE_OUT_PERCENT = 0.98;
     private static final double FADE_IN_PERCENT = 0.005;
 
@@ -89,7 +89,8 @@ public class Notification {
     public enum NotificationType {
         ERROR("\u2716", "RED", "WHITE"),
         WARNING("\u26A0", "ORANGE", "WHITE"),
-        INFO("\u2139", "#008fcc", "WHITE");
+        INFO("\u2139", "#008fcc", "WHITE"),
+        SUCCESS("\u2713", "#00cc00", "WHITE");
 
         private String decorator;
         private String bgColor;

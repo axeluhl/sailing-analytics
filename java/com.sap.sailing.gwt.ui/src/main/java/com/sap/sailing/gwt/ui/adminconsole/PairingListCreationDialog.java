@@ -24,6 +24,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class PairingListCreationDialog extends DataEntryDialog<PairingListTemplateDTO> {
@@ -176,7 +178,8 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                         new AsyncCallback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
-                                Window.alert(stringMessages.successfullyFilledRaceLogsFromPairingList());
+                                // TODO: Success-Type
+                                Notification.notify(stringMessages.successfullyFilledRaceLogsFromPairingList(), NotificationType.INFO);
                             }
 
                             @Override

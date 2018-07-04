@@ -5,7 +5,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -18,6 +17,8 @@ import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.ui.client.QueryDefinitionChangedListener;
 import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.datamining.ui.client.developer.QueryDefinitionParser.TypeToCodeStrategy;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
@@ -79,11 +80,11 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
                 switch (contentPanel.getSelectedIndex()) {
                 case 0:
                     TextExporter.exportToClipboard(queryDefinitionParser.parseToDetailsAsText(currentDefinition));
-                    Window.alert(stringMessages.copiedToClipboard());
+                    Notification.notify(stringMessages.copiedToClipboard(), NotificationType.INFO);
                     break;
                 case 1:
                     TextExporter.exportToClipboard(queryDefinitionParser.parseToCodeAsText(currentDefinition, getTypeStrategy()));
-                    Window.alert(stringMessages.copiedToClipboard());
+                    Notification.notify(stringMessages.copiedToClipboard(), NotificationType.INFO);
                     break;
                 }
             }

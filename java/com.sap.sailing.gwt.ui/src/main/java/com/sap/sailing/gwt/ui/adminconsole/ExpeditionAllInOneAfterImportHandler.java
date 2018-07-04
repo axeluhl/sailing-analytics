@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -24,6 +23,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
@@ -148,7 +149,7 @@ public class ExpeditionAllInOneAfterImportHandler {
         @Override
         public void ok(Set<CompetitorDTO> competitors) {
             if (competitors.isEmpty()) {
-                Window.alert(stringMessages.importCanceledNoCompetitorAdded());
+                Notification.notify(stringMessages.importCanceledNoCompetitorAdded(), NotificationType.ERROR);
             } else {
                 sailingService.setCompetitorRegistrationsInRegattaLog(leaderboard.getName(),
                     competitors, new AsyncCallback<Void>() {
@@ -337,7 +338,7 @@ public class ExpeditionAllInOneAfterImportHandler {
 
         @Override
         public final void cancel() {
-            Window.alert(stringMessages.importCanceledByUser());
+            Notification.notify(stringMessages.importCanceledByUser(), NotificationType.WARNING);
         }
     }
 }
