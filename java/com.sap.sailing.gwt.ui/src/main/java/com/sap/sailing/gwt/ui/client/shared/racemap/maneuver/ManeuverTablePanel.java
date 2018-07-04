@@ -9,11 +9,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.DateCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -42,14 +40,11 @@ import com.sap.sailing.gwt.ui.actions.GetManeuversForCompetitorsAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
-import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
-import com.sap.sailing.gwt.ui.leaderboard.HasStringAndDoubleValue;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel.LeaderBoardStyle;
-import com.sap.sailing.gwt.ui.leaderboard.MinMaxRenderer;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sse.common.TimeRange;
@@ -81,8 +76,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
     private final StringMessages stringMessages;
     private final CompetitorSelectionProvider competitorSelectionModel;
-
-    private final NumberFormat towDigitAccuracy = NumberFormatterFactory.getDecimalFormat(2);
 
     private final SimplePanel contentPanel = new SimplePanel();
     private final Label importantMessageLabel = new Label();
@@ -167,153 +160,26 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         initWidget(rootPanel);
         setVisible(false);
     }
-/**
- * Creates a sortable column with the absolute value.
- * Whereas {@link #createSortableMinMaxColumn()} creates a sortable column with signed values.
- */
+
+    /**
+     * Creates a sortable column with the absolute value. Whereas {@link #createSortableMinMaxColumn()} creates a
+     * sortable column with signed values.
+     */
     private SortableColumn<ManeuverTableData, String> createSortableAbsMinMaxColumn(
             Function<ManeuverTableData, Double> extractor, String title, String unit) {
-        final SortableColumn<ManeuverTableData, String> col = new AbstractSortableColumnWithMinMax<ManeuverTableData, String>(
-                new TextCell(), SortingOrder.ASCENDING) {
-            final InvertibleComparator<ManeuverTableData> comparatorWithAbs = new InvertibleComparatorAdapter<ManeuverTableData>() {
-                @Override
-                public int compare(ManeuverTableData o1, ManeuverTableData o2) {
-                    Double o1v = extractor.apply(o1);
-                    Double o2v = extractor.apply(o2);
-                    if (o1v == null && o2v == null) {
-                        return 0;
-                    }
-                    if (o1v == null && o2v != null) {
-                        return -1;
-                    }
-                    if (o1v != null && o2v == null) {
-                        return 1;
-                    }
-                    return Double.compare(Math.abs(o1v), Math.abs(o2v));
-                }
-            };
-            final HasStringAndDoubleValue<ManeuverTableData> dataProvider = new HasStringAndDoubleValue<ManeuverTableData>() {
-                @Override
-                public String getStringValueToRender(ManeuverTableData row) {
-                    Double value = extractor.apply(row);
-                    if (value == null) {
-                        return null;
-                    }
-                    return towDigitAccuracy.format(value);
-                }
-
-                @Override
-                public Double getDoubleValue(ManeuverTableData row) {
-                    Double value = extractor.apply(row);
-                    return value == null ? null : Math.abs(value);
-                }
-            };
-
-            final MinMaxRenderer<ManeuverTableData> renderer = new MinMaxRenderer<ManeuverTableData>(dataProvider, comparatorWithAbs);
-
-            @Override
-            public InvertibleComparator<ManeuverTableData> getComparator() {
-                return comparatorWithAbs;
-            }
-
-            @Override
-            public void render(Context context, ManeuverTableData object, SafeHtmlBuilder sb) {
-                renderer.render(context, object, title, sb);
-            }
-
-            @Override
-            public Header<?> getHeader() {
-                return new TextHeader(title + " [" + unit + "]");
-            }
-
-            @Override
-            public String getValue(ManeuverTableData object) {
-                return dataProvider.getStringValueToRender(object);
-            }
-
-            @Override
-            public void updateMinMax() {
-                renderer.updateMinMax(maneuverCellTable.getDataProvider().getList());
-            }
-        };
-        col.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        return col;
+        return new SortableMinMaxColumn(extractor, title, unit, maneuverCellTable.getDataProvider(), /* absolute */ true);
     }
+    
     /**
      * Creates a sortable column with signed values. 
      */
     private SortableColumn<ManeuverTableData, String> createSortableMinMaxColumn(
             Function<ManeuverTableData, Double> extractor, String title, String unit) {
-        final SortableColumn<ManeuverTableData, String> col = new AbstractSortableColumnWithMinMax<ManeuverTableData, String>(
-                new TextCell(), SortingOrder.ASCENDING) {
-            final InvertibleComparator<ManeuverTableData> comparator = new InvertibleComparatorAdapter<ManeuverTableData>() {
-                @Override
-                public int compare(ManeuverTableData o1, ManeuverTableData o2) {
-                    Double o1v = extractor.apply(o1);
-                    Double o2v = extractor.apply(o2);
-                    if (o1v == null && o2v == null) {
-                        return 0;
-                    }
-                    if (o1v == null && o2v != null) {
-                        return -1;
-                    }
-                    if (o1v != null && o2v == null) {
-                        return 1;
-                    }
-                    return Double.compare(o1v, o2v);
-                }
-            };
-            final HasStringAndDoubleValue<ManeuverTableData> dataProvider = new HasStringAndDoubleValue<ManeuverTableData>() {
-                @Override
-                public String getStringValueToRender(ManeuverTableData row) {
-                    Double value = extractor.apply(row);
-                    if (value == null) {
-                        return null;
-                    }
-                    return towDigitAccuracy.format(value);
-                }
-
-                @Override
-                public Double getDoubleValue(ManeuverTableData row) {
-                    Double value = extractor.apply(row);
-                    return value == null ? null : value;
-                }
-            };
-
-            final MinMaxRenderer<ManeuverTableData> renderer = new MinMaxRenderer<ManeuverTableData>(dataProvider, comparator);
-
-            @Override
-            public InvertibleComparator<ManeuverTableData> getComparator() {
-                return comparator;
-            }
-
-            @Override
-            public void render(Context context, ManeuverTableData object, SafeHtmlBuilder sb) {
-                renderer.render(context, object, title, sb);
-            }
-
-            @Override
-            public Header<?> getHeader() {
-                return new TextHeader(title + " [" + unit + "]");
-            }
-
-            @Override
-            public String getValue(ManeuverTableData object) {
-                return dataProvider.getStringValueToRender(object);
-            }
-
-            @Override
-            public void updateMinMax() {
-                renderer.updateMinMax(maneuverCellTable.getDataProvider().getList());
-            }
-        };
-        col.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        return col;
+        return new SortableMinMaxColumn(extractor, title, unit, maneuverCellTable.getDataProvider(), /* absolute */ false);
     }
 
     private SortableColumn<ManeuverTableData, String> createManeuverTypeColumn() {
         return new SortableColumn<ManeuverTableData, String>(new TextCell(), SortingOrder.ASCENDING) {
-
             @Override
             public InvertibleComparator<ManeuverTableData> getComparator() {
                 return new InvertibleComparatorAdapter<ManeuverTableData>() {
@@ -343,7 +209,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 return o1.getTimePoint().compareTo(o2.getTimePoint());
             }
         };
-
         final SortableColumn<ManeuverTableData, Date> col = new SortableColumn<ManeuverTableData, Date>(
                 new DateCell(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG)), SortingOrder.ASCENDING) {
             @Override
@@ -371,7 +236,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 return -Boolean.compare(o1.isMarkPassing(), o2.isMarkPassing());
             }
         };
-
         final SortableColumn<ManeuverTableData, Boolean> column = new SortableColumn<ManeuverTableData, Boolean>(
                 new AbstractCell<Boolean>() {
                     @Override
@@ -406,9 +270,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 return o1.getCompetitorName().compareTo(o2.getCompetitorName());
             }
         };
-
         return new SortableColumn<ManeuverTableData, String>(new TextCell(), SortingOrder.ASCENDING) {
-
             @Override
             public InvertibleComparator<ManeuverTableData> getComparator() {
                 return comparator;
