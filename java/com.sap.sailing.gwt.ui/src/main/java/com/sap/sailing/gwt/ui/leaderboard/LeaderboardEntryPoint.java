@@ -137,7 +137,12 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
                     @Override
                     public void onSuccess(Iterable<DetailType> result) {
                         final Function<String, SailingServiceAsync> sailingServiceFactory = leaderboardName -> SailingServiceHelper
-                                .createSailingServiceInstance(() -> leaderboardName);
+                                .createSailingServiceInstance(new ProvidesLeaderboardRouting() {
+                                    @Override
+                                    public String getLeaderboardName() {
+                                        return leaderboardName;
+                                    }
+                                });
                         if (leaderboardDTO.type.isMetaLeaderboard()) {
                             // overall
                             MetaLeaderboardPerspectiveLifecycle rootComponentLifeCycle = new MetaLeaderboardPerspectiveLifecycle(
