@@ -86,6 +86,7 @@ import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTracki
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Permission.Mode;
+import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
@@ -96,6 +97,7 @@ import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
+import com.sap.sailing.domain.sharding.ShardingContext;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -148,29 +150,35 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     public Response getLeaderboard(@PathParam("name") String leaderboardName,
             @DefaultValue("Live") @QueryParam("resultState") ResultStates resultState,
             @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount) {
-        Response response;
-        TimePoint requestTimePoint = MillisecondsTimePoint.now();
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard == null) {
-            response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
-                    .type(MediaType.TEXT_PLAIN).build();
-        } else {
-            try {
-                TimePoint timePoint = calculateTimePointForResultState(leaderboard, resultState);
-                JSONObject jsonLeaderboard;
-                jsonLeaderboard = getLeaderboardJson(resultState, maxCompetitorsCount, requestTimePoint, leaderboard, timePoint,
-                        /* race column names */ null, /* race detail names */ null);
-                StringWriter sw = new StringWriter();
-                jsonLeaderboard.writeJSONString(sw);
-                String json = sw.getBuffer().toString();
-                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
-            } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
-                response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
+        ShardingContext.setShardingConstraint(ShardingType.LEADERBOARDNAME, leaderboardName);
+        
+        try {
+            Response response;
+            TimePoint requestTimePoint = MillisecondsTimePoint.now();
+            Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+            if (leaderboard == null) {
+                response = Response.status(Status.NOT_FOUND)
+                        .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                         .type(MediaType.TEXT_PLAIN).build();
+            } else {
+                try {
+                    TimePoint timePoint = calculateTimePointForResultState(leaderboard, resultState);
+                    JSONObject jsonLeaderboard;
+                    jsonLeaderboard = getLeaderboardJson(resultState, maxCompetitorsCount, requestTimePoint, leaderboard, timePoint,
+                            /* race column names */ null, /* race detail names */ null);
+                    StringWriter sw = new StringWriter();
+                    jsonLeaderboard.writeJSONString(sw);
+                    String json = sw.getBuffer().toString();
+                    response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
+                    response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
+                            .type(MediaType.TEXT_PLAIN).build();
+                }
             }
+            return response;
+        } finally {
+            ShardingContext.clearShardingConstraint(ShardingType.LEADERBOARDNAME);
         }
-        return response;
     }
 
     @Override
