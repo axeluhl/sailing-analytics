@@ -136,6 +136,8 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
 
                     @Override
                     public void onSuccess(Iterable<DetailType> result) {
+                        final Function<String, SailingServiceAsync> sailingServiceFactory = leaderboardName -> SailingServiceHelper
+                                .createSailingServiceInstance(() -> leaderboardName);
                         if (leaderboardDTO.type.isMetaLeaderboard()) {
                             // overall
                             MetaLeaderboardPerspectiveLifecycle rootComponentLifeCycle = new MetaLeaderboardPerspectiveLifecycle(
@@ -148,9 +150,6 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
                                         public void onSuccess(
                                                 PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
                                             configureWithSettings(defaultSettings, timer);
-
-                                            Function<String, SailingServiceAsync> sailingServiceFactory = leaderboardName -> SailingServiceHelper
-                                                    .createSailingServiceInstance(() -> leaderboardName);
                                             final MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(
                                                     null, context, rootComponentLifeCycle, defaultSettings,
                                                     sailingServiceFactory, new AsyncActionsExecutor(), timer, null,
@@ -195,7 +194,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
                                                             configureWithSettings(defaultSettings, timer);
                                                             final MultiRaceLeaderboardViewer leaderboardViewer = new MultiRaceLeaderboardViewer(
                                                                     null, context, rootComponentLifeCycle,
-                                                                    defaultSettings, getSailingService(),
+                                                                    defaultSettings, sailingServiceFactory,
                                                                     new AsyncActionsExecutor(), timer,
                                                                     leaderboardGroupName, leaderboardName,
                                                                     LeaderboardEntryPoint.this, getStringMessages(),
