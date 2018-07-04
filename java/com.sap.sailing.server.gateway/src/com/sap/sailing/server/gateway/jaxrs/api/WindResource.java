@@ -6,7 +6,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -17,8 +16,6 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
-import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -35,14 +32,14 @@ public class WindResource extends AbstractSailingServerResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("putWind")
     public Response putWind(String json) throws ParseException, JsonDeserializationException {
-        SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Mode.UPDATE));
+//        SecurityUtils.getSubject().checkPermission(Permission.TRACKED_RACE.getStringPermission(Mode.UPDATE));
 
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
         JSONArray windDatas = (JSONArray) requestObject.get("windData");
 
         String regattaName = (String) requestObject.get("regattaName");
-        JSONArray raceNames = (JSONArray) requestObject.get("raceName");
+        JSONArray raceNames = (JSONArray) requestObject.get("raceNames");
 
         WindSourceType windSourceType = WindSourceType.valueOf((String) (String) requestObject.get("windSourceType"));
         JSONObject answer = new JSONObject();
