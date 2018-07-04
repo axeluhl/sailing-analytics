@@ -50,6 +50,9 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         this.eventId = eventId;
     }
     
+    /* (non-Javadoc)
+     * @see com.sap.sailing.gwt.home.communication.SailingAction#execute(com.sap.sailing.gwt.home.communication.SailingDispatchContext)
+     */
     @GwtIncompatible
     public EventViewDTO execute(SailingDispatchContext context) {
         final Event event = context.getRacingEventService().getEvent(eventId);
@@ -114,16 +117,23 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
                 // The event is part of one series and does not host any further Regattas
                 dto.setSeriesName(HomeServiceUtil.getLeaderboardDisplayName(singleLeaderboardGroup));
                 
-                final ArrayList<EventReferenceWithStateDTO> eventsOfSeries = new ArrayList<>();
+                final ArrayList<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries = new ArrayList<>();
                 for (Event eventInSeries : HomeServiceUtil.getEventsForSeriesInDescendingOrder(singleLeaderboardGroup,
                         context.getRacingEventService())) {
-                    // TODO include regatta name if more than one regatta is part of the event and add values for every regatta
-                    String displayName = HomeServiceUtil.getLocation(eventInSeries, context.getRacingEventService());
-                    if(displayName == null) {
-                        displayName = eventInSeries.getName();
-                    }
-                    EventState eventState = HomeServiceUtil.calculateEventState(eventInSeries);
-                    eventsOfSeries.add(new EventReferenceWithStateDTO(eventInSeries.getId(), displayName, eventState));
+                    EventActionUtil.forLeaderboardsOfEvent(context, eventInSeries, new LeaderboardCallback() {
+                        @Override
+                        public void doForLeaderboard(LeaderboardContext context) {
+                            if (!context.isPartOfEvent()) {
+                                return;
+                            }
+                            String displayName = HomeServiceUtil.getLocation(eventInSeries, context.getLeaderboard());
+                            if (displayName == null) {
+                                displayName = eventInSeries.getName();
+                            }
+                            EventState eventState = HomeServiceUtil.calculateEventState(eventInSeries);
+                            eventsOfSeries.add(new EventAndLeaderboardReferenceWithStateDTO(eventInSeries.getId(), context.getLeaderboardName(), displayName, eventState));
+                        }
+                    });
                 }
                 dto.setSeriesData(new SeriesReferenceWithEventsDTO(
                         singleLeaderboardGroup.getDisplayName() != null ? singleLeaderboardGroup.getDisplayName()

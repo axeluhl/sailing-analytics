@@ -8,7 +8,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
@@ -99,7 +99,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
         EventViewDTO event = eventDTO;
         final SeriesReferenceWithEventsDTO seriesData = event.getSeriesData();
         if (seriesData != null) {
-            for (EventReferenceWithStateDTO seriesEvent : seriesData.getEventsOfSeries()) {
+            for (EventAndLeaderboardReferenceWithStateDTO seriesEvent : seriesData.getEventsOfSeries()) {
                 if (seriesEvent.getState() != EventState.PLANNED) {
                     AbstractEventRegattaPlace place = currentPlace
                             .newInstanceWithContext(new EventContext().withId(seriesEvent.getId().toString()));

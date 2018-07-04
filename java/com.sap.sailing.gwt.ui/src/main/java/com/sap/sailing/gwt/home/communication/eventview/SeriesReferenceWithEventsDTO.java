@@ -4,22 +4,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 
 public class SeriesReferenceWithEventsDTO extends SeriesReferenceDTO {
 
-    private ArrayList<EventReferenceWithStateDTO> eventsOfSeries = new ArrayList<>();
+    private ArrayList<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries = new ArrayList<>();
 
     protected SeriesReferenceWithEventsDTO() {
     }
 
     public SeriesReferenceWithEventsDTO(String seriesDisplayName, String seriesLeaderboardGroupName,
-            Collection<EventReferenceWithStateDTO> eventsOfSeries) {
+            Collection<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries) {
         super(seriesDisplayName, seriesLeaderboardGroupName);
         this.eventsOfSeries.addAll(eventsOfSeries);
     }
 
-    public List<EventReferenceWithStateDTO> getEventsOfSeries() {
+    public List<EventAndLeaderboardReferenceWithStateDTO> getEventsOfSeries() {
         return eventsOfSeries;
     }
 }

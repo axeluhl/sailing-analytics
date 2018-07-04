@@ -7,7 +7,7 @@ import java.util.Set;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
-import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
@@ -26,7 +26,7 @@ public interface EventViewBase extends IsWidget {
 
     void setQuickFinderValues(Map<String, Set<RegattaMetadataDTO>> regattasByLeaderboardGroupName);
 
-    void setQuickFinderValues(String seriesName, Collection<EventReferenceWithStateDTO> eventsOfSeries);
+    void setQuickFinderValues(String seriesName, Collection<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries);
 
     void hideQuickfinder();
     

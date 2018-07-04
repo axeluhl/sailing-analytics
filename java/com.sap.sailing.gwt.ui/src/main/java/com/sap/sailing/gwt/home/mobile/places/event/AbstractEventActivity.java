@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
-import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
@@ -105,9 +105,9 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         EventViewDTO event = eventDTO;
         final SeriesReferenceWithEventsDTO seriesData = event.getSeriesData();
         if(showQuickfinder && seriesData != null) {
-            List<EventReferenceWithStateDTO> eventsOfSeriesSorted = seriesData.getEventsOfSeries();
-            List<EventReferenceWithStateDTO> seriesEventToShow = new ArrayList<>(eventsOfSeriesSorted.size());
-            for (EventReferenceWithStateDTO seriesEvent : eventsOfSeriesSorted) {
+            List<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeriesSorted = seriesData.getEventsOfSeries();
+            List<EventAndLeaderboardReferenceWithStateDTO> seriesEventToShow = new ArrayList<>(eventsOfSeriesSorted.size());
+            for (EventAndLeaderboardReferenceWithStateDTO seriesEvent : eventsOfSeriesSorted) {
                 if (seriesEvent.getState() != EventState.PLANNED) {
                     seriesEventToShow.add(seriesEvent);
                 }

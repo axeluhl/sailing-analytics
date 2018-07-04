@@ -396,10 +396,14 @@ public final class HomeServiceUtil {
                     // more than one Regatta is associated to the specific event
                     return null;
                 }
-                displayNameOfSingleAssociatedRegatta = leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
+                displayNameOfSingleAssociatedRegatta = getLocation(event, leaderboard);
             }
         }
         return displayNameOfSingleAssociatedRegatta;
+    }
+    
+    public static String getLocation(Event eventBase, Leaderboard leaderboard) {
+        return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
     }
     
     public static ImageDTO convertToImageDTO(ImageDescriptor image) {
