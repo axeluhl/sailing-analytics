@@ -11,8 +11,9 @@ import com.sap.sailing.datamining.impl.data.CompleteManeuverCurveWithEstimationD
 import com.sap.sailing.datamining.shared.ManeuverSettings;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
-import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
+import com.sap.sailing.domain.maneuverdetection.ManeuverDetectorWithEstimationDataSupport;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
+import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorWithEstimationDataSupportDecoratorImpl;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
@@ -45,7 +46,8 @@ public class CompleteManeuverCurveWithEstimationDataRetrievalProcessor extends
         List<HasCompleteManeuverCurveWithEstimationDataContext> result = new ArrayList<>();
         TrackedRace trackedRace = element.getTrackedRaceContext().getTrackedRace();
         Competitor competitor = element.getCompetitor();
-        ManeuverDetector maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
+        ManeuverDetectorWithEstimationDataSupport maneuverDetector = new ManeuverDetectorWithEstimationDataSupportDecoratorImpl(
+                new ManeuverDetectorImpl(trackedRace, competitor));
         Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, false);
         Iterable<CompleteManeuverCurve> maneuverCurves = maneuverDetector.getCompleteManeuverCurves(maneuvers);
         Iterable<CompleteManeuverCurveWithEstimationData> maneuversWithEstimationData = maneuverDetector
