@@ -128,7 +128,7 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
      * @return an empty list if no maneuver spots are detected for <code>competitor</code> between <code>from</code> and
      *         <code>to</code>, or else the list of maneuver spots with corresponding maneuvers detected.
      */
-    protected List<ManeuverSpot> detectManeuvers(TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
+    public List<ManeuverSpot> detectManeuvers(TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
         ApproximatedFixesCalculator approximatedFixesCalculator = new ApproximatedFixesCalculatorImpl(trackedRace,
                 competitor);
         Iterable<GPSFixMoving> approximatedFixes = approximatedFixesCalculator.approximate(earliestManeuverStart,
