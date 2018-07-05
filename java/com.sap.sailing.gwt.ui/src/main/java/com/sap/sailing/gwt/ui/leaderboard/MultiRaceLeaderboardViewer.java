@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.List;
+import java.util.function.Function;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -36,12 +37,12 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
             LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
-            final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
+            final Function<String, SailingServiceAsync> sailingServiceFactory, final AsyncActionsExecutor asyncActionsExecutor,
             final Timer timer, 
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         this(parent, componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
-                sailingService, asyncActionsExecutor, timer,
+                sailingServiceFactory, asyncActionsExecutor, timer,
                 leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, chartDetailType, availableDetailTypes);
     }
@@ -51,13 +52,16 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
             LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionModel,
-            final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
+            final Function<String, SailingServiceAsync> sailingServiceFactory, final AsyncActionsExecutor asyncActionsExecutor,
             final Timer timer, 
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
-        init(new MultiRaceLeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
+        
+        final SailingServiceAsync sailingServiceForMainLeaderboard = sailingServiceFactory.apply(leaderboardName);
+        
+        init(new MultiRaceLeaderboardPanel(this, getComponentContext(), sailingServiceForMainLeaderboard, asyncActionsExecutor,
                 settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), false,
                  competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, settings.getPerspectiveOwnSettings().isShowRaceDetails(),
@@ -71,9 +75,8 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
         
         final FlowPanel mainPanel = createViewerPanel();
         initWidget(mainPanel);
-        multiCompetitorChart = new MultiCompetitorLeaderboardChart(this, getComponentContext(), sailingService,
-                asyncActionsExecutor,
-                leaderboardName, chartDetailType,
+        multiCompetitorChart = new MultiCompetitorLeaderboardChart(this, getComponentContext(),
+                sailingServiceForMainLeaderboard, asyncActionsExecutor, leaderboardName, chartDetailType,
                 competitorSelectionProvider, timer, stringMessages, false, errorReporter);
         multiCompetitorChart.setVisible(showCharts); 
         multiCompetitorChart.getElement().getStyle().setMarginTop(10, Unit.PX);
@@ -91,15 +94,16 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
             multiCompetitorChart.timeChanged(timer.getTime(), null);
         }
         overallLeaderboardPanel = null;
-        if(perspectiveSettings.isShowOverallLeaderboard()) {
-            sailingService.getOverallLeaderboardNamesContaining(leaderboardName, new MarkedAsyncCallback<List<String>>(
+        if (perspectiveSettings.isShowOverallLeaderboard()) {
+            sailingServiceForMainLeaderboard.getOverallLeaderboardNamesContaining(leaderboardName, new MarkedAsyncCallback<List<String>>(
                     new AsyncCallback<List<String>>() {
                         @Override
                         public void onSuccess(List<String> result) {
-                            if(result.size() == 1) {
+                            if (result.size() == 1) {
                                 String overallLeaderboardName = result.get(0);
+                                final SailingServiceAsync sailingServiceForOverallLeaderboard = sailingServiceFactory.apply(overallLeaderboardName);
                                 overallLeaderboardPanel = new OverallLeaderboardPanel(MultiRaceLeaderboardViewer.this,
-                                        getComponentContext(), sailingService,
+                                        getComponentContext(), sailingServiceForOverallLeaderboard,
                                         asyncActionsExecutor,
                                         settings.findSettingsByComponentId(OverallLeaderboardPanelLifecycle.ID),
                                         false,  competitorSelectionProvider, timer,
