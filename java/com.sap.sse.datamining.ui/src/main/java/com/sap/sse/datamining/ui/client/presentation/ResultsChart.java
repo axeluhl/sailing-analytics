@@ -141,7 +141,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private final HorizontalPanel sortByPanel;
     private final ValueListBox<Comparator<GroupKey>> keyComparatorListBox;
     private final ValueListBox<Integer> decimalsListBox;
-    private final CheckBox showDataLabels;
+    private final CheckBox showDataLabelsCheckBox;
 
     private final SimpleLayoutPanel chartPanel;
     private final Chart chart;
@@ -217,10 +217,10 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         HorizontalPanel showDataLabelsPanel = new HorizontalPanel();
         showDataLabelsPanel.setSpacing(5);
         showDataLabelsPanel.add(new Label(getDataMiningStringMessages().showDataLabels() + ":"));
-        showDataLabels = new CheckBox();
-        showDataLabelsPanel.add(showDataLabels);
-        showDataLabels.setValue(true);
-        showDataLabels.addValueChangeHandler(e -> {
+        showDataLabelsCheckBox = new CheckBox();
+        showDataLabelsPanel.add(showDataLabelsCheckBox);
+        showDataLabelsCheckBox.setValue(true);
+        showDataLabelsCheckBox.addValueChangeHandler(e -> {
             resetChartSeries();
             showResultData();
         });
@@ -455,7 +455,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
                     public String format(DataLabelsData dataLabelsData) {
                         String dataLabel = String.valueOf(BigDecimal.valueOf(dataLabelsData.getYAsDouble())
                                 .setScale(decimalsListBox.getValue(), BigDecimal.ROUND_HALF_UP).doubleValue());
-                        return showDataLabels.getValue() ? dataLabel : null;
+                        return showDataLabelsCheckBox.getValue() ? dataLabel : null;
                     }
                 })).setSeriesClickEventHandler(new SeriesClickHandler()));
         return chart;
