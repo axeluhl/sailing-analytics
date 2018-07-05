@@ -30,9 +30,9 @@
     <tr>
         <td>Examples:</td>
         <td>
-            Request: <br> {"windData":[{"position":{"latitude_deg":1,"longitude_deg":1},"timepoint":1234,"direction":120,"speedinknots":60}],"regattaName":"ESS 2016 Cardiff","raceNames":["Race 1"],"windSourceType":"WEB","windSourceId":"tracker02"} 
+            Request: <br> {"windData":[{"position":{"latitude_deg":1,"longitude_deg":1},"timepoint":1234,"direction":120,"speedinknots":60}],"regattaNamesAndRaceNames":[{"regattaName":"ESS 2016 Cardiff","raceName":"Race 1"}],"windSourceType":"WEB","windSourceId":"tracker02"} 
             <br>
-            Answer: <br> {"R1":[true]}
+            Answer: <br> [{"regattaNameAndRaceName":{"regattaName":"ESS 2016 Cardiff","raceName":"Race 1"},"answer":[true]}]
         </td>
     </tr>
 </table>
