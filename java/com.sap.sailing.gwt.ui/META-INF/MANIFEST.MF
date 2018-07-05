@@ -77,6 +77,7 @@ TrackLifecycle: true
 Export-Package: com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.confidence.impl,
  com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.impl,
  com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.tracking.impl,
+ com.sap.sailing.gwt.common.communication.routing,
  com.sap.sailing.gwt.home.communication,
  com.sap.sailing.gwt.home.server,
  com.sap.sailing.gwt.server,

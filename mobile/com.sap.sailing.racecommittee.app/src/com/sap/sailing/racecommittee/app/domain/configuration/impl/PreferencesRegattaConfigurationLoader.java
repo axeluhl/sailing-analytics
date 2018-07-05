@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.base.configuration.procedures.SWCStartConfiguration;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sse.common.Duration;
 
 public class PreferencesRegattaConfigurationLoader implements ConfigurationLoader<RegattaConfiguration> {
 
@@ -48,6 +49,7 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
         
         configuration.setDefaultRacingProcedureType(preferences.getDefaultRacingProcedureType());
         configuration.setDefaultCourseDesignerMode(preferences.getDefaultCourseDesignerMode());
+        configuration.setDefaultProtestTimeDuration(Duration.ONE_MINUTE.times(preferences.getProtestTimeDurationInMinutes()));
         
         RRS26ConfigurationImpl rrs26 = new RRS26ConfigurationImpl();
         rrs26.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.RRS26));
@@ -102,6 +104,13 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
         
         if (configuration.getDefaultCourseDesignerMode() != null) {
             preferences.setDefaultCourseDesignerMode(configuration.getDefaultCourseDesignerMode());
+        }
+
+        if (configuration.getDefaultProtestTimeDuration() != null) {
+            preferences.setDefaultProtestTimeDurationInMinutes((int) configuration.getDefaultProtestTimeDuration().asMinutes());
+            preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(false);
+        } else {
+            preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(true);
         }
 
         if (configuration.getRRS26Configuration() != null) {
