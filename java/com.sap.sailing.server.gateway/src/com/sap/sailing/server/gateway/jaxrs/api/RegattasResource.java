@@ -1043,7 +1043,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 CompleteManeuverCurvesWithEstimationDataJsonSerializer serializer = new CompleteManeuverCurvesWithEstimationDataJsonSerializer(
-                        new DetailedBoatClassJsonSerializer(),
+                        getService().getPolarDataService(), new DetailedBoatClassJsonSerializer(),
                         new CompleteManeuverCurveWithEstimationDataJsonSerializer(
                                 new ManeuverMainCurveWithEstimationDataJsonSerializer(),
                                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer(),

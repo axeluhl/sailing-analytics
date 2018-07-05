@@ -4,6 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.ManeuverMainCurveWithEstimationData;
@@ -12,6 +13,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurveWithEstimationDataJsonSerializer;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
@@ -59,14 +61,26 @@ public class CompleteManeuverCurveWithEstimationDataJsonDeserializer
                 CompleteManeuverCurveWithEstimationDataJsonSerializer.RELATIVE_BEARING_TO_NEXT_MARK_BEFORE_MANEUVER);
         Double relativeBearingToNextMarkAfterManeuver = (Double) object.get(
                 CompleteManeuverCurveWithEstimationDataJsonSerializer.RELATIVE_BEARING_TO_NEXT_MARK_AFTER_MANEUVER);
+        Double closestDistanceToMarkInMeters = (Double) object
+                .get(CompleteManeuverCurveWithEstimationDataJsonSerializer.CLOSEST_DISTANCE_TO_MARK);
+        Double deviationFromTargetTackAngle = (Double) object
+                .get(CompleteManeuverCurveWithEstimationDataJsonSerializer.DEVIATION_FROM_TARGET_TACK_ANGLE);
+        Double deviationFromTargetJibeAngle = (Double) object
+                .get(CompleteManeuverCurveWithEstimationDataJsonSerializer.DEVIATION_FROM_TARGET_JIBE_ANGLE);
         return new CompleteManeuverCurveWithEstimationDataImpl(position, mainCurve, curveWithUnstableCourseAndSpeed,
                 wind, tackingCount, jibingCount, maneuverStartsByRunningAwayFromWind,
                 convertBearing(relativeBearingToNextMarkBeforeManeuver),
-                convertBearing(relativeBearingToNextMarkAfterManeuver), markPassing);
+                convertBearing(relativeBearingToNextMarkAfterManeuver), markPassing,
+                convertDistance(closestDistanceToMarkInMeters), deviationFromTargetTackAngle,
+                deviationFromTargetJibeAngle);
     }
 
     private Bearing convertBearing(Double degrees) {
         return degrees == null ? null : new DegreeBearingImpl(degrees);
+    }
+
+    private Distance convertDistance(Double meters) {
+        return meters == null ? null : new MeterDistance(meters);
     }
 
     public static Integer getInteger(Object object) {

@@ -132,11 +132,15 @@ public class EstimationDataSerializationDeserializationTest {
         Bearing relativeBearingToNextMarkBeforeManeuver = new DegreeBearingImpl(202.23);
         Bearing relativeBearingToNextMarkAfterManeuver = new DegreeBearingImpl(10.01);
         boolean markPassing = true;
+        Distance closestDistanceToMark = new MeterDistance(3.0);
+        Double deviationFromTargetTackAngle = 23.30;
+        Double deviationFromTargetJibeAngle = 22.30;
 
         CompleteManeuverCurveWithEstimationData toSerialize = new CompleteManeuverCurveWithEstimationDataImpl(
                 maneuverPosition, mainCurve, curve, wind, tackingCount, jibingCount,
                 maneuverStartsByRunningAwayFromWind, relativeBearingToNextMarkBeforeManeuver,
-                relativeBearingToNextMarkAfterManeuver, markPassing);
+                relativeBearingToNextMarkAfterManeuver, markPassing, closestDistanceToMark,
+                deviationFromTargetTackAngle, deviationFromTargetJibeAngle);
         CompleteManeuverCurveWithEstimationDataJsonSerializer serializer = new CompleteManeuverCurveWithEstimationDataJsonSerializer(
                 new ManeuverMainCurveWithEstimationDataJsonSerializer(),
                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer(),
@@ -148,6 +152,11 @@ public class EstimationDataSerializationDeserializationTest {
                 new WindJsonDeserializer(new PositionJsonDeserializer()), new PositionJsonDeserializer());
         CompleteManeuverCurveWithEstimationData deserialized = deserializer.deserialize(json);
 
+        assertEquals(deviationFromTargetJibeAngle,
+                deserialized.getDeviationOfManeuverAngleFromTargetJibeAngleInDegrees());
+        assertEquals(deviationFromTargetTackAngle,
+                deserialized.getDeviationOfManeuverAngleFromTargetTackAngleInDegrees());
+        assertEquals(closestDistanceToMark, deserialized.getDistanceToClosestMark());
         assertEquals(maneuverPosition, deserialized.getPosition());
         assertEquals(tackingCount, deserialized.getTackingCount());
         assertEquals(jibingCount, deserialized.getJibingCount());
@@ -303,11 +312,15 @@ public class EstimationDataSerializationDeserializationTest {
         Bearing relativeBearingToNextMarkAfterManeuver = null;
         boolean markPassing = false;
         DegreePosition maneuverPosition = new DegreePosition(50.325246, 11.148556);
+        Distance closestDistanceToMark = null;
+        Double deviationFromTargetTackAngle = null;
+        Double deviationFromTargetJibeAngle = null;
 
         CompleteManeuverCurveWithEstimationData toSerialize = new CompleteManeuverCurveWithEstimationDataImpl(
                 maneuverPosition, mainCurve, curve, wind, tackingCount, jibingCount,
                 maneuverStartsByRunningAwayFromWind, relativeBearingToNextMarkBeforeManeuver,
-                relativeBearingToNextMarkAfterManeuver, markPassing);
+                relativeBearingToNextMarkAfterManeuver, markPassing, closestDistanceToMark,
+                deviationFromTargetTackAngle, deviationFromTargetJibeAngle);
         CompleteManeuverCurveWithEstimationDataJsonSerializer serializer = new CompleteManeuverCurveWithEstimationDataJsonSerializer(
                 new ManeuverMainCurveWithEstimationDataJsonSerializer(),
                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer(),
@@ -319,6 +332,11 @@ public class EstimationDataSerializationDeserializationTest {
                 new WindJsonDeserializer(new PositionJsonDeserializer()), new PositionJsonDeserializer());
         CompleteManeuverCurveWithEstimationData deserialized = deserializer.deserialize(json);
 
+        assertEquals(deviationFromTargetJibeAngle,
+                deserialized.getDeviationOfManeuverAngleFromTargetJibeAngleInDegrees());
+        assertEquals(deviationFromTargetTackAngle,
+                deserialized.getDeviationOfManeuverAngleFromTargetTackAngleInDegrees());
+        assertEquals(closestDistanceToMark, deserialized.getDistanceToClosestMark());
         assertEquals(maneuverPosition, deserialized.getPosition());
         assertEquals(tackingCount, deserialized.getTackingCount());
         assertEquals(jibingCount, deserialized.getJibingCount());

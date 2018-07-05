@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
@@ -17,6 +19,7 @@ import com.sap.sailing.domain.maneuverdetection.ManeuverCurveWithUnstableCourseA
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetectorWithEstimationDataSupport;
 import com.sap.sailing.domain.maneuverdetection.ManeuverMainCurveWithEstimationData;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
@@ -44,10 +47,13 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
         implements ManeuverDetectorWithEstimationDataSupport {
 
-    private ManeuverDetectorImpl maneuverDetector;
+    private final ManeuverDetectorImpl maneuverDetector;
+    private final PolarDataService polarDataService;
 
-    public ManeuverDetectorWithEstimationDataSupportDecoratorImpl(ManeuverDetectorImpl maneuverDetector) {
+    public ManeuverDetectorWithEstimationDataSupportDecoratorImpl(ManeuverDetectorImpl maneuverDetector,
+            PolarDataService polarDataService) {
         this.maneuverDetector = maneuverDetector;
+        this.polarDataService = polarDataService;
     }
 
     @Override
@@ -348,10 +354,72 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
         Bearing relativeBearingToNextMarkPassingAfterManeuver = getRelativeBearingToNextMark(
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter(), maneuverCurve
                         .getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingAfter().getBearing());
+        BoatClass boatClass = maneuverDetector.trackedRace.getRace().getBoatOfCompetitor(maneuverDetector.competitor)
+                .getBoatClass();
+        Double deviationFromTackAngle = null;
+        Double deviationFromJibeAngle = null;
+        Speed boatSpeed = curveWithUnstableCourseAndSpeed.getSpeedWithBearingBefore()
+                .compareTo(curveWithUnstableCourseAndSpeed.getSpeedWithBearingAfter()) < 0
+                        ? curveWithUnstableCourseAndSpeed.getSpeedWithBearingBefore()
+                        : curveWithUnstableCourseAndSpeed.getSpeedWithBearingAfter();
+        if (polarDataService.getAllBoatClassesWithPolarSheetsAvailable().contains(boatClass)) {
+            SpeedWithBearingWithConfidence<Void> closestTackTwa = polarDataService.getClosestTwaTws(ManeuverType.TACK,
+                    boatSpeed, curveWithUnstableCourseAndSpeed.getDirectionChangeInDegrees(), boatClass);
+            SpeedWithBearingWithConfidence<Void> closestJibeTwa = polarDataService.getClosestTwaTws(ManeuverType.JIBE,
+                    boatSpeed, curveWithUnstableCourseAndSpeed.getDirectionChangeInDegrees(), boatClass);
+            if (closestTackTwa != null) {
+                deviationFromTackAngle = polarDataService.getManeuverAngleInDegreesFromTwa(
+                        closestTackTwa.getObject().getBearing().getDegrees(), ManeuverType.TACK);
+            }
+            if (closestJibeTwa != null) {
+                deviationFromJibeAngle = polarDataService.getManeuverAngleInDegreesFromTwa(
+                        closestJibeTwa.getObject().getBearing().getDegrees(), ManeuverType.JIBE);
+            }
+        }
+        Distance closestDistanceToMark = getClosestDistanceToMark(mainCurve.getTimePointOfMaxTurningRate());
+
         return new CompleteManeuverCurveWithEstimationDataImpl(maneuverPosition, mainCurve,
                 curveWithUnstableCourseAndSpeed, wind, numberOfTacks, numberOfJibes,
                 maneuverStartsByRunningAwayFromWind, relativeBearingToNextMarkPassingBeforeManeuver,
-                relativeBearingToNextMarkPassingAfterManeuver, maneuverCurve.isMarkPassing());
+                relativeBearingToNextMarkPassingAfterManeuver, maneuverCurve.isMarkPassing(), closestDistanceToMark,
+                deviationFromTackAngle, deviationFromJibeAngle);
+    }
+
+    private Distance getClosestDistanceToMark(TimePoint timePoint) {
+        NonCachingMarkPositionAtTimePointCache markPositionAtTimePointCache = new NonCachingMarkPositionAtTimePointCache(
+                maneuverDetector.trackedRace, timePoint);
+        Distance result = null;
+        TrackedLegOfCompetitor legAfter = maneuverDetector.trackedRace.getTrackedLeg(maneuverDetector.competitor,
+                timePoint);
+        if (legAfter != null) {
+            Position maneuverPosition = maneuverDetector.track.getEstimatedPosition(timePoint, false);
+            if (legAfter.getLeg().getTo() != null) {
+                result = getClosestDistanceToMarkInternal(markPositionAtTimePointCache, legAfter.getLeg().getTo(),
+                        maneuverPosition);
+            }
+            if (legAfter.getLeg().getFrom() != null) {
+                Distance distance = getClosestDistanceToMarkInternal(markPositionAtTimePointCache,
+                        legAfter.getLeg().getFrom(), maneuverPosition);
+                if (result == null || distance != null && distance.compareTo(result) < 0) {
+                    result = distance;
+                }
+            }
+        }
+        return result;
+    }
+
+    private Distance getClosestDistanceToMarkInternal(
+            NonCachingMarkPositionAtTimePointCache markPositionAtTimePointCache, Waypoint waypoint,
+            Position maneuverPosition) {
+        Distance result = null;
+        for (Mark mark : waypoint.getMarks()) {
+            Position markPosition = markPositionAtTimePointCache.getEstimatedPosition(mark);
+            Distance distance = markPosition.getDistance(maneuverPosition);
+            if (result == null || distance.compareTo(result) < 0) {
+                result = distance;
+            }
+        }
+        return result;
     }
 
     /**
@@ -381,10 +449,10 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
         TrackedLegOfCompetitor legAfter = maneuverDetector.trackedRace.getTrackedLeg(maneuverDetector.competitor,
                 timePoint);
         if (legAfter != null && legAfter.getLeg().getTo() != null) {
+            Position maneuverEndPosition = maneuverDetector.track.getEstimatedPosition(timePoint, false);
             Waypoint nextWaypoint = legAfter.getLeg().getTo();
             for (Mark mark : nextWaypoint.getMarks()) {
                 Position nextMarkPosition = markPositionAtTimePointCache.getEstimatedPosition(mark);
-                Position maneuverEndPosition = maneuverDetector.track.getEstimatedPosition(timePoint, false);
                 Bearing absoluteBearing = maneuverEndPosition.getBearingGreatCircle(nextMarkPosition);
                 Bearing resultCandidate = absoluteBearing.getDifferenceTo(boatCourse);
                 if (result == null) {

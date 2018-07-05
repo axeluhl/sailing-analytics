@@ -47,7 +47,8 @@ public class CompleteManeuverCurveWithEstimationDataRetrievalProcessor extends
         TrackedRace trackedRace = element.getTrackedRaceContext().getTrackedRace();
         Competitor competitor = element.getCompetitor();
         ManeuverDetectorWithEstimationDataSupport maneuverDetector = new ManeuverDetectorWithEstimationDataSupportDecoratorImpl(
-                new ManeuverDetectorImpl(trackedRace, competitor));
+                new ManeuverDetectorImpl(trackedRace, competitor),
+                element.getTrackedRaceContext().getLeaderboardContext().getPolarDataService());
         Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, false);
         Iterable<CompleteManeuverCurve> maneuverCurves = maneuverDetector.getCompleteManeuverCurves(maneuvers);
         Iterable<CompleteManeuverCurveWithEstimationData> maneuversWithEstimationData = maneuverDetector
