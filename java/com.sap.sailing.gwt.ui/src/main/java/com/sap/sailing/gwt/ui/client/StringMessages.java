@@ -1971,7 +1971,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windFinderWindSourceTypeTooltip();
     String windFinder();
     String enterTagsForTheVideo();
-    String enterIdOfWindfinderReviewedSpotCollection();
+    String enterIdOfWindFinderReviewedSpotCollection();
     String enterTagsForTheImage();
     String unableToResolveWindFinderSpotId(String id, String message);
     String windFinderWeatherData();
@@ -2083,4 +2083,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String manage2SailEventURLBox();
     String manage2SailEventIdBoxTooltip();
     String manage2SailPort();
+    String windFinderSpotCollectionsList();
 }
