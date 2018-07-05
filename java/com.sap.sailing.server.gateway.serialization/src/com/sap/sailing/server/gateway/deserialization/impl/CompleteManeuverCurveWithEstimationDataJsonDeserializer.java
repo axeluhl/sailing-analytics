@@ -3,8 +3,10 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.ManeuverMainCurveWithEstimationData;
@@ -26,13 +28,13 @@ public class CompleteManeuverCurveWithEstimationDataJsonDeserializer
 
     private final ManeuverMainCurveWithEstimationDataJsonDeserializer mainCurveDeserializer;
     private final ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer curveWithUnstableCourseAndSpeedDeserializer;
-    private final WindJsonDeserializer windDeserializer;
+    private final ManeuverWindJsonDeserializer windDeserializer;
     private final PositionJsonDeserializer positionDeserializer;
 
     public CompleteManeuverCurveWithEstimationDataJsonDeserializer(
             ManeuverMainCurveWithEstimationDataJsonDeserializer mainCurveDeserializer,
             ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer curveWithUnstableCourseAndSpeedDeserializer,
-            WindJsonDeserializer windDeserializer, PositionJsonDeserializer positionDeserializer) {
+            ManeuverWindJsonDeserializer windDeserializer, PositionJsonDeserializer positionDeserializer) {
         this.mainCurveDeserializer = mainCurveDeserializer;
         this.curveWithUnstableCourseAndSpeedDeserializer = curveWithUnstableCourseAndSpeedDeserializer;
         this.windDeserializer = windDeserializer;
@@ -50,7 +52,9 @@ public class CompleteManeuverCurveWithEstimationDataJsonDeserializer
                 .deserialize((JSONObject) object.get(
                         CompleteManeuverCurveWithEstimationDataJsonSerializer.CURVE_WITH_UNSTABLE_COURSE_AND_SPEED));
         JSONObject windJson = (JSONObject) object.get(CompleteManeuverCurveWithEstimationDataJsonSerializer.WIND);
-        Wind wind = windJson == null ? null : windDeserializer.deserialize(windJson);
+        SpeedWithBearing windSpeedWithBearing = windJson == null ? null : windDeserializer.deserialize(windJson);
+        Wind wind = windSpeedWithBearing == null ? null
+                : new WindImpl(position, mainCurve.getTimePointOfMaxTurningRate(), windSpeedWithBearing);
         Integer tackingCount = getInteger(
                 object.get(CompleteManeuverCurveWithEstimationDataJsonSerializer.TACKING_COUNT));
         Integer jibingCount = getInteger(

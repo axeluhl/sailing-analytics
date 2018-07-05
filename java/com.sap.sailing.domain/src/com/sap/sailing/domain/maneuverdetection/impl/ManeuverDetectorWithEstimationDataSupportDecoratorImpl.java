@@ -385,7 +385,7 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
                 deviationFromTackAngle, deviationFromJibeAngle);
     }
 
-    private Distance getClosestDistanceToMark(TimePoint timePoint) {
+    public Distance getClosestDistanceToMark(TimePoint timePoint) {
         NonCachingMarkPositionAtTimePointCache markPositionAtTimePointCache = new NonCachingMarkPositionAtTimePointCache(
                 maneuverDetector.trackedRace, timePoint);
         Distance result = null;
@@ -442,7 +442,7 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
      * Gets the relative bearing of the next mark from the boat's position and course at {@code timePoint}. The relative
      * bearing is calculated by absolute bearing of next mark from the boat's position minus the boat's course.
      */
-    private Bearing getRelativeBearingToNextMark(TimePoint timePoint, Bearing boatCourse) {
+    public Bearing getRelativeBearingToNextMark(TimePoint timePoint, Bearing boatCourse) {
         NonCachingMarkPositionAtTimePointCache markPositionAtTimePointCache = new NonCachingMarkPositionAtTimePointCache(
                 maneuverDetector.trackedRace, timePoint);
         Bearing result = null;

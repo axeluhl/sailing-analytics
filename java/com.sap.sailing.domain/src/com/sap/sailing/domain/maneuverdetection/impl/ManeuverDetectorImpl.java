@@ -800,9 +800,6 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
                 }
             }
         }
-        if(result == null) {
-            System.out.println("a");
-        }
         return result;
     }
 

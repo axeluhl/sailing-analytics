@@ -28,14 +28,14 @@ import com.sap.sailing.server.gateway.deserialization.impl.CompleteManeuverCurve
 import com.sap.sailing.server.gateway.deserialization.impl.DetailedBoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverMainCurveWithEstimationDataJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.ManeuverWindJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurveWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DetailedBoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverMainCurveWithEstimationDataJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.ManeuverWindJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -120,12 +120,9 @@ public class EstimationDataSerializationDeserializationTest {
                 longestIntervalBetweenTwoFixes, intervalBetweenLastFixOfCurveAndNextFix,
                 intervalBetweenFirstFixOfCurveAndPreviousFix);
 
-        MillisecondsTimePoint windTimePoint = new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:28:25"));
         SpeedWithBearing windSpeedWithBearing = new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(340));
-        DegreePosition windPosition = new DegreePosition(54.325246, 10.148556);
-        Wind wind = new WindImpl(windPosition, windTimePoint, windSpeedWithBearing);
-
         DegreePosition maneuverPosition = new DegreePosition(50.325246, 11.148556);
+        Wind wind = new WindImpl(maneuverPosition, mainCurve.getTimePointOfMaxTurningRate(), windSpeedWithBearing);
         int jibingCount = 203;
         int tackingCount = 12345;
         boolean maneuverStartsByRunningAwayFromWind = true;
@@ -144,12 +141,12 @@ public class EstimationDataSerializationDeserializationTest {
         CompleteManeuverCurveWithEstimationDataJsonSerializer serializer = new CompleteManeuverCurveWithEstimationDataJsonSerializer(
                 new ManeuverMainCurveWithEstimationDataJsonSerializer(),
                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer(),
-                new WindJsonSerializer(new PositionJsonSerializer()), new PositionJsonSerializer());
+                new ManeuverWindJsonSerializer(), new PositionJsonSerializer());
         JSONObject json = serializer.serialize(toSerialize);
         CompleteManeuverCurveWithEstimationDataJsonDeserializer deserializer = new CompleteManeuverCurveWithEstimationDataJsonDeserializer(
                 new ManeuverMainCurveWithEstimationDataJsonDeserializer(),
                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer(),
-                new WindJsonDeserializer(new PositionJsonDeserializer()), new PositionJsonDeserializer());
+                new ManeuverWindJsonDeserializer(), new PositionJsonDeserializer());
         CompleteManeuverCurveWithEstimationData deserialized = deserializer.deserialize(json);
 
         assertEquals(deviationFromTargetJibeAngle,
@@ -165,8 +162,8 @@ public class EstimationDataSerializationDeserializationTest {
         assertEquals(relativeBearingToNextMarkBeforeManeuver,
                 deserialized.getRelativeBearingToNextMarkBeforeManeuver());
         assertEquals(relativeBearingToNextMarkAfterManeuver, deserialized.getRelativeBearingToNextMarkAfterManeuver());
-        assertEquals(windTimePoint, deserialized.getWind().getTimePoint());
-        assertEquals(windPosition, deserialized.getWind().getPosition());
+        assertEquals(wind.getTimePoint(), deserialized.getWind().getTimePoint());
+        assertEquals(wind.getPosition(), deserialized.getWind().getPosition());
         assertEquals(windSpeedWithBearing.getBearing(), deserialized.getWind().getBearing());
         assertEquals(windSpeedWithBearing.getMetersPerSecond(), deserialized.getWind().getMetersPerSecond(), DELTA);
 
@@ -324,12 +321,12 @@ public class EstimationDataSerializationDeserializationTest {
         CompleteManeuverCurveWithEstimationDataJsonSerializer serializer = new CompleteManeuverCurveWithEstimationDataJsonSerializer(
                 new ManeuverMainCurveWithEstimationDataJsonSerializer(),
                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer(),
-                new WindJsonSerializer(new PositionJsonSerializer()), new PositionJsonSerializer());
+                new ManeuverWindJsonSerializer(), new PositionJsonSerializer());
         JSONObject json = serializer.serialize(toSerialize);
         CompleteManeuverCurveWithEstimationDataJsonDeserializer deserializer = new CompleteManeuverCurveWithEstimationDataJsonDeserializer(
                 new ManeuverMainCurveWithEstimationDataJsonDeserializer(),
                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer(),
-                new WindJsonDeserializer(new PositionJsonDeserializer()), new PositionJsonDeserializer());
+                new ManeuverWindJsonDeserializer(), new PositionJsonDeserializer());
         CompleteManeuverCurveWithEstimationData deserialized = deserializer.deserialize(json);
 
         assertEquals(deviationFromTargetJibeAngle,
