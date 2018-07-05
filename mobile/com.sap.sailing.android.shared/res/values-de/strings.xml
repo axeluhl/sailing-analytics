@@ -29,7 +29,7 @@
     <string name="error_invalid_qr_code">Ungültiger QR-Code</string>
 
     <!-- Regatta -->
-    <string name="your_regattas">Ihre Regattas:</string>
+    <string name="your_regattas">Ihre Regatten:</string>
     <string name="options_refresh">Aktualisieren</string>
 
     <!-- Eula -->
