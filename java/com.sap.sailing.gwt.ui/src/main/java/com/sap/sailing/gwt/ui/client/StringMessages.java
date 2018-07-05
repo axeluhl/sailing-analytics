@@ -153,7 +153,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String legDetailsToShow();
     String columnMoveUp();
     String columnMoveDown();
-    String port();
     String raceStartTimeColumn();
     String showOnlySelectedCompetitors();
     String showSelectedCompetitorsInfo();
@@ -2078,4 +2077,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String multiUrlChangeExplain();
     String lastEvent(String locationOrVenue);
     String teaserOverallLinkToolTip();
+    String gender();
+    String manage2SailEventIdBox();
+    String manage2SailEventURLBox();
+    String manage2SailEventIdBoxTooltip();
+    String manage2SailPort();
 }
