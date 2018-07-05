@@ -29,13 +29,13 @@ public class CompleteManeuverCurveWithEstimationDataJsonSerializer
 
     private final ManeuverCurveBoundariesJsonSerializer mainCurveSerializer;
     private final ManeuverCurveBoundariesJsonSerializer curveWithUnstableCourseAndSpeedSerializer;
-    private final WindJsonSerializer windSerializer;
+    private final ManeuverWindJsonSerializer windSerializer;
     private final PositionJsonSerializer positionSerializer;
 
     public CompleteManeuverCurveWithEstimationDataJsonSerializer(
             ManeuverCurveBoundariesJsonSerializer mainCurveSerializer,
             ManeuverCurveBoundariesJsonSerializer curveWithUnstableCourseAndSpeedSerializer,
-            WindJsonSerializer windSerializer, PositionJsonSerializer positionSerializer) {
+            ManeuverWindJsonSerializer windSerializer, PositionJsonSerializer positionSerializer) {
         this.mainCurveSerializer = mainCurveSerializer;
         this.curveWithUnstableCourseAndSpeedSerializer = curveWithUnstableCourseAndSpeedSerializer;
         this.windSerializer = windSerializer;
