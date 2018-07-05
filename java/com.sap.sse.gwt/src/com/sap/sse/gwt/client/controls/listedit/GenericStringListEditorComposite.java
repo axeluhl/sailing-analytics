@@ -99,7 +99,7 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
          */
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues,
                 String placeholderTextForAddTextbox) {
-            this(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox, null);
+            this(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox, /* inputBoxSize */ null);
             
         }
         /**
