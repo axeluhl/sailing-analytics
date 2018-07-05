@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.FontWeight;
@@ -70,22 +71,24 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
     private MultiRaceLeaderboardSettings loadedSettings;
     private final FlagImageResolver flagImageResolver;
     private final Iterable<DetailType> availableDetailTypes;
+    private Function<String, SailingServiceAsync> sailingServiceFactory;
 
     public MultiLeaderboardProxyPanel(Component<?> parent, ComponentContext<?> context,
-            SailingServiceAsync sailingService, String metaLeaderboardName,
+            Function<String, SailingServiceAsync> sailingServiceFactory, String metaLeaderboardName,
             AsyncActionsExecutor asyncActionsExecutor,
             Timer timer, boolean isEmbedded, String preselectedLeaderboardName,  
             ErrorReporter errorReporter, StringMessages stringMessages,
             boolean showRaceDetails, boolean autoExpandLastRaceColumn,
             MultiRaceLeaderboardSettings settings, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
         super(parent, context);
+        this.sailingServiceFactory = sailingServiceFactory;
 
         loadedSettings = settings;
 
         this.availableDetailTypes = availableDetailTypes;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        this.sailingService = sailingService;
+        this.sailingService = sailingServiceFactory.apply(metaLeaderboardName);
         this.metaLeaderboardName = metaLeaderboardName;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.showRaceDetails = showRaceDetails;
@@ -237,8 +240,9 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
                 toMerge = loadedSettings;
             }
 
+            
             MultiRaceLeaderboardPanel newSelectedLeaderboardPanel = new MultiRaceLeaderboardPanel(this, getComponentContext(),
-                    sailingService,
+                    sailingServiceFactory.apply(newSelectedLeaderboardName),
                     asyncActionsExecutor, toMerge, isEmbedded,
                     new CompetitorSelectionModel(true), timer,
                     null, newSelectedLeaderboardName, errorReporter, stringMessages, 
