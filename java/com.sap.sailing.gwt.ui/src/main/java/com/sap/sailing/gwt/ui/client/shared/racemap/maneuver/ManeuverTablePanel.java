@@ -141,17 +141,17 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         this.maneuverCellTable.addColumn(createManeuverTypeColumn());
         this.maneuverCellTable.addColumn(createMarkPassingColumn());
         this.maneuverCellTable.addColumn(timeColumn = createTimeColumn());
-        this.maneuverCellTable.addColumn(createSortableAbsMinMaxColumn(ManeuverTableData::getSpeedBeforeInKnots,
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getSpeedBeforeInKnots,
                 this.stringMessages.speedIn(), this.stringMessages.knotsUnit()));
-        this.maneuverCellTable.addColumn(createSortableAbsMinMaxColumn(ManeuverTableData::getSpeedAfterInKnots,
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getSpeedAfterInKnots,
                 this.stringMessages.speedOut(), this.stringMessages.knotsUnit()));
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getSpeedChangeInKnots,
                 this.stringMessages.speedChange(), this.stringMessages.knotsUnit()));
-        this.maneuverCellTable.addColumn(createSortableAbsMinMaxColumn(ManeuverTableData::getLowestSpeedInKnots,
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getLowestSpeedInKnots,
                 this.stringMessages.lowestSpeed(), this.stringMessages.knotsUnit()));
-        this.maneuverCellTable.addColumn(createSortableAbsMinMaxColumn(ManeuverTableData::getMaximumTurningRate,
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getMaximumTurningRate,
                 this.stringMessages.maxTurningRate(), this.stringMessages.degreesPerSecondUnit()));
-        this.maneuverCellTable.addColumn(createSortableAbsMinMaxColumn(ManeuverTableData::getAverageTurningRate,
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getAverageTurningRate,
                 this.stringMessages.avgTurningRate(), this.stringMessages.degreesPerSecondUnit()));
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getManeuverLoss,
                 this.stringMessages.maneuverLoss(), stringMessages.metersUnit()));

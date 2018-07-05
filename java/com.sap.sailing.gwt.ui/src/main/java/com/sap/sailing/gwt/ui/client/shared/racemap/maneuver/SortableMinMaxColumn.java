@@ -59,7 +59,7 @@ public class SortableMinMaxColumn extends AbstractSortableColumnWithMinMax<Maneu
             @Override
             public Double getDoubleValue(ManeuverTableData row) {
                 Double value = extractor.apply(row);
-                return value == null ? null : value;
+                return value == null ? null : absolute ? Math.abs(value) : value;
             }
         };
 
