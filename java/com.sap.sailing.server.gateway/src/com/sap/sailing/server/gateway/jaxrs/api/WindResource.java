@@ -40,7 +40,7 @@ public class WindResource extends AbstractSailingServerResource {
 
         JSONArray regattaNamesAndRaceNames = (JSONArray) requestObject.get("regattaNamesAndRaceNames");
 
-        WindSourceType windSourceType = WindSourceType.valueOf((String) (String) requestObject.get("windSourceType"));
+        WindSourceType windSourceType = WindSourceType.valueOf((String) requestObject.get("windSourceType"));
         JSONArray answer = new JSONArray();
         String windSourceId = (String) requestObject.get("windSourceId");
         for (Object regattaNameAndRaceName : regattaNamesAndRaceNames) {
