@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
@@ -10,6 +11,7 @@ import com.sap.sailing.domain.maneuverdetection.ManeuverDetectorWithEstimationDa
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorWithEstimationDataSupportDecoratorImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.TrackTimeInfo;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -29,12 +31,16 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends Abst
     public static final String DISTANCE_TRAVELLED_IN_METERS = "distanceTravelledInMeters";
     public static final String START_TIME_POINT = "startUnixTime";
     public static final String END_TIME_POINT = "endUnixTime";
+    public static final String FIXES_COUNT_FOR_POLARS = "fixesCountForPolars";
 
     private final BoatClassJsonSerializer boatClassJsonSerializer;
     private final CompleteManeuverCurveWithEstimationDataJsonSerializer maneuverWithEstimationDataJsonSerializer;
+    private final PolarDataService polarDataService;
 
-    public CompleteManeuverCurvesWithEstimationDataJsonSerializer(BoatClassJsonSerializer boatClassJsonSerializer,
+    public CompleteManeuverCurvesWithEstimationDataJsonSerializer(PolarDataService polarDataService,
+            BoatClassJsonSerializer boatClassJsonSerializer,
             CompleteManeuverCurveWithEstimationDataJsonSerializer maneuverWithEstimationDataJsonSerializer) {
+        this.polarDataService = polarDataService;
         this.boatClassJsonSerializer = boatClassJsonSerializer;
         this.maneuverWithEstimationDataJsonSerializer = maneuverWithEstimationDataJsonSerializer;
     }
@@ -59,6 +65,7 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends Abst
                     completeManeuverCurvesWithEstimationData
                             .add(maneuverWithEstimationDataJsonSerializer.serialize(maneuver));
                 }
+                forCompetitorJson.put(FIXES_COUNT_FOR_POLARS, getFixesCountForPolars(trackedRace, competitor));
                 forCompetitorJson.put(MANEUVER_CURVES, completeManeuverCurvesWithEstimationData);
                 Duration averageIntervalBetweenFixes = trackedRace.getTrack(competitor)
                         .getAverageIntervalBetweenFixes();
@@ -84,7 +91,7 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends Abst
             TrackedRace trackedRace, Competitor competitor) {
         Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, false);
         ManeuverDetectorWithEstimationDataSupport maneuverDetector = new ManeuverDetectorWithEstimationDataSupportDecoratorImpl(
-                new ManeuverDetectorImpl(trackedRace, competitor));
+                new ManeuverDetectorImpl(trackedRace, competitor), polarDataService);
         Iterable<CompleteManeuverCurveWithEstimationData> maneuversWithEstimationData = null;
         try {
             Iterable<CompleteManeuverCurve> maneuverCurves = maneuverDetector.getCompleteManeuverCurves(maneuvers);
@@ -93,6 +100,12 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends Abst
             e.printStackTrace();
         }
         return maneuversWithEstimationData;
+    }
+
+    private long getFixesCountForPolars(TrackedRace trackedRace, Competitor competitor) {
+        BoatClass boatClass = trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass();
+        Long fixesCountForBoatPolars = polarDataService.getFixCountPerBoatClass().get(boatClass);
+        return fixesCountForBoatPolars == null ? 0L : fixesCountForBoatPolars;
     }
 
 }
