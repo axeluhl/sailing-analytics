@@ -1,5 +1,8 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -10,6 +13,7 @@ import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimat
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetectorWithEstimationDataSupport;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorWithEstimationDataSupportDecoratorImpl;
+import com.sap.sailing.domain.maneuverdetection.impl.ManeuverSpot;
 import com.sap.sailing.domain.maneuverdetection.impl.TrackTimeInfo;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
@@ -17,6 +21,8 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
  * 
@@ -36,13 +42,23 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends Abst
     private final BoatClassJsonSerializer boatClassJsonSerializer;
     private final CompleteManeuverCurveWithEstimationDataJsonSerializer maneuverWithEstimationDataJsonSerializer;
     private final PolarDataService polarDataService;
+    private final Integer startBeforeStartLineInSeconds;
+    private final Integer endBeforeStartLineInSeconds;
+    private final Integer startAfterFinishLineInSeconds;
+    private final Integer endAfterFinishLineInSeconds;
 
     public CompleteManeuverCurvesWithEstimationDataJsonSerializer(PolarDataService polarDataService,
             BoatClassJsonSerializer boatClassJsonSerializer,
-            CompleteManeuverCurveWithEstimationDataJsonSerializer maneuverWithEstimationDataJsonSerializer) {
+            CompleteManeuverCurveWithEstimationDataJsonSerializer maneuverWithEstimationDataJsonSerializer,
+            Integer startBeforeStartLineInSeconds, Integer endBeforeStartLineInSeconds,
+            Integer startAfterFinishLineInSeconds, Integer endAfterFinishLineInSeconds) {
         this.polarDataService = polarDataService;
         this.boatClassJsonSerializer = boatClassJsonSerializer;
         this.maneuverWithEstimationDataJsonSerializer = maneuverWithEstimationDataJsonSerializer;
+        this.startBeforeStartLineInSeconds = startBeforeStartLineInSeconds;
+        this.endBeforeStartLineInSeconds = endBeforeStartLineInSeconds;
+        this.startAfterFinishLineInSeconds = startAfterFinishLineInSeconds;
+        this.endAfterFinishLineInSeconds = endAfterFinishLineInSeconds;
     }
 
     @Override
@@ -53,15 +69,41 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends Abst
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
             TrackTimeInfo trackTimeInfo = maneuverDetector.getTrackTimeInfo();
+            TimePoint from = null;
+            TimePoint to = null;
+            if (startBeforeStartLineInSeconds != Integer.MIN_VALUE) {
+                from = trackTimeInfo.getTrackStartTimePoint()
+                        .minus(new MillisecondsDurationImpl(startBeforeStartLineInSeconds * 1000L));
+            } else if (startAfterFinishLineInSeconds != Integer.MIN_VALUE) {
+                from = trackTimeInfo.getTrackEndTimePoint()
+                        .plus(new MillisecondsDurationImpl(startAfterFinishLineInSeconds * 1000L));
+            }
+            if (endAfterFinishLineInSeconds != Integer.MIN_VALUE) {
+                to = trackTimeInfo.getTrackEndTimePoint()
+                        .plus(new MillisecondsDurationImpl(endAfterFinishLineInSeconds * 1000L));
+            } else if (endBeforeStartLineInSeconds != Integer.MIN_VALUE) {
+                to = trackTimeInfo.getTrackStartTimePoint()
+                        .minus(new MillisecondsDurationImpl(endBeforeStartLineInSeconds * 1000L));
+            }
             if (trackTimeInfo != null) {
+                if (from != null ^ to != null) {
+                    if (from == null) {
+                        from = trackTimeInfo.getTrackStartTimePoint();
+                    }
+                    if (to == null) {
+                        to = trackTimeInfo.getTrackEndTimePoint();
+                    }
+                }
                 final JSONObject forCompetitorJson = new JSONObject();
                 byCompetitorJson.add(forCompetitorJson);
                 forCompetitorJson.put(COMPETITOR_NAME, competitor.getName());
                 forCompetitorJson.put(BOAT_CLASS, boatClassJsonSerializer
                         .serialize(trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass()));
                 final JSONArray completeManeuverCurvesWithEstimationData = new JSONArray();
-                for (CompleteManeuverCurveWithEstimationData maneuver : getCompleteManeuverCurvesWithEstimationData(
-                        trackedRace, competitor)) {
+                Iterable<CompleteManeuverCurveWithEstimationData> completeManeuvers = from != null
+                        ? getCompleteManeuverCurvesWithEstimationData(trackedRace, competitor, from, to)
+                        : getCompleteManeuverCurvesWithEstimationData(trackedRace, competitor);
+                for (CompleteManeuverCurveWithEstimationData maneuver : completeManeuvers) {
                     completeManeuverCurvesWithEstimationData
                             .add(maneuverWithEstimationDataJsonSerializer.serialize(maneuver));
                 }
@@ -88,17 +130,28 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer extends Abst
     }
 
     private Iterable<CompleteManeuverCurveWithEstimationData> getCompleteManeuverCurvesWithEstimationData(
+            TrackedRace trackedRace, Competitor competitor, TimePoint from, TimePoint to) {
+        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
+        List<ManeuverSpot> maneuverSpots = maneuverDetector.detectManeuvers(from, to);
+        List<CompleteManeuverCurve> maneuverCurves = maneuverSpots.stream()
+                .map(maneuverSpot -> maneuverSpot.getManeuverCurve()).collect(Collectors.toList());
+        ManeuverDetectorWithEstimationDataSupport maneuverDetectorWithEstimationData = new ManeuverDetectorWithEstimationDataSupportDecoratorImpl(
+                maneuverDetector, polarDataService);
+        Iterable<CompleteManeuverCurveWithEstimationData> maneuversWithEstimationData = maneuverDetectorWithEstimationData
+                .getCompleteManeuverCurvesWithEstimationData(maneuverCurves);
+        return maneuversWithEstimationData;
+    }
+
+    private Iterable<CompleteManeuverCurveWithEstimationData> getCompleteManeuverCurvesWithEstimationData(
             TrackedRace trackedRace, Competitor competitor) {
         Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, false);
-        ManeuverDetectorWithEstimationDataSupport maneuverDetector = new ManeuverDetectorWithEstimationDataSupportDecoratorImpl(
-                new ManeuverDetectorImpl(trackedRace, competitor), polarDataService);
-        Iterable<CompleteManeuverCurveWithEstimationData> maneuversWithEstimationData = null;
-        try {
-            Iterable<CompleteManeuverCurve> maneuverCurves = maneuverDetector.getCompleteManeuverCurves(maneuvers);
-            maneuversWithEstimationData = maneuverDetector.getCompleteManeuverCurvesWithEstimationData(maneuverCurves);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
+        ManeuverDetectorWithEstimationDataSupport maneuverDetectorWithEstimationData = new ManeuverDetectorWithEstimationDataSupportDecoratorImpl(
+                maneuverDetector, polarDataService);
+        Iterable<CompleteManeuverCurve> maneuverCurves = maneuverDetectorWithEstimationData
+                .getCompleteManeuverCurves(maneuvers);
+        Iterable<CompleteManeuverCurveWithEstimationData> maneuversWithEstimationData = maneuverDetectorWithEstimationData
+                .getCompleteManeuverCurvesWithEstimationData(maneuverCurves);
         return maneuversWithEstimationData;
     }
 

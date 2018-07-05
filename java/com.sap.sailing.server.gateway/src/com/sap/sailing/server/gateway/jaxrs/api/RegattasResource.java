@@ -1030,7 +1030,15 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/completeManeuverCurvesWithEstimationData")
     public Response getCompleteManeuverCurvesWithEstimationData(@PathParam("regattaname") String regattaName,
-            @PathParam("racename") String raceName) {
+            @PathParam("racename") String raceName,
+            @QueryParam("startBeforeStartLineInSeconds") @DefaultValue(Integer.MIN_VALUE
+                    + "") Integer startBeforeStartLineInSeconds,
+            @QueryParam("endBeforeStartLineInSeconds") @DefaultValue(Integer.MIN_VALUE
+                    + "") Integer endBeforeStartLineInSeconds,
+            @QueryParam("startAfterFinishLineInSeconds") @DefaultValue(Integer.MIN_VALUE
+                    + "") Integer startAfterFinishLineInSeconds,
+            @QueryParam("endAfterFinishLineInSeconds") @DefaultValue(Integer.MIN_VALUE
+                    + "") Integer endAfterFinishLineInSeconds) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -1050,7 +1058,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                         new CompleteManeuverCurveWithEstimationDataJsonSerializer(
                                 new ManeuverMainCurveWithEstimationDataJsonSerializer(),
                                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer(),
-                                new ManeuverWindJsonSerializer(), new PositionJsonSerializer()));
+                                new ManeuverWindJsonSerializer(), new PositionJsonSerializer()),
+                        startBeforeStartLineInSeconds, endBeforeStartLineInSeconds, startAfterFinishLineInSeconds,
+                        endAfterFinishLineInSeconds);
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
                 return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
@@ -1065,7 +1075,15 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response getGpsFixesWithEstimationData(@PathParam("regattaname") String regattaName,
             @PathParam("racename") String raceName, @QueryParam("addWind") @DefaultValue("true") Boolean addWind,
             @QueryParam("addNextWaypoint") @DefaultValue("true") Boolean addNextWaypoint,
-            @QueryParam("smoothFixes") @DefaultValue("true") Boolean smoothFixes) {
+            @QueryParam("smoothFixes") @DefaultValue("true") Boolean smoothFixes,
+            @QueryParam("startBeforeStartLineInSeconds") @DefaultValue(Integer.MIN_VALUE
+                    + "") Integer startBeforeStartLineInSeconds,
+            @QueryParam("endBeforeStartLineInSeconds") @DefaultValue(Integer.MIN_VALUE
+                    + "") Integer endBeforeStartLineInSeconds,
+            @QueryParam("startAfterFinishLineInSeconds") @DefaultValue(Integer.MIN_VALUE
+                    + "") Integer startAfterFinishLineInSeconds,
+            @QueryParam("endAfterFinishLineInSeconds") @DefaultValue(Integer.MIN_VALUE
+                    + "") Integer endAfterFinishLineInSeconds) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -1082,7 +1100,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 GpsFixesWithEstimationDataJsonSerializer serializer = new GpsFixesWithEstimationDataJsonSerializer(
                         new DetailedBoatClassJsonSerializer(), new GPSFixMovingJsonSerializer(),
-                        new ManeuverWindJsonSerializer(), addWind, addNextWaypoint, smoothFixes);
+                        new ManeuverWindJsonSerializer(), addWind, addNextWaypoint, smoothFixes,
+                        startBeforeStartLineInSeconds, endBeforeStartLineInSeconds, startAfterFinishLineInSeconds,
+                        endAfterFinishLineInSeconds);
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
                 return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();

@@ -15,6 +15,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
  * 
@@ -39,16 +41,26 @@ public class GpsFixesWithEstimationDataJsonSerializer extends AbstractTrackedRac
     private final boolean addNextWaypoint;
     private final ManeuverWindJsonSerializer windJsonSerializer;
     private final Boolean smoothFixes;
+    private Integer startBeforeStartLineInSeconds;
+    private Integer endBeforeStartLineInSeconds;
+    private Integer startAfterFinishLineInSeconds;
+    private Integer endAfterFinishLineInSeconds;
 
     public GpsFixesWithEstimationDataJsonSerializer(BoatClassJsonSerializer boatClassJsonSerializer,
             GPSFixMovingJsonSerializer gpsFixMovingJsonSerializer, ManeuverWindJsonSerializer windJsonSerializer,
-            boolean addWind, boolean addNextWaypoint, Boolean smoothFixes) {
+            boolean addWind, boolean addNextWaypoint, Boolean smoothFixes, Integer startBeforeStartLineInSeconds,
+            Integer endBeforeStartLineInSeconds, Integer startAfterFinishLineInSeconds,
+            Integer endAfterFinishLineInSeconds) {
         this.boatClassJsonSerializer = boatClassJsonSerializer;
         this.gpsFixMovingJsonSerializer = gpsFixMovingJsonSerializer;
         this.windJsonSerializer = windJsonSerializer;
         this.addWind = addWind;
         this.addNextWaypoint = addNextWaypoint;
         this.smoothFixes = smoothFixes;
+        this.startBeforeStartLineInSeconds = startBeforeStartLineInSeconds;
+        this.endBeforeStartLineInSeconds = endBeforeStartLineInSeconds;
+        this.startAfterFinishLineInSeconds = startAfterFinishLineInSeconds;
+        this.endAfterFinishLineInSeconds = endAfterFinishLineInSeconds;
     }
 
     @Override
@@ -61,6 +73,26 @@ public class GpsFixesWithEstimationDataJsonSerializer extends AbstractTrackedRac
             ManeuverDetectorWithEstimationDataSupportDecoratorImpl estimationDataSupportDecoratorImpl = new ManeuverDetectorWithEstimationDataSupportDecoratorImpl(
                     maneuverDetector, null);
             TrackTimeInfo trackTimeInfo = maneuverDetector.getTrackTimeInfo();
+            TimePoint from = null;
+            TimePoint to = null;
+            if (startBeforeStartLineInSeconds != Integer.MIN_VALUE) {
+                from = trackTimeInfo.getTrackStartTimePoint()
+                        .minus(new MillisecondsDurationImpl(startBeforeStartLineInSeconds * 1000L));
+            } else if (startAfterFinishLineInSeconds != Integer.MIN_VALUE) {
+                from = trackTimeInfo.getTrackEndTimePoint()
+                        .plus(new MillisecondsDurationImpl(startAfterFinishLineInSeconds * 1000L));
+            } else {
+                from = trackTimeInfo.getTrackStartTimePoint();
+            }
+            if (endAfterFinishLineInSeconds != Integer.MIN_VALUE) {
+                to = trackTimeInfo.getTrackEndTimePoint()
+                        .plus(new MillisecondsDurationImpl(endAfterFinishLineInSeconds * 1000L));
+            } else if (endBeforeStartLineInSeconds != Integer.MIN_VALUE) {
+                to = trackTimeInfo.getTrackStartTimePoint()
+                        .minus(new MillisecondsDurationImpl(endBeforeStartLineInSeconds * 1000L));
+            } else {
+                to = trackTimeInfo.getTrackEndTimePoint();
+            }
             if (trackTimeInfo != null) {
                 final JSONObject forCompetitorJson = new JSONObject();
                 byCompetitorJson.add(forCompetitorJson);
@@ -71,7 +103,7 @@ public class GpsFixesWithEstimationDataJsonSerializer extends AbstractTrackedRac
                 GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                 track.lockForRead();
                 try {
-                    for (GPSFixMoving gpsFix : track.getFixes()) {
+                    for (GPSFixMoving gpsFix : track.getFixes(from, true, to, true)) {
                         JSONObject serializedGpsFix = gpsFixMovingJsonSerializer.serialize(gpsFix);
                         if (addWind) {
                             Wind wind = trackedRace.getWind(gpsFix.getPosition(), gpsFix.getTimePoint());
