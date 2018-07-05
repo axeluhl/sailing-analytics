@@ -97,7 +97,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         this.stringMessages = stringMessages;
         this.raceIdentifier = raceIdentifier;
         this.mediaService = mediaService;
-        registerNativeMethods();
     }
 
     @Override
@@ -113,6 +112,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         mediaTrack.assignedRaces = assignedRaces;
     }
 
+    //used for audio only tracks, using native mediaelement to determine time
     private void loadMediaDuration() {
         MediaBase mediaBase = Audio.createIfSupported();
         if (mediaBase != null) {
@@ -222,7 +222,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         if (youtubeId != null) {
             mediaTrack.url = youtubeId;
             mediaTrack.mimeType = MimeType.youtube;
-            loadYoutubeMetadata(youtubeId);
+            loadYoutubeMetadata();
         } else {
             mediaTrack.url = url;
             loadMediaDuration();
@@ -250,6 +250,29 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         }
     }
 
+    private void loadYoutubeMetadata() {
+        if(mediaTrack.url != null && !mediaTrack.url.isEmpty()) {
+            mediaService.checkYoutubeMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
+                
+                @Override
+                public void onFailure(Throwable caught) {
+                    infoLabel.setWidget(new Label(caught.getMessage()));
+                }
+                
+                @Override
+                public void onSuccess(VideoMetadataDTO result) {
+                    if (result.isDownloadable()) {
+                        mediaTrack.duration = result.getDuration();
+                        mediaTrack.title = result.getMessage();
+                        refreshUI();
+                    } else {
+                        infoLabel.setWidget(new Label(result.getMessage()));
+                    }
+                }
+            });
+        }
+    }
+
     private String sliceBefore(String lastPathSegment, String slicer) {
         int paramSegment = lastPathSegment.indexOf(slicer);
         if (paramSegment > 0) {
@@ -258,62 +281,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         return lastPathSegment;
     }
 
-    private native void registerNativeMethods() /*-{
-        var that = this;
-        window.youtubeMetadataCallback = function(metadata) {
-            var title = metadata.entry.media$group.media$title.$t;
-            var duration = metadata.entry.media$group.yt$duration.seconds;
-            var description = metadata.entry.media$group.media$description.$t;
-            that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::youtubeMetadataCallback(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(title, duration, description);
-        }
-    }-*/;
-
-    /**
-     * Inspired by https://developers.google.com/web-toolkit/doc/latest/tutorial/Xsite
-     * 
-     * @param youtubeId
-     */
-    public native void loadYoutubeMetadata(String youtubeId) /*-{
-        var that = this;
-        //Create temporary script element.
-        window.youtubeMetadataCallbackScript = document.createElement("script");
-        window.youtubeMetadataCallbackScript.src = "http://gdata.youtube.com/feeds/api/videos/"
-                + youtubeId
-                + "?alt=json&orderby=published&format=6&callback=youtubeMetadataCallback";
-        document.body.appendChild(window.youtubeMetadataCallbackScript);
-
-        // Cancel meta data capturing after has 2-seconds timeout.
-        setTimeout(
-            function() {
-                //Remove temporary script element.
-                if (window != null && window.youtubeMetadataCallbackScript != null) {
-                    document.body.removeChild(window.youtubeMetadataCallbackScript);
-                    delete window.youtubeMetadataCallbackScript;
-                }
-                that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setBusy(Z)(false);
-            }, 2000);
-    }-*/;
-    
     public void setBusy(boolean busy) {
         busyIndicator.setBusy(busy);
-    }
-
-    public void youtubeMetadataCallback(String title, String durationInSeconds, String description) {
-        busyIndicator.setBusy(false);
-        mediaTrack.title = title;
-        try {
-            long duration = (long) Math.round(1000 * Double
-                    .valueOf(durationInSeconds));
-            if (duration > 0) {
-                mediaTrack.duration = new MillisecondsDurationImpl(duration);
-            } else {
-                mediaTrack.duration = null;
-            }
-        } catch (NumberFormatException ex) {
-            mediaTrack.duration = null;
-        }
-        mediaTrack.startTime = this.defaultStartTime;
-        refreshUI();
     }
 
     protected void refreshUI() {
@@ -370,11 +339,10 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     /**
      * For a given url that points to an mp4 video, attempts are made to parse the header, to determine the actual
-     * starttime of the video and to check for a 360° flag. The video will be analyzed by the backendserver, either via
+     * starttime of the video and to check for a 360Â° flag. The video will be analyzed by the backendserver, either via
      * direct download, or proxied by the client, if a video is only available locally. If the video header cannot be
      * read, default values are used instead.
      */
-    // TODO Eclipse doesn't find any calls to this private method; can it be removed?
     private void checkMetadata(String url, Label lbl, AsyncCallback<VideoMetadataDTO> asyncCallback) {
         // check on server first
         mediaService.checkMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
