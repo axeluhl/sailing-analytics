@@ -1,10 +1,14 @@
-.snackbar {
-    visibility: hidden;
-    min-width: 250px;
-    margin-left: -125px;
+.notification {
+	min-width: 250px;
     text-align: center;
     border-radius: 2px;
     padding: 16px;
-    position: fixed;
-    left: 50%;
+    margin-bottom: 10px;
+}
+
+.notification_bar {
+	position: fixed;
+	bottom: 0;
+	left: 50%;
+    transform: translateX(-50%);
 }

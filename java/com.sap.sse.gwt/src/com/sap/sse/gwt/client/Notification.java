@@ -1,90 +1,25 @@
 package com.sap.sse.gwt.client;
 
 import java.util.LinkedList;
+import java.util.List;
 
-import com.google.gwt.animation.client.Animation;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.dom.client.Style.Cursor;
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.sap.sse.common.Util.Pair;
 
 /**
- * Utility class to show non obstructive warning / info messages using a small notification at the bottom of the page. Clicking the notification will hide it. It will autohide after some time.
+ * Utility class to show multiple non obstructive warning / info messages using a small notification at the bottom of the page.
  */
 public class Notification {
-    private static final int NOTIFICATION_TIME = 10000;
-    private static final double FADE_OUT_PERCENT = 0.98;
-    private static final double FADE_IN_PERCENT = 0.005;
-
-    interface NotificationResources extends ClientBundle {
-        @Source("notification.gss")
-        NotificationCSS css();
-    }
-
-    interface NotificationCSS extends CssResource {
-        String snackbar();
-    }
-
-    private final static FlowPanel snackBar = new FlowPanel();
-    private final static NotificationResources ress = GWT.create(NotificationResources.class);
-    private static Animation notificationAnimation;
-
-    static {
-        ress.css().ensureInjected();
-        snackBar.addStyleName(ress.css().snackbar());
-        snackBar.getElement().getStyle().setCursor(Cursor.POINTER);
-
-        notificationAnimation = new Animation() {
-            @Override
-            protected void onStart() {
-                super.onStart();
-                snackBar.getElement().getStyle().setOpacity(0);
-                snackBar.getElement().getStyle().setVisibility(Visibility.VISIBLE);
-            }
-
-            @Override
-            protected void onUpdate(double progress) {
-                if (progress < FADE_IN_PERCENT) {
-                    double relPr = progress / FADE_IN_PERCENT;
-                    double bottom = 60 * relPr - 30;
-                    snackBar.getElement().getStyle().setOpacity(relPr);
-                    snackBar.getElement().getStyle().setBottom(bottom, Unit.PX);
-                } else if (progress > FADE_OUT_PERCENT) {
-                    double relPr = (progress - FADE_OUT_PERCENT) / (1 - FADE_OUT_PERCENT);
-                    snackBar.getElement().getStyle().setOpacity(1 - relPr);
-                    double bottom = 60 * (1 - relPr) - 30;
-                    snackBar.getElement().getStyle().setBottom(bottom, Unit.PX);
-                } else {
-                    snackBar.getElement().getStyle().setOpacity(1);
-                    snackBar.getElement().getStyle().setBottom(30, Unit.PX);
-                }
-            }
-
-            @Override
-            protected void onComplete() {
-                snackBar.getElement().getStyle().setVisibility(Visibility.HIDDEN);
-                checkQueue(true);
-            }
-            
-            @Override
-            protected void onCancel() {
-                snackBar.getElement().getStyle().setVisibility(Visibility.HIDDEN);
-                checkQueue(true);
-            }
-        };
-    }
-
-    private final static LinkedList<Pair<String, NotificationType>> QUEUE = new LinkedList<>();
-
-    private Notification() {
-    }
+    
+    private static int currentlyShown = 0; // currently displayed messages on the screen.
+    private static final int MAX_NOTIFICATIONS = 5; // max. notifications to become displayed at the same time
+    private static final Panel notifications = new FlowPanel();
+    private static final List<NotificationPanel> QUEUE = new LinkedList<>();
+    private static final NotificationResources ress = GWT.create(NotificationResources.class);
 
     public enum NotificationType {
         ERROR("\u2716", "RED", "WHITE"),
@@ -101,37 +36,71 @@ public class Notification {
             this.bgColor = bgColor;
             this.color = color;
         }
-    }
 
-    public static void notify(String message, NotificationType type) {
-        QUEUE.add(new Pair<>(message, type));
-        checkQueue(false);
-    }
-
-    /**
-     * Displays next message if non is displayed currently, else does nothing and will by called by currently displaying
-     * message TTL timer
-     */
-    private static void checkQueue(boolean onAnimationFinish) {
-        if (!QUEUE.isEmpty()) {
-            if (!notificationAnimation.isRunning() || onAnimationFinish) {
-                RootPanel.get().add(snackBar);
-                Event.sinkEvents(snackBar.getElement(), Event.ONCLICK);
-                Event.setEventListener(snackBar.getElement(), new EventListener() {
-                    @Override
-                    public void onBrowserEvent(Event event) {
-                        GWT.log("test");
-                        notificationAnimation.cancel();
-                    }
-                });
-                
-                Pair<String, NotificationType> notification = QUEUE.pop();
-                snackBar.getElement().getStyle().setColor(notification.getB().color);
-                snackBar.getElement().getStyle().setBackgroundColor(notification.getB().bgColor);
-                snackBar.getElement().setInnerText(notification.getB().decorator + " " + notification.getA() + " "
-                        + notification.getB().decorator);
-                notificationAnimation.run(NOTIFICATION_TIME);
-            }
+        public String getDecorator() {
+            return decorator;
         }
+
+        public String getColor() {
+            return color;
+        }
+
+        public String getBackgroundColor() {
+            return bgColor;
+        }
+    }
+
+    interface NotificationResources extends ClientBundle {
+        @Source("notification.gss")
+        NotificationCSS css();
+    }
+
+    interface NotificationCSS extends CssResource {
+        String notification();
+        String notification_bar();
+    }
+
+    static {
+        ress.css().ensureInjected();
+        RootPanel.get().add(notifications);
+        notifications.addStyleName(ress.css().notification_bar());
+    }
+
+    private Notification() {
+    }
+    
+    /**
+     * Creates new notification and adds it to the notification queue.
+     * @param message message formatted as string
+     * @param type type of notification, see {@link com.sap.sse.gwt.client.Notification.NotificationType}
+     */
+    public static void notify(String message, NotificationType type) {
+        NotificationPanel notification = new NotificationPanel(message, type, notifications);
+        if (!QUEUE.contains(notification)) {
+            QUEUE.add(notification);
+        }
+        checkQueue(false, notification);
+    }
+    
+    /**
+     * Checks notification queue for hidden notifications and displays next notification, if the amount of
+     * currently shown notifications does not exceed notification limit. This method does not have to be called
+     * in particular by the user to display messages. Use {@link com.sap.sse.gwt.client.Notification#notify()} instead
+     * to show notifications.
+     * @param onAnimationFinish should only be {@code true} if an already shown message leads to this method call, otherwise {@code false}. Only works in combination with parameter {@code notification}.
+     * @param notification should be an instance of NotificationPanel which has finished displaying, otherwise {@code null}.
+     */
+    protected static void checkQueue(boolean onAnimationFinish, NotificationPanel notification) {
+        if (onAnimationFinish && notification != null && notification.alreadyShown()) {
+            QUEUE.remove(notification);
+        }
+
+        currentlyShown = QUEUE.stream().filter(value -> value.alreadyShown() == true).toArray().length;
+        QUEUE.forEach(panel -> {
+            if (!panel.alreadyShown() && currentlyShown < MAX_NOTIFICATIONS) {
+                panel.show();
+                currentlyShown++;
+            }
+        });
     }
 }
