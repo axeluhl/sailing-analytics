@@ -259,22 +259,29 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
 
     private int getNumberOf(ManeuverType maneuverType) {
-        TrackedRace trackedRace = getTrackedRace();
         int number = 0;
-        if (trackedRace != null && trackedRace.getStartOfRace() != null) {
-            final TimePoint end;
-            final TimePoint endOfTracking = trackedRace.getEndOfTracking();
-            if (trackedRace.getEndOfRace() != null) {
-                end = trackedRace.getEndOfRace();
+        TrackedRace trackedRace = getTrackedRace();
+        if (trackedRace != null) {
+            Course course = trackedRace.getRace().getCourse();
+            Waypoint startWaypoint = course.getFirstWaypoint();
+            MarkPassing startPassing = trackedRace.getMarkPassing(getCompetitor(), startWaypoint);
+            TimePoint start = startPassing != null ? startPassing.getTimePoint() : trackedRace.getStartOfRace();
+            
+            Waypoint finishWaypoint = course.getLastWaypoint();
+            MarkPassing finishPassing = trackedRace.getMarkPassing(getCompetitor(), finishWaypoint);
+            TimePoint end;
+            if (finishPassing != null) {
+                end = finishPassing.getTimePoint();
             } else {
-                final TimePoint now = MillisecondsTimePoint.now();
-                if (endOfTracking != null && endOfTracking.before(now)) {
-                    end = endOfTracking;
-                } else {
-                    end = now;
+                end = trackedRace.getEndOfRace();
+                if (end == null) {
+                    TimePoint endOfTracking = trackedRace.getEndOfTracking();
+                    TimePoint now = MillisecondsTimePoint.now();
+                    end = endOfTracking != null && endOfTracking.before(now) ? endOfTracking : now;
                 }
             }
-            for (Maneuver maneuver : trackedRace.getManeuvers(getCompetitor(), trackedRace.getStartOfRace(), end, false)) {
+            
+            for (Maneuver maneuver : trackedRace.getManeuvers(getCompetitor(), start, end, false)) {
                 if (maneuver.getType() == maneuverType) {
                     number++;
                 }
