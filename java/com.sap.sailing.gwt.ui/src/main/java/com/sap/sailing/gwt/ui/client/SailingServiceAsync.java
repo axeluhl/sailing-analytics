@@ -965,7 +965,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     
     void getRaceDisplayNamesFromLeaderboard(final String leaderboardName, List<String> raceColumnNames, AsyncCallback<List<String>> callback);
 
-    void getAvailableDetailTypesForLeaderboard(String leaderboardName,
+    void getAvailableDetailTypesForLeaderboard(String leaderboardName, RegattaAndRaceIdentifier raceOrNull,
             AsyncCallback<Iterable<DetailType>> asyncCallback);
 
     void canSliceRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> callback);
@@ -985,5 +985,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      */
     void getWindFinderSpot(String spotId, AsyncCallback<SpotDTO> callback);
 
-    void checkIfRaceIsTracked(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
+    /**
+     * @see SailingService#checkIfRaceIsTracking(RegattaAndRaceIdentifier)
+     */
+    void checkIfRaceIsTracking(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
 }

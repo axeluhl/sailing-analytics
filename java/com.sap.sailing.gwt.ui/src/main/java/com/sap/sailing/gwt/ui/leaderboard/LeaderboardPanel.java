@@ -57,9 +57,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -101,6 +99,8 @@ import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.DataExtractor;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -204,13 +204,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
         String determineBoatColorDivStyle(String competitorColor);
 
-        void afterConstructorHook(FlowPanel contentPanel, LeaderboardPanel<?> leaderboardPanel);
-
-        void afterLeaderboardUpdate(LeaderboardDTO leaderboard);
-
-        boolean preUpdateToolbarHook(LeaderboardDTO leaderboard);
+        void afterConstructorHook(LeaderboardPanel<?> leaderboardPanel);
 
         boolean hasRaceColumns();
+
+        void hookLeaderBoardAttachment(FlowPanel contentPanel,
+                FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO> leaderboardTable);
     }
 
     /**
@@ -404,6 +403,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private FlagImageResolver flagImageResolver;
 
+    private Widget toolbarPanel;
+
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LS settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
@@ -528,9 +529,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         busyIndicator.ensureDebugId("BusyIndicator");
         busyStateChangeListeners = new HashSet<>();
 
+        //required to enforce proper margin layouting
+        contentPanel.add(new Label());
+        
         // the information panel
         if (!isEmbedded) {
-            Widget toolbarPanel = createToolbarPanel();
+            toolbarPanel = createToolbarPanel();
             contentPanel.add(toolbarPanel);
         }
         if (competitorSearchTextBox != null) {
@@ -549,7 +553,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         if (enableSyncedScroller) {
             contentPanel.add(new OverlayAssistantScrollPanel(leaderboardTable));
         } else {
-            contentPanel.add(leaderboardTable);
+            style.hookLeaderBoardAttachment(contentPanel, leaderboardTable);
         }
         if (showCompetitorFilterStatus) {
             contentPanel.add(createFilterDeselectionControl());
@@ -569,7 +573,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             loadCompleteLeaderboard(/* showProgress */ false);
         }
         updateSettings(settings);
-        style.afterConstructorHook(contentPanel, this);
+        style.afterConstructorHook(this);
+        
+        //ensure proper margin styling
+        contentPanel.add(new Label());
     }
 
     public void scrollRowIntoView(int selected) {
@@ -770,7 +777,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     protected abstract void setDefaultRaceColumnSelection(LS settings);
 
-    private void setValuesWithReferenceOrder(Iterable<DetailType> valuesToSet, List<DetailType> referenceOrder,
+    private void setValuesWithReferenceOrder(Iterable<DetailType> valuesToSet, Collection<DetailType> referenceOrder,
             List<DetailType> collectionToSetValuesTo) {
         collectionToSetValuesTo.clear();
         collectionToSetValuesTo.addAll(referenceOrder);
@@ -928,11 +935,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     private class BoatInfoColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
         private final BoatFetcher<T> boatFetcher;
-        private final CompetitorFetcher<T> competitorFetcher;
 
-        public BoatInfoColumn(CompetitorFetcher<T> competitorFetcher, BoatFetcher<T> boatFetcher, LeaderBoardStyle style) {            
+        public BoatInfoColumn(BoatFetcher<T> boatFetcher, LeaderBoardStyle style) {            
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
-            this.competitorFetcher = competitorFetcher;
             this.boatFetcher = boatFetcher;
             // This style is adding to avoid contained images CSS property "max-width: 100%", which could cause
             // an overflow to the next column (see https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3537)
@@ -948,12 +953,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
             BoatDTO boat = boatFetcher.getBoat(object);
-            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
-            boolean boatColorShown = renderBoatColorIfNecessary(competitor, sb);
             sb.appendEscaped(getShortInfo(boat));
-            if (boatColorShown) {
-                sb.appendHtmlConstant("</div>");
-            }
         }
         
         private String getShortInfo(BoatDTO boat) {
@@ -2634,26 +2634,22 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
             informLeaderboardUpdateListenersAboutLeaderboardUpdated(leaderboard);
         }
-        style.afterLeaderboardUpdate(leaderboard);
     }
 
     protected void updateToolbar(LeaderboardDTO leaderboard) {
-        boolean doExecute = style.preUpdateToolbarHook(leaderboard);
-        if (doExecute) {
-            scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
-            if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
-                Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
-                String lastUpdate = DateAndTimeFormatterUtil.formatLongDateAndTimeGMT(lastCorrectionDate);
-                scoreCorrectionLastUpdateTimeLabel.setText(stringMessages.lastScoreUpdate() + ": " + lastUpdate);
-            } else {
-                scoreCorrectionLastUpdateTimeLabel.setText("");
-            }
-
-            boolean hasLiveRace = !leaderboard.getLiveRaces(timer.getLiveTimePointInMillis()).isEmpty();
-            liveRaceLabel.setText(hasLiveRace ? getLiveRacesText() : "");
-            scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
-            liveRaceLabel.setVisible(hasLiveRace);
+        scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
+        if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
+            Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
+            String lastUpdate = DateAndTimeFormatterUtil.formatLongDateAndTimeGMT(lastCorrectionDate);
+            scoreCorrectionLastUpdateTimeLabel.setText(stringMessages.lastScoreUpdate() + ": " + lastUpdate);
+        } else {
+            scoreCorrectionLastUpdateTimeLabel.setText("");
         }
+
+        boolean hasLiveRace = !leaderboard.getLiveRaces(timer.getLiveTimePointInMillis()).isEmpty();
+        liveRaceLabel.setText(hasLiveRace ? getLiveRacesText() : "");
+        scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
+        liveRaceLabel.setVisible(hasLiveRace);
     }
 
     protected abstract void processAutoExpands(AbstractSortableColumnWithMinMax<?, ?> c, RaceColumn<?> lastRaceColumn);
@@ -3181,9 +3177,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
                     || !(getLeaderboardTable()
                             .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof LeaderboardPanel.BoatInfoColumn)) {
-                CompetitorFetcher<LeaderboardRowDTO> competitorFetcher = (LeaderboardRowDTO row) -> row.competitor;
                 BoatFetcher<LeaderboardRowDTO> boatFetcher = (LeaderboardRowDTO row) -> row.boat;
-                BoatInfoColumn<LeaderboardRowDTO> boatInfoColumn = new BoatInfoColumn<LeaderboardRowDTO>(competitorFetcher, boatFetcher, style);                
+                BoatInfoColumn<LeaderboardRowDTO> boatInfoColumn = new BoatInfoColumn<LeaderboardRowDTO>(boatFetcher, style);                
                 insertColumn(columnIndexWhereToInsertTheNextColumn, boatInfoColumn);
             }
             columnIndexWhereToInsertTheNextColumn++;

@@ -2,10 +2,10 @@ package com.sap.sailing.datamining.impl.data;
 
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 
 public class GPSFixWithContext implements HasGPSFixContext {

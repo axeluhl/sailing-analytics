@@ -23,7 +23,6 @@ public abstract class AutoPlayNodeBase implements AutoPlayNode {
 
     @Override
     public final void start(EventBus bus) {
-        log("starting node, wrapping bus");
         isStopped = false;
         this.bus = new ResettableEventBus(bus);
         onStart();
@@ -31,7 +30,6 @@ public abstract class AutoPlayNodeBase implements AutoPlayNode {
 
     @Override
     public final void stop() {
-        log("stopping node, resetting bus");
         isStopped = true;
         onStop();
         if (bus != null) {

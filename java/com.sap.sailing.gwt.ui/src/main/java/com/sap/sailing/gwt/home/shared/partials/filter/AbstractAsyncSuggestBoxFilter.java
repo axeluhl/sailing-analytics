@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.home.shared.partials.filter;
 
 import java.util.Collection;
 
-import com.sap.sailing.gwt.common.client.suggestion.AbstractSuggestOracle;
 import com.sap.sse.common.filter.Filter;
+import com.sap.sse.gwt.client.suggestion.AbstractSuggestOracle;
 
 public abstract class AbstractAsyncSuggestBoxFilter<T, C> extends AbstractSuggestBoxFilter<T, C> {
 

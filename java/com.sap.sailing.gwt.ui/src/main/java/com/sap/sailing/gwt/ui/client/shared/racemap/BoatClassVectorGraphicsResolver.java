@@ -44,7 +44,8 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.A_CAT, BoatClassMasterdata.TORNADO, BoatClassMasterdata.FLYING_PHANTOM);
         BoatClassVectorGraphics keelBoatWithGennaker = new KeelBoatWithGennakerVectorGraphics(BoatClassMasterdata.J70,
                 BoatClassMasterdata.B_ONE, BoatClassMasterdata.J80, BoatClassMasterdata.LASER_SB3, BoatClassMasterdata.LONGTZE,
-                BoatClassMasterdata.RS_FEVA, BoatClassMasterdata.RS100, BoatClassMasterdata.TP52);
+                BoatClassMasterdata.RS_FEVA, BoatClassMasterdata.RS_TERA, BoatClassMasterdata.RS100, BoatClassMasterdata.TP52,
+                BoatClassMasterdata.CLUB_SWAN_50);
         BoatClassVectorGraphics dinghyWithSpinnaker = new DinghyWithSpinnakerVectorGraphics(BoatClassMasterdata._420,
                 BoatClassMasterdata._470, BoatClassMasterdata._5O5, BoatClassMasterdata.CADET, BoatClassMasterdata.FLYING_DUTCHMAN,
                 BoatClassMasterdata.FOLKBOAT, BoatClassMasterdata.DYAS, BoatClassMasterdata.DRAGON_INT,
@@ -53,7 +54,7 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.TOM_28_MAX, BoatClassMasterdata.DELPHIA_24,
                 BoatClassMasterdata.RS200, BoatClassMasterdata.RS400, BoatClassMasterdata.RS500, BoatClassMasterdata.RS800,
                 BoatClassMasterdata.STREAMLINE, BoatClassMasterdata.SWAN_45, BoatClassMasterdata.TEENY, BoatClassMasterdata.X_99,
-                BoatClassMasterdata.TRIAS, BoatClassMasterdata.VENT_D_OUEST);
+                BoatClassMasterdata.TRIAS, BoatClassMasterdata.VENT_D_OUEST, BoatClassMasterdata.FLYING_JUNIOR, BoatClassMasterdata.VAURIEN);
         BoatClassVectorGraphics circle = new CircleVectorGraphics(BoatClassMasterdata.RUNNING);
 
         defaultBoatVectorGraphics = dinghyWithSpinnaker; // TODO see bug 2571; this should be a slup-rigged icon working for 470, 505, J/70 etc.

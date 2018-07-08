@@ -18,7 +18,7 @@ public interface MediaPlayerManager {
 
     }
     
-    void setPlayerChangeListener(PlayerChangeListener playerChangeListener);
+    void addPlayerChangeListener(PlayerChangeListener playerChangeListener);
     
     void playAudio(MediaTrack audioTrack);
 

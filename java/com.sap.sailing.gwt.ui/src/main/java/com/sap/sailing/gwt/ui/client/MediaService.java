@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.UnsupportedEncodingException;
+
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
@@ -30,4 +32,15 @@ public interface MediaService extends RemoteService {
     VideoMetadataDTO checkMetadata(byte[] start, byte[] end, Long skipped);
 
     VideoMetadataDTO checkMetadata(String url);
+    
+    /**
+     * Obtains a MediaTrack for the given literal url, if one exists, {@code null} otherwise 
+     */
+    MediaTrack getMediaTrackByUrl(String url);
+    
+    /**
+     * Obtains metadata from the youtube api
+     * @throws UnsupportedEncodingException 
+     */
+    VideoMetadataDTO checkYoutubeMetadata(String url) throws UnsupportedEncodingException;
 }

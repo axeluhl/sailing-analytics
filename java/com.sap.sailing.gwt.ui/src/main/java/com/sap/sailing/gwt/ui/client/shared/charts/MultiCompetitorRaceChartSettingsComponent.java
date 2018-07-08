@@ -60,11 +60,11 @@ public class MultiCompetitorRaceChartSettingsComponent extends
         Collections.sort(sortedAvailableDetailTypes, new Comparator<DetailType>() {
             @Override
             public int compare(DetailType o1, DetailType o2) {
-                String o1Name = DetailTypeFormatter.format(o1);
-                String o2Name = DetailTypeFormatter.format(o2);
-                boolean o1Expedition = DetailType.isExpeditionType(o1);
-                boolean o2Expedition = DetailType.isExpeditionType(o2);
+                final boolean o1Expedition = o1.isExpeditionType();
+                final boolean o2Expedition = o2.isExpeditionType();
                 if ((o1Expedition && o2Expedition) || (!o1Expedition && !o2Expedition)) {
+                    final String o1Name = DetailTypeFormatter.format(o1);
+                    final String o2Name = DetailTypeFormatter.format(o2);
                     return Collator.getInstance().compare(o1Name, o2Name);
                 }
                 if (o1Expedition && !o2Expedition) {

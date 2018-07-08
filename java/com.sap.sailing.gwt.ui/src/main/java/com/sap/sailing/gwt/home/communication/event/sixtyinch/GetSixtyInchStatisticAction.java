@@ -2,18 +2,21 @@ package com.sap.sailing.gwt.home.communication.event.sixtyinch;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -30,7 +33,8 @@ import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
  * otherwise.
  * </p>
  */
-public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchStatisticDTO> {
+public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchStatisticDTO>, ProvidesLeaderboardRouting {
+    private static final Logger LOGGER = Logger.getLogger(GetSixtyInchStatisticAction.class.getName());
     // transfer as string, to avoid transfering incompatible types
     private String racename;
     private String regattaname;
@@ -76,10 +80,8 @@ public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchSt
         try {
             TargetTimeInfo timeToComplete = trace.getEstimatedTimeToComplete(timePoint);
             distance = timeToComplete.getExpectedDistance();
-        } catch (NotEnoughDataHasBeenAddedException e) {
-            e.printStackTrace();
-        } catch (NoWindException e) {
-            e.printStackTrace();
+        } catch (NoWindException | NotEnoughDataHasBeenAddedException e) {
+            LOGGER.log(Level.WARNING, "Could not estimate Distance" , e);
         }
         return distance;
     }
@@ -89,11 +91,14 @@ public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchSt
         try {
             TargetTimeInfo timeToComplete = trace.getEstimatedTimeToComplete(timePoint);
             duration = timeToComplete.getExpectedDuration();
-        } catch (NotEnoughDataHasBeenAddedException e) {
-            e.printStackTrace();
-        } catch (NoWindException e) {
-            e.printStackTrace();
+        } catch (NotEnoughDataHasBeenAddedException | NoWindException e) {
+            LOGGER.log(Level.WARNING, "Could not estimate duration" , e);
         }
         return duration;
+    }
+
+    @Override
+    public String getLeaderboardName() {
+        return regattaname;
     }
 }

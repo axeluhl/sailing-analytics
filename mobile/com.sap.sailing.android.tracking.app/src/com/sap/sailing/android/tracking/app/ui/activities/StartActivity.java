@@ -6,6 +6,7 @@ import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
 import com.sap.sailing.android.shared.util.EulaHelper;
+import com.sap.sailing.android.shared.util.NotificationHelper;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.HomeFragment;
 import com.sap.sailing.android.tracking.app.utils.AboutHelper;
@@ -19,6 +20,8 @@ import com.sap.sailing.android.tracking.app.valueobjects.MarkCheckinData;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Menu;
@@ -49,6 +52,11 @@ public class StartActivity extends AbstractStartActivity<CheckinData> {
         if (!EulaHelper.with(this).isEulaAccepted()) {
             EulaHelper.with(this).showEulaDialog(R.style.AppTheme_AlertDialog);
         }
+
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+        int smallIcon = R.drawable.ic_directions_boat;
+        CharSequence title = getText(R.string.app_name);
+        NotificationHelper.prepareNotificationWith(title, largeIcon, smallIcon);
     }
 
     @Override

@@ -65,10 +65,8 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -80,7 +78,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.RaceColumnConstants;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
@@ -89,6 +86,7 @@ import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTracki
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Permission.Mode;
+import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
@@ -99,6 +97,7 @@ import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
+import com.sap.sailing.domain.sharding.ShardingContext;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -117,12 +116,15 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSe
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 import com.sap.sse.InvalidDateException;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.impl.UUIDHelper;
 
@@ -148,29 +150,35 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     public Response getLeaderboard(@PathParam("name") String leaderboardName,
             @DefaultValue("Live") @QueryParam("resultState") ResultStates resultState,
             @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount) {
-        Response response;
-        TimePoint requestTimePoint = MillisecondsTimePoint.now();
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard == null) {
-            response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
-                    .type(MediaType.TEXT_PLAIN).build();
-        } else {
-            try {
-                TimePoint timePoint = calculateTimePointForResultState(leaderboard, resultState);
-                JSONObject jsonLeaderboard;
-                jsonLeaderboard = getLeaderboardJson(resultState, maxCompetitorsCount, requestTimePoint, leaderboard, timePoint,
-                        /* race column names */ null, /* race detail names */ null);
-                StringWriter sw = new StringWriter();
-                jsonLeaderboard.writeJSONString(sw);
-                String json = sw.getBuffer().toString();
-                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
-            } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
-                response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
+        ShardingContext.setShardingConstraint(ShardingType.LEADERBOARDNAME, leaderboardName);
+        
+        try {
+            Response response;
+            TimePoint requestTimePoint = MillisecondsTimePoint.now();
+            Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+            if (leaderboard == null) {
+                response = Response.status(Status.NOT_FOUND)
+                        .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                         .type(MediaType.TEXT_PLAIN).build();
+            } else {
+                try {
+                    TimePoint timePoint = calculateTimePointForResultState(leaderboard, resultState);
+                    JSONObject jsonLeaderboard;
+                    jsonLeaderboard = getLeaderboardJson(resultState, maxCompetitorsCount, requestTimePoint, leaderboard, timePoint,
+                            /* race column names */ null, /* race detail names */ null);
+                    StringWriter sw = new StringWriter();
+                    jsonLeaderboard.writeJSONString(sw);
+                    String json = sw.getBuffer().toString();
+                    response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
+                    response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
+                            .type(MediaType.TEXT_PLAIN).build();
+                }
             }
+            return response;
+        } finally {
+            ShardingContext.clearShardingConstraint(ShardingType.LEADERBOARDNAME);
         }
-        return response;
     }
 
     @Override
@@ -186,6 +194,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, leaderboardDTO.getTimePoint(), maxCompetitorsCount);
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
+        jsonLeaderboard.put("ShardingLeaderboardName", ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboard.getName()));
         int counter = 1;
         for (CompetitorDTO competitor : leaderboardDTO.competitors) {
             LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);

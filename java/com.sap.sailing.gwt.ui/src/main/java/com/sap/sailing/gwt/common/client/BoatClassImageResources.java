@@ -132,6 +132,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource FinnIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/FLYING_JUNIOR.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource FlyingJuniorIcon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/FLYING_DUTCHMAN.png")
     @ImageOptions(preventInlining = true)
     ImageResource FlyingDutchmanIcon();
@@ -255,6 +259,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS_FEVA.png")
     @ImageOptions(preventInlining = true)
     ImageResource RSFevaIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS_TERA.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource RSTeraIcon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SONAR.png")
     @ImageOptions(preventInlining = true)
@@ -392,6 +400,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource CC30Icon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/CLUBSWAN50.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource CLUBSWAN50Icon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/GP_26.png")
     @ImageOptions(preventInlining = true)
     ImageResource GP26Icon();
@@ -427,4 +439,8 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RUNNING.png")
     @ImageOptions(preventInlining = true)
     ImageResource RunningIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/VAURIEN.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource VaurienIcon();
 }

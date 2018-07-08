@@ -41,12 +41,12 @@ class SignUpRequestManager: NSObject {
     }
     
     let baseURLString: String
-    let manager: AFHTTPRequestOperationManager
+    let manager: AFHTTPSessionManager
     let sessionManager: AFURLSessionManager
     
     init(baseURLString: String = "") {
         self.baseURLString = baseURLString
-        manager = AFHTTPRequestOperationManager(baseURL: URL(string: baseURLString))
+        manager = AFHTTPSessionManager(baseURL: URL(string: baseURLString))
         manager.requestSerializer = AFJSONRequestSerializer() as AFHTTPRequestSerializer
         manager.requestSerializer.timeoutInterval = Application.RequestTimeout
         manager.responseSerializer = AFJSONResponseSerializer() as AFHTTPResponseSerializer
@@ -65,7 +65,7 @@ class SignUpRequestManager: NSObject {
     {
         let urlString = "\(basePathString)/access_token"
         manager.requestSerializer.setAuthorizationHeaderFieldWithUsername(userName, password: password)
-        manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+        manager.post(urlString, parameters: nil, progress: nil, success: { (requestOperation, responseObject) in
             self.postAccessTokenSuccess(responseObject: responseObject, success: success, failure: failure)
         }) { (requestOperation, error) in
             self.postAccessTokenFailure(error: error, failure: failure)
@@ -113,7 +113,7 @@ class SignUpRequestManager: NSObject {
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
         if let urlString = "\(basePathString)/create_user?username=\(userName)&email=\(email)&fullName=\(fullName)&company=\(company)&password=\(password)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
-            manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+            manager.post(urlString, parameters: nil, progress: nil, success: { (requestOperation, responseObject) in
                 self.postCreateUserSuccess(responseObject: responseObject, success: success, failure: failure)
             }) { (requestOperation, error) in
                 self.postCreateUserFailure(error: error, failure: failure)
@@ -180,7 +180,7 @@ class SignUpRequestManager: NSObject {
         success: @escaping () -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
-        manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+        manager.post(urlString, parameters: nil, progress: nil, success: { (requestOperation, responseObject) in
             self.postForgotPasswordSuccess(responseObject: responseObject, success: success, failure: failure)
         }) { (requestOperation, error) in
             self.postForgotPasswordFailure(error: error, failure: failure)
@@ -209,7 +209,7 @@ class SignUpRequestManager: NSObject {
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
         let urlString = "\(basePathString)/hello"
-        manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+        manager.post(urlString, parameters: nil, progress: nil, success: { (requestOperation, responseObject) in
             self.postHelloSuccess(responseObject: responseObject, success: success, failure: failure)
         }) { (requestOperation, error) in
             self.postHelloFailure(error: error, failure: failure)
@@ -254,7 +254,7 @@ class SignUpRequestManager: NSObject {
     {
         let urlString = "\(basePathString)/logout/"
         manager.requestSerializer.clearAuthorizationHeader()
-        manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+        manager.post(urlString, parameters: nil, progress: nil, success: { (requestOperation, responseObject) in
             self.postLogoutSuccess(success: success)
         }) { (requestOperation, error) in
             self.postLogoutFailure(error: error, failure: failure)

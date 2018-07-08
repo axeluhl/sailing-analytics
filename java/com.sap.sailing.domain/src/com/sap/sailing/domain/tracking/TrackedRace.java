@@ -25,13 +25,10 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TargetTimeInfo;
@@ -52,13 +49,16 @@ import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuse
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.impl.NonCachingMarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -773,7 +773,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     void waitUntilLoadingFromWindStoreComplete() throws InterruptedException;
 
     /**
-     * Whenever a {@link RegattaLog} is attached, fixes are loaded from the {@link GPSFixStore} for all mappings
+     * Whenever a {@link RegattaLog} is attached, fixes are loaded from the {@link SensorFixStore} for all mappings
      * found in the {@code RegattaLog} in a separate thread. This method blocks if there is such a thread loading
      * fixes, until that thread is finished.
      */
@@ -812,19 +812,19 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     
     /**
      * Attaches the passed race log with this {@link TrackedRace}.
-     * This causes fixes from the {@link GPSFixStore} to be loaded for such {@link RegattaLogDeviceMappingEvent}s
-     * that are present in the raceLog. This loading is offloaded into a separate thread, that blocks
+     * This causes fixes from the {@link SensorFixStore} to be loaded for such {@link RegattaLogDeviceMappingEvent RegattaLogDeviceMappingEvents}
+     * that are present in the {@link RaceLog raceLog}. This loading is offloaded into a separate thread, that blocks
      * serialization until it is finished. If multiple race logs are attached, the loading process is
      * forced to be serialized.
-     * To garuantee that a the fixes for a race log have been fully loaded before continuing,
-     * {@link #waitForLoadingFromGPSFixStoreToFinishRunning} can be used.
+     * To guarantee that a the fixes for a race log have been fully loaded before continuing,
+     * {@link #waitForLoadingToFinish()} can be used.
      * @param raceLog to be attached.
      */
     void attachRaceLog(RaceLog raceLog);
     
     /**
-     * Attaches the passed regatta log with this {@link TrackedRace}.
-     * This also causes fixes from the {@link GPSFixStore} to be loaded (see {@link #attachRaceLog} for details).
+     * Attaches the passed {@link RegattaLog} with this {@link TrackedRace}.
+     * This also causes fixes from the {@link SensorFixStore} to be loaded (see {@link #attachRaceLog(RaceLog)} for details).
      */
     void attachRegattaLog(RegattaLog regattaLog);
     
@@ -846,7 +846,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     RaceLog getRaceLog(Serializable identifier);
     
     /**
-     * A setter for the listener on course design changes suggested by one of the {@link RaceLog}s attached to this
+     * A setter for the listener on course design changes suggested by one of the {@link RaceLog RaceLog} attached to this
      * race. The listener is mostly part of the tracking provider adapter.
      * 
      * @param listener

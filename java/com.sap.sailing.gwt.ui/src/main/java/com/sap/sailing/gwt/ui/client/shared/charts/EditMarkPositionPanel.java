@@ -114,7 +114,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     private LinePlotOptions markSeriesPlotOptions;
     private final Label noMarkSelectedLabel;
     private MapWidget map;
-    private boolean visible;
     private List<HandlerRegistration> courseMarkClickHandlers;
     
     private Map<MarkDTO, Pair<Date, Date>> marksFromToTimes;
@@ -131,6 +130,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     private final MarkPositionService markPositionService;
     
     private final RaceIdentifierToLeaderboardRaceColumnAndFleetMapper raceIdentifierToLeaderboardRaceColumnAndFleetMapper;
+    protected boolean nonTrackingWarningWasDisplayed;
 
     public EditMarkPositionPanel(Component<?> parent, ComponentContext<?> context, final RaceMap raceMap,
             final SingleRaceLeaderboardPanel leaderboardPanel,
@@ -373,20 +373,25 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
                     overlay.setVisible(false);
                     if (currentFixPositionChooser == null) {
                         OverlayClickHandler.this.unregisterAll();
-                        currentFixPositionChooser = new FixPositionChooser(EditMarkPositionPanel.this, stringMessages, map, getIndexOfFixInPolyline(mark, fix), polyline.getPath(), overlay, new Callback<Position, Exception>() {
-                            @Override
-                            public void onFailure(Exception reason) {
-                                overlay.setVisible(true);
-                                OverlayClickHandler.this.registerAll();
-                                resetCurrentFixPositionChooser();
-                            }
-                            @Override
-                            public void onSuccess(Position result) {
-                                editMarkFix(mark, fix, result);
-                                overlay.setVisible(true);
-                                OverlayClickHandler.this.registerAll();
-                                resetCurrentFixPositionChooser();
-                            }
+                        checkIfTracking(() -> {
+                            currentFixPositionChooser = new FixPositionChooser(EditMarkPositionPanel.this,
+                                    stringMessages, map, getIndexOfFixInPolyline(mark, fix), polyline.getPath(),
+                                    overlay, new Callback<Position, Exception>() {
+                                        @Override
+                                        public void onFailure(Exception reason) {
+                                            overlay.setVisible(true);
+                                            OverlayClickHandler.this.registerAll();
+                                            resetCurrentFixPositionChooser();
+                                        }
+
+                                        @Override
+                                        public void onSuccess(Position result) {
+                                            editMarkFix(mark, fix, result);
+                                            overlay.setVisible(true);
+                                            OverlayClickHandler.this.registerAll();
+                                            resetCurrentFixPositionChooser();
+                                        }
+                                    });
                         });
                     }
                     popup.hide();
@@ -407,26 +412,28 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
                 }
                 
                 private void addDeleteItemAndShowPopup(boolean enableDelete) {
-                    final MenuItem delete;
+                    Runnable r = () -> {
+                        final MenuItem delete = new MenuItem(stringMessages.deleteFix(), new ScheduledCommand() {
+                            @Override
+                            public void execute() {
+                                if (enableDelete) {
+                                    removeMarkFix(mark, fix);
+                                    popup.hide();
+                                }
+                            }
+                        });
+                        if (!enableDelete) {
+                            delete.setEnabled(false);
+                            delete.setTitle(stringMessages.theDeletionOfThisFix());
+                        }
+                        menu.addItem(delete);
+                        popup.setWidget(menu);
+                    };
                     if (enableDelete) {
-                        delete = new MenuItem(stringMessages.deleteFix(), new ScheduledCommand() {
-                            @Override
-                            public void execute() {
-                                removeMarkFix(mark, fix);
-                                popup.hide();
-                            }
-                        });
+                        checkIfTracking(r);
                     } else {
-                        delete = new MenuItem(stringMessages.deleteFix(), new ScheduledCommand() {
-                            @Override
-                            public void execute() {
-                            }
-                        });
-                        delete.setEnabled(false);
-                        delete.setTitle(stringMessages.theDeletionOfThisFix());
+                        r.run();
                     }
-                    menu.addItem(delete);
-                    popup.setWidget(menu);
                 }
             });
         }
@@ -704,20 +711,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     }
 
     public void setVisible(boolean visible) {
-        this.visible = visible;
-        if(visible && !isVisible()){
-            sailingService.checkIfRaceIsTracked(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert(stringMessages.serverError());
-                }
-                @Override
-                public void onSuccess(Boolean result) {
-                    if (Boolean.FALSE.equals(result)) {
-                        Window.alert(stringMessages.positionEditOnNonTrackingRace());
-                    }
-                }
-            });
+        if (visible && !isVisible()) {
+            checkIfTracking(() -> {});
         }
         if (map == null) {
             map = raceMap.getMap();
@@ -725,7 +720,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
                 setMap(map);
             }
         }
-        if (this.visible) {
+        if (visible) {
             if (sideBySideComponentViewer != null) {
                 sideBySideComponentViewer.setLeftComponent(marksPanel);
                 sideBySideComponentViewer.setLeftComponentToggleButtonVisible(false);
@@ -756,7 +751,30 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
             raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
             raceMap.registerAllCourseMarkInfoWindowClickHandlers();
         }
-        super.setVisible(this.visible);
+        super.setVisible(visible);
+    }
+
+    private void checkIfTracking(Runnable continuation) {
+        if (nonTrackingWarningWasDisplayed) {
+            continuation.run();
+        } else {
+            sailingService.checkIfRaceIsTracking(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert(stringMessages.serverError());
+                    continuation.run();
+                }
+
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (Boolean.FALSE.equals(result)) {
+                        Window.alert(stringMessages.positionEditOnNonTrackingRace());
+                        nonTrackingWarningWasDisplayed = true;
+                    }
+                    continuation.run();
+                }
+            });
+        }
     }
     
     @Override
@@ -783,7 +801,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
 
     @Override
     public String getLocalizedShortName() {
-        return null;
+        return stringMessages.editMarkPositions();
     }
 
     @Override
@@ -943,17 +961,21 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
      *             Is thrown when another fix position chooser is still open
      */
     public void createFixPositionChooserToAddFixToMark(MarkDTO mark, Callback<Position, Exception> callback) {
-        if (currentFixPositionChooser != null) { 
+        if (currentFixPositionChooser != null) {
             return;
         }
-        int index = 0;
-        for (GPSFixDTO fix : marks.get(mark).keySet()) {
-            if (fix.timepoint.after(timer.getTime()))
-                break;
-            index++;
-        }
-        Polyline polyline = polylines.get(mark);
-        currentFixPositionChooser = new FixPositionChooser(this, stringMessages, map, index, polyline != null ? polyline.getPath() : null, map.getCenter(), raceMap.getCoordinateSystem(), callback);
+        checkIfTracking(() -> {
+            int index = 0;
+            for (GPSFixDTO fix : marks.get(mark).keySet()) {
+                if (fix.timepoint.after(timer.getTime()))
+                    break;
+                index++;
+            }
+            Polyline polyline = polylines.get(mark);
+            currentFixPositionChooser = new FixPositionChooser(EditMarkPositionPanel.this, stringMessages, map, index,
+                    polyline != null ? polyline.getPath() : null, map.getCenter(), raceMap.getCoordinateSystem(),
+                    callback);
+        });
     }
     
     public void resetCurrentFixPositionChooser() {

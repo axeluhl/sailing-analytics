@@ -26,11 +26,8 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -42,12 +39,15 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.impl.MarkPositionAtTimePointCacheImpl;
 import com.sap.sailing.domain.tracking.impl.TimedComparator;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.util.ThreadPoolUtil;
@@ -1410,7 +1410,8 @@ public class CandidateFinderImpl implements CandidateFinder {
      * @param markPositionCache
      *            a mark position cache for this finder's {@link #race} for time point {@code t}
      * @return the marks of a waypoint with two marks in the order port, starboard (when approaching the waypoint from
-     *         the direction of the waypoint beforehand.
+     *         the direction of the waypoint beforehand, or {@code (null, null)} in case the direction cannot be determined,
+     *         e.g., because the waypoint with passing instructions "Line" is the only waypoint in the course.
      */
     private Util.Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w, MarkPositionAtTimePointCache markPositionCache) {
         assert t.equals(markPositionCache.getTimePoint());
@@ -1428,7 +1429,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
         final List<Leg> legs = race.getRace().getCourse().getLegs();
         final int indexOfWaypoint = race.getRace().getCourse().getIndexOfWaypoint(w);
-        if (indexOfWaypoint < 0) {
+        if (indexOfWaypoint < 0 || legs.isEmpty()) {
             return new Util.Pair<Mark, Mark>(null, null);
         }
         final boolean isStartLine = indexOfWaypoint == 0;

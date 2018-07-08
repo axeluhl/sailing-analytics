@@ -24,7 +24,7 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChartSettings>
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.wind();
+        return stringMessages.windChart();
     }
 
     @Override

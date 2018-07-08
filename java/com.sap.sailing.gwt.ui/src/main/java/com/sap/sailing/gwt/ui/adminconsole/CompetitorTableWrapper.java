@@ -8,9 +8,7 @@ import java.util.List;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
@@ -26,6 +24,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
+import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -57,15 +56,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
     private final boolean filterCompetitorsWithBoat;
     private final boolean filterCompetitorsWithoutBoat;
-    
-    private static final Template TEMPLATE = GWT.create(Template.class);
-    
-    interface Template extends SafeHtmlTemplates {
-        @SafeHtmlTemplates.Template("<div style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:{1}px;height:{2}px;background-image:url({0})'></div>")
-        SafeHtml image(String imageUri,int width, int height);
-        @SafeHtmlTemplates.Template("<div title='{3}' style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:{1}px;height:{2}px;background-image:url({0})'></div>")
-        SafeHtml imageWithTitle(String imageUri,int width, int height,String title);
-    }
     
     public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
@@ -146,7 +136,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
                 final String flagImageURL = competitor.getFlagImageURL();
                 if (flagImageURL != null && !flagImageURL.isEmpty()) {
-                    sb.append(TEMPLATE.imageWithTitle(flagImageURL, 18 ,12,competitor.getName()));
+                    sb.append(FlagImageRenderer.imageWithTitle(flagImageURL, competitor.getName()));
                     sb.appendHtmlConstant("&nbsp;");
                 } else {
                     final ImageResource flagImageResource;
@@ -156,7 +146,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                         flagImageResource = FlagImageResolverImpl.get().getFlagImageResource(twoLetterIsoCountryCode);
                     }
                     if (flagImageResource != null) {
-                        sb.append(TEMPLATE.imageWithTitle(flagImageResource.getSafeUri().asString(), 18 ,12,competitor.getName()));
+                        sb.append(FlagImageRenderer.imageWithTitle(flagImageResource.getSafeUri().asString() ,competitor.getName()));
                         sb.appendHtmlConstant("&nbsp;");
                     }
                 }

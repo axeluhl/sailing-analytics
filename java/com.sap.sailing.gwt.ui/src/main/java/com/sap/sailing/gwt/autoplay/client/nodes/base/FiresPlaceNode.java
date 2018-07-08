@@ -14,7 +14,6 @@ public abstract class FiresPlaceNode
 
 
     public void onStart() {
-        log("Start place node");
         firePlaceChangeAndStartTimer();
     }
 
@@ -28,7 +27,6 @@ public abstract class FiresPlaceNode
 
     protected void firePlaceChangeAndStartTimer() {
         if (placeToGo != null) {
-            log("Fire place change to " + placeToGo);
             getBus().fireEvent(new PlaceChangeEvent(placeToGo));
         }
     }

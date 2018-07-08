@@ -21,7 +21,7 @@ import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.gateway.trackfiles.impl.ImportResultDTO.TrackImportDTO;
+import com.sap.sailing.server.gateway.trackfiles.impl.ImportResult.TrackImportDTO;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
@@ -50,7 +50,7 @@ public class SensorDataImporter {
      * 
      * @throws IOException
      */
-    public void importFiles(boolean enableDownsampler, ImportResultDTO result, Iterable<Pair<String, FileItem>> importerNamesAndFiles)
+    public void importFiles(boolean enableDownsampler, ImportResult result, Iterable<Pair<String, FileItem>> importerNamesAndFiles)
             throws IOException {
         final Collection<DoubleVectorFixImporter> availableImporters = new LinkedHashSet<>();
         availableImporters.addAll(getOSGiRegisteredImporters());

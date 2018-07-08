@@ -14,7 +14,7 @@ public abstract class AutoPlayPresenterBase<P extends Place> extends AbstractAct
     }
 
     protected AutoPlayContext getSlideCtx() {
-        return clientFactory.getAutoPlayCtx();
+        return clientFactory.getAutoPlayCtxSignalError();
     }
 
     public AutoPlayClientFactory getClientFactory() {

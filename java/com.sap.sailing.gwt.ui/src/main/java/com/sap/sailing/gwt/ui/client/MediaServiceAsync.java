@@ -33,4 +33,8 @@ public interface MediaServiceAsync {
 
     void checkMetadata(String url, AsyncCallback<VideoMetadataDTO> asyncCallback);
 
+    void getMediaTrackByUrl(String url, AsyncCallback<MediaTrack> asyncCallback);
+
+    void checkYoutubeMetadata(String url, AsyncCallback<VideoMetadataDTO> asyncCallback);
+
 }

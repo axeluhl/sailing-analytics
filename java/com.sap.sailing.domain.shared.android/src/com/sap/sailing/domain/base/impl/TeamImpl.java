@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.NationalityChangeListener;
@@ -15,6 +16,7 @@ import com.sap.sse.common.impl.NamedImpl;
 
 public class TeamImpl extends NamedImpl implements DynamicTeam {
     private static final long serialVersionUID = 4646922280429210183L;
+    private static final Logger logger = Logger.getLogger(TeamImpl.class.getName());
     private final Iterable<? extends DynamicPerson> sailors;
     private final DynamicPerson coach;
     private final NationalityChangeListener personNationalityChangeForwarder;
@@ -116,14 +118,19 @@ public class TeamImpl extends NamedImpl implements DynamicTeam {
     public void setNationality(Nationality newNationality) {
         Nationality oldNationality = getNationality();
         if (!Util.equalsWithNull(oldNationality, newNationality)) {
-            for (Person sailor : getSailors()) {
-                ((DynamicPerson) sailor).setNationality(newNationality);
-            }
-            if (getCoach() != null) {
-                getCoach().setNationality(newNationality);
-            }
-            for (NationalityChangeListener listener : getNationalityChangeListeners()) {
-                listener.nationalityChanged(this, oldNationality, newNationality);
+            if (Util.isEmpty(getSailors()) && getCoach() == null) {
+                logger.warning("Would like to update nationality of team "+this+
+                        " to "+newNationality+" but cannot because neither sailors nor coach are set");
+            } else {
+                for (Person sailor : getSailors()) {
+                    ((DynamicPerson) sailor).setNationality(newNationality);
+                }
+                if (getCoach() != null) {
+                    getCoach().setNationality(newNationality);
+                }
+                for (NationalityChangeListener listener : getNationalityChangeListeners()) {
+                    listener.nationalityChanged(this, oldNationality, newNationality);
+                }
             }
         }
     }
