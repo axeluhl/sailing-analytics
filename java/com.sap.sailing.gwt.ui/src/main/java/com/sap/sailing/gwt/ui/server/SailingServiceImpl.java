@@ -5062,7 +5062,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
                     final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());
                     importer.importFromStream(inputStream, importOperationId, override);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     // do not assume that RuntimeException is logged properly
                     logger.log(Level.SEVERE, e.getMessage(), e);
                     getService()
