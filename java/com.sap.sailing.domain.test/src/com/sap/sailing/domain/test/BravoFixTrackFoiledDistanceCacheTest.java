@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -23,6 +25,8 @@ import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicBravoFixTrack;
 import com.sap.sailing.domain.tracking.impl.BravoFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
+import com.sap.sailing.domain.tracking.impl.TimeRangeCache;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -37,23 +41,86 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class BravoFixTrackFoiledDistanceCacheTest {
     private DynamicBravoFixTrack<CourseArea> track;
     private DynamicGPSFixMovingTrackImpl<CourseArea> gpsTrack;
+    private TimeRangeCacheWithParallelTestSupport<CourseArea> foilingDistanceCache;
+    
+    /**
+     * Supports blocking and releasing calls to {@link #invalidateAllAtOrLaterThan(TimePoint)} and
+     * {@link #cache(TimePoint, TimePoint, Object)}, so as to force lock acquisition and release
+     * in a specific order.
+     * 
+     * @author Axel Uhl (d043530)
+     *
+     * @param <T>
+     */
+    private static class TimeRangeCacheWithParallelTestSupport<T> extends TimeRangeCache<T> {
+        private static Map<String, TimeRangeCacheWithParallelTestSupport<?>> caches = new HashMap<>();
+        private int callsToCache;
+        private int callsToInvalidateAllAtOrLaterThan;
+        
+        public TimeRangeCacheWithParallelTestSupport(String nameForLockLogging) {
+            super(nameForLockLogging);
+            caches.put(nameForLockLogging, this);
+        }
+        
+        static public <T> TimeRangeCacheWithParallelTestSupport<T> getCacheByName(String nameForLockLogging) {
+            @SuppressWarnings("unchecked")
+            TimeRangeCacheWithParallelTestSupport<T> timeRangeCacheWithParallelTestSupport = (TimeRangeCacheWithParallelTestSupport<T>) caches.get(nameForLockLogging);
+            return timeRangeCacheWithParallelTestSupport;
+        }
+
+        @Override
+        public void invalidateAllAtOrLaterThan(TimePoint timePoint) {
+            super.invalidateAllAtOrLaterThan(timePoint);
+            callsToInvalidateAllAtOrLaterThan++;
+        }
+
+        @Override
+        public void cache(TimePoint from, TimePoint to, T result) {
+            super.cache(from, to, result);
+            callsToCache++;
+        }
+
+        public int getCallsToCache() {
+            return callsToCache;
+        }
+
+        public int getCallsToInvalidateAllAtOrLaterThan() {
+            return callsToInvalidateAllAtOrLaterThan;
+        }
+    }
     
     @Before
     public void setUp() {
         final CourseAreaImpl courseArea = new CourseAreaImpl("Test", UUID.randomUUID());
         gpsTrack = new DynamicGPSFixMovingTrackImpl<>(courseArea, /* millisecondsOverWhichToAverage */ 15000);
-        track = new BravoFixTrackImpl<>(courseArea, "test", /* hasExtendedFixes */ true, gpsTrack);
+        track = new BravoFixTrackImpl<CourseArea>(courseArea, "test", /* hasExtendedFixes */ true, gpsTrack) {
+            private static final long serialVersionUID = 1473560197177750211L;
+
+            @Override
+            protected <T> TimeRangeCache<T> createTimeRangeCache(CourseArea trackedItem, final String cacheName) {
+                return new TimeRangeCacheWithParallelTestSupport<>(cacheName);
+            }
+        };
         track.add(createFix(1000l, /* rideHeightPort */ 0.6, /* rideHeightStarboard */ 0.6, /* heel */ 10., /* pitch */ 5.));
         track.add(createFix(2000l, /* rideHeightPort */ 0.6, /* rideHeightStarboard */ 0.6, /* heel */ 10., /* pitch */ 5.));
         track.add(createFix(3000l, /* rideHeightPort */ 0.6, /* rideHeightStarboard */ 0.6, /* heel */ 10., /* pitch */ 5.));
         gpsTrack.add(createGPSFix(1000l, 0, 0, 0, 1));
         gpsTrack.add(createGPSFix(2000l, 1./3600./60., 0, 0, 1));
         gpsTrack.add(createGPSFix(3000l, 2./3600./60., 0, 0, 1));
+        foilingDistanceCache = TimeRangeCacheWithParallelTestSupport.getCacheByName("foilingDistanceCache");
     }
     
     @Test
     public void testDistanceSpentFoiling() {
         assertEquals(new NauticalMileDistance(2./3600.).getMeters(), track.getDistanceSpentFoiling(t(1000l), t(3000l)).getMeters(), 0.01);
+        assertEquals(1, foilingDistanceCache.getCallsToCache());
+        assertEquals(6, foilingDistanceCache.getCallsToInvalidateAllAtOrLaterThan()); // the three sensor and three GPS fixes
+        assertEquals(new NauticalMileDistance(2./3600.).getMeters(), track.getDistanceSpentFoiling(t(1000l), t(3000l)).getMeters(), 0.01);
+        assertEquals(1, foilingDistanceCache.getCallsToCache()); // still the same perfect cache hit, no new cached value
+        track.add(createFix(2500l, /* rideHeightPort */ 0.6, /* rideHeightStarboard */ 0.6, /* heel */ 10., /* pitch */ 5.));
+        assertEquals(7, foilingDistanceCache.getCallsToInvalidateAllAtOrLaterThan()); // now one more sensor fix
+        assertEquals(new NauticalMileDistance(2./3600.).getMeters(), track.getDistanceSpentFoiling(t(1000l), t(3000l)).getMeters(), 0.01);
+        assertEquals(2, foilingDistanceCache.getCallsToCache()); // had to be re-calculated and then was expected to be put to cache
     }
 
     private BravoExtendedFixImpl createFix(long timePointAsMillis, Double rideHeightPort, Double rideHeightStarboard, Double heel, Double pitch) {
