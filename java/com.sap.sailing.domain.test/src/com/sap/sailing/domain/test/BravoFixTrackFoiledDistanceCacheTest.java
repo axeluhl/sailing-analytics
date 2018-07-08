@@ -188,9 +188,13 @@ public class BravoFixTrackFoiledDistanceCacheTest {
         FutureTask<Boolean> addFuture = new FutureTask<>(()->track.add(createFix(4000l, /* rideHeightPort */ 0.6, /* rideHeightStarboard */ 0.6, /* heel */ 10., /* pitch */ 5.)));
         foilingDistanceCache.allowWaitingForCacheInvalidation();
         new Thread(addFuture).start();
-        foilingDistanceCache.waitForCacheInvalidation();
-        // now that the cache invalidation has happened synchronously, let the request from above continue with its call to cache(...):
+        // with the fix for bug4629 the cache invalidation won't be reached because fix addition will require the write lock
+        // which isn't possible until the cache update has succeeded which now happens under the track's read lock.
+        Thread.sleep(500); // to continue to let the old broken version fail more or less reliably by waiting for track.add(...) to reach the invalidation
+        // So let the request from above continue with its call to cache(...) which eventually will release the track's read lock...
         foilingDistanceCache.letFoilingDistanceCacheContinueWithCaching();
+        // ...so that now the cache invalidation will finally get on its way
+        foilingDistanceCache.waitForCacheInvalidation();
         // wait until the caching has completed:
         getDistanceFuture.get();
         // and until adding the fixes has completed
