@@ -6,6 +6,7 @@ import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimat
 import com.sap.sailing.domain.maneuverdetection.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.ManeuverMainCurveWithEstimationData;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 
 /**
  * 
@@ -24,13 +25,16 @@ public class CompleteManeuverCurveWithEstimationDataImpl implements CompleteMane
     private final Bearing relativeBearingToNextMarkBeforeManeuver;
     private final Bearing relativeBearingToNextMarkAfterManeuver;
     private final boolean markPassing;
-    private Position position;
+    private final Position position;
+    private final Distance distanceToClosestMark;
+    private final Double deviationOfManeuverAngleFromTargetTackAngleInDegrees;
+    private final Double deviationOfManeuverAngleFromTargetJibeAngleInDegrees;
 
     public CompleteManeuverCurveWithEstimationDataImpl(Position position, ManeuverMainCurveWithEstimationData mainCurve,
             ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData curveWithUnstableCourseAndSpeed, Wind wind,
             int tackingCount, int jibingCount, boolean maneuverStartsByRunningAwayFromWind,
             Bearing relativeBearingToNextMarkBeforeManeuver, Bearing relativeBearingToNextMarkAfterManeuver,
-            boolean markPassing) {
+            boolean markPassing, Distance distanceToClosestMark, Double deviationOfManeuverAngleFromTargetTackAngleInDegrees, Double deviationOfManeuverAngleFromTargetJibeAngleInDegrees) {
         this.position = position;
         this.mainCurve = mainCurve;
         this.curveWithUnstableCourseAndSpeed = curveWithUnstableCourseAndSpeed;
@@ -41,6 +45,9 @@ public class CompleteManeuverCurveWithEstimationDataImpl implements CompleteMane
         this.relativeBearingToNextMarkBeforeManeuver = relativeBearingToNextMarkBeforeManeuver;
         this.relativeBearingToNextMarkAfterManeuver = relativeBearingToNextMarkAfterManeuver;
         this.markPassing = markPassing;
+        this.distanceToClosestMark = distanceToClosestMark;
+        this.deviationOfManeuverAngleFromTargetTackAngleInDegrees = deviationOfManeuverAngleFromTargetTackAngleInDegrees;
+        this.deviationOfManeuverAngleFromTargetJibeAngleInDegrees = deviationOfManeuverAngleFromTargetJibeAngleInDegrees;
     }
 
     @Override
@@ -91,6 +98,21 @@ public class CompleteManeuverCurveWithEstimationDataImpl implements CompleteMane
     @Override
     public Position getPosition() {
         return position;
+    }
+    
+    @Override
+    public Distance getDistanceToClosestMark() {
+        return distanceToClosestMark;
+    }
+    
+    @Override
+    public Double getDeviationOfManeuverAngleFromTargetTackAngleInDegrees() {
+        return deviationOfManeuverAngleFromTargetTackAngleInDegrees;
+    }
+    
+    @Override
+    public Double getDeviationOfManeuverAngleFromTargetJibeAngleInDegrees() {
+        return deviationOfManeuverAngleFromTargetJibeAngleInDegrees;
     }
 
 }

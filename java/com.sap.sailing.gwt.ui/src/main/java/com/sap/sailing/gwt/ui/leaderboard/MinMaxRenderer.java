@@ -26,6 +26,7 @@ public class MinMaxRenderer<T> {
     protected static final String BACKGROUND_BAR_STYLE_GOOD = "minMaxBackgroundBarGood";
 
     private final HasStringAndDoubleValue<T> valueProvider;
+    /** used to determine minimum and maximum values for the rendered bars.*/
     private final Comparator<T> comparator;
     private Double minimumValue;
     private Double maximumValue;
@@ -119,7 +120,8 @@ public class MinMaxRenderer<T> {
      * @param row
      *            The row to get the percentage for.
      */
-    protected int getPercentage(T row) {
+
+    protected int getPercentage(T row) {        
         int percentage = 0;
         Double value = valueProvider.getDoubleValue(row);
         if (value != null) {
@@ -128,10 +130,8 @@ public class MinMaxRenderer<T> {
                 percentage = (int) (minBarLength + (100. - minBarLength) * (value - getMinimumDouble())
                         / (getMaximumDouble() - getMinimumDouble()));
             }
-
-        }
+        }        
         return percentage;
-
     }
 
     private Double getMinimumDouble() {
@@ -149,23 +149,24 @@ public class MinMaxRenderer<T> {
      *            The values of {@link LeaderboardRowDTO}s to determine the minimum and maximum values for.
      */
     public void updateMinMax(Iterable<T> displayedLeaderboardRowsProvider) {
-        T minimumRow = null;
-        T maximumRow = null;
+        T minimumOrderRow = null;
+        T maximumOrderRow = null; 
         for (T row : displayedLeaderboardRowsProvider) {
             if (valueProvider.getDoubleValue(row) != null
-                    && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
-                minimumRow = row;
+                    && (minimumOrderRow == null || comparator.compare(minimumOrderRow, row) > 0)) {
+                minimumOrderRow = row;
             }
             if (valueProvider.getDoubleValue(row) != null
-                    && (maximumRow == null || comparator.compare(maximumRow, row) < 0)) {
-                maximumRow = row;
+                    && (maximumOrderRow == null || comparator.compare(maximumOrderRow, row) < 0)) {
+                maximumOrderRow = row;
             }
+        }        
+        if (minimumOrderRow != null) {
+            minimumValue = valueProvider.getDoubleValue(minimumOrderRow);
+
         }
-        if (minimumRow != null) {
-            minimumValue = valueProvider.getDoubleValue(minimumRow);
-        }
-        if (maximumRow != null) {
-            maximumValue = valueProvider.getDoubleValue(maximumRow);
+        if (maximumOrderRow != null) {
+            maximumValue = valueProvider.getDoubleValue(maximumOrderRow);
         }
     }
 
