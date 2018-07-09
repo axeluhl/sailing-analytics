@@ -22,6 +22,8 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -89,6 +91,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
+import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsAction;
 import com.sap.sailing.gwt.ui.actions.GetPolarAction;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
@@ -444,7 +447,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private ManagedInfoWindow managedInfoWindow;
     
     /** The Map where for each competitor and each maneuver is stored if it is visualized or not.*/
-    private Map<Triple<String, Date, ManeuverType>, Boolean> maneuverLossCheckBoxValueStore = new HashMap<>();
+    private Set<Triple<String, Date, ManeuverType>> maneuverLossCheckBoxValueStore = new HashSet<>();
     
     /** The Map where the polylines for the specific maneuver are stored.*/
     private Map<Triple<String, Date, ManeuverType>, Set<Polyline>> maneuverLossLinesMap = new HashMap<>();
@@ -2218,17 +2221,17 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             Widget maneuverLossWidget = createInfoWindowLabelAndValue(stringMessages.maneuverLoss(),
                     numberFormatOneDecimal.format(maneuver.getManeuverLoss().getDistanceLost().getMeters()) + " " + stringMessages.metersUnit());
             CheckBox maneuverLossLinesCheckBox = new CheckBox(stringMessages.show());
-            Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(),
-                    maneuver.getType());
-            if (maneuverLossCheckBoxValueStore.isEmpty()) {
-                maneuverLossCheckBoxValueStore.put(t, false);
-            }
-            maneuverLossLinesCheckBox.setValue(maneuverLossCheckBoxValueStore.get(t));
-            maneuverLossLinesCheckBox.addClickHandler(new ClickHandler() {
+            Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(), maneuver.getType());
+            maneuverLossLinesCheckBox.setValue(maneuverLossCheckBoxValueStore.contains(t));
+            maneuverLossLinesCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
-                public void onClick(ClickEvent event) {
-                    visualizeManeuverLoss(maneuver, maneuverLossLinesCheckBox.getValue(), competitor);
-                    maneuverLossCheckBoxValueStore.put(t, maneuverLossLinesCheckBox.getValue());
+                public void onValueChange(ValueChangeEvent<Boolean> event) {
+                    visualizeManeuverLoss(maneuver, event.getValue(), competitor);
+                    if (event.getValue()) {
+                        maneuverLossCheckBoxValueStore.add(t);
+                    } else {
+                        maneuverLossCheckBoxValueStore.remove(t);
+                    }
                 }
             });
             HorizontalPanel hPanel = new HorizontalPanel();
@@ -3173,24 +3176,17 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * Polylines. Also clears the CheckboxValueStore for maneuverLoss.
      */
     private void removeManeuverLossLinesAndInfoOverlays() {
-        if (!maneuverLossLinesMap.isEmpty()) {
-            for (Triple<String, Date, ManeuverType> t : maneuverLossLinesMap.keySet()) {
-                for (Polyline maneuverLossLine : maneuverLossLinesMap.get(t)) {
-                    maneuverLossLine.setMap((MapWidget) null);
-                }
+        for (Triple<String, Date, ManeuverType> t : maneuverLossLinesMap.keySet()) {
+            for (Polyline maneuverLossLine : maneuverLossLinesMap.get(t)) {
+                maneuverLossLine.setMap((MapWidget) null);
             }
-            maneuverLossLinesMap.clear();
         }
-        if (!maneuverLossInfoOverlayMap.isEmpty()) {
-            for (Map.Entry<Triple<String, Date, ManeuverType>, SmallTransparentInfoOverlay> e : maneuverLossInfoOverlayMap
-                    .entrySet()) {
-                e.getValue().removeFromMap();
-            }
-            maneuverLossInfoOverlayMap.clear();
+        maneuverLossLinesMap.clear();
+        for (Map.Entry<Triple<String, Date, ManeuverType>, SmallTransparentInfoOverlay> e : maneuverLossInfoOverlayMap.entrySet()) {
+            e.getValue().removeFromMap();
         }
-        if (!maneuverLossCheckBoxValueStore.isEmpty()) {
-            maneuverLossCheckBoxValueStore.clear();
-        }
+        maneuverLossInfoOverlayMap.clear();
+        maneuverLossCheckBoxValueStore.clear();
     }
 
     /**
