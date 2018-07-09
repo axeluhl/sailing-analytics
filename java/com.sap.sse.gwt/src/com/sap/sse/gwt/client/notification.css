@@ -4,7 +4,6 @@
     border-radius: 2px;
     padding: 16px;
     margin-bottom: 10px;
-    z-index: 1000;
 }
 
 .notification_bar {
@@ -12,4 +11,5 @@
 	bottom: 0;
 	left: 50%;
     transform: translateX(-50%);
+    z-index: 100;
 }
