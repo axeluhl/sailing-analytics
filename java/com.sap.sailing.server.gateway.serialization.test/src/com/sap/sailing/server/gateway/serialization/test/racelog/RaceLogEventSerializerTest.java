@@ -69,6 +69,7 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> startOfTrackingEventSerializer;
     private JsonSerializer<RaceLogEvent> useCompetitorsFromRaceLogEventSerializer;
     private JsonSerializer<RaceLogEvent> endOfTrackingEventSerializer;
+    private JsonSerializer<RaceLogEvent> tagEventSerializer;
 
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
 
@@ -98,6 +99,7 @@ public class RaceLogEventSerializerTest {
         startOfTrackingEventSerializer = mock(JsonSerializer.class);
         useCompetitorsFromRaceLogEventSerializer = mock(JsonSerializer.class);
         endOfTrackingEventSerializer = mock(JsonSerializer.class);
+        tagEventSerializer = mock(JsonSerializer.class);
 
         serializer = new RaceLogEventSerializer(flagEventSerializer, startTimeSerializer, raceStatusSerializer,
                 passChangedSerializer, courseDesignChangedEventSerializer,
@@ -109,7 +111,7 @@ public class RaceLogEventSerializerTest {
                 fixedMarkPassingEventSerializer, suppressedMarkPassingsSerializer, 
                 additionalScoringInformationSerializer, dependentStartTimeEventSerializer, 
                 startOfTrackingEventSerializer, useCompetitorsFromRaceLogEventSerializer, 
-                endOfTrackingEventSerializer);
+                endOfTrackingEventSerializer, tagEventSerializer);
     }
 
     @Test
@@ -248,5 +250,10 @@ public class RaceLogEventSerializerTest {
         RaceLogEvent event2 = new RaceLogRegisterCompetitorEventImpl(null, author, 0, c2, b2);
         serializer.serialize(event2);
         verify(registerCompetitorEventSerializer).serialize(event2);        
+    }
+    
+    @Test
+    public void testTagSerializer() {
+        // TODO add test for Serializer for RaceLogTagEvents  D067890   
     }
 }

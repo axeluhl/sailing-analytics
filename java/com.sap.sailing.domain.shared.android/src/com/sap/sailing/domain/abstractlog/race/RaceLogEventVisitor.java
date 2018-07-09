@@ -53,4 +53,6 @@ public interface RaceLogEventVisitor {
     public void visit(RaceLogEndOfTrackingEvent event);
 
     public void visit(RaceLogUseCompetitorsFromRaceLogEvent event);
+
+    public void visit(RaceLogTagEvent event);
 }
