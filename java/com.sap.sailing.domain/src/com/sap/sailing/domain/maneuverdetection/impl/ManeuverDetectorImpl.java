@@ -640,7 +640,6 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
             ManeuverCurveBoundaries maneuverUnstableCourseAndSpeedBoundaries, Wind wind, MarkPassing markPassing) {
         final Maneuver maneuver;
         final ManeuverType maneuverType;
-        Distance maneuverLossDistanceLost = null;
         Tack tackAfterManeuver = null;
         ManeuverLoss maneuverLoss = null;
         final Position maneuverPosition = track.getEstimatedPosition(maneuverMainCurveDetails.getTimePoint(),
@@ -681,10 +680,9 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
             } else {
                 tackAfterManeuver = null;
             }
-            maneuverLossDistanceLost = getManeuverLoss(maneuverUnstableCourseAndSpeedBoundaries).getProjectedDistanceLost();
             maneuverLoss = getManeuverLoss(maneuverUnstableCourseAndSpeedBoundaries);
             maneuver = new ManeuverWithStableSpeedAndCourseBoundariesImpl(maneuverType, tackAfterManeuver,
-                    maneuverPosition, maneuverLossDistanceLost, maneuverMainCurveDetails.getTimePoint(),
+                    maneuverPosition, maneuverMainCurveDetails.getTimePoint(),
                     maneuverMainCurveDetails.extractCurveBoundariesOnly(), maneuverUnstableCourseAndSpeedBoundaries,
                     maneuverMainCurveDetails.getMaxTurningRateInDegreesPerSecond(), markPassing, maneuverLoss);
         } else {
@@ -700,8 +698,7 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
             } catch (NoWindException e) {
                 tackAfterManeuver = null;
             }
-            maneuver = new ManeuverWithMainCurveBoundariesImpl(maneuverType, tackAfterManeuver, maneuverPosition,
-                    maneuverLossDistanceLost, maneuverMainCurveDetails.getTimePoint(),
+            maneuver = new ManeuverWithMainCurveBoundariesImpl(maneuverType, tackAfterManeuver, maneuverPosition, maneuverMainCurveDetails.getTimePoint(),
                     maneuverMainCurveDetails.extractCurveBoundariesOnly(), maneuverUnstableCourseAndSpeedBoundaries,
                     maneuverMainCurveDetails.getMaxTurningRateInDegreesPerSecond(), markPassing, maneuverLoss);
         }

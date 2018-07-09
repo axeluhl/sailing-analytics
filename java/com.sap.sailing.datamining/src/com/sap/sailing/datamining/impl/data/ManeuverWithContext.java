@@ -108,7 +108,7 @@ public class ManeuverWithContext implements HasManeuverContext {
 
     @Override
     public Distance getManeuverLossDistanceLost() {
-        return getManeuver().getManeuverLossDistanceLost();
+        return getManeuver().getManeuverLoss() == null ? null : getManeuver().getManeuverLoss().getProjectedDistanceLost();
     }
 
     @Override

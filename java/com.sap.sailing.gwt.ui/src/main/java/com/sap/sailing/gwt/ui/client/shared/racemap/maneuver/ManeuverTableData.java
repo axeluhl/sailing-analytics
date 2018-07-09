@@ -32,7 +32,7 @@ class ManeuverTableData {
         this.speedBeforeInKnots = maneuver.getSpeedWithBearingBefore().speedInKnots;
         this.speedAfterInKnots = maneuver.getSpeedWithBearingAfter().speedInKnots;
         this.lowestSpeedInKnots = maneuver.getLowestSpeedInKnots();
-        this.maneuverLoss = maneuver.getManeuverLossInMeters();
+        this.maneuverLoss = maneuver.getManeuverLoss() == null ? 0.0 : maneuver.getManeuverLoss().getDistanceLostInMeters();
         this.directionChange = maneuver.getDirectionChangeInDegrees();
         this.maximumTurningRate = maneuver.getMaxTurningRateInDegreesPerSecond();
         this.averageTurningRate = maneuver.getAvgTurningRateInDegreesPerSecond();
