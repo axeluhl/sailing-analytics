@@ -13,7 +13,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.controls.ControlPosition;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
@@ -31,6 +30,8 @@ import com.sap.sailing.gwt.ui.simulator.streamlets.Swarm;
 import com.sap.sailing.gwt.ui.simulator.streamlets.VectorField;
 import com.sap.sailing.gwt.ui.simulator.streamlets.WindInfoForRaceVectorField;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
@@ -217,7 +218,8 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         sailingService.getWindSourcesInfo(raceIdentifier, new MarkedAsyncCallback<>(new AsyncCallback<WindInfoForRaceDTO>() {
             @Override
             public void onFailure(Throwable caught) {
-                Window.setStatus(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
+                        Notification.notify(stringMessages.errorFetchingWindStreamletData(caught.getMessage()),
+                                NotificationType.WARNING);
             }
 
             @Override
@@ -256,7 +258,8 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
                 new MarkedAsyncCallback<>(new AsyncCallback<WindInfoForRaceDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        Window.setStatus(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
+                        Notification.notify(stringMessages.errorFetchingWindStreamletData(caught.getMessage()),
+                                NotificationType.WARNING);
                     }
 
                     @Override

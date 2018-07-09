@@ -174,5 +174,5 @@ public interface Maneuver extends GPSFix {
      */
     @Statistic(messageKey = "AvgTurningRateInDegreesPerSecond", resultDecimals = 4)
     double getAvgTurningRateInDegreesPerSecond();
-
+    
 }

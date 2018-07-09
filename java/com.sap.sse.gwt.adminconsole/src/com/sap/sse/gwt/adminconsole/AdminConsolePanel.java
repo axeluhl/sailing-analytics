@@ -210,7 +210,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);
         sysinfoPanel.add(releaseNotesLink);
         informationPanel.add(sysinfoPanel, DockPanel.EAST);
-         informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
+        informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
         this.setFooterWidget(informationPanel);
         topLevelTabPanel.setSize("100%", "100%");
         this.setContentWidget(topLevelTabPanel);
