@@ -107,8 +107,7 @@ public class AngleAndSpeedRegression implements Serializable {
                 boolean angleFound;
                 try {
                     angle = angleRegression.getOrCreatePolynomialFunction().value(windSpeedCandidateInKnots);
-                    if ((tack == Tack.PORT && legType == LegType.UPWIND)
-                            || (tack == Tack.STARBOARD && legType == LegType.DOWNWIND)) {
+                    if (tack == Tack.PORT) {
                         angle = -angle;
                     }
                     angleFound = true;

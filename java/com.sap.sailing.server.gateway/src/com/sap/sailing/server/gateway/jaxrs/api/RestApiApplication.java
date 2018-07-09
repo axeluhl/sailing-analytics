@@ -28,6 +28,7 @@ public class RestApiApplication extends Application {
         classes.add(PingResource.class);
         classes.add(TrackedRaceListResource.class);
         classes.add(StatisticsResource.class);
+        classes.add(WindResource.class);
         classes.add(MarkRessource.class);
         
         // Exception Mappers
