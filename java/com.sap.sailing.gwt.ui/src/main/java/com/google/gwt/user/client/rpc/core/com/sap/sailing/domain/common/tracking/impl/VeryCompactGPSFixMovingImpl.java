@@ -130,8 +130,11 @@ public final class VeryCompactGPSFixMovingImpl {
             final double knotSpeed = streamReader.readDouble();
             final double bearingDeg = streamReader.readDouble();
             try {
-                return (VeryCompactEstimatedSpeed) new com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl(
-                        /* position */ null, /* timePoint */null, new KnotSpeedWithBearingImpl(knotSpeed, new DegreeBearingImpl(bearingDeg))).getSpeed();
+                final KnotSpeedWithBearingImpl speed = new KnotSpeedWithBearingImpl(knotSpeed, new DegreeBearingImpl(bearingDeg));
+                com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl fix = new com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl(
+                        /* dummy position */ new DegreePosition(0, 0), /* timePoint */null, speed);
+                fix.cacheEstimatedSpeed(speed);
+                return (VeryCompactEstimatedSpeed) fix.getCachedEstimatedSpeed();
             } catch (CompactionNotPossibleException e) {
                 logger.log(Level.SEVERE, "Internal error: an object that was a very compact position and was serialized "+
                         "couldn't be de-serialized again as such an object", e);

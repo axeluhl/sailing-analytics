@@ -69,7 +69,7 @@ public final class PreciseCompactGPSFixMovingImpl {
             final double speedInKnots = streamReader.readDouble();
             final double bearingDeg = streamReader.readDouble();
             return (PreciseCompactSpeedWithBearing) new com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl(
-                    /* position */ null, /* timePoint */null, new KnotSpeedWithBearingImpl(speedInKnots, new DegreeBearingImpl(bearingDeg))).getSpeed();
+                    /* dummy position */ new DegreePosition(0, 0), /* timePoint */null, new KnotSpeedWithBearingImpl(speedInKnots, new DegreeBearingImpl(bearingDeg))).getSpeed();
         }
 
         @Override
