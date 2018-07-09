@@ -53,7 +53,7 @@
      
      <system-property>
         <name>webdriver.chrome.driver</name>
-        <value>/opt/chromedriver</value>
+        <value>/opt/chromeDriverWrapper</value>
      </system-property>
      
      <!--

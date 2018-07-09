@@ -16,6 +16,9 @@ Download and extract the chromedriver https://sites.google.com/a/chromium.org/ch
 upon executing it a missing dependency for glibc 2.14 will appear,
 compile it yourself:
 
+Warning: 
+If the glibc is not properly compiled to be installed parallel to the old one, the linux is bricked and cannot be saved/booted as most system tools will be broken.
+
 mkdir ~/glibc_install; cd ~/glibc_install
 wget http://ftp.gnu.org/gnu/glibc/glibc-2.14.tar.gz
 tar zxvf glibc-2.14.tar.gz
@@ -28,6 +31,7 @@ sudo make install
 export LD_LIBRARY_PATH=/opt/glibc-2.14/lib
 Test if the chromedriver starts via ./chromedriver
 
+create a wrapper script next to the chromedriver, to hide the LD_Library_Path hack from the build and selenium
 
-The export might be required to be included into the build job!
-export LD_LIBRARY_PATH=/opt/glibc-2.14/lib &&  before the actual build commmand!
+#!/bin/sh
+export LD_LIBRARY_PATH=/opt/glibc-2.14/lib && /opt/chromedriver
