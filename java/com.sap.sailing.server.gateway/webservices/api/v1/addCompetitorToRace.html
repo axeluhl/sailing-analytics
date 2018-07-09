@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/mark/addCompetitorToRace</h2>
+
+<b>Description:</b>
+<p>Updates the competitor registration, note that requires to be passed the whole set every time it is called, 
+and will perform a delta to the stored state. This will also allow to remove competitors</p>
+<br/>
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Examples:</td>
+        <td>
+            Request: {
+                "leaderboardName":"test",
+                "raceColumnName":"R1",
+                "fleetName":"Default",
+                "competitors":[
+                    {
+                        "competitorId":"b9a8a600-c829-0133-a4ec-448a5b8481d8",
+                        "boatId":"c4d04422-19fd-49ec-b1bb-d3871a72527a"
+                    }   
+                ]
+            }
+            Response: Status 200
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>
