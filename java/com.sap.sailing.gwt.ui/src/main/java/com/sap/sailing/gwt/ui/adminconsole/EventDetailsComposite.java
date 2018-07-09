@@ -40,22 +40,20 @@ public class EventDetailsComposite extends Composite  {
     private final SimpleAnchorListComposite imageURLList;
     private final SimpleAnchorListComposite videoURLList;
     private final SimpleStringListComposite leaderboardGroupList;
+    private final SimpleStringListComposite windfinderSpotCollectionsList;
     
     private final CaptionPanel mainPanel;
 
     public EventDetailsComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages) {
         super();
         this.stringMessages = stringMessages;
-
         event = null;
         mainPanel = new CaptionPanel(stringMessages.regatta());
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
-
         int rows = 17;
         Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
-        
         int currentRow = 0;
         eventId = createLabelAndValueWidget(grid, currentRow++, stringMessages.id(), "IdLabel");
         eventName = createLabelAndValueWidget(grid, currentRow++, stringMessages.eventName(), "NameLabel");
@@ -72,12 +70,11 @@ public class EventDetailsComposite extends Composite  {
         imageURLList = createLabelAndAnchorListWidget(grid, currentRow++, stringMessages.images(), "ImageURLValueList");
         videoURLList = createLabelAndAnchorListWidget(grid, currentRow++, stringMessages.videos(), "VideoURLValueList");
         leaderboardGroupList = createLabelAndValueListWidget(grid, currentRow++, stringMessages.leaderboardGroups(), "LeaderboardGroupValueList");
-        
-        for(int i=0; i < rows; i++) {
+        windfinderSpotCollectionsList = createLabelAndValueListWidget(grid, currentRow++, stringMessages.windFinderSpotCollectionsList(), "WindFinderSpotCollectionsList");
+        for (int i = 0; i < rows; i++) {
             grid.getCellFormatter().setVerticalAlignment(i, 0, HasVerticalAlignment.ALIGN_TOP);
             grid.getCellFormatter().setVerticalAlignment(i, 1, HasVerticalAlignment.ALIGN_TOP);
         }
-
         initWidget(mainPanel);
     }
     
@@ -142,7 +139,6 @@ public class EventDetailsComposite extends Composite  {
                     .createRegattaOverviewLink(new RegattaOverviewContextDefinition(event.id));
             eventOverviewURL.setText(regattaOverviewLink);
             eventOverviewURL.setHref(UriUtils.fromString(regattaOverviewLink));
-     
             List<String> courseAreaNames = new ArrayList<>();
             if (event.venue.getCourseAreas() != null && event.venue.getCourseAreas().size() > 0) {
                 for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
@@ -150,7 +146,6 @@ public class EventDetailsComposite extends Composite  {
                 }
             }
             courseAreaNamesList.setValues(courseAreaNames);
-
             List<String> imageURLStringsAsList = new ArrayList<>();
             for(ImageDTO image: event.getImages()) {
                 imageURLStringsAsList.add(image.getSourceRef());
@@ -166,6 +161,11 @@ public class EventDetailsComposite extends Composite  {
                 leaderboardGroupNamesAsList.add(leaderboardGroupDTO.getName());
             }
             leaderboardGroupList.setValues(leaderboardGroupNamesAsList);
+            List<String> windfinderSpotCollectionsNamesAsList = new ArrayList<>();
+            for (String windfinderSpotCollection : event.getWindFinderReviewedSpotsCollectionIds()) {
+                windfinderSpotCollectionsNamesAsList.add(windfinderSpotCollection);
+            }
+            windfinderSpotCollectionsList.setValues(windfinderSpotCollectionsNamesAsList);
         }
     }
 
