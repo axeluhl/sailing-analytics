@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.TrackTimeInfo;
@@ -34,6 +35,7 @@ public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTra
     public static final String END_TIME_POINT = "endUnixTime";
     public static final String FIXES_COUNT_FOR_POLARS = "fixesCountForPolars";
     public static final String MARK_PASSINGS_COUNT = "markPassingsCount";
+    public static final String WAYPOINTS_COUNT = "waypointsCount";
 
     private final BoatClassJsonSerializer boatClassJsonSerializer;
     private final CompetitorTrackElementsJsonSerializer elementsJsonSerializer;
@@ -107,8 +109,8 @@ public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTra
                         : trackTimeInfo.getTrackStartTimePoint().asMillis());
                 forCompetitorJson.put(END_TIME_POINT, trackTimeInfo.getTrackEndTimePoint() == null ? null
                         : trackTimeInfo.getTrackEndTimePoint().asMillis());
-                int markPassingsCount = getMarkPassingsCount(trackedRace, competitor);
-                forCompetitorJson.put(MARK_PASSINGS_COUNT, markPassingsCount);
+                forCompetitorJson.put(MARK_PASSINGS_COUNT, getMarkPassingsCount(trackedRace, competitor));
+                forCompetitorJson.put(WAYPOINTS_COUNT, getWaypointsCount(trackedRace));
                 forCompetitorJson.put(elements,
                         elementsJsonSerializer.serialize(trackedRace, competitor, from, to, trackTimeInfo));
             }
@@ -132,6 +134,11 @@ public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTra
         BoatClass boatClass = trackedRace.getRace().getBoatOfCompetitor(competitor).getBoatClass();
         Long fixesCountForBoatPolars = polarDataService.getFixCountPerBoatClass().get(boatClass);
         return fixesCountForBoatPolars == null ? 0L : fixesCountForBoatPolars;
+    }
+
+    private int getWaypointsCount(TrackedRace trackedRace) {
+        Iterable<Waypoint> waypoints = trackedRace.getRace().getCourse().getWaypoints();
+        return Util.size(waypoints);
     }
 
 }
