@@ -5,12 +5,12 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sse.common.Duration;
 
 public class ManeuverLossDTO implements IsSerializable {
-    public Position maneuverStartPosition;
-    public Position maneuverEndPosition;
-    public SpeedWithBearingDTO speedWithBearingBefore;
-    public Double middleManeuverAngle;
-    public Duration maneuverDuration;
-    public Double projectedDistanceLostInMeters;
+    private Position maneuverStartPosition;
+    private Position maneuverEndPosition;
+    private SpeedWithBearingDTO speedWithBearingBefore;
+    private Double middleManeuverAngle;
+    private Duration maneuverDuration;
+    private Double projectedDistanceLostInMeters;
     
     public ManeuverLossDTO() {
     }
