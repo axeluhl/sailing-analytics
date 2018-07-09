@@ -33,6 +33,11 @@ public class DummyFileStorageService extends BaseFileStorageServiceImpl implemen
             return null;
         }
     }
+    
+    @Override 
+    public URI duplicateFile(URI uri) {
+        return uri;
+    }
 
     @Override
     public void removeFile(URI uri) throws OperationFailedException, InvalidPropertiesException {

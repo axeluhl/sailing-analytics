@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -81,6 +82,25 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
         }
 
         return getUri(fileName);
+    }
+    
+    @Override
+    public URI duplicateFile(URI uri) {
+        String inFilePath = uri.getPath();
+        String inFileName = inFilePath.substring(inFilePath.lastIndexOf("/") + 1);
+        File inFile = new File(localPath.getValue() + "/" + inFileName);
+        
+        String outFileName = getKey(inFileName.substring(inFileName.lastIndexOf(".")));
+        String outFilePath = localPath.getValue() + "/" + outFileName;
+        File outFile = new File(outFilePath);
+        
+        try {
+            Files.copy(inFile.toPath(), outFile.toPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        return getUri(outFileName);
     }
 
     private static String getKey(String fileEnding) {

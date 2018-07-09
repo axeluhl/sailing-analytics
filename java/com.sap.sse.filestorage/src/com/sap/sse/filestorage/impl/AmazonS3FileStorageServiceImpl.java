@@ -1,5 +1,6 @@
 package com.sap.sse.filestorage.impl;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,6 +14,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -138,5 +140,18 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
             throw new InvalidPropertiesException("invalid bucket", new Pair<FileStorageServiceProperty, String>(
                     bucketName, "bucket does not exist"));
         }
+    }
+
+    @Override
+    public URI duplicateFile(URI uri) throws OperationFailedException, InvalidPropertiesException, IOException {
+        String keyIn = uri.getPath().substring(1);
+        AmazonS3Client s3Client = createS3Client();
+        String keyOut = getKey(keyIn.substring(keyIn.lastIndexOf(".")));
+        try {
+        s3Client.copyObject(new CopyObjectRequest(bucketName.getValue(), keyIn, bucketName.getValue(), keyOut));
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+        return getUri(keyOut);
     }
 }

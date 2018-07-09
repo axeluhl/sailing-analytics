@@ -36,6 +36,8 @@ public interface FileStorageService extends IsManagedByCache<FileStorageServiceR
      */
     void removeFile(URI uri) throws OperationFailedException, InvalidPropertiesException, IOException;
 
+    URI duplicateFile(URI uri)  throws OperationFailedException, InvalidPropertiesException, IOException;
+    
     FileStorageServiceProperty[] getProperties();
 
     /**
