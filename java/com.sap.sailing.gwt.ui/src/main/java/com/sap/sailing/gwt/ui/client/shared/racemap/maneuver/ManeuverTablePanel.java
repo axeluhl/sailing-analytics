@@ -153,7 +153,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 this.stringMessages.maxTurningRate(), this.stringMessages.degreesPerSecondUnit()));
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getAverageTurningRate,
                 this.stringMessages.avgTurningRate(), this.stringMessages.degreesPerSecondUnit()));
-        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getManeuverLoss,
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getManeuverLossInMeters,
                 this.stringMessages.maneuverLoss(), stringMessages.metersUnit()));
         this.maneuverCellTable.addColumn(createSortableAbsMinMaxColumn(ManeuverTableData::getDirectionChange,
                 stringMessages.directionChange(), this.stringMessages.degreesShort()));

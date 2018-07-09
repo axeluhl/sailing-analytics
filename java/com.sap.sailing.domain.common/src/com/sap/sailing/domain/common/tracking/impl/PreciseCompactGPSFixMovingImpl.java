@@ -38,7 +38,7 @@ public class PreciseCompactGPSFixMovingImpl extends AbstractCompactGPSFixMovingI
     private double cachedEstimatedSpeedInKnots;
     
 
-    private class PreciseCompactSpeedWithBearing extends AbstractCompactSpeedWithBearing implements SpeedWithBearing {
+    public class PreciseCompactSpeedWithBearing extends AbstractCompactSpeedWithBearing implements SpeedWithBearing {
         private static final long serialVersionUID = 1802065090733146728L;
 
         @Override

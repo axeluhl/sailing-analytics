@@ -2216,7 +2216,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         if (maneuver.getManeuverLoss() != null) {
             Widget maneuverLossWidget = createInfoWindowLabelAndValue(stringMessages.maneuverLoss(),
-                    numberFormatOneDecimal.format(maneuver.getManeuverLoss().getDistanceLostInMeters()) + " " + stringMessages.metersUnit());
+                    numberFormatOneDecimal.format(maneuver.getManeuverLoss().getDistanceLost().getMeters()) + " " + stringMessages.metersUnit());
             CheckBox maneuverLossLinesCheckBox = new CheckBox(stringMessages.show());
             Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(),
                     maneuver.getType());
@@ -3194,17 +3194,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     /**
-     * Creates the ManeuverLoss Lines as calculated in {@link ManeuverDetectorImpl#getManeuverLoss()} and draw
-     * SmallTransparentInfoOverlays attached to the Polylines visualizing the maneuver.
-     * 
+     * Creates the ManeuverLoss Lines as calculated in {@link ManeuverDetectorImpl#getManeuverLossInMeters()} and draw
+     * {@link SmallTransparentInfoOverlay}s attached to the {@link Polyline}s visualizing the maneuver.
      */
     private void createManeuverLossLinesAndInfoOverlays(ManeuverDTO maneuver, CompetitorDTO competitor) {
-        Set<Polyline> maneuverLossLines = new HashSet<>();
-        Bearing bearingBefore = new DegreeBearingImpl(maneuver.getManeuverLoss().getSpeedWithBearingBefore().bearingInDegrees);
+        final Set<Polyline> maneuverLossLines = new HashSet<>();
+        Bearing bearingBefore = maneuver.getManeuverLoss().getSpeedWithBearingBefore().getBearing();
         Bearing middleManeuverAngle = new DegreeBearingImpl(maneuver.getManeuverLoss().getMiddleManeuverAngle());
-        Distance extrapolationOfManeuverStartPoint = new MeterDistance(
-                maneuver.getManeuverLoss().getSpeedWithBearingBefore().speedInKnots
-                        * maneuver.getManeuverLoss().getManeuverDuration().asHours() * 1852);
+        Distance extrapolationOfManeuverStartPoint = 
+                maneuver.getManeuverLoss().getSpeedWithBearingBefore().travel(maneuver.getManeuverLoss().getManeuverDuration());
         Position extrapolatedManeuverStartPosition = maneuver.getManeuverLoss().getManeuverStartPosition()
                 .translateRhumb(bearingBefore, extrapolationOfManeuverStartPoint);
         Position intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint = maneuver.getManeuverLoss().getManeuverStartPosition()
@@ -3213,7 +3211,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
         Position projectedManeuverEndPosition = maneuver.getManeuverLoss().getManeuverEndPosition().projectToLineThrough(
                 intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
-        String color = maneuver.getManeuverLoss().getDistanceLostInMeters() > 0 ? color = "#FF0000" : "#00FF00";
+        String color = maneuver.getManeuverLoss().getDistanceLost().compareTo(Distance.NULL) > 0 ? color = "#FF0000" : "#00FF00";
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true,
                 intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, projectedManeuverEndPosition,
                 middleManeuverAngleLineInfoProvider, "#ffffff", 1, 0.5));
@@ -3229,7 +3227,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 maneuver.getType());
         maneuverLossLinesMap.put(t, maneuverLossLines);
         StringBuilder sb = new StringBuilder();
-        sb.append(stringMessages.maneuverLoss() + ": " + numberFormatOneDecimal.format(maneuver.getManeuverLoss().getDistanceLostInMeters())
+        sb.append(stringMessages.maneuverLoss() + ": " + numberFormatOneDecimal.format(maneuver.getManeuverLoss().getDistanceLost().getMeters())
                 + stringMessages.metersUnit() + '\n');
         if (maneuver.getType() == ManeuverType.TACK) {
             sb.append(stringMessages.tackAngle() + ": ");
@@ -3243,7 +3241,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         SmallTransparentInfoOverlay maneuverLossInfoOverlay = new SmallTransparentInfoOverlay((MapWidget) map,
                 RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, sb.toString(), coordinateSystem);
         maneuverLossInfoOverlay.setPosition(projectedManeuverEndPosition.translateGreatCircle(middleManeuverAngle,
-                new MeterDistance(maneuver.getManeuverLoss().getDistanceLostInMeters() / 2)), -1);
+                maneuver.getManeuverLoss().getDistanceLost().scale(0.5)), /* transition time */ -1);
         maneuverLossInfoOverlay.draw();
         maneuverLossInfoOverlayMap.put(t, maneuverLossInfoOverlay);
     }

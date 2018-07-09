@@ -20,7 +20,7 @@ class ManeuverTableData {
     private final double lowestSpeedInKnots;
     private final double maximumTurningRate;
     private final double averageTurningRate;
-    private final Double maneuverLoss;
+    private final Double maneuverLossInMeters;
     private final double directionChange;
     private final boolean markPassing;
 
@@ -32,7 +32,7 @@ class ManeuverTableData {
         this.speedBeforeInKnots = maneuver.getSpeedWithBearingBefore().speedInKnots;
         this.speedAfterInKnots = maneuver.getSpeedWithBearingAfter().speedInKnots;
         this.lowestSpeedInKnots = maneuver.getLowestSpeedInKnots();
-        this.maneuverLoss = maneuver.getManeuverLoss() == null ? 0.0 : maneuver.getManeuverLoss().getDistanceLostInMeters();
+        this.maneuverLossInMeters = maneuver.getManeuverLoss() == null ? 0.0 : maneuver.getManeuverLoss().getDistanceLost().getMeters();
         this.directionChange = maneuver.getDirectionChangeInDegrees();
         this.maximumTurningRate = maneuver.getMaxTurningRateInDegreesPerSecond();
         this.averageTurningRate = maneuver.getAvgTurningRateInDegreesPerSecond();
@@ -83,8 +83,8 @@ class ManeuverTableData {
         return averageTurningRate;
     }
 
-    public Double getManeuverLoss() {
-        return maneuverLoss;
+    public Double getManeuverLossInMeters() {
+        return maneuverLossInMeters;
     }
 
     public double getDirectionChange() {

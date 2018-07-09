@@ -41,7 +41,8 @@ public class ManeuverDTO implements IsSerializable {
     
     private ManeuverLossDTO maneuverLoss;
 
-    public ManeuverDTO() {}
+    @Deprecated // for GWT serialization only
+    ManeuverDTO() {}
 
     public ManeuverDTO(ManeuverType type, Tack newTack, Position position, Date timePoint, Date timePointBefore,
             SpeedWithBearingDTO speedWithBearingBefore, SpeedWithBearingDTO speedWithBearingAfter,
@@ -88,9 +89,9 @@ public class ManeuverDTO implements IsSerializable {
                 + stringMessages.degreesPerSecondUnit();
         String lowestSpeed = stringMessages.lowestSpeed() + ": "
                 + NumberFormat.getDecimalFormat().format(this.getLowestSpeedInKnots()) + " " + stringMessages.knotsUnit();
-        String maneuverLoss = this.getManeuverLoss() == null ? ""
+        String maneuverLoss = (this.getManeuverLoss() == null || this.getManeuverLoss().getDistanceLost() == null) ? ""
                 : ("; " + stringMessages.maneuverLoss() + ": "
-                        + NumberFormat.getDecimalFormat().format(this.getManeuverLoss().getDistanceLostInMeters()) + " "
+                        + NumberFormat.getDecimalFormat().format(this.getManeuverLoss().getDistanceLost().getMeters()) + " "
                         + stringMessages.metersUnit());
         String markPassing = getMarkPassingTimePoint() == null ? ""
                 : "; " + stringMessages.markPassedToAt(

@@ -3632,13 +3632,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Date markPassingTimePoint = maneuver.isMarkPassing()
                     ? maneuver.getMarkPassing().getTimePoint().asDate() : null;
             final NauticalSide markPassingSide = maneuver.isMarkPassing() ? maneuver.getToSide() : null;
-            final SpeedWithBearingDTO speedWithBearingBeforeManeuverLoss = maneuver.getManeuverLoss() == null ? null
-                    : createSpeedWithBearingDTO(maneuver.getManeuverLoss().getSpeedWithBearingBefore());
+            final SpeedWithBearing speedWithBearingBeforeManeuverLoss = maneuver.getManeuverLoss() == null ? null
+                    : maneuver.getManeuverLoss().getSpeedWithBearingBefore();
             final Double middleManeuverAngle = maneuver.getManeuverLoss() == null ? null : maneuver.getManeuverLoss().getMiddleManeuverAngle().getDegrees();
             final ManeuverLossDTO maneuverLoss = maneuver.getManeuverLoss() == null ? null
                     : new ManeuverLossDTO(maneuver.getManeuverLoss().getManeuverStartPosition(),
                             maneuver.getManeuverLoss().getManeuverEndPosition(), speedWithBearingBeforeManeuverLoss, middleManeuverAngle,
-                            maneuver.getManeuverLoss().getManeuverDuration(), maneuver.getManeuverLoss().getProjectedDistanceLost().getMeters());
+                            maneuver.getManeuverLoss().getManeuverDuration(), maneuver.getManeuverLoss().getProjectedDistanceLost());
             result.add(new ManeuverDTO(type, newTack, position, timepoint, timePointBefore, speedBefore,
                     speedAfter, directionChangeInDegrees, maxTurningRateInDegreesPerSecond,
                     averageTurningRateInDegreesPerSecond, lowestSpeedInKnots, markPassingTimePoint, markPassingSide, maneuverLoss));

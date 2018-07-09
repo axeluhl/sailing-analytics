@@ -2,27 +2,30 @@ package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 
 public class ManeuverLossDTO implements IsSerializable {
     private Position maneuverStartPosition;
     private Position maneuverEndPosition;
-    private SpeedWithBearingDTO speedWithBearingBefore;
+    private SpeedWithBearing speedWithBearingBefore;
     private Double middleManeuverAngle;
     private Duration maneuverDuration;
-    private Double projectedDistanceLostInMeters;
+    private Distance projectedDistanceLost;
     
-    public ManeuverLossDTO() {
+    @Deprecated // for GWT serialization only
+    ManeuverLossDTO() {
     }
 
     public ManeuverLossDTO(Position maneuverStartPosition, Position maneuverEndPosition,
-            SpeedWithBearingDTO speedWithBearingBefore, Double middleManeuverAngle, Duration maneuverDuration, Double projectedDistanceLostInMeters) {
+            SpeedWithBearing speedWithBearingBefore, Double middleManeuverAngle, Duration maneuverDuration, Distance projectedDistanceLost) {
         this.maneuverStartPosition = maneuverStartPosition;
         this.maneuverEndPosition = maneuverEndPosition;
         this.speedWithBearingBefore = speedWithBearingBefore;
         this.middleManeuverAngle = middleManeuverAngle;
         this.maneuverDuration = maneuverDuration;
-        this.projectedDistanceLostInMeters = projectedDistanceLostInMeters;
+        this.projectedDistanceLost = projectedDistanceLost;
     }
     
     public Duration getManeuverDuration() {
@@ -37,10 +40,10 @@ public class ManeuverLossDTO implements IsSerializable {
     public Double getMiddleManeuverAngle() {
         return middleManeuverAngle;
     }
-    public SpeedWithBearingDTO getSpeedWithBearingBefore() {
+    public SpeedWithBearing getSpeedWithBearingBefore() {
         return speedWithBearingBefore;
     }
-    public Double getDistanceLostInMeters() {
-        return projectedDistanceLostInMeters;
+    public Distance getDistanceLost() {
+        return projectedDistanceLost;
     }
 }
