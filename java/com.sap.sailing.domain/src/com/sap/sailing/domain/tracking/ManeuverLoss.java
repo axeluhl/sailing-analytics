@@ -8,18 +8,13 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 
 /**
- * 
- * @author Vladislav Chumak (D069712)
- *
- */
-
-/**
  * Updated ManeuverLoss class to use it to visualize the correct maneuver loss on the race map. To draw the ManeuverLoss
  * needs the maneuverStartPosition, maneuverEndPosition, middleManeuverAngle, speedWithBearingBefore and
  * maneuverDuration. The ManeuverLoss is calculated by {@link ManeuverDetectorImpl#getManeuverLoss()}.
+ * 
+ * @author Vladislav Chumak (D069712)
  */
 public class ManeuverLoss {
-
     private final Distance distanceSailedProjectedOnMiddleManeuverAngle;
     private final Distance distanceSailedIfNotManeuveringProjectedOnMiddeManeuverAngle;
     private final Position maneuverStartPosition;
