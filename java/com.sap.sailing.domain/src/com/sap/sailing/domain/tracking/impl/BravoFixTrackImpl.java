@@ -170,7 +170,11 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         }
     }
 
-    private <T> TimeRangeCache<T> createTimeRangeCache(ItemType trackedItem, final String cacheName) {
+    /**
+     * This method is protected in order to let test classes use other TimeRangeCache specializations
+     * that provide specific test support.
+     */
+    protected <T> TimeRangeCache<T> createTimeRangeCache(ItemType trackedItem, final String cacheName) {
         return new TimeRangeCache<>(cacheName+" for "+trackedItem);
     }
 
