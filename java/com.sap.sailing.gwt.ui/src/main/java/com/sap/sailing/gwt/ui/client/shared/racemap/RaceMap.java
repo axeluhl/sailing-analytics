@@ -2216,7 +2216,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         if (maneuver.getManeuverLoss() != null) {
             Widget maneuverLossWidget = createInfoWindowLabelAndValue(stringMessages.maneuverLoss(),
-                    numberFormatOneDecimal.format(maneuver.getManeuverLossInMeters()) + " " + stringMessages.metersUnit());
+                    numberFormatOneDecimal.format(maneuver.getManeuverLoss().getDistanceLostInMeters()) + " " + stringMessages.metersUnit());
             CheckBox maneuverLossLinesCheckBox = new CheckBox(stringMessages.show());
             Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(),
                     maneuver.getType());
@@ -3213,7 +3213,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
         Position projectedManeuverEndPosition = maneuver.getManeuverLoss().getManeuverEndPosition().projectToLineThrough(
                 intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
-        String color = maneuver.getManeuverLossInMeters() > 0 ? color = "#FF0000" : "#00FF00";
+        String color = maneuver.getManeuverLoss().getDistanceLostInMeters() > 0 ? color = "#FF0000" : "#00FF00";
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true,
                 intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, projectedManeuverEndPosition,
                 middleManeuverAngleLineInfoProvider, "#ffffff", 1, 0.5));
@@ -3225,16 +3225,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 projectedManeuverEndPosition, projectedManeuverEndLineInfoProvider, "#FFFF00", 1, 0.3));
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, projectedExtrapolatedManeuverStartPosition,
                 projectedManeuverEndPosition, maneuverLossLineInfoProvider, color, 2, 1.0));
-//        for (Polyline maneuverLossLine : maneuverLossLines) {
-//            PolylineOptions options = PolylineOptions.newInstance();
-//            options.setStrokeOpacity(0.5);
-//            maneuverLossLine.setOptions(options);
-//        }
         Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(),
                 maneuver.getType());
         maneuverLossLinesMap.put(t, maneuverLossLines);
         StringBuilder sb = new StringBuilder();
-        sb.append(stringMessages.maneuverLoss() + ": " + numberFormatOneDecimal.format(maneuver.getManeuverLossInMeters())
+        sb.append(stringMessages.maneuverLoss() + ": " + numberFormatOneDecimal.format(maneuver.getManeuverLoss().getDistanceLostInMeters())
                 + stringMessages.metersUnit() + '\n');
         if (maneuver.getType() == ManeuverType.TACK) {
             sb.append(stringMessages.tackAngle() + ": ");
@@ -3248,7 +3243,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         SmallTransparentInfoOverlay maneuverLossInfoOverlay = new SmallTransparentInfoOverlay((MapWidget) map,
                 RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, sb.toString(), coordinateSystem);
         maneuverLossInfoOverlay.setPosition(projectedManeuverEndPosition.translateGreatCircle(middleManeuverAngle,
-                new MeterDistance(maneuver.getManeuverLossInMeters() / 2)), -1);
+                new MeterDistance(maneuver.getManeuverLoss().getDistanceLostInMeters() / 2)), -1);
         maneuverLossInfoOverlay.draw();
         maneuverLossInfoOverlayMap.put(t, maneuverLossInfoOverlay);
     }

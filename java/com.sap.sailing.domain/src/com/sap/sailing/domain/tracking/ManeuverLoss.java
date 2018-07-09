@@ -76,5 +76,4 @@ public class ManeuverLoss {
     public Bearing getMiddleManeuverAngle() {
         return middleManeuverAngle;
     }
-
 }

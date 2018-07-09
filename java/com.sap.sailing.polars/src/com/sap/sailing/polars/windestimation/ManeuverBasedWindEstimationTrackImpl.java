@@ -195,7 +195,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             this.speedAtManeuverStart = maneuver.getSpeedWithBearingBefore();
             this.middleManeuverCourse = maneuver.getSpeedWithBearingBefore().getBearing()
                     .middle(maneuver.getSpeedWithBearingAfter().getBearing());
-            this.maneuverLossDistanceLost = maneuver.getManeuverLossDistanceLost();
+            this.maneuverLossDistanceLost = maneuver.getManeuverLoss() == null ? null : maneuver.getManeuverLoss().getProjectedDistanceLost();
             @SuppressWarnings("unchecked")
             Pair<Double, SpeedWithBearingWithConfidence<Void>>[] myLikelihoodAndTWSBasedOnSpeedAndAngleCache = (Pair<Double, SpeedWithBearingWithConfidence<Void>>[]) new Pair<?, ?>[ManeuverType
                     .values().length];

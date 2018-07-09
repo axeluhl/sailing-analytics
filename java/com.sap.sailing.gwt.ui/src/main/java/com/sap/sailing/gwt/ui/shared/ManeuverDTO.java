@@ -29,8 +29,6 @@ public class ManeuverDTO implements IsSerializable {
 
     private double directionChangeInDegrees;
 
-    private Double maneuverLossInMeters;
-
     private double maxTurningRateInDegreesPerSecond;
 
     private double avgTurningRateInDegreesPerSecond;
@@ -47,7 +45,7 @@ public class ManeuverDTO implements IsSerializable {
 
     public ManeuverDTO(ManeuverType type, Tack newTack, Position position, Date timePoint, Date timePointBefore,
             SpeedWithBearingDTO speedWithBearingBefore, SpeedWithBearingDTO speedWithBearingAfter,
-            double directionChangeInDegrees, Double maneuverLossInMeters, double maxTurningRateInDegreesPerSecond,
+            double directionChangeInDegrees, double maxTurningRateInDegreesPerSecond,
             double avgTurningRateInDegreesPerSecond, double lowestSpeedInKnots, Date markPassingTimePoint,
             NauticalSide markPassingSide, ManeuverLossDTO maneuverLoss) {
         this.type = type;
@@ -58,7 +56,6 @@ public class ManeuverDTO implements IsSerializable {
         this.speedWithBearingBefore = speedWithBearingBefore;
         this.speedWithBearingAfter = speedWithBearingAfter;
         this.directionChangeInDegrees = directionChangeInDegrees;
-        this.maneuverLossInMeters = maneuverLossInMeters;
         this.maxTurningRateInDegreesPerSecond = maxTurningRateInDegreesPerSecond;
         this.avgTurningRateInDegreesPerSecond = avgTurningRateInDegreesPerSecond;
         this.lowestSpeedInKnots = lowestSpeedInKnots;
@@ -91,9 +88,9 @@ public class ManeuverDTO implements IsSerializable {
                 + stringMessages.degreesPerSecondUnit();
         String lowestSpeed = stringMessages.lowestSpeed() + ": "
                 + NumberFormat.getDecimalFormat().format(this.getLowestSpeedInKnots()) + " " + stringMessages.knotsUnit();
-        String maneuverLoss = this.getManeuverLossInMeters() == null ? ""
+        String maneuverLoss = this.getManeuverLoss() == null ? ""
                 : ("; " + stringMessages.maneuverLoss() + ": "
-                        + NumberFormat.getDecimalFormat().format(this.getManeuverLossInMeters()) + " "
+                        + NumberFormat.getDecimalFormat().format(this.getManeuverLoss().getDistanceLostInMeters()) + " "
                         + stringMessages.metersUnit());
         String markPassing = getMarkPassingTimePoint() == null ? ""
                 : "; " + stringMessages.markPassedToAt(
@@ -136,10 +133,6 @@ public class ManeuverDTO implements IsSerializable {
 
     public double getDirectionChangeInDegrees() {
         return directionChangeInDegrees;
-    }
-
-    public Double getManeuverLossInMeters() {
-        return maneuverLossInMeters;
     }
 
     public double getMaxTurningRateInDegreesPerSecond() {

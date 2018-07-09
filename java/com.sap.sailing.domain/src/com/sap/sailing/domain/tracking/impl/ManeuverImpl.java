@@ -10,7 +10,6 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.domain.tracking.ManeuverLoss;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
@@ -25,21 +24,19 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     private final Tack newTack;
     private final Position position;
     private final TimePoint timePoint;
-    private final Distance maneuverLossDistanceLost;
     private final double maxTurningRateInDegreesPerSecond;
     private final ManeuverCurveBoundaries mainCurveBoundaries;
     private final ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries;
     private final MarkPassing markPassing;
     private final ManeuverLoss maneuverLoss;
 
-    public ManeuverImpl(ManeuverType type, Tack newTack, Position position, Distance maneuverLossDistanceLost, TimePoint timePoint,
+    public ManeuverImpl(ManeuverType type, Tack newTack, Position position, TimePoint timePoint,
             ManeuverCurveBoundaries mainCurveBoundaries,
             ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries,
             double maxTurningRateInDegreesPerSecond, MarkPassing markPassing, ManeuverLoss maneuverLoss) {
         this.type = type;
         this.newTack = newTack;
         this.position = position;
-        this.maneuverLossDistanceLost = maneuverLossDistanceLost;
         this.timePoint = timePoint;
         this.mainCurveBoundaries = mainCurveBoundaries;
         this.maneuverCurveWithStableSpeedAndCourseBoundaries = maneuverCurveWithStableSpeedAndCourseBoundaries;
@@ -79,11 +76,6 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
     }
 
     @Override
-    public Distance getManeuverLossDistanceLost() {
-        return maneuverLossDistanceLost;
-    }
-
-    @Override
     public double getDirectionChangeInDegrees() {
         return getManeuverBoundaries().getDirectionChangeInDegrees();
     }
@@ -108,7 +100,7 @@ public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuve
         return super.toString() + " " + type + " on new tack " + newTack + " on position " + position
                 + " at time point " + timePoint + ", " + getManeuverBoundaries() + ", max. turning rate: "
                 + maxTurningRateInDegreesPerSecond
-                + (getManeuverLossDistanceLost() == null ? "" : ", Lost approximately " + getManeuverLossDistanceLost()) + ", Mark passing: "
+                + (getManeuverLoss() == null ? "" : ", Lost approximately " + getManeuverLoss().getProjectedDistanceLost()) + ", Mark passing: "
                 + markPassing;
     }
 
