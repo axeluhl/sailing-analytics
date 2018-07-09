@@ -145,7 +145,9 @@ public class RaceBoardPanel
     private MediaPlayerManagerComponent mediaPlayerManagerComponent;
     private EditMarkPassingsPanel editMarkPassingPanel;
     private EditMarkPositionPanel editMarkPositionPanel;
-
+    
+    private final TaggingPanel taggingPanel;
+    
     private final DockLayoutPanel dockPanel;
     private final ResizableFlowPanel timePanelWrapper;
     private final static int TIMEPANEL_COLLAPSED_HEIGHT = 67;
@@ -154,7 +156,7 @@ public class RaceBoardPanel
     /**
      * The component viewer
      */
-    private SideBySideComponentViewer leaderboardAndMapViewer;
+    private SideBySideComponentViewer mapViewer;
 
     private final AsyncActionsExecutor asyncActionsExecutor;
     
@@ -249,7 +251,8 @@ public class RaceBoardPanel
                     @Override
                     public void execute() {
                         // Show/hide the leaderboard panels toggle button text based on the race map height
-                        leaderboardAndMapViewer.setLeftComponentToggleButtonTextVisibilityAndDraggerPosition(raceMap.getOffsetHeight() > 400);
+                        mapViewer.setLeftComponentToggleButtonTextVisibilityAndDraggerPosition(raceMap.getOffsetHeight() > 400);
+                        mapViewer.setRightComponentToggleButtonTextVisibilityAndDraggerPosition(raceMap.getOffsetHeight() > 400);
                     }
                 });
             }
@@ -297,7 +300,13 @@ public class RaceBoardPanel
         raceMap.getRightHeaderPanel().add(regattaAndRaceTimeInformationHeader);
         raceMap.getRightHeaderPanel().add(userManagementMenuView);
         addChildComponent(raceMap);
-
+        
+        // add panel for tagging functionality, hidden by default
+        taggingPanel = new TaggingPanel(new Label("Hello World!"), stringMessages, parent, componentContext);
+        addChildComponent(taggingPanel);
+        taggingPanel.setVisible(true);
+        taggingPanel.setVisible(false);
+        
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
         boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
@@ -315,6 +324,7 @@ public class RaceBoardPanel
                 isScreenLargeEnoughToInitiallyDisplayLeaderboard,
                 raceMap, userService, showChartMarkEditMediaButtonsAndVideo); // initializes the raceMap field
         leaderboardPanel.addLeaderboardUpdateListener(this);
+        
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
         // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
         if (getPerspectiveSettings().getActiveCompetitorsFilterSetName() != null) {
@@ -418,7 +428,7 @@ public class RaceBoardPanel
         mediaPlayerManagerComponent = new MediaPlayerManagerComponent(this, getComponentContext(), mediaPlayerLifecycle,
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
                 errorReporter, userAgent, this, mediaPlayerSettings);
-        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent,
+        mapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, taggingPanel, mediaPlayerManagerComponent,
                 componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel, maneuverTablePanel);
         
         mediaPlayerManagerComponent.addPlayerChangeListener(new PlayerChangeListener() {
@@ -433,7 +443,7 @@ public class RaceBoardPanel
             addChildComponent(component);
         }
         this.setupUserManagementControlPanel(userService);
-        mainPanel.add(leaderboardAndMapViewer.getViewerWidget());
+        mainPanel.add(mapViewer.getViewerWidget());
         boolean showLeaderboard = getPerspectiveSettings().isShowLeaderboard() && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
         setLeaderboardVisible(showLeaderboard);
         if (showChartMarkEditMediaButtonsAndVideo) {
@@ -546,7 +556,19 @@ public class RaceBoardPanel
      * @param visible <code>true</code> if the leaderboard shall be open/visible
      */
     public void setLeaderboardVisible(boolean visible) {
-        setComponentVisible(leaderboardAndMapViewer, leaderboardPanel, visible);
+        setComponentVisible(mapViewer, leaderboardPanel, visible);
+    }
+    
+    /**
+     * Sets the collapsable panel for the tagging open or close, if in <code>CASCADE</code> view mode.<br />
+     * Displays or hides the tagging panel, if in <code>ONESCREEN</code> view mode.<br /><br />
+     * 
+     * The race board should be completely rendered before this method is called, or a few exceptions could be thrown.
+     * 
+     * @param visible <code>true</code> if the leaderboard shall be open/visible
+     */
+    public void setTaggingPanelVisible(boolean visible) {
+        setComponentVisible(mapViewer, taggingPanel, visible);
     }
 
     /**
@@ -558,11 +580,11 @@ public class RaceBoardPanel
      * @param visible <code>true</code> if the wind chart shall be open/visible
      */
     public void setWindChartVisible(boolean visible) {
-        setComponentVisible(leaderboardAndMapViewer, windChart, visible);
+        setComponentVisible(mapViewer, windChart, visible);
     }
     
     public void showInWindChart(WindSource windprovider) {
-        setComponentVisible(leaderboardAndMapViewer, windChart, true);
+        setComponentVisible(mapViewer, windChart, true);
         windChart.showProvider(windprovider);
     }
 
@@ -575,7 +597,7 @@ public class RaceBoardPanel
      * @param visible <code>true</code> if the competitor chart shall be open/visible
      */
     public void setCompetitorChartVisible(boolean visible) {
-        setComponentVisible(leaderboardAndMapViewer, competitorChart, visible);
+        setComponentVisible(mapViewer, competitorChart, visible);
     }
     
     protected SailingServiceAsync getSailingService() {
