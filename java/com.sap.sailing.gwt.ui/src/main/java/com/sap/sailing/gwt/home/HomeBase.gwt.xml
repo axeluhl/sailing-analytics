@@ -45,9 +45,6 @@
   	<inherits name='com.sap.sse.gwt.CommonControlCSS'/>
 	<inherits name='com.sap.sailing.gwt.settings.Settings'/>
 	
-	<set-configuration-property name="CssResource.enableGss" value="true" />
-	<set-configuration-property name="CssResource.conversionMode" value="strict" />
-	
 	<replace-with class="com.sap.sailing.gwt.home.shared.utils.dateformatter.CustomEventDatesFormatter">
         <when-type-is class="com.sap.sailing.gwt.home.shared.utils.dateformatter.DefaultEventDatesFormatter"/>
         <any>

@@ -51,7 +51,7 @@ public class Notification {
     }
 
     interface NotificationResources extends ClientBundle {
-        @Source("notification.gss")
+        @Source("notification.css")
         NotificationCSS css();
     }
 

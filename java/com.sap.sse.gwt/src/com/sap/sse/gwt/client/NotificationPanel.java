@@ -31,7 +31,7 @@ public class NotificationPanel {
     private boolean alreadyShown = false;
 
     interface NotificationResources extends ClientBundle {
-        @Source("notification.gss")
+        @Source("notification.css")
         NotificationCSS css();
     }
 
