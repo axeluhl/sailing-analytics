@@ -23,6 +23,10 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
         comment = pComment;
         imageURL = pImageURL;
     }
+    
+    public RaceLogTagEventImpl(String pTag, String pComment, URL pImageURL, TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId) {
+        this(pTag, pComment, pImageURL, now(), logicalTimePoint, author, randId(), pPassId);
+    }
 
     @Override
     public String getTag() {
