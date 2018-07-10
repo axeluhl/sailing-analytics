@@ -88,6 +88,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
@@ -114,6 +115,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventI
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogSuppressedMarkPassingsEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogTagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.impl.RaceLogAdditionalScoringInformationEventImpl;
@@ -7779,6 +7781,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                         event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId(),
                                         event.getNextStatus()));
                             }
+                        }
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogTagEvent event) {
+                        // TODO change body of method and check if it is okay D067890
+                        if (!dependentStartTime && isLatestPass(event)) {
+                            raceLog.add(new RaceLogTagEventImpl(event.getTag(), event.getComment(), event.getImageURL(), event.getCreatedAt(), event.getLogicalTimePoint(),
+                                    event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId()));
                         }
                     }
                     
