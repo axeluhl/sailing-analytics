@@ -8,6 +8,7 @@ import java.util.List;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
@@ -46,15 +47,22 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
     protected IntegerBox heightInPxBox;
     protected StringListInlineEditorComposite tagsListEditor;
     protected Image image;
+    protected CheckBox doResize;
     private final BusyIndicator busyIndicator;
+    private ImageParameterValidator validator;
 
     protected static class ImageParameterValidator implements Validator<ImageDTO> {
         private StringMessages stringMessages;
+        private boolean resize = false;
 
         public ImageParameterValidator(StringMessages stringMessages) {
             this.stringMessages = stringMessages;
         }
 
+        public void setResize(boolean resize) {
+            this.resize = resize;
+        }
+        
         @Override
         public String getErrorMessage(ImageDTO imageToValidate) {
             String errorMessage = null;
@@ -65,27 +73,26 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                 errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
             } else if (imageWidth == null || imageHeight == null) {
                 errorMessage = stringMessages.couldNotRetrieveImageSizeYet();
-            } else if (imageToValidate.hasTag(MediaTagConstants.LOGO)
-                    && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
+            } else if (!resize) {
+                if (imageToValidate.hasTag(MediaTagConstants.LOGO) && !isValidSize(imageWidth, imageHeight,
+                        MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH,
+                        MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT)) {
+                    errorMessage = getSizeErrorMessage("Logo", MediaConstants.MIN_LOGO_IMAGE_WIDTH,
                             MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT,
-                            MediaConstants.MAX_LOGO_IMAGE_HEIGHT)) {
-                errorMessage = getSizeErrorMessage("Logo", MediaConstants.MIN_LOGO_IMAGE_WIDTH,
-                        MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT,
-                        MediaConstants.MAX_LOGO_IMAGE_HEIGHT, stringMessages);
-            } else if (imageToValidate.hasTag(MediaTagConstants.TEASER)
-                    && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
+                            MediaConstants.MAX_LOGO_IMAGE_HEIGHT, stringMessages);
+                } else if (imageToValidate.hasTag(MediaTagConstants.TEASER) && !isValidSize(imageWidth, imageHeight,
+                        MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH,
+                        MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT)) {
+                    errorMessage = getSizeErrorMessage("Event-Teaser", MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
                             MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT,
-                            MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT)) {
-                errorMessage = getSizeErrorMessage("Event-Teaser", MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
-                        MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT,
-                        MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, stringMessages);
-            } else if (imageToValidate.hasTag(MediaTagConstants.STAGE)
-                    && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
+                            MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, stringMessages);
+                } else if (imageToValidate.hasTag(MediaTagConstants.STAGE) && !isValidSize(imageWidth, imageHeight,
+                        MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH,
+                        MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT)) {
+                    errorMessage = getSizeErrorMessage("Stage", MediaConstants.MIN_STAGE_IMAGE_WIDTH,
                             MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT,
-                            MediaConstants.MAX_STAGE_IMAGE_HEIGHT)) {
-                errorMessage = getSizeErrorMessage("Stage", MediaConstants.MIN_STAGE_IMAGE_WIDTH,
-                        MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT,
-                        MediaConstants.MAX_STAGE_IMAGE_HEIGHT, stringMessages);
+                            MediaConstants.MAX_STAGE_IMAGE_HEIGHT, stringMessages);
+                }
             }
             return errorMessage;
         }
@@ -102,6 +109,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
 
     public ImageDialog(Date creationDate, ImageParameterValidator validator, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
         super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
+        this.validator = validator;
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.creationDate = creationDate;
@@ -148,6 +156,14 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                 validateAndUpdate();
             }
         });
+        doResize = new CheckBox();
+        doResize.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                validator.setResize(event.getValue());
+            }
+        });
     }
 
     @Override
@@ -176,7 +192,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             panel.add(additionalWidget);
         }
 
-        Grid grid = new Grid(11, 2);
+        Grid grid = new Grid(12, 2);
 
         grid.setWidget(0, 0, new Label(stringMessages.createdAt() + ":"));
         grid.setWidget(0, 1, createdAtLabel);
@@ -200,6 +216,8 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         grid.setWidget(9, 0, new HTML("&nbsp;"));
         grid.setWidget(10, 0, new Label(stringMessages.tags() + ":"));
         grid.setWidget(10, 1, tagsListEditor);
+        grid.setWidget(11, 0, new Label(stringMessages.doResize() + ":"));
+        grid.setWidget(11, 1, doResize);
 
         panel.add(grid);
 
