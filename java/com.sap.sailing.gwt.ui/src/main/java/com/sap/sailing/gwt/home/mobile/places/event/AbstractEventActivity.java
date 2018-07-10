@@ -80,7 +80,8 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     protected final void initSeriesNavigation(EventViewBase view) {
         final SeriesReferenceWithEventsDTO seriesData = eventDTO.getSeriesData();
         if (seriesData != null) {
-            // TODO use leaderboard group name to construct place
+            boolean fixMeWarning = false;
+            // TODO use leaderboard group id to construct place
             String seriesIdAsString = eventDTO.getSeriesIdAsString();
             PlaceNavigation<?> navigation = clientFactory.getNavigator().getEventSeriesNavigation(seriesIdAsString, null, false);
             view.setSeriesNavigation(eventDTO.getSeriesName(), navigation);

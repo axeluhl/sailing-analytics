@@ -181,10 +181,10 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     
     protected PlaceNavigation<SeriesDefaultPlace> getEventSeriesNavigation(final SeriesReferenceDTO seriesReference) {
         if (seriesReference != null) {
-            final String seriesLeaderboardGroupName = seriesReference.getSeriesLeaderboardGroupName();
-            if (seriesLeaderboardGroupName != null) {
+            final UUID seriesLeaderboardGroupId = seriesReference.getSeriesLeaderboardGroupId();
+            if (seriesLeaderboardGroupId != null) {
                 boolean fixMeWarning = false;
-                // FIXME use seriesLeaderboardGroupName for place construction
+                // FIXME use seriesLeaderboardGroupId for place construction
                 return homePlacesNavigator.getEventSeriesNavigation(ctx.getEventId(), null, false);
             }
         }
