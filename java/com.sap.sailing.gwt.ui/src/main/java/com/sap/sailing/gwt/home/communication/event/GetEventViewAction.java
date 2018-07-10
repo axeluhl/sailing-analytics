@@ -138,7 +138,7 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
                 dto.setSeriesData(new SeriesReferenceWithEventsDTO(
                         singleLeaderboardGroup.getDisplayName() != null ? singleLeaderboardGroup.getDisplayName()
                                 : singleLeaderboardGroup.getName(),
-                        singleLeaderboardGroup.getName(), eventsOfSeries));
+                        singleLeaderboardGroup.getId(), eventsOfSeries));
             }
         }
         return dto;

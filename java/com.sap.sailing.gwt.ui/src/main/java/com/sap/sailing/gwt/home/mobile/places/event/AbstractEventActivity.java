@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.home.communication.event.news.LeaderboardNewsEntryDTO
 import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.home.communication.eventview.SeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.eventview.SeriesReferenceWithEventsDTO;
 import com.sap.sailing.gwt.home.communication.media.GetMediaForEventAction;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
@@ -78,9 +79,16 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     protected abstract EventViewBase initView();
     
     protected final void initSeriesNavigation(EventViewBase view) {
-        final SeriesReferenceWithEventsDTO seriesData = eventDTO.getSeriesData();
+        final SeriesReferenceDTO seriesData;
+        final RegattaMetadataDTO regatta = getRegatta();
+        if (regatta != null) {
+            seriesData = regatta.getSeriesReference();
+        } else {
+            seriesData = eventDTO.getSeriesData();
+        }
         if (seriesData != null) {
-            // TODO use leaderboard group name to construct place
+            final UUID seriesLeaderboardGroupId = seriesData.getSeriesLeaderboardGroupId();
+            // TODO use seriesLeaderboardGroupId to construct place
             String seriesIdAsString = eventDTO.getSeriesIdAsString();
             PlaceNavigation<?> navigation = clientFactory.getNavigator().getEventSeriesNavigation(seriesIdAsString, null, false);
             view.setSeriesNavigation(eventDTO.getSeriesName(), navigation);

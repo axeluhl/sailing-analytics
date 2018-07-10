@@ -251,7 +251,7 @@ public class LeaderboardContext {
             if (singleLeaderboardGroup.hasOverallLeaderboard()) {
                 regattaDTO.setSeriesReference(new SeriesReferenceDTO(
                         singleLeaderboardGroup.getDisplayName() != null ? singleLeaderboardGroup.getDisplayName()
-                                : singleLeaderboardGroup.getName(), singleLeaderboardGroup.getName()));
+                                : singleLeaderboardGroup.getName(), singleLeaderboardGroup.getId()));
             }
         }
         regattaDTO.setCompetitorsCount(HomeServiceUtil.calculateCompetitorsCount(leaderboard));
