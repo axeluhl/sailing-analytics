@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.shared.places.fakeseries;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.common.client.AbstractMapTokenizer;
@@ -18,8 +19,8 @@ public abstract class AbstractSeriesPlace extends Place {
         return ctx;
     }
 
-    public AbstractSeriesPlace(String leaderboardName) {
-        this.ctx = new SeriesContext(null, leaderboardName);
+    public AbstractSeriesPlace(UUID leaderboardGroupUUID) {
+        this.ctx = new SeriesContext(null, leaderboardGroupUUID);
     }
 
     public String getTitle(String eventName) {
@@ -34,15 +35,23 @@ public abstract class AbstractSeriesPlace extends Place {
         private final static String PARAM_EVENTID = "seriesId";
         private final static String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
         protected PLACE getPlaceFromParameters(Map<String, String> parameters) {
-            String eventId = parameters.get(PARAM_EVENTID);
-            String leaderboardGroupName = parameters.get(PARAM_LEADERBOARD_GROUP_NAME);
-            return getRealPlace(new SeriesContext(eventId, leaderboardGroupName));
+            String eventIdRaw = parameters.get(PARAM_EVENTID);
+            UUID eventId = null;
+            if (eventIdRaw != null) {
+                eventId = UUID.fromString(eventIdRaw);
+            }
+            String leaderboardGroupIdRaw = parameters.get(PARAM_LEADERBOARD_GROUP_NAME);
+            UUID leaderboardGroupId = null;
+            if(leaderboardGroupIdRaw != null) {
+                leaderboardGroupId = UUID.fromString(leaderboardGroupIdRaw);
+            }
+            return getRealPlace(new SeriesContext(eventId, leaderboardGroupId));
         }
         
         protected Map<String, String> getParameters(PLACE place) {
             Map<String, String> parameters = new HashMap<>();
             SeriesContext context = place.getCtx();
-            parameters.put(PARAM_LEADERBOARD_GROUP_NAME, context.getLeaderboardGroupName());
+            parameters.put(PARAM_LEADERBOARD_GROUP_NAME, context.getLeaderboardGroupName().toString());
             return parameters;
         }
         

@@ -12,7 +12,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 public class EventSeriesViewDTO implements Result, HasLogo {
-    private UUID id;
+    private UUID leaderboardGroupUUID;
     private String displayName;
     private ArrayList<EventMetadataDTO> eventsAscending = new ArrayList<>();
     private ImageDTO logoImage;
@@ -36,12 +36,12 @@ public class EventSeriesViewDTO implements Result, HasLogo {
 
     public EventSeriesState state;
 
-    public UUID getId() {
-        return id;
+    public UUID getLeaderboardGroupUUID() {
+        return leaderboardGroupUUID;
     }
-
-    public void setId(UUID id) {
-        this.id = id;
+    
+    public void setLeaderboardGroupUUID(UUID leaderboardGroupUUID) {
+        this.leaderboardGroupUUID = leaderboardGroupUUID;
     }
 
     public String getDisplayName() {

@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.mobile.places.series.minileaderboard;
 
 import java.util.Collection;
-import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -41,7 +40,7 @@ public class SeriesMiniOverallLeaderboardViewImpl extends Composite implements S
         initWidget(uiBinder.createAndBindUi(this));
         RefreshManager refreshManager = new LifecycleRefreshManager(this, currentPresenter.getDispatch());
         SeriesContext ctx = presenter.getCtx();
-        refreshManager.add(minileaderboardUi, new GetMiniOverallLeaderbordAction(UUID.fromString(ctx.getSeriesId())));
+        refreshManager.add(minileaderboardUi, new GetMiniOverallLeaderbordAction(ctx.getSeriesId()));
         minileaderboardUi.setAction(MSG.details(), presenter.getOverallLeaderboardNavigation());
     }
     
