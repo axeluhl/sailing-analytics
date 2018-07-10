@@ -19,8 +19,8 @@ public abstract class AbstractSeriesPlace extends Place {
         return ctx;
     }
 
-    public AbstractSeriesPlace(UUID leaderboardGroupUUID) {
-        this.ctx = new SeriesContext(null, leaderboardGroupUUID);
+    public AbstractSeriesPlace(UUID seriesUUID) {
+        this.ctx = new SeriesContext(seriesUUID, null);
     }
 
     public String getTitle(String eventName) {
@@ -51,7 +51,12 @@ public abstract class AbstractSeriesPlace extends Place {
         protected Map<String, String> getParameters(PLACE place) {
             Map<String, String> parameters = new HashMap<>();
             SeriesContext context = place.getCtx();
-            parameters.put(PARAM_LEADERBOARD_GROUP_NAME, context.getLeaderboardGroupName().toString());
+            if(context.getLeaderboardGroupId() != null) {
+                parameters.put(PARAM_LEADERBOARD_GROUP_NAME, context.getLeaderboardGroupId().toString());
+            }
+            if(context.getSeriesId() != null) {
+                parameters.put(PARAM_EVENTID, context.getSeriesId().toString());
+            }
             return parameters;
         }
         

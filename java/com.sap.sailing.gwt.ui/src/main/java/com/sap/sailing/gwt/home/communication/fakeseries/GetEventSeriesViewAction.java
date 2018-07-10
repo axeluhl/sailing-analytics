@@ -131,6 +131,7 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
         return dto;
     }
 
+    @GwtIncompatible
     private Event determineBestMatchingEvent(SailingDispatchContext ctx, LeaderboardGroup leaderBoardGroup) {
         List<Event> events = new ArrayList<>(
                 HomeServiceUtil.getEventsForSeriesOrdered(leaderBoardGroup, ctx.getRacingEventService()));

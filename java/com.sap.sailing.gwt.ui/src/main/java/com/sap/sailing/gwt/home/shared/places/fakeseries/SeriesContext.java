@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.shared.places.fakeseries;
 
 import java.util.UUID;
 
+import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
 
 /**
@@ -15,6 +16,7 @@ public class SeriesContext {
     private EventSeriesAnalyticsDataManager analyticsManager;
 
     public SeriesContext(UUID seriesId, UUID leaderboardGroupId) {
+        GWT.debugger();
         this.seriesId = seriesId;
         this.leaderboardGroupId = leaderboardGroupId;
     }
@@ -25,7 +27,7 @@ public class SeriesContext {
         withAnalyticsManager(ctx.analyticsManager);
     }
     
-    public UUID getLeaderboardGroupName() {
+    public UUID getLeaderboardGroupId() {
         return leaderboardGroupId;
     }
 
