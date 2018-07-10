@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
@@ -124,6 +125,11 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     @Override
     public PlaceNavigation<RegattaOverviewPlace> getCurrentRegattaOverviewNavigation() {
         return homePlacesNavigator.getEventNavigation(new RegattaOverviewPlace(ctx), null, false);
+    }
+
+    @Override
+    public PlaceNavigation<SeriesDefaultPlace> getCurrentEventSeriesNavigation() {
+        return getEventSeriesNavigation(getRegattaMetadata().getSeriesReference());
     }
 
     @Override
