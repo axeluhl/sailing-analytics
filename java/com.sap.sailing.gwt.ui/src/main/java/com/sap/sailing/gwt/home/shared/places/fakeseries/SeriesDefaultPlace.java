@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.shared.places.fakeseries;
 
+import java.util.UUID;
+
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
@@ -12,7 +14,7 @@ public class SeriesDefaultPlace extends AbstractSeriesPlace implements HasMobile
     }
 
     public SeriesDefaultPlace(String eventUuidAsString) {
-        super(eventUuidAsString);
+        super(UUID.fromString(eventUuidAsString));
     }
 
     @Prefix(PlaceTokenPrefixes.SeriesDefault)

@@ -13,6 +13,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 public class EventSeriesViewDTO implements Result, HasLogo {
     private UUID leaderboardGroupUUID;
+    private UUID id;
     private String displayName;
     private ArrayList<EventMetadataDTO> eventsAscending = new ArrayList<>();
     private ImageDTO logoImage;
@@ -38,6 +39,14 @@ public class EventSeriesViewDTO implements Result, HasLogo {
 
     public UUID getLeaderboardGroupUUID() {
         return leaderboardGroupUUID;
+    }
+    
+    public void setId(UUID id) {
+        this.id = id;
+    }
+    
+    public UUID getId() {
+        return id;
     }
     
     public void setLeaderboardGroupUUID(UUID leaderboardGroupUUID) {

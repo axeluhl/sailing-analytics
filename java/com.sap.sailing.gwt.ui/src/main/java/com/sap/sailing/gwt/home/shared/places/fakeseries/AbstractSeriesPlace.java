@@ -28,7 +28,7 @@ public abstract class AbstractSeriesPlace extends Place {
     }
 
     public String getSeriesUuidAsString() {
-        return ctx.getSeriesId();
+        return ctx.getSeriesId().toString();
     }
     
     public static abstract class Tokenizer<PLACE extends AbstractSeriesPlace> extends AbstractMapTokenizer<PLACE> {
