@@ -63,6 +63,7 @@ public class Notification {
     static {
         ress.css().ensureInjected();
         RootPanel.get().add(notifications);
+        notifications.getElement().setId("notificationBar");
         notifications.addStyleName(ress.css().notification_bar());
     }
 

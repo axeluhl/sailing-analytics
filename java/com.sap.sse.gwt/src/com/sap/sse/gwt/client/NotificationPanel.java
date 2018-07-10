@@ -59,7 +59,6 @@ public class NotificationPanel {
         panel.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                GWT.log("Clicked");
                 animation.cancel();
             }
         }, ClickEvent.getType());
