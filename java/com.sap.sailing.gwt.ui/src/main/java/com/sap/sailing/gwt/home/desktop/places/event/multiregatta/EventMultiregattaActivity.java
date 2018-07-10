@@ -10,6 +10,8 @@ import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
@@ -61,4 +63,8 @@ public class EventMultiregattaActivity extends AbstractEventActivity<AbstractMul
         return currentView;
     }
 
+    @Override
+    public PlaceNavigation<SeriesDefaultPlace> getCurrentEventSeriesNavigation() {
+        return getEventSeriesNavigation(getEventDTO().getSeriesData());
+    }
 }

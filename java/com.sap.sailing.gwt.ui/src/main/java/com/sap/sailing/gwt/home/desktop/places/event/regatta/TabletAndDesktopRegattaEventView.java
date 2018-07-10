@@ -71,8 +71,8 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
             tabPanelUi.addTabExtension(new SailorInfo(sailorsInfoURL));
         }
 
-        if (currentPresenter.getEventDTO().getSeriesData() != null) {
-            final PlaceNavigation<SeriesDefaultPlace> currentEventSeriesNavigation = currentPresenter.getCurrentEventSeriesNavigation();
+        final PlaceNavigation<SeriesDefaultPlace> currentEventSeriesNavigation = currentPresenter.getCurrentEventSeriesNavigation();
+        if (currentEventSeriesNavigation != null) {
             Anchor seriesAnchor = new Anchor(i18n.overallLeaderboardSelection());
             seriesAnchor.setHref(currentEventSeriesNavigation.getTargetUrl());
             seriesAnchor.addClickHandler(new ClickHandler() {

@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
+import com.sap.sailing.gwt.home.communication.eventview.SeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.media.GetMediaForEventAction;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
@@ -177,10 +178,17 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     public PlaceNavigation<EventDefaultPlace> getCurrentEventNavigation() {
         return homePlacesNavigator.getEventNavigation(ctx.getEventId(), null, false);
     }
-
-    @Override
-    public PlaceNavigation<SeriesDefaultPlace> getCurrentEventSeriesNavigation() {
-        return homePlacesNavigator.getEventSeriesNavigation(ctx.getEventId(), null, false);
+    
+    protected PlaceNavigation<SeriesDefaultPlace> getEventSeriesNavigation(final SeriesReferenceDTO seriesReference) {
+        if (seriesReference != null) {
+            final String seriesLeaderboardGroupName = seriesReference.getSeriesLeaderboardGroupName();
+            if (seriesLeaderboardGroupName != null) {
+                boolean fixMeWarning = false;
+                // FIXME use seriesLeaderboardGroupName for place construction
+                return homePlacesNavigator.getEventSeriesNavigation(ctx.getEventId(), null, false);
+            }
+        }
+        return null;
     }
 
     @Override
