@@ -169,6 +169,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private static final String ADVANTAGE_LINE_COLOR = "#ff9900"; // orange
     private static final String FINISH_LINE_COLOR = "#000000";
     private static final Color LOWLIGHTED_TAIL_COLOR = new RGBColor(200, 200, 200);
+    private static final String MANEUVERLOSSLINES_PROJECTEDLINES_COLOR = "#ffff00";
+    private static final String MANEUVERLOSSLINES_EXTRAPOLATEDLINES_COLOR = "#ffffff";
     public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
     private static final double LOWLIGHTED_TAIL_OPACITY = 0.3;
@@ -3207,18 +3209,21 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
         Position projectedManeuverEndPosition = maneuver.getManeuverLoss().getManeuverEndPosition().projectToLineThrough(
                 intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
-        String color = maneuver.getManeuverLoss().getDistanceLost().compareTo(Distance.NULL) > 0 ? color = "#FF0000" : "#00FF00";
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true,
                 intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, projectedManeuverEndPosition,
-                middleManeuverAngleLineInfoProvider, "#ffffff", 1, 0.5));
-        maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, maneuver.getManeuverLoss().getManeuverStartPosition(),
-                extrapolatedManeuverStartPosition, extrapolatedLineInfoProvider, "#ffffff", 1, 0.5));
+                middleManeuverAngleLineInfoProvider, MANEUVERLOSSLINES_EXTRAPOLATEDLINES_COLOR, 1, 0.5));
+        maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true,
+                maneuver.getManeuverLoss().getManeuverStartPosition(), extrapolatedManeuverStartPosition,
+                extrapolatedLineInfoProvider, MANEUVERLOSSLINES_EXTRAPOLATEDLINES_COLOR, 1, 0.5));
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, extrapolatedManeuverStartPosition,
-                projectedExtrapolatedManeuverStartPosition, projectedExtrapolatedLineInfoProvider, "#FFFF00", 1, 0.3));
+                projectedExtrapolatedManeuverStartPosition, projectedExtrapolatedLineInfoProvider,
+                MANEUVERLOSSLINES_PROJECTEDLINES_COLOR, 1, 0.3));
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, maneuver.getManeuverLoss().getManeuverEndPosition(),
-                projectedManeuverEndPosition, projectedManeuverEndLineInfoProvider, "#FFFF00", 1, 0.3));
+                projectedManeuverEndPosition, projectedManeuverEndLineInfoProvider, 
+                MANEUVERLOSSLINES_PROJECTEDLINES_COLOR, 1, 0.3));
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, projectedExtrapolatedManeuverStartPosition,
-                projectedManeuverEndPosition, maneuverLossLineInfoProvider, color, 2, 1.0));
+                projectedManeuverEndPosition, maneuverLossLineInfoProvider,
+                ManeuverColor.getManeuverColor(maneuver).toString(), 2, 1.0));
         Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(),
                 maneuver.getType());
         maneuverLossLinesMap.put(t, maneuverLossLines);
