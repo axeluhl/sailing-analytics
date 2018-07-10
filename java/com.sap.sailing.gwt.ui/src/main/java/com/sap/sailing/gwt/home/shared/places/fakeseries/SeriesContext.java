@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.shared.places.fakeseries;
 
-import java.util.UUID;
-
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
 
 /**
@@ -11,27 +9,27 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDa
 public class SeriesContext {
 
     private final String seriesId;
+    private final String leaderboardGroupName;
+    
     private EventSeriesAnalyticsDataManager analyticsManager;
 
-    public SeriesContext(String seriesId) {
+    public SeriesContext(String seriesId, String leaderboardGroupName) {
         this.seriesId = seriesId;
+        this.leaderboardGroupName = leaderboardGroupName;
     }
 
     public SeriesContext(SeriesContext ctx) {
         this.seriesId = ctx.seriesId;
+        this.leaderboardGroupName = ctx.leaderboardGroupName;
         withAnalyticsManager(ctx.analyticsManager);
+    }
+    
+    public String getLeaderboardGroupName() {
+        return leaderboardGroupName;
     }
 
     public String getSeriesId() {
         return seriesId;
-    }
-    
-    public UUID getSeriesUUID() {
-        if(seriesId == null) {
-            // TODO assert because seriesId is required
-            return null;
-        }
-        return UUID.fromString(seriesId);
     }
     
     public EventSeriesAnalyticsDataManager getAnalyticsManager() {

@@ -18,8 +18,8 @@ public abstract class AbstractSeriesPlace extends Place {
         return ctx;
     }
 
-    public AbstractSeriesPlace(String eventUuidAsString) {
-        this.ctx = new SeriesContext(eventUuidAsString);
+    public AbstractSeriesPlace(String leaderboardName) {
+        this.ctx = new SeriesContext(null, leaderboardName);
     }
 
     public String getTitle(String eventName) {
@@ -32,14 +32,17 @@ public abstract class AbstractSeriesPlace extends Place {
     
     public static abstract class Tokenizer<PLACE extends AbstractSeriesPlace> extends AbstractMapTokenizer<PLACE> {
         private final static String PARAM_EVENTID = "seriesId";
+        private final static String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
         protected PLACE getPlaceFromParameters(Map<String, String> parameters) {
-            return getRealPlace(new SeriesContext(parameters.get(PARAM_EVENTID)));
+            String eventId = parameters.get(PARAM_EVENTID);
+            String leaderboardGroupName = parameters.get(PARAM_LEADERBOARD_GROUP_NAME);
+            return getRealPlace(new SeriesContext(eventId, leaderboardGroupName));
         }
         
         protected Map<String, String> getParameters(PLACE place) {
             Map<String, String> parameters = new HashMap<>();
             SeriesContext context = place.getCtx();
-            parameters.put(PARAM_EVENTID, context.getSeriesId());
+            parameters.put(PARAM_LEADERBOARD_GROUP_NAME, context.getLeaderboardGroupName());
             return parameters;
         }
         

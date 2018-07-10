@@ -10,7 +10,7 @@ public abstract class AbstractSeriesTabPlace extends AbstractSeriesPlace {
         super(ctx);
     }
 
-    public AbstractSeriesTabPlace(String eventUuidAsString) {
-        super(eventUuidAsString);
+    public AbstractSeriesTabPlace(String leaderboardGroupName) {
+        super(leaderboardGroupName);
     }
 }
