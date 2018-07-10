@@ -5062,7 +5062,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
                     final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());
                     importer.importFromStream(inputStream, importOperationId, override);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     // do not assume that RuntimeException is logged properly
                     logger.log(Level.SEVERE, e.getMessage(), e);
                     getService()
@@ -6444,15 +6444,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived) {
-        if (newStartTimeReceived != null) {
-            RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(
-                    raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
-            DynamicTrackedRace trackedRace = getService().getTrackedRace(regattaAndRaceIdentifier);
-            trackedRace.setStartTimeReceived(new MillisecondsTimePoint(newStartTimeReceived));
-            
-            return baseDomainFactory.createRaceDTO(getService(), false, regattaAndRaceIdentifier, trackedRace);
-        }
-        return null;
+        RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(raceIdentifier.getRegattaName(),
+                raceIdentifier.getRaceName());
+        DynamicTrackedRace trackedRace = getService().getTrackedRace(regattaAndRaceIdentifier);
+        trackedRace.setStartTimeReceived(
+                newStartTimeReceived == null ? null : new MillisecondsTimePoint(newStartTimeReceived));
+        return baseDomainFactory.createRaceDTO(getService(), false, regattaAndRaceIdentifier, trackedRace);
     }
     
     @Override
