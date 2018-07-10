@@ -102,9 +102,8 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
         if (seriesData != null) {
             for (EventAndLeaderboardReferenceWithStateDTO seriesEvent : seriesData.getEventsOfSeries()) {
                 if (seriesEvent.getState() != EventState.PLANNED) {
-                    AbstractEventRegattaPlace place = currentPlace
-                            .newInstanceWithContext(new EventContext().withId(seriesEvent.getId().toString()));
-                    // TODO extend by regatta name
+                    AbstractEventRegattaPlace place = currentPlace.newInstanceWithContext(new EventContext()
+                            .withId(seriesEvent.getId().toString()).withRegattaId(seriesEvent.getLeaderboardName()));
                     callback.forPlace(place, seriesEvent.getDisplayName(), (event.getId().equals(seriesEvent.getId())));
                 }
             }
