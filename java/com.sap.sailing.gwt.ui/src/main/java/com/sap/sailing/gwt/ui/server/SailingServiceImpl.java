@@ -3632,9 +3632,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Date markPassingTimePoint = maneuver.isMarkPassing()
                     ? maneuver.getMarkPassing().getTimePoint().asDate() : null;
             final NauticalSide markPassingSide = maneuver.isMarkPassing() ? maneuver.getToSide() : null;
-            final SpeedWithBearing speedWithBearingBeforeManeuverLoss = (maneuver.getManeuverLoss() == null
-                    || maneuver.getManeuverLoss().getSpeedWithBearingBefore() == null) ? null
-                            : maneuver.getManeuverLoss().getSpeedWithBearingBefore();
+            final SpeedWithBearing speedWithBearingBeforeManeuverLoss = maneuver.getManeuverLoss() == null ? null
+                    : maneuver.getManeuverLoss().getSpeedWithBearingBefore();
             final Double middleManeuverAngle = maneuver.getManeuverLoss() == null ? null : maneuver.getManeuverLoss().getMiddleManeuverAngle().getDegrees();
             final ManeuverLossDTO maneuverLoss = maneuver.getManeuverLoss() == null ? null
                     : new ManeuverLossDTO(maneuver.getManeuverLoss().getManeuverStartPosition(),
