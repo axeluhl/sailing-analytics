@@ -36,7 +36,7 @@ public class RaceLogTagEventDeserializer extends BaseRaceLogEventDeserializer{
         } catch (MalformedURLException e) {
             throw new JsonDeserializationException();
         } 
-        return new RaceLogTagEventImpl(tag, comment, url, timePoint, timePoint, author, id, passId);
+        return new RaceLogTagEventImpl(tag, comment, url, createdAt, timePoint, author, id, passId);
     }
 
 }
