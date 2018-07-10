@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.state;
 
+import java.net.URL;
+
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -194,7 +196,12 @@ public interface RaceState extends ReadonlyRaceState {
      * an already existing one.
      */
     void setAdditionalScoringInformationEnabled(TimePoint creationTimePoint, boolean enable, AdditionalScoringInformationType informationType);
-
+    
+    /*
+     * Adds a new tag to this race
+     */
+    void setNewTag(TimePoint now, String tag, String comment, URL imageURL);
+    
     boolean isAdditionalScoringInformationEnabled(AdditionalScoringInformationType informationType);
 
     /**

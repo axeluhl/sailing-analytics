@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.state.impl;
 
+import java.net.URL;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,6 +24,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogProtestStartTimeEvent
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogTagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
@@ -216,6 +218,13 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     public void setWindFix(TimePoint timePoint, Wind wind, boolean isMagnetic) {
         raceLog.add(new RaceLogWindFixEventImpl(timePoint, author, raceLog.getCurrentPassId(), wind, isMagnetic));
     }
+    
+    @Override
+    public void setNewTag(TimePoint timePoint, String tag, String comment, URL imageURL) {
+        // TODO check if this method is in the right place D067890
+        raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, timePoint, author, raceLog.getCurrentPassId()));
+        
+    }
 
     @Override
     public void setAdditionalScoringInformationEnabled(TimePoint timePoint, boolean enable, AdditionalScoringInformationType informationType) {
@@ -246,5 +255,4 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     public void forceUpdate() {
         super.update();
     }
-
 }
