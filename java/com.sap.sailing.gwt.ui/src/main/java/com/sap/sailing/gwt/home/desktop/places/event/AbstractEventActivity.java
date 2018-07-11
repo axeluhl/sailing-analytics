@@ -183,7 +183,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     protected PlaceNavigation<SeriesDefaultPlace> getEventSeriesNavigation(final EventSeriesReferenceDTO seriesReference) {
         if (seriesReference != null) {
             final UUID seriesLeaderboardGroupId = seriesReference.getSeriesLeaderboardGroupId();
-            return homePlacesNavigator.getEventSeriesNavigation(new SeriesContext(null, seriesLeaderboardGroupId), null, false);
+            return homePlacesNavigator.getEventSeriesNavigation(SeriesContext.createWithLeaderboardGroupId(seriesLeaderboardGroupId), null, false);
         }
         return null;
     }

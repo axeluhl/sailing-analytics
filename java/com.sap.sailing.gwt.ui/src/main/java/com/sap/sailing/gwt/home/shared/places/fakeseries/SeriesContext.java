@@ -15,7 +15,15 @@ public class SeriesContext {
     
     private EventSeriesAnalyticsDataManager analyticsManager;
 
-    public SeriesContext(UUID seriesId, UUID leaderboardGroupId) {
+    public static final SeriesContext createWithSeriesId(UUID seriesId) {
+        return new SeriesContext(seriesId, null);
+    }
+    
+    public static final SeriesContext createWithLeaderboardGroupId(UUID leaderboardGroupId) {
+        return new SeriesContext(null, leaderboardGroupId);
+    }
+    
+    private SeriesContext(UUID seriesId, UUID leaderboardGroupId) {
         this.seriesId = seriesId;
         this.leaderboardGroupId = leaderboardGroupId;
     }

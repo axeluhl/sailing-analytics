@@ -88,7 +88,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         }
         if (seriesData != null) {
             final UUID seriesLeaderboardGroupId = seriesData.getSeriesLeaderboardGroupId();
-            PlaceNavigation<?> navigation = clientFactory.getNavigator().getEventSeriesNavigation(new SeriesContext(null, seriesLeaderboardGroupId), null, false);
+            PlaceNavigation<?> navigation = clientFactory.getNavigator().getEventSeriesNavigation(SeriesContext.createWithLeaderboardGroupId(seriesLeaderboardGroupId), null, false);
             view.setSeriesNavigation(eventDTO.getSeriesName(), navigation);
         }
     }
@@ -207,8 +207,10 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     public PlaceNavigation<?> getMiniOverallLeaderboardNavigation() {
         final EventSeriesReferenceDTO seriesReference = getEventDTO().getSeriesData();
         if (seriesReference != null) {
-            return clientFactory.getNavigator().getSeriesNavigation(new SeriesMiniOverallLeaderboardPlace(
-                    new SeriesContext(null, seriesReference.getSeriesLeaderboardGroupId())), null, false);
+            return clientFactory.getNavigator().getSeriesNavigation(
+                    new SeriesMiniOverallLeaderboardPlace(
+                            SeriesContext.createWithLeaderboardGroupId(seriesReference.getSeriesLeaderboardGroupId())),
+                    null, false);
         }
         return null;
     }
@@ -256,7 +258,8 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     public PlaceNavigation<?> getSeriesNavigationForCurrentEvent() {
         final EventSeriesReferenceDTO seriesData = getEventDTO().getSeriesData();
         if (seriesData != null) {
-            SeriesContext seriesCTX = new SeriesContext(null, seriesData.getSeriesLeaderboardGroupId());
+            SeriesContext seriesCTX = SeriesContext
+                    .createWithLeaderboardGroupId(seriesData.getSeriesLeaderboardGroupId());
             return clientFactory.getNavigator().getSeriesNavigation(new SeriesDefaultPlace(seriesCTX), null, false);
         }
         return null;
