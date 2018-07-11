@@ -2086,6 +2086,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String extrapolatedManeuverStartPosition();
     String projectedExtrapolatedManeuverStartPosition();
     String projectedManeuverEndPosition();
+    String bearingAtManeuverEndPosition();
     String gender();
     String manage2SailEventIdBox();
     String manage2SailEventURLBox();

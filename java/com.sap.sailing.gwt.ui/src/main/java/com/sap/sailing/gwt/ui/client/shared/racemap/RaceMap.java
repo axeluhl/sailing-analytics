@@ -3169,6 +3169,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             return stringMessages.maneuverLoss();
         }
     };
+    
+    final LineInfoProvider bearingAtManeuverEndPositionLineInfoProvider = new LineInfoProvider() {
+        @Override
+        public String getLineInfo() {
+            return stringMessages.bearingAtManeuverEndPosition();
+        }
+    };
 
     /**
      * Visualizes the Maneuver Loss, creates the corresponding polylines and Info Overlays calling
@@ -3227,14 +3234,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
         Position projectedManeuverEndPosition = maneuver.getManeuverLoss().getManeuverEndPosition().projectToLineThrough(
                         intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
-        /* maneuver end extrapolation line, test start */
-        Position help1 = maneuver.getManeuverLoss().getManeuverEndPosition().getIntersection(
-                new DegreeBearingImpl(maneuver.getSpeedWithBearingAfter().bearingInDegrees),
-                intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
-        maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, help1,
-                maneuver.getManeuverLoss().getManeuverEndPosition(), null, MANEUVERLOSSLINES_EXTRAPOLATEDLINES_COLOR,
-                STANDARD_LINE_STROKEWEIGHT, LOWLIGHTED_LINE_OPACITY));
-        /* test end */
+        Position startOfBearingAtManeuverEndPositionLineOnMiddleManeuverAngleLine = maneuver.getManeuverLoss()
+                .getManeuverEndPosition()
+                .getIntersection(new DegreeBearingImpl(maneuver.getSpeedWithBearingAfter().bearingInDegrees),
+                        intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
+        maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true,
+                startOfBearingAtManeuverEndPositionLineOnMiddleManeuverAngleLine,
+                maneuver.getManeuverLoss().getManeuverEndPosition(), bearingAtManeuverEndPositionLineInfoProvider,
+                MANEUVERLOSSLINES_EXTRAPOLATEDLINES_COLOR, STANDARD_LINE_STROKEWEIGHT, LOWLIGHTED_LINE_OPACITY));
         String color = maneuver.getManeuverLoss().getDistanceLost().compareTo(Distance.NULL) > 0
                 ? color = MANEUVERLOSSLINES_RED : MANEUVERLOSSLINES_GREEN;
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true,
