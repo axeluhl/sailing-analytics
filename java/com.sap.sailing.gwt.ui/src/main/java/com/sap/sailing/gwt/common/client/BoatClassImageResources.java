@@ -439,4 +439,8 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RUNNING.png")
     @ImageOptions(preventInlining = true)
     ImageResource RunningIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/VAURIEN.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource VaurienIcon();
 }

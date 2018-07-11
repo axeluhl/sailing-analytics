@@ -36,7 +36,6 @@ public class ShardingContext {
      */
     public static ShardingType identifyAndSetShardingConstraint(String shardingInfo) {
         if (shardingInfo == null || shardingInfo.isEmpty()) {
-            logger.warning("Empty sharding constraint");
             return null;
         }
         ThreadLocal<String> identifiedShardingHolder = null;
@@ -77,12 +76,12 @@ public class ShardingContext {
      */
     public static void checkConstraint(final ShardingType type, final String shardingInfo) {
         if (shardingInfo == null || shardingInfo.isEmpty()) {
-            logger.severe("Empty sharding constraint");
+            logger.warning("Empty sharding constraint");
             return;
         }
         final ThreadLocal<String> shardingHolder = shardingMap.get(type);
         if (shardingHolder == null) {
-            logger.log(Level.SEVERE, "No current sharding context set for " + type.name(), new RuntimeException());
+            logger.log(Level.WARNING, "No current sharding context set for " + type.name(), new RuntimeException());
             return;
         }
         String currentShardingInfo = shardingHolder.get();
@@ -99,7 +98,7 @@ public class ShardingContext {
     }
 
     public static void clearShardingConstraint(ShardingType type) {
-        ThreadLocal<String> shardingHolder = shardingMap.remove(type);
+        ThreadLocal<String> shardingHolder = shardingMap.get(type);
         if (shardingHolder != null) {
             shardingHolder.remove();
         }
@@ -113,7 +112,7 @@ public class ShardingContext {
         }
         String currentShardingInfo = shardingHolder.get();
         if (currentShardingInfo == null) {
-            shardingHolder.set(encodedShardingInfo);    
+            shardingHolder.set(encodedShardingInfo);
         } else if (!encodedShardingInfo.equals(currentShardingInfo)) {
             logger.log(Level.SEVERE, "Switching shard constraint for " + shardingType.name()+". Got <<" + encodedShardingInfo +">>, expeted <<"+ currentShardingInfo+">>", new RuntimeException());
         }

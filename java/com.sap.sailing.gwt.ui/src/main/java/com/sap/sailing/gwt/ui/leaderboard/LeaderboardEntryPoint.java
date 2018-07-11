@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,6 +27,8 @@ import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboar
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -123,7 +126,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
         // make a single live request as the default but don't continue to play by default
 
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
-                .createStoredSettingsLocatorForLeaderboard(leaderboardContextDefinition);        
+                .createStoredSettingsLocatorForLeaderboard(leaderboardContextDefinition);
         getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
                 null, new AsyncCallback<Iterable<DetailType>>() {
                     @Override
@@ -133,6 +136,13 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
 
                     @Override
                     public void onSuccess(Iterable<DetailType> result) {
+                        final Function<String, SailingServiceAsync> sailingServiceFactory = leaderboardName -> SailingServiceHelper
+                                .createSailingServiceInstance(new ProvidesLeaderboardRouting() {
+                                    @Override
+                                    public String getLeaderboardName() {
+                                        return leaderboardName;
+                                    }
+                                });
                         if (leaderboardDTO.type.isMetaLeaderboard()) {
                             // overall
                             MetaLeaderboardPerspectiveLifecycle rootComponentLifeCycle = new MetaLeaderboardPerspectiveLifecycle(
@@ -145,10 +155,9 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
                                         public void onSuccess(
                                                 PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
                                             configureWithSettings(defaultSettings, timer);
-
                                             final MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(
                                                     null, context, rootComponentLifeCycle, defaultSettings,
-                                                    getSailingService(), new AsyncActionsExecutor(), timer, null,
+                                                    sailingServiceFactory, new AsyncActionsExecutor(), timer, null,
                                                     leaderboardGroupName, leaderboardName, LeaderboardEntryPoint.this,
                                                     getStringMessages(), getActualChartDetailType(defaultSettings),
                                                     result);
@@ -190,7 +199,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements 
                                                             configureWithSettings(defaultSettings, timer);
                                                             final MultiRaceLeaderboardViewer leaderboardViewer = new MultiRaceLeaderboardViewer(
                                                                     null, context, rootComponentLifeCycle,
-                                                                    defaultSettings, getSailingService(),
+                                                                    defaultSettings, sailingServiceFactory,
                                                                     new AsyncActionsExecutor(), timer,
                                                                     leaderboardGroupName, leaderboardName,
                                                                     LeaderboardEntryPoint.this, getStringMessages(),
