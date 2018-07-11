@@ -166,17 +166,24 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, RequiresDataInitialization, RequiresResize, QuickRankProvider {
+    /* Line colors */
     private static final String ADVANTAGE_LINE_COLOR = "#ff9900"; // orange
+    private static final String START_LINE_COLOR = "#ffffff";
     private static final String FINISH_LINE_COLOR = "#000000";
     private static final Color LOWLIGHTED_TAIL_COLOR = new RGBColor(200, 200, 200);
     private static final String MANEUVERLOSSLINES_PROJECTEDLINES_COLOR = "#ffff00";
     private static final String MANEUVERLOSSLINES_EXTRAPOLATEDLINES_COLOR = "#ffffff";
     private static final String MANEUVERLOSSLINES_RED = "#ff0000";
     private static final String MANEUVERLOSSLINES_GREEN = "#00ff00";
+    /* Line opacities and stroke weights */
+    private static final double LOWLIGHTED_TAIL_OPACITY = 0.3;
+    private static final double STANDARD_LINE_OPACITY = 1.0;
+    private static final double LOWlIGHTED_LINE_OPACITY = 0.5;
+    private static final int STANDARD_LINE_STROKEWEIGHT = 1;
+    private static final int HIGHLIGHTED_LINE_STROKEWEIGHT = 2;
+    
     public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
-    private static final double LOWLIGHTED_TAIL_OPACITY = 0.3;
-    
     private static final String COMPACT_HEADER_STYLE = "compactHeader";
     public static final Color WATER_COLOR = new RGBColor(0, 67, 125);
     
@@ -1645,12 +1652,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE))
                             && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
                     windwardStartLinePosition, firstMarkPosition, windwardStartLineMarkToFirstMarkLineInfoProvider,
-                    "grey", 1, 1.0);
+                    "grey", STANDARD_LINE_STROKEWEIGHT, STANDARD_LINE_OPACITY);
             leewardStartLineMarkToFirstMarkLine = showOrRemoveOrUpdateLine(leewardStartLineMarkToFirstMarkLine, /* showLine */
                     (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE))
                             && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
                     leewardStartLinePosition, firstMarkPosition, leewardStartLineMarkToFirstMarkLineInfoProvider,
-                    "grey", 1, 1.0);
+                    "grey", STANDARD_LINE_STROKEWEIGHT, STANDARD_LINE_OPACITY);
         }
     }
 
@@ -1707,8 +1714,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     (settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE) && showFinishLineBasedOnCurrentLeg) ||
                     (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY) &&
                             (!startLineEqualsFinishLine(courseDTO) || showFinishLineBasedOnCurrentLeg));
-            startLine = showOrRemoveOrUpdateLine(startLine, reallyShowStartLine,
-                    startLineLeftPosition, startLineRightPosition, startLineInfoProvider, "#ffffff", 1, 1.0);
+            startLine = showOrRemoveOrUpdateLine(startLine, reallyShowStartLine, startLineLeftPosition,
+                    startLineRightPosition, startLineInfoProvider, START_LINE_COLOR, STANDARD_LINE_STROKEWEIGHT,
+                    STANDARD_LINE_OPACITY);
             // draw the finish line
             final Position finishLineLeftPosition = numberOfFinishWaypointMarks == 0 ? null : courseDTO.getFinishMarkPositions().get(0);
             final Position finishLineRightPosition = numberOfFinishWaypointMarks < 2 ? null : courseDTO.getFinishMarkPositions().get(1);
@@ -1721,8 +1729,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             } else {
                 finishLineAdvantageText.delete(0, finishLineAdvantageText.length());
             }
-            finishLine = showOrRemoveOrUpdateLine(finishLine, reallyShowFinishLine,
-                    finishLineLeftPosition, finishLineRightPosition, finishLineInfoProvider, FINISH_LINE_COLOR, 1, 1.0);
+            finishLine = showOrRemoveOrUpdateLine(finishLine, reallyShowFinishLine, finishLineLeftPosition,
+                    finishLineRightPosition, finishLineInfoProvider, FINISH_LINE_COLOR, STANDARD_LINE_STROKEWEIGHT,
+                    STANDARD_LINE_STROKEWEIGHT);
             // the control point pairs for which we already decided whether or not
             // to show a course middle line for; values tell whether to show the line and for which zero-based
             // start waypoint index to do so; when for an equal control point pair multiple decisions with different
@@ -1807,7 +1816,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 return sb.toString();
             }
         };
-        return showOrRemoveOrUpdateLine(lineToShowOrRemoveOrUpdate, showLine, position1DTO, position2DTO, lineInfoProvider, "#2268a0", 1, 1.0);
+        return showOrRemoveOrUpdateLine(lineToShowOrRemoveOrUpdate, showLine, position1DTO, position2DTO,
+                lineInfoProvider, "#2268a0", STANDARD_LINE_STROKEWEIGHT, STANDARD_LINE_OPACITY);
     }
 
     private interface LineInfoProvider {
@@ -3215,18 +3225,21 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 ? color = MANEUVERLOSSLINES_RED : MANEUVERLOSSLINES_GREEN;
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true,
                 intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, projectedManeuverEndPosition,
-                middleManeuverAngleLineInfoProvider, MANEUVERLOSSLINES_EXTRAPOLATEDLINES_COLOR, 1, 0.5));
+                middleManeuverAngleLineInfoProvider, MANEUVERLOSSLINES_EXTRAPOLATEDLINES_COLOR,
+                STANDARD_LINE_STROKEWEIGHT, LOWlIGHTED_LINE_OPACITY));
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true,
                 maneuver.getManeuverLoss().getManeuverStartPosition(), extrapolatedManeuverStartPosition,
-                extrapolatedLineInfoProvider, MANEUVERLOSSLINES_EXTRAPOLATEDLINES_COLOR, 1, 0.5));
+                extrapolatedLineInfoProvider, MANEUVERLOSSLINES_EXTRAPOLATEDLINES_COLOR, STANDARD_LINE_STROKEWEIGHT,
+                LOWlIGHTED_LINE_OPACITY));
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, extrapolatedManeuverStartPosition,
                 projectedExtrapolatedManeuverStartPosition, projectedExtrapolatedLineInfoProvider,
-                MANEUVERLOSSLINES_PROJECTEDLINES_COLOR, 1, 0.3));
+                MANEUVERLOSSLINES_PROJECTEDLINES_COLOR, STANDARD_LINE_STROKEWEIGHT, LOWLIGHTED_TAIL_OPACITY));
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, maneuver.getManeuverLoss().getManeuverEndPosition(),
-                projectedManeuverEndPosition, projectedManeuverEndLineInfoProvider, 
-                MANEUVERLOSSLINES_PROJECTEDLINES_COLOR, 1, 0.3));
+                projectedManeuverEndPosition, projectedManeuverEndLineInfoProvider,
+                MANEUVERLOSSLINES_PROJECTEDLINES_COLOR, STANDARD_LINE_STROKEWEIGHT, LOWLIGHTED_TAIL_OPACITY));
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, projectedExtrapolatedManeuverStartPosition,
-                projectedManeuverEndPosition, maneuverLossLineInfoProvider, color, 2, 1.0));
+                projectedManeuverEndPosition, maneuverLossLineInfoProvider, color, HIGHLIGHTED_LINE_STROKEWEIGHT,
+                STANDARD_LINE_OPACITY));
         Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(),
                 maneuver.getType());
         maneuverLossLinesMap.put(t, maneuverLossLines);
