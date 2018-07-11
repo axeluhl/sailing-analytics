@@ -10,6 +10,7 @@ import java.util.function.BooleanSupplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.SearchContext;
@@ -537,43 +538,37 @@ public class PageObject {
     }
     
     /**
-     * Waits for an notification to appear and accepts the notification by clicking on it. If no notification shows up, an Exception is thrown.
+     * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
      */
-    protected void waitForNotificationAndAccept() throws InterruptedException {
-        waitForNotificationAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS);
+    protected void waitForAlertAndAccept() throws InterruptedException {
+       waitForAlertAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS);
     }
-
+     
     /**
-     * Waits for an notification to appear and accepts the notification by clicking on it. If no notification shows up, an Exception is thrown.
+     * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
      */
-    protected void waitForNotificationAndAccept(int timeoutInSeconds) throws InterruptedException {
+    protected void waitForAlertAndAccept(int timeoutInSeconds) throws InterruptedException {
         int i = 0;
         while (i < timeoutInSeconds) {
             i++;
             try {
-                List<WebElement> notifications = driver.findElements(By.id("notificationBar"));
-                if (notifications.size() > 0) {
-                    notifications.get(0).findElements(By.cssSelector("*"))
-                            .forEach(notification -> notification.click());
-                    ;
-                    return;
-                } else {
-                    throw new NoAlertPresentException();
-                }
+                Alert alert = driver.switchTo().alert();
+                alert.accept();
+                return;
             } catch (NoAlertPresentException e) {
                 Thread.sleep(1000);
             }
         }
         throw new NoAlertPresentException();
     }
-    
+
     /**
      * Waits for an notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
      */
     protected void waitForNotificationAndDismiss() throws InterruptedException {
         waitForNotificationAndDismiss(DEFAULT_WAIT_TIMEOUT_SECONDS);
     }
-    
+
     /**
      * Waits for an notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
      */

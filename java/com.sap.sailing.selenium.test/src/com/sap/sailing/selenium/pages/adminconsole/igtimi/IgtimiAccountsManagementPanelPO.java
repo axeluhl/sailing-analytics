@@ -41,6 +41,6 @@ public class IgtimiAccountsManagementPanelPO extends PageArea {
         addIgtimiAccountDialog.setPassword(password);
         addIgtimiAccountDialog.pressOk();
         
-        waitForNotificationAndAccept(10);
+        waitForNotificationAndDismiss(10);
     }
 }
