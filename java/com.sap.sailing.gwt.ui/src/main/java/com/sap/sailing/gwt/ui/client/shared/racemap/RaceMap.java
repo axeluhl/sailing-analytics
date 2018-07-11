@@ -2236,6 +2236,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     numberFormatOneDecimal.format(maneuver.getManeuverLoss().getDistanceLost().getMeters()) + " " + stringMessages.metersUnit());
             CheckBox maneuverLossLinesCheckBox = new CheckBox(stringMessages.show());
             Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(), maneuver.getType());
+            if (settings.isShowManeuverLossVisualization() && !maneuverLossCheckBoxValueStore.contains(t)) {
+                maneuverLossCheckBoxValueStore.add(t);
+                visualizeManeuverLoss(maneuver, true, competitor);
+            }
             maneuverLossLinesCheckBox.setValue(maneuverLossCheckBoxValueStore.contains(t));
             maneuverLossLinesCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
