@@ -106,7 +106,7 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
                     - cornerRadius, cornerRadius);
             // this translation is important for drawing lines with a real line width of 1 pixel
             context2d.translate(-0.5, -0.5);
-            context2d.setStrokeStyle("gray");
+            context2d.setStrokeStyle(greyWithCustomTransparency);
             context2d.setLineWidth(1.0);
             context2d.beginPath();
             context2d.moveTo(cornerRadius / 2, infoBoxHeight / 2);
