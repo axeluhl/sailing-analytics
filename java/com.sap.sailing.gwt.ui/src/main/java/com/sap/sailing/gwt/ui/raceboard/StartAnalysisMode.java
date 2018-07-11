@@ -81,8 +81,7 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                 defaultSettings.getManeuverTypesToShow(),
                 defaultSettings.isShowDouglasPeuckerPoints(),
                 defaultSettings.isShowEstimatedDuration(),
-                defaultSettings.getStartCountDownFontSizeScaling(),
-                defaultSettings.isShowManeuverLossVisualization());
+                defaultSettings.getStartCountDownFontSizeScaling());
         ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
             @Override
             public void onSettingsReloaded(RaceMapSettings patchedSettings) {

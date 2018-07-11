@@ -60,8 +60,6 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     
     private BooleanSetting showMapControls;
     
-    private BooleanSetting showManeuverLossVisualization;
-    
     /**
      * If <code>true</code>, all map contents will be transformed to a water-only environment, rotating all directions /
      * bearings / headings so that an assumed average wind direction for the race is coming from the top of the map
@@ -99,7 +97,6 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         showDouglasPeuckerPoints = new BooleanSetting("showDouglasPeuckerPoints", this, false);
         showEstimatedDuration = new BooleanSetting("showEstimatedDuration", this, false);
         startCountDownFontSizeScaling = new DoubleSetting("startCountDownFontSizeScaling", this, 1.0);
-        showManeuverLossVisualization = new BooleanSetting("showManeuverLossVisualization", this, true);
     }
 
     public RaceMapSettings() {
@@ -110,7 +107,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
             Distance buoyZoneRadius, Boolean showOnlySelectedCompetitors, Boolean showSelectedCompetitorsInfo,
             Boolean showWindStreamletColors, Boolean showWindStreamletOverlay, Boolean showSimulationOverlay,
             Boolean showMapControls, Collection<ManeuverType> maneuverTypesToShow, Boolean showDouglasPeuckerPoints,
-            Boolean showEstimatedDuration, Double startCountDownFontSizeScaling, Boolean showManeuverLossVisualization) {
+            Boolean showEstimatedDuration, Double startCountDownFontSizeScaling) {
         this.zoomSettings.init(zoomSettings);
         this.helpLinesSettings.init(helpLinesSettings);
         this.transparentHoverlines.setValue(transparentHoverlines);
@@ -128,12 +125,11 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         this.showDouglasPeuckerPoints.setValue(showDouglasPeuckerPoints);
         this.showEstimatedDuration.setValue(showEstimatedDuration);
         this.startCountDownFontSizeScaling.setValue(startCountDownFontSizeScaling);
-        this.showManeuverLossVisualization.setValue(showManeuverLossVisualization);
     }
 
-    public static RaceMapSettings getDefaultWithShowMapControls(boolean showMapControls) {
+    public static RaceMapSettings getDefaultWithShowMapControls(boolean showMapControlls) {
         RaceMapSettings raceMapSetting = new RaceMapSettings();
-        raceMapSetting.showMapControls.setValue(showMapControls);
+        raceMapSetting.showMapControls.setValue(showMapControlls);
         return raceMapSetting;
     }
 
@@ -159,9 +155,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 /* maneuverTypesToShow */ getDefaultManeuvers(),
                 /* showDouglasPeuckerPoints */ false,
                 /* showEstimatedDuration*/ false,
-                /* startCountDownFontSizeScaling */ 1.0,
-                /* showManeuverLossVisualization */ true);
-        
+                /* startCountDownFontSizeScaling */ 1.0);
     }
     
     private static Set<HelpLineTypes> createHelpLineSettings(boolean showCourseGeometry) {
@@ -203,8 +197,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
              /* maneuverTypesToShow */ settings.getManeuverTypesToShow(),
              /* showDouglasPeuckerPoints */ settings.isShowDouglasPeuckerPoints(),
              /* showEstimatedDuration */ settings.isShowEstimatedDuration(),
-             /* startCountDownFontSizeScaling */ settings.getStartCountDownFontSizeScaling(),
-             /* showManeuverLossVisualization */ settings.isShowManeuverLossVisualization());
+             /* startCountDownFontSizeScaling */ settings.getStartCountDownFontSizeScaling());
     }
 
     /**
@@ -278,10 +271,6 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         return startCountDownFontSizeScaling.getValue();
     }
     
-    public boolean isShowManeuverLossVisualization() {
-        return showManeuverLossVisualization.getValue();
-    }
-    
     public static RaceMapSettings createSettingsWithNewBuoyZoneRadius(RaceMapSettings settings, Distance newDefaultBuoyZoneRadius) {
         final RaceMapSettings newRaceMapSettings = new RaceMapSettings(
                 settings.getZoomSettings(), settings.getHelpLinesSettings(),
@@ -295,8 +284,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 settings.isShowSimulationOverlay(), settings.isShowMapControls(),
                 settings.getManeuverTypesToShow(),
                 settings.isShowDouglasPeuckerPoints(),settings.isShowEstimatedDuration(),
-                settings.getStartCountDownFontSizeScaling(),
-                settings.isShowManeuverLossVisualization());
+                settings.getStartCountDownFontSizeScaling());
         return newRaceMapSettings;
     }
 
