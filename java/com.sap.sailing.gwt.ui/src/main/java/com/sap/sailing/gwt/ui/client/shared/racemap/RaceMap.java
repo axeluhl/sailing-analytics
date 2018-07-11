@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -1085,11 +1086,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                         if (maneuverMarkers != null) {
                             removeAllManeuverMarkers();
-                        }
-                        if (!maneuverLossLinesMap.isEmpty()) {
                             removeManeuverLossLinesAndInfoOverlays();
                         }
-                        
                         if (requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown) {
                             updateCoordinateSystemFromSettings();
                         }
@@ -2370,6 +2368,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 lastManeuverResult = result;
                                 if (maneuverMarkers != null) {
                                     removeAllManeuverMarkers();
+                                    removeManeuverLossLinesAndInfoOverlays();
                                 }
                                 if (!(timer.getPlayState() == PlayStates.Playing)) {
                                     showManeuvers(result);
@@ -3276,8 +3275,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         sb.append(numberFormatOneDecimal.format(Math.abs(maneuver.getDirectionChangeInDegrees()))
                 + stringMessages.degreesUnit());
+        CssColor greyWithTransparency = CssColor.make("rgba(255,255,255,0.5)");
         SmallTransparentInfoOverlay maneuverLossInfoOverlay = new SmallTransparentInfoOverlay((MapWidget) map,
-                RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, sb.toString(), coordinateSystem);
+                RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, sb.toString(), coordinateSystem, greyWithTransparency);
         maneuverLossInfoOverlay.setPosition(projectedManeuverEndPosition.translateGreatCircle(middleManeuverAngle,
                 maneuver.getManeuverLoss().getDistanceLost().scale(0.5)), /* transition time */ -1);
         maneuverLossInfoOverlay.draw();
