@@ -178,7 +178,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     /* Line opacities and stroke weights */
     private static final double LOWLIGHTED_TAIL_OPACITY = 0.3;
     private static final double STANDARD_LINE_OPACITY = 1.0;
-    private static final double LOWlIGHTED_LINE_OPACITY = 0.5;
+    private static final double LOWLIGHTED_LINE_OPACITY = 0.5;
     private static final int STANDARD_LINE_STROKEWEIGHT = 1;
     private static final int HIGHLIGHTED_LINE_STROKEWEIGHT = 2;
     
@@ -3230,11 +3230,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true,
                 intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, projectedManeuverEndPosition,
                 middleManeuverAngleLineInfoProvider, MANEUVERLOSSLINES_EXTRAPOLATEDLINES_COLOR,
-                STANDARD_LINE_STROKEWEIGHT, LOWlIGHTED_LINE_OPACITY));
+                STANDARD_LINE_STROKEWEIGHT, LOWLIGHTED_LINE_OPACITY));
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true,
                 maneuver.getManeuverLoss().getManeuverStartPosition(), extrapolatedManeuverStartPosition,
                 extrapolatedLineInfoProvider, MANEUVERLOSSLINES_EXTRAPOLATEDLINES_COLOR, STANDARD_LINE_STROKEWEIGHT,
-                LOWlIGHTED_LINE_OPACITY));
+                LOWLIGHTED_LINE_OPACITY));
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, extrapolatedManeuverStartPosition,
                 projectedExtrapolatedManeuverStartPosition, projectedExtrapolatedLineInfoProvider,
                 MANEUVERLOSSLINES_PROJECTEDLINES_COLOR, STANDARD_LINE_STROKEWEIGHT, LOWLIGHTED_TAIL_OPACITY));

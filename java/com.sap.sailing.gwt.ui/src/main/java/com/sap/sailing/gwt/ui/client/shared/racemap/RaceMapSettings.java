@@ -99,7 +99,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         showDouglasPeuckerPoints = new BooleanSetting("showDouglasPeuckerPoints", this, false);
         showEstimatedDuration = new BooleanSetting("showEstimatedDuration", this, false);
         startCountDownFontSizeScaling = new DoubleSetting("startCountDownFontSizeScaling", this, 1.0);
-        showManeuverLossVisualization = new BooleanSetting("showManeuverLossVisualization", this, true);
+        showManeuverLossVisualization = new BooleanSetting("showManeuverLossVisualization", this, false);
     }
 
     public RaceMapSettings() {
@@ -160,7 +160,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 /* showDouglasPeuckerPoints */ false,
                 /* showEstimatedDuration*/ false,
                 /* startCountDownFontSizeScaling */ 1.0,
-                /* showManeuverLossVisualization */ true);
+                /* showManeuverLossVisualization */ false);
     }
     
     private static Set<HelpLineTypes> createHelpLineSettings(boolean showCourseGeometry) {
