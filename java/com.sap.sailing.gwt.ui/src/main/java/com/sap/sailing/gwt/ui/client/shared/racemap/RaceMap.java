@@ -2236,10 +2236,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     numberFormatOneDecimal.format(maneuver.getManeuverLoss().getDistanceLost().getMeters()) + " " + stringMessages.metersUnit());
             CheckBox maneuverLossLinesCheckBox = new CheckBox(stringMessages.show());
             Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(), maneuver.getType());
-            if (settings.isShowManeuverLossVisualization() && !maneuverLossCheckBoxValueStore.contains(t)) {
-                maneuverLossCheckBoxValueStore.add(t);
-                visualizeManeuverLoss(maneuver, true, competitor);
-            }
             maneuverLossLinesCheckBox.setValue(maneuverLossCheckBoxValueStore.contains(t));
             maneuverLossLinesCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
@@ -2486,6 +2482,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         });
         maneuverMarkers.add(marker);
         marker.setMap(map);
+        /* maneuverloss visualization */
+        if (settings.isShowManeuverLossVisualization() && maneuver.getManeuverLoss() != null) {
+            Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(), maneuver.getType());
+            maneuverLossCheckBoxValueStore.add(t);
+            visualizeManeuverLoss(maneuver, true, competitor);
+        }
     }
 
     /**
@@ -3225,6 +3227,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
         Position projectedManeuverEndPosition = maneuver.getManeuverLoss().getManeuverEndPosition().projectToLineThrough(
                         intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
+        /* maneuver end extrapolation line, test start */
+        Position help1 = maneuver.getManeuverLoss().getManeuverEndPosition().getIntersection(
+                new DegreeBearingImpl(maneuver.getSpeedWithBearingAfter().bearingInDegrees),
+                intersectionMiddleManeuverAngleWithExtrapolationOfManeuverStartPoint, middleManeuverAngle);
+        maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, help1,
+                maneuver.getManeuverLoss().getManeuverEndPosition(), null, MANEUVERLOSSLINES_EXTRAPOLATEDLINES_COLOR,
+                STANDARD_LINE_STROKEWEIGHT, LOWLIGHTED_LINE_OPACITY));
+        /* test end */
         String color = maneuver.getManeuverLoss().getDistanceLost().compareTo(Distance.NULL) > 0
                 ? color = MANEUVERLOSSLINES_RED : MANEUVERLOSSLINES_GREEN;
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true,
