@@ -54,7 +54,7 @@ public abstract class AbstractSeriesPlace extends Place {
             if(context.getLeaderboardGroupId() != null) {
                 parameters.put(PARAM_LEADERBOARD_GROUP_NAME, context.getLeaderboardGroupId().toString());
             }
-            if(context.getSeriesId() != null) {
+            if(context.getLeaderboardGroupId() == null && context.getSeriesId() != null) {
                 parameters.put(PARAM_EVENTID, context.getSeriesId().toString());
             }
             return parameters;
