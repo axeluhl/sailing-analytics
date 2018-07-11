@@ -205,7 +205,12 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     @Override
     public PlaceNavigation<?> getMiniOverallLeaderboardNavigation() {
-        return clientFactory.getNavigator().getSeriesNavigation(new SeriesMiniOverallLeaderboardPlace(new SeriesContext(UUID.fromString(getCtx().getEventId()),null)), null, false);
+        final SeriesReferenceDTO seriesReference = getEventDTO().getSeriesData();
+        if (seriesReference != null) {
+            return clientFactory.getNavigator().getSeriesNavigation(new SeriesMiniOverallLeaderboardPlace(
+                    new SeriesContext(null, seriesReference.getSeriesLeaderboardGroupId())), null, false);
+        }
+        return null;
     }
     
     @Override
@@ -249,8 +254,12 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     public PlaceNavigation<?> getSeriesNavigationForCurrentEvent() {
-        SeriesContext seriesCTX = new SeriesContext(UUID.fromString(place.getCtx().getEventId()), null);
-        return clientFactory.getNavigator().getSeriesNavigation(new SeriesDefaultPlace(seriesCTX), null, false);
+        final SeriesReferenceDTO seriesData = getEventDTO().getSeriesData();
+        if (seriesData != null) {
+            SeriesContext seriesCTX = new SeriesContext(null, seriesData.getSeriesLeaderboardGroupId());
+            return clientFactory.getNavigator().getSeriesNavigation(new SeriesDefaultPlace(seriesCTX), null, false);
+        }
+        return null;
     }
     
     public PlaceNavigation<?> getRegattaRacesNavigation(String regattaId) {

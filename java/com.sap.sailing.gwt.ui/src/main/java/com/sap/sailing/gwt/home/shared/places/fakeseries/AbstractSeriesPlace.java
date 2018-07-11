@@ -27,15 +27,14 @@ public abstract class AbstractSeriesPlace extends Place {
         private final static String PARAM_EVENTID = "seriesId";
         private final static String PARAM_LEADERBOARD_GROUP_UUID = "leaderboardGroupId";
         protected PLACE getPlaceFromParameters(Map<String, String> parameters) {
-            String eventIdRaw = parameters.get(PARAM_EVENTID);
-            UUID eventId = null;
-            if (eventIdRaw != null) {
-                eventId = UUID.fromString(eventIdRaw);
-            }
             String leaderboardGroupIdRaw = parameters.get(PARAM_LEADERBOARD_GROUP_UUID);
             UUID leaderboardGroupId = null;
-            if(leaderboardGroupIdRaw != null) {
+            UUID eventId = null;
+            if (leaderboardGroupIdRaw != null) {
                 leaderboardGroupId = UUID.fromString(leaderboardGroupIdRaw);
+            } else {
+                String eventIdRaw = parameters.get(PARAM_EVENTID);
+                eventId = UUID.fromString(eventIdRaw);
             }
             return getRealPlace(new SeriesContext(eventId, leaderboardGroupId));
         }
