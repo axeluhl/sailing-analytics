@@ -33,14 +33,14 @@ public abstract class AbstractSeriesPlace extends Place {
     
     public static abstract class Tokenizer<PLACE extends AbstractSeriesPlace> extends AbstractMapTokenizer<PLACE> {
         private final static String PARAM_EVENTID = "seriesId";
-        private final static String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
+        private final static String PARAM_LEADERBOARD_GROUP_UUID = "leaderboardGroupId";
         protected PLACE getPlaceFromParameters(Map<String, String> parameters) {
             String eventIdRaw = parameters.get(PARAM_EVENTID);
             UUID eventId = null;
             if (eventIdRaw != null) {
                 eventId = UUID.fromString(eventIdRaw);
             }
-            String leaderboardGroupIdRaw = parameters.get(PARAM_LEADERBOARD_GROUP_NAME);
+            String leaderboardGroupIdRaw = parameters.get(PARAM_LEADERBOARD_GROUP_UUID);
             UUID leaderboardGroupId = null;
             if(leaderboardGroupIdRaw != null) {
                 leaderboardGroupId = UUID.fromString(leaderboardGroupIdRaw);
@@ -52,8 +52,9 @@ public abstract class AbstractSeriesPlace extends Place {
             Map<String, String> parameters = new HashMap<>();
             SeriesContext context = place.getCtx();
             if(context.getLeaderboardGroupId() != null) {
-                parameters.put(PARAM_LEADERBOARD_GROUP_NAME, context.getLeaderboardGroupId().toString());
+                parameters.put(PARAM_LEADERBOARD_GROUP_UUID, context.getLeaderboardGroupId().toString());
             }
+            //fallback only generate old urls if not possible otherwise!
             if(context.getLeaderboardGroupId() == null && context.getSeriesId() != null) {
                 parameters.put(PARAM_EVENTID, context.getSeriesId().toString());
             }

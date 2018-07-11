@@ -88,9 +88,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         }
         if (seriesData != null) {
             final UUID seriesLeaderboardGroupId = seriesData.getSeriesLeaderboardGroupId();
-            // TODO use seriesLeaderboardGroupId to construct place
-            String seriesIdAsString = eventDTO.getSeriesIdAsString();
-            PlaceNavigation<?> navigation = clientFactory.getNavigator().getEventSeriesNavigation(seriesIdAsString, null, false);
+            PlaceNavigation<?> navigation = clientFactory.getNavigator().getEventSeriesNavigation(new SeriesContext(null, seriesLeaderboardGroupId), null, false);
             view.setSeriesNavigation(eventDTO.getSeriesName(), navigation);
         }
     }
@@ -251,7 +249,8 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     public PlaceNavigation<?> getSeriesNavigationForCurrentEvent() {
-        return clientFactory.getNavigator().getSeriesNavigation(new SeriesDefaultPlace(place.getEventUuidAsString()), null, false);
+        SeriesContext seriesCTX = new SeriesContext(UUID.fromString(place.getCtx().getEventId()), null);
+        return clientFactory.getNavigator().getSeriesNavigation(new SeriesDefaultPlace(seriesCTX), null, false);
     }
     
     public PlaceNavigation<?> getRegattaRacesNavigation(String regattaId) {

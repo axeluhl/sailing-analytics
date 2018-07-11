@@ -50,7 +50,9 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
             throw new RuntimeException("invalid context, neither seriesid not leaderboardgroupid is known");
         }
         this.leaderboardGroupUUIDOrNull = ctx.getLeaderboardGroupId();
-        this.seriesUUIDOrNull = ctx.getSeriesId();
+        if(leaderboardGroupUUIDOrNull == null) {
+            this.seriesUUIDOrNull = ctx.getSeriesId();
+        }
     }
 
     @Override

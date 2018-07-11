@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.eventsrecent;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -20,6 +21,7 @@ import com.sap.sailing.gwt.home.desktop.partials.statistics.DesktopStatisticsBox
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.statistics.YearStatisticsBox;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.utils.CollapseAnimation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -55,7 +57,8 @@ public class EventsOverviewRecentYear extends Composite {
             RecentEventTeaser recentEvent = new RecentEventTeaser(eventNavigation, eventDTO, eventDTO.getState().getListStateMarker());
             if (eventDTO.getEventSeries() != null) {
                 String seriesId = eventDTO.getEventSeries().getId().toString(), baseUrl = eventDTO.getBaseURL();
-                PlaceNavigation<?> seriesNavigation = navigator.getEventSeriesNavigation(seriesId, baseUrl, eventDTO.isOnRemoteServer());
+                SeriesContext ctx = new SeriesContext(UUID.fromString(seriesId), null);
+                PlaceNavigation<?> seriesNavigation = navigator.getEventSeriesNavigation(ctx, baseUrl, eventDTO.isOnRemoteServer());
                 recentEvent.setSeriesInformation(seriesNavigation, eventDTO.getEventSeries());
             }
             recentEventsTeaserPanel.add(recentEvent);

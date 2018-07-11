@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.shared.places.fakeseries;
 
 import java.util.UUID;
 
+import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
 
 /**
@@ -30,6 +31,10 @@ public class SeriesContext {
     }
 
     public UUID getSeriesId() {
+        if(leaderboardGroupId != null) {
+            GWT.log("Access to seriesid! when leaderboardgroupid exist!" + seriesId + " lid " + leaderboardGroupId);
+            GWT.debugger();
+        }
         return seriesId;
     }
     

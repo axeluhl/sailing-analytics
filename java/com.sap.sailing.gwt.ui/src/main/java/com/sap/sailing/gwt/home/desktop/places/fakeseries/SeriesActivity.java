@@ -121,7 +121,7 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     
     @Override
     public PlaceNavigation<SeriesDefaultPlace> getCurrentEventSeriesNavigation() {
-        return homePlacesNavigator.getEventSeriesNavigation(ctx.getSeriesId().toString(), null, false);
+        return homePlacesNavigator.getEventSeriesNavigation(ctx, null, false);
     }
     
     @Override

@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
@@ -182,8 +183,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     protected PlaceNavigation<SeriesDefaultPlace> getEventSeriesNavigation(final SeriesReferenceDTO seriesReference) {
         if (seriesReference != null) {
             final UUID seriesLeaderboardGroupId = seriesReference.getSeriesLeaderboardGroupId();
-            // FIXME use seriesLeaderboardGroupId for place construction
-            return homePlacesNavigator.getEventSeriesNavigation(ctx.getEventId(), null, false);
+            return homePlacesNavigator.getEventSeriesNavigation(new SeriesContext(null, seriesLeaderboardGroupId), null, false);
         }
         return null;
     }
