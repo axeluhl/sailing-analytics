@@ -556,7 +556,7 @@ public final class HomeServiceUtil {
         final List<Event> orderedEventsInSeries = new ArrayList<>();
         for (Leaderboard leaderboard : orderedLeaderboards) {
             final Event associatedEvent = getAssociatedEventForLeaderboardInSeries(leaderboard, eventsInSeries);
-            if (associatedEvent != null) {
+            if (associatedEvent != null && !orderedEventsInSeries.contains(associatedEvent)) {
                 orderedEventsInSeries.add(associatedEvent);
             }
         }

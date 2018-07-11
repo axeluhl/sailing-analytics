@@ -38,7 +38,7 @@ public class SeriesHeader extends Composite {
 
     private void setUiFieldValues(EventSeriesViewDTO event, PlaceNavigation<?> logoNavigation) {
         LogoUtil.setEventLogo(eventLogoUi, event);
-        if(logoNavigation != null) {
+        if (logoNavigation != null) {
             logoNavigation.configureAnchorElement(eventLogoUi);
         }
         eventNameUi.setInnerText(event.getDisplayName());
@@ -49,8 +49,11 @@ public class SeriesHeader extends Composite {
             if(!first) {
                 locationsBuilder.append(", ");
             }
-            locationsBuilder.append(eventOfSeries.getLocation());
-            first = false;
+            final String location = eventOfSeries.getLocation();
+            if (location != null && !location.isEmpty()) {
+                locationsBuilder.append(location);
+                first = false;
+            }
         }
         locationsUi.setInnerText(locationsBuilder.toString());
     }
