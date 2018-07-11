@@ -37,10 +37,11 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         final SeriesContext ctx = place.getCtx();
-        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(ctx.getSeriesId(), ctx.getLeaderboardGroupId()), 
+        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(ctx), 
                 new ActivityCallback<EventSeriesViewDTO>(clientFactory, panel) {
                     @Override
                     public void onSuccess(EventSeriesViewDTO series) {
+                        ctx.updateLeaderboardGroupId(series.getLeaderboardGroupUUID());
                         SeriesActivity.this.series = series;
                         initUi(panel, eventBus, series);
                     }

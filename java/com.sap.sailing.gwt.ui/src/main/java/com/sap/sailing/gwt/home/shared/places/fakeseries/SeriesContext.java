@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.shared.places.fakeseries;
 
 import java.util.UUID;
 
-import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
 
 /**
@@ -11,12 +10,11 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDa
  */
 public class SeriesContext {
     private final UUID seriesId;
-    private final UUID leaderboardGroupId;
+    private UUID leaderboardGroupId;
     
     private EventSeriesAnalyticsDataManager analyticsManager;
 
     public SeriesContext(UUID seriesId, UUID leaderboardGroupId) {
-        GWT.debugger();
         this.seriesId = seriesId;
         this.leaderboardGroupId = leaderboardGroupId;
     }
@@ -42,5 +40,9 @@ public class SeriesContext {
     public SeriesContext withAnalyticsManager(EventSeriesAnalyticsDataManager regattaAnalyticsManager) {
         this.analyticsManager = regattaAnalyticsManager;
         return this;
+    }
+
+    public void updateLeaderboardGroupId(UUID leaderboardGroupUUID) {
+        this.leaderboardGroupId = leaderboardGroupUUID;
     }
 }

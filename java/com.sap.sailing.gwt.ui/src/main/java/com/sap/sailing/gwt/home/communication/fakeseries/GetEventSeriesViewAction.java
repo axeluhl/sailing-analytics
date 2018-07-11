@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO.EventSeriesState;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -36,30 +37,20 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
     private GetEventSeriesViewAction() {
     }
 
-    /**
-     * Creates a {@link GetEventSeriesViewAction} instance for the given series-id.
-     * 
-     * @param id
-     *            {@link UUID} of the series to load data for
-     */
-    public GetEventSeriesViewAction(UUID leaderboardGroupUUID) {
-        super();
-        if(leaderboardGroupUUID == null) {
-            throw new RuntimeException("leaderboardGroupUUID cannot be null in this context");
-        }
-        this.leaderboardGroupUUIDOrNull = leaderboardGroupUUID;
-    }
     
     /**
-     * Creates a {@link GetEventSeriesViewAction} instance for the given series-id.
+     * Creates a {@link GetEventSeriesViewAction} instance for the given series-id or leaderboardGroupId
      * 
      * @param id
      *            {@link UUID} of the series to load data for
      */
-    public GetEventSeriesViewAction(UUID seriesUUIDOrNull, UUID leaderboardGroupUUIDOrNull) {
+    public GetEventSeriesViewAction(SeriesContext ctx) {
         super();
-        this.seriesUUIDOrNull = seriesUUIDOrNull;
-        this.leaderboardGroupUUIDOrNull = leaderboardGroupUUIDOrNull;
+        if (ctx.getLeaderboardGroupId() == null && ctx.getSeriesId() == null) {
+            throw new RuntimeException("invalid context, neither seriesid not leaderboardgroupid is known");
+        }
+        this.leaderboardGroupUUIDOrNull = ctx.getLeaderboardGroupId();
+        this.seriesUUIDOrNull = ctx.getSeriesId();
     }
 
     @Override

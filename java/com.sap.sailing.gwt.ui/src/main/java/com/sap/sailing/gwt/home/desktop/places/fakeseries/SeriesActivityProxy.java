@@ -48,10 +48,11 @@ public class SeriesActivityProxy extends AbstractActivityProxy implements Provid
 
     @Override
     protected void startAsync() {
-        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(ctx.getSeriesId(), ctx.getLeaderboardGroupId()), 
+        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(ctx), 
                 new ActivityProxyCallback<EventSeriesViewDTO>(clientFactory, place) {
             @Override
             public void onSuccess(EventSeriesViewDTO series) {
+                ctx.updateLeaderboardGroupId(series.getLeaderboardGroupUUID());
                 afterLoad(series);
             }
         });

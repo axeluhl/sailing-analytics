@@ -37,11 +37,12 @@ public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity imple
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         final SeriesContext ctx = place.getCtx();
-        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(ctx.getSeriesId()), 
+        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(ctx), 
                 new ActivityCallback<EventSeriesViewDTO>(clientFactory, panel) {
 
             @Override
             public void onSuccess(final EventSeriesViewDTO series) {
+                ctx.updateLeaderboardGroupId(series.getLeaderboardGroupUUID());
                 SeriesMiniOverallLeaderboardActivity.this.series = series;
                 initUi(panel, eventBus, series);
             }
