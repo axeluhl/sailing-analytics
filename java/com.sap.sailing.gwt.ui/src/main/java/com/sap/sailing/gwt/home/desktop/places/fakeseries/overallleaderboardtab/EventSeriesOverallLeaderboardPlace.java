@@ -7,10 +7,6 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 
 public class EventSeriesOverallLeaderboardPlace extends AbstractSeriesTabPlace {
-    public EventSeriesOverallLeaderboardPlace(String id) {
-        super(id);
-    }
-    
     public EventSeriesOverallLeaderboardPlace(SeriesContext context) {
         super(context);
     }

@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -606,5 +607,36 @@ public final class HomeServiceUtil {
             }
         }
         return eventsInSeries;
+    }
+    
+    /**
+     * Determines the Event for a LeaderboardGroup, if an exact 1-1 match exists this is returned,
+     * else the newes 1-1 is returned. If that does not exist also, the newest n-1 match is returned
+     */
+    public static Event determineBestMatchingEvent(RacingEventService service, LeaderboardGroup leaderBoardGroup) {
+        List<Event> events = new ArrayList<>(
+                HomeServiceUtil.getEventsForSeriesOrdered(leaderBoardGroup, service));
+        Collections.sort(events, new Comparator<Event>() {
+
+            @Override
+            public int compare(Event o1, Event o2) {
+                boolean o1GroupPerfectMatch = Util.size(o1.getLeaderboardGroups()) == 1;
+                boolean o2GroupPerfectMatch = Util.size(o2.getLeaderboardGroups()) == 1;
+                int result = Boolean.compare(o1GroupPerfectMatch, o2GroupPerfectMatch);
+                if (result == 0) {
+                    TimePoint o1Start = o1.getStartDate();
+                    if (o1Start == null) {
+                        o1Start = TimePoint.BeginningOfTime;
+                    }
+                    TimePoint o2Start = o2.getStartDate();
+                    if (o2Start == null) {
+                        o2Start = TimePoint.BeginningOfTime;
+                    }
+                    result = o1Start.compareTo(o2Start);
+                }
+                return result;
+            }
+        });
+        return events.get(0);
     }
 }

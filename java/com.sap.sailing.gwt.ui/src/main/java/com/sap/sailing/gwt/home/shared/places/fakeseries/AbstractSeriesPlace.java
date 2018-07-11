@@ -19,18 +19,10 @@ public abstract class AbstractSeriesPlace extends Place {
         return ctx;
     }
 
-    public AbstractSeriesPlace(UUID seriesUUID) {
-        this.ctx = new SeriesContext(seriesUUID, null);
-    }
-
     public String getTitle(String eventName) {
         return StringMessages.INSTANCE.sapSailing() + " - " + eventName;
     }
 
-    public String getSeriesUuidAsString() {
-        return ctx.getSeriesId().toString();
-    }
-    
     public static abstract class Tokenizer<PLACE extends AbstractSeriesPlace> extends AbstractMapTokenizer<PLACE> {
         private final static String PARAM_EVENTID = "seriesId";
         private final static String PARAM_LEADERBOARD_GROUP_UUID = "leaderboardGroupId";

@@ -1,9 +1,5 @@
 package com.sap.sailing.gwt.home.communication.fakeseries;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -15,7 +11,6 @@ import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO.EventSeriesState;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
@@ -37,6 +32,14 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
     private GetEventSeriesViewAction() {
     }
 
+    public GetEventSeriesViewAction(UUID leaderboardGroupUUID) {
+        super();
+        this.leaderboardGroupUUIDOrNull = leaderboardGroupUUID;
+        if(leaderboardGroupUUID == null) {
+            throw new RuntimeException("leaderboardgroupid is known");
+        }
+    }
+
     
     /**
      * Creates a {@link GetEventSeriesViewAction} instance for the given series-id or leaderboardGroupId
@@ -46,11 +49,11 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
      */
     public GetEventSeriesViewAction(SeriesContext ctx) {
         super();
-        if (ctx.getLeaderboardGroupId() == null && ctx.getSeriesId() == null) {
-            throw new RuntimeException("invalid context, neither seriesid not leaderboardgroupid is known");
-        }
         this.leaderboardGroupUUIDOrNull = ctx.getLeaderboardGroupId();
         if(leaderboardGroupUUIDOrNull == null) {
+            if (ctx.getSeriesId() == null) {
+                throw new RuntimeException("invalid context, neither seriesid not leaderboardgroupid is known");
+            }
             this.seriesUUIDOrNull = ctx.getSeriesId();
         }
     }
@@ -65,7 +68,7 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
             if (leaderBoardGroup == null) {
                 throw new RuntimeException("LeaderboardGroup not found");
             }
-            o = determineBestMatchingEvent(ctx, leaderBoardGroup);
+            o = HomeServiceUtil.determineBestMatchingEvent(ctx.getRacingEventService(), leaderBoardGroup);
         } else {
             // legacy code for old links
             o = ctx.getRacingEventService().getEvent(seriesUUIDOrNull);
@@ -122,34 +125,6 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
 
         dto.setHasAnalytics(oneEventStarted);
         return dto;
-    }
-
-    @GwtIncompatible
-    private Event determineBestMatchingEvent(SailingDispatchContext ctx, LeaderboardGroup leaderBoardGroup) {
-        List<Event> events = new ArrayList<>(
-                HomeServiceUtil.getEventsForSeriesOrdered(leaderBoardGroup, ctx.getRacingEventService()));
-        Collections.sort(events, new Comparator<Event>() {
-
-            @Override
-            public int compare(Event o1, Event o2) {
-                boolean o1GroupPerfectMatch = Util.size(o1.getLeaderboardGroups()) == 1;
-                boolean o2GroupPerfectMatch = Util.size(o2.getLeaderboardGroups()) == 1;
-                int result = Boolean.compare(o1GroupPerfectMatch, o2GroupPerfectMatch);
-                if (result == 0) {
-                    TimePoint o1Start = o1.getStartDate();
-                    if (o1Start == null) {
-                        o1Start = TimePoint.BeginningOfTime;
-                    }
-                    TimePoint o2Start = o2.getStartDate();
-                    if (o2Start == null) {
-                        o2Start = TimePoint.BeginningOfTime;
-                    }
-                    result = o1Start.compareTo(o2Start);
-                }
-                return result;
-            }
-        });
-        return events.get(0);
     }
 
     @Override

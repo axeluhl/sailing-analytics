@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.mobile.places.series.minileaderboard;
 
-import java.util.UUID;
-
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
@@ -11,10 +9,6 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class SeriesMiniOverallLeaderboardPlace extends AbstractSeriesPlace implements HasLocationTitle, HasMobileVersion {
-    public SeriesMiniOverallLeaderboardPlace(String id) {
-        super(UUID.fromString(id));
-    }
-    
     public SeriesMiniOverallLeaderboardPlace(SeriesContext context) {
         super(context);
     }
