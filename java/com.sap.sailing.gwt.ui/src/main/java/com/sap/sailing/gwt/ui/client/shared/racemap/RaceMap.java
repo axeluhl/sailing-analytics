@@ -1819,7 +1819,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private interface LineInfoProvider {
+        /* is used to get the information that appears on hovering over a line is written in {@link #adjustInfoOverlayForVisibleLine} */
         String getLineInfo();
+        /* defines if a info overlay is shown with helplines */
+        default boolean isShowInfoOverlayWithHelplines() {
+            return true;
+        };
     }
     
     /**
@@ -1892,21 +1897,25 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private void adjustInfoOverlayForVisibleLine(Polyline lineToShowOrRemoveOrUpdate, final Position position1DTO,
             final Position position2DTO, final LineInfoProvider lineInfoProvider) {
         SmallTransparentInfoOverlay infoOverlay = infoOverlaysForLinesForCourseGeometry.get(lineToShowOrRemoveOrUpdate);
-        if (getSettings().getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY)) {
-            if (infoOverlay == null) {
-                infoOverlay = new SmallTransparentInfoOverlay(map, RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, lineInfoProvider.getLineInfo(), coordinateSystem);
-                infoOverlaysForLinesForCourseGeometry.put(lineToShowOrRemoveOrUpdate, infoOverlay);
-                infoOverlay.addToMap();    
+        if (lineInfoProvider.isShowInfoOverlayWithHelplines()) {
+            if (getSettings().getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY)) {
+                if (infoOverlay == null) {
+                    infoOverlay = new SmallTransparentInfoOverlay(map, RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX,
+                            lineInfoProvider.getLineInfo(), coordinateSystem);
+                    infoOverlaysForLinesForCourseGeometry.put(lineToShowOrRemoveOrUpdate, infoOverlay);
+                    infoOverlay.addToMap();
+                } else {
+                    infoOverlay.setInfoText(lineInfoProvider.getLineInfo());
+                }
+                infoOverlay
+                        .setPosition(position1DTO.translateGreatCircle(position1DTO.getBearingGreatCircle(position2DTO),
+                                position1DTO.getDistance(position2DTO).scale(0.5)), /* transition time */ -1);
+                infoOverlay.draw();
             } else {
-                infoOverlay.setInfoText(lineInfoProvider.getLineInfo());
-            }
-            infoOverlay.setPosition(position1DTO.translateGreatCircle(position1DTO.getBearingGreatCircle(position2DTO),
-                    position1DTO.getDistance(position2DTO).scale(0.5)), /* transition time */ -1);
-            infoOverlay.draw();
-        } else {
-            if (infoOverlay != null) {
-               infoOverlay.removeFromMap();
-               infoOverlaysForLinesForCourseGeometry.remove(lineToShowOrRemoveOrUpdate);
+                if (infoOverlay != null) {
+                    infoOverlay.removeFromMap();
+                    infoOverlaysForLinesForCourseGeometry.remove(lineToShowOrRemoveOrUpdate);
+                }
             }
         }
     }
@@ -3139,15 +3148,24 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return raceMapLifecycle;
     }
     final LineInfoProvider middleManeuverAngleLineInfoProvider = new LineInfoProvider() {
-    @Override
-    public String getLineInfo() {
-        return stringMessages.middleManeuverAngle();
-    }
+        @Override
+        public String getLineInfo() {
+            return stringMessages.middleManeuverAngle();
+        }
+
+        @Override
+        public boolean isShowInfoOverlayWithHelplines() {
+            return false;
+        }
     };
     final LineInfoProvider extrapolatedLineInfoProvider = new LineInfoProvider() {
         @Override
         public String getLineInfo() {
             return stringMessages.extrapolatedManeuverStartPosition();
+        }
+        @Override
+        public boolean isShowInfoOverlayWithHelplines() {
+            return false;
         }
     };
     final LineInfoProvider projectedExtrapolatedLineInfoProvider = new LineInfoProvider() {
@@ -3155,11 +3173,19 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         public String getLineInfo() {
             return stringMessages.projectedExtrapolatedManeuverStartPosition();
         }
+        @Override
+        public boolean isShowInfoOverlayWithHelplines() {
+            return false;
+        }
     };
     final LineInfoProvider projectedManeuverEndLineInfoProvider = new LineInfoProvider() {
         @Override
         public String getLineInfo() {
             return stringMessages.projectedManeuverEndPosition();
+        }
+        @Override
+        public boolean isShowInfoOverlayWithHelplines() {
+            return false;
         }
     };
     final LineInfoProvider maneuverLossLineInfoProvider = new LineInfoProvider() {
@@ -3167,12 +3193,20 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         public String getLineInfo() {
             return stringMessages.maneuverLoss();
         }
+        @Override
+        public boolean isShowInfoOverlayWithHelplines() {
+            return false;
+        }
     };
     
     final LineInfoProvider bearingAtManeuverEndPositionLineInfoProvider = new LineInfoProvider() {
         @Override
         public String getLineInfo() {
             return stringMessages.bearingAtManeuverEndPosition();
+        }
+        @Override
+        public boolean isShowInfoOverlayWithHelplines() {
+            return false;
         }
     };
 
