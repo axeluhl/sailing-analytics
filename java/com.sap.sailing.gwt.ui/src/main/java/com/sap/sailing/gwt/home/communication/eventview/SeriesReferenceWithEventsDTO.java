@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
+import com.sap.sailing.gwt.home.communication.event.EventSeriesReferenceDTO;
 
-public class SeriesReferenceWithEventsDTO extends SeriesReferenceDTO {
+public class SeriesReferenceWithEventsDTO extends EventSeriesReferenceDTO {
 
     private ArrayList<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries = new ArrayList<>();
 

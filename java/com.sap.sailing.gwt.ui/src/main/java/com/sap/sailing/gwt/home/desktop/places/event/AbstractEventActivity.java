@@ -12,10 +12,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
+import com.sap.sailing.gwt.home.communication.event.EventSeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
-import com.sap.sailing.gwt.home.communication.eventview.SeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.media.GetMediaForEventAction;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
@@ -180,7 +180,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return homePlacesNavigator.getEventNavigation(ctx.getEventId(), null, false);
     }
     
-    protected PlaceNavigation<SeriesDefaultPlace> getEventSeriesNavigation(final SeriesReferenceDTO seriesReference) {
+    protected PlaceNavigation<SeriesDefaultPlace> getEventSeriesNavigation(final EventSeriesReferenceDTO seriesReference) {
         if (seriesReference != null) {
             final UUID seriesLeaderboardGroupId = seriesReference.getSeriesLeaderboardGroupId();
             return homePlacesNavigator.getEventSeriesNavigation(new SeriesContext(null, seriesLeaderboardGroupId), null, false);

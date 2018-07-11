@@ -24,7 +24,7 @@ public class EventOverviewRecentSeriesInfo extends UIObject {
     
     public EventOverviewRecentSeriesInfo(PlaceNavigation<?> seriesNavigation, EventListEventSeriesDTO eventSeries) {
         setElement(seriesUi = uiBinder.createAndBindUi(this));
-        seriesNameUi.setInnerText(eventSeries.getDisplayName());
+        seriesNameUi.setInnerText(eventSeries.getSeriesDisplayName());
         seriesInfoUi.setInnerText(StringMessages.INSTANCE.eventsHaveTakenPlace(eventSeries.getEventsCount()));
         seriesNavigation.configureAnchorElement(seriesUi);
     }

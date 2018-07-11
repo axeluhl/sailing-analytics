@@ -24,13 +24,13 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
+import com.sap.sailing.gwt.home.communication.event.EventSeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.MiniLeaderboardItemDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
-import com.sap.sailing.gwt.home.communication.eventview.SeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil.RaceCallback;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
@@ -249,9 +249,9 @@ public class LeaderboardContext {
         } else {
             final LeaderboardGroup singleLeaderboardGroup = leaderboardGroups.iterator().next();
             if (singleLeaderboardGroup.hasOverallLeaderboard()) {
-                regattaDTO.setSeriesReference(new SeriesReferenceDTO(
-                        singleLeaderboardGroup.getDisplayName() != null ? singleLeaderboardGroup.getDisplayName()
-                                : singleLeaderboardGroup.getName(), singleLeaderboardGroup.getId()));
+                regattaDTO.setSeriesReference(
+                        new EventSeriesReferenceDTO(HomeServiceUtil.getLeaderboardDisplayName(singleLeaderboardGroup),
+                                singleLeaderboardGroup.getId()));
             }
         }
         regattaDTO.setCompetitorsCount(HomeServiceUtil.calculateCompetitorsCount(leaderboard));

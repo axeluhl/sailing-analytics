@@ -16,12 +16,12 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
+import com.sap.sailing.gwt.home.communication.event.EventSeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
-import com.sap.sailing.gwt.home.communication.eventview.SeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.eventview.SeriesReferenceWithEventsDTO;
 import com.sap.sailing.gwt.home.communication.media.GetMediaForEventAction;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
@@ -79,7 +79,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     protected abstract EventViewBase initView();
     
     protected final void initSeriesNavigation(EventViewBase view) {
-        final SeriesReferenceDTO seriesData;
+        final EventSeriesReferenceDTO seriesData;
         final RegattaMetadataDTO regatta = getRegatta();
         if (regatta != null) {
             seriesData = regatta.getSeriesReference();
@@ -205,7 +205,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     @Override
     public PlaceNavigation<?> getMiniOverallLeaderboardNavigation() {
-        final SeriesReferenceDTO seriesReference = getEventDTO().getSeriesData();
+        final EventSeriesReferenceDTO seriesReference = getEventDTO().getSeriesData();
         if (seriesReference != null) {
             return clientFactory.getNavigator().getSeriesNavigation(new SeriesMiniOverallLeaderboardPlace(
                     new SeriesContext(null, seriesReference.getSeriesLeaderboardGroupId())), null, false);
@@ -254,7 +254,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     public PlaceNavigation<?> getSeriesNavigationForCurrentEvent() {
-        final SeriesReferenceDTO seriesData = getEventDTO().getSeriesData();
+        final EventSeriesReferenceDTO seriesData = getEventDTO().getSeriesData();
         if (seriesData != null) {
             SeriesContext seriesCTX = new SeriesContext(null, seriesData.getSeriesLeaderboardGroupId());
             return clientFactory.getNavigator().getSeriesNavigation(new SeriesDefaultPlace(seriesCTX), null, false);

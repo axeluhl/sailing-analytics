@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.mobile.partials.recents;
 
 import java.util.List;
-import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -16,6 +15,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
+import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListYearDTO;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.partials.stage.Stage;
@@ -56,14 +56,16 @@ public class EventsOverviewRecentYear extends Composite {
         this.eventsCount.setInnerText(i18n.eventsCount(yearDTO.getEventCount()));
         boolean first = true;
         for (EventListEventDTO eventDTO : events) {
-            PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(eventDTO.getId()
-                    .toString(), eventDTO.getBaseURL(), eventDTO.isOnRemoteServer());
-            EventsOverviewRecentYearEvent recentEvent = new EventsOverviewRecentYearEvent(eventNavigation, eventDTO,
-                    eventDTO.getState().getListStateMarker(), first || eventDTO.isRunning());
-            if (eventDTO.getEventSeries() != null) {
-                String seriesId = eventDTO.getEventSeries().getId().toString(), baseUrl = eventDTO.getBaseURL();
-                SeriesContext ctx = new SeriesContext(UUID.fromString(seriesId), null);
-                PlaceNavigation<?> seriesNavigation = navigator.getEventSeriesNavigation(ctx, baseUrl, eventDTO.isOnRemoteServer());
+            final PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(
+                    eventDTO.getId().toString(), eventDTO.getBaseURL(), eventDTO.isOnRemoteServer());
+            final EventsOverviewRecentYearEvent recentEvent = new EventsOverviewRecentYearEvent(eventNavigation,
+                    eventDTO, eventDTO.getState().getListStateMarker(), first || eventDTO.isRunning());
+            final EventListEventSeriesDTO eventSeries = eventDTO.getEventSeries();
+            if (eventSeries != null) {
+                final String baseUrl = eventDTO.getBaseURL();
+                final SeriesContext ctx = new SeriesContext(null, eventSeries.getSeriesLeaderboardGroupId());
+                final PlaceNavigation<?> seriesNavigation = navigator.getEventSeriesNavigation(ctx, baseUrl,
+                        eventDTO.isOnRemoteServer());
                 recentEvent.setSeriesInformation(seriesNavigation, eventDTO.getEventSeries());
             }
             recentEventsTeaserPanel.add(recentEvent);
