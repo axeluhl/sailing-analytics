@@ -104,8 +104,8 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     private final JsonSerializer<RaceLogEvent> suppressedMarkPassingsEventSerializer;
     private final JsonSerializer<RaceLogEvent> dependentStartTimeEventSerializer;
     private final JsonSerializer<RaceLogEvent> startOfTrackingEventSerializer;
-    private final JsonSerializer<RaceLogEvent> endOfTrackingEventSerializer;
     private final JsonSerializer<RaceLogEvent> useCompetitorsFromRaceLogEventSerializer;
+    private final JsonSerializer<RaceLogEvent> endOfTrackingEventSerializer;
 
     private JsonSerializer<RaceLogEvent> chosenSerializer;
 
@@ -132,8 +132,8 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
             JsonSerializer<RaceLogEvent> suppressedMarkPassingsSerializer,
             JsonSerializer<RaceLogEvent> dependentStartTimeEventSerializer,
             JsonSerializer<RaceLogEvent> startOfTrackingEventSerializer,
-            JsonSerializer<RaceLogEvent> endOfTrackingEventSerializer,
-            JsonSerializer<RaceLogEvent> useCompetitorsFromRaceLogEventSerializer) {
+            JsonSerializer<RaceLogEvent> useCompetitorsFromRaceLogEventSerializer,
+            JsonSerializer<RaceLogEvent> endOfTrackingEventSerializer) {
         this.flagEventSerializer = flagEventSerializer;
         this.startTimeSerializer = startTimeSerializer;
         this.raceStatusSerializer = raceStatusSerializer;
