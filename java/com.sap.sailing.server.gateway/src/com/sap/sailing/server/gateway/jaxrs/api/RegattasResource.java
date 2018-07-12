@@ -84,6 +84,7 @@ import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorTrackWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurveWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompleteManeuverCurvesWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DefaultWindTrackJsonSerializer;
@@ -1061,14 +1062,17 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-                CompleteManeuverCurvesWithEstimationDataJsonSerializer serializer = new CompleteManeuverCurvesWithEstimationDataJsonSerializer(
+                CompetitorTrackWithEstimationDataJsonSerializer serializer = new CompetitorTrackWithEstimationDataJsonSerializer(
                         getService().getPolarDataService(), new DetailedBoatClassJsonSerializer(),
-                        new CompleteManeuverCurveWithEstimationDataJsonSerializer(
-                                new ManeuverMainCurveWithEstimationDataJsonSerializer(),
-                                new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer(),
-                                new ManeuverWindJsonSerializer(), new PositionJsonSerializer()),
-                        startBeforeStartLineInSeconds, endBeforeStartLineInSeconds, startAfterFinishLineInSeconds,
-                        endAfterFinishLineInSeconds);
+                        new CompleteManeuverCurvesWithEstimationDataJsonSerializer(getService().getPolarDataService(),
+                                new CompleteManeuverCurveWithEstimationDataJsonSerializer(
+                                        new ManeuverMainCurveWithEstimationDataJsonSerializer(),
+                                        new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer(),
+                                        new ManeuverWindJsonSerializer(), new PositionJsonSerializer())),
+                        getNullableValueFromDefault(startBeforeStartLineInSeconds),
+                        getNullableValueFromDefault(endBeforeStartLineInSeconds),
+                        getNullableValueFromDefault(startAfterFinishLineInSeconds),
+                        getNullableValueFromDefault(endAfterFinishLineInSeconds));
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
                 return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
@@ -1076,7 +1080,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         }
         return response;
     }
-    
+
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/gpsFixesWithEstimationData")
@@ -1106,17 +1110,24 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-                GpsFixesWithEstimationDataJsonSerializer serializer = new GpsFixesWithEstimationDataJsonSerializer(
-                        new DetailedBoatClassJsonSerializer(), new GPSFixMovingJsonSerializer(),
-                        new ManeuverWindJsonSerializer(), addWind, addNextWaypoint, smoothFixes,
-                        startBeforeStartLineInSeconds, endBeforeStartLineInSeconds, startAfterFinishLineInSeconds,
-                        endAfterFinishLineInSeconds);
+                CompetitorTrackWithEstimationDataJsonSerializer serializer = new CompetitorTrackWithEstimationDataJsonSerializer(
+                        getService().getPolarDataService(), new DetailedBoatClassJsonSerializer(),
+                        new GpsFixesWithEstimationDataJsonSerializer(new GPSFixMovingJsonSerializer(),
+                                new ManeuverWindJsonSerializer(), addWind, addNextWaypoint, smoothFixes),
+                        getNullableValueFromDefault(startBeforeStartLineInSeconds),
+                        getNullableValueFromDefault(endBeforeStartLineInSeconds),
+                        getNullableValueFromDefault(startAfterFinishLineInSeconds),
+                        getNullableValueFromDefault(endAfterFinishLineInSeconds));
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
                 return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
+    }
+
+    private Integer getNullableValueFromDefault(Integer value) {
+        return Integer.MIN_VALUE == value ? null : value;
     }
 
     @GET
