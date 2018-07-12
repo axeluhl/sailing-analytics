@@ -1,12 +1,9 @@
 package com.sap.sailing.server.gateway.deserialization.test.racelog;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
-
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -19,7 +16,6 @@ import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetito
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEndOfTrackingEventDeserializer;
@@ -27,13 +23,8 @@ import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventD
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogFlagEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogUseCompetitorsFromRaceLogEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
-import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEndOfTrackingEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
-import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogUseCompetitorsFromRaceLogEventSerializer;
 import com.sap.sse.common.TimePoint;
-
-import junit.framework.Assert;
 
 public class RaceLogEventDeserializerTest {
     
