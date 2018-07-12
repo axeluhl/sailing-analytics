@@ -40,8 +40,8 @@ public class RaceLogEventDeserializerTest {
         public InnerRaceLogEventDeserializer() {
             super(mockitoRaceLogFlagEventDeserializer, null, null, null, null, null, null, null, null, null, null, null,
                     null, null, null, null, null, null, null, null, null,
-                    mockitoRaceLogEndOfTrackingEventDeserializer,
-                    mockitoRaceLogUseCompetitorsFromRaceLogEventDeserializer);
+                    mockitoRaceLogUseCompetitorsFromRaceLogEventDeserializer,
+                    mockitoRaceLogEndOfTrackingEventDeserializer);
         }
     }
     
