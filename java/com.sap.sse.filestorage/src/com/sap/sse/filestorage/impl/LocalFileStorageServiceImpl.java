@@ -1,6 +1,7 @@
 package com.sap.sse.filestorage.impl;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.FileStorageServiceProperty;
 import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.filestorage.OperationFailedException;
 
 /**
  * Service for storing files in the local file system. Files get stored in localPath+fileName and can be accessed at
@@ -84,25 +86,6 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
         return getUri(fileName);
     }
     
-    @Override
-    public URI duplicateFile(URI uri) {
-        String inFilePath = uri.getPath();
-        String inFileName = inFilePath.substring(inFilePath.lastIndexOf("/") + 1);
-        File inFile = new File(localPath.getValue() + "/" + inFileName);
-        
-        String outFileName = getKey(inFileName.substring(inFileName.lastIndexOf(".")));
-        String outFilePath = localPath.getValue() + "/" + outFileName;
-        File outFile = new File(outFilePath);
-        
-        try {
-            Files.copy(inFile.toPath(), outFile.toPath());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-        return getUri(outFileName);
-    }
-
     private static String getKey(String fileEnding) {
         String key = UUID.randomUUID().toString();
         key += fileEnding;
@@ -184,5 +167,13 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
             value = value.substring(0, value.length() - 1);
         }
         return value;
+    }
+
+    @Override
+    public InputStream loadFile(URI uri) throws OperationFailedException, InvalidPropertiesException, IOException {
+        String filePath = uri.getPath();
+        String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
+        File file = new File(localPath.getValue() + "/" + fileName);
+        return new FileInputStream(file);
     }
 }

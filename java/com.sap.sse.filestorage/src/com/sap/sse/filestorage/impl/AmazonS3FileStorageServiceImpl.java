@@ -111,7 +111,7 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
 
     @Override
     public void removeFile(URI uri) throws InvalidPropertiesException, OperationFailedException {
-        String key = uri.getPath().substring(1); // remove initial slash
+        String key = uri.getPath().substring(2+bucketName.getValue().length()); // remove 2 slashs and bucketName
         AmazonS3Client s3Client = createS3Client();
         try {
             s3Client.deleteObject(new DeleteObjectRequest(bucketName.getValue(), key));
@@ -143,15 +143,9 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
     }
 
     @Override
-    public URI duplicateFile(URI uri) throws OperationFailedException, InvalidPropertiesException, IOException {
-        String keyIn = uri.getPath().substring(1);
+    public InputStream loadFile(URI uri) throws OperationFailedException, InvalidPropertiesException, IOException {
+        String key = uri.getPath().substring(2+bucketName.getValue().length());
         AmazonS3Client s3Client = createS3Client();
-        String keyOut = getKey(keyIn.substring(keyIn.lastIndexOf(".")));
-        try {
-        s3Client.copyObject(new CopyObjectRequest(bucketName.getValue(), keyIn, bucketName.getValue(), keyOut));
-        }catch(Exception e) {
-            e.printStackTrace();
-        }
-        return getUri(keyOut);
+        return s3Client.getObject(bucketName.getValue(), key).getObjectContent();
     }
 }

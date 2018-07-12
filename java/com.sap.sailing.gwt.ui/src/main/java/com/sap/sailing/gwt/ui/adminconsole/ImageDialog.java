@@ -49,18 +49,17 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
     protected Image image;
     protected CheckBox doResize;
     private final BusyIndicator busyIndicator;
-    private ImageParameterValidator validator;
 
     protected static class ImageParameterValidator implements Validator<ImageDTO> {
         private StringMessages stringMessages;
-        private boolean resize = false;
+        private CheckBox doResize;
 
         public ImageParameterValidator(StringMessages stringMessages) {
             this.stringMessages = stringMessages;
         }
-
-        public void setResize(boolean resize) {
-            this.resize = resize;
+        
+        public void setCheckBox(CheckBox doResize) {
+            this.doResize = doResize;
         }
         
         @Override
@@ -73,7 +72,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                 errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
             } else if (imageWidth == null || imageHeight == null) {
                 errorMessage = stringMessages.couldNotRetrieveImageSizeYet();
-            } else if (!resize) {
+            } else if (!doResize.isEnabled()) {
                 if (imageToValidate.hasTag(MediaTagConstants.LOGO) && !isValidSize(imageWidth, imageHeight,
                         MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH,
                         MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT)) {
@@ -109,7 +108,6 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
 
     public ImageDialog(Date creationDate, ImageParameterValidator validator, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
         super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
-        this.validator = validator;
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.creationDate = creationDate;
@@ -161,9 +159,10 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
 
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                validator.setResize(event.getValue());
+                validateAndUpdate();
             }
         });
+        validator.setCheckBox(doResize);
     }
 
     @Override

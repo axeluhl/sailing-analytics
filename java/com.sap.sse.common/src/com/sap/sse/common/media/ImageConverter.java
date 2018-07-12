@@ -10,31 +10,41 @@ import javax.imageio.ImageIO;
 import org.apache.commons.codec.binary.Base64;
 
 public class ImageConverter {
-
-    public static void main(String[] args) {
-        try {
-            BufferedImage image = ImageIO.read(new File("C:\\Users\\D067799\\Desktop\\img3.jpg"));
-            ImageIO.write(image, "jpg", new File("C:\\Users\\D067799\\Desktop\\img2.jpg"));
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
     
     public static String resizeAndConvertToBase64(InputStream is, int minWidth, int maxWidth, int minHeight,
             int maxHeight, String imageFormat, boolean upsize) {
         BufferedImage img = isToBi(is);
-        int[] dimensions = calculateActualDimensions(img.getWidth(), img.getHeight(), minWidth, maxWidth, minHeight,
-                maxHeight, upsize);
-        if(dimensions != null) {
-            img = resize(img, dimensions[0], dimensions[1]);
-            return convertToBase64(biToBy(img, imageFormat));
+        if(img.getWidth()>maxWidth || img.getHeight() > maxHeight || (upsize && (img.getWidth() < minWidth || img.getHeight() < minHeight))) {
+            int[] dimensions = calculateActualDimensions(img.getWidth(), img.getHeight(), minWidth, maxWidth, minHeight,
+                    maxHeight, upsize);
+            if(dimensions != null) {
+                img = resize(img, dimensions[0], dimensions[1]);
+                return convertToBase64(biToBy(img, imageFormat));
+            }else {
+                return null;
+            }
+        }else {
+            return null;
+        }
+    }
+    
+    public static String resizeAndConvertToBase64(BufferedImage img, int minWidth, int maxWidth, int minHeight,
+            int maxHeight, String imageFormat, boolean upsize) {
+        if(img.getWidth()>maxWidth || img.getHeight() > maxHeight || (upsize && (img.getWidth() < minWidth || img.getHeight() < minHeight))) {
+            int[] dimensions = calculateActualDimensions(img.getWidth(), img.getHeight(), minWidth, maxWidth, minHeight,
+                    maxHeight, upsize);
+            if(dimensions != null) {
+                img = resize(img, dimensions[0], dimensions[1]);
+                return convertToBase64(biToBy(img, imageFormat));
+            }else {
+                return null;
+            }
         }else {
             return null;
         }
     }
 
-    private static int[] calculateActualDimensions(double width, double height, double minWidth, double maxWidth, double minHeight,
+    public static int[] calculateActualDimensions(double width, double height, double minWidth, double maxWidth, double minHeight,
             double maxHeight, boolean upsize) {
         if (maxWidth > 0 && maxHeight > 0 && maxHeight > minHeight && maxWidth > minWidth) {
             if(maxWidth <= width || maxHeight <= height) {
@@ -74,12 +84,16 @@ public class ImageConverter {
     public static String convertToBase64(InputStream is, String imageFormat) {
         return convertToBase64(biToBy(isToBi(is), imageFormat));
     }
+    
+    public static String convertToBase64(BufferedImage img, String imageFormat) {
+        return convertToBase64(biToBy(img, imageFormat));
+    }
 
     private static String convertToBase64(byte[] bytes) {
         return Base64.encodeBase64String(bytes);
     }
 
-    private static BufferedImage isToBi(InputStream is) {
+    public static BufferedImage isToBi(InputStream is) {
         try {
             return ImageIO.read(is);
         } catch (IOException e) {
@@ -103,12 +117,6 @@ public class ImageConverter {
         Graphics2D g = resizedImage.createGraphics();
         g.drawImage(img, 0, 0, (int) demandedWidth, (int) demandedHeight, null);
         g.dispose();
-        try {
-            ImageIO.write(resizedImage, "jpg", new File("C:\\Users\\D067799\\Desktop\\img2.jpg"));
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
         return resizedImage;
     }
 

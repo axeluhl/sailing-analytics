@@ -33,11 +33,6 @@ public class DummyFileStorageService extends BaseFileStorageServiceImpl implemen
             return null;
         }
     }
-    
-    @Override 
-    public URI duplicateFile(URI uri) {
-        return uri;
-    }
 
     @Override
     public void removeFile(URI uri) throws OperationFailedException, InvalidPropertiesException {
@@ -45,6 +40,11 @@ public class DummyFileStorageService extends BaseFileStorageServiceImpl implemen
 
     @Override
     public void testProperties() throws InvalidPropertiesException {
+    }
+
+    @Override
+    public InputStream loadFile(URI uri) throws OperationFailedException, InvalidPropertiesException, IOException {
+        return null;
     }
 
 }

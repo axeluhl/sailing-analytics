@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -9,6 +11,17 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -34,6 +47,7 @@ import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.media.ConvertedImageDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
 /**
@@ -272,8 +286,7 @@ public class ImagesListComposite extends Composite {
 
             @Override
             public void ok(ImageDTO newImage) {
-                imageListDataProvider.getList().add(newImage);
-                updateTableVisisbilty();
+                callResizingServlet(newImage);
             }
         });
         dialog.show();
@@ -287,12 +300,78 @@ public class ImagesListComposite extends Composite {
 
             @Override
             public void ok(ImageDTO updatedImage) {
-                imageListDataProvider.getList().remove(selectedImage);
-                imageListDataProvider.getList().add(updatedImage);
-                updateTableVisisbilty();
+                callResizingServlet(updatedImage);
             }
         });
         dialog.show();
+    }
+    
+    private String imageToJSON(ImageDTO image) {
+        JSONObject obj = new JSONObject();
+        obj.put("URI", new JSONString(image.getSourceRef()));
+        obj.put("Title", new JSONString(image.getTitle()));
+        obj.put("Subtitle", new JSONString(image.getSubtitle()));
+        obj.put("Height", new JSONNumber(image.getHeightInPx()));
+        obj.put("Width", new JSONNumber(image.getWidthInPx()));
+        obj.put("Date", new JSONNumber(image.getCreatedAtDate().getTime()));
+        obj.put("Copyright", new JSONString(image.getCopyright()));
+        JSONArray tags = new JSONArray();
+        for(String tag : image.getTags()) {
+            tags.set(tags.size(), new JSONString(tag));
+        }
+        obj.put("Tags", tags);
+        return obj.toString();
+    }
+    
+    private void callResizingServlet(ImageDTO image) {
+        
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,"/sailingserver/imageResize");
+        builder.setHeader("Content-Type", "application/json");
+        try {
+            Request response = builder.sendRequest(imageToJSON(image), new RequestCallback() {
+                
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    JSONArray array = new JSONArray();
+                    List<ConvertedImageDTO> images = new ArrayList<>();
+                    array = (JSONArray) JSONParser.parseStrict(response.getText());
+                    for(int i= 0; i < array.size(); i++){
+                        JSONObject obj = array.get(i).isObject();
+                        ConvertedImageDTO image = new ConvertedImageDTO(obj.get("URI").isString().stringValue(),new Date(Long.valueOf(obj.get("Date").isNumber().toString())),obj.get("Base64Code").isString().stringValue(),obj.get("FileType").isString().stringValue(), obj.get("SizeTag").isString().stringValue());
+                        List<String> tags = new ArrayList<>();
+                        JSONArray jsonTags = obj.get("Tags").isArray();
+                        for(int j = 0; j < jsonTags.size(); j++) {
+                            tags.add(jsonTags.get(j).isString().stringValue());
+                        }
+                        image.setTags(tags);
+                        image.setTitle(obj.get("Title").isString().stringValue());
+                        image.setSubtitle(obj.get("Subtitle").isString().stringValue());
+                        image.setSizeInPx(Integer.valueOf(obj.get("Width").isNumber().toString()), Integer.valueOf(obj.get("Height").isNumber().toString()));
+                        images.add(image);
+                    }
+                    
+                    for(int i = 0; i < imageListDataProvider.getList().size(); i++) {
+                        ImageDTO dataProviderImage = imageListDataProvider.getList().get(i);
+                        if(dataProviderImage.getSourceRef().equals(images.get(0).getSourceRef())) {
+                            imageListDataProvider.getList().remove(dataProviderImage);
+                            i--;
+                        }
+                    }
+                    for(ConvertedImageDTO image : images) {
+                        imageListDataProvider.getList().add(image);
+                    }
+                    updateTableVisisbilty();
+                }
+                
+                @Override
+                public void onError(Request request, Throwable exception) {
+                    // TODO Auto-generated method stub
+                    
+                }
+            });
+        } catch (RequestException e) {
+            e.printStackTrace();
+        }
     }
 
     private void updateTableVisisbilty() {
