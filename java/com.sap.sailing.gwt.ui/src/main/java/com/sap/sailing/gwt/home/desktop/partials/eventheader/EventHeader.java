@@ -153,7 +153,7 @@ public class EventHeader extends Composite {
     }
 
     private void initTitleAndSelection(String nameToShow) {
-        if(!presenter.needsSelectionInHeader()) {
+        if (!presenter.needsSelectionInHeader()) {
             eventName.setInnerText(nameToShow);
             LabelTypeUtil.renderLabelType(eventState, event.getState().getStateMarker());
             UIObject.ensureDebugId(eventState, "EventStateLabelDiv");

@@ -92,26 +92,29 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     @Override
     public boolean needsSelectionInHeader() {
         final EventViewDTO event = eventDTO;
-        return (event.getSeriesData() != null || event.isMultiRegatta());
+        SeriesReferenceWithEventsDTO seriesData = event.getSeriesData();
+        return (event.isMultiRegatta() || (seriesData != null && seriesData.getEventsOfSeries().size() > 1));
     }
     
     @Override
     public void forPlaceSelection(PlaceCallback callback) {
         EventViewDTO event = eventDTO;
-        final SeriesReferenceWithEventsDTO seriesData = event.getSeriesData();
-        if (seriesData != null) {
-            for (EventAndLeaderboardReferenceWithStateDTO seriesEvent : seriesData.getEventsOfSeries()) {
-                if (seriesEvent.getState() != EventState.PLANNED) {
-                    AbstractEventRegattaPlace place = currentPlace.newInstanceWithContext(new EventContext()
-                            .withId(seriesEvent.getId().toString()).withRegattaId(seriesEvent.getLeaderboardName()));
-                    callback.forPlace(place, seriesEvent.getDisplayName(), (event.getId().equals(seriesEvent.getId())));
-                }
-            }
-        } else {
+        if (event.isMultiRegatta()) {
             for (RegattaReferenceDTO regatta : event.getRegattas()) {
                 AbstractEventRegattaPlace place = currentPlace
                         .newInstanceWithContext(contextForRegatta(regatta.getId()));
                 callback.forPlace(place, regatta.getDisplayName(), (getRegattaId().equals(regatta.getId())));
+            }
+        } else {
+            final SeriesReferenceWithEventsDTO seriesData = event.getSeriesData();
+            if (seriesData != null) {
+                for (EventAndLeaderboardReferenceWithStateDTO seriesEvent : seriesData.getEventsOfSeries()) {
+                    if (seriesEvent.getState() != EventState.PLANNED) {
+                        AbstractEventRegattaPlace place = currentPlace.newInstanceWithContext(new EventContext()
+                                .withId(seriesEvent.getId().toString()).withRegattaId(seriesEvent.getLeaderboardName()));
+                        callback.forPlace(place, seriesEvent.getDisplayName(), (event.getId().equals(seriesEvent.getId())));
+                    }
+                }
             }
         }
     }

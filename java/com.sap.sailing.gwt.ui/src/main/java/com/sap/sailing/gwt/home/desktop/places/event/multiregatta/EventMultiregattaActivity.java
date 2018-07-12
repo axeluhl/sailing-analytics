@@ -46,7 +46,7 @@ public class EventMultiregattaActivity extends AbstractEventActivity<AbstractMul
     
     @Override
     public boolean needsSelectionInHeader() {
-        return eventDTO.getSeriesData() != null;
+        return false;
     }
     
     @Override
