@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
-import java.net.URL;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
@@ -12,11 +11,10 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
 
     private static final long serialVersionUID = 7213518902555323432L;
     
-    private String tag, comment;
-    private URL imageURL;
+    private String tag, comment, imageURL;
     
 
-    public RaceLogTagEventImpl(String pTag, String pComment, URL pImageURL,TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL,TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Serializable pId, int pPassId) {
         super(createdAt, logicalTimePoint, author, pId, pPassId);
         tag = pTag;
@@ -24,7 +22,7 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
         imageURL = pImageURL;
     }
     
-    public RaceLogTagEventImpl(String pTag, String pComment, URL pImageURL, TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId) {
+    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId) {
         this(pTag, pComment, pImageURL, now(), logicalTimePoint, author, randId(), pPassId);
     }
 
@@ -44,7 +42,7 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     }
 
     @Override
-    public URL getImageURL() {
+    public String getImageURL() {
         return imageURL;
     }
 

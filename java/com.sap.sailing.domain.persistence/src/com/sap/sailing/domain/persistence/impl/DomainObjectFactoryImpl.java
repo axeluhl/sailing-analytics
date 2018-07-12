@@ -1775,14 +1775,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String tag = (String) dbObject.get(FieldNames.RACE_LOG_TAG.name());
         String comment = (String) dbObject.get(FieldNames.RACE_LOG_COMMENT.name());
         String urlPath = (String) dbObject.get(FieldNames.RACE_LOG_IMAGE_URL.name());
-        URL url;
-        try {
-            url = new URL(urlPath);
-        } catch (MalformedURLException e) {
-            // TODO update this method D067890
-            url = null;
-        }
-        return new RaceLogTagEventImpl(tag, comment, url, createdAt, logicalTimePoint, author, id, passId);
+        return new RaceLogTagEventImpl(tag, comment, urlPath, createdAt, logicalTimePoint, author, id, passId);
     }
 
     private RaceLogEvent loadRaceLogGateLineOpeningTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author,

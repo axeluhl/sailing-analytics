@@ -1,8 +1,6 @@
 package com.sap.sailing.server.gateway.deserialization.racelog.impl;
 
 import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 
 import org.json.simple.JSONObject;
@@ -29,14 +27,8 @@ public class RaceLogTagEventDeserializer extends BaseRaceLogEventDeserializer{
             throws JsonDeserializationException {
         String tag = object.get(RaceLogTagEventSerializer.FIELD_TAG).toString();
         String comment = object.get(RaceLogTagEventSerializer.FIELD_COMMENT).toString();
-        String urlPath = object.get(RaceLogTagEventSerializer.FIELD_URL).toString();
-        URL url;
-        try {
-            url = new URL(urlPath);
-        } catch (MalformedURLException e) {
-            throw new JsonDeserializationException();
-        } 
-        return new RaceLogTagEventImpl(tag, comment, url, createdAt, timePoint, author, id, passId);
+        String imageURL = object.get(RaceLogTagEventSerializer.FIELD_URL).toString();
+        return new RaceLogTagEventImpl(tag, comment, imageURL, createdAt, timePoint, author, id, passId);
     }
 
 }

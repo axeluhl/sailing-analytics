@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.abstractlog.race;
 
-import java.net.URL;
-
 import com.sap.sailing.domain.abstractlog.Revokable;
 
 public interface RaceLogTagEvent extends RaceLogEvent, Revokable {
@@ -15,6 +13,6 @@ public interface RaceLogTagEvent extends RaceLogEvent, Revokable {
     /*
      * Image URL in RaceLogTagEvents is optional
      */
-    URL getImageURL();
+    String getImageURL();
     
 }

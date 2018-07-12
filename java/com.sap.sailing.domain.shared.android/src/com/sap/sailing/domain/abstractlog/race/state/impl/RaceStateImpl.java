@@ -220,7 +220,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     }
     
     @Override
-    public void setNewTag(TimePoint timePoint, String tag, String comment, URL imageURL) {
+    public void setNewTag(TimePoint timePoint, String tag, String comment, String imageURL) {
         // TODO check if this method is in the right place D067890
         raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, timePoint, author, raceLog.getCurrentPassId()));
         

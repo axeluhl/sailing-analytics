@@ -200,7 +200,7 @@ public interface RaceState extends ReadonlyRaceState {
     /*
      * Adds a new tag to this race
      */
-    void setNewTag(TimePoint now, String tag, String comment, URL imageURL);
+    void setNewTag(TimePoint now, String tag, String comment, String imageURL);
     
     boolean isAdditionalScoringInformationEnabled(AdditionalScoringInformationType informationType);
 
