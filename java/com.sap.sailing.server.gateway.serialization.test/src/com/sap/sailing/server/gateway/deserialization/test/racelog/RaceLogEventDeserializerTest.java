@@ -72,7 +72,7 @@ public class RaceLogEventDeserializerTest {
         //assert correct deserializer was used
         Mockito.verify(mockitoRaceLogFlagEventDeserializer).deserialize(object);
         
-        RaceLogFlagEventImpl newEvent = (RaceLogFlagEventImpl) deserializer.deserialize(object);
+        RaceLogFlagEventImpl newEvent = (RaceLogFlagEventImpl) raceLogEvent;
         
         //assert raceLogEvent has correct values
         assertEquals(originalEvent.getTimePoint().toString(), newEvent.getTimePoint().toString());
