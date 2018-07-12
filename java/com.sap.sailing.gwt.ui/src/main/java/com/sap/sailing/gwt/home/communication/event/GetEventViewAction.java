@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.communication.event;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -84,23 +85,14 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         }
         dto.setDescription(description);
 
-        final HashSet<RegattaMetadataDTO> regattasOfEvent = new HashSet<>();
-        final HashSet<LeaderboardGroup> relevantLeaderboardGroupsOfEvent = new HashSet<>();
+        final Set<RegattaMetadataDTO> regattasOfEvent = new HashSet<>();
+        final Set<LeaderboardGroup> relevantLeaderboardGroupsOfEvent = new HashSet<>();
         
         EventActionUtil.forLeaderboardsOfEvent(context, event, new LeaderboardCallback() {
             @Override
             public void doForLeaderboard(LeaderboardContext context) {
                 try {
-                    final Iterable<LeaderboardGroup> leaderboardGroupsForRegatta = context.getLeaderboardGroups();
-                    Util.addAll(leaderboardGroupsForRegatta, relevantLeaderboardGroupsOfEvent);
-                    if (Util.size(leaderboardGroupsForRegatta) == 1) {
-                        final LeaderboardGroup singleLeaderboardGroup = leaderboardGroupsForRegatta.iterator().next();
-                        if (singleLeaderboardGroup.hasOverallLeaderboard() && !context.isPartOfEvent()) {
-                            // Regatta is associated to LeaderboardGroup that forms a series.
-                            // In this case we only assume the Regatta to be part of the current event if the Regatta references the Event through the associated CourseArea.
-                            return;
-                        }
-                    }
+                    Util.addAll(context.getLeaderboardGroups(), relevantLeaderboardGroupsOfEvent);
                     RegattaMetadataDTO regattaDTO = context.asRegattaMetadataDTO();
                     regattasOfEvent.add(regattaDTO);
                     dto.getRegattas().add(regattaDTO);

@@ -78,6 +78,6 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     
     private void setupStatisticsBox(EventSeriesViewDTO series) {
         statisticsBoxUi = new EventStatisticsBox(true, new MobileStatisticsBoxView());
-        refreshManager.add(statisticsBoxUi, new GetSeriesStatisticsAction(series.getId()));
+        refreshManager.add(statisticsBoxUi, new GetSeriesStatisticsAction(series.getLeaderboardGroupUUID()));
     }
 }

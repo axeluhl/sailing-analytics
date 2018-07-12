@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -188,7 +189,17 @@ public final class EventActionUtil {
             }
         }
         for (Entry<Leaderboard, LinkedHashSet<LeaderboardGroup>> e : leaderboardGroupsForLeaderboard.entrySet()) {
-            callback.doForLeaderboard(new LeaderboardContext(context, event, e.getValue(), e.getKey()));
+            final Set<LeaderboardGroup> leaderboardGroupsForRegatta = e.getValue();
+            final LeaderboardContext leaderboardContext = new LeaderboardContext(context, event, e.getValue(), e.getKey());
+            if (leaderboardGroupsForRegatta.size() == 1) {
+                final LeaderboardGroup singleLeaderboardGroup = leaderboardGroupsForRegatta.iterator().next();
+                if (singleLeaderboardGroup.hasOverallLeaderboard() && !leaderboardContext.isPartOfEvent()) {
+                    // Regatta is associated to LeaderboardGroup that forms a series.
+                    // In this case we only assume the Regatta to be part of the current event if the Regatta references the Event through the associated CourseArea.
+                    continue;
+                }
+            }
+            callback.doForLeaderboard(leaderboardContext);
         }
     }
     

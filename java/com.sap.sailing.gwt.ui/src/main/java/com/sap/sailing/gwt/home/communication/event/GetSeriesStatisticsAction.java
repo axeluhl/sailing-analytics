@@ -3,11 +3,11 @@ package com.sap.sailing.gwt.home.communication.event;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.statistics.EventStatisticsDTO;
 import com.sap.sailing.gwt.home.communication.event.statistics.GetEventStatisticsAction;
-import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.StatisticsCalculator;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
@@ -25,7 +25,7 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
  */
 public class GetSeriesStatisticsAction implements SailingAction<ResultWithTTL<EventStatisticsDTO>>, IsClientCacheable {
     
-    private UUID seriesId;
+    private UUID seriesLeaderboardGroupId;
     
     protected GetSeriesStatisticsAction() {
     }
@@ -36,20 +36,21 @@ public class GetSeriesStatisticsAction implements SailingAction<ResultWithTTL<Ev
      * @param seriesId
      *            {@link UUID} of the series to load data for
      */
-    public GetSeriesStatisticsAction(UUID seriesId) {
-        this.seriesId = seriesId;
+    public GetSeriesStatisticsAction(UUID seriesLeaderboardGroupId) {
+        this.seriesLeaderboardGroupId = seriesLeaderboardGroupId;
     }
 
     @Override
     @GwtIncompatible
     public ResultWithTTL<EventStatisticsDTO> execute(SailingDispatchContext context) throws DispatchException {
         StatisticsCalculator statisticsCalculator = new StatisticsCalculator(context.getTrackedRaceStatisticsCache());
-        EventActionUtil.forLeaderboardsOfEvent(context, seriesId, statisticsCalculator);
+        final LeaderboardGroup leaderboardGroupByID = context.getRacingEventService().getLeaderboardGroupByID(seriesLeaderboardGroupId);
+        leaderboardGroupByID.getLeaderboards().forEach(statisticsCalculator::addLeaderboard);
         return statisticsCalculator.getResult();
     }
 
     @Override
     public void cacheInstanceKey(StringBuilder key) {
-        key.append(seriesId);
+        key.append(seriesLeaderboardGroupId);
     }
 }
