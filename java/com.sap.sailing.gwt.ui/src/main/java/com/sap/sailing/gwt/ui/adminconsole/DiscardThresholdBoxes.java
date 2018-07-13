@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -29,7 +27,6 @@ public class DiscardThresholdBoxes {
     private static final int NUMBER_OF_BOXES_PER_LINE = 5;
 
     private final LongBox[] discardThresholdBoxes;
-    private final DataEntryDialog<?> parent;
     
     /**
      * The widget used to represent the UI
@@ -41,7 +38,6 @@ public class DiscardThresholdBoxes {
     }
     
     public DiscardThresholdBoxes(DataEntryDialog<?> parent, int[] initialDiscardThresholds, StringMessages stringMessages) {
-        this.parent = parent;
         discardThresholdBoxes = new LongBox[MAX_NUMBER_OF_DISCARDED_RESULTS];
         for (int i = 0; i < discardThresholdBoxes.length; i++) {
             if (initialDiscardThresholds != null && i < initialDiscardThresholds.length) {
@@ -87,15 +83,16 @@ public class DiscardThresholdBoxes {
         assert discardThresholdBoxes != null && discardThresholdBoxes.length == MAX_NUMBER_OF_DISCARDED_RESULTS;
         final VerticalPanel vp = new VerticalPanel();
         vp.add(new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
-        Grid grid = new Grid(MAX_NUMBER_OF_DISCARDED_RESULTS/NUMBER_OF_BOXES_PER_LINE+
-                (MAX_NUMBER_OF_DISCARDED_RESULTS%NUMBER_OF_BOXES_PER_LINE==0?0:1), 2*NUMBER_OF_BOXES_PER_LINE);
+        final Grid grid = new Grid(0, 2*NUMBER_OF_BOXES_PER_LINE);
         grid.setCellSpacing(3);
         vp.add(grid);
         for (int i = 0; i < discardThresholdBoxes.length; i++) {
+            if (i%NUMBER_OF_BOXES_PER_LINE == 0) {
+                grid.resizeRows(i/NUMBER_OF_BOXES_PER_LINE + 1);
+            }
             grid.setWidget(i/NUMBER_OF_BOXES_PER_LINE, 2*(i%NUMBER_OF_BOXES_PER_LINE), new Label("" + (i + 1) + "."));
             grid.setWidget(i/NUMBER_OF_BOXES_PER_LINE, 2*(i%NUMBER_OF_BOXES_PER_LINE)+1, discardThresholdBoxes[i]);
         }
-//        parent.alignAllPanelWidgetsVertically(grid, HasVerticalAlignment.ALIGN_MIDDLE);
         return vp;
     }
     
