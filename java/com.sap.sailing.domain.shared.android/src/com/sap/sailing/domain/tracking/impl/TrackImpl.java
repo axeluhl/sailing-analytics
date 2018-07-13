@@ -506,11 +506,13 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
                         result = nullElement;
                     }
                 }
+                // run the cache update while still holding the read lock; this avoids bug4629 where a cache invalidation
+                // caused by fix insertions can come after the result calculation and before the cache update
+                if (!perfectCacheHit && recursionDepth == 0) {
+                    cache.cache(from, to, result);
+                }
             } finally {
                 unlockAfterRead();
-            }
-            if (!perfectCacheHit && recursionDepth == 0) {
-                cache.cache(from, to, result);
             }
         }
         return result;
