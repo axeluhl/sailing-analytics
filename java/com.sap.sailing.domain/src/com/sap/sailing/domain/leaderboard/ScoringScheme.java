@@ -26,6 +26,13 @@ import com.sap.sse.common.Util;
  */
 public interface ScoringScheme extends Serializable {
     /**
+     * The factor by which a medal race score is multiplied by default in the overall point scheme.
+     * 
+     * @see #getFactor()
+     */
+    static final double DEFAULT_MEDAL_RACE_FACTOR = 2.0;
+    
+    /**
      * If this returns <code>true</code>, a higher score is better. For example, the Extreme Sailing Series uses this
      * scoring scheme, as opposed to the olympic sailing classes which use a low-point system.
      */
@@ -130,5 +137,19 @@ public interface ScoringScheme extends Serializable {
 
     default boolean doesCountAsWinInMedalRace(Double o1Score, RaceColumn raceColumn) {
         throw new IllegalStateException("This call is not valid for this scoringSheme");
+    }
+    
+    /**
+     * Usually, the scores in each leaderboard column count as they are for the overall score. However, if a column is
+     * a medal race column it usually counts double. Under certain circumstances, columns may also count with factors different
+     * from 1 or 2. For example, we've seen cases in the Extreme Sailing Series where the race committee defined that in the
+     * overall series leaderboard the last two columns each count 1.5 times their scores.
+     */
+    default double getScoreFactor(RaceColumn a) {
+        Double factor = a.getExplicitFactor();
+        if(factor == null) {
+            factor = a.isMedalRace() ? DEFAULT_MEDAL_RACE_FACTOR : 1.0;
+        }
+        return factor;
     }
 }

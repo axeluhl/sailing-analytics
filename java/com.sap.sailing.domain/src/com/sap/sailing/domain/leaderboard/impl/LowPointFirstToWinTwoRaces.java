@@ -24,7 +24,7 @@ public class LowPointFirstToWinTwoRaces extends LowPoint {
     @Override
     public boolean doesCountAsWinInMedalRace(Double score, RaceColumn raceColumn) {
         if(score != null) {
-            double minScore = 1 * raceColumn.getFactor();
+            double minScore = 1 * getScoreFactor(raceColumn);
             return score == minScore;
         } else {
             return false;
