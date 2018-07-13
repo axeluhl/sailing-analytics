@@ -124,6 +124,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         // it is guaranteed to have equal ordering as all fleets that the competitor is assigned to within the key series.
         final Map<Series, Map<Competitor, Fleet>> fleetWithCorrectOrderingForCompetitorBySeries = new HashMap<>();
         int defaultFleetBasedComparisonResult = 0; // relevant if no authoritative fleet-based comparison result was determined; based on extreme fleet vs. no fleet comparison
+        int numberOfMedalRacesWonO1 = 0;
+        int numberOfMedalRacesWonO2 = 0;
         for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
             needToResetO1ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
             needToResetO2ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
@@ -182,6 +184,10 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     // similar to compareByFleet, however, tracking is not required; having medal race column points
                     // (tracked or manual) is sufficient
                     preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
+                    if(scoringScheme.isMedalWinAmountCriteria()) {
+                        numberOfMedalRacesWonO1+= scoringScheme.doesCountAsWinInMedalRace(o1Score, raceColumn) ? 1:0;
+                        numberOfMedalRacesWonO2+= scoringScheme.doesCountAsWinInMedalRace(o2Score, raceColumn) ? 1:0;
+                    }
                 }
                 if (preemptiveColumnResult == 0 && raceColumn.isTotalOrderDefinedByFleet()) {
                     final FleetComparisonResult compareByFleetResult = compareByFleet(raceColumn, o1, o2, fleetWithCorrectOrderingForCompetitorBySeries);
@@ -205,25 +211,46 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         // break tie by sorting scores and looking for the first score difference.
         int result = compareByNumberOfRacesScored(o1Scores.size(), o2Scores.size());
         if (result == 0) {
-            result = compareByScoreSum(o1ScoreSum, o2ScoreSum);
+            if(scoringScheme.isMedalWinAmountCriteria()) {
+                //FIXME somehere carry values must be obtained and added here, if compeitor was in carry
+                result = compareByMedalRacesWon(numberOfMedalRacesWonO1, numberOfMedalRacesWonO2);
+            }
             if (result == 0) {
-                result = compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore);
+                result = compareByScoreSum(o1ScoreSum, o2ScoreSum);
                 if (result == 0) {
-                    result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2, Collections.unmodifiableList(o2Scores), timePoint);
+                    result = compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore);
                     if (result == 0) {
-                        // compare by last race:
-                        result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter, o1, o2);
+                        result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2, Collections.unmodifiableList(o2Scores), timePoint);
                         if (result == 0) {
-                            result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
+                            // compare by last race:
+                            result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter, o1, o2);
                             if (result == 0) {
-                                result = compareByArbitraryButStableCriteria(o1, o2);
+                                result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
+                                if (result == 0) {
+                                    result = compareByArbitraryButStableCriteria(o1, o2);
+                                }
                             }
                         }
                     }
                 }
+            }else {
+                System.out.println("chjeck me");
             }
+           
         }
         return result;
+    }
+
+    private int compareByMedalRacesWon(int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
+        int targetAmount = scoringScheme.getTargetAmountOfMedalRaceWins();
+        //if one reaches the targetamount, this has precendece, else proceed with normal low points scoring (eg not enough races yet)
+        if(numberOfMedalRacesWonO1 == targetAmount) {
+            return -1;
+        }
+        if(numberOfMedalRacesWonO2 == targetAmount) {
+            return 1;
+        }
+        return 0;
     }
 
     private int compareByArbitraryButStableCriteria(Competitor o1, Competitor o2) {

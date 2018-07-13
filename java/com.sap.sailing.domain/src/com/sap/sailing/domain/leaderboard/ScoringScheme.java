@@ -119,4 +119,16 @@ public interface ScoringScheme extends Serializable {
      * @throws NoWindException 
      */
     int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint);
+
+    default boolean isMedalWinAmountCriteria() {
+        return false;
+    }
+
+    default int getTargetAmountOfMedalRaceWins() {
+        throw new IllegalStateException("This call is not valid for this scoringSheme");
+    }
+
+    default boolean doesCountAsWinInMedalRace(Double o1Score, RaceColumn raceColumn) {
+        throw new IllegalStateException("This call is not valid for this scoringSheme");
+    }
 }

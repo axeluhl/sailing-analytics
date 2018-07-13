@@ -46,6 +46,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeLowPointTieBreakBasedOnLastSeriesOnly();
         case LOW_POINT_WITH_AUTOMATIC_RDG:
             return stringMessages.scoringSchemeLowPointWithAutomaticRdg();
+        case LOW_POINT_FIRST_TO_WIN_TWO_RACES:
+            return stringMessages.scoringSchemeLowPointSystemFirstTwoWins();
         }
         return null;
     }
