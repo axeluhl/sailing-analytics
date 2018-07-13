@@ -302,7 +302,7 @@ public class RaceBoardPanel
         addChildComponent(raceMap);
         
         // add panel for tagging functionality, hidden by default
-        taggingPanel = new TaggingPanel(new Label("Hello World!"), stringMessages, parent, componentContext);
+        taggingPanel = new TaggingPanel(parent, componentContext, stringMessages, sailingService, userService);
         addChildComponent(taggingPanel);
         taggingPanel.setVisible(true);
         taggingPanel.setVisible(false);
@@ -673,6 +673,7 @@ public class RaceBoardPanel
             regattaAndRaceTimeInformationHeader.add(regattaNameAnchor);
             regattaAndRaceTimeInformationHeader.add(raceTimeLabel);
             currentRaceHasBeenSelectedOnce = true;
+            taggingPanel.updateRace(leaderboardName, raceColumn, fleet);
         }
     }
 

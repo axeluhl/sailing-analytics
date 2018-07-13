@@ -7883,4 +7883,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
     }
+    
+    @Override
+    public void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment, String imageURL, String username, TimePoint raceTimepoint) {
+        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
+        raceLog.add(new RaceLogTagEventImpl(tag, username, comment, imageURL, raceTimepoint, getService().getServerAuthor(), raceLog.getCurrentPassId()));
+    }
 }

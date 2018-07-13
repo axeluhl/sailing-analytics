@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.abstractlog.race.state;
 
-import java.net.URL;
-
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;

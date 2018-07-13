@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.abstractlog.race.state.impl;
 
-import java.net.URL;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
