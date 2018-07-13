@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -23,7 +24,9 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  *
  */
 public class DiscardThresholdBoxes {
-    private static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
+    private static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 15;
+
+    private static final int NUMBER_OF_BOXES_PER_LINE = 5;
 
     private final LongBox[] discardThresholdBoxes;
     private final DataEntryDialog<?> parent;
@@ -82,16 +85,17 @@ public class DiscardThresholdBoxes {
 
     private Widget createDiscardThresholdBoxesPanel(StringMessages stringMessages) {
         assert discardThresholdBoxes != null && discardThresholdBoxes.length == MAX_NUMBER_OF_DISCARDED_RESULTS;
-        VerticalPanel vp = new VerticalPanel();
+        final VerticalPanel vp = new VerticalPanel();
         vp.add(new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
-        HorizontalPanel hp = new HorizontalPanel();
-        vp.add(hp);
-        hp.setSpacing(3);
+        Grid grid = new Grid(MAX_NUMBER_OF_DISCARDED_RESULTS/NUMBER_OF_BOXES_PER_LINE+
+                (MAX_NUMBER_OF_DISCARDED_RESULTS%NUMBER_OF_BOXES_PER_LINE==0?0:1), 2*NUMBER_OF_BOXES_PER_LINE);
+        grid.setCellSpacing(3);
+        vp.add(grid);
         for (int i = 0; i < discardThresholdBoxes.length; i++) {
-            hp.add(new Label("" + (i + 1) + "."));
-            hp.add(discardThresholdBoxes[i]);
+            grid.setWidget(i/NUMBER_OF_BOXES_PER_LINE, 2*(i%NUMBER_OF_BOXES_PER_LINE), new Label("" + (i + 1) + "."));
+            grid.setWidget(i/NUMBER_OF_BOXES_PER_LINE, 2*(i%NUMBER_OF_BOXES_PER_LINE)+1, discardThresholdBoxes[i]);
         }
-        parent.alignAllPanelWidgetsVertically(hp, HasVerticalAlignment.ALIGN_MIDDLE);
+//        parent.alignAllPanelWidgetsVertically(grid, HasVerticalAlignment.ALIGN_MIDDLE);
         return vp;
     }
     
