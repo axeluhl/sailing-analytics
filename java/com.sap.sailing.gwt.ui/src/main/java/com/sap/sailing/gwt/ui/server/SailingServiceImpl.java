@@ -7788,7 +7788,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     public void visit(RaceLogTagEvent event) {
                         // TODO change body of method and check if it is okay D067890
                         if (!dependentStartTime && isLatestPass(event)) {
-                            raceLog.add(new RaceLogTagEventImpl(event.getTag(), event.getComment(), event.getImageURL(), event.getCreatedAt(), event.getLogicalTimePoint(),
+                            raceLog.add(new RaceLogTagEventImpl(event.getTag(), event.getUserName(), event.getComment(), event.getImageURL(), event.getCreatedAt(), event.getLogicalTimePoint(),
                                     event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId()));
                         }
                     }

@@ -6,6 +6,8 @@ public interface RaceLogTagEvent extends RaceLogEvent, Revokable {
 
     String getTag();
     
+    String getUserName();
+    
     /*
      * Comment is optional
      */
@@ -13,6 +15,5 @@ public interface RaceLogTagEvent extends RaceLogEvent, Revokable {
     /*
      * Image URL in RaceLogTagEvents is optional
      */
-    String getImageURL();
-    
+    String getImageURL(); 
 }
