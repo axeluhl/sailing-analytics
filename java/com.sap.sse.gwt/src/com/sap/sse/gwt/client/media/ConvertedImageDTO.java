@@ -1,34 +1,33 @@
 package com.sap.sse.gwt.client.media;
 
 import java.util.Date;
+import java.util.Map;
 
 public class ConvertedImageDTO extends ImageDTO {
 
-    private String base64Code;
     private String fileType;
-    private String sizeTag;
+    Map<String,String> map;
     
-    public ConvertedImageDTO(String imageRef, Date createdAtDate, String base64Code, String fileType, String sizeTag) {
+    public ConvertedImageDTO(String imageRef, Date createdAtDate, String fileType, Map<String,String> base64CodeMap) {
         super(imageRef, createdAtDate);
-        this.base64Code = base64Code;
         this.fileType = fileType;
-        this.sizeTag = sizeTag;
+        this.map = base64CodeMap;
     }
     
     public ConvertedImageDTO(String imageRef, Date createdAtDate) {
         super(imageRef,createdAtDate);
     }
-    
-    public String getBase64Code() {
-        return base64Code;
-    }
 
     public String getFileType() {
         return fileType;
     }
-
-    public String getSizeTag() {
-        return sizeTag;
+    
+    public String getBase64Code(String key) {
+        return map.get(key);
+    }
+    
+    public Map<String,String> getMap() {
+        return map;
     }
     
     protected ConvertedImageDTO() {

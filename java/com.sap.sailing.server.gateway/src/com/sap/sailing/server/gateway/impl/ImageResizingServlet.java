@@ -32,43 +32,54 @@ public class ImageResizingServlet extends AbstractJsonHttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String jsonString = new BufferedReader(new InputStreamReader(req.getInputStream())).readLine();
         JSONObject obj = getObjFromJSON(jsonString);
-        JSONArray tags;
+        JSONArray tags = null;
+        JSONArray alreadyResizedTags = null;
         List<String> sizeTags = new ArrayList<>();
-        BufferedImage img = null;
-        try {
-            img = ImageConverter.isToBi(getService().getFileStorageManagementService().getActiveFileStorageService().loadFile(new URI((String)obj.get("URI"))));
-        } catch (NoCorrespondingServiceRegisteredException | OperationFailedException
-                | InvalidPropertiesException | URISyntaxException | IOException e) {
-            e.printStackTrace();
-        }
-        
         if(obj != null) {
+            String fileType = ((String)obj.get("URI")).substring(((String)obj.get("URI")).lastIndexOf(".")+1);
+            obj.put("FileType", fileType);
+            InputStream is = getInputStreamFromURIString(((String)obj.get("URI")));
+            BufferedImage img = ImageConverter.isToBi(is);
+            is.close();
+        
             tags = (JSONArray) obj.get("Tags");
+            alreadyResizedTags = (JSONArray) obj.get("AlreadyResizedTags");
             for(Object tag : tags) {
-                if(((String)tag).equalsIgnoreCase(MediaTagConstants.LOGO)||((String)tag).equalsIgnoreCase(MediaTagConstants.STAGE)||((String)tag).equalsIgnoreCase(MediaTagConstants.TEASER)) {
+                if(((String)tag).equalsIgnoreCase(MediaTagConstants.LOGO)||((String)tag).equalsIgnoreCase(MediaTagConstants.STAGE)||((String)tag).equalsIgnoreCase(MediaTagConstants.TEASER)||((String)tag).equalsIgnoreCase(MediaTagConstants.GALLERY)) {
                     sizeTags.add((String)tag);
                 }
             }
-            JSONArray ar = new JSONArray();
+            JSONObject sizes = new JSONObject();
             if(sizeTags.size() == 0) {
-                obj.put("SizeTag", "");
-                resizeAndAddToAr(img, ar, "", obj);//Does not actually resize, because of the empty tag
+                if(alreadyResizedTags.size() == 0) {//If there are already resized tags, this means, that there already is a converted image for all size tag and that the default case does not have to create a converted image without size tag
+                    resizeAndAddToAr(img, sizes, "", obj, fileType);//Does not actually resize, because of the empty tag
+                }
             }else {
                 for(String sizeTag : sizeTags) {
-                    int[] dimensions = getDimensions(sizeTag, img);
-                    obj.remove("Width");
-                    obj.remove("Height");
-                    obj.put("Width", dimensions[0]);
-                    obj.put("Height", dimensions[1]);
-                    obj.put("SizeTag", sizeTag);
-                    resizeAndAddToAr(img, ar, sizeTag, obj);
-                    obj = getObjFromJSON(jsonString);//obj has to be created again, because of the put resizeAndConvert
+                    resizeAndAddToAr(img, sizes, sizeTag, obj, fileType);
                 }
             }
-            resp.getWriter().write(ar.toJSONString());
+            obj.put("Sizes", sizes);
+            resp.getWriter().write(obj.toJSONString());
         }else {
             //ERROR
         }
+        if(alreadyResizedTags != null) {
+            for(Object tag : alreadyResizedTags) {
+                tags.add(tag);
+            }
+        }
+        obj.remove("AlreadyResizedTags");
+    }
+
+    private InputStream getInputStreamFromURIString(String uri) {
+        try {
+            return getService().getFileStorageManagementService().getActiveFileStorageService().loadFile(new URI(uri));
+        } catch (NoCorrespondingServiceRegisteredException | OperationFailedException | InvalidPropertiesException
+                | IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private JSONObject getObjFromJSON(String json) {
@@ -80,44 +91,26 @@ public class ImageResizingServlet extends AbstractJsonHttpServlet {
         }
         return null;
     }
-
-    public static int[] getDimensions(String tag, BufferedImage img) {
-        int width = img.getWidth();
-        int height = img.getHeight();
-        switch(tag) {
-        case MediaTagConstants.LOGO:
-            return ImageConverter.calculateActualDimensions(width, height, MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT, false);
-        case MediaTagConstants.STAGE:
-            return ImageConverter.calculateActualDimensions(width, height, MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT, false);
-        case MediaTagConstants.TEASER:
-            return ImageConverter.calculateActualDimensions(width, height, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, false);
-        default:
-            return new int[] {0,0};
-        }
-    }
     
-    private void resizeAndAddToAr(BufferedImage img, JSONArray ar, String tag,JSONObject obj) {
+    private void resizeAndAddToAr(BufferedImage img, JSONObject sizes, String tag,JSONObject obj, String fileType) {
         String imgString;
         switch(tag) {
         case MediaTagConstants.LOGO:
-            imgString = ImageConverter.resizeAndConvertToBase64(img, MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT, ((String)obj.get("URI")).substring(((String)obj.get("URI")).lastIndexOf(".")+1), false);
+            imgString = ImageConverter.resizeAndConvertToBase64(img, MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT, fileType, false);
+            sizes.put(MediaTagConstants.LOGO, imgString);
             break;
         case MediaTagConstants.STAGE:
-            imgString = ImageConverter.resizeAndConvertToBase64(img, MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT, ((String)obj.get("URI")).substring(((String)obj.get("URI")).lastIndexOf(".")+1), false);
+            imgString = ImageConverter.resizeAndConvertToBase64(img, MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT, fileType, false);
+            sizes.put(MediaTagConstants.STAGE, imgString);
             break;
         case MediaTagConstants.TEASER:
-            imgString = ImageConverter.resizeAndConvertToBase64(img, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, ((String)obj.get("URI")).substring(((String)obj.get("URI")).lastIndexOf(".")+1), false);
+            imgString = ImageConverter.resizeAndConvertToBase64(img, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, fileType, false);
+            sizes.put(MediaTagConstants.TEASER, imgString);
             break;
-        default:
-            imgString = ImageConverter.convertToBase64(img, ((String)obj.get("URI")).substring(((String)obj.get("URI")).lastIndexOf(".")));
+        default://case for Gallery or for no size tags
+            imgString = ImageConverter.convertToBase64(img,fileType);
+            sizes.put(MediaTagConstants.GALLERY, imgString);
             break;
-        }
-        if(imgString != null && !imgString.equals("")) {
-            obj.put("FileType",((String)obj.get("URI")).substring(((String)obj.get("URI")).lastIndexOf(".")+1));
-            obj.put("Base64Code", imgString);
-            ar.add(obj);
-        }else{
-            ar.add("Error resizing to " + tag + " dimensions.");
         }
     }
 }

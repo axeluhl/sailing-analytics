@@ -3,7 +3,6 @@ package com.sap.sse.common.media;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
@@ -14,18 +13,7 @@ public class ImageConverter {
     public static String resizeAndConvertToBase64(InputStream is, int minWidth, int maxWidth, int minHeight,
             int maxHeight, String imageFormat, boolean upsize) {
         BufferedImage img = isToBi(is);
-        if(img.getWidth()>maxWidth || img.getHeight() > maxHeight || (upsize && (img.getWidth() < minWidth || img.getHeight() < minHeight))) {
-            int[] dimensions = calculateActualDimensions(img.getWidth(), img.getHeight(), minWidth, maxWidth, minHeight,
-                    maxHeight, upsize);
-            if(dimensions != null) {
-                img = resize(img, dimensions[0], dimensions[1]);
-                return convertToBase64(biToBy(img, imageFormat));
-            }else {
-                return null;
-            }
-        }else {
-            return null;
-        }
+        return resizeAndConvertToBase64(img, minWidth, maxWidth, minHeight, maxHeight, imageFormat, upsize);
     }
     
     public static String resizeAndConvertToBase64(BufferedImage img, int minWidth, int maxWidth, int minHeight,
@@ -44,7 +32,7 @@ public class ImageConverter {
         }
     }
 
-    public static int[] calculateActualDimensions(double width, double height, double minWidth, double maxWidth, double minHeight,
+    private static int[] calculateActualDimensions(double width, double height, double minWidth, double maxWidth, double minHeight,
             double maxHeight, boolean upsize) {
         if (maxWidth > 0 && maxHeight > 0 && maxHeight > minHeight && maxWidth > minWidth) {
             if(maxWidth <= width || maxHeight <= height) {
