@@ -23,6 +23,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogTagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
@@ -253,7 +254,10 @@ public class RaceLogEventSerializerTest {
     }
     
     @Test
-    public void testTagSerializer() {
-        // TODO add test for Serializer for RaceLogTagEvents  D067890   
+    public void testTagSerializer() { 
+        // we use the real event type here because we do not want to re-implement the dispatching.
+        RaceLogEvent event = new RaceLogTagEventImpl("", "", "", "", MillisecondsTimePoint.now(), author, 0);
+        serializer.serialize(event);
+        verify(tagEventSerializer).serialize(event);
     }
 }
