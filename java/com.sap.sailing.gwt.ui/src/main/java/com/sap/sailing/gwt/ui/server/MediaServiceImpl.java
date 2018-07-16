@@ -18,6 +18,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -254,7 +255,11 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
             message = e.getMessage();
         } finally {
             if (tmp != null) {
-                tmp.delete();
+                try {
+                    Files.delete(tmp.toPath());
+                } catch (IOException e) {
+                    logger.log(Level.SEVERE, "Could not delete tmp mp4 file", e);
+                }
             }
         }
         return new VideoMetadataDTO(true, duration, spherical, recordStartedTimer, message);
