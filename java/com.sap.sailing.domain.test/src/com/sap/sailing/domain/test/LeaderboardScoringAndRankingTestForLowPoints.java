@@ -69,45 +69,41 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         return regatta;
     }
 
-    private void setupMedalSeries() {
-        // -------- medal series ------------
-        {
-            Set<? extends Fleet> medalFleets = Collections.singleton(new FleetImpl("Default"));
-            List<String> medalRaceColumnNames = new ArrayList<String>();
-            medalRaceColumnNames.add("Carry");
-            medalRaceColumnNames.add("M1");
-            medalRaceColumnNames.add("M2");
-            medalRaceColumnNames.add("M3");
-            medalRaceColumnNames.add("M4");
-            Series medalSeries = new SeriesImpl("Medal", /* isMedal */true, /* isFleetsCanRunInParallel */ true,
-                    medalFleets, medalRaceColumnNames, /* trackedRegattaRegistry */ null);
-            series.add(medalSeries);
-        }
+    private void setupMedalSeriesWithCarryOverAndFourRaceColumns() {
+        Set<? extends Fleet> medalFleets = Collections.singleton(new FleetImpl("Default"));
+        List<String> medalRaceColumnNames = new ArrayList<String>();
+        medalRaceColumnNames.add("Carry");
+        medalRaceColumnNames.add("M1");
+        medalRaceColumnNames.add("M2");
+        medalRaceColumnNames.add("M3");
+        medalRaceColumnNames.add("M4");
+        Series medalSeries = new SeriesImpl("Medal", /* isMedal */true, /* isFleetsCanRunInParallel */ true,
+                medalFleets, medalRaceColumnNames, /* trackedRegattaRegistry */ null);
+        medalSeries.setFirstColumnIsNonDiscardableCarryForward(true);
+        series.add(medalSeries);
     }
 
-    private void setupPreSeries() {
-        {
-            List<Fleet> qualificationFleets = new ArrayList<Fleet>();
-            for (String qualificationFleetName : new String[] { "Yellow", "Blue" }) {
-                qualificationFleets.add(new FleetImpl(qualificationFleetName));
-            }
-            List<String> qualificationRaceColumnNames = new ArrayList<String>();
-            qualificationRaceColumnNames.add("Q");
-            Series qualificationSeries = new SeriesImpl("Qualification", /* isMedal */false,
-                    /* isFleetsCanRunInParallel */ true, qualificationFleets, qualificationRaceColumnNames,
-                    /* trackedRegattaRegistry */ null);
-            // discard the one and only qualification race; it doesn't score
-            qualificationSeries.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(new int[] { 1 }));
-            series.add(qualificationSeries);
+    private void setupQualificationSeriesWithOneRaceColumn() {
+        List<Fleet> qualificationFleets = new ArrayList<Fleet>();
+        for (String qualificationFleetName : new String[] { "Yellow", "Blue" }) {
+            qualificationFleets.add(new FleetImpl(qualificationFleetName));
         }
+        List<String> qualificationRaceColumnNames = new ArrayList<String>();
+        qualificationRaceColumnNames.add("Q");
+        Series qualificationSeries = new SeriesImpl("Qualification", /* isMedal */false,
+                /* isFleetsCanRunInParallel */ true, qualificationFleets, qualificationRaceColumnNames,
+                /* trackedRegattaRegistry */ null);
+        // discard the one and only qualification race; it doesn't score
+        qualificationSeries.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(new int[] { 1 }));
+        series.add(qualificationSeries);
     }
 
     @Test
     public void testFirstPreseriesWinsAgain() throws NoWindException {
         series = new ArrayList<Series>();
-        setupPreSeries();
+        setupQualificationSeriesWithOneRaceColumn();
 
-        setupMedalSeries();
+        setupMedalSeriesWithCarryOverAndFourRaceColumns();
         Regatta regatta = setupRegatta(true);
         List<Competitor> competitors = createCompetitors(12);
         List<Competitor> yellow = new ArrayList<>(competitors.subList(0, 6));
@@ -152,8 +148,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     public void testSecondPreSeriesWinsTwice() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
-        setupPreSeries();
-        setupMedalSeries();
+        setupQualificationSeriesWithOneRaceColumn();
+        setupMedalSeriesWithCarryOverAndFourRaceColumns();
         Regatta regatta = setupRegatta(true);
         List<Competitor> competitors = createCompetitors(12);
         List<Competitor> yellow = new ArrayList<>(competitors.subList(0, 6));
@@ -217,8 +213,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     public void testFirstWinsSecondRace() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
-        setupPreSeries();
-        setupMedalSeries();
+        setupQualificationSeriesWithOneRaceColumn();
+        setupMedalSeriesWithCarryOverAndFourRaceColumns();
         Regatta regatta = setupRegatta(true);
         List<Competitor> competitors = createCompetitors(12);
         List<Competitor> yellow = new ArrayList<>(competitors.subList(0, 6));
@@ -282,8 +278,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     public void testLastWinsTwoRaces() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
-        setupPreSeries();
-        setupMedalSeries();
+        setupQualificationSeriesWithOneRaceColumn();
+        setupMedalSeriesWithCarryOverAndFourRaceColumns();
         Regatta regatta = setupRegatta(true);
         List<Competitor> competitors = createCompetitors(12);
         List<Competitor> yellow = new ArrayList<>(competitors.subList(0, 6));
@@ -347,8 +343,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     public void noTwoWinsAbortAfterTwoRacesAndTieBraker() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
-        setupPreSeries();
-        setupMedalSeries();
+        setupQualificationSeriesWithOneRaceColumn();
+        setupMedalSeriesWithCarryOverAndFourRaceColumns();
         Regatta regatta = setupRegatta(true);
         List<Competitor> competitors = createCompetitors(12);
         List<Competitor> yellow = new ArrayList<>(competitors.subList(0, 6));
@@ -412,9 +408,9 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     @Test
     public void negativeTestFirstPreseriesWinsAgain() throws NoWindException {
         series = new ArrayList<Series>();
-        setupPreSeries();
+        setupQualificationSeriesWithOneRaceColumn();
 
-        setupMedalSeries();
+        setupMedalSeriesWithCarryOverAndFourRaceColumns();
         Regatta regatta = setupRegatta(false);
         List<Competitor> competitors = createCompetitors(12);
         List<Competitor> yellow = new ArrayList<>(competitors.subList(0, 6));
@@ -459,8 +455,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     public void negativeTestSecondPreSeriesWinsTwice() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
-        setupPreSeries();
-        setupMedalSeries();
+        setupQualificationSeriesWithOneRaceColumn();
+        setupMedalSeriesWithCarryOverAndFourRaceColumns();
         Regatta regatta = setupRegatta(false);
         List<Competitor> competitors = createCompetitors(12);
         List<Competitor> yellow = new ArrayList<>(competitors.subList(0, 6));
@@ -524,8 +520,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     public void negativeTestFirstWinsSecondRace() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
-        setupPreSeries();
-        setupMedalSeries();
+        setupQualificationSeriesWithOneRaceColumn();
+        setupMedalSeriesWithCarryOverAndFourRaceColumns();
         Regatta regatta = setupRegatta(false);
         List<Competitor> competitors = createCompetitors(12);
         List<Competitor> yellow = new ArrayList<>(competitors.subList(0, 6));
@@ -589,8 +585,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     public void negativeTestLastWinsTwoRaces() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
-        setupPreSeries();
-        setupMedalSeries();
+        setupQualificationSeriesWithOneRaceColumn();
+        setupMedalSeriesWithCarryOverAndFourRaceColumns();
         Regatta regatta = setupRegatta(false);
         List<Competitor> competitors = createCompetitors(12);
         List<Competitor> yellow = new ArrayList<>(competitors.subList(0, 6));
@@ -654,8 +650,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     public void negativeNoTwoWinsAbortAfterTwoRacesAndTieBraker() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
-        setupPreSeries();
-        setupMedalSeries();
+        setupQualificationSeriesWithOneRaceColumn();
+        setupMedalSeriesWithCarryOverAndFourRaceColumns();
         Regatta regatta = setupRegatta(false);
         List<Competitor> competitors = createCompetitors(12);
         List<Competitor> yellow = new ArrayList<>(competitors.subList(0, 6));
