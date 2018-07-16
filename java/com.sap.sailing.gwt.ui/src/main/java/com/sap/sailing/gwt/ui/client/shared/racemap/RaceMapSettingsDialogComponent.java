@@ -54,6 +54,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox transparentHoverlines;
     private IntegerBox hoverlineStrokeWeight;
     private DoubleBox startCountDownFontSizeScalingBox;
+    private CheckBox maneuverLossVisualizationCheckBox;
     
     private boolean isSimulationEnabled;
     
@@ -62,8 +63,6 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
 
     private ArrayList<CheckBox> disableOnlySelectedWhenAreFalse;
     private CheckBox showEstimatedDuration;
-    
-    private CheckBox showManeuverLossVisualizationCheckBox;
     
     public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages, boolean isSimulationEnabled) {
         this.isSimulationEnabled = isSimulationEnabled;
@@ -163,7 +162,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         
         Label maneuversLabel = dialog.createHeadlineLabel(stringMessages.maneuverTypesToShowWhenCompetitorIsClicked());
         vp.add(maneuversLabel);
-        int checkBoxCount = ManeuverType.values().length + 2; // including douglas peucker checkbox and maneuverloss checkbox
+        int checkBoxCount = ManeuverType.values().length + 1; // including douglas peucker checkbox
         int gridRowsRequired = checkBoxCount / 2 + checkBoxCount % 2; 
         Grid maneuverGrid = new Grid(gridRowsRequired, 2);
         vp.add(maneuverGrid);
@@ -235,10 +234,9 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE));
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.COURSEGEOMETRY));
         
-        /* ManeuverLossLines CheckBox */
-        showManeuverLossVisualizationCheckBox = dialog.createCheckbox(stringMessages.maneuverLoss());
-        showManeuverLossVisualizationCheckBox.setValue(initialSettings.isShowManeuverLossVisualization());
-        vp.add(showManeuverLossVisualizationCheckBox);
+        maneuverLossVisualizationCheckBox = dialog.createCheckbox(stringMessages.maneuverLoss());
+        maneuverLossVisualizationCheckBox.setValue(initialSettings.isShowManeuverLossVisualization());
+        vp.add(maneuverLossVisualizationCheckBox);
         
         transparentHoverlines = dialog.createCheckbox(stringMessages.transparentBufferLineOnHover());
         transparentHoverlines.ensureDebugId("transparentHoverlinesCheckBox");
@@ -311,7 +309,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 buoyZoneRadius, showOnlySelectedCompetitorsCheckBox.getValue(), showSelectedCompetitorsInfoCheckBox.getValue(),
                 showWindStreamletColorsCheckbox.getValue(), showWindStreamletOverlayCheckbox.getValue(), showSimulationOverlay,
                 initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue(),estimatedDuration,
-                startCountDownFontSizeScalingBox.getValue(), showManeuverLossVisualizationCheckBox.getValue());
+                startCountDownFontSizeScalingBox.getValue(), maneuverLossVisualizationCheckBox.getValue());
     }
     
     private RaceMapZoomSettings getZoomSettings() {
