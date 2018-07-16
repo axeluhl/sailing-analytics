@@ -241,10 +241,13 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         try {
             tmp = createFileFromData(start, end, skipped);
             try (IsoFile isof = new IsoFile(tmp)) {
-                recordStartedTimer = determineRecordingStart(isof);
-                spherical = determine360(isof);
-                duration = determineDuration(isof);
-                removeTempFiles(isof);
+                try {
+                    recordStartedTimer = determineRecordingStart(isof);
+                    spherical = determine360(isof);
+                    duration = determineDuration(isof);
+                } finally {
+                    removeTempFiles(isof);
+                }
             }
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error in video analysis ", e);
