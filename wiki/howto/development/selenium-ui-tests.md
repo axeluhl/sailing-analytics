@@ -8,6 +8,8 @@ There are two ways to run the Selenium tests locally on your computer. Either, y
 
 ### Firefox Prerequisites
 
+Make sure that Firefox is running maximized (at least at Windows) as per default it is not running maximized!
+
 Running Selenium tests with FireFox requires to use GeckoDriver. You need to download a current version of GeckoDriver from [the download page](https://github.com/mozilla/geckodriver/releases) and unzip it on your system. At the time this was written, the current version was 0.20.1 and it worked best with FireFox versions 57-59 but other versions of both, GeckoDriver and FireFox should also work. In the file "/com.sap.sailing.selenium.test/local-test-environment.xml" you need to adjust the property "webdriver.gecko.driver" to point to the unzipped GeckoDriver executable. If you have a version of FixeFox globally installed on your system, GeckoDriver will use this one. If you do not have an installed version of FireFox or need to use a different version, you can set the property "webdriver.firefox.bin" in "/com.sap.sailing.selenium.test/local-test-environment.xml" to point to the specific firefox executable. When using a portable version, it is not the "FirefoxPortable.exe" but "App/Firefox/firefox.exe".
 
 In older versions of Selenium, you needed to configure a special user profile in FireFox. With GeckoDriver, this isn't needed anymore.

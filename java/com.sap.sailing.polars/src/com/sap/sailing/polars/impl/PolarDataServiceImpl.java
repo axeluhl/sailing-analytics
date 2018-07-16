@@ -177,7 +177,8 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
         return result;
     }
 
-    private SpeedWithBearingWithConfidence<Void> getClosestTwaTws(ManeuverType type, Speed speedAtManeuverStart,
+    @Override
+    public SpeedWithBearingWithConfidence<Void> getClosestTwaTws(ManeuverType type, Speed speedAtManeuverStart,
             double courseChangeDeg, BoatClass boatClass) {
         assert type == ManeuverType.TACK || type == ManeuverType.JIBE;
         double minDiff = Double.MAX_VALUE;
@@ -186,8 +187,9 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
                 boatClass, speedAtManeuverStart, type == ManeuverType.TACK ? LegType.UPWIND : LegType.DOWNWIND,
                 type == ManeuverType.TACK ? courseChangeDeg >= 0 ? Tack.PORT : Tack.STARBOARD
                         : courseChangeDeg >= 0 ? Tack.STARBOARD : Tack.PORT)) {
-            double diff = Math.abs(trueWindSpeedAndAngle.getObject().getBearing().getDegrees() * 2)
-                    - Math.abs(courseChangeDeg);
+            double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(
+                    trueWindSpeedAndAngle.getObject().getBearing().getDegrees(), type);
+            double diff = Math.abs(targetManeuverAngle) - Math.abs(courseChangeDeg);
             if (diff < minDiff) {
                 minDiff = diff;
                 closestTwsTwa = trueWindSpeedAndAngle;
@@ -235,10 +237,20 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
         }
         SpeedWithBearingWithConfidence<Void> speed = polarDataMiner.getAverageSpeedAndCourseOverGround(boatClass,
                 windSpeed, legType);
-        Bearing bearing = new DegreeBearingImpl(speed.getObject().getBearing().getDegrees() * 2);
+        Bearing bearing = new DegreeBearingImpl(getManeuverAngleInDegreesFromTwa(speed.getObject().getBearing().getDegrees(), maneuverType));
         BearingWithConfidence<Void> bearingWithConfidence = new BearingWithConfidenceImpl<Void>(bearing,
                 speed.getConfidence(), null);
         return bearingWithConfidence;
+    }
+    
+    public double getManeuverAngleInDegreesFromTwa(double twa, ManeuverType maneuverType) {
+        if (maneuverType == ManeuverType.TACK) {
+            return Math.abs(twa) * 2;
+        }
+        if (maneuverType == ManeuverType.JIBE) {
+            return (180 - Math.abs(twa)) * 2;
+        }
+        throw new IllegalArgumentException("ManeuverType needs to be tack or jibe.");
     }
 
     @Override
@@ -388,7 +400,8 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
         return polarDataMiner.getSpeedRegressionPerAngleClusterProcessor().getRegressionsImpl();
     }
 
-    public Map<BoatClass, Long> getFixCointPerBoatClass() {
+    @Override
+    public Map<BoatClass, Long> getFixCountPerBoatClass() {
         return polarDataMiner.getSpeedRegressionPerAngleClusterProcessor().getFixCountPerBoatClass();
     }
 
