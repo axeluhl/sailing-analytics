@@ -493,7 +493,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         // from there on
         boolean needToResetScoreUponNextNonEmptyEntry = false;
         double result = getCarriedPoints(competitor);
-        double wonRaces = 0;
+        int wonRaces = 0;
         final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this,
                 raceColumnsToConsider, timePoint);
         for (RaceColumn raceColumn : raceColumnsToConsider) {
@@ -502,12 +502,13 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
             }
             if (getScoringScheme().isValidInNetScore(this, raceColumn, competitor, timePoint)) {
                 final Double netPoints = getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
-                if(getScoringScheme().isMedalWinAmountCriteria()) {
+                if (getScoringScheme().isMedalWinAmountCriteria() && raceColumn.isMedalRace()) {
                     wonRaces += getScoringScheme().doesCountAsWinInMedalRace(netPoints, raceColumn) ? 1 : 0;
                 }
-                if(true){
-                    System.out.println("Check " + competitor.getName() + " " + raceColumn.getName() + " " + netPoints + " " + wonRaces);
-                }else {
+                if (true) {
+                    System.out.println("Check " + competitor.getName() + " " + raceColumn.getName() + " " + netPoints
+                            + " " + wonRaces);
+                } else {
                     System.out.println("remove stuff");
                 }
                 if (netPoints != null) {
@@ -521,8 +522,8 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
                 }
             }
         }
-        if(getScoringScheme().isMedalWinAmountCriteria()) {
-            if(wonRaces == getScoringScheme().getTargetAmountOfMedalRaceWins()) {
+        if (getScoringScheme().isMedalWinAmountCriteria()) {
+            if (wonRaces == getScoringScheme().getTargetAmountOfMedalRaceWins()) {
                 return 2.0;
             }
         }
