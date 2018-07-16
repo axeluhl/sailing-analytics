@@ -502,23 +502,16 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
             }
             if (getScoringScheme().isValidInNetScore(this, raceColumn, competitor, timePoint)) {
                 final Double netPoints = getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
-                if (getScoringScheme().isMedalWinAmountCriteria() && raceColumn.isMedalRace()) {
-                    wonRaces += getScoringScheme().doesCountAsWinInMedalRace(netPoints, raceColumn) ? 1 : 0;
-                }
-                if (true) {
-                    System.out.println("Check " + competitor.getName() + " " + raceColumn.getName() + " " + netPoints
-                            + " " + wonRaces);
-                } else {
-                    System.out.println("remove stuff");
-                }
                 if (netPoints != null) {
                     if (needToResetScoreUponNextNonEmptyEntry) {
                         result = 0;
-                        //FIXME if medal amount, use carry column here instead of 0?
                         wonRaces = 0;
                         needToResetScoreUponNextNonEmptyEntry = false;
                     }
                     result += netPoints;
+                    if (getScoringScheme().isMedalWinAmountCriteria() && raceColumn.isMedalRace()) {
+                        wonRaces += getScoringScheme().doesCountAsWinInMedalRace(netPoints, raceColumn) ? 1 : 0;
+                    }
                 }
             }
         }
