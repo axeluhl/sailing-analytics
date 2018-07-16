@@ -458,13 +458,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private final Consumer<WindSource> showWindChartForProvider;
     private ManagedInfoWindow managedInfoWindow;
     
-    /** The Map where for each competitor and each maneuver is stored if it is visualized or not.*/
+    /** The Map where for each competitor and each maneuver is stored if it is visualized or not. */
     private Set<Triple<String, Date, ManeuverType>> maneuverLossCheckBoxValueStore = new HashSet<>();
     
-    /** The Map where the polylines for the specific maneuver are stored.*/
+    /** The Map where the polylines for the specific maneuver are stored. */
     private Map<Triple<String, Date, ManeuverType>, Set<Polyline>> maneuverLossLinesMap = new HashMap<>();
     
-    /** The Map where the info overlays for a maneuver loss visualization are stored.*/
+    /** The Map where the info overlays for a maneuver loss visualization are stored. */
     private Map<Triple<String, Date, ManeuverType>, SmallTransparentInfoOverlay> maneuverLossInfoOverlayMap = new HashMap<>();
 
     private class AdvantageLineUpdater implements QuickRanksListener {
@@ -1818,10 +1818,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 lineInfoProvider, "#2268a0", STANDARD_LINE_STROKEWEIGHT, STANDARD_LINE_OPACITY);
     }
 
+    /**
+     * is used to get the information that appears on hovering over a line is written in
+     * {@link #adjustInfoOverlayForVisibleLine}
+     */
     private interface LineInfoProvider {
-        /* is used to get the information that appears on hovering over a line is written in {@link #adjustInfoOverlayForVisibleLine} */
         String getLineInfo();
-        /* defines if a info overlay is shown with helplines */
+
+        /** defines if a info overlay is shown with helplines */
         default boolean isShowInfoOverlayWithHelplines() {
             return true;
         };
@@ -2490,7 +2494,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         });
         maneuverMarkers.add(marker);
         marker.setMap(map);
-        /* maneuverloss visualization */
+        // maneuverloss visualization
         if (settings.isShowManeuverLossVisualization() && maneuver.getManeuverLoss() != null) {
             Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(), maneuver.getType());
             maneuverLossCheckBoxValueStore.add(t);
@@ -3215,8 +3219,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * {@link #createManeuverLossLinesAndInfoOverlays(ManeuverDTO, CompetitorDTO)}. If called with
      * showManeuverVisualization=false removes the polylines and infooverlays, if there are any.
      */
-    private void visualizeManeuverLoss(ManeuverDTO maneuver, boolean showManeuverVisualization,
-            CompetitorDTO competitor) {
+    private void visualizeManeuverLoss(ManeuverDTO maneuver, boolean showManeuverVisualization, CompetitorDTO competitor) {
         if (showManeuverVisualization == false) {
             Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(),
                     maneuver.getType());
