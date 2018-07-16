@@ -3,8 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -23,10 +22,11 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  *
  */
 public class DiscardThresholdBoxes {
-    private static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
+    private static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 15;
+
+    private static final int NUMBER_OF_BOXES_PER_LINE = 5;
 
     private final LongBox[] discardThresholdBoxes;
-    private final DataEntryDialog<?> parent;
     
     /**
      * The widget used to represent the UI
@@ -38,7 +38,6 @@ public class DiscardThresholdBoxes {
     }
     
     public DiscardThresholdBoxes(DataEntryDialog<?> parent, int[] initialDiscardThresholds, StringMessages stringMessages) {
-        this.parent = parent;
         discardThresholdBoxes = new LongBox[MAX_NUMBER_OF_DISCARDED_RESULTS];
         for (int i = 0; i < discardThresholdBoxes.length; i++) {
             if (initialDiscardThresholds != null && i < initialDiscardThresholds.length) {
@@ -82,16 +81,18 @@ public class DiscardThresholdBoxes {
 
     private Widget createDiscardThresholdBoxesPanel(StringMessages stringMessages) {
         assert discardThresholdBoxes != null && discardThresholdBoxes.length == MAX_NUMBER_OF_DISCARDED_RESULTS;
-        VerticalPanel vp = new VerticalPanel();
+        final VerticalPanel vp = new VerticalPanel();
         vp.add(new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
-        HorizontalPanel hp = new HorizontalPanel();
-        vp.add(hp);
-        hp.setSpacing(3);
+        final Grid grid = new Grid(0, 2*NUMBER_OF_BOXES_PER_LINE);
+        grid.setCellSpacing(3);
+        vp.add(grid);
         for (int i = 0; i < discardThresholdBoxes.length; i++) {
-            hp.add(new Label("" + (i + 1) + "."));
-            hp.add(discardThresholdBoxes[i]);
+            if (i%NUMBER_OF_BOXES_PER_LINE == 0) {
+                grid.resizeRows(i/NUMBER_OF_BOXES_PER_LINE + 1);
+            }
+            grid.setWidget(i/NUMBER_OF_BOXES_PER_LINE, 2*(i%NUMBER_OF_BOXES_PER_LINE), new Label("" + (i + 1) + "."));
+            grid.setWidget(i/NUMBER_OF_BOXES_PER_LINE, 2*(i%NUMBER_OF_BOXES_PER_LINE)+1, discardThresholdBoxes[i]);
         }
-        parent.alignAllPanelWidgetsVertically(hp, HasVerticalAlignment.ALIGN_MIDDLE);
         return vp;
     }
     
