@@ -12,6 +12,7 @@ import java.util.UUID;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
@@ -58,6 +59,9 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected VideosListComposite videosListComposite;
     protected ExternalLinksComposite externalLinksComposite;
     
+    private final static String BASE_URL_PATTERN = "(https?|ftp)://(www\\.)?(((([a-zA-Z0-9.-]+\\.){1,}[a-zA-Z]{2,4}|localhost))|((\\d{1,3}\\.){3}(\\d{1,3})))(:(\\d+))?(/([a-zA-Z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?(\\?([a-zA-Z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*)?(#([a-zA-Z0-9._-]|%[0-9A-F]{2})*)?";
+    private final static RegExp BASE_URL_REG_EXP  = RegExp.compile(BASE_URL_PATTERN);
+    
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
         private StringMessages stringMessages;
@@ -74,7 +78,12 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             boolean nameNotEmpty = eventToValidate.getName() != null && eventToValidate.getName().length() > 0;
             boolean venueNotEmpty = eventToValidate.venue.getName() != null && eventToValidate.venue.getName().length() > 0;
             boolean courseAreaNotEmpty = eventToValidate.venue.getCourseAreas() != null && eventToValidate.venue.getCourseAreas().size() > 0;
-
+            
+            boolean invalidURL = true;
+            if(eventToValidate.getBaseURL() == null && BASE_URL_REG_EXP.test(eventToValidate.getBaseURL())) {
+                invalidURL=false;
+            }
+            
             if (courseAreaNotEmpty) {
                 for (CourseAreaDTO courseArea : eventToValidate.venue.getCourseAreas()) {
                     courseAreaNotEmpty = courseArea.getName() != null && courseArea.getName().length() > 0;
@@ -114,6 +123,8 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                 errorMessage = stringMessages.pleaseEnterNonEmptyCourseArea();
             } else if (!unique) {
                 errorMessage = stringMessages.eventWithThisNameAlreadyExists();
+            } else if(invalidURL) {
+                errorMessage = stringMessages.eventBaseURL();
             }
 
             return errorMessage;
