@@ -211,8 +211,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         // break tie by sorting scores and looking for the first score difference.
         int result = compareByNumberOfRacesScored(o1Scores.size(), o2Scores.size());
         if (result == 0) {
-            if(scoringScheme.isMedalWinAmountCriteria()) {
-                //FIXME somehere carry values must be obtained and added here, if compeitor was in carry
+            if (scoringScheme.isMedalWinAmountCriteria()) {
                 result = compareByMedalRacesWon(numberOfMedalRacesWonO1, numberOfMedalRacesWonO2);
             }
             if (result == 0) {
@@ -220,12 +219,15 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                 if (result == 0) {
                     result = compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore);
                     if (result == 0) {
-                        result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2, Collections.unmodifiableList(o2Scores), timePoint);
+                        result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2,
+                                Collections.unmodifiableList(o2Scores), timePoint);
                         if (result == 0) {
                             // compare by last race:
-                            result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter, o1, o2);
+                            result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter,
+                                    o1, o2);
                             if (result == 0) {
-                                result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
+                                result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2,
+                                        timePoint);
                                 if (result == 0) {
                                     result = compareByArbitraryButStableCriteria(o1, o2);
                                 }
@@ -233,21 +235,22 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                         }
                     }
                 }
-            }else {
+            } else {
                 System.out.println("chjeck me");
             }
-           
+
         }
         return result;
     }
 
     private int compareByMedalRacesWon(int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
         int targetAmount = scoringScheme.getTargetAmountOfMedalRaceWins();
-        //if one reaches the targetamount, this has precendece, else proceed with normal low points scoring (eg not enough races yet)
-        if(numberOfMedalRacesWonO1 == targetAmount) {
+        // if one reaches the targetamount, this has priority, else proceed with normal low points scoring (eg. not
+        // enough races yet)
+        if (numberOfMedalRacesWonO1 == targetAmount) {
             return -1;
         }
-        if(numberOfMedalRacesWonO2 == targetAmount) {
+        if (numberOfMedalRacesWonO2 == targetAmount) {
             return 1;
         }
         return 0;
