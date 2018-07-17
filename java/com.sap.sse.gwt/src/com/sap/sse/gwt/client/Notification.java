@@ -17,7 +17,7 @@ public class Notification {
     private static final int MAX_NOTIFICATIONS = 5; // max. notifications to become displayed at the same time
     private static final Panel notifications = new FlowPanel();
     private static final List<NotificationPanel> QUEUE = new LinkedList<>();
-    private static final NotificationResources ress = GWT.create(NotificationResources.class);
+    static final NotificationResources ress = GWT.create(NotificationResources.class);
 
     public enum NotificationType {
         ERROR("\u2716", "RED", "WHITE"),
@@ -55,6 +55,8 @@ public class Notification {
 
     interface NotificationCSS extends CssResource {
         String notification_bar();
+
+        String notification();
     }
 
     static {

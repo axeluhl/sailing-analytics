@@ -1,12 +1,9 @@
 package com.sap.sse.gwt.client;
 
 import com.google.gwt.animation.client.Animation;
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -20,7 +17,6 @@ public class NotificationPanel {
     private static final int NOTIFICATION_TIME = 10000;
     private static final double FADE_OUT_PERCENT = 0.98;
     private static final double FADE_IN_PERCENT = 0.005;
-    private static final NotificationResources ress = GWT.create(NotificationResources.class);
 
     private final String message;
     private final Panel panel;
@@ -29,25 +25,13 @@ public class NotificationPanel {
 
     private boolean alreadyShown = false;
 
-    interface NotificationResources extends ClientBundle {
-        @Source("notification.css")
-        NotificationCSS css();
-    }
-
-    interface NotificationCSS extends CssResource {
-        String notification();
-    }
-
-    static {
-        ress.css().ensureInjected();
-    }
 
     public NotificationPanel(String message, NotificationType type, Panel parent) {
         this.message = message;
         this.parent = parent;
 
         panel = new FlowPanel();
-        panel.addStyleName(ress.css().notification());
+        panel.addStyleName(Notification.ress.css().notification());
         panel.getElement().getStyle().setCursor(Cursor.POINTER);
 
         panel.getElement().getStyle().setColor(type.getColor());
