@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.places.event.overview.multiregatta;
 
+import java.util.List;
+
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventActivity;
@@ -17,7 +19,8 @@ public class MultiRegattaActivity extends AbstractEventActivity<AbstractEventPla
     }
     
     private void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
-        navigationPathDisplay.showNavigationPath(new NavigationItem(getEventDTO().getLocationOrDisplayName(), getEventNavigation()));
+        final List<NavigationItem> navigationItems = getNavigationPathToEventLevel();
+        navigationPathDisplay.showNavigationPath(navigationItems.toArray(new NavigationItem[navigationItems.size()]));
     }
     
     @Override

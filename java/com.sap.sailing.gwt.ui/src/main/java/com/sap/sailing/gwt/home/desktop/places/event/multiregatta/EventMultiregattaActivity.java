@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.event.multiregatta;
 
+import java.util.List;
+
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
@@ -12,7 +14,6 @@ import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * Base Activity for all desktop multi-regatta-event pages.
@@ -31,10 +32,8 @@ public class EventMultiregattaActivity extends AbstractEventActivity<AbstractMul
     }
     
     private void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
-        StringMessages i18n = StringMessages.INSTANCE;
-        navigationPathDisplay.showNavigationPath(new NavigationItem(i18n.home(), getHomeNavigation()),
-                new NavigationItem(i18n.events(), getEventsNavigation()),
-                new NavigationItem(getEventDTO().getDisplayName(), getCurrentEventNavigation()));
+        final List<NavigationItem> navigationItems = getNavigationPathToEventLevel();
+        navigationPathDisplay.showNavigationPath(navigationItems.toArray(new NavigationItem[navigationItems.size()]));
     }
 
     @Override

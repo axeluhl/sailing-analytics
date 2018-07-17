@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.event.shared.EventBus;
@@ -28,7 +27,6 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -64,17 +62,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     }
     
     private void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
-        StringMessages i18n = StringMessages.INSTANCE;
-        List<NavigationItem> navigationItems = new ArrayList<>();
-        navigationItems.add(new NavigationItem(i18n.home(), getHomeNavigation()));
-        navigationItems.add(new NavigationItem(i18n.events(), getEventsNavigation()));
-        final SeriesReferenceWithEventsDTO seriesData = getEventDTO().getSeriesData();
-        if (seriesData != null) {
-            navigationItems
-                    .add(new NavigationItem(seriesData.getSeriesDisplayName(), getCurrentEventSeriesNavigation()));
-        }
-        navigationItems.add(new NavigationItem(getEventDTO().getLocationOrDisplayName(), getCurrentEventNavigation()));
-        
+        final List<NavigationItem> navigationItems = getNavigationPathToEventLevel();
         if (showRegattaMetadata()) {
             navigationItems.add(
                     new NavigationItem(getRegattaMetadata().getDisplayName(), getCurrentRegattaOverviewNavigation()));

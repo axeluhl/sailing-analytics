@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.desktop.places.event;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.activity.shared.AbstractActivity;
@@ -16,6 +18,7 @@ import com.sap.sailing.gwt.home.communication.event.EventSeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
+import com.sap.sailing.gwt.home.communication.eventview.SeriesReferenceWithEventsDTO;
 import com.sap.sailing.gwt.home.communication.media.GetMediaForEventAction;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
@@ -25,6 +28,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.Rega
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
@@ -38,6 +42,7 @@ import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSett
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
@@ -84,6 +89,23 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         this.clientFactory = clientFactory;
     }
     
+    /**
+     * Provides the navigation path to the {@link #getEventDTO() event}.
+     * 
+     * @return {@link List} of {@link NavigationItem} to the event level
+     */
+    protected final List<NavigationItem> getNavigationPathToEventLevel() {
+        final List<NavigationItem> navItems = new ArrayList<>();
+        navItems.add(new NavigationItem(StringMessages.INSTANCE.home(), getHomeNavigation()));
+        navItems.add(new NavigationItem(StringMessages.INSTANCE.events(), getEventsNavigation()));
+        final SeriesReferenceWithEventsDTO seriesData = getEventDTO().getSeriesData();
+        if (seriesData != null) {
+            navItems.add(new NavigationItem(seriesData.getSeriesDisplayName(), getCurrentEventSeriesNavigation()));
+        }
+        navItems.add(new NavigationItem(getEventDTO().getLocationOrDisplayName(), getCurrentEventNavigation()));
+        return navItems;
+    }
+
     public SailingDispatchSystem getDispatch() {
         return clientFactory.getDispatch();
     }
