@@ -17,7 +17,6 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
  * {@link com.sap.sse.gwt.client.Notification#notify()}.
  */
 public class NotificationPanel {
-
     private static final int NOTIFICATION_TIME = 10000;
     private static final double FADE_OUT_PERCENT = 0.98;
     private static final double FADE_IN_PERCENT = 0.005;
@@ -37,8 +36,6 @@ public class NotificationPanel {
 
     interface NotificationCSS extends CssResource {
         String notification();
-
-        String notification_bar();
     }
 
     static {
@@ -119,16 +116,9 @@ public class NotificationPanel {
      */
     public void remove() {
         parent.remove(panel);
-        checkQueue(true);
+        Notification.checkQueue(this);
     }
     
-    /**
-     * Embeds reference to this notification panel instance to allow access at {@link com.sap.sse.gwt.client.Notification}.
-     */
-    private void checkQueue(boolean onAnimationFinish) {
-        Notification.checkQueue(onAnimationFinish, this);
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
