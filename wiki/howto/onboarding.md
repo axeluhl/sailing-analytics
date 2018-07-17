@@ -65,13 +65,14 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
 2. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
 3. Setup and configure Eclipse
   * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Formatter)
-  * Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse)
-  * Install the Google Android SDK (see section "Additional steps required for Android projects" for detailed info!)
+  * Install the required plugins using the script provided above. Further configuration steps depend on the plugins being installed successfully. As an alternative, the steps done by the script can be performed manually:
+    * Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse)
+    * Install the Google Android SDK (see section "Additional steps required for Android projects" for detailed info!)
   * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> GWT -> GWT Settings -> Add...)
   * In "Window->Preferences->GWT->Errors/Warnings, set "Missing SDK" to "Ignore"
   * In "Window->Preferences->General->Editors->TextEditors" check Insert Spaces for Tabs 
-  * <del>In "Window->Preferences->Web->HTML Files->Editor" indent using Spaces</del>
+  * In "Window->Preferences->Web->HTML Files->Editor" indent using Spaces
   * In "Window->Preferences->General->Content Types" select on the right side CSS, now add in the lower file association list *.gss to get limited syntax highlighting and content assist in GSS files
   * Install Eclipse debugger for GWT SuperDevMode
   * Install Eclipse eGit (optional)
@@ -79,7 +80,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Check that the both JDKs are available (Windows->Preferences->Java->Installed JREs)
   * Check that JDK 1.7 has been matched to JavaSE-1.7 and that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
   * It is also possible to match the SAPJVM 7 or 8 to JavaSE-1.7 / JavaSE-1.8 (for profiling purposes)
-  * <del>Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"</del>
+  * Go to Windows->Preferences->GWT->Errors/Warnings and set "Missing SDK" to "Ignore"
   * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard <del>"Git->Projects from Git"</del> "Import->General->Projects from Folder or Archive" in Eclipse, and additionally make sure to scan for nested projects!)
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
