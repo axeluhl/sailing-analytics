@@ -15,7 +15,6 @@ public abstract class AbstractLeaderboardDialog<LD extends LeaderboardDescriptor
     protected LD leaderboardDescriptor;
 
     protected DiscardThresholdBoxes discardThresholdBoxes;
-    protected static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
     public AbstractLeaderboardDialog(String title, LD leaderboardDescriptor, StringMessages stringMessages,
             Validator<LD> validator,  DialogCallback<LD> callback) {

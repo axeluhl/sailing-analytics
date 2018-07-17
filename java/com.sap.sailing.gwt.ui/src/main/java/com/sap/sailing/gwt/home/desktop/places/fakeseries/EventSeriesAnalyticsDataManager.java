@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.desktop.places.fakeseries;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
@@ -103,9 +104,10 @@ public class EventSeriesAnalyticsDataManager {
             MultiRaceLeaderboardSettings leaderboardSettings,
             String preselectedLeaderboardName,  String leaderboardGroupName,
             String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn, Iterable<DetailType> availableDetailTypes) {
-        if(multiLeaderboardPanel == null) {
-            SailingServiceAsync sailingService = sailingCF.getSailingService(()-> metaLeaderboardName);
-            multiLeaderboardPanel = new MultiLeaderboardProxyPanel(parent, context, sailingService, metaLeaderboardName,
+        if (multiLeaderboardPanel == null) {
+            final Function<String, SailingServiceAsync> sailingServiceFactory = leaderBoardName -> sailingCF
+                    .getSailingService(() -> leaderBoardName);
+            multiLeaderboardPanel = new MultiLeaderboardProxyPanel(parent, context, sailingServiceFactory, metaLeaderboardName,
                     asyncActionsExecutor, timer, true /* isEmbedded */,
                     preselectedLeaderboardName, errorReporter, StringMessages.INSTANCE,
                     showRaceDetails, autoExpandLastRaceColumn, leaderboardSettings, flagImageResolver, availableDetailTypes);

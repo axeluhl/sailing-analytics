@@ -2545,20 +2545,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return results;
     }
-    
-    private void checkLeaderboardRouting(String leaderboardName) {
-        final String currentRequestUrl = getThreadLocalRequest().getRequestURL().toString();
-        if (!currentRequestUrl.contains("/leaderboard/")) {
-            logger.log(Level.WARNING, "Leaderboard routing stacktrace", new RuntimeException("Request without leaderboard routing information"));
-        } else {
-          if (currentRequestUrl.contains(leaderboardName)) {
-              logger.info("leaderboard access matches leaderboard url");
-          } else {
-              logger.info("leaderboard access to " + leaderboardName + " does not match request url " + currentRequestUrl);
-              logger.log(Level.SEVERE, "Leaderboard routing stacktrace", new RuntimeException("Request without leaderboard routing information"));
-          }
-        }
-    }
 
     /**
      * Creates a {@link LeaderboardDTO} for <code>leaderboard</code> and fills in the name, race master data
@@ -2569,8 +2555,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * If <code>withGeoLocationData</code> is <code>true</code> the geographical location of all races will be determined.
      */
     private StrippedLeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard, boolean withGeoLocationData, boolean withStatisticalData) {
-        checkLeaderboardRouting(leaderboard.getName());
-        
         StrippedLeaderboardDTO leaderboardDTO = new StrippedLeaderboardDTO(convertToBoatClassDTO(leaderboard.getBoatClass()));
         TimePoint startOfLatestRace = null;
         Long delayToLiveInMillisForLatestRace = null;
@@ -5078,7 +5062,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
                     final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());
                     importer.importFromStream(inputStream, importOperationId, override);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     // do not assume that RuntimeException is logged properly
                     logger.log(Level.SEVERE, e.getMessage(), e);
                     getService()
@@ -6460,15 +6444,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived) {
-        if (newStartTimeReceived != null) {
-            RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(
-                    raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
-            DynamicTrackedRace trackedRace = getService().getTrackedRace(regattaAndRaceIdentifier);
-            trackedRace.setStartTimeReceived(new MillisecondsTimePoint(newStartTimeReceived));
-            
-            return baseDomainFactory.createRaceDTO(getService(), false, regattaAndRaceIdentifier, trackedRace);
-        }
-        return null;
+        RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(raceIdentifier.getRegattaName(),
+                raceIdentifier.getRaceName());
+        DynamicTrackedRace trackedRace = getService().getTrackedRace(regattaAndRaceIdentifier);
+        trackedRace.setStartTimeReceived(
+                newStartTimeReceived == null ? null : new MillisecondsTimePoint(newStartTimeReceived));
+        return baseDomainFactory.createRaceDTO(getService(), false, regattaAndRaceIdentifier, trackedRace);
     }
     
     @Override

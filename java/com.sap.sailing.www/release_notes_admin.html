@@ -22,8 +22,21 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
 
+                    <h2 class="articleSubheadline">July 2018</h2>
+                    <ul class="bulletList">
+                        <li>When adding a YouTube video for tracked races ("Manage Media" in <tt>RaceBoard.html</tt> or "Tracked Races > Audio & Video" in <tt>AdminConsole.html</tt>) the respective video metadata is now read using YouTube API v3.
+                            This functionality used to work some years ago using API v2 but was broken since this API version was discontinued some time ago.
+                            Due to limitations of the new API we can't read the start timepoint of videos by now. You still need to provide this value manually.</li>
+                        <li>In the "Tracked races" tab, within the eponymous section of the AdminConsole, the "Set start
+                            time received" dialog can be used to remove the currently set start time received, by simply
+                            leaving the value empty and confirming the dialog.</li>
+                        <li>Up to 15 discards can now be configured for series and leaderboards. This enables, e.g., "Wednesday Night" scenarios
+                            where over the season, say, 20 races are run but due to changing participation only, say, the five best ones shall be scored.</li>
+                    </ul>
+
                     <h2 class="articleSubheadline">June 2018</h2>
                     <ul class="bulletList">
+                        <li>Added the available WindFinder Spot Collections. The desired ones can be selected from the WindFinder Tab in the Event Dialog.</li>
                         <li>Added the ability to change the url of multiple Mediatracks with a common prefix at once.
                             This is useful e.g. for video migration scenarios when movin videaos from one server to another.
                             This can be done from the adminconsole->tracked races->audio & videos tab</li>
