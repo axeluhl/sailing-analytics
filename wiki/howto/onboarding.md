@@ -8,11 +8,11 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 
 #### Installations
 
-1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.7.2 ["Oxygen SR2"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/oxygen2)), [http://www.eclipse.org](http://www.eclipse.org)
+1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.8.0 ["Photon"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/photonr)), [http://www.eclipse.org](http://www.eclipse.org)
 2. Eclipse Extensions
   * Install GWT Eclipse plugin for Eclipse ([https://github.com/gwt-plugins/gwt-eclipse-plugin](https://github.com/gwt-plugins/gwt-eclipse-plugin) using [http://storage.googleapis.com/gwt-eclipse-plugin/v3/release](http://storage.googleapis.com/gwt-eclipse-plugin/v3/release) as the update site URL)
   * Install Eclipse debugger for GWT SuperDevMode (master version: [http://p2.sapsailing.com/p2/sdbg](http://p2.sapsailing.com/p2/sdbg); public release: [http://sdbg.github.io/p2](http://sdbg.github.io/p2))
-3. Git (e.g. Git for Windows v2.12.2), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
+3. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
 4. MongoDB (e.g. Production Release 2.6.7), download: [https://www.mongodb.com/](https://www.mongodb.com/)
 5. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8) is the link.
 6. JDK 1.7 (Java SE 7), [http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html](http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html)
@@ -23,9 +23,9 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 
 #### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.7.2 "Oxygen.2"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/oxygen2) by using the script "configuration/installPluginsForEclipseOxygen.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.8.0 "Photon"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/photonr) by using the script "configuration/installPluginsForEclipsePhoton.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
-    ./installPluginsForEclipseOxygen.sh "/some/path/on/my/computer/eclipse"
+    ./installPluginsForEclipsePhoton.sh "/some/path/on/my/computer/eclipse"
 
 Be aware that with this script it's not possible to update the plugins to newer versions. Instead you can install a new version by unpacking the base package and executing the script.
 
@@ -63,15 +63,19 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Clone the repository to your local file system from `ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git`  or `ssh://[user]@sapsailing.com/home/trac/git`  User "trac" has all public ssh keys.
   * Please note that when using one of the newer versions of Cygwin, your Cygwin home folder setting might differ from your Windows home folder. This will likely lead to problems when issuing certain commands. For troubleshooting, take a look at the following thread: [https://stackoverflow.com/questions/1494658/how-can-i-change-my-cygwin-home-folder-after-installation](https://stackoverflow.com/questions/1494658/how-can-i-change-my-cygwin-home-folder-after-installation)
 2. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
+2. Configure your local git repository
+  * Execute the command `git config core.autocrlf false` in the git repository
+  * Ensure that your git username and email is set properly: In case you are unsure, use the commands `git config user.name "My Name"` and `git config user.email my.email@sap.com` in the git repository.
 3. Setup and configure Eclipse
   * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Formatter)
-  * Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse)
-  * Install the Google Android SDK (see section "Additional steps required for Android projects" for detailed info!)
+  * Install the required plugins using the script provided above. Further configuration steps depend on the plugins being installed successfully. As an alternative, the steps done by the script can be performed manually:
+    * Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse)
+    * Install the Google Android SDK (see section "Additional steps required for Android projects" for detailed info!)
   * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> GWT -> GWT Settings -> Add...)
   * In "Window->Preferences->GWT->Errors/Warnings, set "Missing SDK" to "Ignore"
   * In "Window->Preferences->General->Editors->TextEditors" check Insert Spaces for Tabs 
-  * <del>In "Window->Preferences->Web->HTML Files->Editor" indent using Spaces</del>
+  * In "Window->Preferences->Web->HTML Files->Editor" indent using Spaces
   * In "Window->Preferences->General->Content Types" select on the right side CSS, now add in the lower file association list *.gss to get limited syntax highlighting and content assist in GSS files
   * Install Eclipse debugger for GWT SuperDevMode
   * Install Eclipse eGit (optional)
@@ -79,7 +83,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Check that the both JDKs are available (Windows->Preferences->Java->Installed JREs)
   * Check that JDK 1.7 has been matched to JavaSE-1.7 and that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
   * It is also possible to match the SAPJVM 7 or 8 to JavaSE-1.7 / JavaSE-1.8 (for profiling purposes)
-  * <del>Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"</del>
+  * Go to Windows->Preferences->GWT->Errors/Warnings and set "Missing SDK" to "Ignore"
   * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard <del>"Git->Projects from Git"</del> "Import->General->Projects from Folder or Archive" in Eclipse, and additionally make sure to scan for nested projects!)
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
@@ -99,8 +103,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Press "List Races"
 
 #### Git repository configuration essentials
-
-The project has some configuration of line endings for specific file types in ".gitattributes". To make this work as intended, you need to set the git attribute "core.autocrlf" to "false". This can be done by navigating to your local repository in a Bach/Git Bach/Cygwin instance and executing the command `git config core.autocrlf false`.
+The project has some configuration of line endings for specific file types in ".gitattributes". To make this work as intended, you need to ensure that the git attribute "core.autocrlf" is set to "false". This can be done by navigating to your local repository in a Bach/Git Bach/Cygwin instance and executing the command `git config core.autocrlf false`.
 
 If you are first time git user, don't forget to specify your user metadata. Use the commands `git config user.name "My Name"` and `git config user.email my.email@sap.com` to tell git your name and email address.
 
