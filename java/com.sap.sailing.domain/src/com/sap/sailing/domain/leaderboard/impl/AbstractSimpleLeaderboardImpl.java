@@ -517,7 +517,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         }
         if (getScoringScheme().isMedalWinAmountCriteria()) {
             if (wonRaces == getScoringScheme().getTargetAmountOfMedalRaceWins()) {
-                return 2.0;
+                return getScoringScheme().getTargetAmountOfMedalRaceWinsScore();
             }
         }
         return result;
