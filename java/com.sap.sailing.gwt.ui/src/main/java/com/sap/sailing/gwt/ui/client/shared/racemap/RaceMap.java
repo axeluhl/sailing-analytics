@@ -334,8 +334,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * markers displayed in response to
      * {@link SailingServiceAsync#getDouglasPoints(String, String, Map, Map, double, AsyncCallback)}
      */
-
     private Set<Marker> maneuverMarkers;
+    
     private Map<CompetitorDTO, List<ManeuverDTO>> lastManeuverResult;
 
     private Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> lastDouglasPeuckerResult;
@@ -1824,8 +1824,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private interface LineInfoProvider {
         String getLineInfo();
-
-        /** defines if a info overlay is shown with helplines */
         default boolean isShowInfoOverlayWithHelplines() {
             return true;
         };
@@ -1911,8 +1909,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 } else {
                     infoOverlay.setInfoText(lineInfoProvider.getLineInfo());
                 }
-                infoOverlay
-                        .setPosition(position1DTO.translateGreatCircle(position1DTO.getBearingGreatCircle(position2DTO),
+                infoOverlay.setPosition(position1DTO.translateGreatCircle(position1DTO.getBearingGreatCircle(position2DTO),
                                 position1DTO.getDistance(position2DTO).scale(0.5)), /* transition time */ -1);
                 infoOverlay.draw();
             } else {
