@@ -30,6 +30,12 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import junit.framework.Assert;
 
+/**
+ * This class contains several Tests for the first two victories in medal series rule in the LOW_POINT_FIRST_TO_WIN_TWO_RACES scheme.
+ * It tests that the carry is correctly applied and that the ordering is as expected.
+ * Furthermore it contains seeral negative tests, that validate, that the normal low point behaviour is not changed and still works for those same cases in case the LOW_POINT scoringscheme is used.
+ * 
+ */
 public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardScoringAndRankingTestBase {
     private static final double EPSILON = 0.000001;
 
@@ -113,6 +119,11 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     }
 
     @Test
+    /**
+     * In this test the preseries winner will win the first race, and should get a score of 2, all other finalists
+     * should be scored with Low_Points restarting at 0 for the medal series The non finalists score should not change
+     * during the medalseries
+     */
     public void testFirstPreseriesWinsAgain() throws NoWindException {
         series = new ArrayList<Series>();
         setupQualificationSeriesWithOneRaceColumn();
@@ -164,6 +175,11 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     }
 
     @Test
+    /**
+     * In this test the second best in the preseries wins the first two medal races, and should get a score of 2, all other finalists
+     * should be scored with Low_Points restarting at 0 for the medal series The non finalists score should not change
+     * during the medalseries
+     */
     public void testSecondPreSeriesWinsTwice() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
@@ -235,6 +251,11 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     }
 
     @Test
+    /**
+     * In this test the best in the preseries wins the first second medal races, and should get a score of 2, all other finalists
+     * should be scored with Low_Points restarting at 0 for the medal series The non finalists score should not change
+     * during the medalseries
+     */
     public void testFirstWinsSecondRace() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
@@ -306,6 +327,11 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     }
 
     @Test
+    /**
+     * In this test the worst finalist the first and second medal races, and should get a score of 2, all other finalists
+     * should be scored with Low_Points restarting at 0 for the medal series The non finalists score should not change
+     * during the medalseries
+     */
     public void testLastWinsTwoRaces() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
@@ -377,6 +403,11 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     }
 
     @Test
+    /**
+     * In this test the no finalist reaches two wins before terminating (eg. due to bad weather) all finalists
+     * should be scored with Low_Points restarting at 0 for the medal series The non finalists score should not change
+     * during the medalseries. 
+     */
     public void noTwoWinsAbortAfterTwoRacesAndTieBraker() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
@@ -448,6 +479,9 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     }
 
     @Test
+    /**
+     * Using normal lowpoints, having two wins should not matter, also the racecolum factor is expected to be 2 instead of 1
+     */
     public void negativeTestFirstPreseriesWinsAgain() throws NoWindException {
         series = new ArrayList<Series>();
         setupQualificationSeriesWithOneRaceColumn();
@@ -499,6 +533,9 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     }
 
     @Test
+    /**
+     * Using normal lowpoints, having two wins should not matter, also the racecolum factor is expected to be 2 instead of 1
+     */
     public void negativeTestSecondPreSeriesWinsTwice() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
@@ -570,6 +607,9 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     }
 
     @Test
+    /**
+     * Using normal lowpoints, having two wins should not matter, also the racecolum factor is expected to be 2 instead of 1
+     */
     public void negativeTestFirstWinsSecondRace() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
@@ -641,6 +681,9 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     }
 
     @Test
+    /**
+     * Using normal lowpoints, the racecolum factor is expected to be 2 instead of 1
+     */
     public void negativeTestLastWinsTwoRaces() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
@@ -713,6 +756,9 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     }
 
     @Test
+    /**
+     * Using normal lowpoints, tie braking is done with manual carry decimals
+     */
     public void negativeNoTwoWinsAbortAfterTwoRacesAndTieBraker() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
