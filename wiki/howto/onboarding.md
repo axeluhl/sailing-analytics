@@ -62,7 +62,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
 3. Wiki
   * Send a request to Axel Uhl or Simon Marcel Pamies that includes the SHA1 hash of your desired password. Obtain such an SHA1 hash for your password here: [http://www.sha1-online.com/](http://www.sha1-online.com/).
 4. Hudson
-  * Request a Hudson user by sending e-mail to Axel Uhl, Frank Mittag or Simon Marcel Pamies.
+  * Request a [Hudson](https://hudson.sapsailing.com) user by sending e-mail to Axel Uhl, Frank Mittag or Simon Marcel Pamies.
 
 #### Steps to build and run the Race Analysis Suite
 
