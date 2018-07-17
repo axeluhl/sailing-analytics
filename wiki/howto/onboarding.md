@@ -9,9 +9,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 #### Installations
 
 1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.8.0 ["Photon"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/photonr)), [http://www.eclipse.org](http://www.eclipse.org)
-2. Eclipse Extensions
-  * Install GWT Eclipse plugin for Eclipse ([https://github.com/gwt-plugins/gwt-eclipse-plugin](https://github.com/gwt-plugins/gwt-eclipse-plugin) using [http://storage.googleapis.com/gwt-eclipse-plugin/v3/release](http://storage.googleapis.com/gwt-eclipse-plugin/v3/release) as the update site URL)
-  * Install Eclipse debugger for GWT SuperDevMode (master version: [http://p2.sapsailing.com/p2/sdbg](http://p2.sapsailing.com/p2/sdbg); public release: [http://sdbg.github.io/p2](http://sdbg.github.io/p2))
+2. Install the eclipse plugins (see Automatic Eclipse plugin installation below)
 3. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
 4. MongoDB (e.g. Production Release 2.6.7), download: [https://www.mongodb.com/](https://www.mongodb.com/)
 5. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8) is the link.
@@ -35,6 +33,16 @@ On Mac OS, it's not sufficient to provide the path to the app, instead you need 
 
 Be aware hat the installation may take several minutes depending on your Internet connection. When the script finished running, please check that no errors occurred (the installation process only logs errors but doesn't fail).
 
+The script will install the following plugins for your convenience:
+
+* GWT Plugin ([https://github.com/gwt-plugins/gwt-eclipse-plugin](https://github.com/gwt-plugins/gwt-eclipse-plugin))
+* GWT SDM Debug Bridge ([http://sdbg.github.io/](http://sdbg.github.io/))
+* Android Tools ([https://marketplace.eclipse.org/content/android-development-tools-eclipse](https://marketplace.eclipse.org/content/android-development-tools-eclipse))
+* Easy Shell ([https://anb0s.github.io/EasyShell/](https://anb0s.github.io/EasyShell/))
+* Memory Analyzer ([https://www.eclipse.org/mat/](https://www.eclipse.org/mat/))
+* SAP JVM Profiler ([https://tools.hana.ondemand.com](https://tools.hana.ondemand.com))
+* various updates to preinstalled plugins
+
 #### Further optional but recommended installations
 
 1. Cygwin, [http://www.cygwin.com/](http://www.cygwin.com/)
@@ -54,7 +62,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
 3. Wiki
   * Send a request to Axel Uhl or Simon Marcel Pamies that includes the SHA1 hash of your desired password. Obtain such an SHA1 hash for your password here: [http://www.sha1-online.com/](http://www.sha1-online.com/).
 4. Hudson
-  * Request a Hudson user by sending e-mail to Axel Uhl, Frank Mittag or Simon Marcel Pamies.
+  * Request a [Hudson](https://hudson.sapsailing.com) user by sending e-mail to Axel Uhl, Frank Mittag or Simon Marcel Pamies.
 
 #### Steps to build and run the Race Analysis Suite
 
@@ -68,9 +76,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Ensure that your git username and email is set properly: In case you are unsure, use the commands `git config user.name "My Name"` and `git config user.email my.email@sap.com` in the git repository.
 3. Setup and configure Eclipse
   * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Formatter)
-  * Install the required plugins using the script provided above. Further configuration steps depend on the plugins being installed successfully. As an alternative, the steps done by the script can be performed manually:
-    * Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse)
-    * Install the Google Android SDK (see section "Additional steps required for Android projects" for detailed info!)
+  * Install the required plugins using the script provided above. Further configuration steps depend on the plugins being installed successfully.
   * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> GWT -> GWT Settings -> Add...)
   * In "Window->Preferences->GWT->Errors/Warnings, set "Missing SDK" to "Ignore"
@@ -139,7 +145,7 @@ To ensure that all components of the Analysis Suite are working, you should also
   - It is also possible to download the Android SDK separately from the official Google download website. However, as of Revision 25.0.0 of the Android SDK Tools, the SDK Manager became an integrated part of Android Studio. Therefore, Revisions newer than 24.4.1 will not come with a standalone SDK Manager. Since it is absolutely essential if you want to use Eclipse, please download the Android SDK from the following link: Windows: [https://dl.google.com/android/installer_r24.4.1-windows.exe](https://dl.google.com/android/installer_r24.4.1-windows.exe) MacOS: [https://dl.google.com/android/android-sdk_r24.4.1-macosx.zip](https://dl.google.com/android/android-sdk_r24.4.1-macosx.zip) Linux: [https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz](https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz) 
 2. Setup the Android SDK
   * In Eclipse press Window -> Android SDK Manager
-  * Install everything of "Tools" (hint: watchout not to update Android SDK Tools, see note below)
+  * Install most recent version of "Android SDK Platform Tools" under "Tools" (hint: watch out not to update Android SDK Tools, see note below)
   * Install everything of "Android 3.2 API 13"
   * Install everything of "Android 5.1.1 API 22"
   * From the package "Extras", install "Android Support Repository" **or** "Android Support Library". Additionally install "Google Play Services", "Google Repository" **and** "Google USB Driver".
