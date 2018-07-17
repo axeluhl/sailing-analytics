@@ -8,6 +8,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.GetSeriesStatisticsAction;
@@ -67,7 +68,8 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     }
     
     @Override
-    public void setQuickFinderValues(String seriesName, Collection<EventMetadataDTO> eventsOfSeries) {
+    public void setQuickFinderValues(String seriesName,
+            Collection<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries) {
         QuickfinderPresenter.getForSeriesLeaderboards(quickFinderUi, seriesName, currentPresenter, eventsOfSeries);
     }
 

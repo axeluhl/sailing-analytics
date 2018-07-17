@@ -216,8 +216,9 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     @Override
-    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId) {
-        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), null), null, false);
+    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId, String leaderboardName) {
+        return clientFactory.getNavigator()
+                .getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), leaderboardName), null, false);
     }
 
     @Override

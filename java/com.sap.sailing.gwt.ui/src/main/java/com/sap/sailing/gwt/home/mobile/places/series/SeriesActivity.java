@@ -50,7 +50,7 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     
     private void initUi(final AcceptsOneWidget panel, EventBus eventBus, EventSeriesViewDTO series) {
         final SeriesView view = new SeriesViewImpl(this, flagImageResolver);
-        view.setQuickFinderValues(series.getDisplayName(), series.getEventsDescending());
+        view.setQuickFinderValues(series.getDisplayName(), series.getEventsAndRegattasOfSeriesDescending());
         panel.setWidget(view.asWidget());
         
         initNavigationPath();
@@ -70,8 +70,9 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     }
     
     @Override
-    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId) {
-        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), null), null, false);
+    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId, String leaderboardName) {
+        return clientFactory.getNavigator()
+                .getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), leaderboardName), null, false);
     }
     
     @Override

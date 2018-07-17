@@ -7,7 +7,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniOverallLeaderbordAction;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
@@ -43,7 +43,8 @@ public class SeriesMiniOverallLeaderboardViewImpl extends Composite implements S
     }
     
     @Override
-    public void setQuickFinderValues(String seriesName, Collection<EventMetadataDTO> eventsOfSeries) {
+    public void setQuickFinderValues(String seriesName,
+            Collection<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries) {
         QuickfinderPresenter.getForSeriesLeaderboards(quickFinderUi, seriesName, currentPresenter, eventsOfSeries);
     }
 }

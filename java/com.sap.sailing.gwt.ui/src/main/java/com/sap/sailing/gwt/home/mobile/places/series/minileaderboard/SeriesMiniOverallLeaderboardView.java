@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
-import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.home.mobile.places.SeriesLeaderboardNavigationProvider;
 import com.sap.sailing.gwt.home.mobile.places.series.OverallLeaderboardNavigationProvider;
@@ -25,5 +25,5 @@ public interface SeriesMiniOverallLeaderboardView {
 
     Widget asWidget();
     
-    void setQuickFinderValues(String seriesName, Collection<EventMetadataDTO> eventsOfSeries);
+    void setQuickFinderValues(String seriesName, Collection<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries);
 }

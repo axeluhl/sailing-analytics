@@ -51,7 +51,7 @@ public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity imple
 
     private void initUi(AcceptsOneWidget panel, EventBus eventBus, EventSeriesViewDTO series) {
         final SeriesMiniOverallLeaderboardView view = new SeriesMiniOverallLeaderboardViewImpl(this, flagImageResolver);
-        view.setQuickFinderValues(series.getDisplayName(), series.getEventsDescending());
+        view.setQuickFinderValues(series.getDisplayName(), series.getEventsAndRegattasOfSeriesDescending());
         panel.setWidget(view.asWidget());
         
         initNavigationPath();
@@ -83,8 +83,9 @@ public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity imple
     }
     
     @Override
-    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId) {
-        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), null), null, false);
+    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId, String leaderboardName) {
+        return clientFactory.getNavigator()
+                .getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), leaderboardName), null, false);
     }
     
     @Override
