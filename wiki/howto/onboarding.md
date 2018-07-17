@@ -8,7 +8,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 
 #### Installations
 
-1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.7.2 ["Oxygen SR2"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/oxygen2)), [http://www.eclipse.org](http://www.eclipse.org)
+1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.8.0 ["Photon"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/photonr)), [http://www.eclipse.org](http://www.eclipse.org)
 2. Eclipse Extensions
   * Install GWT Eclipse plugin for Eclipse ([https://github.com/gwt-plugins/gwt-eclipse-plugin](https://github.com/gwt-plugins/gwt-eclipse-plugin) using [http://storage.googleapis.com/gwt-eclipse-plugin/v3/release](http://storage.googleapis.com/gwt-eclipse-plugin/v3/release) as the update site URL)
   * Install Eclipse debugger for GWT SuperDevMode (master version: [http://p2.sapsailing.com/p2/sdbg](http://p2.sapsailing.com/p2/sdbg); public release: [http://sdbg.github.io/p2](http://sdbg.github.io/p2))
@@ -23,9 +23,9 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 
 #### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.7.2 "Oxygen.2"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/oxygen2) by using the script "configuration/installPluginsForEclipseOxygen.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.8.0 "Photon"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/photonr) by using the script "configuration/installPluginsForEclipsePhoton.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
-    ./installPluginsForEclipseOxygen.sh "/some/path/on/my/computer/eclipse"
+    ./installPluginsForEclipsePhoton.sh "/some/path/on/my/computer/eclipse"
 
 Be aware that with this script it's not possible to update the plugins to newer versions. Instead you can install a new version by unpacking the base package and executing the script.
 
