@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.HasLogo;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
@@ -15,6 +16,7 @@ public class EventSeriesViewDTO implements Result, HasLogo {
     private UUID leaderboardGroupUUID;
     private String displayName;
     private ArrayList<EventMetadataDTO> eventsAscending = new ArrayList<>();
+    private ArrayList<EventAndLeaderboardReferenceWithStateDTO> eventsAndRegattasOfSeriesDescending = new ArrayList<>();
     private ImageDTO logoImage;
     private boolean hasMedia;
     private boolean hasAnalytics;
@@ -64,6 +66,14 @@ public class EventSeriesViewDTO implements Result, HasLogo {
 
     public void addEvent(EventMetadataDTO event) {
         this.eventsAscending.add(event);
+    }
+    
+    public ArrayList<EventAndLeaderboardReferenceWithStateDTO> getEventsAndRegattasOfSeriesDescending() {
+        return eventsAndRegattasOfSeriesDescending;
+    }
+    
+    public void addEventAndLeaderboard(EventAndLeaderboardReferenceWithStateDTO event) {
+        this.eventsAndRegattasOfSeriesDescending.add(event);
     }
 
     public ImageDTO getLogoImage() {
