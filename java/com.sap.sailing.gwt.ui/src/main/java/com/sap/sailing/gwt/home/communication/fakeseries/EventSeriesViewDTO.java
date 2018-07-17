@@ -59,21 +59,29 @@ public class EventSeriesViewDTO implements Result, HasLogo {
     }
     
     public List<EventMetadataDTO> getEventsDescending() {
-        ArrayList<EventMetadataDTO> eventsDescending = new ArrayList<>(eventsAscending);
-        Collections.reverse(eventsDescending);
-        return eventsDescending;
+        return reverseList(eventsAscending);
     }
 
     public void addEvent(EventMetadataDTO event) {
         this.eventsAscending.add(event);
     }
     
-    public ArrayList<EventAndLeaderboardReferenceWithStateDTO> getEventsAndRegattasOfSeriesAscending() {
+    public List<EventAndLeaderboardReferenceWithStateDTO> getEventsAndRegattasOfSeriesAscending() {
         return eventsAndRegattasOfSeriesAscending;
     }
     
+    public List<EventAndLeaderboardReferenceWithStateDTO> getEventsAndRegattasOfSeriesDescending() {
+        return reverseList(eventsAndRegattasOfSeriesAscending);
+    }
+
     public void addEventAndLeaderboard(EventAndLeaderboardReferenceWithStateDTO event) {
         this.eventsAndRegattasOfSeriesAscending.add(event);
+    }
+
+    private <T> List<T> reverseList(final ArrayList<T> ordered) {
+        final ArrayList<T> reversed = new ArrayList<>(ordered);
+        Collections.reverse(reversed);
+        return reversed;
     }
 
     public ImageDTO getLogoImage() {
