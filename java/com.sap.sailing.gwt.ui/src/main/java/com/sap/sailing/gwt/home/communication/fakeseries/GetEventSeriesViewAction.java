@@ -117,7 +117,7 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
             oneEventLive |= (eventOfSeries.isStarted() && !eventOfSeries.isFinished());
             allFinished &= eventOfSeries.isFinished();
         }
-        for (Event eventInSeries : HomeServiceUtil.getEventsForSeriesInDescendingOrder(leaderBoardGroup,
+        for (Event eventInSeries : HomeServiceUtil.getEventsForSeriesOrdered(leaderBoardGroup,
                 ctx.getRacingEventService())) {
             EventActionUtil.forLeaderboardsOfEvent(ctx, eventInSeries, new LeaderboardCallback() {
                 @Override
@@ -130,7 +130,8 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
                         displayName = eventInSeries.getName();
                     }
                     EventState eventState = HomeServiceUtil.calculateEventState(eventInSeries);
-                    dto.addEventAndLeaderboard(new EventAndLeaderboardReferenceWithStateDTO(eventInSeries.getId(), context.getLeaderboardName(), displayName, eventState));
+                    dto.addEventAndLeaderboard(new EventAndLeaderboardReferenceWithStateDTO(eventInSeries.getId(),
+                            context.getLeaderboardName(), displayName, eventState));
                 }
             });
         }

@@ -16,7 +16,7 @@ public class EventSeriesViewDTO implements Result, HasLogo {
     private UUID leaderboardGroupUUID;
     private String displayName;
     private ArrayList<EventMetadataDTO> eventsAscending = new ArrayList<>();
-    private ArrayList<EventAndLeaderboardReferenceWithStateDTO> eventsAndRegattasOfSeriesDescending = new ArrayList<>();
+    private ArrayList<EventAndLeaderboardReferenceWithStateDTO> eventsAndRegattasOfSeriesAscending = new ArrayList<>();
     private ImageDTO logoImage;
     private boolean hasMedia;
     private boolean hasAnalytics;
@@ -68,12 +68,12 @@ public class EventSeriesViewDTO implements Result, HasLogo {
         this.eventsAscending.add(event);
     }
     
-    public ArrayList<EventAndLeaderboardReferenceWithStateDTO> getEventsAndRegattasOfSeriesDescending() {
-        return eventsAndRegattasOfSeriesDescending;
+    public ArrayList<EventAndLeaderboardReferenceWithStateDTO> getEventsAndRegattasOfSeriesAscending() {
+        return eventsAndRegattasOfSeriesAscending;
     }
     
     public void addEventAndLeaderboard(EventAndLeaderboardReferenceWithStateDTO event) {
-        this.eventsAndRegattasOfSeriesDescending.add(event);
+        this.eventsAndRegattasOfSeriesAscending.add(event);
     }
 
     public ImageDTO getLogoImage() {
