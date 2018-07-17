@@ -334,8 +334,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * markers displayed in response to
      * {@link SailingServiceAsync#getDouglasPoints(String, String, Map, Map, double, AsyncCallback)}
      */
-    private Set<Marker> maneuverMarkers;
 
+    private Set<Marker> maneuverMarkers;
     private Map<CompetitorDTO, List<ManeuverDTO>> lastManeuverResult;
 
     private Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> lastDouglasPeuckerResult;
@@ -1086,7 +1086,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                         if (maneuverMarkers != null) {
                             removeAllManeuverMarkers();
-                            removeManeuverLossLinesAndInfoOverlays();
+                            removeAllManeuverLossLinesAndInfoOverlays();
                         }
                         if (requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown) {
                             updateCoordinateSystemFromSettings();
@@ -2381,7 +2381,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 lastManeuverResult = result;
                                 if (maneuverMarkers != null) {
                                     removeAllManeuverMarkers();
-                                    removeManeuverLossLinesAndInfoOverlays();
+                                    removeAllManeuverLossLinesAndInfoOverlays();
                                 }
                                 if (!(timer.getPlayState() == PlayStates.Playing)) {
                                     showManeuvers(result);
@@ -2460,7 +2460,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         }
     }
-
+    
     private void showManeuvers(Map<CompetitorDTO, List<ManeuverDTO>> maneuvers) {
         maneuverMarkers = new HashSet<Marker>();
         if (map != null && maneuvers != null) {
@@ -2494,7 +2494,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         });
         maneuverMarkers.add(marker);
         marker.setMap(map);
-        // maneuverloss visualization
+        // maneuver loss visualization
         if (settings.isShowManeuverLossVisualization() && maneuver.getManeuverLoss() != null) {
             Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(), maneuver.getType());
             maneuverLossCheckBoxValueStore.add(t);
@@ -2693,19 +2693,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     @Override
     public void updateSettings(RaceMapSettings newSettings) {
         boolean maneuverTypeSelectionChanged = false;
+        boolean showManeuverLossChanged = false;
         boolean requiresRedraw = false;
         boolean requiresUpdateCoordinateSystem = false;
         
+        if (newSettings.isShowManeuverLossVisualization() != settings.isShowManeuverLossVisualization()) {
+            showManeuverLossChanged = true;
+        }
         for (ManeuverType maneuverType : ManeuverType.values()) {
             if (newSettings.isShowManeuverType(maneuverType) != settings.isShowManeuverType(maneuverType)) {
                 maneuverTypeSelectionChanged = true;
-            }
-        }
-        if (maneuverTypeSelectionChanged) {
-            if (!(timer.getPlayState() == PlayStates.Playing) && lastManeuverResult != null) {
-                removeAllManeuverMarkers();
-                showManeuvers(lastManeuverResult);
-                removeManeuverLossLinesAndInfoOverlays();
             }
         }
         if (newSettings.isShowDouglasPeuckerPoints() != settings.isShowDouglasPeuckerPoints()) {
@@ -2719,7 +2716,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (newSettings.getTailLengthInMilliseconds() != settings.getTailLengthInMilliseconds()) {
             requiresRedraw = true;
         }
-        if (newSettings.getBuoyZoneRadius() != settings.getBuoyZoneRadius()) {
+        if (!newSettings.getBuoyZoneRadius().equals(settings.getBuoyZoneRadius())) {
             requiresRedraw = true;
         }
         if (newSettings.isShowOnlySelectedCompetitors() != settings.isShowOnlySelectedCompetitors()) {
@@ -2764,6 +2761,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             requiresRedraw = true;
         }
         this.settings = newSettings;
+        
+        if (maneuverTypeSelectionChanged || showManeuverLossChanged) {
+            if (!(timer.getPlayState() == PlayStates.Playing) && lastManeuverResult != null) {
+                removeAllManeuverMarkers();
+                removeAllManeuverLossLinesAndInfoOverlays();
+                showManeuvers(lastManeuverResult);
+            }
+        }
         
         if (requiresUpdateCoordinateSystem) {
             updateCoordinateSystemFromSettings();
@@ -3202,7 +3207,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             return false;
         }
     };
-    
     final LineInfoProvider bearingAtManeuverEndPositionLineInfoProvider = new LineInfoProvider() {
         @Override
         public String getLineInfo() {
@@ -3213,7 +3217,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             return false;
         }
     };
-
     /**
      * Visualizes the Maneuver Loss, creates the corresponding polylines and Info Overlays calling
      * {@link #createManeuverLossLinesAndInfoOverlays(ManeuverDTO, CompetitorDTO)}. If called with
@@ -3221,24 +3224,36 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private void visualizeManeuverLoss(ManeuverDTO maneuver, boolean showManeuverVisualization, CompetitorDTO competitor) {
         if (showManeuverVisualization == false) {
-            Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(),
-                    maneuver.getType());
-            if (maneuverLossLinesMap.get(t) != null) {
-                for (Polyline p : maneuverLossLinesMap.get(t)) {
-                    p.setMap((MapWidget) null);
-                }
-            }
-            maneuverLossInfoOverlayMap.get(t).removeFromMap();
+            removeManeuverLossLinesAndInfoOverlayForManeuver(maneuver, competitor);
         } else {
             createManeuverLossLinesAndInfoOverlays(maneuver, competitor);
         }
     }
 
     /**
-     * Removes the Polylines visualizing the ManeuverLoss and the SmallTransparentInfoOverlays attached to the
-     * Polylines. Also clears the CheckboxValueStore for maneuverLoss.
+     * Removes the polylines and the info overlay visualizing one maneuver from the map. Also removes the identifying
+     * Triple<competitor.getIdAsString(), maneuver.getTimePoint(), maneuver.getType()> from the corresponding
+     * {@link #maneuverLossLinesMap} and {@link #maneuverLossInfoOverlayMap}.
      */
-    private void removeManeuverLossLinesAndInfoOverlays() {
+    private void removeManeuverLossLinesAndInfoOverlayForManeuver(ManeuverDTO maneuver, CompetitorDTO competitor) {
+        Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(), maneuver.getType());
+        if (maneuverLossLinesMap.get(t) != null) {
+            for (Polyline p : maneuverLossLinesMap.get(t)) {
+                p.setMap((MapWidget) null);
+            }
+            maneuverLossLinesMap.remove(t);
+        }
+        if (maneuverLossInfoOverlayMap.get(t) != null) {
+            maneuverLossInfoOverlayMap.get(t).removeFromMap();
+            maneuverLossInfoOverlayMap.remove(t);
+        }
+    }
+
+    /**
+     * Removes all maneuver loss polylines and corresponding info overlays from the map. Clears {@link #maneuverLossInfoOverlayMap}
+     * and {@link #maneuverLossLinesMap}. Clears {@link #maneuverLossCheckBoxValueStore}.
+     */
+    private void removeAllManeuverLossLinesAndInfoOverlays() {
         for (Triple<String, Date, ManeuverType> t : maneuverLossLinesMap.keySet()) {
             for (Polyline maneuverLossLine : maneuverLossLinesMap.get(t)) {
                 maneuverLossLine.setMap((MapWidget) null);
@@ -3253,8 +3268,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     /**
-     * Creates the ManeuverLoss Lines as calculated in {@link ManeuverDetectorImpl#getManeuverLossInMeters()} and draw
-     * {@link SmallTransparentInfoOverlay}s attached to the {@link Polyline}s visualizing the maneuver.
+     * Creates the ManeuverLoss Lines as calculated in {@link ManeuverDetectorImpl#getManeuverLossInMeters()} and
+     * {@link SmallTransparentInfoOverlay}s attached to the {@link Polyline}s visualizing the maneuver. Stores them in
+     * {@link #maneuverLossInfoOverlayMap} and {@link #maneuverLossLinesMap} with the identifier
+     * Triple<competitor.getIdAsString(), maneuver.getTimePoint(), maneuver.getType()>.
      */
     private void createManeuverLossLinesAndInfoOverlays(ManeuverDTO maneuver, CompetitorDTO competitor) {
         final Set<Polyline> maneuverLossLines = new HashSet<>();
