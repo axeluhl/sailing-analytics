@@ -8,7 +8,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
@@ -45,11 +45,11 @@ public class SeriesHeader extends Composite {
         LabelTypeUtil.renderLabelType(eventStateUi, event.getState().getStateMarker());
         StringBuilder locationsBuilder = new StringBuilder();
         boolean first = true;
-        for (EventMetadataDTO eventOfSeries : event.getEventsAscending()) {
+        for (EventAndLeaderboardReferenceWithStateDTO eventOfSeries : event.getEventsAndRegattasOfSeriesAscending()) {
             if(!first) {
                 locationsBuilder.append(", ");
             }
-            final String location = eventOfSeries.getLocation();
+            final String location = eventOfSeries.getDisplayName();
             if (location != null && !location.isEmpty()) {
                 locationsBuilder.append(location);
                 first = false;
