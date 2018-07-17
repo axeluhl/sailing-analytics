@@ -1,8 +1,9 @@
 package com.sap.sailing.gwt.home.communication.event;
 
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -108,28 +109,15 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
             if (singleLeaderboardGroup.hasOverallLeaderboard()) {
                 // The event is part of one series and does not host any further Regattas
                 dto.setSeriesName(HomeServiceUtil.getLeaderboardDisplayName(singleLeaderboardGroup));
-                
-                final ArrayList<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries = new ArrayList<>();
-                for (Event eventInSeries : HomeServiceUtil.getEventsForSeriesInDescendingOrder(singleLeaderboardGroup,
-                        context.getRacingEventService())) {
-                    EventActionUtil.forLeaderboardsOfEvent(context, eventInSeries, new LeaderboardCallback() {
-                        @Override
-                        public void doForLeaderboard(LeaderboardContext context) {
-                            if (!context.isPartOfEvent()) {
-                                return;
-                            }
-                            String displayName = HomeServiceUtil.getLocation(eventInSeries, context.getLeaderboard());
-                            if (displayName == null) {
-                                displayName = eventInSeries.getName();
-                            }
-                            EventState eventState = HomeServiceUtil.calculateEventState(eventInSeries);
-                            eventsOfSeries.add(new EventAndLeaderboardReferenceWithStateDTO(eventInSeries.getId(), context.getLeaderboardName(), displayName, eventState));
-                        }
-                    });
-                }
+
+                final List<EventAndLeaderboardReferenceWithStateDTO> eventAndLeaderboardReferencesForSeriesOrdered = HomeServiceUtil
+                        .getEventAndLeaderboardReferencesForSeriesOrdered(singleLeaderboardGroup,
+                                context.getRacingEventService());
+                Collections.reverse(eventAndLeaderboardReferencesForSeriesOrdered);
+
                 dto.setSeriesData(new SeriesReferenceWithEventsDTO(
                         HomeServiceUtil.getLeaderboardDisplayName(singleLeaderboardGroup),
-                        singleLeaderboardGroup.getId(), eventsOfSeries));
+                        singleLeaderboardGroup.getId(), eventAndLeaderboardReferencesForSeriesOrdered));
             }
         }
         return dto;

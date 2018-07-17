@@ -7,13 +7,8 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
-import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
-import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO.EventSeriesState;
-import com.sap.sailing.gwt.home.server.EventActionUtil;
-import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
-import com.sap.sailing.gwt.home.server.LeaderboardContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sse.common.Util;
@@ -117,24 +112,10 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
             oneEventLive |= (eventOfSeries.isStarted() && !eventOfSeries.isFinished());
             allFinished &= eventOfSeries.isFinished();
         }
-        for (Event eventInSeries : HomeServiceUtil.getEventsForSeriesOrdered(leaderBoardGroup,
-                ctx.getRacingEventService())) {
-            EventActionUtil.forLeaderboardsOfEvent(ctx, eventInSeries, new LeaderboardCallback() {
-                @Override
-                public void doForLeaderboard(LeaderboardContext context) {
-                    if (!context.isPartOfEvent()) {
-                        return;
-                    }
-                    String displayName = HomeServiceUtil.getLocation(eventInSeries, context.getLeaderboard());
-                    if (displayName == null) {
-                        displayName = eventInSeries.getName();
-                    }
-                    EventState eventState = HomeServiceUtil.calculateEventState(eventInSeries);
-                    dto.addEventAndLeaderboard(new EventAndLeaderboardReferenceWithStateDTO(eventInSeries.getId(),
-                            context.getLeaderboardName(), displayName, eventState));
-                }
-            });
-        }
+        
+        HomeServiceUtil.getEventAndLeaderboardReferencesForSeriesOrdered(leaderBoardGroup,
+                ctx.getRacingEventService()).forEach(dto::addEventAndLeaderboard);
+        
         if (oneEventLive) {
             dto.setState(EventSeriesState.RUNNING);
         } else if (!oneEventStarted) {

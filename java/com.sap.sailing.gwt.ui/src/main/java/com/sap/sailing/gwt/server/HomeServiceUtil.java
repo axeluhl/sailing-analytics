@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -31,6 +32,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventLinkDTO;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
@@ -551,13 +553,30 @@ public final class HomeServiceUtil {
      */
     public static List<Event> getEventsForSeriesOrdered(LeaderboardGroup overallLeaderboardGroup,
             RacingEventService service) {
+        return getEventsAndLeaderboardsForSeriesOrdered(overallLeaderboardGroup, service).stream()
+                .map(pair -> pair.getA()).distinct().collect(Collectors.toList());
+    }
+    
+    /**
+     * Provides the list of {@link Event Events} and {@link Leaderboard Leaderboards} for a series based on the given
+     * overall {@link LeaderboardGroup} in an order that matches the order of {@link Leaderboard Leaderboards} in the
+     * {@link LeaderboardGroup}.
+     * 
+     * @param overallLeaderboardGroup
+     *            the series overall {@link LeaderboardGroup}
+     * @param service
+     *            {@link RacingEventService}
+     * @return the {@link Event} and {@link Leaderboard} pairs for the series
+     */
+    public static List<Pair<Event, Leaderboard>> getEventsAndLeaderboardsForSeriesOrdered(LeaderboardGroup overallLeaderboardGroup,
+            RacingEventService service) {
         final Iterable<Event> eventsInSeries = getEventsInSeries(overallLeaderboardGroup, service);
         final Iterable<Leaderboard> orderedLeaderboards = getLeaderboardsForSeriesInOrder(overallLeaderboardGroup);
-        final List<Event> orderedEventsInSeries = new ArrayList<>();
+        final List<Pair<Event, Leaderboard>> orderedEventsInSeries = new ArrayList<>();
         for (Leaderboard leaderboard : orderedLeaderboards) {
             final Event associatedEvent = getAssociatedEventForLeaderboardInSeries(leaderboard, eventsInSeries);
-            if (associatedEvent != null && !orderedEventsInSeries.contains(associatedEvent)) {
-                orderedEventsInSeries.add(associatedEvent);
+            if (associatedEvent != null) {
+                orderedEventsInSeries.add(new Pair<>(associatedEvent, leaderboard));
             }
         }
         return orderedEventsInSeries;
@@ -589,6 +608,24 @@ public final class HomeServiceUtil {
             }
         }
         return null;
+    }
+
+    public static List<EventAndLeaderboardReferenceWithStateDTO> getEventAndLeaderboardReferencesForSeriesOrdered(
+            LeaderboardGroup overallLeaderboardGroup, RacingEventService service) {
+        final ArrayList<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries = new ArrayList<>();
+        for (Pair<Event, Leaderboard> eventAndLeaderboardInSeries : getEventsAndLeaderboardsForSeriesOrdered(
+                overallLeaderboardGroup, service)) {
+            final Event eventInSeries = eventAndLeaderboardInSeries.getA();
+            final Leaderboard leaderboardInSeries = eventAndLeaderboardInSeries.getB();
+            String displayName = HomeServiceUtil.getLocation(eventInSeries, leaderboardInSeries);
+            if (displayName == null) {
+                displayName = eventInSeries.getName();
+            }
+            final EventState eventState = HomeServiceUtil.calculateEventState(eventInSeries);
+            eventsOfSeries.add(new EventAndLeaderboardReferenceWithStateDTO(eventInSeries.getId(),
+                    leaderboardInSeries.getName(), displayName, eventState));
+        }
+        return eventsOfSeries;
     }
 
     /**
