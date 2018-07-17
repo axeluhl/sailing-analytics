@@ -1,3 +1,5 @@
+// Aggregates settings by their frequency across all DBs.
+// Usage: mongo --host <hostname> --port <port> settings-agg.js
 allDatabases = db.adminCommand({ "listDatabases": 1 }).databases
 
 collection = 'PREFERENCES'
