@@ -165,7 +165,8 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         FlowPanel overallDetailDialogContentSecondLine = new FlowPanel();
         overallDetailDialogContentSecondLine.addStyleName("dialogInnerContent");
         showCompetitorShortNameColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorShortNameColumn());
-        showCompetitorShortNameColumnCheckBox.setTitle(stringMessages.showCompetitorShortNameColumnTooltip(stringMessages.alwaysShowCompetitorNationalityColumn()));
+        showCompetitorShortNameColumnCheckBox.setTitle(
+                stringMessages.showCompetitorShortNameColumnTooltip(stringMessages.showCompetitorNationalityColumn()));
         showCompetitorShortNameColumnCheckBox.setValue(initialSettings.isShowCompetitorShortNameColumn());
         overallDetailDialogContentSecondLine.add(showCompetitorShortNameColumnCheckBox);
         showCompetitorFullNameColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorFullNameColumn());
@@ -175,8 +176,8 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         showCompetitorBoatInfoColumnCheckBox.setValue(initialSettings.isShowCompetitorBoatInfoColumn());
         overallDetailDialogContentSecondLine.add(showCompetitorBoatInfoColumnCheckBox);
         showCompetitorBoatInfoColumnCheckBox.setVisible(canBoatInfoBeShown);
-        isCompetitorNationalityColumnVisible = dialog.createCheckbox(stringMessages.alwaysShowCompetitorNationalityColumn());
-        isCompetitorNationalityColumnVisible.setTitle(stringMessages.alwaysShowCompetitorNationalityColumnTooltip());
+        isCompetitorNationalityColumnVisible = dialog.createCheckbox(stringMessages.showCompetitorNationalityColumn());
+        isCompetitorNationalityColumnVisible.setTitle(stringMessages.showCompetitorNationalityColumnTooltip());
         isCompetitorNationalityColumnVisible.setValue(initialSettings.isShowCompetitorNationality());
         overallDetailDialogContentSecondLine.add(isCompetitorNationalityColumnVisible);
 

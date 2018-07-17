@@ -63,8 +63,8 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 currentLeaderboardSettings.isShowCompetitorShortNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorBoatInfoColumn(),
-                currentLeaderboardSettings.isShowRaceRankColumn(),
-                currentLeaderboardSettings.isShowCompetitorNationality());
+                currentLeaderboardSettings.isShowCompetitorNationality(),
+                currentLeaderboardSettings.isShowRaceRankColumn());
         return SettingsUtil.copyValues(contextSpecificLeaderboardSettings, defaultLeaderboardSettings);
     }
     
@@ -79,7 +79,8 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 currentLeaderboardSettings.isShowCompetitorShortNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
                 currentLeaderboardSettings.isShowCompetitorBoatInfoColumn(),
-                currentLeaderboardSettings.isShowCompetitorNationality(),currentLeaderboardSettings.isShowRaceRankColumn());
+                currentLeaderboardSettings.isShowCompetitorNationality(),
+                currentLeaderboardSettings.isShowRaceRankColumn());
         return SettingsUtil.copyValues(globalLeaderboardSettings, defaultLeaderboardSettings);
     }
 

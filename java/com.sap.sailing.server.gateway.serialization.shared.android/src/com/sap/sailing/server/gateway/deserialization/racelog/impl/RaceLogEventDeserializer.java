@@ -109,8 +109,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
     protected final JsonDeserializer<RaceLogEvent> fixedMarkPassingEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> suppressedMarkPassingsDeserializer;
     protected final JsonDeserializer<RaceLogEvent> startOfTrackingDeserializer;
-    protected final JsonDeserializer<RaceLogEvent> endOfTrackingDeserializer;
     protected final JsonDeserializer<RaceLogEvent> useCompetitorsFromRaceLogDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> endOfTrackingDeserializer;
 
     public RaceLogEventDeserializer(JsonDeserializer<RaceLogEvent> flagEventDeserializer,
             JsonDeserializer<RaceLogEvent> startTimeEventDeserializer,
@@ -208,7 +208,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
         } else if (type.equals(RaceLogEndOfTrackingEventSerializer.VALUE_CLASS)){
             return endOfTrackingDeserializer;
         } else if (type.equals(RaceLogUseCompetitorsFromRaceLogEventSerializer.VALUE_CLASS)){
-            return endOfTrackingDeserializer;
+            return useCompetitorsFromRaceLogDeserializer;
         }
 
         throw new JsonDeserializationException(String.format("There is no deserializer defined for event type %s.",
