@@ -36,7 +36,7 @@ public class NotificationPanel {
 
         panel.getElement().getStyle().setColor(type.getColor());
         panel.getElement().getStyle().setBackgroundColor(type.getBackgroundColor());
-        panel.getElement().setInnerText(type.getDecorator() + " " + message + " " + type.getDecorator());
+        panel.getElement().setInnerText(type.getDecorator() + " " + message);
         panel.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
