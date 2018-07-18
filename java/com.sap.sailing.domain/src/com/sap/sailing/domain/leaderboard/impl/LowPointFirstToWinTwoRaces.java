@@ -37,8 +37,8 @@ public class LowPointFirstToWinTwoRaces extends LowPoint {
     }
     
     @Override
-    public double getScoreFactor(RaceColumn a) {
-        Double factor = a.getExplicitFactor();
+    public double getScoreFactor(RaceColumn raceColumn) {
+        Double factor = raceColumn.getExplicitFactor();
         if (factor == null) {
             factor = 1.0;
         }
