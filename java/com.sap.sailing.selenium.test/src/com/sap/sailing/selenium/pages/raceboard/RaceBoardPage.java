@@ -53,11 +53,12 @@ public class RaceBoardPage extends HostPageWithAuthentication {
                 WebElement settingsDialog = null;
                 try {
                     settingsDialog = findElementBySeleniumId("raceMapSettings");
+                    boolean exists = settingsDialog != null;
+                    // exists, and was actually rendered (to apply the values)
+                    return (exists && settingsDialog.isDisplayed());
                 } catch(Exception e) {
                 }
-                boolean exists = settingsDialog != null;
-                // exists, and was actually rendered (to apply the values)
-                return (exists && settingsDialog.isDisplayed());
+                return false;
             }
         });
         return new MapSettingsPO(driver, findElementBySeleniumId("raceMapSettings"));
