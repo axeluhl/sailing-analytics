@@ -283,16 +283,16 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * Compares by the scores of a single race column. If only one of the competitors has a result this competitor is
      * ranked better than the other one.
      */
-    private int compareBySingleRaceColumnScore(Double o1CarryForwardInMedals, Double o2CarryForwardInMedals) {
+    private int compareBySingleRaceColumnScore(Double o1Score, Double o2Score) {
         final int result;
-        if (o1CarryForwardInMedals == null &&  o2CarryForwardInMedals == null) {
+        if (o1Score == null &&  o2Score == null) {
             result = 0;
-        } else if (o1CarryForwardInMedals == null) {
+        } else if (o1Score == null) {
             result = 1;
-        } else if (o2CarryForwardInMedals == null) {
+        } else if (o2Score == null) {
             result = -1;
         } else {
-            result = getScoreComparator().compare(o1CarryForwardInMedals, o2CarryForwardInMedals);
+            result = getScoreComparator().compare(o1Score, o2Score);
         }
         return result;
     }
