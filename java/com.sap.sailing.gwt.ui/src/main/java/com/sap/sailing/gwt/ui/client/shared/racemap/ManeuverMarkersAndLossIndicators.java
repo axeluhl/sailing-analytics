@@ -118,7 +118,12 @@ public class ManeuverMarkersAndLossIndicators {
         });
     }
 
-    protected void removeAllManeuverMarkers() {
+    /**
+     * Removes the visualizations of maneuvers from the map. The maneuver objects as received from the server are remembered
+     * (see {@link #lastManeuverResult}) and may be restored by a subsequent call to {@link #showManeuvers(Map)} as it is, e.g.,
+     * called by {@link #updateManeuverMarkersAfterSettingsChanged()}.
+     */
+    void removeAllManeuverMarkers() {
         // clone entry set to avoid concurrent modification exception
         for (final Entry<Triple<String, Date, ManeuverType>, Marker> keyAndMarker : new HashSet<>(maneuverMarkers.entrySet())) {
             removeManeuverMarker(keyAndMarker.getKey(), keyAndMarker.getValue());
@@ -257,8 +262,9 @@ public class ManeuverMarkersAndLossIndicators {
             }
             maneuverLossLinesMap.remove(key);
         }
-        if (maneuverLossInfoOverlayMap.remove(key) != null) {
-            maneuverLossInfoOverlayMap.get(key).removeFromMap();
+        final SmallTransparentInfoOverlay overlay;
+        if ((overlay=maneuverLossInfoOverlayMap.remove(key)) != null) {
+            overlay.removeFromMap();
         }
     }
 
@@ -400,5 +406,18 @@ public class ManeuverMarkersAndLossIndicators {
             removeAllManeuverMarkers();
             showManeuvers(lastManeuverResult);
         }
+    }
+
+    /**
+     * Removes all maneuver displays from the map and also clears the structure holding the maneuvers
+     * last received from the server so that upon the next request to show maneuvers without a previous
+     * update from the server no maneuvers will be displayed.<p>
+     * 
+     * @see #getAndShowManeuvers(RegattaAndRaceIdentifier, Map)
+     * @see #removeAllManeuverMarkers()
+     */
+    void clearAllManeuverMarkers() {
+        removeAllManeuverMarkers();
+        lastManeuverResult = null;
     }
 }

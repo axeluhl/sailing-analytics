@@ -1062,7 +1062,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (douglasMarkers != null) {
                             removeAllMarkDouglasPeuckerpoints();
                         }
-                        maneuverMarkersAndLossIndicators.removeAllManeuverMarkers();
+                        maneuverMarkersAndLossIndicators.clearAllManeuverMarkers();
                         if (requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown) {
                             updateCoordinateSystemFromSettings();
                         }
@@ -1093,7 +1093,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                         zoomMapToNewBounds(zoomToBounds);
                         mapFirstZoomDone = true;
-                        
                         updateEstimatedDuration(raceMapDataDTO.estimatedDuration);
                     }
                 } else {
