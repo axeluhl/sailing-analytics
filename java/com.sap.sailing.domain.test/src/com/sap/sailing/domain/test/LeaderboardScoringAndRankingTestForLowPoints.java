@@ -56,11 +56,10 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     }
 
     private void manuallyTransferCarry(Leaderboard leaderboard, List<Competitor> medalCompetitors) {
-        double carryScore = 0;
+        int carryScore = 1;
         for (Competitor medalCompetitor : medalCompetitors) {
             leaderboard.getScoreCorrection().correctScore(medalCompetitor, leaderboard.getRaceColumnByName("Carry"),
-                    carryScore);
-            carryScore += 0.0001;
+                    carryScore++);
         }
     }
 
@@ -167,10 +166,10 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TrackedRace mDefault = new MockedTrackedRaceWithStartTimeAndRanks(now, m1Results);
         m1.setTrackedRace(m1.getFleetByName("Default"), mDefault);
 
-        Assert.assertEquals(2.0, leaderboard.getNetPoints(medalCompetitorsBestToWorst.get(0), later), EPSILON);
-        Assert.assertEquals(2.0001, leaderboard.getNetPoints(medalCompetitorsBestToWorst.get(1), later), EPSILON);
-        Assert.assertEquals(3.0002, leaderboard.getNetPoints(medalCompetitorsBestToWorst.get(2), later), EPSILON);
-        Assert.assertEquals(4.0003, leaderboard.getNetPoints(medalCompetitorsBestToWorst.get(3), later), EPSILON);
+        Assert.assertEquals(2.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
+        Assert.assertEquals(4, leaderboard.getNetPoints(preSecond, later), EPSILON);
+        Assert.assertEquals(6, leaderboard.getNetPoints(preThird, later), EPSILON);
+        Assert.assertEquals(8, leaderboard.getNetPoints(preFourth, later), EPSILON);
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
@@ -225,11 +224,15 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TrackedRace m1Default = new MockedTrackedRaceWithStartTimeAndRanks(now, m1Results);
         m1.setTrackedRace(m1.getFleetByName("Default"), m1Default);
 
-        Assert.assertEquals(1.0001, leaderboard.getNetPoints(preSecond, later), EPSILON);
-        Assert.assertEquals(2.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
-        Assert.assertEquals(3.0002, leaderboard.getNetPoints(preThird, later), EPSILON);
-        Assert.assertEquals(4.0003, leaderboard.getNetPoints(preFourth, later), EPSILON);
-
+        Assert.assertEquals(3, leaderboard.getNetPoints(preSecond, later), EPSILON);
+        Assert.assertEquals(3, leaderboard.getNetPoints(preFirst, later), EPSILON);
+        Assert.assertEquals(6, leaderboard.getNetPoints(preThird, later), EPSILON);
+        Assert.assertEquals(8, leaderboard.getNetPoints(preFourth, later), EPSILON);
+        
+        List<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
+        Assert.assertEquals(res.get(0), preFirst);
+        Assert.assertEquals(res.get(1), preSecond);
+        
         RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
 
         ArrayList<Competitor> m2Results = new ArrayList<>();
@@ -244,9 +247,9 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         m2.setTrackedRace(m1.getFleetByName("Default"), m2Default);
 
         Assert.assertEquals(2.0, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
-        Assert.assertEquals(4.0, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
-        Assert.assertEquals(6.0002, leaderboard.getNetPoints(preThird, m2later), EPSILON);
-        Assert.assertEquals(8.0003, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
+        Assert.assertEquals(5.0, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
+        Assert.assertEquals(9, leaderboard.getNetPoints(preThird, m2later), EPSILON);
+        Assert.assertEquals(12, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(m2later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
@@ -301,10 +304,14 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TrackedRace m1Default = new MockedTrackedRaceWithStartTimeAndRanks(now, m1Results);
         m1.setTrackedRace(m1.getFleetByName("Default"), m1Default);
 
-        Assert.assertEquals(1.0001, leaderboard.getNetPoints(preSecond, later), EPSILON);
-        Assert.assertEquals(2.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
-        Assert.assertEquals(3.0002, leaderboard.getNetPoints(preThird, later), EPSILON);
-        Assert.assertEquals(4.0003, leaderboard.getNetPoints(preFourth, later), EPSILON);
+        Assert.assertEquals(3, leaderboard.getNetPoints(preSecond, later), EPSILON);
+        Assert.assertEquals(3.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
+        Assert.assertEquals(6, leaderboard.getNetPoints(preThird, later), EPSILON);
+        Assert.assertEquals(8, leaderboard.getNetPoints(preFourth, later), EPSILON);
+        
+        List<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
+        Assert.assertEquals(res.get(0), preFirst);
+        Assert.assertEquals(res.get(1), preSecond);
 
         RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
 
@@ -320,9 +327,9 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         m2.setTrackedRace(m1.getFleetByName("Default"), m2Default);
 
         Assert.assertEquals(2.0, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
-        Assert.assertEquals(3.0001, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
-        Assert.assertEquals(6.0002, leaderboard.getNetPoints(preThird, m2later), EPSILON);
-        Assert.assertEquals(8.0003, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
+        Assert.assertEquals(5, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
+        Assert.assertEquals(9, leaderboard.getNetPoints(preThird, m2later), EPSILON);
+        Assert.assertEquals(12, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(m2later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
@@ -377,10 +384,15 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TrackedRace m1Default = new MockedTrackedRaceWithStartTimeAndRanks(now, m1Results);
         m1.setTrackedRace(m1.getFleetByName("Default"), m1Default);
 
-        Assert.assertEquals(1.0003, leaderboard.getNetPoints(preFourth, later), EPSILON);
-        Assert.assertEquals(2.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
-        Assert.assertEquals(3.0001, leaderboard.getNetPoints(preSecond, later), EPSILON);
-        Assert.assertEquals(4.0002, leaderboard.getNetPoints(preThird, later), EPSILON);
+        Assert.assertEquals(5, leaderboard.getNetPoints(preFourth, later), EPSILON);
+        Assert.assertEquals(3.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
+        Assert.assertEquals(5, leaderboard.getNetPoints(preSecond, later), EPSILON);
+        Assert.assertEquals(7, leaderboard.getNetPoints(preThird, later), EPSILON);
+        
+        List<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
+        Assert.assertEquals(res.get(0), preFirst);
+        Assert.assertEquals(res.get(1), preSecond);
+        Assert.assertEquals(res.get(2), preFourth);
 
         RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
 
@@ -396,9 +408,9 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         m2.setTrackedRace(m1.getFleetByName("Default"), m2Default);
 
         Assert.assertEquals(2.0, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
-        Assert.assertEquals(4.0, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
-        Assert.assertEquals(6.0001, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
-        Assert.assertEquals(8.0002, leaderboard.getNetPoints(preThird, m2later), EPSILON);
+        Assert.assertEquals(5.0, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
+        Assert.assertEquals(8, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
+        Assert.assertEquals(11, leaderboard.getNetPoints(preThird, m2later), EPSILON);
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(m2later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
@@ -453,10 +465,16 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TrackedRace m1Default = new MockedTrackedRaceWithStartTimeAndRanks(now, m1Results);
         m1.setTrackedRace(m1.getFleetByName("Default"), m1Default);
 
-        Assert.assertEquals(1.0003, leaderboard.getNetPoints(preFourth, later), EPSILON);
-        Assert.assertEquals(2.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
-        Assert.assertEquals(3.0001, leaderboard.getNetPoints(preSecond, later), EPSILON);
-        Assert.assertEquals(4.0002, leaderboard.getNetPoints(preThird, later), EPSILON);
+        Assert.assertEquals(5, leaderboard.getNetPoints(preFourth, later), EPSILON);
+        Assert.assertEquals(3.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
+        Assert.assertEquals(5, leaderboard.getNetPoints(preSecond, later), EPSILON);
+        Assert.assertEquals(7, leaderboard.getNetPoints(preThird, later), EPSILON);
+        
+        
+        List<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
+        Assert.assertEquals(res.get(0), preFirst);
+        Assert.assertEquals(res.get(1), preSecond);
+        Assert.assertEquals(res.get(2), preFourth);
 
         RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
 
@@ -471,10 +489,10 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TrackedRace m2Default = new MockedTrackedRaceWithStartTimeAndRanks(m2now, m2Results);
         m2.setTrackedRace(m1.getFleetByName("Default"), m2Default);
 
-        Assert.assertEquals(5.0003, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
-        Assert.assertEquals(4.0, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
-        Assert.assertEquals(6.0001, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
-        Assert.assertEquals(5.0002, leaderboard.getNetPoints(preThird, m2later), EPSILON);
+        Assert.assertEquals(9, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
+        Assert.assertEquals(5.0, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
+        Assert.assertEquals(8, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
+        Assert.assertEquals(8, leaderboard.getNetPoints(preThird, m2later), EPSILON);
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(m2later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
@@ -526,10 +544,10 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TrackedRace mDefault = new MockedTrackedRaceWithStartTimeAndRanks(now, m1Results);
         m1.setTrackedRace(m1.getFleetByName("Default"), mDefault);
 
-        Assert.assertEquals(2.0, leaderboard.getNetPoints(medalCompetitors.get(0), later), EPSILON);
-        Assert.assertEquals(4.0002, leaderboard.getNetPoints(medalCompetitors.get(1), later), EPSILON);
-        Assert.assertEquals(6.0004, leaderboard.getNetPoints(medalCompetitors.get(2), later), EPSILON);
-        Assert.assertEquals(8.0006, leaderboard.getNetPoints(medalCompetitors.get(3), later), EPSILON);
+        Assert.assertEquals(4, leaderboard.getNetPoints(preFirst, later), EPSILON);
+        Assert.assertEquals(8, leaderboard.getNetPoints(preSecond, later), EPSILON);
+        Assert.assertEquals(12, leaderboard.getNetPoints(preThird, later), EPSILON);
+        Assert.assertEquals(16, leaderboard.getNetPoints(preFourth, later), EPSILON);
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
@@ -583,10 +601,10 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TrackedRace m1Default = new MockedTrackedRaceWithStartTimeAndRanks(now, m1Results);
         m1.setTrackedRace(m1.getFleetByName("Default"), m1Default);
 
-        Assert.assertEquals(2.0002, leaderboard.getNetPoints(preSecond, later), EPSILON);
-        Assert.assertEquals(4.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
-        Assert.assertEquals(6.0004, leaderboard.getNetPoints(preThird, later), EPSILON);
-        Assert.assertEquals(8.0006, leaderboard.getNetPoints(preFourth, later), EPSILON);
+        Assert.assertEquals(6, leaderboard.getNetPoints(preSecond, later), EPSILON);
+        Assert.assertEquals(6.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
+        Assert.assertEquals(12, leaderboard.getNetPoints(preThird, later), EPSILON);
+        Assert.assertEquals(16, leaderboard.getNetPoints(preFourth, later), EPSILON);
 
         RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
 
@@ -601,10 +619,10 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TrackedRace m2Default = new MockedTrackedRaceWithStartTimeAndRanks(m2now, m2Results);
         m2.setTrackedRace(m1.getFleetByName("Default"), m2Default);
 
-        Assert.assertEquals(4.0002, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
-        Assert.assertEquals(8.0, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
-        Assert.assertEquals(12.0004, leaderboard.getNetPoints(preThird, m2later), EPSILON);
-        Assert.assertEquals(16.0006, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
+        Assert.assertEquals(8, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
+        Assert.assertEquals(10.0, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
+        Assert.assertEquals(18, leaderboard.getNetPoints(preThird, m2later), EPSILON);
+        Assert.assertEquals(24, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(m2later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
@@ -658,10 +676,15 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TrackedRace m1Default = new MockedTrackedRaceWithStartTimeAndRanks(now, m1Results);
         m1.setTrackedRace(m1.getFleetByName("Default"), m1Default);
 
-        Assert.assertEquals(2.0002, leaderboard.getNetPoints(preSecond, later), EPSILON);
-        Assert.assertEquals(4.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
-        Assert.assertEquals(6.0004, leaderboard.getNetPoints(preThird, later), EPSILON);
-        Assert.assertEquals(8.0006, leaderboard.getNetPoints(preFourth, later), EPSILON);
+        Assert.assertEquals(6, leaderboard.getNetPoints(preSecond, later), EPSILON);
+        Assert.assertEquals(6, leaderboard.getNetPoints(preFirst, later), EPSILON);
+        Assert.assertEquals(12, leaderboard.getNetPoints(preThird, later), EPSILON);
+        Assert.assertEquals(16, leaderboard.getNetPoints(preFourth, later), EPSILON);
+        
+        
+        List<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
+        Assert.assertEquals(res.get(0), preSecond);
+        Assert.assertEquals(res.get(1), preFirst);
 
         RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
 
@@ -676,10 +699,10 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TrackedRace m2Default = new MockedTrackedRaceWithStartTimeAndRanks(m2now, m2Results);
         m2.setTrackedRace(m1.getFleetByName("Default"), m2Default);
 
-        Assert.assertEquals(6.0, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
-        Assert.assertEquals(6.0002, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
-        Assert.assertEquals(12.0004, leaderboard.getNetPoints(preThird, m2later), EPSILON);
-        Assert.assertEquals(16.0006, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
+        Assert.assertEquals(8, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
+        Assert.assertEquals(10, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
+        Assert.assertEquals(18, leaderboard.getNetPoints(preThird, m2later), EPSILON);
+        Assert.assertEquals(24, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(m2later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
@@ -733,10 +756,15 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TrackedRace m1Default = new MockedTrackedRaceWithStartTimeAndRanks(now, m1Results);
         m1.setTrackedRace(m1.getFleetByName("Default"), m1Default);
 
-        Assert.assertEquals(2.0006, leaderboard.getNetPoints(preFourth, later), EPSILON);
-        Assert.assertEquals(4.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
-        Assert.assertEquals(6.0002, leaderboard.getNetPoints(preSecond, later), EPSILON);
-        Assert.assertEquals(8.0004, leaderboard.getNetPoints(preThird, later), EPSILON);
+        Assert.assertEquals(10, leaderboard.getNetPoints(preFourth, later), EPSILON);
+        Assert.assertEquals(6.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
+        Assert.assertEquals(10, leaderboard.getNetPoints(preSecond, later), EPSILON);
+        Assert.assertEquals(14, leaderboard.getNetPoints(preThird, later), EPSILON);
+        
+        List<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
+        Assert.assertEquals(res.get(0), preFirst);
+        Assert.assertEquals(res.get(1), preFourth);
+        Assert.assertEquals(res.get(2), preSecond);
 
         RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
 
@@ -751,10 +779,10 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TrackedRace m2Default = new MockedTrackedRaceWithStartTimeAndRanks(m2now, m2Results);
         m2.setTrackedRace(m1.getFleetByName("Default"), m2Default);
 
-        Assert.assertEquals(4.0006, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
-        Assert.assertEquals(8.0, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
-        Assert.assertEquals(12.0002, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
-        Assert.assertEquals(16.0004, leaderboard.getNetPoints(preThird, m2later), EPSILON);
+        Assert.assertEquals(12, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
+        Assert.assertEquals(10, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
+        Assert.assertEquals(16, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
+        Assert.assertEquals(22, leaderboard.getNetPoints(preThird, m2later), EPSILON);
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(m2later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
@@ -807,10 +835,15 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TrackedRace m1Default = new MockedTrackedRaceWithStartTimeAndRanks(now, m1Results);
         m1.setTrackedRace(m1.getFleetByName("Default"), m1Default);
 
-        Assert.assertEquals(2.0006, leaderboard.getNetPoints(preFourth, later), EPSILON);
-        Assert.assertEquals(4.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
-        Assert.assertEquals(6.0002, leaderboard.getNetPoints(preSecond, later), EPSILON);
-        Assert.assertEquals(8.0004, leaderboard.getNetPoints(preThird, later), EPSILON);
+        Assert.assertEquals(10, leaderboard.getNetPoints(preFourth, later), EPSILON);
+        Assert.assertEquals(6.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
+        Assert.assertEquals(10, leaderboard.getNetPoints(preSecond, later), EPSILON);
+        Assert.assertEquals(14, leaderboard.getNetPoints(preThird, later), EPSILON);
+        
+        List<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
+        Assert.assertEquals(res.get(0), preFirst);
+        Assert.assertEquals(res.get(1), preFourth);
+        Assert.assertEquals(res.get(2), preSecond);
 
         RaceColumn m2 = leaderboard.getRaceColumnByName("M2");
 
@@ -825,10 +858,15 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         TrackedRace m2Default = new MockedTrackedRaceWithStartTimeAndRanks(m2now, m2Results);
         m2.setTrackedRace(m1.getFleetByName("Default"), m2Default);
 
-        Assert.assertEquals(10.0006, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
-        Assert.assertEquals(8.0, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
-        Assert.assertEquals(12.0002, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
-        Assert.assertEquals(10.0004, leaderboard.getNetPoints(preThird, m2later), EPSILON);
+        Assert.assertEquals(18, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
+        Assert.assertEquals(10, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
+        Assert.assertEquals(16, leaderboard.getNetPoints(preSecond, m2later), EPSILON);
+        Assert.assertEquals(16, leaderboard.getNetPoints(preThird, m2later), EPSILON);
+        
+        List<Competitor> res2 = leaderboard.getCompetitorsFromBestToWorst(later);
+        Assert.assertEquals(res2.get(0), preFirst);
+        Assert.assertEquals(res2.get(1), preFourth);
+        Assert.assertEquals(res2.get(2), preSecond);
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(m2later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
