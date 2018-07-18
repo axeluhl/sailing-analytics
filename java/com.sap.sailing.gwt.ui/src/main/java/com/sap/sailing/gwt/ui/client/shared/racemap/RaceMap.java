@@ -1819,7 +1819,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     /**
-     * is used to get the information that appears on hovering over a line is written in
+     * Used to get the information that appears on hovering over a line and that is displayed in
      * {@link #adjustInfoOverlayForVisibleLine}
      */
     private interface LineInfoProvider {
@@ -1898,8 +1898,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private void adjustInfoOverlayForVisibleLine(Polyline lineToShowOrRemoveOrUpdate, final Position position1DTO,
             final Position position2DTO, final LineInfoProvider lineInfoProvider) {
-        SmallTransparentInfoOverlay infoOverlay = infoOverlaysForLinesForCourseGeometry.get(lineToShowOrRemoveOrUpdate);
         if (lineInfoProvider.isShowInfoOverlayWithHelplines()) {
+            SmallTransparentInfoOverlay infoOverlay = infoOverlaysForLinesForCourseGeometry.get(lineToShowOrRemoveOrUpdate);
             if (getSettings().getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY)) {
                 if (infoOverlay == null) {
                     infoOverlay = new SmallTransparentInfoOverlay(map, RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX,
@@ -2243,7 +2243,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             Widget maneuverLossWidget = createInfoWindowLabelAndValue(stringMessages.maneuverLoss(),
                     numberFormatOneDecimal.format(maneuver.getManeuverLoss().getDistanceLost().getMeters()) + " " + stringMessages.metersUnit());
             CheckBox maneuverLossLinesCheckBox = new CheckBox(stringMessages.show());
-            Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(), maneuver.getType());
+            Triple<String, Date, ManeuverType> t = createManeuverKey(maneuver, competitor);
             maneuverLossLinesCheckBox.setValue(maneuverLossCheckBoxValueStore.contains(t));
             maneuverLossLinesCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
@@ -2493,10 +2493,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         marker.setMap(map);
         // maneuver loss visualization
         if (settings.isShowManeuverLossVisualization() && maneuver.getManeuverLoss() != null) {
-            Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(), maneuver.getType());
+            Triple<String, Date, ManeuverType> t = createManeuverKey(maneuver, competitor);
             maneuverLossCheckBoxValueStore.add(t);
             visualizeManeuverLoss(maneuver, true, competitor);
         }
+    }
+
+    private Triple<String, Date, ManeuverType> createManeuverKey(ManeuverDTO maneuver, CompetitorDTO competitor) {
+        return new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(), maneuver.getType());
     }
 
     /**
@@ -3224,7 +3228,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     /**
      * Visualizes the Maneuver Loss, creates the corresponding polylines and Info Overlays calling
      * {@link #createManeuverLossLinesAndInfoOverlays(ManeuverDTO, CompetitorDTO)}. If called with
-     * showManeuverVisualization=false removes the polylines and infooverlays, if there are any.
+     * {@code showManeuverVisualization=false} removes the polylines and info overlays, if there are any.
+     * This modifies the {@link #maneuverLossInfoOverlayMap} and {@link #maneuverLossLinesMap} structures.
      */
     private void visualizeManeuverLoss(ManeuverDTO maneuver, boolean showManeuverVisualization, CompetitorDTO competitor) {
         if (showManeuverVisualization == false) {
@@ -3240,7 +3245,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * {@link #maneuverLossLinesMap} and {@link #maneuverLossInfoOverlayMap}.
      */
     private void removeManeuverLossLinesAndInfoOverlayForManeuver(ManeuverDTO maneuver, CompetitorDTO competitor) {
-        Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(), maneuver.getType());
+        Triple<String, Date, ManeuverType> t = createManeuverKey(maneuver, competitor);
         if (maneuverLossLinesMap.get(t) != null) {
             for (Polyline p : maneuverLossLinesMap.get(t)) {
                 p.setMap((MapWidget) null);
@@ -3318,8 +3323,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         maneuverLossLines.add(showOrRemoveOrUpdateLine(null, true, projectedExtrapolatedManeuverStartPosition,
                 projectedManeuverEndPosition, maneuverLossLineInfoProvider, color, HIGHLIGHTED_LINE_STROKEWEIGHT,
                 STANDARD_LINE_OPACITY));
-        Triple<String, Date, ManeuverType> t = new Triple<>(competitor.getIdAsString(), maneuver.getTimePoint(),
-                maneuver.getType());
+        Triple<String, Date, ManeuverType> t = createManeuverKey(maneuver, competitor);
         maneuverLossLinesMap.put(t, maneuverLossLines);
         StringBuilder sb = new StringBuilder();
         sb.append(stringMessages.maneuverLoss() + ": " + numberFormatOneDecimal.format(maneuver.getManeuverLoss().getDistanceLost().getMeters())
