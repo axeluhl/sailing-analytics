@@ -151,6 +151,10 @@ public interface ScoringScheme extends Serializable {
         return false;
     }
 
+    /**
+     * If isMedalWinAmountCriteria returns true, this will be the amount of races that must be won, in order to win the
+     * medal series instantly
+     */
     default int getTargetAmountOfMedalRaceWins() {
         throw new IllegalStateException("This call is not valid for this scoringSheme");
     }

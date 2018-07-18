@@ -605,6 +605,10 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      */
     boolean hasScores(Competitor competitor, TimePoint timePoint);
 
+    /**
+     * Returns true if a racecolumn evaluates to be a win for the given competitor at the given timepoint.
+     * If the competitor is not scored for this race, false is returned 
+     */
     default boolean isWin(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         Double points = getTotalPoints(competitor, raceColumn, timePoint);
         if(points == null) {

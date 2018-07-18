@@ -3,6 +3,11 @@ package com.sap.sailing.domain.leaderboard.impl;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 
+/**
+ * This class is a derivation of the LowPointScoring scheme. The first participant in the medal series, that wins two
+ * races is ranked as the first. The participant that has the score 1 in the preSeries carry column only must reach one
+ * additional victory. This Scheme will change the default scoring factor for medal races to 1, usually 2 is used
+ */
 public class LowPointFirstToWinTwoRaces extends LowPoint {
     private static final long serialVersionUID = 7072175334160798617L;
 
