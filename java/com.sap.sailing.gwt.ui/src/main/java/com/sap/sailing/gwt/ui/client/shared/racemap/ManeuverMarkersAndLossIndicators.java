@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.canvas.dom.client.CssColor;
@@ -81,22 +82,22 @@ public class ManeuverMarkersAndLossIndicators {
      * markers displayed in response to
      * {@link SailingServiceAsync#getDouglasPoints(String, String, Map, Map, double, AsyncCallback)}
      */
-    private Set<Marker> maneuverMarkers;
-    
-    /** The Map where for each competitor and each maneuver is stored if it is visualized or not. */
-    private Set<Triple<String, Date, ManeuverType>> maneuverLossCheckBoxValueStore = new HashSet<>();
+    private final Map<Triple<String, Date, ManeuverType>, Marker> maneuverMarkers;
     
     /** The Map where the polylines for the specific maneuver are stored. */
-    private Map<Triple<String, Date, ManeuverType>, Set<Polyline>> maneuverLossLinesMap = new HashMap<>();
+    private final Map<Triple<String, Date, ManeuverType>, Set<Polyline>> maneuverLossLinesMap;
     
     /** The Map where the info overlays for a maneuver loss visualization are stored. */
-    private Map<Triple<String, Date, ManeuverType>, SmallTransparentInfoOverlay> maneuverLossInfoOverlayMap = new HashMap<>();
+    private final Map<Triple<String, Date, ManeuverType>, SmallTransparentInfoOverlay> maneuverLossInfoOverlayMap;
 
     public ManeuverMarkersAndLossIndicators(RaceMap raceMap, SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages) {
         this.raceMap = raceMap;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+        this.maneuverMarkers = new HashMap<>();
+        this.maneuverLossLinesMap = new HashMap<>();
+        this.maneuverLossInfoOverlayMap = new HashMap<>();
     }
 
     public void getAndShowManeuvers(RegattaAndRaceIdentifier race, Map<CompetitorDTO, TimeRange> timeRange) {
@@ -109,10 +110,7 @@ public class ManeuverMarkersAndLossIndicators {
             @Override
             public void onSuccess(Map<CompetitorDTO, List<ManeuverDTO>> result) {
                 lastManeuverResult = result;
-                if (maneuverMarkers != null) {
-                    removeAllManeuverMarkers();
-                    removeAllManeuverLossLinesAndInfoOverlays();
-                }
+                removeAllManeuverMarkers();
                 if (raceMap.getTimer().getPlayState() != PlayStates.Playing) {
                     showManeuvers(result);
                 }
@@ -121,16 +119,19 @@ public class ManeuverMarkersAndLossIndicators {
     }
 
     protected void removeAllManeuverMarkers() {
-        if (maneuverMarkers != null) {
-            for (Marker marker : maneuverMarkers) {
-                marker.setMap((MapWidget) null);
-            }
-            maneuverMarkers = null;
+        // clone entry set to avoid concurrent modification exception
+        for (final Entry<Triple<String, Date, ManeuverType>, Marker> keyAndMarker : new HashSet<>(maneuverMarkers.entrySet())) {
+            removeManeuverMarker(keyAndMarker.getKey(), keyAndMarker.getValue());
         }
     }
-    
+
+    private void removeManeuverMarker(Triple<String, Date, ManeuverType> key, Marker marker) {
+        marker.setMap((MapWidget) null);
+        removeManeuverLossLinesAndInfoOverlayForManeuver(key);
+        maneuverMarkers.remove(key);
+    }
+
     private void showManeuvers(Map<CompetitorDTO, List<ManeuverDTO>> maneuvers) {
-        maneuverMarkers = new HashSet<Marker>();
         if (raceMap.getMap() != null && maneuvers != null) {
             Set<CompetitorDTO> keySet = maneuvers.keySet();
             Iterator<CompetitorDTO> iter = keySet.iterator();
@@ -146,6 +147,10 @@ public class ManeuverMarkersAndLossIndicators {
         }
     }
 
+    /**
+     * Creates a maneuver marker. Additionally, if the {@link RaceMapSettings#isShowManeuverLossVisualization()} setting is {@code true},
+     * a maneuver loss indicator is shown.
+     */
     private void createAndAddMarkerOfManeuver(ManeuverDTO maneuver, CompetitorDTO competitor) {
         LatLng latLng = raceMap.getCoordinateSystem().toLatLng(maneuver.getPosition());
         Marker maneuverMarker = raceMap.getRaceMapImageManager().getManeuverIconsForTypeAndDirectionIndicatingColor()
@@ -160,12 +165,11 @@ public class ManeuverMarkersAndLossIndicators {
             Widget content = getInfoWindowContent(maneuver, competitor);
             raceMap.getManagedInfoWindow().openAtPosition(content, where);
         });
-        maneuverMarkers.add(marker);
+        final Triple<String, Date, ManeuverType> key = createManeuverKey(maneuver, competitor);
+        maneuverMarkers.put(key, marker);
         marker.setMap(raceMap.getMap());
         // maneuver loss visualization: if the setting is active, show loss visualization for the maneuver by default
         if (raceMap.getSettings().isShowManeuverLossVisualization() && maneuver.getManeuverLoss() != null) {
-            Triple<String, Date, ManeuverType> t = createManeuverKey(maneuver, competitor);
-            maneuverLossCheckBoxValueStore.add(t);
             createManeuverLossLinesAndInfoOverlays(maneuver, competitor);
         }
     }
@@ -242,35 +246,20 @@ public class ManeuverMarkersAndLossIndicators {
      * {@link #maneuverLossLinesMap} and {@link #maneuverLossInfoOverlayMap}.
      */
     private void removeManeuverLossLinesAndInfoOverlayForManeuver(ManeuverDTO maneuver, CompetitorDTO competitor) {
-        Triple<String, Date, ManeuverType> t = createManeuverKey(maneuver, competitor);
-        if (maneuverLossLinesMap.get(t) != null) {
-            for (Polyline p : maneuverLossLinesMap.get(t)) {
-                p.setMap((MapWidget) null);
-            }
-            maneuverLossLinesMap.remove(t);
-        }
-        if (maneuverLossInfoOverlayMap.get(t) != null) {
-            maneuverLossInfoOverlayMap.get(t).removeFromMap();
-            maneuverLossInfoOverlayMap.remove(t);
-        }
+        Triple<String, Date, ManeuverType> key = createManeuverKey(maneuver, competitor);
+        removeManeuverLossLinesAndInfoOverlayForManeuver(key);
     }
 
-    /**
-     * Removes all maneuver loss polylines and corresponding info overlays from the map. Clears {@link #maneuverLossInfoOverlayMap}
-     * and {@link #maneuverLossLinesMap}. Clears {@link #maneuverLossCheckBoxValueStore}.
-     */
-    private void removeAllManeuverLossLinesAndInfoOverlays() {
-        for (Triple<String, Date, ManeuverType> t : maneuverLossLinesMap.keySet()) {
-            for (Polyline maneuverLossLine : maneuverLossLinesMap.get(t)) {
-                maneuverLossLine.setMap((MapWidget) null);
+    private void removeManeuverLossLinesAndInfoOverlayForManeuver(Triple<String, Date, ManeuverType> key) {
+        if (maneuverLossLinesMap.get(key) != null) {
+            for (Polyline p : maneuverLossLinesMap.get(key)) {
+                p.setMap((MapWidget) null);
             }
+            maneuverLossLinesMap.remove(key);
         }
-        maneuverLossLinesMap.clear();
-        for (Map.Entry<Triple<String, Date, ManeuverType>, SmallTransparentInfoOverlay> e : maneuverLossInfoOverlayMap.entrySet()) {
-            e.getValue().removeFromMap();
+        if (maneuverLossInfoOverlayMap.remove(key) != null) {
+            maneuverLossInfoOverlayMap.get(key).removeFromMap();
         }
-        maneuverLossInfoOverlayMap.clear();
-        maneuverLossCheckBoxValueStore.clear();
     }
 
     /**
@@ -320,8 +309,8 @@ public class ManeuverMarkersAndLossIndicators {
         maneuverLossLines.add(raceMap.showOrRemoveOrUpdateLine(null, true, projectedExtrapolatedManeuverStartPosition,
                 projectedManeuverEndPosition, maneuverLossLineInfoProvider, color, HIGHLIGHTED_LINE_STROKEWEIGHT,
                 RaceMap.STANDARD_LINE_OPACITY));
-        Triple<String, Date, ManeuverType> t = createManeuverKey(maneuver, competitor);
-        maneuverLossLinesMap.put(t, maneuverLossLines);
+        final Triple<String, Date, ManeuverType> key = createManeuverKey(maneuver, competitor);
+        maneuverLossLinesMap.put(key, maneuverLossLines);
         StringBuilder sb = new StringBuilder();
         sb.append(stringMessages.maneuverLoss() + ": " + numberFormatOneDecimal.format(maneuver.getManeuverLoss().getDistanceLost().getMeters())
                 + stringMessages.metersUnit() + '\n');
@@ -340,14 +329,7 @@ public class ManeuverMarkersAndLossIndicators {
         maneuverLossInfoOverlay.setPosition(projectedManeuverEndPosition.translateGreatCircle(middleManeuverAngle,
                 maneuver.getManeuverLoss().getDistanceLost().scale(0.5)), /* transition time */ -1);
         maneuverLossInfoOverlay.draw();
-        maneuverLossInfoOverlayMap.put(t, maneuverLossInfoOverlay);
-    }
-
-    void removeManeuverMarkers() {
-        if (maneuverMarkers != null) {
-            removeAllManeuverMarkers();
-            removeAllManeuverLossLinesAndInfoOverlays();
-        }
+        maneuverLossInfoOverlayMap.put(key, maneuverLossInfoOverlay);
     }
 
     Widget getInfoWindowContent(ManeuverDTO maneuver, CompetitorDTO competitor) {
@@ -384,16 +366,14 @@ public class ManeuverMarkersAndLossIndicators {
                     numberFormatOneDecimal.format(maneuver.getManeuverLoss().getDistanceLost().getMeters()) + " " + stringMessages.metersUnit());
             CheckBox maneuverLossLinesCheckBox = new CheckBox(stringMessages.show());
             Triple<String, Date, ManeuverType> t = createManeuverKey(maneuver, competitor);
-            maneuverLossLinesCheckBox.setValue(maneuverLossCheckBoxValueStore.contains(t));
+            maneuverLossLinesCheckBox.setValue(maneuverLossLinesMap.containsKey(t));
             maneuverLossLinesCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
                     if (event.getValue()) {
                         createManeuverLossLinesAndInfoOverlays(maneuver, competitor);
-                        maneuverLossCheckBoxValueStore.add(t);
                     } else {
                         removeManeuverLossLinesAndInfoOverlayForManeuver(maneuver, competitor);
-                        maneuverLossCheckBoxValueStore.remove(t);
                     }
                 }
             });
@@ -418,7 +398,6 @@ public class ManeuverMarkersAndLossIndicators {
         // TODO is it really necessary to remove them all first...?
         if (lastManeuverResult != null) {
             removeAllManeuverMarkers();
-            removeAllManeuverLossLinesAndInfoOverlays();
             showManeuvers(lastManeuverResult);
         }
     }

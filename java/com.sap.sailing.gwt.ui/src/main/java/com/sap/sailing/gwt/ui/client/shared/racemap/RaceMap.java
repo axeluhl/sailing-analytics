@@ -1062,7 +1062,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (douglasMarkers != null) {
                             removeAllMarkDouglasPeuckerpoints();
                         }
-                        maneuverMarkersAndLossIndicators.removeManeuverMarkers();
+                        maneuverMarkersAndLossIndicators.removeAllManeuverMarkers();
                         if (requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown) {
                             updateCoordinateSystemFromSettings();
                         }
