@@ -302,13 +302,13 @@
 		9E95C3D61C723AB30016632B /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E95C3D51C723AB30016632B /* Constants.swift */; };
 		9ECBDDAE1C9C4F0300F76AEB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */; };
 		B3150BA920FF42D9006D742A /* SAPTracker.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = B3150B2920FE3280006D742A /* SAPTracker.entitlements */; };
-		B3150BAB20FF4518006D742A /* Branch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BAA20FF4518006D742A /* Branch.framework */; };
-		B3150BAC20FF4518006D742A /* Branch.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BAA20FF4518006D742A /* Branch.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		B3150BAF20FF452C006D742A /* AdSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BAE20FF452C006D742A /* AdSupport.framework */; };
 		B3150BB120FF4532006D742A /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BB020FF4532006D742A /* SafariServices.framework */; };
 		B3150BB320FF453D006D742A /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BB220FF453D006D742A /* MobileCoreServices.framework */; };
 		B3150BB520FF4548006D742A /* CoreSpotlight.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BB420FF4548006D742A /* CoreSpotlight.framework */; };
 		B3150BB720FF454D006D742A /* iAd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BB620FF454D006D742A /* iAd.framework */; };
+		B31EE1A320FF915E0097AA40 /* Branch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BAA20FF4518006D742A /* Branch.framework */; };
+		B31EE1A420FF915E0097AA40 /* Branch.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BAA20FF4518006D742A /* Branch.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C8150BA51DCC6FDB0087C9C2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C8150BA71DCC6FDB0087C9C2 /* InfoPlist.strings */; };
 		C8289F3A1F386D8300A76953 /* SignUpRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8289F391F386D8300A76953 /* SignUpRequestManager.swift */; };
 		C843D47F1EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4791EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift */; };
@@ -429,13 +429,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		B3150BAD20FF4518006D742A /* Embed Frameworks */ = {
+		B31EE1A520FF915E0097AA40 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				B3150BAC20FF4518006D742A /* Branch.framework in Embed Frameworks */,
+				B31EE1A420FF915E0097AA40 /* Branch.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -894,11 +894,11 @@
 			files = (
 				B3150BB720FF454D006D742A /* iAd.framework in Frameworks */,
 				B3150BB520FF4548006D742A /* CoreSpotlight.framework in Frameworks */,
+				B31EE1A320FF915E0097AA40 /* Branch.framework in Frameworks */,
 				B3150BB320FF453D006D742A /* MobileCoreServices.framework in Frameworks */,
 				B3150BB120FF4532006D742A /* SafariServices.framework in Frameworks */,
 				B3150BAF20FF452C006D742A /* AdSupport.framework in Frameworks */,
 				7FC5232D19F6AEE800BBFDCC /* AVFoundation.framework in Frameworks */,
-				B3150BAB20FF4518006D742A /* Branch.framework in Frameworks */,
 				7F83F17619F1574700C53328 /* CoreLocation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1683,7 +1683,7 @@
 				7F83F14D19F154F000C53328 /* Frameworks */,
 				7F83F14E19F154F000C53328 /* Resources */,
 				7FF3E4BE1A1DFCF20012F1FB /* ShellScript */,
-				B3150BAD20FF4518006D742A /* Embed Frameworks */,
+				B31EE1A520FF915E0097AA40 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -2331,7 +2331,6 @@
 		7F83F17019F154F000C53328 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = SAPTracker/SAPTracker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -2341,6 +2340,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/SAPTracker/Libraries",
+					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = SAPTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -2359,7 +2359,6 @@
 		7F83F17119F154F000C53328 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = SAPTracker/SAPTracker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -2369,6 +2368,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/SAPTracker/Libraries",
+					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = SAPTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
