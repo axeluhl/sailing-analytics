@@ -166,7 +166,7 @@ public class ManeuverMarkersAndLossIndicators {
         if (raceMap.getSettings().isShowManeuverLossVisualization() && maneuver.getManeuverLoss() != null) {
             Triple<String, Date, ManeuverType> t = createManeuverKey(maneuver, competitor);
             maneuverLossCheckBoxValueStore.add(t);
-            visualizeManeuverLoss(maneuver, true, competitor);
+            createManeuverLossLinesAndInfoOverlays(maneuver, competitor);
         }
     }
 
@@ -235,20 +235,7 @@ public class ManeuverMarkersAndLossIndicators {
             return false;
         }
     };
-    /**
-     * Visualizes the Maneuver Loss, creates the corresponding polylines and Info Overlays calling
-     * {@link #createManeuverLossLinesAndInfoOverlays(ManeuverDTO, CompetitorDTO)}. If called with
-     * {@code showManeuverVisualization=false} removes the polylines and info overlays, if there are any.
-     * This modifies the {@link #maneuverLossInfoOverlayMap} and {@link #maneuverLossLinesMap} structures.
-     */
-    private void visualizeManeuverLoss(ManeuverDTO maneuver, boolean showManeuverVisualization, CompetitorDTO competitor) {
-        if (showManeuverVisualization == false) {
-            removeManeuverLossLinesAndInfoOverlayForManeuver(maneuver, competitor);
-        } else {
-            createManeuverLossLinesAndInfoOverlays(maneuver, competitor);
-        }
-    }
-
+    
     /**
      * Removes the polylines and the info overlay visualizing one maneuver from the map. Also removes the identifying
      * Triple<competitor.getIdAsString(), maneuver.getTimePoint(), maneuver.getType()> from the corresponding
@@ -401,10 +388,11 @@ public class ManeuverMarkersAndLossIndicators {
             maneuverLossLinesCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
-                    visualizeManeuverLoss(maneuver, event.getValue(), competitor);
                     if (event.getValue()) {
+                        createManeuverLossLinesAndInfoOverlays(maneuver, competitor);
                         maneuverLossCheckBoxValueStore.add(t);
                     } else {
+                        removeManeuverLossLinesAndInfoOverlayForManeuver(maneuver, competitor);
                         maneuverLossCheckBoxValueStore.remove(t);
                     }
                 }
