@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -136,8 +137,9 @@ public interface ScoringScheme extends Serializable {
     }
     
     /**
-     * Returning {@code true} makes the carry forward score a secondary ranking criteria for competitors that have an
-     * equal overall score.
+     * Returning {@code true} makes the {@link RaceColumn#isCarryForward() carry forward score} in a
+     * {@link Series#isMedal() medal series} a secondary ranking criteria for competitors that have an equal overall
+     * score.
      */
     default boolean isCarryForwardInMedalsCriteria() {
         return false;
@@ -165,10 +167,10 @@ public interface ScoringScheme extends Serializable {
      * different from 1 or 2. For example, we've seen cases in the Extreme Sailing Series where the race committee
      * defined that in the overall series leaderboard the last two columns each count 1.5 times their scores.
      */
-    default double getScoreFactor(RaceColumn a) {
-        Double factor = a.getExplicitFactor();
+    default double getScoreFactor(RaceColumn raceColumn) {
+        Double factor = raceColumn.getExplicitFactor();
         if (factor == null) {
-            factor = a.isMedalRace() ? DEFAULT_MEDAL_RACE_FACTOR : 1.0;
+            factor = raceColumn.isMedalRace() ? DEFAULT_MEDAL_RACE_FACTOR : 1.0;
         }
         return factor;
     }
