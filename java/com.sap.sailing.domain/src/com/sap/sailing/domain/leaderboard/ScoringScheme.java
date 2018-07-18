@@ -127,14 +127,26 @@ public interface ScoringScheme extends Serializable {
      */
     int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint);
 
+    /**
+     * Returning {@code true} makes the number of wins in a medal series the primary ranking criteria.
+     * The number of wins that makes a competitor the overall winner must be returned by {@link #getTargetAmountOfMedalRaceWins()}.
+     */
     default boolean isMedalWinAmountCriteria() {
         return false;
     }
     
+    /**
+     * Returning {@code true} makes the carry forward score a secondary ranking criteria for competitors that have an
+     * equal overall score.
+     */
     default boolean isCarryForwardInMedalsCriteria() {
         return false;
     }
     
+    /**
+     * Returning {@code true} makes the last medal race (having valid scores) a secondary ranking criteria for
+     * competitors that have an equal overall score.
+     */
     default boolean isLastMedalRaceCriteria() {
         return false;
     }
