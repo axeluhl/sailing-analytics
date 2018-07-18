@@ -1181,6 +1181,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showUncorrectedTotalPoints();
     String setStartTimeReceived();
     String setStartTimeReceivedDescription();
+    String setStartTimeReceivedNotice();
     String lastScoreCorrectionsTime();
     String lastScoreCorrectionsComment();
     String setTimeToNow();
@@ -1294,13 +1295,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     @Override
     String removeUploadedFile();
     String showCompetitorBoatColumn();
-    String showCompetitorSailIdColumn();
-    String showCompetitorSailIdColumnTooltip(String alwaysShowCompetitorNationalityColumnTitle);
     String showCompetitorShortNameColumn();
-    String showCompetitorShortNameColumnTooltip(String alwaysShowCompetitorNationalityColumnTitle);
+    String showCompetitorShortNameColumnTooltip(String showCompetitorNationalityColumnTitle);
     String showCompetitorFullNameColumn();
-    String alwaysShowCompetitorNationalityColumn();
-    String alwaysShowCompetitorNationalityColumnTooltip();
+    String showCompetitorNationalityColumn();
+    String showCompetitorNationalityColumnTooltip();
     String loadingDimensionValues();
     String inviteBuoyTenders();
     String orMultipleEmails();
