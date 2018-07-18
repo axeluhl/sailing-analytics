@@ -262,7 +262,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     /**
      * In this test the best in the preseries wins the second medal race, and should get a score of 2, all other
      * finalists should be scored with Low_Points restarting at 0 for the medal series. The non finalists score should
-     * not change during the medalseries.
+     * not change during the medalseries. Also asserts that during tie-breaking the pre-series carry score takes
+     * precedence.
      */
     @Test
     public void testFirstWinsSecondRace() throws NoWindException {
@@ -309,10 +310,10 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         m1.setTrackedRace(m1.getFleetByName("Default"), m1Default);
 
         Assert.assertEquals(3, leaderboard.getNetPoints(preSecond, later), EPSILON);
-        Assert.assertEquals(3.0, leaderboard.getNetPoints(preFirst, later), EPSILON);
+        Assert.assertEquals(3, leaderboard.getNetPoints(preFirst, later), EPSILON);
         Assert.assertEquals(6, leaderboard.getNetPoints(preThird, later), EPSILON);
         Assert.assertEquals(8, leaderboard.getNetPoints(preFourth, later), EPSILON);
-        
+        // assert that during tie-breaking the pre-series carry score takes precedence
         List<Competitor> res = leaderboard.getCompetitorsFromBestToWorst(later);
         Assert.assertEquals(res.get(0), preFirst);
         Assert.assertEquals(res.get(1), preSecond);
@@ -427,8 +428,6 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Assert.assertEquals(res2.get(1), preFirst);
         Assert.assertEquals(res2.get(2), preSecond);
         Assert.assertEquals(res2.get(3), preThird);
-        
-        
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(m2later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
@@ -566,6 +565,10 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Assert.assertEquals(8, leaderboard.getNetPoints(preSecond, later), EPSILON);
         Assert.assertEquals(12, leaderboard.getNetPoints(preThird, later), EPSILON);
         Assert.assertEquals(16, leaderboard.getNetPoints(preFourth, later), EPSILON);
+        Assert.assertEquals(1, leaderboard.getTotalRankOfCompetitor(preFirst, later));
+        Assert.assertEquals(2, leaderboard.getTotalRankOfCompetitor(preSecond, later));
+        Assert.assertEquals(3, leaderboard.getTotalRankOfCompetitor(preThird, later));
+        Assert.assertEquals(4, leaderboard.getTotalRankOfCompetitor(preFourth, later));
 
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
