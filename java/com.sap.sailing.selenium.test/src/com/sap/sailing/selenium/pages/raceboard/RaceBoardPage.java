@@ -57,7 +57,7 @@ public class RaceBoardPage extends HostPageWithAuthentication {
                 }
                 boolean exists = settingsDialog != null;
                 // exists, and was actually rendered (to apply the values)
-                return (exists && settingsDialog.getSize().height > 50);
+                return (exists && settingsDialog.isDisplayed());
             }
         });
         return new MapSettingsPO(driver, findElementBySeleniumId("raceMapSettings"));
