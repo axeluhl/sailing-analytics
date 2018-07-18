@@ -196,8 +196,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     // (tracked or manual) is sufficient
                     preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
                     if (scoringScheme.isMedalWinAmountCriteria()) {
-                        numberOfMedalRacesWonO1 += scoringScheme.doesCountAsWinInMedalRace(o1Score, raceColumn) ? 1 : 0;
-                        numberOfMedalRacesWonO2 += scoringScheme.doesCountAsWinInMedalRace(o2Score, raceColumn) ? 1 : 0;
+                        numberOfMedalRacesWonO1 += leaderboard.isWin(o1, raceColumn, timePoint) ? 1 : 0;
+                        numberOfMedalRacesWonO2 += leaderboard.isWin(o2, raceColumn, timePoint) ? 1 : 0;
                     }
                 }
                 if (preemptiveColumnResult == 0 && raceColumn.isTotalOrderDefinedByFleet()) {
@@ -261,6 +261,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         return result;
     }
 
+    /**
+     * Compares by the number of races won in the medal series. If one of the competitors reached the target of won
+     * races (defined by {@link ScoringScheme#getTargetAmountOfMedalRaceWins()} he is ranked better than the other. If
+     * none of the competitors reached the target, they are ranked equally even if one has more wins.
+     */
     private int compareByMedalRacesWon(int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
         int targetAmount = scoringScheme.getTargetAmountOfMedalRaceWins();
         // if one reaches the targetamount, this has priority, else proceed with normal low points scoring (eg. not
@@ -274,6 +279,10 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         return 0;
     }
     
+    /**
+     * Compares by the scores of a single race column. If only one of the competitors has a result this competitor is
+     * ranked better than the other one.
+     */
     private int compareBySingleRaceColumnScore(Double o1CarryForwardInMedals, Double o2CarryForwardInMedals) {
         if (o1CarryForwardInMedals == null &&  o2CarryForwardInMedals == null) {
             return 0;
