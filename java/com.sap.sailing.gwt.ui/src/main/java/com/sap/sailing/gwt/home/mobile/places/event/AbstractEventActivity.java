@@ -336,12 +336,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return getEventDTO().isMultiRegatta();
     }
 
-    @Override
-    public boolean isSingleRegattaEvent() {
-        // TODO fix
-        return !getEventDTO().isMultiRegatta();
-    }
-
     protected List<NavigationItem> getNavigationPathToEventLevel() {
         List<NavigationItem> navigationItems = new ArrayList<>();
         final SeriesReferenceWithEventsDTO seriesData = getEventDTO().getSeriesData();
