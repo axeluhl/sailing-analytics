@@ -223,6 +223,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         int result = compareByNumberOfRacesScored(o1Scores.size(), o2Scores.size());
         if (result == 0) {
             if (scoringScheme.isMedalWinAmountCriteria()) {
+                // if one reaches the target amount of races won then this has priority, else proceed with normal low
+                // points scoring (e.g., not enough races yet)
                 result = compareByMedalRacesWon(numberOfMedalRacesWonO1, numberOfMedalRacesWonO2);
             }
             if (result == 0) {
@@ -262,21 +264,22 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     }
 
     /**
-     * Compares by the number of races won in the medal series. If one of the competitors reached the target of won
-     * races (defined by {@link ScoringScheme#getTargetAmountOfMedalRaceWins()} he is ranked better than the other. If
+     * Compares by the number of races won in the medal series. If one of the competitors reached the target of races won
+     * (defined by {@link ScoringScheme#getTargetAmountOfMedalRaceWins()} it is ranked better than the other. If
      * none of the competitors reached the target, they are ranked equally even if one has more wins.
      */
     private int compareByMedalRacesWon(int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
-        int targetAmount = scoringScheme.getTargetAmountOfMedalRaceWins();
-        // if one reaches the targetamount, this has priority, else proceed with normal low points scoring (eg. not
-        // enough races yet)
+        // TODO bug4661 clarify what the desired outcome is if (e.g., temporarily due to manual score corrections) both reached or surpassed the number of wins required
+        final int targetAmount = scoringScheme.getTargetAmountOfMedalRaceWins();
+        final int result;
         if (numberOfMedalRacesWonO1 == targetAmount) {
-            return -1;
+            result = -1;
+        } else if (numberOfMedalRacesWonO2 == targetAmount) {
+            result = 1;
+        } else {
+            result = 0;
         }
-        if (numberOfMedalRacesWonO2 == targetAmount) {
-            return 1;
-        }
-        return 0;
+        return result;
     }
     
     /**
