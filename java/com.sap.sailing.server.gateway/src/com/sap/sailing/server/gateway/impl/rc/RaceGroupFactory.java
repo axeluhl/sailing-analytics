@@ -93,7 +93,6 @@ public class RaceGroupFactory {
     /**
      * @param raceColumns
      *            must be provided in the same order in which they appear in the series / leaderboard
-     * @param scoringScheme
      */
     private Collection<RaceRow> getRows(Series series, List<RaceColumn> raceColumns, ScoringScheme scoringScheme) {
         Collection<RaceRow> rows = new ArrayList<>();
