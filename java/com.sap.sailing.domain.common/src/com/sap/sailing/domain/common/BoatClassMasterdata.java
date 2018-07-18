@@ -117,6 +117,7 @@ public enum BoatClassMasterdata {
     TOM_28_MAX ("Tom 28 MAX", true, 8.48, 2.48, BoatHullType.MONOHULL, true, "Tom 28"),
     TRIAS ("Trias", true, 9.20, 2.12, BoatHullType.MONOHULL, true),
     TP52 ("TP52", true, 15.85, 4.35, BoatHullType.MONOHULL, true, "TP 52", "Transpac 52", "Transpac52"),
+    VARIANTA ("Varianta", true, 6.40, 2.10, BoatHullType.MONOHULL, true),
     VAURIEN ("Vaurien", true, 4.08, 1.47, BoatHullType.MONOHULL, true),
     VENT_D_OUEST ("Vent d'Ouest", true, 5.85, 1.75, BoatHullType.MONOHULL, true, "VENTDOUEST", "VENTD'OUEST"),
     VIPER_640 ("Viper 640", true, 6.43, 2.49, BoatHullType.MONOHULL, true),

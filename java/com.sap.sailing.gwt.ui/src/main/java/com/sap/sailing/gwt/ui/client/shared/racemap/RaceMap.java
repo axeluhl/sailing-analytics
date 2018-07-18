@@ -2759,6 +2759,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         this.settings = newSettings;
         
+        if (maneuverTypeSelectionChanged) {
+            if (!(timer.getPlayState() == PlayStates.Playing) && lastManeuverResult != null) {
+                removeAllManeuverMarkers();
+                showManeuvers(lastManeuverResult);
+            }
+        }
+        
         if (maneuverTypeSelectionChanged || showManeuverLossChanged) {
             if (!(timer.getPlayState() == PlayStates.Playing) && lastManeuverResult != null) {
                 removeAllManeuverMarkers();
