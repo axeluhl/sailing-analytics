@@ -284,17 +284,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * ranked better than the other one.
      */
     private int compareBySingleRaceColumnScore(Double o1Score, Double o2Score) {
-        final int result;
-        if (o1Score == null &&  o2Score == null) {
-            result = 0;
-        } else if (o1Score == null) {
-            result = 1;
-        } else if (o2Score == null) {
-            result = -1;
-        } else {
-            result = getScoreComparator().compare(o1Score, o2Score);
-        }
-        return result;
+        return Comparator.nullsLast((Double o1s, Double o2s)->getScoreComparator().compare(o1s, o2s)).compare(o1Score, o2Score);
     }
 
     private int compareByArbitraryButStableCriteria(Competitor o1, Competitor o2) {
@@ -307,11 +297,13 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      */
     private int compareByMedalRaceScore(Double o1MedalRaceScore, Double o2MedalRaceScore) {
         assert o1MedalRaceScore != null || o2MedalRaceScore == null;
+        final int result;
         if (o1MedalRaceScore != null) {
-            return getScoreComparator().compare(o1MedalRaceScore, o2MedalRaceScore);
+            result = getScoreComparator().compare(o1MedalRaceScore, o2MedalRaceScore);
         } else {
-            return 0;
+            result = 0;
         }
+        return result;
     }
 
     private static class FleetComparisonResult {
