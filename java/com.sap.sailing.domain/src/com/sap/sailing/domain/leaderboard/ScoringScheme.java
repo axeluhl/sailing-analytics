@@ -130,6 +130,14 @@ public interface ScoringScheme extends Serializable {
     default boolean isMedalWinAmountCriteria() {
         return false;
     }
+    
+    default boolean isCarryForwardInMedalsCriteria() {
+        return false;
+    }
+    
+    default boolean isLastMedalRaceCriteria() {
+        return false;
+    }
 
     default int getTargetAmountOfMedalRaceWins() {
         throw new IllegalStateException("This call is not valid for this scoringSheme");

@@ -17,6 +17,16 @@ public class LowPointFirstToWinTwoRaces extends LowPoint {
     }
     
     @Override
+    public boolean isCarryForwardInMedalsCriteria() {
+        return true;
+    }
+    
+    @Override
+    public boolean isLastMedalRaceCriteria() {
+        return true;
+    }
+    
+    @Override
     public int getTargetAmountOfMedalRaceWins() {
         return 2;
     }

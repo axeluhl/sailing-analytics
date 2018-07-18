@@ -111,6 +111,10 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         double o2ScoreSum = getLeaderboard().getCarriedPoints(o2);
         Double o1MedalRaceScore = 0.0;
         Double o2MedalRaceScore = 0.0;
+        Double o1CarryForwardScoreInMedals = null;
+        Double o2CarryForwardScoreInMedals = null;
+        Double o1LastMedalScore = null;
+        Double o2LastMedalScore = null;
         // When a column has isStartsWithZeroScore, the competitor's score only need to be reset to zero if from there on
         // the competitor scored in this or any subsequent columns
         boolean needToResetO1ScoreUponNextValidResult = false;
@@ -180,6 +184,13 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                         if (o2Score != null) {
                             o2MedalRaceScore += o2Score;
                         }
+                        if (o1Score != null || o2Score != null) {
+                            o1LastMedalScore = o1Score;
+                            o2LastMedalScore = o2Score;
+                        }
+                    } else {
+                        o1CarryForwardScoreInMedals = o1Score;
+                        o2CarryForwardScoreInMedals = o2Score;
                     }
                     // similar to compareByFleet, however, tracking is not required; having medal race column points
                     // (tracked or manual) is sufficient
@@ -217,19 +228,29 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             if (result == 0) {
                 result = compareByScoreSum(o1ScoreSum, o2ScoreSum);
                 if (result == 0) {
-                    result = compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore);
+                    if (scoringScheme.isCarryForwardInMedalsCriteria()) {
+                        result = compareBySingleRaceColumnScore(o1CarryForwardScoreInMedals, o2CarryForwardScoreInMedals);
+                    }
                     if (result == 0) {
-                        result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2,
-                                Collections.unmodifiableList(o2Scores), timePoint);
+                        if (scoringScheme.isLastMedalRaceCriteria()) {
+                            result = compareBySingleRaceColumnScore(o1LastMedalScore, o2LastMedalScore);
+                        }
                         if (result == 0) {
-                            // compare by last race:
-                            result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter,
-                                    o1, o2);
+                            result = compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore);
                             if (result == 0) {
-                                result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2,
-                                        timePoint);
+                                result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2,
+                                        Collections.unmodifiableList(o2Scores), timePoint);
                                 if (result == 0) {
-                                    result = compareByArbitraryButStableCriteria(o1, o2);
+                                    // compare by last race:
+                                    result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter,
+                                            o1, o2);
+                                    if (result == 0) {
+                                        result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2,
+                                                timePoint);
+                                        if (result == 0) {
+                                            result = compareByArbitraryButStableCriteria(o1, o2);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -254,6 +275,19 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             return 1;
         }
         return 0;
+    }
+    
+    private int compareBySingleRaceColumnScore(Double o1CarryForwardInMedals, Double o2CarryForwardInMedals) {
+        if (o1CarryForwardInMedals == null &&  o2CarryForwardInMedals == null) {
+            return 0;
+        }
+        if (o1CarryForwardInMedals == null) {
+            return 1;
+        }
+        if (o2CarryForwardInMedals == null) {
+            return -1;
+        }
+        return getScoreComparator().compare(o1CarryForwardInMedals, o2CarryForwardInMedals);
     }
 
     private int compareByArbitraryButStableCriteria(Competitor o1, Competitor o2) {
