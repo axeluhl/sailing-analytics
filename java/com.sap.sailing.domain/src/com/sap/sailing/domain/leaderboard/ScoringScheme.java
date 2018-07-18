@@ -155,10 +155,6 @@ public interface ScoringScheme extends Serializable {
         throw new IllegalStateException("This call is not valid for this scoringSheme");
     }
 
-    default boolean doesCountAsWinInMedalRace(Double o1Score, RaceColumn raceColumn) {
-        throw new IllegalStateException("This call is not valid for this scoringSheme");
-    }
-
     /**
      * Usually, the scores in each leaderboard column count as they are for the overall score. However, if a column is a
      * medal race column it usually counts double. Under certain circumstances, columns may also count with factors

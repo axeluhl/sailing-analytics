@@ -959,5 +959,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         return Util.getDominantObject(StreamSupport.stream(allBoats.spliterator(), /* parallel */ false)
                 .map(b -> b.getBoatClass()).collect(Collectors.toList()));
     }
+    
+    
 
 }
