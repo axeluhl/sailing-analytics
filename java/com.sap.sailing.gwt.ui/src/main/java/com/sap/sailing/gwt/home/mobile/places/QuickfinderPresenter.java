@@ -80,12 +80,12 @@ public class QuickfinderPresenter {
         }, seriesName, eventsOfSeries);
     }
     
-    public static <T extends EventReferenceDTO> QuickfinderPresenter getForSeriesEventOverview(Quickfinder quickfinder, String seriesName,
-            final SeriesEventOverviewNavigationProvider navigator, Collection<T> eventsOfSeries) {
+    public static <T extends EventAndLeaderboardReferenceWithStateDTO> QuickfinderPresenter getForSeriesEventOverview(Quickfinder quickfinder, String seriesName,
+            final SeriesEventLeaderboardOverviewNavigationProvider navigator, Collection<T> eventsOfSeries) {
         return new QuickfinderPresenter(quickfinder, MSG.eventQuickfinder(), new SeriesEventPlaceNaviationProvider<T>() {
             @Override
             public PlaceNavigation<?> getPlaceNavigation(T event) {
-                return navigator.getSeriesEventOverviewNavigation(event.getId());
+                return navigator.getSeriesEventLeaderboardOverviewNavigation(event.getId(), event.getLeaderboardName());
             }
             
             @Override

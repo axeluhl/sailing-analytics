@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.home.mobile.partials.updatesBox.NewsItemLinkProvider;
 import com.sap.sailing.gwt.home.mobile.places.RegattaLeaderboardNavigationProvider;
 import com.sap.sailing.gwt.home.mobile.places.RegattaOverviewNavigationProvider;
 import com.sap.sailing.gwt.home.mobile.places.RegattaRacesNavigationProvider;
-import com.sap.sailing.gwt.home.mobile.places.SeriesEventOverviewNavigationProvider;
+import com.sap.sailing.gwt.home.mobile.places.SeriesEventLeaderboardOverviewNavigationProvider;
 import com.sap.sailing.gwt.home.mobile.places.SeriesEventRacesNavigationProvider;
 import com.sap.sailing.gwt.home.mobile.places.SeriesLeaderboardNavigationProvider;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
@@ -38,7 +38,7 @@ public interface EventViewBase extends IsWidget {
 
     public interface Presenter extends RegattaLeaderboardNavigationProvider, SeriesLeaderboardNavigationProvider,
             RegattaRacesNavigationProvider, SeriesEventRacesNavigationProvider, RegattaOverviewNavigationProvider,
-            SeriesEventOverviewNavigationProvider, NewsItemLinkProvider {
+            SeriesEventLeaderboardOverviewNavigationProvider, NewsItemLinkProvider {
         
         EventContext getCtx();
 

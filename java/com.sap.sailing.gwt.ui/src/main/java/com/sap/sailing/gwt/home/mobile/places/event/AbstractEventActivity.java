@@ -252,8 +252,8 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     @Override
-    public PlaceNavigation<?> getSeriesEventOverviewNavigation(UUID eventId) {
-        return clientFactory.getNavigator().getEventNavigation(new EventDefaultPlace(eventId.toString()), null, false);
+    public PlaceNavigation<?> getSeriesEventLeaderboardOverviewNavigation(UUID eventId, String leaderboardName) {
+        return clientFactory.getNavigator().getEventNavigation(new RegattaOverviewPlace(eventId.toString(), leaderboardName), null, false);
     }
     
     public PlaceNavigation<?> getSeriesNavigationForCurrentEvent() {
