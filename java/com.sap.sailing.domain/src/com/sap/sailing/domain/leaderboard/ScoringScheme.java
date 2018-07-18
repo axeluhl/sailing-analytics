@@ -172,8 +172,4 @@ public interface ScoringScheme extends Serializable {
         }
         return factor;
     }
-
-    default double getTargetAmountOfMedalRaceWinsScore() {
-        throw new IllegalStateException("This call is not valid for this scoringSheme");
-    };
 }

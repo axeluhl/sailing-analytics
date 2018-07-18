@@ -49,10 +49,4 @@ public class LowPointFirstToWinTwoRaces extends LowPoint {
         }
         return factor;
     }
-    
-    @Override
-    public double getTargetAmountOfMedalRaceWinsScore() {
-        return 2.0;
-    }
-    
 }

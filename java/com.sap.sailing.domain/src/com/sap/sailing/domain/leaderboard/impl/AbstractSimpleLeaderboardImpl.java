@@ -493,7 +493,6 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         // from there on
         boolean needToResetScoreUponNextNonEmptyEntry = false;
         double result = getCarriedPoints(competitor);
-        int wonRaces = 0;
         final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this,
                 raceColumnsToConsider, timePoint);
         for (RaceColumn raceColumn : raceColumnsToConsider) {
@@ -505,19 +504,10 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
                 if (netPoints != null) {
                     if (needToResetScoreUponNextNonEmptyEntry) {
                         result = 0;
-                        wonRaces = 0;
                         needToResetScoreUponNextNonEmptyEntry = false;
                     }
                     result += netPoints;
-                    if (getScoringScheme().isMedalWinAmountCriteria() && raceColumn.isMedalRace()) {
-                        wonRaces += getScoringScheme().doesCountAsWinInMedalRace(netPoints, raceColumn) ? 1 : 0;
-                    }
                 }
-            }
-        }
-        if (getScoringScheme().isMedalWinAmountCriteria()) {
-            if (wonRaces == getScoringScheme().getTargetAmountOfMedalRaceWins()) {
-                return getScoringScheme().getTargetAmountOfMedalRaceWinsScore();
             }
         }
         return result;
