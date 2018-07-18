@@ -11,6 +11,7 @@ import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -42,14 +43,20 @@ public abstract class AbstractBranchStartActivity<C extends BaseCheckinData> ext
 
     @Override
     public void onStart() {
+
         super.onStart();
 
         Branch.getInstance().initSession(new Branch.BranchReferralInitListener() {
             @Override
             public void onInitFinished(JSONObject referringParams, BranchError error) {
                 if (error == null) {
-                    ExLog.i(AbstractBranchStartActivity.this, "BRANCH SDK", referringParams.toString());
                     try {
+                        Boolean clickedBranchLink = referringParams.getBoolean("+clicked_branch_link");
+                        if (!clickedBranchLink) {
+                            AbstractBranchStartActivity.this.handleLegacyStart();
+                            return;
+                        }
+                        ExLog.i(AbstractBranchStartActivity.this, "BRANCH SDK", referringParams.toString());
                         String checkinUrl = referringParams.getString("checkinUrl");
                         if (checkinUrl != null) {
                             if (BuildConfig.DEBUG) {
@@ -66,6 +73,18 @@ public abstract class AbstractBranchStartActivity<C extends BaseCheckinData> ext
             }
         }, this.getIntent().getData(), this);
 
+    }
+
+    private void handleLegacyStart() {
+        Intent intent = getIntent();
+        Uri uri = intent.getData();
+        if (uri != null) {
+            if (BuildConfig.DEBUG) {
+                ExLog.i(this, TAG, "Matched URL, handling scanned or matched URL.");
+            }
+            getHomeFragment().handleScannedOrUrlMatchedUri(uri);
+        }
+        intent.setData(null);
     }
 
     public abstract AbstractHomeFragment getHomeFragment();
