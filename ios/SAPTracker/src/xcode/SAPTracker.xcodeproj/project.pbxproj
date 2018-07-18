@@ -743,7 +743,7 @@
 		9E95C3D51C723AB30016632B /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B3150B2920FE3280006D742A /* SAPTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SAPTracker.entitlements; sourceTree = "<group>"; };
-		B3150BAA20FF4518006D742A /* Branch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Branch.framework; path = SAPTracker/Libraries/Branch.framework; sourceTree = "<group>"; };
+		B3150BAA20FF4518006D742A /* Branch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Branch.framework; sourceTree = "<group>"; };
 		B3150BAE20FF452C006D742A /* AdSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdSupport.framework; path = System/Library/Frameworks/AdSupport.framework; sourceTree = SDKROOT; };
 		B3150BB020FF4532006D742A /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
 		B3150BB220FF453D006D742A /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
@@ -918,6 +918,7 @@
 		7AC6457280AEA3EC18F5E846 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B3150BAA20FF4518006D742A /* Branch.framework */,
 				B3150BB620FF454D006D742A /* iAd.framework */,
 				B3150BB420FF4548006D742A /* CoreSpotlight.framework */,
 				B3150BB220FF453D006D742A /* MobileCoreServices.framework */,
@@ -1252,7 +1253,6 @@
 		7F83F14719F154F000C53328 = {
 			isa = PBXGroup;
 			children = (
-				B3150BAA20FF4518006D742A /* Branch.framework */,
 				7AC6457280AEA3EC18F5E846 /* Frameworks */,
 				7F83F15119F154F000C53328 /* Products */,
 				7F83F15219F154F000C53328 /* SAPTracker */,
