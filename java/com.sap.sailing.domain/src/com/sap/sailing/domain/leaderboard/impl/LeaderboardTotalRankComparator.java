@@ -256,10 +256,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                         }
                     }
                 }
-            } else {
-                System.out.println("chjeck me");
             }
-
         }
         return result;
     }
