@@ -58,14 +58,12 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     private void manuallyTransferCarry(Leaderboard leaderboard, List<Competitor> medalCompetitors) {
         int carryScore = 1;
         for (Competitor medalCompetitor : medalCompetitors) {
-            leaderboard.getScoreCorrection().correctScore(medalCompetitor, leaderboard.getRaceColumnByName("Carry"),
-                    carryScore++);
+            leaderboard.getScoreCorrection().correctScore(medalCompetitor, leaderboard.getRaceColumnByName("Carry"), carryScore++);
         }
     }
 
     private Regatta setupRegatta(boolean useFirstTwoWins) {
-        final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("470",
-                /* typicallyStartsUpwind */ true);
+        final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass,
                 false, /* startDate */ null, /* endDate */ null, series, /* persistent */false,
                 DomainFactory.INSTANCE
@@ -442,7 +440,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
      * medalseries.
      */
     @Test
-    public void noTwoWinsAbortAfterTwoRacesAndTieBraker() throws NoWindException {
+    public void noTwoWinsAbortAfterTwoRacesAndTieBreaker() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
         setupQualificationSeriesWithOneRaceColumn();
@@ -812,7 +810,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
      * Using normal lowpoints, tie braking is done with manual carry decimals.
      */
     @Test
-    public void negativeNoTwoWinsAbortAfterTwoRacesAndTieBraker() throws NoWindException {
+    public void negativeNoTwoWinsAbortAfterTwoRacesAndTieBreaker() throws NoWindException {
         series = new ArrayList<Series>();
         // -------- qualification series ------------
         setupQualificationSeriesWithOneRaceColumn();
