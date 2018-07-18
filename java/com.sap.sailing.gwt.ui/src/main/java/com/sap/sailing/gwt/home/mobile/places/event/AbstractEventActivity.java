@@ -110,7 +110,9 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     protected final void initQuickfinder(EventViewBase view, boolean showQuickfinder) {
         EventViewDTO event = eventDTO;
         final SeriesReferenceWithEventsDTO seriesData = event.getSeriesData();
-        if(showQuickfinder && seriesData != null) {
+        if (showQuickfinder && event.isMultiRegatta()) {
+            view.setQuickFinderValues(getRegattasByLeaderboardGroupName());
+        } else if(showQuickfinder && seriesData != null) {
             List<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeriesSorted = seriesData.getEventsOfSeries();
             List<EventAndLeaderboardReferenceWithStateDTO> seriesEventToShow = new ArrayList<>(eventsOfSeriesSorted.size());
             for (EventAndLeaderboardReferenceWithStateDTO seriesEvent : eventsOfSeriesSorted) {
@@ -119,8 +121,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
                 }
             }
             view.setQuickFinderValues(seriesData.getSeriesDisplayName(), seriesEventToShow);
-        } else if(showQuickfinder && event.isMultiRegatta()) {
-            view.setQuickFinderValues(getRegattasByLeaderboardGroupName());
         } else {
             view.hideQuickfinder();
         }

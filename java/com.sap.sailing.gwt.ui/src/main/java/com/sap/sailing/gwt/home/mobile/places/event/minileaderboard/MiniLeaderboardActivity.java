@@ -32,6 +32,9 @@ public class MiniLeaderboardActivity extends AbstractEventActivity<MiniLeaderboa
     @Override
     protected EventViewBase initView() {
         final MiniLeaderboardView view = new MiniLeaderboardViewImpl(this, flagImageResolver);
+        if (isMultiRegattaEvent()) {
+            initSeriesNavigation(view);
+        }
         initQuickfinder(view, true);
         return view;
     }
