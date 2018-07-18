@@ -57,3 +57,11 @@ The basic idea of setting up a build job is to create a so-called "free-style so
 * as Post-build Action, select "Publish JUnit test result report" and as Test report XMLs provide `**/TEST-*.xml` as the file pattern for the test reports.
 * check the "Additional test reports features / Measurement Plots" box
 * provide e-mail notification settings as you see fit
+
+## Hudson Master/Slave Set-Up
+
+In order to elastically scale our build / CI infrastructure, we use AWS to provide Hudson build slaves on demand. The Hudson Master (https://hudson.sapsailing.com) has a script obtained from our git at ``./configuration/launchhudsonslave`` which takes an Amazon Machine Image (AMI), launches it in our default region (eu-west-1) and connects to it. The AWS credentials are stored in the ``root`` account on ``hudson.sapsailing.com``, and the ``hudson`` user is granted access to the script by means of an ``/etc/sudoers.d`` entry.
+
+The image has been crafted specifically to contain the tools required for the build (as of this writing in particular Google Chrome, chromedriver and an old Firefox 26.0, plus a current Maven installation and the JDKs required for the build). Furthermore, the ephemeral storage is partitioned with a ``gpt`` label into a swap partition with 8GB and the remainder as an ``ext4`` partition mounted under ``/ephemeral/data`` with is then bound with a "bind" mount to ``/home/hudson/workspace``. See the ``/etc/systemd/system/mounthudsonworkspace.service`` systemd service definition on the slave instances. The ``launchhudsonslave`` script launches the instance, checks for it to enter the ``running`` state, then tries to connect using SSH with user ``hudson``. The respective keys are baked into the image and match up with the key stored in ``hudson@hudson.sapsailing.com:.ssh``.
+
+The ``launchhudsonslave`` script will then establish the SSH connection, launching the ``slave.jar`` connector. When the Hudson Master disconnects, the Java VM running ``slave.jar`` will terminate, and the next script command of ``launchhudsonslave`` will shutdown the host. This is possible for user ``hudson`` due to corresponding entries under ``/etc/sudoers.d``. The hosts are launched such that shutting them down will terminate the Amazon EC2 instance.

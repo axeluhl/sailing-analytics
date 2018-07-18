@@ -2634,12 +2634,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 maneuverTypeSelectionChanged = true;
             }
         }
-        if (maneuverTypeSelectionChanged) {
-            if (!(timer.getPlayState() == PlayStates.Playing) && lastManeuverResult != null) {
-                removeAllManeuverMarkers();
-                showManeuvers(lastManeuverResult);
-            }
-        }
         if (newSettings.isShowDouglasPeuckerPoints() != settings.isShowDouglasPeuckerPoints()) {
             if (!(timer.getPlayState() == PlayStates.Playing) && lastDouglasPeuckerResult != null && newSettings.isShowDouglasPeuckerPoints()) {
                 removeAllMarkDouglasPeuckerpoints();
@@ -2651,7 +2645,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (newSettings.getTailLengthInMilliseconds() != settings.getTailLengthInMilliseconds()) {
             requiresRedraw = true;
         }
-        if (newSettings.getBuoyZoneRadius() != settings.getBuoyZoneRadius()) {
+        if (!newSettings.getBuoyZoneRadius().equals(settings.getBuoyZoneRadius())) {
             requiresRedraw = true;
         }
         if (newSettings.isShowOnlySelectedCompetitors() != settings.isShowOnlySelectedCompetitors()) {
@@ -2696,6 +2690,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             requiresRedraw = true;
         }
         this.settings = newSettings;
+        
+        if (maneuverTypeSelectionChanged) {
+            if (!(timer.getPlayState() == PlayStates.Playing) && lastManeuverResult != null) {
+                removeAllManeuverMarkers();
+                showManeuvers(lastManeuverResult);
+            }
+        }
         
         if (requiresUpdateCoordinateSystem) {
             updateCoordinateSystemFromSettings();
