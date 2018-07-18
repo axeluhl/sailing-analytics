@@ -284,16 +284,17 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * ranked better than the other one.
      */
     private int compareBySingleRaceColumnScore(Double o1CarryForwardInMedals, Double o2CarryForwardInMedals) {
+        final int result;
         if (o1CarryForwardInMedals == null &&  o2CarryForwardInMedals == null) {
-            return 0;
+            result = 0;
+        } else if (o1CarryForwardInMedals == null) {
+            result = 1;
+        } else if (o2CarryForwardInMedals == null) {
+            result = -1;
+        } else {
+            result = getScoreComparator().compare(o1CarryForwardInMedals, o2CarryForwardInMedals);
         }
-        if (o1CarryForwardInMedals == null) {
-            return 1;
-        }
-        if (o2CarryForwardInMedals == null) {
-            return -1;
-        }
-        return getScoreComparator().compare(o1CarryForwardInMedals, o2CarryForwardInMedals);
+        return result;
     }
 
     private int compareByArbitraryButStableCriteria(Competitor o1, Competitor o2) {
