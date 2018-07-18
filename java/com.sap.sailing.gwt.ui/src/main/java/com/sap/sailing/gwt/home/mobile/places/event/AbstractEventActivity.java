@@ -89,7 +89,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         if (seriesData != null) {
             final UUID seriesLeaderboardGroupId = seriesData.getSeriesLeaderboardGroupId();
             PlaceNavigation<?> navigation = clientFactory.getNavigator().getEventSeriesNavigation(SeriesContext.createWithLeaderboardGroupId(seriesLeaderboardGroupId), null, false);
-            view.setSeriesNavigation(eventDTO.getSeriesName(), navigation);
+            view.setSeriesNavigation(seriesData.getSeriesDisplayName(), navigation);
         }
     }
     

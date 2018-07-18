@@ -107,9 +107,6 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         if (relevantLeaderboardGroupsOfEvent.size() == 1) {
             final LeaderboardGroup singleLeaderboardGroup = relevantLeaderboardGroupsOfEvent.iterator().next();
             if (singleLeaderboardGroup.hasOverallLeaderboard()) {
-                // The event is part of one series and does not host any further Regattas
-                dto.setSeriesName(HomeServiceUtil.getLeaderboardDisplayName(singleLeaderboardGroup));
-
                 final List<EventAndLeaderboardReferenceWithStateDTO> eventAndLeaderboardReferencesForSeriesOrdered = HomeServiceUtil
                         .getEventAndLeaderboardReferencesForSeriesOrdered(singleLeaderboardGroup,
                                 context.getRacingEventService());

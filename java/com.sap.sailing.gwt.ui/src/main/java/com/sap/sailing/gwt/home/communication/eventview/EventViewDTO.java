@@ -22,7 +22,6 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     private SeriesReferenceWithEventsDTO seriesData;
     private boolean hasMedia;
     private boolean hasAnalytics;
-    private String seriesName;
     private ImageDTO logoImage;
     private String officialWebsiteURL;
     private String sailorsInfoWebsiteURL;
@@ -36,17 +35,6 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     public String getVenueCountry() {
         // FIXME: We need a country?
         return "";
-    }
-    
-    public void setSeriesName(String seriesName) {
-        this.seriesName = seriesName;
-    }
-
-    public String getSeriesName() {
-        return seriesName;
-    }
-    public String getSeriesIdAsString() {
-        return getId().toString();
     }
 
     public boolean isHasMedia() {
