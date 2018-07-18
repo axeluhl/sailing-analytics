@@ -246,7 +246,8 @@ public class LeaderboardContext {
             for (final LeaderboardGroup lg : leaderboardGroups) {
                 regattaDTO.addLeaderboardGroupName(lg.getDisplayName() != null ? lg.getDisplayName() : lg.getName());
             }
-        } else {
+        }
+        if (Util.size(leaderboardGroups) == 1) {
             final LeaderboardGroup singleLeaderboardGroup = leaderboardGroups.iterator().next();
             if (singleLeaderboardGroup.hasOverallLeaderboard()) {
                 regattaDTO.setSeriesReference(
