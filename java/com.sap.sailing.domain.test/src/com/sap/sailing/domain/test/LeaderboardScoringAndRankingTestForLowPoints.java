@@ -435,7 +435,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     }
 
     /**
-     * In this test the no finalist reaches two wins before terminating (eg. due to bad weather) all finalists should be
+     * In this test no finalist reaches two wins before terminating (eg. due to bad weather) all finalists should be
      * scored with Low_Points restarting at 0 for the medal series. The non finalists score should not change during the
      * medalseries.
      */
@@ -641,7 +641,10 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Assert.assertEquals(10.0, leaderboard.getNetPoints(preFirst, m2later), EPSILON);
         Assert.assertEquals(18, leaderboard.getNetPoints(preThird, m2later), EPSILON);
         Assert.assertEquals(24, leaderboard.getNetPoints(preFourth, m2later), EPSILON);
-
+        Assert.assertEquals(1, leaderboard.getTotalRankOfCompetitor(preSecond, m2later));
+        Assert.assertEquals(2, leaderboard.getTotalRankOfCompetitor(preFirst, m2later));
+        Assert.assertEquals(3, leaderboard.getTotalRankOfCompetitor(preThird, m2later));
+        Assert.assertEquals(4, leaderboard.getTotalRankOfCompetitor(preFourth, m2later));
         List<Pair<Competitor, Double>> afterFinalResults = createCompetitorResultForTimestamp(m2later, leaderboard);
         assertNonFinalistsAreBehindFinalistsAndNotChanged(preSeriesScoreRankResult, afterFinalResults);
     }
