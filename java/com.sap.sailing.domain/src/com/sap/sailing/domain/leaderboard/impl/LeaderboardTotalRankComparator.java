@@ -240,15 +240,12 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                         if (result == 0) {
                             result = compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore);
                             if (result == 0) {
-                                result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2,
-                                        Collections.unmodifiableList(o2Scores), timePoint);
+                                result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2, Collections.unmodifiableList(o2Scores), timePoint);
                                 if (result == 0) {
                                     // compare by last race:
-                                    result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter,
-                                            o1, o2);
+                                    result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter, o1, o2);
                                     if (result == 0) {
-                                        result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2,
-                                                timePoint);
+                                        result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
                                         if (result == 0) {
                                             result = compareByArbitraryButStableCriteria(o1, o2);
                                         }
