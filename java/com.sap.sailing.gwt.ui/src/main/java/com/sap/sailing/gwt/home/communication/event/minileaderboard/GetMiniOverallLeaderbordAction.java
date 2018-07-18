@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.LeaderboardContext;
@@ -23,8 +24,9 @@ import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
  * otherwise.
  * </p>
  */
-public class GetMiniOverallLeaderbordAction implements SailingAction<ResultWithTTL<GetMiniLeaderboardDTO>>, IsClientCacheable {
+public class GetMiniOverallLeaderbordAction implements SailingAction<ResultWithTTL<GetMiniLeaderboardDTO>>, IsClientCacheable, ProvidesLeaderboardRouting {
     private UUID leaderboardGroupUUID;
+    private String leaderboardName;
     private int limit = 0;
 
     @SuppressWarnings("unused")
@@ -38,8 +40,8 @@ public class GetMiniOverallLeaderbordAction implements SailingAction<ResultWithT
      * @param leaderboardGroupUUID
      *            {@link UUID} of the series to load data for
      */
-    public GetMiniOverallLeaderbordAction(UUID leaderboardGroupUUID) {
-        this(leaderboardGroupUUID, 0);
+    public GetMiniOverallLeaderbordAction(UUID leaderboardGroupUUID, String leaderboardName) {
+        this(leaderboardGroupUUID, leaderboardName, 0);
     }
     
     /**
@@ -51,8 +53,9 @@ public class GetMiniOverallLeaderbordAction implements SailingAction<ResultWithT
      * @param limit
      *            maximum number of entries to be loaded
      */
-    public GetMiniOverallLeaderbordAction(UUID leaderboardGroupUUID, int limit) {
+    public GetMiniOverallLeaderbordAction(UUID leaderboardGroupUUID, String leaderboardName, int limit) {
         this.leaderboardGroupUUID = leaderboardGroupUUID;
+        this.leaderboardName = leaderboardName;
         this.limit = limit;
     }
 
@@ -72,5 +75,10 @@ public class GetMiniOverallLeaderbordAction implements SailingAction<ResultWithT
     @Override
     public void cacheInstanceKey(StringBuilder key) {
         key.append(leaderboardGroupUUID).append("_").append(limit);
+    }
+
+    @Override
+    public String getLeaderboardName() {
+        return leaderboardName;
     }
 }
