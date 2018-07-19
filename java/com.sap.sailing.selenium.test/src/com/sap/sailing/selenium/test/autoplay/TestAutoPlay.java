@@ -11,6 +11,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -94,16 +95,11 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         assertTrue("Url does not contain proper type " + url, url.contains("autoplayType=SIXTYINCH"));
         assertTrue("Url does not contain proper name " + url, url.contains("name=BMW+Cup+(J80)"));
         AutoPlayUpcomingView autoplayPage = page.goToAutoPlaySixtyInchUrl(getWebDriver(), url);
-        // give some extra time to load the leaderboard and finish the animation
-        try {
-            Thread.sleep(15000);
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        }
         String nextUpText = autoplayPage.getText();
         assertEquals("There are no further races starting soon", nextUpText);
     }
 
+    @Ignore
     @Test
     public void testClassicAutoPlayStartup() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
