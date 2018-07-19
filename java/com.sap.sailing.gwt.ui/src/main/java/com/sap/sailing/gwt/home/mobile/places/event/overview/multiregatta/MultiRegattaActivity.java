@@ -34,4 +34,8 @@ public class MultiRegattaActivity extends AbstractEventActivity<AbstractEventPla
         return view;
     }
 
+    @Override
+    protected boolean isRegattaLevel() {
+        return false;
+    }
 }

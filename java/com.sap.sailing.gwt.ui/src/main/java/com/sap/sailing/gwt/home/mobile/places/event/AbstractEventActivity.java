@@ -81,8 +81,8 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     protected final void initSeriesNavigation(EventViewBase view) {
         final EventSeriesReferenceDTO seriesData;
         final RegattaMetadataDTO regatta = getRegatta();
-        if (regatta != null) {
-            seriesData = regatta.getSeriesReference();
+        if (isRegattaLevel()) {
+            seriesData = (regatta != null) ? regatta.getSeriesReference() : null;
         } else {
             seriesData = eventDTO.getSeriesData();
         }
@@ -334,6 +334,10 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     @Override
     public boolean isMultiRegattaEvent() {
         return getEventDTO().isMultiRegatta();
+    }
+    
+    protected boolean isRegattaLevel() {
+        return true;
     }
 
     protected List<NavigationItem> getNavigationPathToEventLevel() {

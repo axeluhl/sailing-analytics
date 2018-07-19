@@ -39,4 +39,9 @@ public class MediaActivity extends AbstractEventActivity<AbstractEventPlace> imp
         });
         return view;
     }
+    
+    @Override
+    protected boolean isRegattaLevel() {
+        return !isMultiRegattaEvent();
+    }
 }
