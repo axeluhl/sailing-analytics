@@ -475,7 +475,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
             if (totalPoints == null) {
                 result = null;
             } else {
-                result = raceColumn.getFactor() * totalPoints;
+                result = getScoringScheme().getScoreFactor(raceColumn) * totalPoints;
             }
         }
         return result;
@@ -663,7 +663,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         return new EntryImpl(trackedRankProvider, correctedScore, () -> correctedResults.getUncorrectedScore(),
                 correctedResults.isCorrected(),
                 discarded ? DOUBLE_0
-                        : correctedScore == null ? null : Double.valueOf(correctedScore * race.getFactor()),
+                        : correctedScore == null ? null : Double.valueOf(correctedScore * getScoringScheme().getScoreFactor(race)),
                 correctedResults.getMaxPointsReason(), discarded, race.getFleetOfCompetitor(competitor));
     }
 
@@ -738,7 +738,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
                         () -> correctedResults.getUncorrectedScore(), correctedResults.isCorrected(),
                         discarded ? DOUBLE_0
                                 : (correctedScore == null ? null
-                                        : Double.valueOf((correctedScore * raceColumn.getFactor()))),
+                                        : Double.valueOf((correctedScore * getScoringScheme().getScoreFactor(raceColumn)))),
                         correctedResults.getMaxPointsReason(), discarded, raceColumn.getFleetOfCompetitor(competitor));
                 result.put(new com.sap.sse.common.Util.Pair<Competitor, RaceColumn>(competitor, raceColumn), entry);
             }
@@ -959,5 +959,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         return Util.getDominantObject(StreamSupport.stream(allBoats.spliterator(), /* parallel */ false)
                 .map(b -> b.getBoatClass()).collect(Collectors.toList()));
     }
+    
+    
 
 }
