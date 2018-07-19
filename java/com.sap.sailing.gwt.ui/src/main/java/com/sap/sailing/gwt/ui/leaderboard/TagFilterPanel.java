@@ -4,17 +4,36 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TagSelectionProvider;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorSelectionProviderFilterContext;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorTotalRankFilter;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsJsonDeSerializer;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterUIFactory;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
+import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFilterContext;
+import com.sap.sailing.gwt.ui.client.shared.filter.SelectedTagsFilter;
+import com.sap.sailing.gwt.ui.client.shared.filter.TagSelectionProviderFilterContext;
+import com.sap.sailing.gwt.ui.client.shared.filter.SelectedRaceFilterContext;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsDialog;
+import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsJsonDeSerializer;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterResources.CompetitorFilterCss;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
+import com.sap.sse.common.filter.BinaryOperator;
+import com.sap.sse.common.filter.Filter;
+import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -23,6 +42,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * 
  */
 public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWithUI<TagDTO>{
+    
+    private final static String LOCAL_STORAGE_TAGS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.tagsFilterSets";
     
     private final static CompetitorFilterCss css = CompetitorFilterResources.INSTANCE.css();
     private final TextBox searchTextBox;
@@ -33,6 +54,9 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     private final FlowPanel searchBoxPanel;
     private final StringMessages stringMessages;
     private final TagsFilterSets tagsFilterSets;
+    private final TagSelectionProvider tagSelectionProvider = null;
+    
+    private FilterSet<TagDTO, FilterWithUI<TagDTO>> lastActiveTagFilterSet;
 
     public TagFilterPanel(RaceIdentifier selectedRaceIdentifier, StringMessages stringMessages, TagsFilterSets tagsFilterSets) {
         css.ensureInjected();
@@ -40,6 +64,15 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         this.stringMessages = stringMessages;
         this.tagsFilterSets = tagsFilterSets;
         this.setStyleName(css.competitorFilterContainer());
+        
+        TagsFilterSets loadedTagsFilterSets = loadTagsFilterSets();
+        if (loadedTagsFilterSets != null) {
+            tagsFilterSets = loadedTagsFilterSets;
+            insertSelectedTagsFilter(tagsFilterSets);
+        } else {
+            tagsFilterSets = createAndAddDefaultTagsFilter();
+            storeTagsFilterSets(tagsFilterSets);
+        }
         
         
         Button submitButton = new Button();
@@ -99,14 +132,14 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
                 stringMessages, new DialogCallback<TagsFilterSets>() {
             @Override
             public void ok(final TagsFilterSets newTagsFilterSets) {
-                /*tagsFilterSets.getFilterSets().clear();
+                tagsFilterSets.getFilterSets().clear();
                 tagsFilterSets.getFilterSets().addAll(newTagsFilterSets.getFilterSets());
                 tagsFilterSets.setActiveFilterSet(newTagsFilterSets.getActiveFilterSet());
                 
                 updateTagsFilterContexts(newTagsFilterSets);
                 tagSelectionProvider.setTagsFilterSet(newTagsFilterSets.getActiveFilterSetWithGeneralizedType());
                 updateTagsFilterControlState(newTagsFilterSets);
-                storeTagsFilterSets(newTagsFilterSets);*/
+                storeTagsFilterSets(newTagsFilterSets);
              }
 
             @Override
@@ -116,6 +149,99 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         });
         
         tagsFilterSetsDialog .show();
+    }
+    
+    private void insertSelectedTagsFilter(TagsFilterSets filterSet) {
+        // selected tags filter
+        FilterSet<TagDTO, FilterWithUI<TagDTO>> selectedTagsFilterSet = 
+                new FilterSet<TagDTO, FilterWithUI<TagDTO>>(stringMessages.selectedCompetitors());
+        selectedTagsFilterSet.setEditable(false);
+        SelectedTagsFilter selectedTagsFilter = new SelectedTagsFilter();
+        selectedTagsFilter.setTagSelectionProvider(tagSelectionProvider);
+        selectedTagsFilterSet.addFilter(selectedTagsFilter);
+        filterSet.addFilterSet(0, selectedTagsFilterSet);
+    }
+    
+    private void updateTagsFilterContexts(TagsFilterSets filterSets) {
+        for (FilterSet<TagDTO, FilterWithUI<TagDTO>> filterSet : filterSets.getFilterSets()) {
+            for (Filter<TagDTO> filter : filterSet.getFilters()) {
+                if (filter instanceof TagSelectionProviderFilterContext) {
+                    ((TagSelectionProviderFilterContext) filter)
+                            .setTagSelectionProvider(tagSelectionProvider);
+                }
+            }
+        }
+    }
+
+    /**
+     * Updates the tags filter checkbox state by setting its check mark and updating its label according to the
+     * current filter selected
+     */
+    private void updateTagsFilterControlState(TagsFilterSets filterSets) {
+        String tagsFilterTitle = stringMessages.competitorsFilter();
+        FilterSet<TagDTO, FilterWithUI<TagDTO>> activeFilterSet = filterSets.getActiveFilterSet();
+        if (activeFilterSet != null) {
+            if (lastActiveTagFilterSet == null) {
+                filterSettingsButton.removeStyleName(css.filterInactiveButtonBackgroundImage());
+                filterSettingsButton.addStyleName(css.filterActiveButtonBackgroundImage());
+            }
+            lastActiveTagFilterSet = activeFilterSet;
+        } else {
+            if (lastActiveTagFilterSet != null) {
+                filterSettingsButton.removeStyleName(css.filterActiveButtonBackgroundImage());
+                filterSettingsButton.addStyleName(css.filterInactiveButtonBackgroundImage());
+            }
+            lastActiveTagFilterSet = null;
+        }
+        if (lastActiveTagFilterSet != null) {
+            filterSettingsButton.setTitle(tagsFilterTitle+" ("+lastActiveTagFilterSet.getName()+")");
+        } else {
+            filterSettingsButton.setTitle(tagsFilterTitle);
+        }
+    }
+    
+   private TagsFilterSets loadTagsFilterSets() {
+       TagsFilterSets result = null;
+        Storage localStorage = Storage.getLocalStorageIfSupported();
+        if (localStorage != null) {
+            try {
+                String jsonAsLocalStore = localStorage.getItem(LOCAL_STORAGE_TAGS_FILTER_SETS_KEY);
+                if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
+                    TagsFilterSetsJsonDeSerializer deserializer = new TagsFilterSetsJsonDeSerializer();
+                    JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
+                    if (value.isObject() != null) {
+                        result = deserializer.deserialize((JSONObject) value);
+                    }
+                }
+            } catch (Exception e) {
+                // exception during loading of tag filters from local storage
+            }
+        }
+        return result;
+    }
+
+    private void storeTagsFilterSets(TagsFilterSets newTagsFilterSets) {
+        Storage localStorage = Storage.getLocalStorageIfSupported();
+        if(localStorage != null) {
+            // delete old value
+            localStorage.removeItem(LOCAL_STORAGE_TAGS_FILTER_SETS_KEY);
+            
+            // store the tags filter set 
+            TagsFilterSetsJsonDeSerializer serializer = new TagsFilterSetsJsonDeSerializer();
+            JSONObject jsonObject = serializer.serialize(newTagsFilterSets);
+            localStorage.setItem(LOCAL_STORAGE_TAGS_FILTER_SETS_KEY, jsonObject.toString());
+        }
+    }
+    
+    private TagsFilterSets createAndAddDefaultTagsFilter() {
+        TagsFilterSets filterSets = new TagsFilterSets();
+        // 1. selected tags filter
+        insertSelectedTagsFilter(filterSets);
+        
+        FilterSet<TagDTO, FilterWithUI<TagDTO>> defaultTagFilterSet = new FilterSet<>("Default empty filter");
+        filterSets.addFilterSet(defaultTagFilterSet);
+
+        return filterSets;
     }
 
     private void clearSelection() {
