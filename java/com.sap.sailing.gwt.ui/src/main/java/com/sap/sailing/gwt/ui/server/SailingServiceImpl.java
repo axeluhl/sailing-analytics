@@ -397,6 +397,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
+import com.sap.sailing.gwt.ui.shared.ManeuverLossDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
@@ -2602,7 +2603,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     }
                 }    
                 final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(fleet);
-                RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
+                RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(),
+                        raceColumn.getExplicitFactor(), leaderboard.getScoringScheme().getScoreFactor(raceColumn),
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO, raceColumn instanceof MetaLeaderboardColumn);
@@ -3625,16 +3627,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final SpeedWithBearingDTO speedBefore = createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore());
             final SpeedWithBearingDTO speedAfter = createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter());
             final double directionChangeInDegrees = maneuver.getDirectionChangeInDegrees();
-            final Double maneuverLossInMeters = maneuver.getManeuverLoss() == null ? null : maneuver.getManeuverLoss().getMeters();
             final double maxTurningRateInDegreesPerSecond = maneuver.getMaxTurningRateInDegreesPerSecond();
             final double averageTurningRateInDegreesPerSecond = maneuver.getAvgTurningRateInDegreesPerSecond();
             final double lowestSpeedInKnots = maneuver.getLowestSpeed().getKnots();
             final Date markPassingTimePoint = maneuver.isMarkPassing()
                     ? maneuver.getMarkPassing().getTimePoint().asDate() : null;
             final NauticalSide markPassingSide = maneuver.isMarkPassing() ? maneuver.getToSide() : null;
-            result.add(new ManeuverDTO(type, newTack, position, timepoint, timePointBefore, speedBefore, speedAfter,
-                    directionChangeInDegrees, maneuverLossInMeters, maxTurningRateInDegreesPerSecond,
-                    averageTurningRateInDegreesPerSecond, lowestSpeedInKnots, markPassingTimePoint, markPassingSide));
+            final SpeedWithBearing speedWithBearingBeforeManeuverLoss = maneuver.getManeuverLoss() == null ? null
+                    : maneuver.getManeuverLoss().getSpeedWithBearingBefore();
+            final Double middleManeuverAngle = maneuver.getManeuverLoss() == null ? null : maneuver.getManeuverLoss().getMiddleManeuverAngle().getDegrees();
+            final ManeuverLossDTO maneuverLoss = maneuver.getManeuverLoss() == null ? null
+                    : new ManeuverLossDTO(maneuver.getManeuverLoss().getManeuverStartPosition(),
+                            maneuver.getManeuverLoss().getManeuverEndPosition(), speedWithBearingBeforeManeuverLoss, middleManeuverAngle,
+                            maneuver.getManeuverLoss().getManeuverDuration(), maneuver.getManeuverLoss().getProjectedDistanceLost());
+            result.add(new ManeuverDTO(type, newTack, position, timepoint, timePointBefore, speedBefore,
+                    speedAfter, directionChangeInDegrees, maxTurningRateInDegreesPerSecond,
+                    averageTurningRateInDegreesPerSecond, lowestSpeedInKnots, markPassingTimePoint, markPassingSide, maneuverLoss));
         }
         return result;
     }
@@ -6444,15 +6452,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived) {
-        if (newStartTimeReceived != null) {
-            RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(
-                    raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
-            DynamicTrackedRace trackedRace = getService().getTrackedRace(regattaAndRaceIdentifier);
-            trackedRace.setStartTimeReceived(new MillisecondsTimePoint(newStartTimeReceived));
-            
-            return baseDomainFactory.createRaceDTO(getService(), false, regattaAndRaceIdentifier, trackedRace);
-        }
-        return null;
+        RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(raceIdentifier.getRegattaName(),
+                raceIdentifier.getRaceName());
+        DynamicTrackedRace trackedRace = getService().getTrackedRace(regattaAndRaceIdentifier);
+        trackedRace.setStartTimeReceived(
+                newStartTimeReceived == null ? null : new MillisecondsTimePoint(newStartTimeReceived));
+        return baseDomainFactory.createRaceDTO(getService(), false, regattaAndRaceIdentifier, trackedRace);
     }
     
     @Override

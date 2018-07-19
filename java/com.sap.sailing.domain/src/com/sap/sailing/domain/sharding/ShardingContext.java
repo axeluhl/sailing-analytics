@@ -36,7 +36,6 @@ public class ShardingContext {
      */
     public static ShardingType identifyAndSetShardingConstraint(String shardingInfo) {
         if (shardingInfo == null || shardingInfo.isEmpty()) {
-            logger.warning("Empty sharding constraint");
             return null;
         }
         ThreadLocal<String> identifiedShardingHolder = null;
