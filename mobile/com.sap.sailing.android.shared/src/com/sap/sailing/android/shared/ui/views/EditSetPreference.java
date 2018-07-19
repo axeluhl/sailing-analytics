@@ -3,7 +3,6 @@ package com.sap.sailing.android.shared.ui.views;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import android.content.Context;
@@ -28,19 +27,19 @@ public class EditSetPreference extends DialogPreference {
 
     private static final String TAG = EditSetPreference.class.getName();
     
-    private static final List<String> defaultFallbackValue = new ArrayList<String>();
-    private List<String> currentValue;
+    private static final Set<String> defaultFallbackValue = new HashSet<String>();
+    private Set<String> currentValue;
     
-    private List<String> exampleValues;
+    private Set<String> exampleValues;
     
     public EditSetPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.exampleValues = new ArrayList<String>();
+        this.exampleValues = new HashSet<String>();
         setDialogLayoutResource(R.layout.edit_set_preference);
     }
 
     public void setExampleValues(String[] values) {
-        this.exampleValues = Arrays.asList(values);
+        this.exampleValues.addAll(Arrays.asList(values));
     }
 
     @Override
@@ -52,12 +51,12 @@ public class EditSetPreference extends DialogPreference {
         final ListView listView = (ListView) view.findViewById(R.id.edit_set_preference_list);
         
         // setup list view
-        final ArrayRemoveAdapter<String> adapter = new ArrayRemoveAdapter<String>(view.getContext(), currentValue);
+        final ArrayRemoveAdapter<String> adapter = new ArrayRemoveAdapter<String>(view.getContext(), new ArrayList<String>(currentValue));
         listView.setEmptyView(view.findViewById(R.id.edit_set_preference_list_empty));
         listView.setAdapter(adapter);
         
         // setup inputView
-        ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(view.getContext(), android.R.layout.simple_dropdown_item_1line, exampleValues);
+        ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(view.getContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<String>(exampleValues));
         inputView.setAdapter(autoCompleteAdapter);
         inputView.addTextChangedListener(new TextWatcher() {
             @Override
@@ -95,7 +94,7 @@ public class EditSetPreference extends DialogPreference {
             currentValue = getPersistedStringSet(defaultFallbackValue);
         } else {
             // Set default state from the XML attribute
-            currentValue = new ArrayList<String>((Set<String>) defaultValue);
+            currentValue = new HashSet<String>((Set<String>) defaultValue);
             persistStringSet(currentValue);
         }
     }
@@ -119,10 +118,11 @@ public class EditSetPreference extends DialogPreference {
         }
     }
 
-    private boolean persistStringSet(List<String> value) {
+    @Override
+    public boolean persistStringSet(Set<String> value) {
         if (shouldPersist()) {
             // Shouldn't store null
-            if (value == getPersistedStringSet(null)) {
+            if (value == this.getPersistedStringSet(null)) {
                 // It's already there, so the same as persisting
                 return true;
             }
@@ -137,8 +137,9 @@ public class EditSetPreference extends DialogPreference {
         }
         return false;
     }
-    
-    protected List<String> getPersistedStringSet(List<String> defaultReturnValue) {
+
+    @Override
+    public Set<String> getPersistedStringSet(Set<String> defaultReturnValue) {
         if (!shouldPersist()) {
             return defaultReturnValue;
         }
@@ -146,7 +147,7 @@ public class EditSetPreference extends DialogPreference {
         Set<String> fallbackDefault = defaultReturnValue == null ? null : new HashSet<String>(defaultReturnValue);
         Set<String> value = getSharedPreferences().getStringSet(getKey(), fallbackDefault);
         
-        return value == null ? null : new ArrayList<String>(value);
+        return value == null ? null : new HashSet<String>(value);
     }
 
 
