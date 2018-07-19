@@ -991,7 +991,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      */
     void checkIfRaceIsTracking(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
     
-    void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment, String imageURL, String username, TimePoint raceTimepoint, AsyncCallback<Void> asyncCallback);
+    void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment, String imageURL, TimePoint raceTimepoint, AsyncCallback<Void> asyncCallback);
     
     void getTags(String leaderboardName, String raceColumnName, String fleetName, TimePoint from, TimePoint to, AsyncCallback<List<TagDTO>> callback);
 }

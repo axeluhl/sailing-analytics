@@ -151,8 +151,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                 TagDTO tag = new TagDTO("Super Duper Tag!", "Fancy comment...", "https://localhost:8080/image/abc.png",
                         userService.getCurrentUser().getName(), new MillisecondsTimePoint(timer.getTime()));
                 sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag.getTag(),
-                        tag.getComment(), tag.getImageURL(), tag.getUsername(), tag.getRaceTimepoint(),
-                        new AsyncCallback<Void>() {
+                        tag.getComment(), tag.getImageURL(), tag.getRaceTimepoint(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 GWT.log("Could not add new tag to race log!", caught);

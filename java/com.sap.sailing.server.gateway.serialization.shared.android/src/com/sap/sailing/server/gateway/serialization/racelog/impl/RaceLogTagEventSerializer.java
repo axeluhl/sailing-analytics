@@ -11,7 +11,6 @@ public class RaceLogTagEventSerializer extends BaseRaceLogEventSerializer{
     
     public static final String VALUE_CLASS = RaceLogTagEvent.class.getSimpleName();
     public static final String FIELD_TAG = "tag";
-    public static final String FIELD_USER_NAME = "user_name";
     public static final String FIELD_COMMENT = "comment";
     public static final String FIELD_URL = "url";
 
@@ -29,7 +28,6 @@ public class RaceLogTagEventSerializer extends BaseRaceLogEventSerializer{
         RaceLogTagEvent tagEvent = (RaceLogTagEvent) object;
         JSONObject result = super.serialize(tagEvent);
         result.put(FIELD_TAG, tagEvent.getTag());
-        result.put(FIELD_USER_NAME, tagEvent.getUsername());
         result.put(FIELD_COMMENT, tagEvent.getComment());
         result.put(FIELD_URL, tagEvent.getImageURL());
         return result;

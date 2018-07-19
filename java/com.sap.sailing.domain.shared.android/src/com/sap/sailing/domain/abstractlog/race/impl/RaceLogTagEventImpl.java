@@ -12,23 +12,23 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
 
     private String tag, comment, imageURL, username;
 
-    public RaceLogTagEventImpl(String pTag, String pUsername, String pComment, String pImageURL, TimePoint createdAt,
+    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, TimePoint createdAt,
             TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable pId, int pPassId) {
         super(createdAt, logicalTimePoint, author, pId, pPassId);
         tag = pTag;
         comment = pComment;
         imageURL = pImageURL;
-        username = pUsername;
+        username = author.getName();
     }
 
-    public RaceLogTagEventImpl(String pTag, String pUsername, String pComment, String pImageURL, TimePoint createdAt,
+    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, TimePoint createdAt,
             TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId) {
-        this(pTag, pUsername, pComment, pImageURL, createdAt, logicalTimePoint, author, randId(), pPassId);
+        this(pTag, pComment, pImageURL, createdAt, logicalTimePoint, author, randId(), pPassId);
     }
 
-    public RaceLogTagEventImpl(String pTag, String pUsername, String pComment, String pImageURL,
+    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL,
             TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId) {
-        this(pTag, pUsername, pComment, pImageURL, now(), logicalTimePoint, author, randId(), pPassId);
+        this(pTag, pComment, pImageURL, now(), logicalTimePoint, author, randId(), pPassId);
     }
 
     @Override

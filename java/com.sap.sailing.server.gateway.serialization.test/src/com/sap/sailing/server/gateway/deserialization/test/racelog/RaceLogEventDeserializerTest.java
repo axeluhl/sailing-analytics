@@ -132,7 +132,7 @@ public class RaceLogEventDeserializerTest {
     
     @Test
     public void testSerializationAndDeserializationForRaceLogTagEvent() throws Exception{
-        RaceLogTagEventImpl originalEvent = new RaceLogTagEventImpl("tag", "username", "comment", "url", timePoint, timePoint2, author, UUID.randomUUID(), 3);
+        RaceLogTagEventImpl originalEvent = new RaceLogTagEventImpl("tag", "comment", "url", timePoint, timePoint2, author, UUID.randomUUID(), 3);
         RaceLogEventSerializer serializer = (RaceLogEventSerializer) RaceLogEventSerializer.create(CompetitorJsonSerializer.create());
         JSONObject object = serializer.serialize(originalEvent); 
         

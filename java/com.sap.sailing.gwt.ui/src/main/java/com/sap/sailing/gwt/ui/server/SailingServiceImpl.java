@@ -7787,7 +7787,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     public void visit(RaceLogTagEvent event) {
                         // TODO check if if condition is correct D067890
                         if (hasStartTime && isLatestPass(event)) {
-                            raceLog.add(new RaceLogTagEventImpl(event.getTag(), event.getUsername(), event.getComment(), event.getImageURL(), event.getCreatedAt(), event.getLogicalTimePoint(),
+                            raceLog.add(new RaceLogTagEventImpl(event.getTag(), event.getComment(), event.getImageURL(), event.getCreatedAt(), event.getLogicalTimePoint(),
                                     event.getAuthor(), raceLog.getCurrentPassId()));
                         }
                     }
@@ -7884,9 +7884,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment, String imageURL, String username, TimePoint raceTimepoint) {
+    public void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment, String imageURL, TimePoint raceTimepoint) {
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-        raceLog.add(new RaceLogTagEventImpl(tag, username, comment, imageURL, raceTimepoint, getService().getServerAuthor(), raceLog.getCurrentPassId()));
+        raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint, getService().getServerAuthor(), raceLog.getCurrentPassId()));
     }
     
     @Override

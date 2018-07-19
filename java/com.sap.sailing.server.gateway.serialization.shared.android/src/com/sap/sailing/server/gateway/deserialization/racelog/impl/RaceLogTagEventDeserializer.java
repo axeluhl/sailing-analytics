@@ -26,10 +26,9 @@ public class RaceLogTagEventDeserializer extends BaseRaceLogEventDeserializer{
             AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
         String tag = object.get(RaceLogTagEventSerializer.FIELD_TAG).toString();
-        String username = object.get(RaceLogTagEventSerializer.FIELD_USER_NAME).toString();
         String comment = object.get(RaceLogTagEventSerializer.FIELD_COMMENT).toString();
         String imageURL = object.get(RaceLogTagEventSerializer.FIELD_URL).toString();
-        return new RaceLogTagEventImpl(tag, username, comment, imageURL, createdAt, timePoint, author, id, passId);
+        return new RaceLogTagEventImpl(tag, comment, imageURL, createdAt, timePoint, author, id, passId);
     }
 
 }

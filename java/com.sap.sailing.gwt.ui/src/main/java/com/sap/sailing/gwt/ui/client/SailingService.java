@@ -784,7 +784,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     Boolean checkIfRaceIsTracking(RegattaAndRaceIdentifier race);
 
-    void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment, String imageURL, String username, TimePoint raceTimepoint);
+    void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment, String imageURL, TimePoint raceTimepoint);
     
     List<TagDTO> getTags(String leaderboardName, String raceColumnName, String fleetName, TimePoint from, TimePoint to);
 }
