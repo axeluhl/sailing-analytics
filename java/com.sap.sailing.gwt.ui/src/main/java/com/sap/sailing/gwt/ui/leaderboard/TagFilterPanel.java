@@ -9,10 +9,13 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterUIFactory;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterResources.CompetitorFilterCss;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
  * 
@@ -25,7 +28,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     private final TextBox searchTextBox;
     private final Button clearTextBoxButton;
     private final Button settingsButton;
-    private final Button advancedSettingsButton;
+    private final Button filterSettingsButton;
     private final RaceIdentifier selectedRaceIdentifier;
     private final FlowPanel searchBoxPanel;
     private final StringMessages stringMessages;
@@ -36,13 +39,6 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         this.stringMessages = stringMessages;
         this.setStyleName(css.competitorFilterContainer());
         
-        
-        settingsButton = new Button();
-        settingsButton.ensureDebugId("tagSettingsButton");
-        settingsButton.setTitle(stringMessages.settings());
-        settingsButton.setStyleName(css.button());
-        settingsButton.addStyleName(css.settingsButton());
-        settingsButton.addStyleName(css.settingsButtonBackgroundImage());
         
         Button submitButton = new Button();
         submitButton.setStyleName(css.button());
@@ -66,17 +62,25 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
             }
         });
         
-        advancedSettingsButton = new Button("");
-        advancedSettingsButton.setStyleName(css.button());
-        advancedSettingsButton.addStyleName(css.filterButton());
-        advancedSettingsButton.setTitle(stringMessages.competitorsFilter());
-        advancedSettingsButton.addStyleName(css.filterInactiveButtonBackgroundImage());
-        advancedSettingsButton.addClickHandler(new ClickHandler() {
+        settingsButton = new Button();
+        settingsButton.ensureDebugId("tagSettingsButton");
+        settingsButton.setTitle("settings");
+        settingsButton.setStyleName(css.button());
+        settingsButton.addStyleName(css.settingsButton());
+        settingsButton.addStyleName(css.settingsButtonBackgroundImage());
+        
+        filterSettingsButton = new Button("");
+        filterSettingsButton.setStyleName(css.button());
+        filterSettingsButton.addStyleName(css.filterButton());
+        filterSettingsButton.setTitle(stringMessages.competitorsFilter());
+        filterSettingsButton.addStyleName(css.filterInactiveButtonBackgroundImage());
+        filterSettingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                //showEditCompetitorsFiltersDialog();
+                showEditTagsFiltersDialog();
             }
         });
+        
         
         searchBoxPanel = new FlowPanel();
         searchBoxPanel.setStyleName(css.searchBox());
@@ -85,10 +89,34 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         searchBoxPanel.add(clearTextBoxButton);
         add(searchBoxPanel);
         add(settingsButton);
-        add(advancedSettingsButton);
+        add(filterSettingsButton);
+    }
+    
+    private void showEditTagsFiltersDialog() {
+        /*CompetitorsFilterSetsDialog competitorsFilterSetsDialog = new CompetitorsFilterSetsDialog(competitorsFilterSets,
+                stringMessages, new DialogCallback<CompetitorsFilterSets>() {
+            @Override
+            public void ok(final CompetitorsFilterSets newCompetitorsFilterSets) {
+                competitorsFilterSets.getFilterSets().clear();
+                competitorsFilterSets.getFilterSets().addAll(newCompetitorsFilterSets.getFilterSets());
+                competitorsFilterSets.setActiveFilterSet(newCompetitorsFilterSets.getActiveFilterSet());
+                
+                updateCompetitorsFilterContexts(newCompetitorsFilterSets);
+                competitorSelectionProvider.setCompetitorsFilterSet(newCompetitorsFilterSets.getActiveFilterSetWithGeneralizedType());
+                updateCompetitorsFilterControlState(newCompetitorsFilterSets);
+                storeCompetitorsFilterSets(newCompetitorsFilterSets);
+             }
+
+            @Override
+            public void cancel() { 
+            }
+            
+        });
+        
+        competitorsFilterSetsDialog .show();*/
     }
 
-    public void clearSelection() {
+    private void clearSelection() {
         searchTextBox.setText("");
         clearTextBoxButton.addStyleName(css.hiddenButton());
         onKeyUp(null);
