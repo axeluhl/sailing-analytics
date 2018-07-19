@@ -114,12 +114,15 @@ public class CameraHelper {
         // Create a media file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + MEDIA_TYPE_IMAGE_EXT);
-        } else if (type == MEDIA_TYPE_VIDEO) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "VID_" + timeStamp + MEDIA_TYPE_VIDEO_EXT);
-        } else {
-            return null;
+        switch (type) {
+            case MEDIA_TYPE_IMAGE:
+                mediaFile = new File(mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + MEDIA_TYPE_IMAGE_EXT);
+                break;
+            case MEDIA_TYPE_VIDEO:
+                mediaFile = new File(mediaStorageDir.getPath() + File.separator + "VID_" + timeStamp + MEDIA_TYPE_VIDEO_EXT);
+                break;
+            default:
+                return null;
         }
 
         return mediaFile;

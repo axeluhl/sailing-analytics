@@ -376,12 +376,16 @@ public class TimePanelFragment extends BasePanelFragment {
                 if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
                     if (intent.getExtras() != null) {
                         String data = intent.getStringExtra(AppConstants.INTENT_ACTION_EXTRA);
-                        if (AppConstants.INTENT_ACTION_TOGGLE_TIME.equals(data)) {
-                            uncheckMarker(mRaceHeader);
-                        } else if (AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR.equals(data)) {
-                            uncheckMarker(mCompetitorList);
-                        } else {
-                            uncheckMarker(null);
+                        switch (data) {
+                            case AppConstants.INTENT_ACTION_TOGGLE_TIME:
+                                uncheckMarker(mRaceHeader);
+                                break;
+                            case AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR:
+                                uncheckMarker(mCompetitorList);
+                                break;
+                            default:
+                                uncheckMarker(null);
+                                break;
                         }
                     }
                 }

@@ -295,7 +295,7 @@ public class MessageSendingService extends Service implements MessageSendingList
         try {
             final Intent firstDelayedIntent = persistenceManager.restoreFirstDelayedIntentNotUnderwayAndMarkAsUnderway();
             if (firstDelayedIntent != null) {
-                ExLog.i(this, TAG, String.format("Resending one message..."));
+                ExLog.i(this, TAG, "Resending one message...");
                 sendMessage(firstDelayedIntent);
             }
         } catch (UnsupportedEncodingException e) {

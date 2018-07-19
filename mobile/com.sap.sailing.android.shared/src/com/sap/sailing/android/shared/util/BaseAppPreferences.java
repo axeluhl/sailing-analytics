@@ -24,6 +24,6 @@ public class BaseAppPreferences {
     }
 
     public void setLastScannedQRCode(String lastQRCode) {
-        preferences.edit().putString(context.getString(R.string.preference_last_scanned_qr_code), lastQRCode).commit();
+        preferences.edit().putString(context.getString(R.string.preference_last_scanned_qr_code), lastQRCode).apply();
     }
 }

@@ -70,7 +70,7 @@ public class PreferenceHelper {
 
     public void clearPreferences() {
         SharedPreferences.Editor editor = getSharedPreferences(sharedPreferencesName).edit();
-        editor.clear().commit();
+        editor.clear().apply();
     }
 
     private boolean clearPreferencesIfNeeded(boolean forceReset) {
@@ -82,7 +82,7 @@ public class PreferenceHelper {
             clearPreferences();
 
             ExLog.i(context, TAG, String.format("Bumping preference version code to %d", LAST_COMPATIBLE_VERSION));
-            versionPreferences.edit().putInt(HIDDEN_PREFERENCE_VERSION_CODE_KEY, LAST_COMPATIBLE_VERSION).commit();
+            versionPreferences.edit().putInt(HIDDEN_PREFERENCE_VERSION_CODE_KEY, LAST_COMPATIBLE_VERSION).apply();
             return true;
         }
         return false;

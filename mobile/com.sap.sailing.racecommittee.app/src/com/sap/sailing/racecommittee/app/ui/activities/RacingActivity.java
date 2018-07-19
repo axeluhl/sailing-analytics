@@ -76,7 +76,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.internal.widget.TintImageView;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -527,7 +527,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                     return;
                 }
                 // Actual replacement of the icon
-                TintImageView overflow = (TintImageView) outViews.get(0);
+                AppCompatImageView overflow = (AppCompatImageView) outViews.get(0);
                 overflow.setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.bigger_over_flow_width));
                 overflow.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.bigger_over_flow_height));
                 Bitmap bitmap = BitmapHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ic_more_vert_white_48dp,

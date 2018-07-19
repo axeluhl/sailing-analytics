@@ -22,7 +22,7 @@
     </style>
 
     <style name="AlertDialogHeader">
-        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>﻿
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>
         <item name="android:textColor">@color/dialog_color_header</item>
     </style>
 

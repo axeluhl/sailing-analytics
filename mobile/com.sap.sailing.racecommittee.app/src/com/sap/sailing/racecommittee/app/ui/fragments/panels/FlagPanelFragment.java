@@ -568,20 +568,28 @@ public class FlagPanelFragment extends BasePanelFragment {
             if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
                 if (intent.getExtras() != null) {
                     String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                    if (AppConstants.INTENT_ACTION_TOGGLE_ABANDON.equals(data)) {
-                        uncheckMarker(mAbandonFlags);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_RECALL.equals(data)) {
-                        uncheckMarker(mRecallFlags);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_POSTPONE.equals(data)) {
-                        uncheckMarker(mPostponeFlags);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_COURSE.equals(data)) {
-                        uncheckMarker(mCourseFlags);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_BLUE_FIRST.equals(data)) {
-                        uncheckMarker(mBlueFirstFlag);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_BLUE_LAST.equals(data)) {
-                        uncheckMarker(mBlueLastFlag);
-                    } else {
-                        uncheckMarker(new View(context));
+                    switch (data) {
+                        case AppConstants.INTENT_ACTION_TOGGLE_ABANDON:
+                            uncheckMarker(mAbandonFlags);
+                            break;
+                        case AppConstants.INTENT_ACTION_TOGGLE_RECALL:
+                            uncheckMarker(mRecallFlags);
+                            break;
+                        case AppConstants.INTENT_ACTION_TOGGLE_POSTPONE:
+                            uncheckMarker(mPostponeFlags);
+                            break;
+                        case AppConstants.INTENT_ACTION_TOGGLE_COURSE:
+                            uncheckMarker(mCourseFlags);
+                            break;
+                        case AppConstants.INTENT_ACTION_TOGGLE_BLUE_FIRST:
+                            uncheckMarker(mBlueFirstFlag);
+                            break;
+                        case AppConstants.INTENT_ACTION_TOGGLE_BLUE_LAST:
+                            uncheckMarker(mBlueLastFlag);
+                            break;
+                        default:
+                            uncheckMarker(new View(context));
+                            break;
                     }
                 }
             }

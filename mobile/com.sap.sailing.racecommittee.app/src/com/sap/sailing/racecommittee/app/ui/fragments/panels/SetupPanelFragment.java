@@ -637,22 +637,31 @@ public class SetupPanelFragment extends BasePanelFragment {
             if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
                 if (intent.getExtras() != null) {
                     String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                    if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE.equals(data)) {
-                        uncheckMarker(mButtonProcedure);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE.equals(data)) {
-                        uncheckMarker(mButtonMode);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER.equals(data)) {
-                        uncheckMarker(mButtonPathfinder);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_TIMING.equals(data)) {
-                        uncheckMarker(mButtonTiming);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_FACTOR.equals(data)) {
-                        uncheckMarker(mButtonFactor);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_COURSE.equals(data)) {
-                        uncheckMarker(mButtonCourse);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_WIND.equals(data)) {
-                        uncheckMarker(mButtonWind);
-                    } else {
-                        uncheckMarker(null);
+                    switch (data) {
+                        case AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE:
+                            uncheckMarker(mButtonProcedure);
+                            break;
+                        case AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE:
+                            uncheckMarker(mButtonMode);
+                            break;
+                        case AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER:
+                            uncheckMarker(mButtonPathfinder);
+                            break;
+                        case AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_TIMING:
+                            uncheckMarker(mButtonTiming);
+                            break;
+                        case AppConstants.INTENT_ACTION_TOGGLE_FACTOR:
+                            uncheckMarker(mButtonFactor);
+                            break;
+                        case AppConstants.INTENT_ACTION_TOGGLE_COURSE:
+                            uncheckMarker(mButtonCourse);
+                            break;
+                        case AppConstants.INTENT_ACTION_TOGGLE_WIND:
+                            uncheckMarker(mButtonWind);
+                            break;
+                        default:
+                            uncheckMarker(null);
+                            break;
                     }
                 }
             }

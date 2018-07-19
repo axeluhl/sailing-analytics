@@ -465,23 +465,27 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
             String action = intent.getAction();
             setVisibility(onboarding, View.GONE);
             setVisibility(login, View.GONE);
-            if (AppConstants.INTENT_ACTION_CHECK_LOGIN.equals(action)) {
-                AppPreferences pref = AppPreferences.on(getActivity());
-                if (TextUtils.isEmpty(pref.getServerBaseURL())) {
-                    BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_ONBOARDING));
-                } else {
-                    try {
-                        AuthCheckTask task = new AuthCheckTask(getActivity(), pref.getServerBaseURL(), mAuthCheckTaskListener);
-                        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                    } catch (MalformedURLException e) {
-                        ExLog.e(getActivity(), TAG, "Error: Failed to perform check-in due to a MalformedURLException: " + e.getMessage());
+            switch (action) {
+                case AppConstants.INTENT_ACTION_CHECK_LOGIN:
+                    AppPreferences pref = AppPreferences.on(getActivity());
+                    if (TextUtils.isEmpty(pref.getServerBaseURL())) {
+                        BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_ONBOARDING));
+                    } else {
+                        try {
+                            AuthCheckTask task = new AuthCheckTask(getActivity(), pref.getServerBaseURL(), mAuthCheckTaskListener);
+                            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                        } catch (MalformedURLException e) {
+                            ExLog.e(getActivity(), TAG, "Error: Failed to perform check-in due to a MalformedURLException: " + e.getMessage());
+                        }
                     }
-                }
-            } else if (AppConstants.INTENT_ACTION_SHOW_ONBOARDING.equals(action)) {
-                setVisibility(onboarding, View.VISIBLE);
-            } else if (AppConstants.INTENT_ACTION_SHOW_LOGIN.equals(action)) {
-                setupLogin(getView());
-                setVisibility(login, View.VISIBLE);
+                    break;
+                case AppConstants.INTENT_ACTION_SHOW_ONBOARDING:
+                    setVisibility(onboarding, View.VISIBLE);
+                    break;
+                case AppConstants.INTENT_ACTION_SHOW_LOGIN:
+                    setupLogin(getView());
+                    setVisibility(login, View.VISIBLE);
+                    break;
             }
         }
 

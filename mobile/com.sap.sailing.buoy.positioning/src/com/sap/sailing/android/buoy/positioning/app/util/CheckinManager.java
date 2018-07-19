@@ -310,7 +310,7 @@ public class CheckinManager {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(url.getBytes("UTF-8"));
             byte[] digest = md.digest();
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             for (byte byt : digest) {
                 buf.append(Integer.toString((byt & 0xff) + 0x100, 16).substring(1));
                 checkinDigest = buf.toString();

@@ -216,14 +216,19 @@ public class FinishedButtonFragment extends BasePanelFragment {
             if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
                 if (intent.getExtras() != null) {
                     String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                    if (AppConstants.INTENT_ACTION_TOGGLE_REPLAY.equals(data)) {
-                        uncheckMarker(mRecord);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_PHOTOS.equals(data)) {
-                        uncheckMarker(mPhoto);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_LIST.equals(data)) {
-                        uncheckMarker(mList);
-                    } else {
-                        uncheckMarker(new View(context));
+                    switch (data) {
+                        case AppConstants.INTENT_ACTION_TOGGLE_REPLAY:
+                            uncheckMarker(mRecord);
+                            break;
+                        case AppConstants.INTENT_ACTION_TOGGLE_PHOTOS:
+                            uncheckMarker(mPhoto);
+                            break;
+                        case AppConstants.INTENT_ACTION_TOGGLE_LIST:
+                            uncheckMarker(mList);
+                            break;
+                        default:
+                            uncheckMarker(new View(context));
+                            break;
                     }
                 }
             }

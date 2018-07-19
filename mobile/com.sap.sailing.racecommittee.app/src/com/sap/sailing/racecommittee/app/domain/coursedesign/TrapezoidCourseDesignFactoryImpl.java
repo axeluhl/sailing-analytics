@@ -116,7 +116,7 @@ public class TrapezoidCourseDesignFactoryImpl extends AbstractCourseDesignFactor
     @Override
     protected void setCourseDesignDescription(Position startBoatPosition, Double windSpeed, Bearing windDirection,
             BoatClassType boatClass, CourseLayouts courseLayout, NumberOfRounds numberOfRounds, TargetTime targetTime) {
-        StringBuffer courseDesignDescription = new StringBuffer();
+        StringBuilder courseDesignDescription = new StringBuilder();
         courseDesignDescription.append(boatClass.toString());
         courseDesignDescription.append(", course: ");
         courseDesignDescription.append(courseLayout.getShortName());

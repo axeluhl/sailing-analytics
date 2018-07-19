@@ -51,21 +51,19 @@ public class SignalQualityIndicatorView extends View {
 	
 	private void setAccessibilityString()
 	{
-		if (this.signalQuality == 2)
-		{
-			this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext().getString(R.string.poor));
-		}
-		else if (this.signalQuality == 3)
-		{
-			this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext().getString(R.string.good));
-		}
-		else if (this.signalQuality == 4)
-		{
-			this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext().getString(R.string.great));
-		}
-		else
-		{
-			this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext().getString(R.string.no_signal));
+		switch (this.signalQuality) {
+			case 2:
+				this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext().getString(R.string.poor));
+				break;
+			case 3:
+				this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext().getString(R.string.good));
+				break;
+			case 4:
+				this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext().getString(R.string.great));
+				break;
+			default:
+				this.setContentDescription(getContext().getString(R.string.signal_accuracy_indicator_view_description) + getContext().getString(R.string.no_signal));
+				break;
 		}
 	}
 
@@ -125,17 +123,23 @@ public class SignalQualityIndicatorView extends View {
 	 */
 	public void setSignalQuality(Integer signalQuality) {
 		Integer previousSingalQuality = this.signalQuality;
-		
-		if (signalQuality == 0) {
-			this.signalQuality = 0;
-		} else if (signalQuality == 2) {
-			this.signalQuality = 2;
-		} else if (signalQuality == 3) {
-			this.signalQuality = 3;
-		} else if (signalQuality == 4) {
-			this.signalQuality = 4;
-		} else {
-			this.signalQuality = 0;
+
+		switch (signalQuality) {
+			case 0:
+				this.signalQuality = 0;
+				break;
+			case 2:
+				this.signalQuality = 2;
+				break;
+			case 3:
+				this.signalQuality = 3;
+				break;
+			case 4:
+				this.signalQuality = 4;
+				break;
+			default:
+				this.signalQuality = 0;
+				break;
 		}
 
 		if (this.signalQuality != previousSingalQuality)

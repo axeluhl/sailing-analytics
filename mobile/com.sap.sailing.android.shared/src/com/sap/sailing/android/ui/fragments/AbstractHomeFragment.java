@@ -86,16 +86,20 @@ public abstract class AbstractHomeFragment extends BaseFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_OK) {
-            String scanResult = data.getStringExtra("SCAN_RESULT");
-            prefs.setLastScannedQRCode(scanResult);
-            // handleQRCode is called in onResume()
-        } else if (resultCode == Activity.RESULT_CANCELED) {
-            Toast.makeText(getActivity(), getString(R.string.scanning_cancelled), Toast.LENGTH_LONG).show();
-        } else {
-            String templateString = getString(R.string.error_scanning_qrcode);
-            Toast.makeText(getActivity(), templateString.replace("{result-code}", String.valueOf(resultCode)),
-                    Toast.LENGTH_LONG).show();
+        switch (resultCode) {
+            case Activity.RESULT_OK:
+                String scanResult = data.getStringExtra("SCAN_RESULT");
+                prefs.setLastScannedQRCode(scanResult);
+                // handleQRCode is called in onResume()
+                break;
+            case Activity.RESULT_CANCELED:
+                Toast.makeText(getActivity(), getString(R.string.scanning_cancelled), Toast.LENGTH_LONG).show();
+                break;
+            default:
+                String templateString = getString(R.string.error_scanning_qrcode);
+                Toast.makeText(getActivity(), templateString.replace("{result-code}", String.valueOf(resultCode)),
+                        Toast.LENGTH_LONG).show();
+                break;
         }
     }
 

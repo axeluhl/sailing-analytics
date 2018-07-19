@@ -342,17 +342,18 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
         @Override
         public Fragment getItem(int position) {
-            if (position == VIEW_PAGER_FRAGMENT_STOP_BUTTON) {
-                trackingTimeFragment = new TrackingTimeFragment();
-                return trackingTimeFragment;
-            } else if (position == VIEW_PAGER_FRAGMENT_COMPASS) {
-                cFragment = new CompassFragment();
-                return cFragment;
-            } else if (position == VIEW_PAGER_FRAGMENT_SPEED) {
-                sFragment = new SpeedFragment();
-                return sFragment;
-            } else {
-                return null;
+            switch (position) {
+                case VIEW_PAGER_FRAGMENT_STOP_BUTTON:
+                    trackingTimeFragment = new TrackingTimeFragment();
+                    return trackingTimeFragment;
+                case VIEW_PAGER_FRAGMENT_COMPASS:
+                    cFragment = new CompassFragment();
+                    return cFragment;
+                case VIEW_PAGER_FRAGMENT_SPEED:
+                    sFragment = new SpeedFragment();
+                    return sFragment;
+                default:
+                    return null;
             }
         }
 

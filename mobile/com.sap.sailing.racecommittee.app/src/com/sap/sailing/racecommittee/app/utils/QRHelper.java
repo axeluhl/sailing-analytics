@@ -53,7 +53,7 @@ public class QRHelper {
                 editor.putString(mContext.getString(R.string.preference_identifier_key), identifier);
                 editor.putString(mContext.getString(R.string.preference_server_url_key), serverUrl);
                 editor.putString(mContext.getString(R.string.preference_access_token_key), accessToken);
-                editor.commit();
+                editor.apply();
 
                 new AutoUpdater(mContext).checkForUpdate(false);
                 return true;
