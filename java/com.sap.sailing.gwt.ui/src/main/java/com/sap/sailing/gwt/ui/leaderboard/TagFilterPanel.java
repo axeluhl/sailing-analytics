@@ -64,7 +64,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         this.stringMessages = stringMessages;
         this.tagsFilterSets = tagsFilterSets;
         this.setStyleName(css.competitorFilterContainer());
-        
+        /*
         TagsFilterSets loadedTagsFilterSets = loadTagsFilterSets();
         if (loadedTagsFilterSets != null) {
             tagsFilterSets = loadedTagsFilterSets;
@@ -73,7 +73,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
             tagsFilterSets = createAndAddDefaultTagsFilter();
             storeTagsFilterSets(tagsFilterSets);
         }
-        
+        */
         
         Button submitButton = new Button();
         submitButton.setStyleName(css.button());
@@ -132,14 +132,14 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
                 stringMessages, new DialogCallback<TagsFilterSets>() {
             @Override
             public void ok(final TagsFilterSets newTagsFilterSets) {
-                tagsFilterSets.getFilterSets().clear();
+                /*tagsFilterSets.getFilterSets().clear();
                 tagsFilterSets.getFilterSets().addAll(newTagsFilterSets.getFilterSets());
                 tagsFilterSets.setActiveFilterSet(newTagsFilterSets.getActiveFilterSet());
                 
                 updateTagsFilterContexts(newTagsFilterSets);
                 tagSelectionProvider.setTagsFilterSet(newTagsFilterSets.getActiveFilterSetWithGeneralizedType());
                 updateTagsFilterControlState(newTagsFilterSets);
-                storeTagsFilterSets(newTagsFilterSets);
+                storeTagsFilterSets(newTagsFilterSets);*/
              }
 
             @Override
