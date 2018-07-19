@@ -261,20 +261,28 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     }
 
     /**
-     * Compares by the number of races won in the medal series. If one of the competitors reached the target of races won
-     * (defined by {@link ScoringScheme#getTargetAmountOfMedalRaceWins()} it is ranked better than the other. If
-     * none of the competitors reached the target, they are ranked equally even if one has more wins.
+     * Compares by the number of races won in the medal series. If one of the competitors reached the target of races
+     * won (defined by {@link ScoringScheme#getTargetAmountOfMedalRaceWins()} it is ranked better than the other. If
+     * none of the competitors reached the target, they are ranked equally even if one has more wins. This is because
+     * only reaching the exact number of wins counts for this criteria but not the general comparison by the number of
+     * wins. If both competitors exactly reached the target, they are also ranked equally (this can e.g. occur while
+     * entering score corrections).
      */
     private int compareByMedalRacesWon(int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
-        // TODO bug4661 clarify what the desired outcome is if (e.g., temporarily due to manual score corrections) both reached or surpassed the number of wins required
-        final int targetAmount = scoringScheme.getTargetAmountOfMedalRaceWins();
         final int result;
-        if (numberOfMedalRacesWonO1 == targetAmount) {
-            result = -1;
-        } else if (numberOfMedalRacesWonO2 == targetAmount) {
-            result = 1;
-        } else {
+        if (numberOfMedalRacesWonO1 == numberOfMedalRacesWonO2) {
+            // If both competitors have an equal amount of wins it doesn't matter if they reached the target.
+            // In this case we just can't say who is better based on the number of wins.
             result = 0;
+        } else {
+            final int targetAmount = scoringScheme.getTargetAmountOfMedalRaceWins();
+            if (numberOfMedalRacesWonO1 == targetAmount) {
+                result = -1;
+            } else if (numberOfMedalRacesWonO2 == targetAmount) {
+                result = 1;
+            } else {
+                result = 0;
+            }
         }
         return result;
     }
