@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.leaderboard;
+package com.sap.sailing.gwt.ui.raceboard;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.ui.client.shared.filter.SelectedRaceFilterContext;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsJsonDeSerializer;
+import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterResources;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterResources.CompetitorFilterCss;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.filter.BinaryOperator;

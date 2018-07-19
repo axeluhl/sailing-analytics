@@ -23,7 +23,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HeaderPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -32,9 +31,8 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.TaggingPanel.TagResources.TagStyle;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSets;
-import com.sap.sailing.gwt.ui.leaderboard.TagFilterPanel;
+import com.sap.sailing.gwt.ui.raceboard.TaggingPanel.TagResources.TagStyle;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -132,7 +130,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     }
 
     private final HeaderPanel panel;
-    private final Panel searchbarPanel;
+    private final Panel filterbarPanel;
     private final Panel contentPanel;
     private final CellList<TagDTO> tagCellList;
     private final Panel buttonsPanel;
@@ -156,7 +154,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         super(parent, context);
 
         panel = new HeaderPanel();
-        searchbarPanel = new FlowPanel();
+        filterbarPanel = new TagFilterPanel(null, stringMessages, new TagsFilterSets());
         tagCellList = new CellList<TagDTO>(new TagCell(), TagResources.INSTANCE);
         contentPanel = new ScrollPanel();
         buttonsPanel = new FlowPanel();
@@ -193,13 +191,9 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         panel.getElement().getStyle().setRight(0, Unit.PX);
         panel.getElement().getStyle().setMargin(6, Unit.PX);
         panel.getElement().getStyle().setMarginTop(10, Unit.PX);
-        
-        TagFilterPanel tagFilterPanel = new TagFilterPanel(null, stringMessages, new TagsFilterSets());
-        panel.add(tagFilterPanel);
 
         // Searchbar
-        searchbarPanel.add(new Label("Searchbar"));
-        panel.setHeaderWidget(searchbarPanel);
+        panel.setHeaderWidget(filterbarPanel);
 
         // Buttons
         buttons.add(new Button("Add new Tag-Button", new ClickHandler() {
