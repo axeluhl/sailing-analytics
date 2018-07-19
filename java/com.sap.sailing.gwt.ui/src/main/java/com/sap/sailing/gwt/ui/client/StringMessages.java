@@ -2087,4 +2087,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagging();
     String tagFilterExplanation();
     String username();
+    String tag();
 }

@@ -83,12 +83,12 @@ public class TagTagFilter extends AbstractTextFilter<TagDTO> implements FilterWi
 
     @Override
     public String getLocalizedName(StringMessages stringMessages) {
-        return stringMessages.raceRank();
+        return stringMessages.tag();
     }
 
     @Override
     public String getLocalizedDescription(StringMessages stringMessages) {
-        return "Top " + this.getValue() + " " + stringMessages.raceRank();
+        return "Top " + this.getValue() + " " + stringMessages.tag();
     }
 
     @Override
