@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.TagFilterPanel;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -79,6 +80,9 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         panel.setTitle(stringMessages.tagging());
         panel.getElement().getStyle().setMargin(6, Unit.PX);
         panel.getElement().getStyle().setMarginTop(10, Unit.PX);
+        
+        TagFilterPanel tagFilterPanel = new TagFilterPanel(null, stringMessages);
+        panel.add(tagFilterPanel);
 
         // Buttons
         panel.add(new Button("Add new Tag-Button", new ClickHandler() {
