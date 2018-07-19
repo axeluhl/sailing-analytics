@@ -153,7 +153,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 this.stringMessages.maxTurningRate(), this.stringMessages.degreesPerSecondUnit()));
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getAverageTurningRate,
                 this.stringMessages.avgTurningRate(), this.stringMessages.degreesPerSecondUnit()));
-        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getManeuverLoss,
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getManeuverLossInMeters,
                 this.stringMessages.maneuverLoss(), stringMessages.metersUnit()));
         this.maneuverCellTable.addColumn(createSortableAbsMinMaxColumn(ManeuverTableData::getDirectionChange,
                 stringMessages.directionChange(), this.stringMessages.degreesShort()));
@@ -320,7 +320,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         final Map<CompetitorDTO, Iterable<ManeuverDTO>> cachedData = competitorDataProvider.getCachedData();
         for (final Entry<CompetitorDTO, Iterable<ManeuverDTO>> entry : cachedData.entrySet()) {
             for (ManeuverDTO maneuver : entry.getValue()) {
-                if (settings.getSelectedManeuverTypes().contains(maneuver.type)) {
+                if (settings.getSelectedManeuverTypes().contains(maneuver.getType())) {
                     data.add(new ManeuverTableData(entry.getKey(), maneuver));
                 }
             }
@@ -435,7 +435,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         private CachedManeuverTableDataProvider(final TimeRangeProvider timeRangeProvider, final Timer timer,
                 final RegattaAndRaceIdentifier raceIdentifier, final SailingServiceAsync sailingService,
                 final AsyncActionsExecutor asyncActionsExecutor) {
-            super(timeRangeProvider, timer, m -> m.timePoint, LOADING_OFFSET_TO_NEXT_MANEUVER_PROVIDER, true);
+            super(timeRangeProvider, timer, m -> m.getTimePoint(), LOADING_OFFSET_TO_NEXT_MANEUVER_PROVIDER, true);
             this.asyncActionsExecutor = asyncActionsExecutor;
             this.raceIdentifier = raceIdentifier;
             this.sailingService = sailingService;
