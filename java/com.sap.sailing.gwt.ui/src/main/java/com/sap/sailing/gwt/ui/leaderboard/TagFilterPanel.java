@@ -9,10 +9,10 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterUIFactory;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
+import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSets;
+import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterResources.CompetitorFilterCss;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -32,11 +32,13 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     private final RaceIdentifier selectedRaceIdentifier;
     private final FlowPanel searchBoxPanel;
     private final StringMessages stringMessages;
+    private final TagsFilterSets tagsFilterSets;
 
-    public TagFilterPanel(RaceIdentifier selectedRaceIdentifier, StringMessages stringMessages) {
+    public TagFilterPanel(RaceIdentifier selectedRaceIdentifier, StringMessages stringMessages, TagsFilterSets tagsFilterSets) {
         css.ensureInjected();
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.stringMessages = stringMessages;
+        this.tagsFilterSets = tagsFilterSets;
         this.setStyleName(css.competitorFilterContainer());
         
         
@@ -93,18 +95,18 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     }
     
     private void showEditTagsFiltersDialog() {
-        /*CompetitorsFilterSetsDialog competitorsFilterSetsDialog = new CompetitorsFilterSetsDialog(competitorsFilterSets,
-                stringMessages, new DialogCallback<CompetitorsFilterSets>() {
+        TagsFilterSetsDialog tagsFilterSetsDialog = new TagsFilterSetsDialog(tagsFilterSets,
+                stringMessages, new DialogCallback<TagsFilterSets>() {
             @Override
-            public void ok(final CompetitorsFilterSets newCompetitorsFilterSets) {
-                competitorsFilterSets.getFilterSets().clear();
-                competitorsFilterSets.getFilterSets().addAll(newCompetitorsFilterSets.getFilterSets());
-                competitorsFilterSets.setActiveFilterSet(newCompetitorsFilterSets.getActiveFilterSet());
+            public void ok(final TagsFilterSets newTagsFilterSets) {
+                /*tagsFilterSets.getFilterSets().clear();
+                tagsFilterSets.getFilterSets().addAll(newTagsFilterSets.getFilterSets());
+                tagsFilterSets.setActiveFilterSet(newTagsFilterSets.getActiveFilterSet());
                 
-                updateCompetitorsFilterContexts(newCompetitorsFilterSets);
-                competitorSelectionProvider.setCompetitorsFilterSet(newCompetitorsFilterSets.getActiveFilterSetWithGeneralizedType());
-                updateCompetitorsFilterControlState(newCompetitorsFilterSets);
-                storeCompetitorsFilterSets(newCompetitorsFilterSets);
+                updateTagsFilterContexts(newTagsFilterSets);
+                tagSelectionProvider.setTagsFilterSet(newTagsFilterSets.getActiveFilterSetWithGeneralizedType());
+                updateTagsFilterControlState(newTagsFilterSets);
+                storeTagsFilterSets(newTagsFilterSets);*/
              }
 
             @Override
@@ -113,7 +115,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
             
         });
         
-        competitorsFilterSetsDialog .show();*/
+        tagsFilterSetsDialog .show();
     }
 
     private void clearSelection() {
