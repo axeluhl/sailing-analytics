@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.sap.sailing.android.buoy.positioning.app"
-          xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.sap.sailing.android.buoy.positioning.app"
           android:versionCode="13"
           android:versionName="1.11">
 
-    <uses-sdk
-        android:minSdkVersion="14"
-        android:targetSdkVersion="22"/>
+    <uses-sdk />
 
     <!-- <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" /> -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>

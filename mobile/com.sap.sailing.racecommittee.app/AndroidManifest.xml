@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.sap.sailing.racecommittee.app"
-    android:versionCode="19"
-    android:versionName="1.11">
+          package="com.sap.sailing.racecommittee.app"
+          android:versionCode="19"
+          android:versionName="1.11">
 
-    <uses-sdk
-        android:minSdkVersion="14"
-        android:targetSdkVersion="22" />
+    <uses-sdk />
 
     <permission
         android:name="com.sap.sailing.racecommittee.app.MAPS_RECEIVE"
