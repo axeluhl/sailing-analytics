@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.filter.AbstractTextFilter;
@@ -15,15 +13,7 @@ import com.sap.sse.common.filter.AbstractTextFilter;
 public class TagTagFilter extends AbstractTextFilter<TagDTO> implements FilterWithUI<TagDTO> {
     public static final String FILTER_NAME = "Tag";
 
-    private LeaderboardFetcher leaderboardFetcher;
-    private RaceIdentifier selectedRace;
-    
-
     public TagTagFilter() {
-    }
-
-    private LeaderboardDTO getLeaderboard() {
-        return leaderboardFetcher != null ? leaderboardFetcher.getLeaderboard() : null;
     }
 
     @Override
@@ -60,10 +50,6 @@ public class TagTagFilter extends AbstractTextFilter<TagDTO> implements FilterWi
         }
         return false;
     }
-
-    /**
-     * @return <code>null</code> if no rank could be determined for <code>TagDTO</code>, a 1-based rank otherwise
-     */
 
     @Override
     public TagTagFilter copy() {
