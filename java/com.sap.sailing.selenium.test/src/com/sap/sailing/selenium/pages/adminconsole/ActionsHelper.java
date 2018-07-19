@@ -1,5 +1,7 @@
 package com.sap.sailing.selenium.pages.adminconsole;
 
+import java.util.function.Function;
+
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoAlertPresentException;
@@ -9,7 +11,6 @@ import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.FluentWait;
 
-import com.google.common.base.Function;
 import com.sap.sailing.selenium.pages.PageObject;
 
 public class ActionsHelper {

@@ -3,6 +3,7 @@ package com.sap.sailing.selenium.core;
 import java.lang.reflect.Field;
 import java.time.Duration;
 import java.util.List;
+import java.util.function.Function;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -10,8 +11,6 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.pagefactory.ElementLocator;
 import org.openqa.selenium.support.ui.FluentWait;
-
-import com.google.common.base.Function;
 
 /**
  * <p>An element locator, which will lazily locate and wait for an element or an element list to appear, by polling the
