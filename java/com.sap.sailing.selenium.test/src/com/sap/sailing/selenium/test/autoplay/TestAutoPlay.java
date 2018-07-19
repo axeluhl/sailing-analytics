@@ -94,12 +94,6 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         assertTrue("Url does not contain proper type " + url, url.contains("autoplayType=SIXTYINCH"));
         assertTrue("Url does not contain proper name " + url, url.contains("name=BMW+Cup+(J80)"));
         AutoPlayUpcomingView autoplayPage = page.goToAutoPlaySixtyInchUrl(getWebDriver(), url);
-        // give some extra time to load the leaderboard and finish the animation
-        try {
-            Thread.sleep(15000);
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        }
         String nextUpText = autoplayPage.getText();
         assertEquals("There are no further races starting soon", nextUpText);
     }
@@ -123,13 +117,8 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         assertTrue("Url does not contain proper title " + url, url.contains("lbwh.saph.title=Leaderboard%3A+BMW+Cup+(J80)"));
         assertTrue("Url does not contain proper name " + url, url.contains("name=BMW+Cup+(J80)"));
         AutoPlayLeaderboardView autoplayPage = page.goToAutoPlayClassicUrl(getWebDriver(), url);
-        // give some extra time to load the leaderboard and finish the animation
-        try {
-            Thread.sleep(15000);
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        }
         LeaderboardTablePO leaderBoard = autoplayPage.getLeaderBoard();
+        leaderBoard.waitForLeaderboardToHaveData();
         List<String> races = leaderBoard.getRaceNames();
         Assert.assertTrue(races.contains("R1"));
         Assert.assertTrue(races.contains("R2"));
