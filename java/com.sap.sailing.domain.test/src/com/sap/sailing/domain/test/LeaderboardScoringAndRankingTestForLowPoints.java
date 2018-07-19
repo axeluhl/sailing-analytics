@@ -47,7 +47,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
                 () -> createLeaderboard(regatta, discardingThresholds), leaderboardName);
     }
 
-    private void executeRandomPreSeries(List<Competitor> yellow, List<Competitor> blue, TimePoint now) {
+    private void executePreSeries(List<Competitor> yellow, List<Competitor> blue, TimePoint now) {
         RaceColumn qColumn = series.get(0).getRaceColumnByName("Q");
         TrackedRace qYellow = new MockedTrackedRaceWithStartTimeAndRanks(now, yellow);
         qColumn.setTrackedRace(qColumn.getFleetByName("Yellow"), qYellow);
@@ -139,7 +139,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
-        executeRandomPreSeries(yellow, blue, now);
+        executePreSeries(yellow, blue, now);
 
         List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
         List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
@@ -195,7 +195,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
-        executeRandomPreSeries(yellow, blue, now);
+        executePreSeries(yellow, blue, now);
 
         List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
         List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
@@ -282,7 +282,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
-        executeRandomPreSeries(yellow, blue, now);
+        executePreSeries(yellow, blue, now);
 
         List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
         List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
@@ -368,7 +368,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
-        executeRandomPreSeries(yellow, blue, now);
+        executePreSeries(yellow, blue, now);
 
         List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
         List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
@@ -455,7 +455,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
-        executeRandomPreSeries(yellow, blue, now);
+        executePreSeries(yellow, blue, now);
 
         List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
         List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
@@ -516,8 +516,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     }
 
     /**
-     * Using normal lowpoints, having two wins should not matter, also the racecolum factor is expected to be 2 instead
-     * of 1.
+     * Using normal lowpoints, being the best in the preseries and having an additional win in the medals, should not
+     * make you the overall winner in case another finalist has a better score.
      */
     @Test
     public void negativeTestFirstPreseriesWinsAgain() throws NoWindException {
@@ -536,7 +536,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
-        executeRandomPreSeries(yellow, blue, now);
+        executePreSeries(yellow, blue, now);
 
         List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
         List<Pair<Competitor, Double>> preSeriesScoreRankResult = createCompetitorResultForTimestamp(later,
@@ -595,7 +595,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
-        executeRandomPreSeries(yellow, blue, now);
+        executePreSeries(yellow, blue, now);
 
         List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
         List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
@@ -673,7 +673,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
-        executeRandomPreSeries(yellow, blue, now);
+        executePreSeries(yellow, blue, now);
 
         List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
         List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
@@ -752,7 +752,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
-        executeRandomPreSeries(yellow, blue, now);
+        executePreSeries(yellow, blue, now);
 
         List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
         List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
@@ -832,7 +832,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis() + 1000);
-        executeRandomPreSeries(yellow, blue, now);
+        executePreSeries(yellow, blue, now);
 
         List<Competitor> preSeriesRankResult = leaderboard.getCompetitorsFromBestToWorst(later);
         List<Competitor> medalCompetitorsBestToWorst = preSeriesRankResult.subList(0, 4);
