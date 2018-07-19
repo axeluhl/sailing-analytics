@@ -50,10 +50,10 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.internal.view.ContextThemeWrapper;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ClickableSpan;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -456,7 +456,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         @Override
         public void performAction(NetworkHelperError e) {
             if (e.getMessage() != null) {
-                ExLog.e(getActivity(), TAG, e.getMessage().toString());
+                ExLog.e(getActivity(), TAG, e.getMessage());
             } else {
                 ExLog.e(getActivity(), TAG, "Unknown Error");
             }
