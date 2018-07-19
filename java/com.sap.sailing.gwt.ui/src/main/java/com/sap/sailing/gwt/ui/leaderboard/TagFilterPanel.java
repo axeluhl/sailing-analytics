@@ -62,7 +62,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         clearTextBoxButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                //clearSelection();
+                clearSelection();
             }
         });
         
@@ -88,6 +88,12 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         add(advancedSettingsButton);
     }
 
+    public void clearSelection() {
+        searchTextBox.setText("");
+        clearTextBoxButton.addStyleName(css.hiddenButton());
+        onKeyUp(null);
+    }
+    
     @Override
     public boolean matches(TagDTO object) {
         // TODO Auto-generated method stub
@@ -108,14 +114,12 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
 
     @Override
     public String getLocalizedName(StringMessages stringMessages) {
-        // TODO Auto-generated method stub
-        return null;
+        return getName();
     }
 
     @Override
     public String getLocalizedDescription(StringMessages stringMessages) {
-        // TODO Auto-generated method stub
-        return null;
+        return getName();
     }
 
     @Override
