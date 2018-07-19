@@ -1,15 +1,9 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import java.util.LinkedHashSet;
-
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
-import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
-import com.sap.sse.common.filter.AbstractNumberFilter;
 import com.sap.sse.common.filter.AbstractTextFilter;
 
 /**
