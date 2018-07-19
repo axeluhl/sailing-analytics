@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
 import com.sap.sailing.domain.common.security.Permission;
@@ -47,7 +48,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
 
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
     private final int MIN_LEADERBOARD_WIDTH = Math.min(432, Window.getClientWidth() - 40); // fallback value "432" works well for 505 and ESS
-    private final int MIN_TAGGING_WIDTH = Math.min(300, Window.getClientWidth() - 40);
+    private final int MIN_TAGGING_WIDTH = Math.min(350, Window.getClientWidth() - 40);
 
     /**
      * Absolute Panel that informs its children about a resize
@@ -68,7 +69,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     private final Component<?> rightComponent;
     private final List<Component<?>> components;
     private final ScrollPanel leftScrollPanel;
-    private final ScrollPanel rightScrollPanel;
+    private final Panel rightPanel;
     private final StringMessages stringMessages;
     private final Button mediaSelectionButton;
     private final Button mediaManagementButton;
@@ -135,9 +136,11 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         this.leftScrollPanel = new ScrollPanel();
         this.leftScrollPanel.add(leftComponentP.getEntryWidget());
         this.leftScrollPanel.setTitle(leftComponentP.getEntryWidget().getTitle());
-        this.rightScrollPanel = new ScrollPanel();
-        this.rightScrollPanel.add(rightComponentP.getEntryWidget());
-        this.rightScrollPanel.setTitle(rightComponentP.getEntryWidget().getTitle());
+        // Right panel needs to implement interface ProvidesResize as the only child 
+        // is a HeaderPanel which implements RequiresResize.
+        this.rightPanel = new SimpleLayoutPanel();
+        this.rightPanel.add(rightComponentP.getEntryWidget());
+        this.rightPanel.setTitle(rightComponentP.getEntryWidget().getTitle());
         this.mainPanel = new LayoutPanel();
         this.mainPanel.setSize("100%", "100%");
         this.mainPanel.getElement().getStyle().setMarginTop(-12, Unit.PX);
@@ -152,7 +155,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         splitLayoutPanel.insert(leftScrollPanel, leftComponent, Direction.WEST, MIN_LEADERBOARD_WIDTH);
         
         // initialize the tagging component
-        splitLayoutPanel.insert(rightScrollPanel, rightComponent, Direction.EAST, MIN_TAGGING_WIDTH);
+        splitLayoutPanel.insert(rightPanel, rightComponent, Direction.EAST, MIN_TAGGING_WIDTH);
 
         // create a panel that will contain the horizontal toggle buttons
         ResizableAbsolutePanel panelForMapAndHorizontalToggleButtons = new ResizableAbsolutePanel();
@@ -264,13 +267,13 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         
         if (!rightComponent.isVisible() && centerComponent.isVisible()) {
             // the tagging is not visible, but the map is
-            if (isWidgetInSplitPanel(rightScrollPanel)) {
-                splitLayoutPanel.setWidgetVisibility(rightScrollPanel, rightComponent, /* hidden */true,
+            if (isWidgetInSplitPanel(rightPanel)) {
+                splitLayoutPanel.setWidgetVisibility(rightPanel, rightComponent, /* hidden */true,
                         MIN_TAGGING_WIDTH);
             }
         } else if (rightComponent.isVisible() && centerComponent.isVisible()) {
             // the leaderboard and the map are visible
-            splitLayoutPanel.setWidgetVisibility(rightScrollPanel, rightComponent, /* hidden */false, MIN_TAGGING_WIDTH);
+            splitLayoutPanel.setWidgetVisibility(rightPanel, rightComponent, /* hidden */false, MIN_TAGGING_WIDTH);
         } else if (!rightComponent.isVisible() && !centerComponent.isVisible()) {
         }
 
@@ -362,12 +365,12 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
      *            <code>true</code> to show the button text, <code>false</code> to hide it
      */
     void setRightComponentToggleButtonTextVisibilityAndDraggerPosition(final boolean visible) {
-        Splitter rightScrollPanelSplitter = splitLayoutPanel.getAssociatedSplitter(rightScrollPanel);
-        if (rightScrollPanelSplitter != null) {
-            Style toggleButtonStyle = rightScrollPanelSplitter.getToggleButton().getElement().getStyle();
+        Splitter rightFlowPanelSplitter = splitLayoutPanel.getAssociatedSplitter(rightPanel);
+        if (rightFlowPanelSplitter != null) {
+            Style toggleButtonStyle = rightFlowPanelSplitter.getToggleButton().getElement().getStyle();
             if (visible) toggleButtonStyle.clearFontSize();
             else toggleButtonStyle.setFontSize(0, Unit.PX);
-            Style drapperStyle = rightScrollPanelSplitter.getDragger().getElement().getStyle();
+            Style drapperStyle = rightFlowPanelSplitter.getDragger().getElement().getStyle();
             if (visible) drapperStyle.clearMarginTop();
             else drapperStyle.setMarginTop(-25, Unit.PX);
         }
@@ -381,9 +384,9 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     }
     
     public void setRightComponentToggleButtonVisible(boolean visible) {
-        Splitter rightScrollPanelSplitter = splitLayoutPanel.getAssociatedSplitter(rightScrollPanel);
-        if (rightScrollPanelSplitter != null) {
-            rightScrollPanelSplitter.getToggleButton().setVisible(visible);
+        Splitter rightPanelSplitter = splitLayoutPanel.getAssociatedSplitter(rightPanel);
+        if (rightPanelSplitter != null) {
+            rightPanelSplitter.getToggleButton().setVisible(visible);
         }
     }
     
@@ -391,7 +394,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         return leftScrollPanel;
     }
     
-    public ScrollPanel getRightScrollPanel() {
-        return rightScrollPanel;
+    public Panel getRightPanel() {
+        return rightPanel;
     }
 }

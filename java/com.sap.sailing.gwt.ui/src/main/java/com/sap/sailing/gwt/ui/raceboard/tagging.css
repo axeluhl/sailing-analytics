@@ -1,0 +1,44 @@
+b {
+	font-weight: bold;
+}
+
+i {
+	font-style: italic; 
+}
+
+.tag {
+	border: 1px solid lightgrey;
+    margin-bottom: 5px;
+}
+
+.tagHeading {
+	font-weight: bold;
+}
+
+.tagImage {
+    text-align: center;
+}
+
+.tagImage img {
+	max-height: 200px;
+    width: auto;
+}
+
+.tagCreated {
+	font-size: 75%;
+	padding-top: 2px;
+	padding-bottom: 5px;
+}
+
+.tagComment {
+	font-size: 85%;
+}
+
+.cellListWidget,
+.cellListEvenItem,
+.cellListOddItem,
+.cellListEventItem,
+.cellListSelectedItem,
+.cellListKeyboardSelectedItem {
+	
+}
