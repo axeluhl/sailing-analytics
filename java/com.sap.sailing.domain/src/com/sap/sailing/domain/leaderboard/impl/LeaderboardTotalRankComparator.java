@@ -270,19 +270,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      */
     private int compareByMedalRacesWon(int numberOfMedalRacesWonO1, int numberOfMedalRacesWonO2) {
         final int result;
-        if (numberOfMedalRacesWonO1 == numberOfMedalRacesWonO2) {
-            // If both competitors have an equal amount of wins it doesn't matter if they reached the target.
-            // In this case we just can't say who is better based on the number of wins.
-            result = 0;
+        final int targetAmount = scoringScheme.getTargetAmountOfMedalRaceWins();
+        if (numberOfMedalRacesWonO1 >= targetAmount || numberOfMedalRacesWonO2 >= targetAmount) {
+            result = Integer.compare(numberOfMedalRacesWonO2, numberOfMedalRacesWonO1);
         } else {
-            final int targetAmount = scoringScheme.getTargetAmountOfMedalRaceWins();
-            if (numberOfMedalRacesWonO1 == targetAmount) {
-                result = -1;
-            } else if (numberOfMedalRacesWonO2 == targetAmount) {
-                result = 1;
-            } else {
-                result = 0;
-            }
+            result = 0;
         }
         return result;
     }
