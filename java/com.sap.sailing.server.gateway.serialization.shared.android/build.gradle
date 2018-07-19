@@ -8,8 +8,9 @@ sourceSets {
 
 dependencies {
     /* local dependencies */
-    compile project(":java:com.sap.sailing.domain.common")
-    compile project(":java:com.sap.sailing.domain.shared.android")
-    compile project(":java:com.sap.sse.common")
-    compile project(":java:org.json.simple")
+    implementation project(':java:com.sap.sailing.domain.common')
+    implementation project(':java:com.sap.sailing.domain.shared.android')
+    implementation project(':java:com.sap.sse.common')
+    implementation project(':java:org.json.simple')
+    implementation project(':java:com.sap.sse.shared.android')
 }

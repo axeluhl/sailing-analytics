@@ -40,25 +40,27 @@ android {
 
 dependencies {
     /* support libraries */
-    compile "com.android.support:appcompat-v7:${rootProject.ext.support}"
+    api "com.android.support:appcompat-v7:${rootProject.ext.support}"
+    api "com.android.support:support-v13:${rootProject.ext.support}"
 
     /* local dependencies */
-    compile project(':java:com.sap.sailing.domain.common')
-    compile project(':java:com.sap.sailing.domain.shared.android')
-    compile project(':java:com.sap.sailing.server.gateway.serialization.shared.android')
-    compile project(':java:com.sap.sse.common')
-    compile project(':java:org.json.simple')
+    api project(':java:com.sap.sailing.domain.common')
+    api project(':java:com.sap.sailing.domain.shared.android')
+    api project(':java:com.sap.sailing.server.gateway.serialization.shared.android')
+    api project(':java:com.sap.sse.common')
+    api project(':java:com.sap.sse.shared.android')
+    api project(':java:org.json.simple')
 
     /* Google Play Services */
-    compile "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
+    api "com.google.android.gms:play-services-maps:${rootProject.ext.play_services}"
 
     /* license dialog */
-    compile("de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}")
+    api "de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}"
 
     /* all local jar-libs */
-    compile fileTree(dir: "libs", include: ["*.jar"])
+    api fileTree(dir: "libs", include: ["*.jar"])
 
     /* JVM tests */
-    testCompile "junit:junit:${rootProject.ext.junit}"
-    testCompile "org.mockito:mockito-core:${rootProject.ext.mockito}"
+    testImplementation "junit:junit:${rootProject.ext.junit}"
+    testImplementation "org.mockito:mockito-core:${rootProject.ext.mockito}"
 }
