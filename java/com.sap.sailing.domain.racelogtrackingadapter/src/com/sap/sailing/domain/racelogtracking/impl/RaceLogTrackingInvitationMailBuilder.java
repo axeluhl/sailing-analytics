@@ -44,6 +44,8 @@ class RaceLogTrackingInvitationMailBuilder {
      * URL prefix, so the iOS app will recognize as deep link and pass anything after it to the app for analysis.
      */
     private static final String IOS_DEEP_LINK_PREFIX = "comsapsailingtracker://";
+    
+    private static final String SAIL_INSIGHT_BRANCH_DEEPLINK = "https://d-labs.app.link/YUAdvnZjEO";
 
     private final Locale locale;
     private final Map<String,byte[]> pngAttachAndInline = new HashMap<>();
@@ -75,7 +77,7 @@ class RaceLogTrackingInvitationMailBuilder {
     }
 
     RaceLogTrackingInvitationMailBuilder addSailInSightIntroductoryText(final String invitee) {
-        this.addIntroductoryText(RaceLogTrackingI18n.sailInSightAppName(locale), invitee);
+        this.addIntroductoryTextForBranchDeeplink(RaceLogTrackingI18n.sailInSightAppName(locale), invitee);
         return this;
     }
 
@@ -164,6 +166,19 @@ class RaceLogTrackingInvitationMailBuilder {
         this.html.append("</table>");
         return this;
     }
+    
+    RaceLogTrackingInvitationMailBuilder addSailInsightBranchDeeplink(final String checkinUrl) {
+    	String deeplink = String.format("%s?checkinUrl=%s", SAIL_INSIGHT_BRANCH_DEEPLINK, checkinUrl);
+        this.html.append("<table border=\"0\" cellspacing=\"20px\" cellpadding=\"0px\">");
+        this.html.append("<tr>");
+        this.html.append("<td>");
+        this.addHtmlLink(deeplink, RaceLogTrackingI18n::register);
+        this.html.append("</td>");
+        this.addTextLink(deeplink, RaceLogTrackingI18n::register);
+        this.html.append("</tr>");
+        this.html.append("</table>");
+    	return this;
+    }
 
     String getSubject() {
         return subject;
@@ -196,6 +211,12 @@ class RaceLogTrackingInvitationMailBuilder {
 
     private void addIntroductoryText(final String appName, final String invitee) {
         final String introText = RaceLogTrackingI18n.scanQRCodeOrVisitUrlToRegisterAs(locale, appName);
+        this.html.append("<p>").append(introText).append(" <b>").append(invitee).append("</b></p>");
+        this.text.append(introText).append(" ").append(invitee).append(TEXT_LINE_BREAK).append(TEXT_LINE_BREAK);
+    }
+    
+    private void addIntroductoryTextForBranchDeeplink(final String appName, final String invitee) {
+        final String introText = RaceLogTrackingI18n.followBranchDeeplink(locale, appName);
         this.html.append("<p>").append(introText).append(" <b>").append(invitee).append("</b></p>");
         this.text.append(introText).append(" ").append(invitee).append(TEXT_LINE_BREAK).append(TEXT_LINE_BREAK);
     }

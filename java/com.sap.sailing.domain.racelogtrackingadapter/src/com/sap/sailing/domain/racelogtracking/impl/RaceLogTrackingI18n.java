@@ -19,6 +19,14 @@ public class RaceLogTrackingI18n {
     public static String scanQRCodeOrVisitUrlToRegisterAs(final Locale locale, final String appName) {
         return STRING_MESSAGES.get(locale, "scanQRCodeOrVisitUrlToRegisterAs", appName);
     }
+    
+    public static String followBranchDeeplink(final Locale locale, final String appName) {
+        return STRING_MESSAGES.get(locale, "followBranchDeeplink", appName);
+    }
+    
+    public static String register(final Locale locale) {
+        return STRING_MESSAGES.get(locale, "register");
+    }
 
     public static String welcomeTo(final Locale locale, final String eventName, final String leaderboardName) {
         return STRING_MESSAGES.get(locale, "welcomeTo") + " " + eventName + ", " + leaderboardName;
