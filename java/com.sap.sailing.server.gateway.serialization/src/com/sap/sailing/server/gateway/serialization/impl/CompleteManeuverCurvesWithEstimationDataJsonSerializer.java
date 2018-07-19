@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetectorWithEstimationDataSupport;
