@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.pages.leaderboard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -9,12 +10,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.google.common.base.Predicate;
 import com.sap.sailing.selenium.pages.common.CSSHelper;
-
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
-
 import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO.LeaderboardEntry;
 
 public class LeaderboardTablePO extends CellTablePO<LeaderboardEntry> {
@@ -197,9 +195,9 @@ public class LeaderboardTablePO extends CellTablePO<LeaderboardEntry> {
     }
     
     public void waitForLeaderboardToHaveData() {
-        new WebDriverWait(driver, 30).until(new Predicate<WebDriver>() {
+        new WebDriverWait(driver, 30).until(new Function<WebDriver, Boolean>() {
             @Override
-            public boolean apply(WebDriver driver) {
+            public Boolean apply(WebDriver driver) {
                 return !getEntries().isEmpty();
             }
         });
