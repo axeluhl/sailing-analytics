@@ -30,6 +30,7 @@ public class RaceLogTagEventSerializer extends BaseRaceLogEventSerializer{
         JSONObject result = super.serialize(tagEvent);
         result.put(FIELD_TAG, tagEvent.getTag());
         result.put(FIELD_USER_NAME, tagEvent.getUsername());
+        result.put(FIELD_COMMENT, tagEvent.getComment());
         result.put(FIELD_URL, tagEvent.getImageURL());
         return result;
     }

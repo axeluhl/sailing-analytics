@@ -40,6 +40,7 @@ public class Notification {
         ress.css().ensureInjected();
         snackBar.addStyleName(ress.css().snackbar());
         snackBar.getElement().getStyle().setCursor(Cursor.POINTER);
+        snackBar.getElement().getStyle().setZIndex(99);
 
         notificationAnimation = new Animation() {
             @Override
