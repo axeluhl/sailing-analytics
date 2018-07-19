@@ -2066,6 +2066,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String multiVideoDoNoAdd();
     String multiVideoOffsetInput();
     String multiVideoDescription();
+    String maneuverAngle();
+    String jibeAngle();
+    String tackAngle();
     String multiUrlChangeMediaTrack();
     String multiUrlChangeReplace();
     String multiUrlChangeFind();
@@ -2077,6 +2080,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String resetZoom();
     String lastEvent(String locationOrVenue);
     String teaserOverallLinkToolTip();
+    String middleManeuverAngle();
+    String extrapolatedManeuverStartPosition();
+    String projectedExtrapolatedManeuverStartPosition();
+    String projectedManeuverEndPosition();
+    String bearingAtManeuverEndPosition();
     String gender();
     String manage2SailEventIdBox();
     String manage2SailEventURLBox();
