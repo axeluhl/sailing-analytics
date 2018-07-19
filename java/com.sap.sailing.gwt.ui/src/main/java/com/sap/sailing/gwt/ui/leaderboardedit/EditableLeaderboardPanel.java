@@ -195,8 +195,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
 
         @Override
         public void render(Context context, CompetitorDTO competitor, SafeHtmlBuilder sb) {
-            String competitorColorBarStyle = "style=\"border: none;\"";
-            base.render(competitor, competitorColorBarStyle, sb);
+            base.render(context, competitor, sb);
         }
     }
 
