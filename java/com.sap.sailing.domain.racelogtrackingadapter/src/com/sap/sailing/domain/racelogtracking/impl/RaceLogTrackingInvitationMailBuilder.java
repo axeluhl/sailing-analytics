@@ -113,6 +113,11 @@ class RaceLogTrackingInvitationMailBuilder {
         }
         return this;
     }
+    
+    RaceLogTrackingInvitationMailBuilder addQrCodeDeeplinkImage(final String url) {
+    	String deeplink = String.format("%s?checkinUrl=%s", SAIL_INSIGHT_BRANCH_DEEPLINK, url);
+    	return this.addQrCodeImage(deeplink);
+    }
 
     RaceLogTrackingInvitationMailBuilder addOpenInAppTextAndLinks(final String targetUrl, final String iOSAppUrl,
             final String androidAppUrl) {

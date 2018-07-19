@@ -300,7 +300,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                             .addEventLogo(event)
                             .addHeadline(event, leaderboard)
                             .addSailInSightIntroductoryText(competitor.getName())
-                            .addSailInsightBranchDeeplink(url);
+                            .addSailInsightBranchDeeplink(url)
+                            .addQrCodeDeeplinkImage(url);
                     getMailService().sendMail(toAddress, mail.getSubject(), mail.getMultipartSupplier());
                 } catch (MessagingException | MailException | IOException e) {
                     logger.log(Level.SEVERE, "Error while trying to send invitation mail to competitor"
