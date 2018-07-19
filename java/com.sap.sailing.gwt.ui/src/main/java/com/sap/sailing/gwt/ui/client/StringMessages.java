@@ -2085,4 +2085,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windFinderSpotCollectionsList();
     
     String tagging();
+    String tagFilterExplanation();
+    String username();
+    String tag();
+    String selectedTags();
 }
