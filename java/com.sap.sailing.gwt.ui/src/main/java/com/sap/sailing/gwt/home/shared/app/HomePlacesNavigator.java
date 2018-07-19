@@ -92,7 +92,7 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     }
 
     public PlaceNavigation<ConfirmationPlace> getMailVerifiedConfirmationNavigation() {
-        return createLocalPlaceNavigation(new ConfirmationPlace(Action.MAIL_VERIFIED));
+        return createLocalPlaceNavigation(new ConfirmationPlace(Action.MAIL_VERIFIED, null, null));
     }
 
     public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {

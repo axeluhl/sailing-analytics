@@ -2,30 +2,28 @@
 
 This document describes the onboarding process for a new team member (developer)
 
-First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-Reusable-Object-Oriented-Software/dp/0201633612. That's a great book, and knowing at least some of it will help you a great deal finding your way around our solution.
+First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements-Reusable-Object-Oriented-Software/dp/0201633612](http://www.amazon.de/Patterns-Elements-Reusable-Object-Oriented-Software/dp/0201633612). That's a great book, and knowing at least some of it will help you a great deal finding your way around our solution.
 
 ### Race Analysis Development Setup
 
 #### Installations
 
-1. Eclipse (Eclipse IDE for Eclipse Committers, e.g. version 4.7.2 "Oxygen SR2"), http://www.eclipse.org
-2. Eclipse Extensions
-  * Install GWT Eclipse plugin for Eclipse (https://github.com/gwt-plugins/gwt-eclipse-plugin using http://storage.googleapis.com/gwt-eclipse-plugin/v3/release as the update site URL)
-  * Install Eclipse debugger for GWT SuperDevMode (master version: http://p2.sapsailing.com/p2/sdbg; public release: http://sdbg.github.io/p2)
-3. Git (e.g. Git for Windows v2.12.2), http://git-scm.com / https://git-for-windows.github.io/
-4. MongoDB (e.g. Production Release 2.6.7), download: https://www.mongodb.com/
-5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to newest versions have been reported. We know that version 3.6.8 works well. https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8 is the link.
-6. JDK 1.7 (Java SE 7), http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html
-7. JDK 1.8 (Java SE 8), http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
-8. Maven 3.1.1 (or higher), http://maven.apache.org
-9. GWT SDK 2.8.2 (http://www.gwtproject.org/download.html)
-10. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: You may additionally install Android Studio (https://developer.android.com/tools/studio/index.html) or IntelliJ IDEA (https://www.jetbrains.com/idea/download/).
+1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.8.0 ["Photon"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/photonr)), [http://www.eclipse.org](http://www.eclipse.org)
+2. Install the eclipse plugins (see Automatic Eclipse plugin installation below)
+3. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
+4. MongoDB (e.g. Production Release 2.6.7), download: [https://www.mongodb.com/](https://www.mongodb.com/)
+5. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8) is the link.
+6. JDK 1.7 (Java SE 7), [http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html](http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html)
+7. JDK 1.8 (Java SE 8), [http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+8. Maven 3.1.1 (or higher), [http://maven.apache.org](http://maven.apache.org)
+9. GWT SDK 2.8.2 ([http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html))
+10. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: You may additionally install Android Studio ([https://developer.android.com/tools/studio/index.html](https://developer.android.com/tools/studio/index.html)) or IntelliJ IDEA ([https://www.jetbrains.com/idea/download/](https://www.jetbrains.com/idea/download/)).
 
 #### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.7.2 "Oxygen.2"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/oxygen2) by using the script "configuration/installPluginsForEclipseOxygen.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.8.0 "Photon"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/photonr) by using the script "configuration/installPluginsForEclipsePhoton.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
-    ./installPluginsForEclipseOxygen.sh "/some/path/on/my/computer/eclipse"
+    ./installPluginsForEclipsePhoton.sh "/some/path/on/my/computer/eclipse"
 
 Be aware that with this script it's not possible to update the plugins to newer versions. Instead you can install a new version by unpacking the base package and executing the script.
 
@@ -35,9 +33,19 @@ On Mac OS, it's not sufficient to provide the path to the app, instead you need 
 
 Be aware hat the installation may take several minutes depending on your Internet connection. When the script finished running, please check that no errors occurred (the installation process only logs errors but doesn't fail).
 
+The script will install the following plugins for your convenience:
+
+* GWT Plugin ([https://github.com/gwt-plugins/gwt-eclipse-plugin](https://github.com/gwt-plugins/gwt-eclipse-plugin))
+* GWT SDM Debug Bridge ([http://sdbg.github.io/](http://sdbg.github.io/))
+* Android Tools ([https://marketplace.eclipse.org/content/android-development-tools-eclipse](https://marketplace.eclipse.org/content/android-development-tools-eclipse))
+* Easy Shell ([https://anb0s.github.io/EasyShell/](https://anb0s.github.io/EasyShell/))
+* Memory Analyzer ([https://www.eclipse.org/mat/](https://www.eclipse.org/mat/))
+* SAP JVM Profiler ([https://tools.hana.ondemand.com](https://tools.hana.ondemand.com))
+* various updates to preinstalled plugins
+
 #### Further optional but recommended installations
 
-1. Cygwin, http://www.cygwin.com/
+1. Cygwin, [http://www.cygwin.com/](http://www.cygwin.com/)
 2. Eclipse Mylyn Bugzilla extension
 3. kdiff3 (git tool)
 4. Firebug (javascript & .css debugging, included in Firefox Developer Tools in newer versions of Firefox by default)
@@ -46,27 +54,29 @@ Be aware hat the installation may take several minutes depending on your Interne
 
 1. Git Account
 The primary Git repository for the project is hosted on sapsailing.com. It is mirrored on an hourly basis into SAP's internal Git/Gerrit repository, but branches from the external Git end up under the remote ``sapsailing.com`` in the internal repository, thus do not automatically merge into their branch counterparts. Conversely, commits pushed onto branches of the SAP-internal Gerrit will not by themselves end up on the external Git at sapsailing.com.
-  * For access to the external git at ssh://trac@sapsailing.com/home/trac/git please send your SSH public key to Axel Uhl or Simon Marcel Pamies, requesting git access. Make sure to NOT generate the key using Putty. Putty keys don't work reliably under Linux and on Windows/Cygwin environments. Use ssh-keygen in a Cygwin or Linux or MacOS/X environment instead.
-  * Alternatively, for access to the SAP-internal Git/Gerrit repository register yourself as a Git user in the SAP-Git under: https://git.wdf.sap.corp:8080/; ask the Git administrator (Axel Uhl) to get on the list of enabled committers
+  * For access to the external git at ``ssh://trac@sapsailing.com/home/trac/git`` please send your SSH public key to Axel Uhl or Simon Marcel Pamies, requesting git access. Make sure to NOT generate the key using Putty. Putty keys don't work reliably under Linux and on Windows/Cygwin environments. Use ssh-keygen in a Cygwin or Linux or MacOS/X environment instead.
+  * Alternatively, for access to the SAP-internal Git/Gerrit repository register yourself as a Git user in the SAP-Git under: [https://git.wdf.sap.corp:8080/](https://git.wdf.sap.corp:8080/); ask the Git administrator (Axel Uhl) to get on the list of enabled committers
 2. Bugzilla
   * Ask the Bugzilla administrator (Frank Mittag, Axel Uhl) to create a bugzilla account for you.
-  * Bugzilla url: http://bugzilla.sapsailing.com/bugzilla/
+  * Bugzilla url: [http://bugzilla.sapsailing.com/bugzilla/](http://bugzilla.sapsailing.com/bugzilla/)
 3. Wiki
-  * Send a request to Axel Uhl or Simon Marcel Pamies that includes the SHA1 hash of your desired password. Obtain such an SHA1 hash for your password here: http://www.sha1-online.com/.
+  * Send a request to Axel Uhl or Simon Marcel Pamies that includes the SHA1 hash of your desired password. Obtain such an SHA1 hash for your password here: [http://www.sha1-online.com/](http://www.sha1-online.com/).
 4. Hudson
-  * Request a Hudson user by sending e-mail to Axel Uhl, Frank Mittag or Simon Marcel Pamies.
+  * Request a [Hudson](https://hudson.sapsailing.com) user by sending e-mail to Axel Uhl, Frank Mittag or Simon Marcel Pamies.
 
 #### Steps to build and run the Race Analysis Suite
 
 1. Get the content of the git repository
   * Generate SSH Keys with "ssh-keygen -t rsa -C "" " command in Cygwin Terminal (Not with Putty!!!)
   * Clone the repository to your local file system from `ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git`  or `ssh://[user]@sapsailing.com/home/trac/git`  User "trac" has all public ssh keys.
-  * Please note that when using one of the newer versions of Cygwin, your Cygwin home folder setting might differ from your Windows home folder. This will likely lead to problems when issuing certain commands. For troubleshooting, take a look at the following thread: https://stackoverflow.com/questions/1494658/how-can-i-change-my-cygwin-home-folder-after-installation
+  * Please note that when using one of the newer versions of Cygwin, your Cygwin home folder setting might differ from your Windows home folder. This will likely lead to problems when issuing certain commands. For troubleshooting, take a look at the following thread: [https://stackoverflow.com/questions/1494658/how-can-i-change-my-cygwin-home-folder-after-installation](https://stackoverflow.com/questions/1494658/how-can-i-change-my-cygwin-home-folder-after-installation)
 2. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
+2. Configure your local git repository
+  * Execute the command `git config core.autocrlf false` in the git repository
+  * Ensure that your git username and email is set properly: In case you are unsure, use the commands `git config user.name "My Name"` and `git config user.email my.email@sap.com` in the git repository.
 3. Setup and configure Eclipse
   * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Formatter)
-  * Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse)
-  * Install the Google Android SDK (see section "Additional steps required for Android projects" for detailed info!)
+  * Install the required plugins using the script provided above. Further configuration steps depend on the plugins being installed successfully.
   * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> GWT -> GWT Settings -> Add...)
   * In "Window->Preferences->GWT->Errors/Warnings, set "Missing SDK" to "Ignore"
@@ -79,8 +89,8 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Check that the both JDKs are available (Windows->Preferences->Java->Installed JREs)
   * Check that JDK 1.7 has been matched to JavaSE-1.7 and that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
   * It is also possible to match the SAPJVM 7 or 8 to JavaSE-1.7 / JavaSE-1.8 (for profiling purposes)
-  * Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"
-  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard "Git->Projects from Git" in Eclipse, and additionally make sure to scan for nested projects!)
+  * Go to Windows->Preferences->GWT->Errors/Warnings and set "Missing SDK" to "Ignore"
+  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard <del>"Git->Projects from Git"</del> "Import->General->Projects from Folder or Archive" in Eclipse, and additionally make sure to scan for nested projects!)
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
   * Wait until the target platform has been resolved completely
@@ -92,15 +102,14 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Run "SailingGWT sdm" in the debug dropdown
 5. Import races within the Race Analysis Suite
   * <del>Choose "Security UI sdm" in the upper left corner of the "Development Mode" Tab in Eclipse and open "...Login.html" in your browser</del> (obsolete)
-  * Choose "SailingGWT sdm" in the "Development Mode" Tab and open "...AdminConsole.html..." (It is normal that the first try fails. Reload the page after the first try)
+  * Choose "GWT Sailing SDM" in the "Development Mode" Tab and open "...AdminConsole.html..." (It is normal that the first try fails. Reload the page after the first try)
   * Default Login: user "admin", password "admin"
   * In the list on the left, click on "Connectors"
-  * For TracTrac Events: In the "TracTrac Connections" Form, fill in the JSON URL http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php (all other required information will be filled in automatically)
+  * For TracTrac Events: In the "TracTrac Connections" Form, fill in the JSON URL [http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php](http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php)(all other required information will be filled in automatically)
   * Press "List Races"
 
 #### Git repository configuration essentials
-
-The project has some configuration of line endings for specific file types in ".gitattributes". To make this work as intended, you need to set the git attribute "core.autocrlf" to "false". This can be done by navigating to your local repository in a Bach/Git Bach/Cygwin instance and executing the command `git config core.autocrlf false`.
+The project has some configuration of line endings for specific file types in ".gitattributes". To make this work as intended, you need to ensure that the git attribute "core.autocrlf" is set to "false". This can be done by navigating to your local repository in a Bach/Git Bach/Cygwin instance and executing the command `git config core.autocrlf false`.
 
 If you are first time git user, don't forget to specify your user metadata. Use the commands `git config user.name "My Name"` and `git config user.email my.email@sap.com` to tell git your name and email address.
 
@@ -130,13 +139,13 @@ When a file has "wrong line endings" (line endings are different to what is conf
 To ensure that all components of the Analysis Suite are working, you should also import all Android projects (mobile/) into your workspace. There are some additional requirements to enable the build process of these projects.
 
 1. Add the Android Development Tools (ADT) plugin to your Eclipse IDE
-  - In Eclipse click Help -> Install New Software -> Add and enter https://dl-ssl.google.com/android/eclipse/
+  - In Eclipse click Help -> Install New Software -> Add and enter [https://dl-ssl.google.com/android/eclipse/](https://dl-ssl.google.com/android/eclipse/)
   - Select the Developer Tools and install
   - After restarting Eclipse the "Welcome to Android Development"-window should help you with installing the Android SDK
-  - It is also possible to download the Android SDK separately from the official Google download website. However, as of Revision 25.0.0 of the Android SDK Tools, the SDK Manager became an integrated part of Android Studio. Therefore, Revisions newer than 24.4.1 will not come with a standalone SDK Manager. Since it is absolutely essential if you want to use Eclipse, please download the Android SDK from the following link: https://dl.google.com/android/installer_r24.4.1-windows.exe
+  - It is also possible to download the Android SDK separately from the official Google download website. However, as of Revision 25.0.0 of the Android SDK Tools, the SDK Manager became an integrated part of Android Studio. Therefore, Revisions newer than 24.4.1 will not come with a standalone SDK Manager. Since it is absolutely essential if you want to use Eclipse, please download the Android SDK from the following link: Windows: [https://dl.google.com/android/installer_r24.4.1-windows.exe](https://dl.google.com/android/installer_r24.4.1-windows.exe) MacOS: [https://dl.google.com/android/android-sdk_r24.4.1-macosx.zip](https://dl.google.com/android/android-sdk_r24.4.1-macosx.zip) Linux: [https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz](https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz) 
 2. Setup the Android SDK
   * In Eclipse press Window -> Android SDK Manager
-  * Install everything of "Tools"
+  * Install most recent version of "Android SDK Platform Tools" under "Tools" (hint: watch out not to update Android SDK Tools, see note below)
   * Install everything of "Android 3.2 API 13"
   * Install everything of "Android 5.1.1 API 22"
   * From the package "Extras", install "Android Support Repository" **or** "Android Support Library". Additionally install "Google Play Services", "Google Repository" **and** "Google USB Driver".
@@ -184,7 +193,7 @@ The Android Apps can be built in Android Studio or gradle command line. Android 
         * choose "add root" from "Unregistered VCS root detected" (you can add this later, if you missed it)
 3. Setup the Android SDK
     * in Android Studio press Tools -> Android -> SDK Manager
-    * Install from section "Tools"
+    * Install from section "Tools" (hint: carefull not to update 
         * Android SDK Tools
         * Android SDK Platform-tools
         * Android SDK Build-tools 22.0.1 (latest version at the time of writing)

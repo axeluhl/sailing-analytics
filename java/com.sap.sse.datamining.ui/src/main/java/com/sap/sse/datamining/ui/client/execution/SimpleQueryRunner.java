@@ -94,8 +94,7 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             counter.increase();
             resultsPresenter.showBusyIndicator();
-            dataMiningService.runQuery(session, queryDefinition,
-                    new ManagedDataMiningQueryCallback<Serializable>(counter) {
+            dataMiningService.runQuery(session, queryDefinition, new ManagedDataMiningQueryCallback<Serializable>(counter) {
                         @Override
                         protected void handleFailure(Throwable caught) {
                             errorReporter.reportError("Error running the query: " + caught.getMessage());

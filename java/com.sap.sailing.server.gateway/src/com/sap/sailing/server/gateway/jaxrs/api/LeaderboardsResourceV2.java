@@ -37,7 +37,9 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
+import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.sharding.ShardingContext;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -52,40 +54,46 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
     public Response getLeaderboard(@PathParam("name") String leaderboardName,
             @DefaultValue("Live") @QueryParam("resultState") ResultStates resultState,
             @QueryParam("columnNames") final List<String> raceColumnNames,
-            @QueryParam("raceDetails") final List<String> raceDetails,            
+            @QueryParam("raceDetails") final List<String> raceDetails,
             @QueryParam("time") String time, @QueryParam("timeasmillis") Long timeasmillis,
             @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount) {
-        Response response;
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard == null) {
-            response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
-                    .type(MediaType.TEXT_PLAIN).build();
-        } else {
-            try {
-                TimePoint timePoint;
+        ShardingContext.setShardingConstraint(ShardingType.LEADERBOARDNAME, leaderboardName);
+        
+        try {
+            Response response;
+            Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+            if (leaderboard == null) {
+                response = Response.status(Status.NOT_FOUND)
+                        .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+                        .type(MediaType.TEXT_PLAIN).build();
+            } else {
                 try {
-                    timePoint = parseTimePoint(time, timeasmillis, calculateTimePointForResultState(leaderboard, resultState));
-                } catch (InvalidDateException e1) {
-                    return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not parse the time.")
+                    TimePoint timePoint;
+                    try {
+                        timePoint = parseTimePoint(time, timeasmillis, calculateTimePointForResultState(leaderboard, resultState));
+                    } catch (InvalidDateException e1) {
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not parse the time.")
+                                .type(MediaType.TEXT_PLAIN).build();
+                    }
+                    JSONObject jsonLeaderboard;
+                    if (timePoint != null || resultState == ResultStates.Live) {
+                        jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount, raceColumnNames, raceDetails);
+                    } else {
+                        jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount);
+                    }
+                    StringWriter sw = new StringWriter();
+                    jsonLeaderboard.writeJSONString(sw);
+                    String json = sw.getBuffer().toString();
+                    response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
+                    response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
                             .type(MediaType.TEXT_PLAIN).build();
                 }
-                JSONObject jsonLeaderboard;
-                if (timePoint != null || resultState == ResultStates.Live) {
-                    jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount, raceColumnNames, raceDetails);
-                } else {
-                    jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount);
-                }
-                StringWriter sw = new StringWriter();
-                jsonLeaderboard.writeJSONString(sw);
-                String json = sw.getBuffer().toString();
-                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
-            } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
-                response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
-                        .type(MediaType.TEXT_PLAIN).build();
             }
+            return response;
+        } finally {
+            ShardingContext.clearShardingConstraint(ShardingType.LEADERBOARDNAME);
         }
-        return response;
     }
 
     @Override
@@ -122,6 +130,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         }
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
+        jsonLeaderboard.put("ShardingLeaderboardName", ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboard.getName()));
         int competitorCounter = 1;
         // Remark: leaderboardDTO.competitors are ordered by total rank
         for (CompetitorDTO competitor : leaderboardDTO.competitors) {

@@ -67,6 +67,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -194,8 +196,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
 
         @Override
         public void render(Context context, CompetitorDTO competitor, SafeHtmlBuilder sb) {
-            String competitorColorBarStyle = "style=\"border: none;\"";
-            base.render(competitor, competitorColorBarStyle, sb);
+            base.render(context, competitor, sb);
         }
     }
 
@@ -708,7 +709,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                     }
                     @Override
                     public void onSuccess(Void result) {
-                        Window.setStatus("Successfully unsuppressed competitor "+object.getName());
+                        Notification.notify("Successfully unsuppressed competitor "+object.getName(), NotificationType.INFO);
                         // force a reload of the entire editable leaderboard to hide the now suppressed competitor
                         loadCompleteLeaderboard(/* showProgress */ true);
                     }

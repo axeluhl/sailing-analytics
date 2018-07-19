@@ -58,4 +58,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String tabbedResultsPresenter();
     String useStringLiterals();
     String numberPairResultsPresenter();
+    String copiedToClipboard();
+    String csvExport();
+    String search();
+    String csvCopiedToClipboard();
+    String filter();
+    String filterShownDimensions();
+    String selectDimensionsToFilterBy();
+    
 }

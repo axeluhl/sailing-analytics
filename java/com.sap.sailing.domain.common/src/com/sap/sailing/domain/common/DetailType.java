@@ -5,10 +5,9 @@ import static com.sap.sse.common.SortingOrder.DESCENDING;
 import static com.sap.sse.common.SortingOrder.NONE;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.LinkedHashSet;
 
 import com.sap.sse.common.SortingOrder;
 
@@ -246,11 +245,11 @@ public enum DetailType implements Serializable {
     }
 
     /**
-     * Special List of DetailTypes, that allows operators to select for example the RideHeight, that is usually only
-     * selectable, if it already has data.
+     * Special collection of {@link DetailType}s, that allows operators to select for example the RideHeight, that is
+     * usually only selectable, if it already has data.
      */
-    public static List<DetailType> getAutoplayDetailTypesForChart() {
-        List<DetailType> availableDetailsTypes = new ArrayList<>();
+    public static Collection<DetailType> getAutoplayDetailTypesForChart() {
+        final Collection<DetailType> availableDetailsTypes = new LinkedHashSet<>();
         availableDetailsTypes.add(DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD);
         availableDetailsTypes.add(DetailType.LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         availableDetailsTypes.add(DetailType.LEG_DISTANCE_TRAVELED);
@@ -268,8 +267,8 @@ public enum DetailType implements Serializable {
         return availableDetailsTypes;
     }
 
-    public static List<DetailType> getRaceExpeditionDetailTypes() {
-        ArrayList<DetailType> allowed = new ArrayList<>();
+    public static Collection<DetailType> getRaceExpeditionDetailTypes() {
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(EXPEDITION_RACE_AWA);
         allowed.add(EXPEDITION_RACE_AWS);
         allowed.add(EXPEDITION_RACE_TWA);
@@ -312,15 +311,8 @@ public enum DetailType implements Serializable {
         return allowed;
     }
 
-    public static List<DetailType> getLegExtendedBravoDetailTypes() {
-        ArrayList<DetailType> allowed = new ArrayList<>();
-        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS);
-        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DURATION_FOILED_IN_SECONDS);
-        return allowed;
-    }
-
-    public static List<DetailType> getRaceExtendedBravoDetailTypes() {
-        ArrayList<DetailType> allowed = new ArrayList<>();
+     public static Collection<DetailType> getRaceExtendedBravoDetailTypes() {
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(DetailType.BRAVOEXTENDED_RACE_CURRENT_PORT_DAGGERBOARD_RAKE);
         allowed.add(DetailType.BRAVOEXTENDED_RACE_CURRENT_STBD_DAGGERBOARD_RAKE);
         allowed.add(DetailType.BRAVOEXTENDED_RACE_CURRENT_PORT_RUDDER_RAKE);
@@ -342,24 +334,28 @@ public enum DetailType implements Serializable {
         return allowed;
     }
 
-    public static List<DetailType> getRaceBravoDetailTypes() {
-        ArrayList<DetailType> allowed = new ArrayList<>();
+    public static Collection<DetailType> getRaceBravoDetailTypes() {
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(DetailType.BRAVO_RACE_HEEL_IN_DEGREES);
         allowed.add(DetailType.BRAVO_RACE_PITCH_IN_DEGREES);
         allowed.add(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
+        allowed.add(DetailType.RACE_CURRENT_DISTANCE_FOILED_IN_METERS);
+        allowed.add(DetailType.RACE_CURRENT_DURATION_FOILED_IN_SECONDS);
         return allowed;
     }
 
-    public static List<DetailType> getLegBravoDetailTypes() {
-        ArrayList<DetailType> allowed = new ArrayList<>();
+    public static Collection<DetailType> getLegBravoDetailTypes() {
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(DetailType.BRAVO_LEG_CURRENT_HEEL_IN_DEGREES);
         allowed.add(DetailType.BRAVO_LEG_CURRENT_PITCH_IN_DEGREES);
         allowed.add(DetailType.BRAVO_LEG_CURRENT_RIDE_HEIGHT_IN_METERS);
+        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DISTANCE_FOILED_IN_METERS);
+        allowed.add(DetailType.BRAVOEXTENDED_LEG_CURRENT_DURATION_FOILED_IN_SECONDS);
         return allowed;
     }
 
-    public static List<DetailType> getAllRaceDetailTypes() {
-        ArrayList<DetailType> allowed = new ArrayList<>();
+    public static Collection<DetailType> getAllRaceDetailTypes() {
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(RACE_GAP_TO_LEADER_IN_SECONDS);
         allowed.add(RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         allowed.add(RACE_DISTANCE_TRAVELED);
@@ -368,7 +364,6 @@ public enum DetailType implements Serializable {
         allowed.add(RACE_CALCULATED_TIME_TRAVELED);
         allowed.add(RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD);
         allowed.add(RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
-        allowed.add(BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
         allowed.add(RACE_CURRENT_DISTANCE_FOILED_IN_METERS);
         allowed.add(RACE_CURRENT_DURATION_FOILED_IN_SECONDS);
         allowed.add(RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS);
@@ -390,7 +385,7 @@ public enum DetailType implements Serializable {
      * @return
      */
     public static Collection<DetailType> getAllNonRestrictedDetailTypes() {
-        List<DetailType> all = new ArrayList<>(Arrays.asList(values()));
+        final Collection<DetailType> all = new LinkedHashSet<>(Arrays.asList(values()));
         all.removeAll(getRaceBravoDetailTypes());
         all.removeAll(getLegBravoDetailTypes());
         all.removeAll(getRaceExtendedBravoDetailTypes());
@@ -400,83 +395,150 @@ public enum DetailType implements Serializable {
         return all;
     }
 
-    public static List<DetailType> getAvailableOverallDetailColumnTypes() {
-        return Arrays.asList(new DetailType[] { DetailType.REGATTA_RANK, DetailType.OVERALL_TOTAL_DISTANCE_TRAVELED,
-                DetailType.OVERALL_TOTAL_AVERAGE_SPEED_OVER_GROUND, DetailType.OVERALL_TOTAL_TIME_SAILED_IN_SECONDS,
-                DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, DetailType.OVERALL_TIME_ON_TIME_FACTOR,
-                DetailType.OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
-                DetailType.OVERALL_TOTAL_SCORED_RACE_COUNT, TOTAL_TIME_SAILED_UPWIND_IN_SECONDS,
-                TOTAL_TIME_SAILED_REACHING_IN_SECONDS, TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS });
+    public static Collection<DetailType> getAvailableOverallDetailColumnTypes() {
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
+        allowed.add(REGATTA_RANK);
+        allowed.add(OVERALL_TOTAL_DISTANCE_TRAVELED);
+        allowed.add(OVERALL_TOTAL_AVERAGE_SPEED_OVER_GROUND);
+        allowed.add(OVERALL_TOTAL_TIME_SAILED_IN_SECONDS);
+        allowed.add(OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS);
+        allowed.add(OVERALL_TIME_ON_TIME_FACTOR);
+        allowed.add(OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
+        allowed.add(OVERALL_TOTAL_SCORED_RACE_COUNT);
+        allowed.add(TOTAL_TIME_SAILED_UPWIND_IN_SECONDS);
+        allowed.add(TOTAL_TIME_SAILED_REACHING_IN_SECONDS);
+        allowed.add(TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS);
+        return allowed;
     }
 
-    public static List<DetailType> getOverallBravoDetailTypes() {
-        return Arrays.asList(new DetailType[] { DetailType.OVERALL_TOTAL_DISTANCE_FOILED_IN_METERS,
-                OVERALL_TOTAL_DURATION_FOILED_IN_SECONDS });
+    public static Collection<DetailType> getOverallBravoDetailTypes() {
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
+        allowed.add(OVERALL_TOTAL_DISTANCE_FOILED_IN_METERS);
+        allowed.add(OVERALL_TOTAL_DURATION_FOILED_IN_SECONDS);
+        return allowed;
     }
 
-    public static List<DetailType> getLegDetailColumnTypes() {
-        return Arrays.asList(new DetailType[] { DetailType.LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
-                DetailType.LEG_DISTANCE_TRAVELED, DetailType.LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START,
-                DetailType.LEG_GAP_TO_LEADER_IN_SECONDS, DetailType.LEG_GAP_CHANGE_SINCE_LEG_START_IN_SECONDS,
-                DetailType.LEG_SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED,
-                DetailType.LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS,
-                DetailType.NUMBER_OF_MANEUVERS, DetailType.LEG_ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS,
-                DetailType.LEG_VELOCITY_MADE_GOOD_IN_KNOTS, DetailType.LEG_TIME_TRAVELED,
-                DetailType.LEG_CORRECTED_TIME_TRAVELED, DetailType.LEG_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
-                DetailType.LEG_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, DetailType.LEG_RANK_GAIN });
+    public static Collection<DetailType> getLegDetailColumnTypes() {
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
+        allowed.add(LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
+        allowed.add(LEG_DISTANCE_TRAVELED);
+        allowed.add(LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START);
+        allowed.add(LEG_GAP_TO_LEADER_IN_SECONDS);
+        allowed.add(LEG_GAP_CHANGE_SINCE_LEG_START_IN_SECONDS);
+        allowed.add(LEG_SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED);
+        allowed.add(LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
+        allowed.add(LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS);
+        allowed.add(NUMBER_OF_MANEUVERS);
+        allowed.add(LEG_ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS);
+        allowed.add(LEG_VELOCITY_MADE_GOOD_IN_KNOTS);
+        allowed.add(LEG_TIME_TRAVELED);
+        allowed.add(LEG_CORRECTED_TIME_TRAVELED);
+        allowed.add(LEG_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS);
+        allowed.add(LEG_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS);
+        allowed.add(LEG_RANK_GAIN);
+        return allowed;
     }
 
-    public static List<DetailType> getRaceStartAnalysisColumnTypes() {
-        return Arrays.asList(new DetailType[] { DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START,
-                DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START, DetailType.DISTANCE_TO_START_AT_RACE_START,
-                DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START, DetailType.SPEED_OVER_GROUND_AT_RACE_START,
-                DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
-                DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS,
-                DetailType.START_TACK });
+    public static Collection<DetailType> getRaceStartAnalysisColumnTypes() {
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
+        allowed.add(RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START);
+        allowed.add(RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START);
+        allowed.add(DISTANCE_TO_START_AT_RACE_START);
+        allowed.add(TIME_BETWEEN_RACE_START_AND_COMPETITOR_START);
+        allowed.add(SPEED_OVER_GROUND_AT_RACE_START);
+        allowed.add(SPEED_OVER_GROUND_WHEN_PASSING_START);
+        allowed.add(DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS);
+        allowed.add(START_TACK);
+        return allowed;
     }
 
-    public static List<DetailType> getLegExpeditionDetailColumnTypes() {
-        return Arrays.asList(new DetailType[] { EXPEDITION_LEG_AWA, EXPEDITION_LEG_AWS, EXPEDITION_LEG_TWA,
-                EXPEDITION_LEG_TWS, EXPEDITION_LEG_TWD, EXPEDITION_LEG_TARG_TWA, EXPEDITION_LEG_BOAT_SPEED,
-                EXPEDITION_LEG_TARG_BOAT_SPEED, EXPEDITION_LEG_SOG, EXPEDITION_LEG_COG, EXPEDITION_LEG_FORESTAY_LOAD,
-                EXPEDITION_LEG_RAKE, EXPEDITION_LEG_COURSE, EXPEDITION_LEG_HEADING, EXPEDITION_LEG_VMG,
-                EXPEDITION_LEG_VMG_TARG_VMG_DELTA, EXPEDITION_LEG_RATE_OF_TURN, EXPEDITION_LEG_RUDDER_ANGLE,
-                EXPEDITION_LEG_TARGET_HEEL, EXPEDITION_LEG_TIME_TO_PORT_LAYLINE,
-                EXPEDITION_LEG_TIME_TO_STB_LAYLINE, EXPEDITION_LEG_DIST_TO_PORT_LAYLINE,
-                EXPEDITION_LEG_DIST_TO_STB_LAYLINE, EXPEDITION_LEG_TIME_TO_GUN, EXPEDITION_LEG_TIME_TO_COMMITTEE_BOAT,
-                EXPEDITION_LEG_TIME_TO_PIN, EXPEDITION_LEG_TIME_TO_BURN_TO_LINE,
-                EXPEDITION_LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT, EXPEDITION_LEG_TIME_TO_BURN_TO_PIN,
-                EXPEDITION_LEG_DISTANCE_TO_COMMITTEE_BOAT, EXPEDITION_LEG_DISTANCE_TO_PIN,
-                EXPEDITION_LEG_DISTANCE_BELOW_LINE, EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION, EXPEDITION_LEG_BARO,
-                EXPEDITION_LEG_LOAD_S, EXPEDITION_LEG_LOAD_P, EXPEDITION_LEG_JIB_CAR_PORT, EXPEDITION_LEG_JIB_CAR_STBD,
-                EXPEDITION_LEG_MAST_BUTT });
+    public static Collection<DetailType> getLegExpeditionDetailColumnTypes() {
+        final Collection<DetailType> allowed = new LinkedHashSet<>();
+        allowed.add(EXPEDITION_LEG_AWA);
+        allowed.add(EXPEDITION_LEG_AWS);
+        allowed.add(EXPEDITION_LEG_TWA);
+        allowed.add(EXPEDITION_LEG_TWS);
+        allowed.add(EXPEDITION_LEG_TWD);
+        allowed.add(EXPEDITION_LEG_TARG_TWA);
+        allowed.add(EXPEDITION_LEG_BOAT_SPEED);
+        allowed.add(EXPEDITION_LEG_TARG_BOAT_SPEED);
+        allowed.add(EXPEDITION_LEG_SOG);
+        allowed.add(EXPEDITION_LEG_COG);
+        allowed.add(EXPEDITION_LEG_FORESTAY_LOAD);
+        allowed.add(EXPEDITION_LEG_RAKE);
+        allowed.add(EXPEDITION_LEG_COURSE);
+        allowed.add(EXPEDITION_LEG_HEADING);
+        allowed.add(EXPEDITION_LEG_VMG);
+        allowed.add(EXPEDITION_LEG_VMG_TARG_VMG_DELTA);
+        allowed.add(EXPEDITION_LEG_RATE_OF_TURN);
+        allowed.add(EXPEDITION_LEG_RUDDER_ANGLE);
+        allowed.add(EXPEDITION_LEG_TARGET_HEEL);
+        allowed.add(EXPEDITION_LEG_TIME_TO_PORT_LAYLINE);
+        allowed.add(EXPEDITION_LEG_TIME_TO_STB_LAYLINE);
+        allowed.add(EXPEDITION_LEG_DIST_TO_PORT_LAYLINE);
+        allowed.add(EXPEDITION_LEG_DIST_TO_STB_LAYLINE);
+        allowed.add(EXPEDITION_LEG_TIME_TO_GUN);
+        allowed.add(EXPEDITION_LEG_TIME_TO_COMMITTEE_BOAT);
+        allowed.add(EXPEDITION_LEG_TIME_TO_PIN);
+        allowed.add(EXPEDITION_LEG_TIME_TO_BURN_TO_LINE);
+        allowed.add(EXPEDITION_LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT);
+        allowed.add(EXPEDITION_LEG_TIME_TO_BURN_TO_PIN);
+        allowed.add(EXPEDITION_LEG_DISTANCE_TO_COMMITTEE_BOAT);
+        allowed.add(EXPEDITION_LEG_DISTANCE_TO_PIN);
+        allowed.add(EXPEDITION_LEG_DISTANCE_BELOW_LINE);
+        allowed.add(EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION);
+        allowed.add(EXPEDITION_LEG_BARO);
+        allowed.add(EXPEDITION_LEG_LOAD_S);
+        allowed.add(EXPEDITION_LEG_LOAD_P);
+        allowed.add(EXPEDITION_LEG_JIB_CAR_PORT);
+        allowed.add(EXPEDITION_LEG_JIB_CAR_STBD);
+        allowed.add(EXPEDITION_LEG_MAST_BUTT);
+        return allowed;
     }
 
     /**
      * Not yet implemented types can be added here, they will be hidden from any user under all circumstances
      */
-    public static List<DetailType> getDisabledDetailColumTypes() {
-        return Arrays.asList(new DetailType[] { EXPEDITION_LEG_TARG_TWA, EXPEDITION_LEG_VMG,
-                EXPEDITION_LEG_VMG_TARG_VMG_DELTA, EXPEDITION_LEG_RATE_OF_TURN, EXPEDITION_LEG_RUDDER_ANGLE,
-                EXPEDITION_LEG_TIME_TO_PORT_LAYLINE, EXPEDITION_LEG_TIME_TO_STB_LAYLINE,
-                EXPEDITION_LEG_DIST_TO_PORT_LAYLINE, EXPEDITION_LEG_DIST_TO_STB_LAYLINE,
-                EXPEDITION_LEG_TIME_TO_COMMITTEE_BOAT, EXPEDITION_LEG_TIME_TO_PIN, EXPEDITION_LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT,
-                EXPEDITION_LEG_TIME_TO_BURN_TO_PIN, EXPEDITION_LEG_DISTANCE_TO_COMMITTEE_BOAT,
-                EXPEDITION_LEG_DISTANCE_TO_PIN, EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION, EXPEDITION_RACE_TARG_TWA,
-                EXPEDITION_RACE_VMG, EXPEDITION_RACE_VMG_TARG_VMG_DELTA,
-                EXPEDITION_RACE_RUDDER_ANGLE, EXPEDITION_RACE_TIME_TO_PORT_LAYLINE, EXPEDITION_RACE_TIME_TO_STB_LAYLINE,
-                EXPEDITION_RACE_DIST_TO_PORT_LAYLINE, EXPEDITION_RACE_DIST_TO_STB_LAYLINE,
-                EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT, EXPEDITION_RACE_TIME_TO_PIN,
-                EXPEDITION_RACE_TIME_TO_BURN_TO_PIN, EXPEDITION_RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT,
-                EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT, EXPEDITION_RACE_DISTANCE_TO_PIN,
-                EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION });
+    public static Collection<DetailType> getDisabledDetailColumTypes() {
+        final Collection<DetailType> disabled = new LinkedHashSet<>();
+        disabled.add(EXPEDITION_LEG_TARG_TWA);
+        disabled.add(EXPEDITION_LEG_VMG);
+        disabled.add(EXPEDITION_LEG_VMG_TARG_VMG_DELTA);
+        disabled.add(EXPEDITION_LEG_RATE_OF_TURN);
+        disabled.add(EXPEDITION_LEG_RUDDER_ANGLE);
+        disabled.add(EXPEDITION_LEG_TIME_TO_PORT_LAYLINE);
+        disabled.add(EXPEDITION_LEG_TIME_TO_STB_LAYLINE);
+        disabled.add(EXPEDITION_LEG_DIST_TO_PORT_LAYLINE);
+        disabled.add(EXPEDITION_LEG_DIST_TO_STB_LAYLINE);
+        disabled.add(EXPEDITION_LEG_TIME_TO_COMMITTEE_BOAT);
+        disabled.add(EXPEDITION_LEG_TIME_TO_PIN);
+        disabled.add(EXPEDITION_LEG_TIME_TO_BURN_TO_COMMITTEE_BOAT);
+        disabled.add(EXPEDITION_LEG_TIME_TO_BURN_TO_PIN);
+        disabled.add(EXPEDITION_LEG_DISTANCE_TO_COMMITTEE_BOAT);
+        disabled.add(EXPEDITION_LEG_DISTANCE_TO_PIN);
+        disabled.add(EXPEDITION_LEG_LINE_SQUARE_FOR_WIND_DIRECTION);
+        disabled.add(EXPEDITION_RACE_TARG_TWA);
+        disabled.add(EXPEDITION_RACE_VMG);
+        disabled.add(EXPEDITION_RACE_VMG_TARG_VMG_DELTA);
+        disabled.add(EXPEDITION_RACE_RUDDER_ANGLE);
+        disabled.add(EXPEDITION_RACE_TIME_TO_PORT_LAYLINE);
+        disabled.add(EXPEDITION_RACE_TIME_TO_STB_LAYLINE);
+        disabled.add(EXPEDITION_RACE_DIST_TO_PORT_LAYLINE);
+        disabled.add(EXPEDITION_RACE_DIST_TO_STB_LAYLINE);
+        disabled.add(EXPEDITION_RACE_TIME_TO_COMMITTEE_BOAT);
+        disabled.add(EXPEDITION_RACE_TIME_TO_PIN);
+        disabled.add(EXPEDITION_RACE_TIME_TO_BURN_TO_PIN);
+        disabled.add(EXPEDITION_RACE_TIME_TO_BURN_TO_COMMITTEE_BOAT);
+        disabled.add(EXPEDITION_RACE_DISTANCE_TO_COMMITTEE_BOAT);
+        disabled.add(EXPEDITION_RACE_DISTANCE_TO_PIN);
+        disabled.add(EXPEDITION_RACE_LINE_SQUARE_FOR_WIND_DIRECTION);
+        return disabled;
     }
 
-    public static List<DetailType> getAllLegDetailColumnTypes() {
-        ArrayList<DetailType> all = new ArrayList<>();
+    public static Collection<DetailType> getAllLegDetailColumnTypes() {
+        final Collection<DetailType> all = new LinkedHashSet<>();
         all.addAll(getLegDetailColumnTypes());
         all.addAll(getLegBravoDetailTypes());
-        all.addAll(getLegExtendedBravoDetailTypes());
         all.addAll(getLegExpeditionDetailColumnTypes());
         return all;
     }
@@ -500,7 +562,6 @@ public enum DetailType implements Serializable {
                             return t;
                         }
                     }
-
                 }
             }
         }

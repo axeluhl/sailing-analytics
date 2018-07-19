@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
@@ -40,17 +39,6 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * not possible to only show a physical race.
  */
 public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderboardSettings> {
-
-    public MultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            MultiRaceLeaderboardSettings settings, boolean isEmbedded,
-            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
-            String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages, boolean showRaceDetails,
-            LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
-        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
-                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails, style, flagImageResolver, availableDetailTypes);
-        initialize(settings);
-    }
 
     public MultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
@@ -114,13 +102,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
 
     @Override
     public String getCompetitorColor(CompetitorDTO competitor) {
-        // not used for multi
-        return null;
-    }
-
-    @Override
-    public boolean renderBoatColorIfNecessary(CompetitorDTO competitor, SafeHtmlBuilder sb) {
-        return false;
+        return null; // Not used in multi-race leaderboard
     }
 
     @Override

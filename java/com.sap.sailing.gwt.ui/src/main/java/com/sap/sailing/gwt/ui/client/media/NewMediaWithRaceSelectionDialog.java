@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.media;
 
+import java.util.Date;
 import java.util.Set;
 
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -13,7 +14,6 @@ import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
@@ -41,19 +41,7 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
         this.regattasDisplayers = regattasDisplayers;
     }
 
-    protected void updateStartTimeFromUi() {
-        try {
-            String startTime = startTimeBox.getValue();
-            if (startTime != null && !startTime.equals("")) {
-                mediaTrack.startTime = new MillisecondsTimePoint(TimeFormatUtil.DATETIME_FORMAT.parse(startTime));
-                regattaRefresher.fillRegattas();
-                listOfRacesForMedia.setVisible(true);
-            }
-        } catch (Exception e) {
-            listOfRacesForMedia.setVisible(false);
-        }
-    }
-
+    @Override
     protected void connectMediaWithRace() {
         mediaTrack.assignedRaces = racesForMediaDialog.getAssignedRaces();
     }
@@ -81,6 +69,7 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
         return listOfRacesForMedia = racesForMediaDialog.getAdditionalWidget();
     }
 
+    @Override
     protected Widget getAdditionalWidget() {
         VerticalPanel mainPanel = (VerticalPanel) super.getAdditionalWidget();
         mainPanel.add(racesForMedia());
@@ -88,4 +77,17 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
         return mainPanel;
     }
 
+    @Override
+    protected void refreshUI() {
+        super.refreshUI();
+        try {
+            Date value = startTimeBox.getValue();
+            if (value != null) {
+                regattaRefresher.fillRegattas();
+                listOfRacesForMedia.setVisible(true);
+            }
+        } catch (Exception e) {
+            listOfRacesForMedia.setVisible(false);
+        }
+    }
 }

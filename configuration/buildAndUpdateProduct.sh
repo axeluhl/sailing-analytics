@@ -631,7 +631,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         PATH=$PATH:$ANDROID_HOME/platform-tools
         SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager"
         if [ \! -x "$SDK_MANAGER" ]; then
-            SDK_MANAGER="$SDK_MANAGER/tools/bin/sdkmanager.bat"
+            SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager.bat"
         fi
         
         mobile_extra="-P -with-not-android-relevant -P with-mobile"

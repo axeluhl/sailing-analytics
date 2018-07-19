@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import java.util.Comparator;
 
 import com.google.gwt.cell.client.AbstractSafeHtmlCell;
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -17,12 +18,13 @@ import com.sap.sse.common.InvertibleComparator;
 import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 
 public class CompetitorColumnBase<T> {
+
     private final LeaderboardFetcher leaderboardFetcher;
-    protected final StringMessages stringMessages;
+    private final StringMessages stringMessages;
     private final CompetitorFetcher<T> competitorFetcher;
     
-    public CompetitorColumnBase(LeaderboardFetcher leaderboardFetcher, StringMessages stringMessages, CompetitorFetcher<T> competitorFetcher) {
-        super();
+    public CompetitorColumnBase(LeaderboardFetcher leaderboardFetcher, StringMessages stringMessages,
+            CompetitorFetcher<T> competitorFetcher) {
         this.leaderboardFetcher = leaderboardFetcher;
         this.stringMessages = stringMessages;
         this.competitorFetcher = competitorFetcher;
@@ -36,11 +38,11 @@ public class CompetitorColumnBase<T> {
         return new AbstractSafeHtmlCell<T>(new AbstractSafeHtmlRenderer<T>() {
             @Override
             public SafeHtml render(T row) {
-                return new SafeHtmlBuilder().appendEscaped(leaderboard.getDisplayName(competitorFetcher.getCompetitor(row))).toSafeHtml();
+                return SafeHtmlUtils.fromString(leaderboard.getDisplayName(competitorFetcher.getCompetitor(row)));
             }
         }) {
             @Override
-            protected void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml data, SafeHtmlBuilder sb) {
+            protected void render(Context context, SafeHtml data, SafeHtmlBuilder sb) {
                 sb.append(data);
             }
         };
@@ -50,8 +52,10 @@ public class CompetitorColumnBase<T> {
         return new InvertibleComparatorAdapter<T>() {
             @Override
             public int compare(T o1, T o2) {
-                return Comparator.<CompetitorDTO>nullsLast((c1, c2)->new NaturalComparator(/* caseSensitive */ false).compare(c1.getShortName(), c2.getShortName())).compare(
-                        competitorFetcher.getCompetitor(o1), competitorFetcher.getCompetitor(o2));
+                return Comparator
+                        .<CompetitorDTO> nullsLast((c1, c2) -> new NaturalComparator(/* caseSensitive */ false)
+                                .compare(c1.getShortName(), c2.getShortName()))
+                        .compare(competitorFetcher.getCompetitor(o1), competitorFetcher.getCompetitor(o2));
             }
         };
     }
@@ -61,10 +65,8 @@ public class CompetitorColumnBase<T> {
                 stringMessages.competitorColumnTooltip());
     }
 
-    public void render(T t, String competitorColorBarStyle, SafeHtmlBuilder sb) {
-        sb.appendHtmlConstant("<div " + competitorColorBarStyle + ">");
-        sb.appendEscaped(getLeaderboard().getDisplayName(competitorFetcher.getCompetitor(t)));
-        sb.appendHtmlConstant("</div>");
+    public void render(Context context, T row, SafeHtmlBuilder sb) {
+        sb.appendEscaped(getLeaderboard().getDisplayName(competitorFetcher.getCompetitor(row)));
     }
 
 }

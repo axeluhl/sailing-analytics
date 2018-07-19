@@ -54,7 +54,7 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
@@ -540,7 +540,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
     
     /**
-     * Adds a fix to the {@link GPSFixStore}, and creates a mapping with a virtual device for exactly the current
+     * Adds a fix to the {@link SensorFixStore}, and creates a mapping with a virtual device for exactly the current
      * timepoint.
      * 
      * @param timePoint
@@ -757,7 +757,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     List<String> getRaceDisplayNamesFromLeaderboard(String leaderboardName, List<String> raceColumnNames) throws NotFoundException;
     
-    Iterable<DetailType> getAvailableDetailTypesForLeaderboard(String leaderboardName);
+    Iterable<DetailType> getAvailableDetailTypesForLeaderboard(String leaderboardName, RegattaAndRaceIdentifier raceOrNull);
 
     SpotDTO getWindFinderSpot(String spotId) throws Exception;
     
@@ -779,5 +779,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     SliceRacePreperationDTO prepareForSlicingOfRace(RegattaAndRaceIdentifier raceIdentifier);
     
-    Boolean checkIfRaceIsTracked(RegattaAndRaceIdentifier race);
+    /**
+     * Checks if the given race is currently in state tracking or loading.
+     */
+    Boolean checkIfRaceIsTracking(RegattaAndRaceIdentifier race);
 }
