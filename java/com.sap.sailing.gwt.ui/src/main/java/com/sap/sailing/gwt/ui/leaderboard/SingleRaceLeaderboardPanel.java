@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.cell.client.TextCell;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.domain.common.DetailType;
@@ -165,17 +164,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     
     @Override
     public String getCompetitorColor(CompetitorDTO competitor) {
-        return getRaceCompetitorSelection().getColor(competitor, preSelectedRace).getAsHtml();
-    }
-
-    @Override
-    public boolean renderBoatColorIfNecessary(CompetitorDTO competitor, SafeHtmlBuilder sb) {
-        boolean showBoatColor = !isShowCompetitorFullName() && isEmbedded;
-        if (showBoatColor) {
-            String competitorColor = getRaceCompetitorSelection().getColor(competitor, preSelectedRace).getAsHtml();
-            sb.appendHtmlConstant("<div style=\" "+style.determineBoatColorDivStyle(competitorColor)+ "\">");
-        }
-        return showBoatColor;
+        return isEmbedded() ? getRaceCompetitorSelection().getColor(competitor, preSelectedRace).getAsHtml() : null;
     }
 
     @Override

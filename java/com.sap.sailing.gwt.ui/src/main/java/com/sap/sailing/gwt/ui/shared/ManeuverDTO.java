@@ -13,41 +13,42 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class ManeuverDTO implements IsSerializable {
-    public ManeuverType type;
+    private ManeuverType type;
 
-    public Tack newTack;
+    private Tack newTack;
 
-    public Position position;
+    private Position position;
 
-    public Date timePoint;
+    private Date timePoint;
 
-    public Date timePointBefore;
+    private Date timePointBefore;
+    
+    private SpeedWithBearingDTO speedWithBearingBefore;
 
-    public SpeedWithBearingDTO speedWithBearingBefore;
+    private SpeedWithBearingDTO speedWithBearingAfter;
 
-    public SpeedWithBearingDTO speedWithBearingAfter;
+    private double directionChangeInDegrees;
 
-    public double directionChangeInDegrees;
+    private double maxTurningRateInDegreesPerSecond;
 
-    public Double maneuverLossInMeters;
+    private double avgTurningRateInDegreesPerSecond;
 
-    public double maxTurningRateInDegreesPerSecond;
+    private double lowestSpeedInKnots;
 
-    public double avgTurningRateInDegreesPerSecond;
+    private Date markPassingTimePoint;
 
-    public double lowestSpeedInKnots;
+    private NauticalSide markPassingSide;
+    
+    private ManeuverLossDTO maneuverLoss;
 
-    public Date markPassingTimePoint;
-
-    public NauticalSide markPassingSide;
-
-    public ManeuverDTO() {}
+    @Deprecated // for GWT serialization only
+    ManeuverDTO() {}
 
     public ManeuverDTO(ManeuverType type, Tack newTack, Position position, Date timePoint, Date timePointBefore,
             SpeedWithBearingDTO speedWithBearingBefore, SpeedWithBearingDTO speedWithBearingAfter,
-            double directionChangeInDegrees, Double maneuverLossInMeters, double maxTurningRateInDegreesPerSecond,
+            double directionChangeInDegrees, double maxTurningRateInDegreesPerSecond,
             double avgTurningRateInDegreesPerSecond, double lowestSpeedInKnots, Date markPassingTimePoint,
-            NauticalSide markPassingSide) {
+            NauticalSide markPassingSide, ManeuverLossDTO maneuverLoss) {
         this.type = type;
         this.newTack = newTack;
         this.position = position;
@@ -56,23 +57,23 @@ public class ManeuverDTO implements IsSerializable {
         this.speedWithBearingBefore = speedWithBearingBefore;
         this.speedWithBearingAfter = speedWithBearingAfter;
         this.directionChangeInDegrees = directionChangeInDegrees;
-        this.maneuverLossInMeters = maneuverLossInMeters;
         this.maxTurningRateInDegreesPerSecond = maxTurningRateInDegreesPerSecond;
         this.avgTurningRateInDegreesPerSecond = avgTurningRateInDegreesPerSecond;
         this.lowestSpeedInKnots = lowestSpeedInKnots;
         this.markPassingTimePoint = markPassingTimePoint;
         this.markPassingSide = markPassingSide;
+        this.maneuverLoss = maneuverLoss;
     }
 
     public String toString(StringMessages stringMessages) {
-        SpeedWithBearingDTO before = this.speedWithBearingBefore;
-        SpeedWithBearingDTO after = this.speedWithBearingAfter;
+        SpeedWithBearingDTO before = this.getSpeedWithBearingBefore();
+        SpeedWithBearingDTO after = this.getSpeedWithBearingAfter();
 
         final DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL);
-        String timeAndManeuver = dateTimeFormat.format(this.timePoint) + ": " + this.type.name();
-        String timePointBefore = " (started: " + dateTimeFormat.format(this.timePointBefore) + ")";
+        String timeAndManeuver = dateTimeFormat.format(this.getTimePoint()) + ": " + this.getType().name();
+        String timePointBefore = " (started: " + dateTimeFormat.format(this.getTimePointBefore()) + ")";
         String directionChange = stringMessages.directionChange() + ": "
-                + ((int) Math.round(this.directionChangeInDegrees)) + " " + stringMessages.degreesShort() + " ("
+                + ((int) Math.round(this.getDirectionChangeInDegrees())) + " " + stringMessages.degreesShort() + " ("
                 + ((int) Math.round(before.bearingInDegrees)) + " " + stringMessages.degreesShort() + " -> "
                 + ((int) Math.round(after.bearingInDegrees)) + " " + stringMessages.degreesShort() + ")";
         String speedChange = stringMessages.speedChange() + ": "
@@ -81,25 +82,81 @@ public class ManeuverDTO implements IsSerializable {
                 + stringMessages.knotsUnit() + " -> " + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "
                 + stringMessages.knotsUnit() + ")";
         String maxTurningRate = stringMessages.maxTurningRate() + ": "
-                + NumberFormat.getDecimalFormat().format(this.maxTurningRateInDegreesPerSecond) + " "
+                + NumberFormat.getDecimalFormat().format(this.getMaxTurningRateInDegreesPerSecond()) + " "
                 + stringMessages.degreesPerSecondUnit();
         String avgTurningRate = stringMessages.avgTurningRate() + ": "
-                + NumberFormat.getDecimalFormat().format(this.avgTurningRateInDegreesPerSecond) + " "
+                + NumberFormat.getDecimalFormat().format(this.getAvgTurningRateInDegreesPerSecond()) + " "
                 + stringMessages.degreesPerSecondUnit();
         String lowestSpeed = stringMessages.lowestSpeed() + ": "
-                + NumberFormat.getDecimalFormat().format(this.lowestSpeedInKnots) + " " + stringMessages.knotsUnit();
-        String maneuverLoss = this.maneuverLossInMeters == null ? ""
+                + NumberFormat.getDecimalFormat().format(this.getLowestSpeedInKnots()) + " " + stringMessages.knotsUnit();
+        String maneuverLoss = (this.getManeuverLoss() == null || this.getManeuverLoss().getDistanceLost() == null) ? ""
                 : ("; " + stringMessages.maneuverLoss() + ": "
-                        + NumberFormat.getDecimalFormat().format(this.maneuverLossInMeters) + " "
+                        + NumberFormat.getDecimalFormat().format(this.getManeuverLoss().getDistanceLost().getMeters()) + " "
                         + stringMessages.metersUnit());
-        String markPassing = markPassingTimePoint == null ? ""
+        String markPassing = getMarkPassingTimePoint() == null ? ""
                 : "; " + stringMessages.markPassedToAt(
-                        this.markPassingSide == null ? ""
-                                : this.markPassingSide == NauticalSide.PORT ? stringMessages.portSide()
+                        this.getMarkPassingSide() == null ? ""
+                                : this.getMarkPassingSide() == NauticalSide.PORT ? stringMessages.portSide()
                                         : stringMessages.starboardSide(),
-                        DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(this.markPassingTimePoint));
+                        DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(this.getMarkPassingTimePoint()));
         String maneuverTitle = timeAndManeuver + timePointBefore + "; " + directionChange + "; " + speedChange + "; "
                 + maxTurningRate + "; " + avgTurningRate + "; " + lowestSpeed + maneuverLoss + markPassing;
         return maneuverTitle;
+    }
+
+    public ManeuverType getType() {
+        return type;
+    }
+
+    public Tack getNewTack() {
+        return newTack;
+    }
+
+    public Position getPosition() {
+        return position;
+    }
+
+    public Date getTimePoint() {
+        return timePoint;
+    }
+
+    public Date getTimePointBefore() {
+        return timePointBefore;
+    }
+
+    public SpeedWithBearingDTO getSpeedWithBearingBefore() {
+        return speedWithBearingBefore;
+    }
+
+    public SpeedWithBearingDTO getSpeedWithBearingAfter() {
+        return speedWithBearingAfter;
+    }
+
+    public double getDirectionChangeInDegrees() {
+        return directionChangeInDegrees;
+    }
+
+    public double getMaxTurningRateInDegreesPerSecond() {
+        return maxTurningRateInDegreesPerSecond;
+    }
+
+    public double getAvgTurningRateInDegreesPerSecond() {
+        return avgTurningRateInDegreesPerSecond;
+    }
+
+    public double getLowestSpeedInKnots() {
+        return lowestSpeedInKnots;
+    }
+
+    public Date getMarkPassingTimePoint() {
+        return markPassingTimePoint;
+    }
+
+    public NauticalSide getMarkPassingSide() {
+        return markPassingSide;
+    }
+
+    public ManeuverLossDTO getManeuverLoss() {
+        return maneuverLoss;
     }
 }
