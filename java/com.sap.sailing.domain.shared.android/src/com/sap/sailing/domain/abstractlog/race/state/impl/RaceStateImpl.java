@@ -23,7 +23,6 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogProtestStartTimeEvent
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogTagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
@@ -216,13 +215,6 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     @Override
     public void setWindFix(TimePoint timePoint, Wind wind, boolean isMagnetic) {
         raceLog.add(new RaceLogWindFixEventImpl(timePoint, author, raceLog.getCurrentPassId(), wind, isMagnetic));
-    }
-    
-    @Override
-    public void setNewTag(TimePoint timePoint, String tag, String userName, String comment, String imageURL) {
-        // TODO check if this method is in the right place D067890
-        raceLog.add(new RaceLogTagEventImpl(tag, userName, comment, imageURL, timePoint, author, raceLog.getCurrentPassId()));
-        
     }
 
     @Override

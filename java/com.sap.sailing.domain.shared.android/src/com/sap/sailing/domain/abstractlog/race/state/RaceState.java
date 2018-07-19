@@ -195,11 +195,6 @@ public interface RaceState extends ReadonlyRaceState {
      */
     void setAdditionalScoringInformationEnabled(TimePoint creationTimePoint, boolean enable, AdditionalScoringInformationType informationType);
     
-    /*
-     * Adds a new tag to this race
-     */
-    void setNewTag(TimePoint now, String tag, String userName, String comment, String imageURL);
-    
     boolean isAdditionalScoringInformationEnabled(AdditionalScoringInformationType informationType);
 
     /**
