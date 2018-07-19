@@ -1,13 +1,13 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
+import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.fragments.preference.GeneralPreferenceFragment;
+
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-
-import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.ui.fragments.preference.GeneralPreferenceFragment;
 
 public class SettingsActivity extends AppCompatActivity {
 

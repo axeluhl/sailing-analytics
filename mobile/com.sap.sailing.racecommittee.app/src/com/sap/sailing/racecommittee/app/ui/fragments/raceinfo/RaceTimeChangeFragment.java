@@ -4,16 +4,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Calendar;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.annotation.IntDef;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.NumberPicker;
-import android.widget.TimePicker;
-import android.widget.Toast;
-
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -24,6 +14,16 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.IntDef;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.NumberPicker;
+import android.widget.TimePicker;
+import android.widget.Toast;
 
 public class RaceTimeChangeFragment extends BaseFragment implements View.OnClickListener {
 

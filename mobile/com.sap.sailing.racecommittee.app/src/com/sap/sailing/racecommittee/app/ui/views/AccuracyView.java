@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.views;
 
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
 import android.content.Context;
 import android.support.annotation.ColorRes;
 import android.util.AttributeSet;
@@ -7,9 +10,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class AccuracyView extends LinearLayout {
 

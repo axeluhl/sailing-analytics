@@ -1,10 +1,10 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
-import android.os.Bundle;
-import android.view.MenuItem;
-
 import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
 import com.sap.sailing.android.shared.ui.activities.AbstractBaseActivity;
+
+import android.os.Bundle;
+import android.view.MenuItem;
 
 public class BaseActivity extends AbstractBaseActivity {
 

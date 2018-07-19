@@ -3,11 +3,6 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import java.io.Closeable;
 import java.io.IOException;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.MenuItem;
-import android.view.WindowManager;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -15,6 +10,11 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.BackPressListener;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.WindowManager;
 
 /**
  * Base activity for all race committee cockpit activities enabling basic menu functionality.

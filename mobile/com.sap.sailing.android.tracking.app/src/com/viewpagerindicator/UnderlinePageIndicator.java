@@ -15,6 +15,8 @@
  */
 package com.viewpagerindicator;
 
+import com.sap.sailing.android.tracking.app.R;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -33,8 +35,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-
-import com.sap.sailing.android.tracking.app.R;
 
 /**
  * Draws a line for each page. The current page line is colored differently than the unselected page lines.

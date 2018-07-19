@@ -1,12 +1,12 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
+import com.sap.sailing.android.buoy.positioning.app.R;
+import com.sap.sailing.android.buoy.positioning.app.service.MarkerService;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-
-import com.sap.sailing.android.buoy.positioning.app.R;
-import com.sap.sailing.android.buoy.positioning.app.service.MarkerService;
 
 public class MarkerUtils {
 

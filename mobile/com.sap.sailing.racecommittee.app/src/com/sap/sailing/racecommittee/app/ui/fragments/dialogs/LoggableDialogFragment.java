@@ -1,10 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
+import com.sap.sailing.android.shared.logging.LifecycleLogger;
+
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.os.Bundle;
-
-import com.sap.sailing.android.shared.logging.LifecycleLogger;
 
 /**
  * Simple base class for {@link DialogFragment}'s to add some logging.

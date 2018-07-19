@@ -2,6 +2,15 @@ package com.sap.sailing.android.buoy.positioning.app.provider;
 
 import java.util.Arrays;
 
+import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.CheckinUri;
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.Leaderboard;
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.Mark;
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.MarkPing;
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsDatabase.Tables;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.SelectionBuilder;
+
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -12,15 +21,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.provider.BaseColumns;
-
-import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
-import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.CheckinUri;
-import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.Leaderboard;
-import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.Mark;
-import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.MarkPing;
-import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsDatabase.Tables;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.SelectionBuilder;
 
 public class AnalyticsProvider extends ContentProvider {
 

@@ -1,12 +1,12 @@
 package com.sap.sailing.android.shared.util;
 
+import com.sap.sailing.android.shared.R;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.support.v7.app.AlertDialog;
-
-import com.sap.sailing.android.shared.R;
 
 public class LocationHelper {
 

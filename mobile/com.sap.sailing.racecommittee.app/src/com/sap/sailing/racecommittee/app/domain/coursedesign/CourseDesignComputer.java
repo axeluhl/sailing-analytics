@@ -1,9 +1,9 @@
 package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
-import android.util.Log;
-
 import com.sap.sailing.domain.common.Position;
 import com.sap.sse.common.Bearing;
+
+import android.util.Log;
 
 public class CourseDesignComputer {
     private static final String TAG = CourseDesignComputer.class.getName();

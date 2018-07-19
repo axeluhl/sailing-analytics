@@ -1,13 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.chooser;
 
-import android.content.Context;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.ErrorRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartTimeFragment;
+
+import android.content.Context;
 
 public abstract class RaceInfoFragmentChooser {
     private static final String TAG = RaceInfoFragmentChooser.class.getName();

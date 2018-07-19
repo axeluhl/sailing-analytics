@@ -17,6 +17,10 @@
  */
 package com.viewpagerindicator;
 
+import java.util.ArrayList;
+
+import com.sap.sailing.android.tracking.app.R;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -38,10 +42,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-
-import com.sap.sailing.android.tracking.app.R;
-
-import java.util.ArrayList;
 
 /**
  * A TitlePageIndicator is a PageIndicator which displays the title of left view (if exist), the title of the current

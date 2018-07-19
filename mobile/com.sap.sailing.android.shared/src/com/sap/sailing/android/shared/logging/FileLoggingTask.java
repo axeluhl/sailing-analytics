@@ -11,11 +11,11 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
 
-import android.content.Context;
-import android.util.Log;
-
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.util.FileHandlerUtils;
+
+import android.content.Context;
+import android.util.Log;
 
 public class FileLoggingTask implements Runnable {
 

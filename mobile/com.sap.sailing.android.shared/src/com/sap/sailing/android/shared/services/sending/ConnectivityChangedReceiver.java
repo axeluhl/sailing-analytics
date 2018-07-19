@@ -3,6 +3,8 @@
  */
 package com.sap.sailing.android.shared.services.sending;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -10,7 +12,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import com.sap.sailing.android.shared.logging.ExLog;
 
 /**
  * Informs {@link MessageSendingService} whenever connectivity is restored, so that it can start sending

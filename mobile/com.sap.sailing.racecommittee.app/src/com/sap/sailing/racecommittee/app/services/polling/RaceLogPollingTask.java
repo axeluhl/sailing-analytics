@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import android.content.Context;
-import android.os.AsyncTask;
-
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogEventsCallback;
 import com.sap.sse.common.Util;
+
+import android.content.Context;
+import android.os.AsyncTask;
 
 public class RaceLogPollingTask extends AsyncTask<Util.Pair<String, URL>, /* Progress */ Void, Void> {
 

@@ -1,5 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.MainPreferenceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
+import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
+
 import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.content.Context;
@@ -11,14 +19,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.MainPreferenceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
-import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
 
 public class PreferenceActivity extends AppCompatActivity {
 

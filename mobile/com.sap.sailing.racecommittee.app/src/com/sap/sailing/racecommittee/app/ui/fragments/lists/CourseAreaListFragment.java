@@ -4,10 +4,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import android.app.Activity;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.os.Bundle;
-
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -16,6 +12,10 @@ import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
+
+import android.app.Activity;
+import android.app.LoaderManager.LoaderCallbacks;
+import android.os.Bundle;
 
 public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
 

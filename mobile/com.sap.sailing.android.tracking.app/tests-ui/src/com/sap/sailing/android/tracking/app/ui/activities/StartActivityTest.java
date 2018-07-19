@@ -1,9 +1,10 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
+import com.sap.sailing.android.tracking.app.R;
+
 import android.app.Activity;
 import android.test.ActivityUnitTestCase;
 import android.view.ContextThemeWrapper;
-import com.sap.sailing.android.tracking.app.R;
 
 public class StartActivityTest extends ActivityUnitTestCase<StartActivity> {
 

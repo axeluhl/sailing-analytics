@@ -3,13 +3,13 @@ package com.sap.sailing.racecommittee.app.utils;
 import java.util.Calendar;
 import java.util.Locale;
 
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.racecommittee.app.R;
+
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.widget.NumberPicker;
 import android.widget.TimePicker;
-
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.racecommittee.app.R;
 
 public class TimeUtils extends com.sap.sailing.android.shared.util.TimeUtils {
 

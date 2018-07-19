@@ -1,12 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.SetupPanelFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
+
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v13.app.FragmentStatePagerAdapter;
-
-import com.sap.sailing.racecommittee.app.ui.fragments.panels.SetupPanelFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 
 public class PanelsAdapter extends FragmentStatePagerAdapter {
 

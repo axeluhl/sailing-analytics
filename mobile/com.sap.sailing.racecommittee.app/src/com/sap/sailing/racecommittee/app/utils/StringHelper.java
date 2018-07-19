@@ -1,10 +1,10 @@
 package com.sap.sailing.racecommittee.app.utils;
 
-import android.content.Context;
-import android.support.annotation.NonNull;
-
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+
+import android.content.Context;
+import android.support.annotation.NonNull;
 
 public class StringHelper {
 

@@ -13,11 +13,11 @@ import java.util.Enumeration;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
-import android.os.AsyncTask;
-
 import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
+
+import android.content.Context;
+import android.os.AsyncTask;
 
 public class NetworkHelper {
 

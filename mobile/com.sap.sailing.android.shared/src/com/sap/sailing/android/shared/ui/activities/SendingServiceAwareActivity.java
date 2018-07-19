@@ -2,6 +2,13 @@ package com.sap.sailing.android.shared.ui.activities;
 
 import java.util.Date;
 
+import com.sap.sailing.android.shared.R;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingServiceLogger;
+import com.sap.sailing.android.shared.util.PrefUtils;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -11,13 +18,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
-
-import com.sap.sailing.android.shared.R;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingServiceLogger;
-import com.sap.sailing.android.shared.util.PrefUtils;
 
 public abstract class SendingServiceAwareActivity extends ResilientActivity {
 

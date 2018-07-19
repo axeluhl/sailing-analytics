@@ -1,12 +1,12 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
-import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
-import android.view.Menu;
-
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.AboutFragment;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
+
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.view.Menu;
 
 public class AboutActivity extends BaseActivity {
     @Override

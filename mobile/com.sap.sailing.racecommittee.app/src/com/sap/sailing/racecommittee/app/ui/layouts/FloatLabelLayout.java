@@ -16,6 +16,8 @@ package com.sap.sailing.racecommittee.app.ui.layouts;
  * limitations under the License.
  */
 
+import com.sap.sailing.racecommittee.app.R;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -34,8 +36,6 @@ import android.view.animation.Interpolator;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.sap.sailing.racecommittee.app.R;
 
 /**
  * Layout which an {@link android.widget.EditText} to show a floating label when the hint is hidden

@@ -1,8 +1,8 @@
 package com.sap.sailing.android.shared.services.sending;
 
-import android.content.Context;
-
 import com.sap.sailing.android.shared.logging.ExLog;
+
+import android.content.Context;
 
 public class SendDelayedMessagesCaller implements Runnable {
 

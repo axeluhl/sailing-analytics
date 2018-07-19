@@ -1,15 +1,15 @@
 package com.sap.sailing.android.tracking.app.ui.fragments.preference;
 
+import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
+import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.SwitchPreference;
-
-import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
-import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment implements OnPreferenceChangeListener {   
     @Override

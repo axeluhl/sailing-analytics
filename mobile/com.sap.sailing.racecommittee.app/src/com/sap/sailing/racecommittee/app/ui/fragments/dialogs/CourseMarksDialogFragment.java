@@ -2,6 +2,14 @@ package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
 import java.util.ArrayList;
 
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithIdImpl;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter;
+import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
+import com.sap.sailing.racecommittee.app.ui.views.decoration.ItemStrokeDecoration;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.os.Bundle;
@@ -10,14 +18,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithIdImpl;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter;
-import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
-import com.sap.sailing.racecommittee.app.ui.views.decoration.ItemStrokeDecoration;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class CourseMarksDialogFragment extends DialogFragment {
 

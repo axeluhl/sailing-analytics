@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
-import android.content.Context;
-
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
@@ -15,6 +13,8 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+
+import android.content.Context;
 
 public interface DataStore {
 

@@ -1,12 +1,12 @@
 package com.sap.sailing.racecommittee.app.utils;
 
-import android.content.Context;
-
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
+
+import android.content.Context;
 
 public class GeoUtils {
     public static Position getPositionForGivenPointDistanceAndBearing(Position givenPoint, Distance distance,

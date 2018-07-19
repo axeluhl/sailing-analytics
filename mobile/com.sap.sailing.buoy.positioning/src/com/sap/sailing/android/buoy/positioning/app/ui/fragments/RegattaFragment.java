@@ -1,5 +1,12 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
+import com.sap.sailing.android.buoy.positioning.app.R;
+import com.sap.sailing.android.buoy.positioning.app.adapter.MarkAdapter;
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
+import com.sap.sailing.android.buoy.positioning.app.ui.activities.PositioningActivity;
+import com.sap.sailing.android.buoy.positioning.app.ui.activities.RegattaActivity;
+import com.sap.sailing.android.ui.fragments.BaseFragment;
+
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -19,13 +26,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-
-import com.sap.sailing.android.buoy.positioning.app.R;
-import com.sap.sailing.android.buoy.positioning.app.adapter.MarkAdapter;
-import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
-import com.sap.sailing.android.buoy.positioning.app.ui.activities.PositioningActivity;
-import com.sap.sailing.android.buoy.positioning.app.ui.activities.RegattaActivity;
-import com.sap.sailing.android.ui.fragments.BaseFragment;
 
 public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cursor> {
     private static final String TAG = RegattaFragment.class.getName();

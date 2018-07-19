@@ -1,13 +1,13 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
+import com.sap.sailing.android.buoy.positioning.app.R;
+import com.sap.sailing.android.buoy.positioning.app.ui.fragments.GeneralPreferenceFragment;
+import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
+
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-
-import com.sap.sailing.android.buoy.positioning.app.R;
-import com.sap.sailing.android.buoy.positioning.app.ui.fragments.GeneralPreferenceFragment;
-import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 
 public class SettingActivity extends AppCompatActivity {
 

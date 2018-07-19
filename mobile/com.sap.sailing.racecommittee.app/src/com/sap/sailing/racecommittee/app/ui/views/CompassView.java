@@ -1,5 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.views;
 
+import java.util.Locale;
+
+import com.sap.sailing.racecommittee.app.R;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,10 +22,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.sap.sailing.racecommittee.app.R;
-
-import java.util.Locale;
 
 public class CompassView extends RelativeLayout {
 

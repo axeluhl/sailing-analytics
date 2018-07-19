@@ -2,6 +2,11 @@ package com.sap.sailing.racecommittee.app.ui.adapters;
 
 import java.util.ArrayList;
 
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
@@ -12,11 +17,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 
 public class MoreFlagsAdapter extends BaseFlagsAdapter {
 

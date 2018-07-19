@@ -8,16 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
-import android.text.TextUtils;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -27,6 +17,16 @@ import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 public class RaceLogPollingService extends Service implements AppPreferences.PollingActiveChangedListener, RaceLogPollingTask.PollingResultListener {
 

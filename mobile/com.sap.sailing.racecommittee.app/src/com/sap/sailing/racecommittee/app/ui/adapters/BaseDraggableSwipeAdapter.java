@@ -1,11 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import com.h6ah4i.android.widget.advrecyclerview.draggable.DraggableItemAdapter;
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemAdapter;
+
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-
-import com.h6ah4i.android.widget.advrecyclerview.draggable.DraggableItemAdapter;
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemAdapter;
 
 public abstract class BaseDraggableSwipeAdapter<T extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<T>
     implements DraggableItemAdapter<T>, SwipeableItemAdapter<T> {

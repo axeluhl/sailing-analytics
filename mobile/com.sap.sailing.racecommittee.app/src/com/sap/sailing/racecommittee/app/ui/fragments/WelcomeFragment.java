@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
+
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
@@ -8,9 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 
 public class WelcomeFragment extends Fragment implements OnClickListener {
 

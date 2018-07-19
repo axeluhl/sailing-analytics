@@ -1,9 +1,9 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
-import android.content.Context;
-
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.shared.util.BaseAppPreferences;
+
+import android.content.Context;
 
 public class AppPreferences extends BaseAppPreferences {
 

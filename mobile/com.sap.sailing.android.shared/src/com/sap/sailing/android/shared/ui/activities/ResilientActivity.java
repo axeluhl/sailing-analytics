@@ -1,9 +1,9 @@
 package com.sap.sailing.android.shared.ui.activities;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+
 import android.content.Intent;
 import android.view.MenuItem;
-
-import com.sap.sailing.android.shared.logging.ExLog;
 
 public class ResilientActivity extends LoggableActivity {
     private static final String TAG = ResilientActivity.class.getName();

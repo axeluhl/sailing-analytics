@@ -1,12 +1,12 @@
 package com.sap.sailing.racecommittee.app.data.loaders;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.content.Loader;
 import android.os.Bundle;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 
 /**
  * <p>

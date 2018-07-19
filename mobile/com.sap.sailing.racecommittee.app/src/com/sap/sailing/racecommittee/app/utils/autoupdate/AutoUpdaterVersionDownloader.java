@@ -6,12 +6,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-import android.content.Context;
-import android.util.Log;
-
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdaterChecker.AutoUpdaterState;
 import com.sap.sse.common.Util;
+
+import android.content.Context;
+import android.util.Log;
 
 public class AutoUpdaterVersionDownloader extends AutoUpdaterDownloader<Util.Pair<Integer, String>> {
     private final static String TAG = AutoUpdaterVersionDownloader.class.getName();

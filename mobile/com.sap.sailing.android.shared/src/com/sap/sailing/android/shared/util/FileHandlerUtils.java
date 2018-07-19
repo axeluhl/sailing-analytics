@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import android.content.Context;
-import android.os.Environment;
-
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
+
+import android.content.Context;
+import android.os.Environment;
 
 public class FileHandlerUtils {
 

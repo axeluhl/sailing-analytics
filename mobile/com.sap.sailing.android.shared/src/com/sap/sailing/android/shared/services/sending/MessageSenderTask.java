@@ -4,14 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
+import com.sap.sailing.android.shared.data.http.HttpRequest;
+import com.sap.sailing.android.shared.logging.ExLog;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
-import com.sap.sailing.android.shared.data.http.HttpRequest;
-import com.sap.sailing.android.shared.logging.ExLog;
 
 public class MessageSenderTask extends AsyncTask<Intent, Void, MessageSenderResult> {
 

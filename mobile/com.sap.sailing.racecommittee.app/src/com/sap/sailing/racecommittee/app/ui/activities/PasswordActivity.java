@@ -1,5 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.DataStore;
+import com.sap.sailing.racecommittee.app.ui.fragments.LoginBackdrop;
+
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,13 +14,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-
-import com.sap.sailing.android.shared.util.BroadcastManager;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.DataStore;
-import com.sap.sailing.racecommittee.app.ui.fragments.LoginBackdrop;
 
 public class PasswordActivity extends BaseActivity {
 

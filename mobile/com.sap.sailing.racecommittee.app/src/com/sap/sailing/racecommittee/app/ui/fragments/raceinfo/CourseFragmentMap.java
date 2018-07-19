@@ -1,11 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import com.sap.sailing.racecommittee.app.R;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.sap.sailing.racecommittee.app.R;
 
 public class CourseFragmentMap extends CourseFragment {
 

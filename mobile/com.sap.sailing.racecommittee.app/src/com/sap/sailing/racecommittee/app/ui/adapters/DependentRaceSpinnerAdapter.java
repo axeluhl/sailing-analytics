@@ -2,6 +2,11 @@ package com.sap.sailing.racecommittee.app.ui.adapters;
 
 import java.util.ArrayList;
 
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sse.common.Util;
+
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.support.annotation.LayoutRes;
@@ -11,11 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
-
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-import com.sap.sse.common.Util;
 
 public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
 

@@ -1,5 +1,7 @@
 package com.sap.sailing.android.shared.ui.customviews;
 
+import com.sap.sailing.android.shared.R;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -9,8 +11,6 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
-
-import com.sap.sailing.android.shared.R;
 
 /**
  * Draws one vertical indicator that is colored depending on the signal quality

@@ -3,13 +3,13 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import android.app.FragmentTransaction;
-import android.support.annotation.IdRes;
-import android.support.annotation.IntDef;
-
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+
+import android.app.FragmentTransaction;
+import android.support.annotation.IdRes;
+import android.support.annotation.IntDef;
 
 public class BaseFragment extends RaceFragment {
 

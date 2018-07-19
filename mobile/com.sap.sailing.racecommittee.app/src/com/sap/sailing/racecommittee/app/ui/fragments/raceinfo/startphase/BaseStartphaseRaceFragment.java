@@ -1,14 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase;
 
-import android.annotation.TargetApi;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.v4.view.ViewPager;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -18,8 +11,15 @@ import com.sap.sailing.racecommittee.app.ui.adapters.PanelsAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
+import android.annotation.TargetApi;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.v4.view.ViewPager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 
 public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
 

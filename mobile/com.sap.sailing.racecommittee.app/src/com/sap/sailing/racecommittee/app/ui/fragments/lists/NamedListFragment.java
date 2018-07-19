@@ -7,17 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListView;
-
 import com.sap.sailing.android.shared.data.http.UnauthorizedException;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.R;
@@ -33,6 +22,17 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDi
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 import com.sap.sse.common.Named;
+
+import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.LoaderManager.LoaderCallbacks;
+import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListView;
 
 public abstract class NamedListFragment<T extends Named> extends LoggableListFragment implements LoadClient<Collection<T>>, DialogListenerHost {
 

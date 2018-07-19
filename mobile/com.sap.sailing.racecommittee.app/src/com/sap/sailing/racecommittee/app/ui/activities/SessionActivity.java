@@ -1,13 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.racecommittee.app.R;
+
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.racecommittee.app.R;
 
 public abstract class SessionActivity extends BaseActivity {
 

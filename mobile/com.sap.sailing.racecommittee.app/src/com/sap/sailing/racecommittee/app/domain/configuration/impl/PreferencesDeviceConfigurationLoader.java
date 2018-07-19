@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.domain.configuration.impl;
 
-import android.content.Context;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
@@ -9,6 +7,8 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
+
+import android.content.Context;
 
 public class PreferencesDeviceConfigurationLoader implements ConfigurationLoader<DeviceConfiguration> {
 

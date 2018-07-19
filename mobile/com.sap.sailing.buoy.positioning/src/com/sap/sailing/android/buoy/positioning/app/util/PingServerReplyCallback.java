@@ -1,13 +1,14 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
+import java.io.InputStream;
+
+import com.sap.sailing.android.buoy.positioning.app.R;
+import com.sap.sailing.android.shared.services.sending.ServerReplyCallback;
+
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import com.sap.sailing.android.buoy.positioning.app.R;
-import com.sap.sailing.android.shared.services.sending.ServerReplyCallback;
-
-import java.io.InputStream;
 
 public class PingServerReplyCallback implements ServerReplyCallback {
 

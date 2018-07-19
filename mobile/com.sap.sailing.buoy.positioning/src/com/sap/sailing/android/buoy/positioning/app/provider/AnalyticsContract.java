@@ -1,10 +1,10 @@
 package com.sap.sailing.android.buoy.positioning.app.provider;
 
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsDatabase.Tables;
+
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.BaseColumns;
-
-import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsDatabase.Tables;
 
 public class AnalyticsContract {
 

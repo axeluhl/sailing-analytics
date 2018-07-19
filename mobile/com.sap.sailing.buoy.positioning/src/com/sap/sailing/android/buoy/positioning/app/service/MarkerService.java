@@ -1,13 +1,13 @@
 package com.sap.sailing.android.buoy.positioning.app.service;
 
-import android.app.IntentService;
-import android.content.Intent;
-import android.util.Log;
-
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
+
+import android.app.IntentService;
+import android.content.Intent;
+import android.util.Log;
 
 public class MarkerService extends IntentService implements  CheckinManager.DataChangedListner{
     private static String TAG = MarkerService.class.getName();

@@ -1,15 +1,15 @@
 package com.sap.sailing.android.buoy.positioning.app.provider;
 
-import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.BaseColumns;
-
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.CheckinUri;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.Mark;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.MarkPing;
 import com.sap.sailing.android.shared.logging.ExLog;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.BaseColumns;
 
 public class AnalyticsDatabase extends SQLiteOpenHelper {
 

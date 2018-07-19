@@ -1,13 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.racecommittee.app.R;
+
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.racecommittee.app.R;
 
 public abstract class AttachedDialogFragment extends LoggableDialogFragment {
     private final static String TAG = AttachedDialogFragment.class.getName();

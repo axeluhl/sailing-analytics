@@ -1,12 +1,12 @@
 package com.sap.sailing.racecommittee.app.data;
 
-import android.content.Context;
-import android.content.Intent;
-
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.services.RaceStateService;
+
+import android.content.Context;
+import android.content.Intent;
 
 /**
  * Base class for all data managers. Use {@link DataManager#create(Context)} for creating your {@link DataManager}.

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import com.sap.sailing.android.shared.R;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,8 +23,6 @@ import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
-
-import com.sap.sailing.android.shared.R;
 
 public class EulaHelper {
     private static final String EULA_PREFERENCES = "eula.preferences";
@@ -72,7 +72,7 @@ public class EulaHelper {
         SharedPreferences preferences = mContext.getSharedPreferences(EULA_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(EULA_CONFIRMED, true);
-        editor.commit();
+        editor.apply();
     }
 
     public boolean isEulaAccepted() {

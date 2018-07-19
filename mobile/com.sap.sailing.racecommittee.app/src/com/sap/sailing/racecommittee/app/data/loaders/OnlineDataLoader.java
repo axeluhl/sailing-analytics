@@ -5,15 +5,15 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 
-import android.content.AsyncTaskLoader;
-import android.content.Context;
-import android.content.Loader;
-
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
+
+import android.content.AsyncTaskLoader;
+import android.content.Context;
+import android.content.Loader;
 
 /**
  * <p>

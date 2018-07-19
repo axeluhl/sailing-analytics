@@ -9,8 +9,8 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Boat;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Checkin;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Mark;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Mark;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase.Tables;
 
 import android.content.ContentProvider;
