@@ -129,11 +129,11 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         // needs to compare net points; therefore, divide the total points by the column factor for comparison:
         List<Double> o1NetScores = new ArrayList<>();
         for (com.sap.sse.common.Util.Pair<RaceColumn, Double> o1ColumnAndScore : o1Scores) {
-            o1NetScores.add(o1ColumnAndScore.getB()/o1ColumnAndScore.getA().getFactor());
+            o1NetScores.add(o1ColumnAndScore.getB() / getScoreFactor(o1ColumnAndScore.getA()));
         }
         List<Double> o2NetScores = new ArrayList<>();
         for (com.sap.sse.common.Util.Pair<RaceColumn, Double> o2ColumnAndScore : o2Scores) {
-            o2NetScores.add(o2ColumnAndScore.getB()/o2ColumnAndScore.getA().getFactor());
+            o2NetScores.add(o2ColumnAndScore.getB() / getScoreFactor(o2ColumnAndScore.getA()));
         }
         Collections.sort(o1NetScores, pureScoreComparator);
         Collections.sort(o2NetScores, pureScoreComparator);
