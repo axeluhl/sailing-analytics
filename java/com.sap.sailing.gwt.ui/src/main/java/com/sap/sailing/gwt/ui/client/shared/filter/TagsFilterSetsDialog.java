@@ -62,10 +62,8 @@ public class TagsFilterSetsDialog extends DataEntryDialog<TagsFilterSets> {
         filterSets = new ArrayList<>();
         addFilterSetButton = new Button(stringMessages.actionAddFilter());
         availableTagFilterNames = new ArrayList<String>();
-        /*availableTagFilterNames.add(TagTotalRankFilter.FILTER_NAME);
-        availableTagFilterNames.add(TagRaceRankFilter.FILTER_NAME);
-        availableTagFilterNames.add(TagNationalityFilter.FILTER_NAME);
-        availableTagFilterNames.add(TagSailNumbersFilter.FILTER_NAME);*/
+        availableTagFilterNames.add(TagTagFilter.FILTER_NAME);
+        availableTagFilterNames.add(TagUsernameFilter.FILTER_NAME);
     }
     
     @Override
