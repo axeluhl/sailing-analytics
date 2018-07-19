@@ -63,6 +63,10 @@ public abstract class AbstractBranchStartActivity<C extends BaseCheckinData> ext
                                 ExLog.i(AbstractBranchStartActivity.this, TAG, "Matched URL, handling  matched URL.");
                             }
                             getHomeFragment().handleScannedOrUrlMatchedUri(Uri.parse(checkinUrl));
+                            // if we don't clear the intent data here the next onStart cycle
+                            // will error in the legacy start procedure while trying to interpret
+                            // the branch.io deeplink as legacy link
+                            AbstractBranchStartActivity.this.getIntent().setData(null);
                         }
                     } catch (JSONException e) {
                         ExLog.ex(AbstractBranchStartActivity.this, TAG, e);
