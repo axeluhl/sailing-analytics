@@ -11,7 +11,6 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -99,7 +98,6 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         assertEquals("There are no further races starting soon", nextUpText);
     }
 
-    @Ignore
     @Test
     public void testClassicAutoPlayStartup() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
