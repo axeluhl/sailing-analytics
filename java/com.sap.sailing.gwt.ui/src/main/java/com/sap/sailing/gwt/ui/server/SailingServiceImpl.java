@@ -97,6 +97,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCours
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesEventFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
@@ -441,6 +442,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
+import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
@@ -7788,8 +7790,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     public void visit(RaceLogTagEvent event) {
                         // TODO check if if condition is correct D067890
                         if (hasStartTime && isLatestPass(event)) {
-                            raceLog.add(new RaceLogTagEventImpl(event.getTag(), event.getUserName(), event.getComment(), event.getImageURL(), event.getCreatedAt(), event.getLogicalTimePoint(),
-                                    event.getAuthor(), UUID.randomUUID(), raceLog.getCurrentPassId()));
+                            raceLog.add(new RaceLogTagEventImpl(event.getTag(), event.getUsername(), event.getComment(), event.getImageURL(), event.getCreatedAt(), event.getLogicalTimePoint(),
+                                    event.getAuthor(), raceLog.getCurrentPassId()));
                         }
                     }
                     
@@ -7888,5 +7890,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment, String imageURL, String username, TimePoint raceTimepoint) {
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         raceLog.add(new RaceLogTagEventImpl(tag, username, comment, imageURL, raceTimepoint, getService().getServerAuthor(), raceLog.getCurrentPassId()));
+    }
+    
+    @Override
+    /**
+     * @param from may be null, results in loading every tag since the race start
+     */
+    public List<TagDTO> getTags(String leaderboardName, String raceColumnName, String fleetName, TimePoint from, TimePoint to) {
+        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
+        TagFinder tagFinder = new TagFinder(raceLog, from, to);
+        List<RaceLogTagEvent> foundTagEvents = tagFinder.analyze();
+        
+        List<TagDTO> result = new ArrayList<>();
+        for(RaceLogTagEvent tagEvent : foundTagEvents) {
+            result.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(), tagEvent.getUsername(), tagEvent.getLogicalTimePoint()));
+        }
+        return result;
     }
 }

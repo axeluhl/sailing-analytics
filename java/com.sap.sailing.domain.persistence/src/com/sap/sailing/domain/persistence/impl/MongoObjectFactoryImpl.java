@@ -1089,11 +1089,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
     
-    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogTagEvent event) {      
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogTagEvent event) {
+        BasicDBObject result = new BasicDBObject();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogTagEvent(event));
+        return result;
+    }
+    
+    public DBObject storeRaceLogTagEvent(RaceLogTagEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogTagEvent.class.getSimpleName());
-        
         result.put(FieldNames.RACE_LOG_TAG.name(), event.getTag());
         result.put(FieldNames.RACE_LOG_COMMENT.name(), event.getComment());
         result.put(FieldNames.RACE_LOG_IMAGE_URL.name(), event.getImageURL());

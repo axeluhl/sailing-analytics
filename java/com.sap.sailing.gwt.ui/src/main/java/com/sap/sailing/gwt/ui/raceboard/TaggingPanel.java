@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.shared.GWT;
@@ -13,7 +13,6 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -21,16 +20,19 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.security.ui.client.UserService;
 
-public class TaggingPanel extends ComponentWithoutSettings {
+public class TaggingPanel extends ComponentWithoutSettings implements TimeListener {
 
     private final Panel panel;
     private final Panel buttonsPanel;
@@ -41,49 +43,15 @@ public class TaggingPanel extends ComponentWithoutSettings {
     private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
     private final UserService userService;
+    private final Timer timer;
 
     private String leaderboardName = null;
     private RaceColumnDTO raceColumn = null;
     private FleetDTO fleet = null;
-
-    public class TagDTO {
-        String tag;
-        String comment;
-        String imageURL;
-        String username;
-        TimePoint raceTimepoint;
-
-        public TagDTO(String tag, String comment, String imageURL, String username, TimePoint raceTimepoint) {
-            this.tag = tag;
-            this.comment = comment;
-            this.imageURL = imageURL;
-            this.username = username;
-            this.raceTimepoint = raceTimepoint;
-        }
-
-        public String getTag() {
-            return tag;
-        }
-
-        public String getComment() {
-            return comment;
-        }
-
-        public String getImageURL() {
-            return imageURL;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-        
-        public TimePoint getRaceTimepoint() {
-            return raceTimepoint;
-        }
-    }
+    private TimePoint lastReceivedTag = null;
 
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
-            SailingServiceAsync sailingService, UserService userService) {
+            SailingServiceAsync sailingService, UserService userService, Timer timer) {
         super(parent, context);
         panel = new FlowPanel();
         buttonsPanel = new FlowPanel();
@@ -94,22 +62,24 @@ public class TaggingPanel extends ComponentWithoutSettings {
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.userService = userService;
+        this.timer = timer;
+        timer.addTimeListener(this);
         initializePanel();
     }
 
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
-            SailingServiceAsync sailingService, UserService userService, String leaderboardName,
+            SailingServiceAsync sailingService, UserService userService, Timer timer, String leaderboardName,
             RaceColumnDTO raceColumn, FleetDTO fleet) {
-        this(parent, context, stringMessages, sailingService, userService);
+        this(parent, context, stringMessages, sailingService, userService, timer);
         updateRace(leaderboardName, raceColumn, fleet);
     }
 
     private void initializePanel() {
         // Misc
+        panel.setTitle(stringMessages.tagging());
         panel.getElement().getStyle().setMargin(6, Unit.PX);
         panel.getElement().getStyle().setMarginTop(10, Unit.PX);
-        panel.add(new Label(stringMessages.tagging()));
-        
+
         // Buttons
         panel.add(new Button("Add new Tag-Button", new ClickHandler() {
             @Override
@@ -118,7 +88,7 @@ public class TaggingPanel extends ComponentWithoutSettings {
             }
         }));
         panel.add(buttonsPanel);
-        
+
         // Content
         content.addColumn(new TextColumn<TagDTO>() {
             @Override
@@ -147,7 +117,7 @@ public class TaggingPanel extends ComponentWithoutSettings {
         tagProvider.addDataDisplay(content);
         tagProvider.setList(tags);
         panel.add(content);
-        
+
         updateUi();
     }
 
@@ -169,29 +139,33 @@ public class TaggingPanel extends ComponentWithoutSettings {
             @Override
             public void onClick(ClickEvent event) {
                 if (leaderboardName == null || raceColumn == null || fleet == null) {
-                    Notification.notify("Could not trigger RaceLogTagEvent, missing information!", NotificationType.ERROR);
+                    Notification.notify("Could not trigger RaceLogTagEvent, missing information!",
+                            NotificationType.ERROR);
                     return;
                 }
-                if(userService.getCurrentUser() == null) {
+                if (userService.getCurrentUser() == null) {
                     Notification.notify("Please log in to add new tags!", NotificationType.WARNING);
                     return;
                 }
-                
-                TagDTO tag = new TagDTO("Super Duper Tag!", "Fancy comment...", "https://localhost:8080/image/abc.png", userService.getCurrentUser().getName(), MillisecondsTimePoint.now());
-                sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag.getTag(), tag.getComment(), tag.getImageURL(), tag.getUsername(), tag.getRaceTimepoint(), new AsyncCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Could not add new tag to race log!", caught);
-                        Notification.notify("Could not add new tag to race log!", NotificationType.ERROR);
-                    }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        Notification.notify("Added new tag successfully", NotificationType.INFO);
-                        tags.add(tag);
-                        updateContent();
-                    }
-                });
+                TagDTO tag = new TagDTO("Super Duper Tag!", "Fancy comment...", "https://localhost:8080/image/abc.png",
+                        userService.getCurrentUser().getName(), new MillisecondsTimePoint(timer.getTime()));
+                sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag.getTag(),
+                        tag.getComment(), tag.getImageURL(), tag.getUsername(), tag.getRaceTimepoint(),
+                        new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                GWT.log("Could not add new tag to race log!", caught);
+                                Notification.notify("Could not add new tag to race log!", NotificationType.ERROR);
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                Notification.notify("Added new tag successfully", NotificationType.INFO);
+                                tags.add(tag);
+                                updateContent();
+                            }
+                        });
             }
         });
         buttons.add(tagButton);
@@ -202,16 +176,44 @@ public class TaggingPanel extends ComponentWithoutSettings {
         updateButtons();
         updateContent();
     }
-    
+
     private void updateContent() {
+        content.setVisibleRange(0, tags.size());
         tagProvider.refresh();
     }
-    
+
     private void updateButtons() {
         buttonsPanel.clear();
         buttons.forEach(button -> {
             buttonsPanel.add(button);
         });
+    }
+
+    @Override
+    public void timeChanged(Date newTime, Date oldTime) {
+        if(leaderboardName != null && raceColumn != null && fleet != null && panel.isAttached() && panel.isVisible() && oldTime != null) {
+            // load tags since last received tag => decrease required bandwidth as only difference in tags will be sent over network
+            sailingService.getTags(leaderboardName, raceColumn.getName(), fleet.getName(), lastReceivedTag, new MillisecondsTimePoint(newTime.getTime()), new AsyncCallback<List<TagDTO>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Notification.notify("Could not load tags!", NotificationType.ERROR);
+                    GWT.log("Could not load tags!", caught);
+                }
+
+                @Override
+                public void onSuccess(List<TagDTO> result) {
+                    if(result != null) {
+                        for(TagDTO tag : result) {
+                            if(!tags.contains(tag)) {                                
+                                tags.add(tag);
+                                lastReceivedTag = tag.getRaceTimepoint();
+                                updateContent();
+                            }
+                        }
+                    }
+                }
+            });
+        }
     }
 
     @Override

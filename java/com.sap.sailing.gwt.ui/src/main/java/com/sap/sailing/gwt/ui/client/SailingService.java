@@ -101,6 +101,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
+import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
@@ -784,4 +785,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Boolean checkIfRaceIsTracking(RegattaAndRaceIdentifier race);
 
     void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment, String imageURL, String username, TimePoint raceTimepoint);
+    
+    List<TagDTO> getTags(String leaderboardName, String raceColumnName, String fleetName, TimePoint from, TimePoint to);
 }

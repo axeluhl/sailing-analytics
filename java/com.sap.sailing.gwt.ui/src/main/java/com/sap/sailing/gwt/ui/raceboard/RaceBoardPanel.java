@@ -302,7 +302,7 @@ public class RaceBoardPanel
         addChildComponent(raceMap);
         
         // add panel for tagging functionality, hidden by default
-        taggingPanel = new TaggingPanel(parent, componentContext, stringMessages, sailingService, userService);
+        taggingPanel = new TaggingPanel(parent, componentContext, stringMessages, sailingService, userService, timer);
         addChildComponent(taggingPanel);
         taggingPanel.setVisible(true);
         taggingPanel.setVisible(false);
