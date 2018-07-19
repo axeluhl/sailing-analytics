@@ -1014,7 +1014,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                                             result.numberOfManeuvers.get(maneuver.getType()) + 1);
                                     totalManeuverLossInMeters.put(maneuver.getType(),
                                             totalManeuverLossInMeters.get(maneuver.getType())
-                                            + maneuver.getManeuverLoss().getMeters());
+                                            + maneuver.getManeuverLoss().getProjectedDistanceLost().getMeters());
                                 }
                             }
                             break;
