@@ -3,6 +3,7 @@ package com.sap.sailing.selenium.pages.raceboard;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -44,7 +45,17 @@ public class RaceBoardPage extends HostPageWithAuthentication {
         super(driver);
     }
     public MapSettingsPO openMapSettings() {
-        new WebDriverWait(driver, 20000).until(p -> raceMapSettingsButton.getRect().y > 100);
+        new WebDriverWait(driver, 30).until(new Function<WebDriver, Boolean>() {
+            @Override
+            public Boolean apply(WebDriver p) {
+                try {
+                    return raceMapSettingsButton.isDisplayed() && raceMapSettingsButton.getLocation().y > 100;
+                } catch (Exception e) {
+                    // RaceMap cause multiple reflows and the element may temporarily not be in the viewport
+                    return false;
+                }
+            }
+        });
         raceMapSettingsButton.click();
         waitUntil(new BooleanSupplier() {
 
