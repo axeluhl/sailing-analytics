@@ -1,0 +1,11 @@
+.cellListWidget,
+.cellListEvenItem,
+.cellListOddItem,
+.cellListEventItem{
+	
+}
+
+.cellListSelectedItem,
+.cellListKeyboardSelectedItem {
+	background-color: #e5f2f9;
+}

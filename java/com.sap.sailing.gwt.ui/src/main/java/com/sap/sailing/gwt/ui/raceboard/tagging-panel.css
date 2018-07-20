@@ -2,13 +2,13 @@ b {
 	font-weight: bold;
 }
 
-i {
-	font-style: italic; 
-}
-
 .tag {
-	border: 1px solid lightgrey;
+    box-shadow: 2px 2px 3px lightgrey;
     margin-bottom: 5px;
+    margin-right: 3px;
+    border: 1px solid lightgrey;
+    border-radius: 3px;
+    padding: 5px;
 }
 
 .tagHeading {
@@ -17,11 +17,14 @@ i {
 
 .tagImage {
     text-align: center;
+    margin: 0 -5px;
+    padding: 5px 0;
 }
 
 .tagImage img {
-	max-height: 200px;
-    width: auto;
+	min-width: 100%;
+	max-Width: 100%;
+	height: auto;
 }
 
 .tagCreated {
@@ -32,13 +35,4 @@ i {
 
 .tagComment {
 	font-size: 85%;
-}
-
-.cellListWidget,
-.cellListEvenItem,
-.cellListOddItem,
-.cellListEventItem,
-.cellListSelectedItem,
-.cellListKeyboardSelectedItem {
-	
 }

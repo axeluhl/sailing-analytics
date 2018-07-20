@@ -32,7 +32,8 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSets;
-import com.sap.sailing.gwt.ui.raceboard.TaggingPanel.TagResources.TagStyle;
+import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sailing.gwt.ui.raceboard.TaggingPanel.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -47,19 +48,29 @@ import com.sap.sse.security.ui.client.UserService;
 
 public class TaggingPanel extends ComponentWithoutSettings implements TimeListener {
 
-    public interface TagResources extends ClientBundle, CellList.Resources {
-        public static final TagResources INSTANCE = GWT.create(TagResources.class);
+    public interface TagPanelResources extends ClientBundle {
+        public static final TagPanelResources INSTANCE = GWT.create(TagPanelResources.class);
 
-        @Source("tagging.css")
-        public TagStyle style();
+        @Source("tagging-panel.css")
+        public TagPanelStyle style();
 
-        public interface TagStyle extends CssResource, CellList.Style {
+        public interface TagPanelStyle extends CssResource {
             String tag();
             String tagHeading();
             String tagCreated();
             String tagComment();
             String tagImage();
+        }
+    }
+    
+    public interface CellListResources extends CellList.Resources {
+        public static final CellListResources INSTANCE = GWT.create(CellListResources.class);
+        
+        @Override
+        @Source("tagging-celllist.css")
+        public CellListStyle cellListStyle();
 
+        public interface CellListStyle extends CellList.Style {
             String cellListEventItem();
             String cellListWidget();
             String cellListEvenItem();
@@ -70,60 +81,60 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     }
 
     public interface TagCellTemplate extends SafeHtmlTemplates {
-        @Template("<div class='{0}'><div class='{1}'>{5}</div><div class='{2}'>(created by <b>{6}</b> at <i>{7}</i>)</div><div class='{3}'>{8}</div><div class='{4}'><img src='{9}'/></div></div>")
-        SafeHtml cell(String styleTag, String styleTagHeading, String styleTagCreated, String styleTagComment,
-                String styleTagImage, SafeHtml tag, SafeHtml author, SafeHtml createdAt, SafeHtml comment,
-                SafeUri imageURL);
+        @Template("<div class='{0}'><div class='{1}'>{5}</div><div class='{2}'>(created by <b>{6}</b> at {7})</div><div class='{3}'><img src='{8}'/></div><div class='{4}'>{9}</div></div>")
+        SafeHtml cell(String styleTag, String styleTagHeading, String styleTagCreated, String styleTagImage,
+                String styleTagComment, SafeHtml tag, SafeHtml author, SafeHtml createdAt, SafeUri imageURL,
+                SafeHtml comment);
 
-        @Template("<div class='{0}'><div class='{1}'>{4}</div><div class='{2}'>(created by <b>{5}</b> at <i>{6}</i>)</div><div class='{3}'>{7}</div></div>")
+        @Template("<div class='{0}'><div class='{1}'>{4}</div><div class='{2}'>(created by <b>{5}</b> at {6})</div><div class='{3}'>{7}</div></div>")
         SafeHtml cellWithCommentWithoutImage(String styleTag, String styleTagHeading, String styleTagCreated,
                 String styleTagComment, SafeHtml tag, SafeHtml author, SafeHtml createdAt, SafeHtml comment);
 
-        @Template("<div class='{0}'><div class='{1}'>{4}</div><div class='{2}'>(created by <b>{5}</b> at <i>{6}</i>)</div><div class='{3}'><img src='{7}'/></div></div>")
+        @Template("<div class='{0}'><div class='{1}'>{4}</div><div class='{2}'>(created by <b>{5}</b> at {6})</div><div class='{3}'><img src='{7}'/></div></div>")
         SafeHtml cellWithoutCommentWithImage(String styleTag, String styleTagHeading, String styleTagCreated,
                 String styleTagImage, SafeHtml tag, SafeHtml author, SafeHtml createdAt, SafeUri imageURL);
 
-        @Template("<div class='{0}'><div class='{1}'>{3}</div><div class='{2}'>(created by <b>{4}</b> at <i>{5}</i>)</div></div>")
+        @Template("<div class='{0}'><div class='{1}'>{3}</div><div class='{2}'>(created by <b>{4}</b> at {5})</div></div>")
         SafeHtml cellWithoutCommentWithoutImage(String styleTag, String styleTagHeading, String styleTagCreated,
                 SafeHtml tag, SafeHtml author, SafeHtml createdAt);
     }
 
     private class TagCell extends AbstractCell<TagDTO> {
         private final TagCellTemplate tagCellTemplate = GWT.create(TagCellTemplate.class);
-        private final TagResources tagRes = GWT.create(TagResources.class);
-        private final TagStyle tagStyle = tagRes.style();
+        private final TagPanelResources tagPanelRes = GWT.create(TagPanelResources.class);
+        private final TagPanelStyle tagPanelStyle = tagPanelRes.style();
 
         @Override
         public void render(Context context, TagDTO tag, SafeHtmlBuilder htmlBuilder) {
             if (tag == null) {
                 return;
             }
-
+            
             SafeHtml safeTag = SafeHtmlUtils.fromString(tag.getTag());
             SafeHtml safeAuthor = SafeHtmlUtils.fromString(tag.getUsername());
-            SafeHtml safeCreatedAt = SafeHtmlUtils.fromString(tag.getRaceTimepoint().toString());
+            SafeHtml safeCreatedAt = SafeHtmlUtils.fromString(DateAndTimeFormatterUtil.shortTimeFormatter.render(tag.getRaceTimepoint().asDate()));
             SafeHtml safeComment = SafeHtmlUtils.fromString(tag.getComment());
             SafeUri  trustedImageURL = UriUtils.fromTrustedString(tag.getImageURL());
 
             SafeHtml cell = null;
             if (tag.getComment().length() <= 0 && tag.getImageURL().length() <= 0) {
                 // no comment & no image
-                cell = tagCellTemplate.cellWithoutCommentWithoutImage(tagStyle.tag(), tagStyle.tagHeading(),
-                        tagStyle.tagCreated(), safeTag, safeAuthor, safeCreatedAt);
+                cell = tagCellTemplate.cellWithoutCommentWithoutImage(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
+                        tagPanelStyle.tagCreated(), safeTag, safeAuthor, safeCreatedAt);
             } else if (tag.getComment().length() > 0 && tag.getImageURL().length() <= 0) {
                 // comment & no image
-                cell = tagCellTemplate.cellWithCommentWithoutImage(tagStyle.tag(), tagStyle.tagHeading(),
-                        tagStyle.tagCreated(), tagStyle.tagComment(), safeTag, safeAuthor, safeCreatedAt, safeComment);
+                cell = tagCellTemplate.cellWithCommentWithoutImage(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
+                        tagPanelStyle.tagCreated(), tagPanelStyle.tagComment(), safeTag, safeAuthor, safeCreatedAt, safeComment);
             } else if (tag.getComment().length() <= 0 && tag.getImageURL().length() > 0) {
                 // no comment & image
-                cell = tagCellTemplate.cellWithoutCommentWithImage(tagStyle.tag(), tagStyle.tagHeading(),
-                        tagStyle.tagCreated(), tagStyle.tagImage(), safeTag, safeAuthor, safeCreatedAt,
+                cell = tagCellTemplate.cellWithoutCommentWithImage(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
+                        tagPanelStyle.tagCreated(), tagPanelStyle.tagImage(), safeTag, safeAuthor, safeCreatedAt,
                         trustedImageURL);
             } else {
                 // comment & image
-                cell = tagCellTemplate.cell(tagStyle.tag(), tagStyle.tagHeading(), tagStyle.tagCreated(),
-                        tagStyle.tagComment(), tagStyle.tagImage(), safeTag, safeAuthor, safeCreatedAt, safeComment,
-                        trustedImageURL);
+                cell = tagCellTemplate.cell(tagPanelStyle.tag(), tagPanelStyle.tagHeading(), tagPanelStyle.tagCreated(),
+                        tagPanelStyle.tagImage(), tagPanelStyle.tagComment(), safeTag, safeAuthor, safeCreatedAt,
+                        trustedImageURL, safeComment);
             }
             htmlBuilder.append(cell);
         }
@@ -152,10 +163,13 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
             SailingServiceAsync sailingService, UserService userService, Timer timer) {
         super(parent, context);
-
+        
+        TagPanelResources.INSTANCE.style().ensureInjected();
+        CellListResources.INSTANCE.cellListStyle().ensureInjected();
+        
         panel = new HeaderPanel();
         filterbarPanel = new TagFilterPanel(null, stringMessages, new TagsFilterSets());
-        tagCellList = new CellList<TagDTO>(new TagCell(), TagResources.INSTANCE);
+        tagCellList = new CellList<TagDTO>(new TagCell(), CellListResources.INSTANCE);
         contentPanel = new ScrollPanel();
         buttonsPanel = new FlowPanel();
 
@@ -180,8 +194,6 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     }
 
     private void initializePanel() {
-        TagResources.INSTANCE.style().ensureInjected();
-
         // Panel
         panel.setTitle(stringMessages.tagging());
         panel.getElement().getStyle().setPosition(Position.ABSOLUTE);
@@ -209,8 +221,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         tagProvider.setList(tags);
         contentPanel.add(tagCellList);
         contentPanel.getElement().getStyle().setHeight(100, Unit.PCT);
-        contentPanel.getElement().getStyle().setPaddingBottom(10, Unit.PX);
-        contentPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
+        contentPanel.getElement().getStyle().setPaddingTop(10, Unit.PX);
 
         panel.setContentWidget(contentPanel);
         updateUi();
