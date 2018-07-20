@@ -373,7 +373,7 @@
                     android:layout_alignParentBottom="true"
                     android:paddingBottom="5dp">
 
-                    <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
+                    <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
                         android:id="@+id/show_event_button"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
