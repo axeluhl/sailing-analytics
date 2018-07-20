@@ -118,7 +118,7 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         assertTrue("Url does not contain proper name " + url, url.contains("name=BMW+Cup+(J80)"));
         AutoPlayLeaderboardView autoplayPage = page.goToAutoPlayClassicUrl(getWebDriver(), url);
         LeaderboardTablePO leaderBoard = autoplayPage.getLeaderBoard();
-        leaderBoard.waitForLeaderboardToHaveData();
+        leaderBoard.waitForTableToShowData();
         List<String> races = leaderBoard.getRaceNames();
         Assert.assertTrue(races.contains("R1"));
         Assert.assertTrue(races.contains("R2"));
