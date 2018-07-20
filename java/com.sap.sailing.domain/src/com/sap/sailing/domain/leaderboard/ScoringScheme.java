@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -25,6 +26,13 @@ import com.sap.sse.common.Util;
  *
  */
 public interface ScoringScheme extends Serializable {
+    /**
+     * The factor by which a medal race score is multiplied by default in the overall point scheme.
+     * 
+     * @see #getFactor()
+     */
+    static final double DEFAULT_MEDAL_RACE_FACTOR = 2.0;
+    
     /**
      * If this returns <code>true</code>, a higher score is better. For example, the Extreme Sailing Series uses this
      * scoring scheme, as opposed to the olympic sailing classes which use a low-point system.
@@ -119,4 +127,51 @@ public interface ScoringScheme extends Serializable {
      * @throws NoWindException 
      */
     int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint);
+
+    /**
+     * Returning {@code true} makes the number of wins in a medal series the primary ranking criteria.
+     * The number of wins that makes a competitor the overall winner must be returned by {@link #getTargetAmountOfMedalRaceWins()}.
+     */
+    default boolean isMedalWinAmountCriteria() {
+        return false;
+    }
+    
+    /**
+     * Returning {@code true} makes the {@link RaceColumn#isCarryForward() carry forward score} in a
+     * {@link Series#isMedal() medal series} a secondary ranking criteria for competitors that have an equal overall
+     * score.
+     */
+    default boolean isCarryForwardInMedalsCriteria() {
+        return false;
+    }
+    
+    /**
+     * Returning {@code true} makes the last medal race (having valid scores) a secondary ranking criteria for
+     * competitors that have an equal overall score.
+     */
+    default boolean isLastMedalRaceCriteria() {
+        return false;
+    }
+
+    /**
+     * If {@link #isMedalWinAmountCriteria()} returns {@code true}, this will be the amount of races that must be won,
+     * in order to win the medal series instantly
+     */
+    default int getTargetAmountOfMedalRaceWins() {
+        throw new IllegalStateException("This call is not valid for this scoringSheme");
+    }
+
+    /**
+     * Usually, the scores in each leaderboard column count as they are for the overall score. However, if a column is a
+     * medal race column it usually counts double. Under certain circumstances, columns may also count with factors
+     * different from 1 or 2. For example, we've seen cases in the Extreme Sailing Series where the race committee
+     * defined that in the overall series leaderboard the last two columns each count 1.5 times their scores.
+     */
+    default double getScoreFactor(RaceColumn raceColumn) {
+        Double factor = raceColumn.getExplicitFactor();
+        if (factor == null) {
+            factor = raceColumn.isMedalRace() ? DEFAULT_MEDAL_RACE_FACTOR : 1.0;
+        }
+        return factor;
+    }
 }

@@ -7,7 +7,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.google.common.base.Predicate;
 import com.sap.sailing.selenium.pages.common.CSSHelper;
 
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
@@ -192,5 +194,14 @@ public class LeaderboardTablePO extends CellTablePO<LeaderboardEntry> {
     
     private WebElement getExpansionButton(WebElement header) {
         return header.findElement(By.xpath(EXPANSION_BUTTON_XPATH));
+    }
+    
+    public void waitForLeaderboardToHaveData() {
+        new WebDriverWait(driver, 30).until(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver driver) {
+                return !getEntries().isEmpty();
+            }
+        });
     }
 }

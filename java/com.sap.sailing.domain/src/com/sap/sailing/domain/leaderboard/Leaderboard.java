@@ -604,4 +604,22 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * leaderboard.
      */
     boolean hasScores(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * Returns true if a racecolumn evaluates to be a win for the given competitor at the given timepoint.
+     * If the competitor is not scored for this race, false is returned 
+     */
+    default boolean isWin(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
+        final Double points = getTotalPoints(competitor, raceColumn, timePoint);
+        final boolean result;
+        if (points == null) {
+            result = false;
+        } else if (getScoringScheme().isHigherBetter()) {
+            double competitorCount = Util.size(getCompetitors());
+            result = points >= (competitorCount - 0.05);
+        } else {
+            result = points <= 1.05;
+        }
+        return result;
+    }
 }
