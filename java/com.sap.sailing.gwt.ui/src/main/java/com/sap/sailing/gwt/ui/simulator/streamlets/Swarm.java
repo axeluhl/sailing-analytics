@@ -254,7 +254,7 @@ public class Swarm implements TimeListener {
             double h = (1 - (speed - minParticleSpeedInKnots)/(maxParticleSpeedInKnots - minParticleSpeedInKnots)) * 240;
             return "hsl(" + Math.round(h) + ", 100%, 50%)";
         } else {
-            return "rgba(255,255,255," + Math.min(1.0, speed / 40) + ")";
+            return "rgba(255,255,255," + Math.min(1.0, (speed - minParticleSpeedInKnots)/(maxParticleSpeedInKnots - minParticleSpeedInKnots)) + ")";
         }
     }
     public void setColors(boolean isColored) {
@@ -346,7 +346,7 @@ public class Swarm implements TimeListener {
             minParticleSpeedInKnots = minSpeed;
             isUpdateListeners = true;
         }
-        this.isNotifyListeners = isUpdateListeners;
+        isNotifyListeners = isUpdateListeners;
         drawSwarm();
         notifyListeners();
         return true;
