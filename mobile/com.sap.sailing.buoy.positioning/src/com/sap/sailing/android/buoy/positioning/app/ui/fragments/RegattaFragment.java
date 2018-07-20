@@ -5,7 +5,7 @@ import com.sap.sailing.android.buoy.positioning.app.adapter.MarkAdapter;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
 import com.sap.sailing.android.buoy.positioning.app.ui.activities.PositioningActivity;
 import com.sap.sailing.android.buoy.positioning.app.ui.activities.RegattaActivity;
-import com.sap.sailing.android.ui.fragments.BaseFragment;
+import com.sap.sailing.android.shared.ui.fragments.BaseFragment;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;

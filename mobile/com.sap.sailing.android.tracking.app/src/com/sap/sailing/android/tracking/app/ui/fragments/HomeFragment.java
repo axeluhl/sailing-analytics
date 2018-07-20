@@ -38,7 +38,7 @@ import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkInfo;
-import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
+import com.sap.sailing.android.shared.ui.fragments.AbstractHomeFragment;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;

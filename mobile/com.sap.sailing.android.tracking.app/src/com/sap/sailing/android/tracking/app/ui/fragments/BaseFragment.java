@@ -7,7 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public abstract class BaseFragment extends com.sap.sailing.android.ui.fragments.BaseFragment {
+public abstract class BaseFragment extends com.sap.sailing.android.shared.ui.fragments.BaseFragment {
 
     protected AppPreferences prefs;
 

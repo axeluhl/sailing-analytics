@@ -13,7 +13,7 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
-import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
+import com.sap.sailing.android.shared.ui.fragments.AbstractHomeFragment;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;

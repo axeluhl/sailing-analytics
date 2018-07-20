@@ -1,5 +1,6 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
+import com.sap.sailing.android.shared.ui.fragments.BaseFragment;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.shared.util.LicenseHelper;
@@ -20,7 +21,7 @@ import android.widget.TextView;
 import de.psdev.licensesdialog.LicensesDialog;
 import de.psdev.licensesdialog.model.Notices;
 
-public class AboutFragment extends com.sap.sailing.android.ui.fragments.BaseFragment {
+public class AboutFragment extends BaseFragment {
 
     public static AboutFragment newInstance() {
         AboutFragment fragment = new AboutFragment();

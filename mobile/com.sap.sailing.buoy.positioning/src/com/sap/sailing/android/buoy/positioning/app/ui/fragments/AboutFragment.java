@@ -4,7 +4,7 @@ import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.shared.util.LicenseHelper;
-import com.sap.sailing.android.ui.fragments.BaseFragment;
+import com.sap.sailing.android.shared.ui.fragments.BaseFragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

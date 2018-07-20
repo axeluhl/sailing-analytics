@@ -18,7 +18,7 @@ import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.android.ui.fragments.BaseFragment;
+import com.sap.sailing.android.shared.ui.fragments.BaseFragment;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;

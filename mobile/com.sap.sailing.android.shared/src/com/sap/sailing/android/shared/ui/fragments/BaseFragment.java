@@ -1,4 +1,4 @@
-package com.sap.sailing.android.ui.fragments;
+package com.sap.sailing.android.shared.ui.fragments;
 
 import android.support.v4.app.Fragment;
 

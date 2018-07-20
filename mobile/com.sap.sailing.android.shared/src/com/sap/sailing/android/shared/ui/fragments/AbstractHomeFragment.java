@@ -1,11 +1,12 @@
-package com.sap.sailing.android.ui.fragments;
+package com.sap.sailing.android.shared.ui.fragments;
 
-import java.util.List;
-
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.vision.barcode.Barcode;
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
+import com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity;
 import com.sap.sailing.android.shared.ui.adapters.AbstractRegattaAdapter;
 import com.sap.sailing.android.shared.util.BaseAppPreferences;
 
@@ -13,11 +14,10 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -58,48 +58,25 @@ public abstract class AbstractHomeFragment extends BaseFragment {
     }
 
     private boolean requestQRCodeScan() {
-        boolean result;
-        PackageManager manager = getActivity().getPackageManager();
-        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-        List<ResolveInfo> infos = manager.queryIntentActivities(intent, 0);
-        if (infos.size() != 0) {
-            try {
-                startActivityForResult(intent, requestCodeQRCode);
-                result = true;
-            } catch (Exception ex) {
-                requestQRCodeScannerInstallation();
-                result = false;
-            }
-        } else {
-            requestQRCodeScannerInstallation();
-            result = false;
-        }
-        return result;
-    }
+        Intent intent = new Intent(getContext(), BarcodeCaptureActivity.class);
+        intent.putExtra(BarcodeCaptureActivity.AutoFocus, true);
+        startActivityForResult(intent, requestCodeQRCode);
 
-    private void requestQRCodeScannerInstallation() {
-        Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-        Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-        startActivity(marketIntent);
+        return true;
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (resultCode) {
-            case Activity.RESULT_OK:
-                String scanResult = data.getStringExtra("SCAN_RESULT");
-                prefs.setLastScannedQRCode(scanResult);
-                // handleQRCode is called in onResume()
-                break;
-            case Activity.RESULT_CANCELED:
-                Toast.makeText(getActivity(), getString(R.string.scanning_cancelled), Toast.LENGTH_LONG).show();
-                break;
-            default:
-                String templateString = getString(R.string.error_scanning_qrcode);
-                Toast.makeText(getActivity(), templateString.replace("{result-code}", String.valueOf(resultCode)),
-                        Toast.LENGTH_LONG).show();
-                break;
+        if (requestCode == requestCodeQRCode) {
+            if (resultCode == CommonStatusCodes.SUCCESS) {
+                Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+                handleQRCode(barcode.displayValue);
+            } else {
+                ExLog.e(getActivity(), TAG, CommonStatusCodes.getStatusCodeString(resultCode));
+            }
+        }
+        else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 

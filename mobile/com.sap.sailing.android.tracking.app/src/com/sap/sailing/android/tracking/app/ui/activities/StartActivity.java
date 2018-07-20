@@ -17,7 +17,7 @@ import com.sap.sailing.android.tracking.app.valueobjects.BoatCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkCheckinData;
-import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
+import com.sap.sailing.android.shared.ui.fragments.AbstractHomeFragment;
 
 import android.content.Intent;
 import android.graphics.Bitmap;

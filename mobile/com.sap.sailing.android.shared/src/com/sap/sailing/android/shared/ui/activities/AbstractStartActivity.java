@@ -7,7 +7,7 @@ import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
-import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
+import com.sap.sailing.android.shared.ui.fragments.AbstractHomeFragment;
 
 import android.app.Dialog;
 import android.content.Intent;
