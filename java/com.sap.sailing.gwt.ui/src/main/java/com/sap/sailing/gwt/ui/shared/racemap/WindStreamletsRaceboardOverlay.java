@@ -157,6 +157,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
                     scale_spread = 50;
                 }
                 final int maxIdx = 300;
+//                final colors[] = swarm.getColorsForSteps(maxIdx);
                 Context2d context2d = streamletLegend.getContext2d();
                 context2d.setFillStyle("rgba(0,0,0,.3)");
                 context2d.setLineWidth(1.0);
