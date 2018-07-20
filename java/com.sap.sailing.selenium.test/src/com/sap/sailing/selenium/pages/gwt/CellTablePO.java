@@ -11,7 +11,9 @@ import java.util.stream.Stream;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.google.common.base.Function;
 import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.common.CSSConstants;
 
@@ -342,5 +344,14 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
         String image = images.get(0).getAttribute("src");
         
         return LOADING_ANIMATION_IMAGE.equals(image);
+    }
+    
+    public void waitForTableToShowData() {
+        new WebDriverWait(driver, 30).until(new Function<WebDriver, Boolean>() {
+            @Override
+            public Boolean apply(WebDriver driver) {
+                return !getRows().isEmpty();
+            }
+        });
     }
 }
