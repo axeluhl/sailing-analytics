@@ -1,12 +1,12 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -57,6 +57,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         public TagPanelStyle style();
 
         public interface TagPanelStyle extends CssResource {
+            String tagPanel();
             String tag();
             String tagHeading();
             String tagCreated();
@@ -201,14 +202,8 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     private void initializePanel() {
         // Panel
         panel.setTitle(stringMessages.tagging());
-        panel.getElement().getStyle().setPosition(Position.ABSOLUTE);
-        panel.getElement().getStyle().setTop(0, Unit.PX);
-        panel.getElement().getStyle().setBottom(0, Unit.PX);
-        panel.getElement().getStyle().setLeft(0, Unit.PX);
-        panel.getElement().getStyle().setRight(0, Unit.PX);
-        panel.getElement().getStyle().setMargin(6, Unit.PX);
-        panel.getElement().getStyle().setMarginTop(10, Unit.PX);
-
+        panel.setStyleName(TagPanelResources.INSTANCE.style().tagPanel());
+        
         // Searchbar
         panel.setHeaderWidget(filterbarPanel);
 
@@ -229,7 +224,8 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         tagSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                jumpTo(tagSelectionModel.getSelectedObject());
+                // set time slider to corresponding position
+                timer.setTime(tagSelectionModel.getSelectedObject().getRaceTimepoint().asMillis());
             }
         });
         
@@ -299,6 +295,14 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
 
     private void updateContent() {
         tagCellList.setVisibleRange(0, tags.size());
+        tags.sort(new Comparator<TagDTO>() {
+            @Override
+            public int compare(TagDTO tag1, TagDTO tag2) {
+                long time1 = tag1.getRaceTimepoint().asMillis();
+                long time2 = tag2.getRaceTimepoint().asMillis();
+                return time1 < time2 ? -1 : time1 == time2 ? 0 : 1;
+            }
+        });
         tagProvider.refresh();
     }
 
@@ -337,14 +341,6 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                         }
                     });
         }
-    }
-    
-    private void jumpTo(TagDTO tag) {
-        if(tag == null) {
-            return;
-        }
-        
-        timer.setTime(tag.getRaceTimepoint().asMillis());
     }
     
     @Override
