@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.sap.sailing.android.shared.logging.ExLog;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.racegroup.CurrentRaceComparator;
@@ -49,16 +49,19 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.text.InputFilter;
@@ -72,13 +75,14 @@ import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
-public class WindFragment extends BaseFragment implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnRaceUpdatedListener {
+public class WindFragment extends BaseFragment implements CompassDirectionListener, OnRaceUpdatedListener, OnSuccessListener<Location> {
 
     private final static String TAG = WindFragment.class.getName();
     private final static long FIVE_SEC = 5000;
     private final static long EVERY_POSITION_CHANGE = 2000;
     private final static int MIN_KTS = 3;
     private final static int MAX_KTS = 30;
+    private final static int REQUEST_PERMISSIONS_REQUEST_CODE = 42;
 
     private View mHeaderLayout;
     private View mContentLayout;
@@ -99,9 +103,10 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     private ImageView mEditCourse;
     private ImageView mEditSpeed;
 
-    private GoogleApiClient apiClient;
+    private FusedLocationProviderClient apiClient;
     private LocationRequest locationRequest;
     private Location mCurrentLocation;
+    private LocationCallback mLocationCallback;
 
     private IsTrackedReceiver mReceiver;
 
@@ -136,7 +141,19 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         super.onCreate(savedInstanceState);
 
         // initialize the googleApiClient for location requests
-        apiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).build();
+        apiClient = LocationServices.getFusedLocationProviderClient(getActivity());
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(FIVE_SEC);
+        locationRequest.setFastestInterval(EVERY_POSITION_CHANGE);
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                mCurrentLocation = locationResult.getLastLocation();
+                refreshUI(false);
+            }
+        };
+        resumeApiClient();
     }
 
     @Override
@@ -200,6 +217,54 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         refreshUI(false);
     }
 
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (mCompassView != null) {
+            mCompassView.setDirectionListener(this);
+        }
+
+        if (!hasPermissions()) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSIONS_REQUEST_CODE);
+            return;
+        }
+        resumeApiClient();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // disconnect googleApiClient and unregister position poller
+        pauseApiClient();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
+        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mRacesByGroup = ((RacingActivity) getActivity()).getRacesByGroup();
+        final Set<ManagedRace> allRaces = new HashSet<>();
+        for (final Iterable<ManagedRace> racesInGroup : mRacesByGroup.values()) {
+            Util.addAll(racesInGroup, allRaces);
+        }
+        final CurrentRaceFilter<ManagedRace> raceFilter = new CurrentRaceFilterImpl<>(allRaces);
+        mManagedRaces = new ArrayList<>(raceFilter.getCurrentRaces());
+        Collections.sort(mManagedRaces, new CurrentRaceComparator());
+        mSelectedRaces = new ArrayList<>();
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+        // connect googleApiClient and register position poller
+        resumeApiClient();
+        //register receiver to be notified if race is tracked
+        IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
+        // Contact server and ask if race is tracked and map is allowed to show.
+        WindHelper.isTrackedRace(getActivity(), getRace());
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+    }
+
     @Override
     public void notifyTick(TimePoint now) {
         super.notifyTick(now);
@@ -255,20 +320,18 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     /**
      * starts the googleApiClient to get location updates
      */
+    @SuppressWarnings("MissingPermission")
     private void resumeApiClient() {
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(FIVE_SEC);
-        locationRequest.setFastestInterval(EVERY_POSITION_CHANGE);
-        apiClient.registerConnectionCallbacks(this);
-        apiClient.registerConnectionFailedListener(this);
-        apiClient.connect();
+        if (!hasPermissions()) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSIONS_REQUEST_CODE);
+            return;
+        }
+        apiClient.requestLocationUpdates(locationRequest, mLocationCallback, null);
+        apiClient.getLastLocation();
     }
 
     private void pauseApiClient() {
-        apiClient.unregisterConnectionFailedListener(this);
-        apiClient.unregisterConnectionCallbacks(this);
-        apiClient.disconnect();
+        apiClient.removeLocationUpdates(mLocationCallback);
     }
 
     /**
@@ -376,47 +439,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         return false;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        if (mCompassView != null) {
-            mCompassView.setDirectionListener(this);
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        // disconnect googleApiClient and unregister position poller
-        pauseApiClient();
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mRacesByGroup = ((RacingActivity) getActivity()).getRacesByGroup();
-        final Set<ManagedRace> allRaces = new HashSet<>();
-        for (final Iterable<ManagedRace> racesInGroup : mRacesByGroup.values()) {
-            Util.addAll(racesInGroup, allRaces);
-        }
-        final CurrentRaceFilter<ManagedRace> raceFilter = new CurrentRaceFilterImpl<>(allRaces);
-        mManagedRaces = new ArrayList<>(raceFilter.getCurrentRaces());
-        Collections.sort(mManagedRaces, new CurrentRaceComparator());
-        mSelectedRaces = new ArrayList<>();
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-        // connect googleApiClient and register position poller
-        resumeApiClient();
-        //register receiver to be notified if race is tracked
-        IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
-        // Contact server and ask if race is tracked and map is allowed to show.
-        WindHelper.isTrackedRace(getActivity(), getRace());
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-    }
-
     /**
      * sends the entered windData to the server
      */
@@ -435,26 +457,11 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-        mCurrentLocation = location;
-        refreshUI(false);
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult arg0) {
-        ExLog.e(getActivity(), TAG, "Failed to connect to Google Play Services for location updates");
-    }
-
-    @Override
-    public void onConnected(Bundle arg0) {
-        LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, locationRequest, this);
-        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(apiClient);
-        refreshUI(false);
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        LocationServices.FusedLocationApi.removeLocationUpdates(apiClient, this);
+    public void onSuccess(Location location) {
+        if (location != null) {
+            mCurrentLocation = location;
+            refreshUI(false);
+        }
     }
 
     @Override
@@ -479,6 +486,12 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         Bearing bearing_from = new DegreeBearingImpl(windBearing);
         SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(windSpeed, bearing_from.reverse());
         return new WindImpl(currentPosition, MillisecondsTimePoint.now(), speedBearing);
+    }
+
+    private boolean hasPermissions() {
+        boolean fine = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean coarse = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        return fine && coarse;
     }
 
     /**

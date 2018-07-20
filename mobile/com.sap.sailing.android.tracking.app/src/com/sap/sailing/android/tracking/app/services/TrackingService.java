@@ -14,6 +14,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
+import com.sap.sailing.android.shared.util.NotificationHelper;
+import com.sap.sailing.android.tracking.app.BuildConfig;
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedImpl;
+import com.sap.sailing.domain.common.tracking.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
+import com.sap.sse.common.impl.DegreeBearingImpl;
+
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -33,23 +50,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.widget.Toast;
 
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService;
-import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
-import com.sap.sailing.android.shared.util.NotificationHelper;
-import com.sap.sailing.android.tracking.app.BuildConfig;
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
-import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
-import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
-import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedImpl;
-import com.sap.sailing.domain.common.tracking.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
-import com.sap.sse.common.Bearing;
-import com.sap.sse.common.Duration;
-import com.sap.sse.common.Speed;
-import com.sap.sse.common.impl.DegreeBearingImpl;
-
 public class TrackingService extends Service implements LocationListener {
 
     private static final String TAG = TrackingService.class.getName();
@@ -61,6 +61,8 @@ public class TrackingService extends Service implements LocationListener {
     private static final int POOR_DISTANCE = 48;
     private static final int GREAT_DISTANCE = 10;
     private static final int NO_DISTANCE = 0;
+
+    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 40;
 
     private AppPreferences prefs;
 
@@ -144,7 +146,6 @@ public class TrackingService extends Service implements LocationListener {
                         if (BuildConfig.DEBUG) {
                             ExLog.i(this, TAG, "Starting Tracking Service with checkinDigest: " + checkinDigest);
                         }
-
                         startTracking();
                     }
                 }
@@ -155,9 +156,8 @@ public class TrackingService extends Service implements LocationListener {
         return Service.START_STICKY;
     }
 
+    @SuppressWarnings("MissingPermission")
     private void startTracking() {
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, prefs.getGPSFixInterval(), minLocationUpdateDistanceInMeters, this);
-
         ExLog.i(this, TAG, "Started Tracking");
         showNotification();
 

@@ -1,28 +1,9 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.location.Location;
-import android.location.LocationManager;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sap.sailing.android.buoy.positioning.app.R;
@@ -39,18 +20,40 @@ import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
+import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
 public class BuoyFragment extends BaseFragment
-    implements android.location.LocationListener {
-    
+        implements android.location.LocationListener, OnMapReadyCallback {
+
     private static final String TAG = BuoyFragment.class.getName();
 
     private static final int GPS_MIN_TIME = 1000;
+    private final static int REQUEST_PERMISSIONS_REQUEST_CODE = 41;
+
     private float minLocationUpdateDistanceInMeters = 0f;
 
     private TextView accuracyTextView;
     private TextView distanceTextView;
     private Button setPositionButton;
-    private MapFragment mapFragment;
     private Location lastKnownLocation;
     private LatLng savedPosition;
     private pingListener pingListener;
@@ -59,6 +62,7 @@ public class BuoyFragment extends BaseFragment
     private IntentReceiver mReceiver;
     private PositioningActivity positioningActivity;
     private LocalBroadcastManager mBroadcastManager;
+    private GoogleMap mMap;
 
     protected LocationManager locationManager;
 
@@ -79,10 +83,15 @@ public class BuoyFragment extends BaseFragment
 
         mReceiver = new IntentReceiver();
         mBroadcastManager = LocalBroadcastManager.getInstance(inflater.getContext());
-        initMapFragment();
+
+        positioningActivity = (PositioningActivity) getActivity();
+        SupportMapFragment mapFragment = (SupportMapFragment) positioningActivity
+                .getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             /**
              * prior to JellyBean, the minimum time for location updates parameter MIGHT be ignored,
@@ -90,7 +99,7 @@ public class BuoyFragment extends BaseFragment
              */
             minLocationUpdateDistanceInMeters = .5f;
         }
-        
+
         return layout;
     }
 
@@ -99,31 +108,40 @@ public class BuoyFragment extends BaseFragment
         super.onResume();
         disablePositionButton();
         positioningActivity = (PositioningActivity) getActivity();
-        mapFragment.getMap().setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        SupportMapFragment mapFragment = (SupportMapFragment) positioningActivity
+                .getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
         initialLocationUpdate = true;
         MarkInfo mark = positioningActivity.getMarkInfo();
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal);
         if (mark != null) {
             setUpTextUI(lastKnownLocation);
-            GoogleMap map = mapFragment.getMap();
-            configureMap(map);
             updateMap();
-            if (savedPosition != null) {
-                initialLocationUpdate = false;
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(savedPosition, 15));
-            }
         }
         initMarkerReceiver();
     }
 
-    private void initMapFragment() {
-        mapFragment = new MapFragment();
-        FragmentManager manager = getActivity().getFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.map, mapFragment);
-        transaction.commit();
+    @Override
+    @SuppressWarnings("MissingPermission")
+    public void onMapReady(GoogleMap map) {
+        mMap = map;
+        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+        // Enabling MyLocation Layer of Google Map
+        if (!hasPermissions()) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSIONS_REQUEST_CODE);
+            return;
+        }
+        mMap.setMyLocationEnabled(true);
+        if (savedPosition != null || (initialLocationUpdate && lastKnownLocation != null)) {
+            LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+            LatLng position = savedPosition != null ? savedPosition : lastKnownLatLng;
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
+            initialLocationUpdate = false;
+        }
     }
-    
+
     private void setUpSetPositionButton(View layout, ClickListener clickListener) {
         setPositionButton = ViewHelper.get(layout, R.id.marker_set_position_button);
         disablePositionButton();
@@ -144,9 +162,14 @@ public class BuoyFragment extends BaseFragment
     }
 
     @Override
+    @SuppressWarnings("MissingPermission")
     public void onStart() {
         super.onStart();
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME, minLocationUpdateDistanceInMeters , this);
+        if (!hasPermissions()) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSIONS_REQUEST_CODE);
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME, minLocationUpdateDistanceInMeters, this);
         lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
     }
 
@@ -188,24 +211,13 @@ public class BuoyFragment extends BaseFragment
      */ 
     @Override
     public void onLocationChanged(Location location) {
-        if (getActivity() instanceof PositioningActivity) {
-            mapFragment.getMap().setMyLocationEnabled(true);
-            lastKnownLocation = location;
-            reportGPSQuality(lastKnownLocation.getAccuracy());
-            setPositionButton.setEnabled(true);
-            setPositionButton.setAllCaps(true);
-            setPositionButton.setText(R.string.set_position);
-            setUpTextUI(lastKnownLocation);
-            updateMap();
-        }
-
-        if (initialLocationUpdate && lastKnownLocation != null) {
-            LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-            GoogleMap map = mapFragment.getMap();
-            configureMap(map);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 15));
-            initialLocationUpdate = false;
-        }
+        lastKnownLocation = location;
+        reportGPSQuality(lastKnownLocation.getAccuracy());
+        setPositionButton.setEnabled(true);
+        setPositionButton.setAllCaps(true);
+        setPositionButton.setText(R.string.set_position);
+        setUpTextUI(lastKnownLocation);
+        updateMap();
     }
     
     @Override
@@ -230,21 +242,14 @@ public class BuoyFragment extends BaseFragment
         disablePositionButton();
     }
 
-    private void configureMap(GoogleMap map) {
-        if (map != null) {
-            map.getUiSettings().setZoomControlsEnabled(true);
-        }
-    }
-
     private void updateMap() {
-        GoogleMap map = mapFragment.getMap();
-        map.clear();
+        mMap.clear();
 
         if (savedPosition != null) {
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(savedPosition);
             markerOptions.visible(true);
-            map.addMarker(markerOptions);
+            mMap.addMarker(markerOptions);
         }
     }
 
@@ -271,6 +276,12 @@ public class BuoyFragment extends BaseFragment
 
     public interface pingListener {
         void updatePing();
+    }
+
+    private boolean hasPermissions() {
+        boolean fine = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean coarse = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        return fine && coarse;
     }
 
     private class ClickListener implements OnClickListener {
