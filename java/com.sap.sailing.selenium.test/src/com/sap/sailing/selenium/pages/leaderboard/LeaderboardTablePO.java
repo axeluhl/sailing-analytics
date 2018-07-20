@@ -200,7 +200,7 @@ public class LeaderboardTablePO extends CellTablePO<LeaderboardEntry> {
         new WebDriverWait(driver, 30).until(new Predicate<WebDriver>() {
             @Override
             public boolean apply(WebDriver driver) {
-                return !getEntries().isEmpty();
+                return !getRows().isEmpty();
             }
         });
     }
