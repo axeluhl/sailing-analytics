@@ -27,6 +27,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -144,6 +146,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     private final Panel filterbarPanel;
     private final Panel contentPanel;
     private final CellList<TagDTO> tagCellList;
+    private final SingleSelectionModel<TagDTO> tagSelectionModel;
     private final Panel buttonsPanel;
 
     private final List<Button> buttons;
@@ -170,6 +173,8 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         panel = new HeaderPanel();
         filterbarPanel = new TagFilterPanel(null, stringMessages, new TagsFilterSets());
         tagCellList = new CellList<TagDTO>(new TagCell(), CellListResources.INSTANCE);
+        tagSelectionModel = new SingleSelectionModel<TagDTO>();
+        
         contentPanel = new ScrollPanel();
         buttonsPanel = new FlowPanel();
 
@@ -219,6 +224,15 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         // Content (tags)
         tagProvider.addDataDisplay(tagCellList);
         tagProvider.setList(tags);
+        
+        tagCellList.setSelectionModel(tagSelectionModel);
+        tagSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                jumpTo(tagSelectionModel.getSelectedObject());
+            }
+        });
+        
         contentPanel.add(tagCellList);
         contentPanel.getElement().getStyle().setHeight(100, Unit.PCT);
         contentPanel.getElement().getStyle().setPaddingTop(10, Unit.PX);
@@ -324,7 +338,15 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                     });
         }
     }
-
+    
+    private void jumpTo(TagDTO tag) {
+        if(tag == null) {
+            return;
+        }
+        
+        timer.setTime(tag.getRaceTimepoint().asMillis());
+    }
+    
     @Override
     public String getId() {
         return "TaggingPanel";
