@@ -406,7 +406,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 }
                 // Note: the RaceColumnDTO won't be created by the following addRace call because it has been created
                 // above by the result.createEmptyRaceColumn call
-                result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
+                result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), getScoringScheme().getScoreFactor(raceColumn),
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn);
@@ -1014,7 +1014,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                                             result.numberOfManeuvers.get(maneuver.getType()) + 1);
                                     totalManeuverLossInMeters.put(maneuver.getType(),
                                             totalManeuverLossInMeters.get(maneuver.getType())
-                                            + maneuver.getManeuverLoss().getMeters());
+                                            + maneuver.getManeuverLoss().getProjectedDistanceLost().getMeters());
                                 }
                             }
                             break;
