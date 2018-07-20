@@ -58,6 +58,12 @@ import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -171,12 +177,21 @@ public class MarkRessource extends AbstractSailingServerResource {
             if (marksRaw.size() == 1) {
                 String markName = (String) marksRaw.get(0);
                 Mark mark = getService().getBaseDomainFactory().getExistingMarkByIdAsString(markName);
+                if (mark == null) {
+                    throw new IllegalStateException("Could not resolve mark " + markName);
+                }
                 controlPoints.add(new Pair<>(mark, passing));
             } else {
                 String markNameA = (String) marksRaw.get(0);
                 String markNameB = (String) marksRaw.get(1);
                 Mark markA = getService().getBaseDomainFactory().getExistingMarkByIdAsString(markNameA);
                 Mark markB = getService().getBaseDomainFactory().getExistingMarkByIdAsString(markNameB);
+                if (markA == null) {
+                    throw new IllegalStateException("Could not resolve mark " + markA);
+                }
+                if (markB == null) {
+                    throw new IllegalStateException("Could not resolve mark " + markB);
+                }
                 controlPoints.add(new Pair<>(
                         new ControlPointWithTwoMarksImpl(markA, markB, markA.getName() + "-" + markB.getName()),
                         passing));
@@ -184,6 +199,7 @@ public class MarkRessource extends AbstractSailingServerResource {
         }
 
         Course course = new CourseImpl(courseName, lastPublishedCourse.getWaypoints());
+
 
         try {
             course.update(controlPoints, getService().getBaseDomainFactory());
@@ -193,7 +209,18 @@ public class MarkRessource extends AbstractSailingServerResource {
         RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(),
                 getService().getServerAuthor(), raceLog.getCurrentPassId(), course, CourseDesignerMode.ADMIN_CONSOLE);
         raceLog.add(event);
-        return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+
+        CourseBase updatedPublishedCourse = new LastPublishedCourseDesignFinder(raceLog,
+                /* onlyCoursesWithValidWaypointList */ false).analyze();
+
+        JSONObject jsonResult = new JSONObject();
+        jsonResult.put("course",
+                new CourseJsonSerializer(new CourseBaseJsonSerializer(
+                        new WaypointJsonSerializer(new ControlPointJsonSerializer(new MarkJsonSerializer(),
+                                new GateJsonSerializer(new MarkJsonSerializer()))))).serialize(updatedPublishedCourse));
+
+        return Response.ok(jsonResult.toJSONString())
+                .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     @POST
