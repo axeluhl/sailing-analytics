@@ -40,7 +40,6 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.NotFoundException;
@@ -83,7 +82,7 @@ public class MarkRessource extends AbstractSailingServerResource {
         String markName = (String) requestObject.get("markName");
 
         UUID markId = UUID.randomUUID();
-        MarkImpl mark = new MarkImpl(markId, markName);
+        Mark mark = getService().getBaseDomainFactory().getOrCreateMark(markId, markName);
         String regattaName = (String) requestObject.get("regattaName");
         RegattaLog regattaLog = getRegattaLogInternal(regattaName);
         RegattaLogDefineMarkEventImpl event = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
@@ -200,7 +199,6 @@ public class MarkRessource extends AbstractSailingServerResource {
 
         Course course = new CourseImpl(courseName, lastPublishedCourse.getWaypoints());
 
-
         try {
             course.update(controlPoints, getService().getBaseDomainFactory());
         } catch (Exception e) {
@@ -263,9 +261,8 @@ public class MarkRessource extends AbstractSailingServerResource {
         }
         return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
-    
-    private Iterable<Competitor> filterCompetitorDuplicates(
-            Map<Competitor, Boat> competitorToBoatMappingsToRegister,
+
+    private Iterable<Competitor> filterCompetitorDuplicates(Map<Competitor, Boat> competitorToBoatMappingsToRegister,
             Map<Competitor, Boat> competitorToBoatMappingsRegistered) {
         final Set<Competitor> competitorsToUnregister = new HashSet<>();
         Util.addAll(competitorToBoatMappingsRegistered.keySet(), competitorsToUnregister);
