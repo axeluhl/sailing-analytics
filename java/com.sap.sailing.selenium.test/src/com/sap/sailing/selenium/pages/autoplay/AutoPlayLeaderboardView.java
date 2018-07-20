@@ -14,17 +14,13 @@ public class AutoPlayLeaderboardView extends PageArea {
         super(driver, element);
     }
 
-    public LeaderboardTablePO getLeaderBoard() {
+    public LeaderboardTablePO getLeaderBoardWithData() {
         WebElement leaderboardCellTable = new WebDriverWait(driver, 30).until(new Function<WebDriver, WebElement>() {
             @Override
             public WebElement apply(WebDriver driver) {
                 WebElement leaderboardCellTable = findElementOrNullBySeleniumId("LeaderboardCellTable");
                 if (leaderboardCellTable != null) {
-                    try {
-                        if (leaderboardCellTable.isDisplayed()) {
-                            final int windowWidth = driver.manage().window().getSize().getWidth();
-                            if (windowWidth >= leaderboardCellTable.getLocation().x
-                                    + leaderboardCellTable.getSize().width) {
+                    if (isElementEntirelyVisible(leaderboardCellTable)) {
                                 return leaderboardCellTable;
                             } else {
                                 return null;
@@ -32,17 +28,19 @@ public class AutoPlayLeaderboardView extends PageArea {
                         } else {
                             return null;
                         }
-                    } catch (Exception e) {
-                        // The element may currently only partially visible which makes some of the calls fail
-                        // In this case it is necessary to wait for the next loop
-                        return null;
                     }
-                } else {
-                    return null;
-                }
+        });
+        LeaderboardTablePO leaderboardTablePO = new LeaderboardTablePO(this.driver, leaderboardCellTable);
+        leaderboardTablePO.waitForTableToShowData();
+        
+        // After the data is loaded it could be possible that the table isn't completely visible anymore
+        new WebDriverWait(driver, 30).until(new Function<WebDriver, Boolean>() {
+            @Override
+            public Boolean apply(WebDriver arg0) {
+                return isElementEntirelyVisible(leaderboardCellTable);
             }
         });
-        return new LeaderboardTablePO(this.driver, leaderboardCellTable);
+        return leaderboardTablePO;
     }
 
 }
