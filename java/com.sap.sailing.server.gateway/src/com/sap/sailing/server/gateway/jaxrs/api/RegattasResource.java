@@ -1795,46 +1795,47 @@ public class RegattasResource extends AbstractSailingServerResource {
 
         Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
-            // SecurityUtils.getSubject()
-            // .checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
-        }
+            SecurityUtils.getSubject()
+                    .checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
+            String seriesName = (String) requestObject.get("seriesName");
+            String seriesNameNew = (String) requestObject.get("seriesNameNew");
+            boolean isMedal = (boolean) requestObject.get("isMedal");
+            boolean isFleetsCanRunInParallel = (boolean) requestObject.get("isFleetsCanRunInParallel");
+            boolean startsWithZeroScore = (boolean) requestObject.get("startsWithZeroScore");
+            boolean firstColumnIsNonDiscardableCarryForward = (boolean) requestObject
+                    .get("firstColumnIsNonDiscardableCarryForward");
+            boolean hasSplitFleetContiguousScoring = (boolean) requestObject.get("hasSplitFleetContiguousScoring");
 
-        String seriesName = (String) requestObject.get("seriesName");
-        String seriesNameNew = (String) requestObject.get("seriesNameNew");
-        boolean isMedal = (boolean) requestObject.get("isMedal");
-        boolean isFleetsCanRunInParallel = (boolean) requestObject.get("isFleetsCanRunInParallel");
-        boolean startsWithZeroScore = (boolean) requestObject.get("startsWithZeroScore");
-        boolean firstColumnIsNonDiscardableCarryForward = (boolean) requestObject
-                .get("firstColumnIsNonDiscardableCarryForward");
-        boolean hasSplitFleetContiguousScoring = (boolean) requestObject.get("hasSplitFleetContiguousScoring");
-
-        Integer maximumNumberOfDiscards = null;
-        if (requestObject.containsKey("maximumNumberOfDiscards")) {
-            maximumNumberOfDiscards = (int) (long) requestObject.get("maximumNumberOfDiscards");
-        }
-
-        int[] resultDiscardingThresholds = null;
-        if (requestObject.containsKey("resultDiscardingThresholds")) {
-            JSONArray resultDiscardingThresholdsRaw = (JSONArray) requestObject.get("resultDiscardingThresholds");
-            resultDiscardingThresholds = new int[resultDiscardingThresholdsRaw.size()];
-            for (int i = 0; i < resultDiscardingThresholdsRaw.size(); i++) {
-                resultDiscardingThresholds[i] = (int) (long) resultDiscardingThresholdsRaw.get(i);
+            Integer maximumNumberOfDiscards = null;
+            if (requestObject.containsKey("maximumNumberOfDiscards")) {
+                maximumNumberOfDiscards = (int) (long) requestObject.get("maximumNumberOfDiscards");
             }
+
+            int[] resultDiscardingThresholds = null;
+            if (requestObject.containsKey("resultDiscardingThresholds")) {
+                JSONArray resultDiscardingThresholdsRaw = (JSONArray) requestObject.get("resultDiscardingThresholds");
+                resultDiscardingThresholds = new int[resultDiscardingThresholdsRaw.size()];
+                for (int i = 0; i < resultDiscardingThresholdsRaw.size(); i++) {
+                    resultDiscardingThresholds[i] = (int) (long) resultDiscardingThresholdsRaw.get(i);
+                }
+            }
+
+            JSONArray fleetsRaw = (JSONArray) requestObject.get("fleets");
+            List<FleetDTO> fleets = new ArrayList<>();
+            for (Object fleetRaw : fleetsRaw) {
+                JSONObject fleet = Helpers.toJSONObjectSafe(fleetRaw);
+                String fleetName = (String) fleet.get("fleetName");
+                int orderNo = (int) (long) fleet.get("orderNo");
+                String htmlColor = (String) fleet.get("htmlColor");
+                fleets.add(new FleetDTO(fleetName, orderNo, new RGBColor(htmlColor)));
+            }
+            getService().apply(new UpdateSeries(regatta.getRegattaIdentifier(), seriesName, seriesNameNew, isMedal,
+                    isFleetsCanRunInParallel, resultDiscardingThresholds, startsWithZeroScore,
+                    firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring, maximumNumberOfDiscards,
+                    fleets));
         }
 
-        JSONArray fleetsRaw = (JSONArray) requestObject.get("fleets");
-        List<FleetDTO> fleets = new ArrayList<>();
-        for (Object fleetRaw : fleetsRaw) {
-            JSONObject fleet = Helpers.toJSONObjectSafe(fleetRaw);
-            String fleetName = (String) fleet.get("fleetName");
-            int orderNo = (int) (long) fleet.get("orderNo");
-            String htmlColor = (String) fleet.get("htmlColor");
-            fleets.add(new FleetDTO(fleetName, orderNo, new RGBColor(htmlColor)));
-        }
-        getService().apply(new UpdateSeries(regatta.getRegattaIdentifier(), seriesName, seriesNameNew, isMedal,
-                isFleetsCanRunInParallel, resultDiscardingThresholds, startsWithZeroScore,
-                firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring, maximumNumberOfDiscards,
-                fleets));
+
 
         return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
