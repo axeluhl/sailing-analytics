@@ -625,4 +625,23 @@ public class PageObject {
         }
         throw new NoAlertPresentException();
     }
+    
+    public boolean isElementEntirelyVisible(WebElement element) {
+        try {
+            if (element.isDisplayed()) {
+                final int windowWidth = driver.manage().window().getSize().getWidth();
+                if (windowWidth >= element.getLocation().x
+                        + element.getSize().width) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            // The element may currently only partially visible which makes some of the calls fail
+            return false;
+        }
+    }
 }
