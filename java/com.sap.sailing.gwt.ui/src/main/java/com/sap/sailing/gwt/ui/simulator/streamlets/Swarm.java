@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.simulator.streamlets;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
@@ -13,6 +15,7 @@ import com.google.gwt.maps.client.events.bounds.BoundsChangeMapHandler;
 import com.google.gwt.user.client.Timer;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
+import com.sap.sailing.gwt.ui.shared.racemap.SwarmMinMaxSpeedChangedListener;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sse.gwt.client.player.TimeListener;
@@ -74,6 +77,8 @@ public class Swarm implements TimeListener {
         timePoint = timer.getTime();
         cosineOfAverageLatitude = 1.0; // default to equator
         diffPx = new Vector(0, 0);
+        swarmMinMaxSpeedChangedListeners = new HashSet<>();
+        schmittTrigger = new SchmittTrigger(/*percent*/ 25);
     }
 
     public void start(final int animationIntervalMillis) {
@@ -113,7 +118,9 @@ public class Swarm implements TimeListener {
         while (!done && attempts-- > 0) {
             particle = new Particle();
             particle.currentPosition = getRandomPosition();
-            if (field.inBounds(particle.currentPosition)) {
+            // Is the if check really needed? getRandomPosition() returns always a position that is within the
+            // visibleBoundsOfField. visibleBoundsOfField is always within fieldBounds. See updateBounds().
+            if(field.inBounds(particle.currentPosition)) {
                 Vector v = field.getVector(particle.currentPosition, timePoint);
                 double weight = field.getParticleWeight(particle.currentPosition, v);
                 if (weight >= Math.random()) {
@@ -145,7 +152,6 @@ public class Swarm implements TimeListener {
         result = LatLng.newInstance(latDeg, lngDeg);
         return result;
     }
-
     private Particle[] createParticles() {
         Particle[] newParticles = new Particle[nParticles];
         for (int idx = 0; idx < newParticles.length; idx++) {
@@ -234,7 +240,7 @@ public class Swarm implements TimeListener {
             }
             double particleSpeed = particle.v == null ? 0 : particle.v.length();
             ctxt.setLineWidth(field.getLineWidth(particleSpeed));
-            ctxt.setStrokeStyle(field.getColor(particleSpeed));
+            ctxt.setStrokeStyle(getColorWithSpectrumBoundaries(particleSpeed));
             ctxt.beginPath();
             ctxt.moveTo(particle.previousPixelCoordinate.x, particle.previousPixelCoordinate.y);
             ctxt.lineTo(particle.currentPixelCoordinate.x, particle.currentPixelCoordinate.y);
@@ -242,11 +248,61 @@ public class Swarm implements TimeListener {
         }
     }
 
+    private boolean colored = false;
+    public String getColorWithSpectrumBoundaries(double speed) {
+        if (colored) {
+            double h = (1 - (speed - minParticleSpeedInKnots)/(maxParticleSpeedInKnots - minParticleSpeedInKnots)) * 240;
+            return "hsl(" + Math.round(h) + ", 100%, 50%)";
+        } else {
+            return "rgba(255,255,255," + Math.min(1.0, speed / 40) + ")";
+        }
+    }
+    public void setColors(boolean isColored) {
+        this.colored = isColored;
+    }
+    
+    public boolean isColored() {
+        return colored;
+    }
+
+    private double maxParticleSpeedInKnots = 0.0;
+    /**
+     * @return the maxParticleSpeedInKnots
+     */
+    public double getMaxParticleSpeedInKnots() {
+        return maxParticleSpeedInKnots;
+    }
+
+    /**
+     * @return the minParticleSpeedInKnots
+     */
+    public double getMinParticleSpeedInKnots() {
+        return minParticleSpeedInKnots;
+    }
+
+    private double minParticleSpeedInKnots = 120.0;
+
+    private boolean isNotifyListeners = true;
+
+    private void notifyListeners() {
+        if (isNotifyListeners) {
+            for (SwarmMinMaxSpeedChangedListener listener : swarmMinMaxSpeedChangedListeners) {
+                listener.onSwarmMinMaxSpeedChanged();
+            }
+        }
+    }
+    
+    private final SchmittTrigger schmittTrigger;
+    
     /**
      * Moves each particle by its vector {@link Particle#v} multiplied by the speed which is 0.01 times the
-     * {@link VectorField#getMotionScale(int)} at the map's current zoom level.
+     * {@link VectorField#getMotionScale(int)} at the map's current zoom level. Also the max and min speed fields of the
+     * swarm get updated and the listeners get notified.
      */
     private boolean execute(Vector diffPx) {
+        boolean isUpdateListeners = false;
+        double minSpeed = 120.0;
+        double maxSpeed = 0.0;
         double speed = field.getMotionScale(map.getZoom());
         for (int idx = 0; idx < particles.length; idx++) {
             Particle particle = particles[idx];
@@ -268,6 +324,12 @@ public class Swarm implements TimeListener {
                 particle.stepsToLive--;
                 if ((particle.stepsToLive > 0) && (this.field.inBounds(particle.currentPosition))) {
                     particle.v = field.getVector(particle.currentPosition, timePoint);
+                    if (particle.v.length() > maxSpeed) {
+                        maxSpeed = particle.v.length();
+                    }
+                    if (particle.v.length() < minSpeed) {
+                        minSpeed = particle.v.length();
+                    }
                 } else {
                     particle.v = null;
                 }
@@ -276,7 +338,17 @@ public class Swarm implements TimeListener {
                 particles[idx] = this.createParticle();
             }
         }
+        if (schmittTrigger.isValueChangeTriggered(maxSpeed, maxParticleSpeedInKnots)) {
+            maxParticleSpeedInKnots = maxSpeed;
+            isUpdateListeners = true;
+        }
+        if (schmittTrigger.isValueChangeTriggered(minSpeed, minParticleSpeedInKnots)) {
+            minParticleSpeedInKnots = minSpeed;
+            isUpdateListeners = true;
+        }
+        this.isNotifyListeners = isUpdateListeners;
         drawSwarm();
+        notifyListeners();
         return true;
     }
 
@@ -288,4 +360,14 @@ public class Swarm implements TimeListener {
     public void timeChanged(Date newTime, Date oldTime) {
         timePoint = newTime;
     }
+    
+    private final Set<SwarmMinMaxSpeedChangedListener> swarmMinMaxSpeedChangedListeners;
+    public void addSwarmMinMaxSpeedChangedListener(SwarmMinMaxSpeedChangedListener listener) {
+        swarmMinMaxSpeedChangedListeners.add(listener);
+    }
+    public void removeSwarmMinMaxSpeedChangedListener(SwarmMinMaxSpeedChangedListener listener) {
+        swarmMinMaxSpeedChangedListeners.remove(listener);
+    }
+
+
 }
