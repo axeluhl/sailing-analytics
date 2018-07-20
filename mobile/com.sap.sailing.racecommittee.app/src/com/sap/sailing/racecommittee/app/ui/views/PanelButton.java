@@ -4,6 +4,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.TouchEventListener;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
@@ -354,6 +355,7 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         return retValue;
     }
 
+    @SuppressLint("Range")
     public int getMarkerLevel() {
         int retValue = LEVEL_UNKNOWN;
 

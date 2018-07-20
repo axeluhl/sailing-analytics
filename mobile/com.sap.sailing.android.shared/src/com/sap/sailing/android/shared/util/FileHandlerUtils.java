@@ -25,10 +25,10 @@ public class FileHandlerUtils {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         StringBuilder stringBuilder = new StringBuilder();
 
-        String line = null;
+        String line;
         try {
             while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line + "\n");
+                stringBuilder.append(line);
             }
         } catch (IOException e) {
             ExLog.e(context, TAG, "In Method convertStreamToString while converting stream to string: " + e.getMessage());

@@ -6,6 +6,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -63,6 +64,7 @@ public abstract class BasePanelFragment extends RaceFragment {
      * @param resId resource id of the marker drawable
      * @return new level (LEVEL_UNKNOWN, LEVEL_NORMAL, LEVEL_TOGGLED)
      */
+    @SuppressLint("Range")
     protected int getMarkerLevel(View view, @IdRes int resId) {
         int retValue = LEVEL_UNKNOWN;
 
