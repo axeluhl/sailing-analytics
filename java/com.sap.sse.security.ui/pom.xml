@@ -74,6 +74,7 @@
 							<!-- <userAgents>chrome</userAgents> -->
 							<modules>
 								<module>com.sap.sse.security.ui.UserManagement</module>
+								<module>com.sap.sse.security.ui.UserManagementEntryPoint</module>
 								<module>com.sap.sse.security.ui.Login</module>
 								<module>com.sap.sse.security.ui.OAuthLogin</module>
 								<module>com.sap.sse.security.ui.LoginPanel</module>
