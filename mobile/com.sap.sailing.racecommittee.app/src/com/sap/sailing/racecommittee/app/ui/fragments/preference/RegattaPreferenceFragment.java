@@ -14,8 +14,8 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 
 import android.os.Bundle;
-import android.preference.ListPreference;
-import android.preference.MultiSelectListPreference;
+import android.support.v7.preference.ListPreference;
+import android.support.v14.preference.MultiSelectListPreference;
 import android.support.annotation.StringRes;
 import android.text.TextUtils;
 

@@ -3,8 +3,8 @@ package com.sap.sailing.android.shared.ui.utils;
 import java.util.HashSet;
 import java.util.Set;
 
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceChangeListener;
+import android.support.v7.preference.Preference;
+import android.support.v7.preference.Preference.OnPreferenceChangeListener;
 
 public class MultiplePreferenceChangeListener implements OnPreferenceChangeListener {
     

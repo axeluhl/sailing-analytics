@@ -9,17 +9,19 @@ import java.util.Set;
 import com.sap.sailing.android.shared.ui.utils.MultiplePreferenceChangeListener;
 import com.sap.sailing.android.shared.ui.views.EditSetPreference;
 
-import android.preference.CheckBoxPreference;
-import android.preference.ListPreference;
-import android.preference.MultiSelectListPreference;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.PreferenceFragment;
+import android.os.Bundle;
+import android.support.v7.preference.CheckBoxPreference;
+import android.support.v7.preference.ListPreference;
+import android.support.v14.preference.MultiSelectListPreference;
+import android.support.v7.preference.Preference;
+import android.support.v7.preference.Preference.OnPreferenceChangeListener;
+import android.support.v7.preference.PreferenceFragmentCompat;
+import android.support.v7.preference.PreferenceScreen;
 
 /**
  * Created by I074137 on 18.09.13.
  */
-public class BasePreferenceFragment extends PreferenceFragment {
+public class BasePreferenceFragment extends PreferenceFragmentCompat {
     
     @SuppressWarnings("unchecked")
     protected <T extends Preference> T findPreference(int resourceId) {
@@ -120,4 +122,17 @@ public class BasePreferenceFragment extends PreferenceFragment {
             preference.setOnPreferenceChangeListener(multiListener);
         }
     }
+
+    /**
+     * Called during {@link #onCreate(Bundle)} to supply the preferences for this fragment.
+     * Subclasses are expected to call {@link #setPreferenceScreen(PreferenceScreen)} either
+     * directly or via helper methods such as {@link #addPreferencesFromResource(int)}.
+     *
+     * @param savedInstanceState If the fragment is being re-created from
+     *                           a previous saved state, this is the state.
+     * @param rootKey            If non-null, this preference fragment should be rooted at the
+     *                           {@link PreferenceScreen} with this key.
+     */
+    @Override
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) { }
 }
