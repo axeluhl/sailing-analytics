@@ -50,7 +50,7 @@ public abstract class AbstractSpeedImpl implements Speed {
     public int compareTo(Speed speed) {
         final double metersPerSecond = getMetersPerSecond();
         final double otherMetersPerSecond = speed.getMetersPerSecond();
-        return metersPerSecond > otherMetersPerSecond ? 1 : metersPerSecond == otherMetersPerSecond ? 0 : -1;
+        return Double.compare(metersPerSecond, otherMetersPerSecond);
     }
     
     @Override
