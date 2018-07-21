@@ -8,7 +8,7 @@
 # only the same root directories are associated to that name. It is NOT possible
 # to backup different root directories to the same backup name.
 #
-# Documentation: http://wiki.sapsailing.com/wiki/amazon-ec2-backup-strategy
+# Documentation: https://wiki.sapsailing.com/wiki/info/landscape/amazon-ec2-backup-strategy
 #
 # Maintainer: simon.marcel.pamies@sap.com
 

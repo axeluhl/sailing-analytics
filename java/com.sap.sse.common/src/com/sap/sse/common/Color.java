@@ -306,4 +306,9 @@ public interface Color extends Serializable {
     com.sap.sse.common.Util.Triple<Float, Float, Float> getAsHSV();
 
     String getAsHtml();
+
+    /**
+     * @return an inverted color, computed as {@code rgb(255-R, 255-G, 255-B)}
+     */
+    Color invert();
 }

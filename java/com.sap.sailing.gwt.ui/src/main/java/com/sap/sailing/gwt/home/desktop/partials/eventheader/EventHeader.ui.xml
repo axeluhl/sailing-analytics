@@ -11,19 +11,19 @@
        	  <a ui:field="eventLogoAnchorUi"><div ui:field="eventLogo" class="{local_res.css.eventheader_intro_logo_image}" /></a>
         </div>
         <!-- IF header.dropdown === 'regattas' -->
-        <div ui:field="dropdownTitle" class="{local_res.css.dropdown} {local_res.css.dropdownregattas} {local_res.css.jsdropdown}">
-          <div class="{local_res.css.dropdown_head} {local_res.css.dropdownregattas_head} {local_res.css.jsdropdown_head}">
-            <a ui:field="dropdownTrigger" class="{local_res.css.dropdown_head_title} {local_res.css.dropdownregattas_head_title}">
+        <div ui:field="dropdownTitle" class="{local_res.css.dropdown} {local_res.css.jsdropdown}">
+          <a ui:field="dropdownTrigger" class="{local_res.css.dropdown_head} {local_res.css.jsdropdown_head}">
+            <span class="{local_res.css.dropdown_head_title}">
               <span ui:field="dropdownEventName"></span>
               <!-- IF event.state === 'live' -->
               <div ui:field="dropdownEventState" data-labeltype="live" class="{res.mainCss.label} {res.mainCss.labellarge}">
                 <!-- <ui:text from='{i18n.live}' /> -->
               </div>
               <!-- IFEND event.state === 'live' -->
-              <div class="{local_res.css.dropdown_head_title_button} {local_res.css.dropdownregattas_head_title_button}"></div>
-            </a>
-          </div>
-          <g:FlowPanel ui:field="dropdownContent" addStyleNames="{local_res.css.dropdown_content} {local_res.css.dropdownregattas_content} {local_res.css.jsdropdown_content}">
+              <div class="{local_res.css.dropdown_head_title_button}"></div>
+            </span>
+          </a>
+          <g:FlowPanel ui:field="dropdownContent" addStyleNames="{local_res.css.dropdown_content} {local_res.css.jsdropdown_content}">
             <!-- EACH regattaItem in event.regattas -->
             <!-- TODO <s:eventHeader.RegattasDropdownItem ui:field='regattaItem'></s> -->
               <!-- EACHEND -->
@@ -42,7 +42,7 @@
           <div ui:field="eventDate" class="{local_res.css.eventheader_intro_details_item}">
           </div>
           <div ui:field="eventVenueContainer" class="{local_res.css.eventheader_intro_details_item}">
-            <img src="images/home/location-icon.png" class="{local_res.css.locationicon}"></img>
+            <img src="{local_res.location.getSafeUri}" class="{local_res.css.locationicon}"></img>
             <span ui:field="eventVenue"></span>
           </div>
           <a ui:field="eventLink" class="{local_res.css.eventheader_intro_details_item}"></a>

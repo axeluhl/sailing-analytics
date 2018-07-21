@@ -25,4 +25,8 @@ public interface TracTracControlPoint extends NamedWithID {
     String getShortName();
     
     boolean getHasTwoPoints();
+    
+    UUID getFirstMarkId();
+    
+    UUID getSecondMarkId();
 }

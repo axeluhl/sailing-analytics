@@ -1,25 +1,26 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" 
-		xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
-	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.regattaheader.RegattaHeaderResources" />
-	<g:HTMLPanel debugId="RegattaHeaderPanel">
-		<div>
-			<div class="{res.mediaCss.grid}">
-				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-					<a class="{local_res.css.regattaheader} {local_res.css.regattaheaderpadding}" ui:field="headerBodyUi"></a>
+        xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.regattaheader.RegattaHeaderResources" />
+    <g:HTMLPanel debugId="RegattaHeaderPanel">
+        <div>
+            <div class="{res.mediaCss.grid}">
+                <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+                    <a class="{local_res.css.regattaheader_logo}" ui:field="logoUi"></a>
+                    <a class="{local_res.css.regattaheader} {local_res.css.regattaheaderpadding}" ui:field="headerBodyUi"></a>
                     <a class="{local_res.css.regattaheader_indicators}" ui:field="dataIndicatorsUi">
-                        <div>
-	                        <div style="background-image:url('images/home/raw_gps_fixes.png');" ui:field="gpsDataIndicatorUi"></div>
-	                        <div style="background-image:url('images/home/icon-wind.png');" ui:field="windDataIndicatorUi"></div>
-	                        <div style="background-image:url('images/home/icon-video.png');" ui:field="videoDataIndicatorUi"></div>
-	                        <div style="background-image:url('images/home/icon-audio.png');" ui:field="audioDataIndicatorUi"></div>
+                        <div style="pointer-events: none;">
+                            <div class="{local_res.css.iconHeaderGPS}" ui:field="gpsDataIndicatorUi"></div>
+                            <div class="{local_res.css.iconHeaderWind}" ui:field="windDataIndicatorUi"></div>
+                            <div class="{local_res.css.iconHeaderVideo}" ui:field="videoDataIndicatorUi"></div>
+                            <div class="{local_res.css.iconHeaderAudio}" ui:field="audioDataIndicatorUi"></div>
                         </div>
                     </a>
-					<a class="{local_res.css.regattaheader_arrow}" style="display:none;" ui:field="headerArrowUi"></a>
-				</div>
-			</div>
-		</div>
-	</g:HTMLPanel>
+                    <a class="{local_res.css.regattaheader_arrow}" style="display:none;" ui:field="headerArrowUi"></a>
+                </div>
+            </div>
+        </div>
+    </g:HTMLPanel>
 </ui:UiBinder>

@@ -11,7 +11,8 @@ Require-Bundle: com.sap.sse.replication,
  com.sap.sse,
  com.sap.sse.common,
  org.hamcrest;bundle-version="1.1.0",
- org.junit4;bundle-version="4.8.2",
+ org.junit;bundle-version="4.8.2",
  org.mockito.mockito-core;bundle-version="1.10.14",
  com.sun.mail.javax.mail;bundle-version="1.4.5"
 Export-Package: com.sap.sse.mail.replication.testsupport
+Automatic-Module-Name: com.sap.sse.mail.replication.testsupport

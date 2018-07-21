@@ -24,18 +24,18 @@ import com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.rankingtable.
 import com.sap.sailing.dashboards.gwt.shared.StartlineAdvantageType;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
-import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.racemap.DefaultQuickRanksDTOProvider;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -72,8 +72,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
 
     private SailingServiceAsync sailingServiceAsync;
     private StringMessages stringMessages;
-    private final CompetitorSelectionModel competitorSelectionModel;
-    private final CompetitorColorProvider colorProvider; 
+    private final RaceCompetitorSelectionModel competitorSelectionModel;
     
     private final double WIND_LINE_ADVANTAGE_DIV_WIDTH_IN_PT = 185;
     private final double GEOMETRIC_LINE_ADVANTAGE_DIV_WIDTH_IN_PT = 210;
@@ -85,10 +84,8 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
         stringMessages = StringMessages.INSTANCE;
         this.sailingServiceAsync = sailingServiceAsync;
         this.raceMapResources = raceMapResources;
-        colorProvider = new CompetitorColorProviderImpl();
-        competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */true, colorProvider);
-        competitorSelectionModel.setCompetitors(startAnalysisDTO.getCompetitorDTOsFromStartAnaylsisCompetitorDTOs(),
-                raceMap);
+        competitorSelectionModel = new RaceCompetitorSelectionModel(/* hasMultiSelection */true);
+        competitorSelectionModel.setCompetitors(startAnalysisDTO.getCompetitorDTOsFromStartAnaylsisCompetitorDTOs(), raceMap);
         initWidget(uiBinder.createAndBindUi(this));
         startanalysis_card.getElement().getStyle().setLeft(leftCSSProperty, Unit.PCT);
         this.startAnalysisDTO = startAnalysisDTO;
@@ -161,18 +158,21 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
         final RaceMapSettings raceMapSettings = new RaceMapSettings(raceMapZoomSettings, getHelpLineSettings(),
                 defaultRaceMapSettings.getTransparentHoverlines(), defaultRaceMapSettings.getHoverlineStrokeWeight(), 
                 startAnalysisDTO.tailLenghtInMilliseconds, defaultRaceMapSettings.isWindUp(),
-                defaultRaceMapSettings.getBuoyZoneRadiusInMeters(), defaultRaceMapSettings.isShowOnlySelectedCompetitors(),
+                defaultRaceMapSettings.getBuoyZoneRadius(), defaultRaceMapSettings.isShowOnlySelectedCompetitors(),
                 defaultRaceMapSettings.isShowSelectedCompetitorsInfo(), defaultRaceMapSettings.isShowWindStreamletColors(),
                 defaultRaceMapSettings.isShowWindStreamletOverlay(), defaultRaceMapSettings.isShowSimulationOverlay(),
                 defaultRaceMapSettings.isShowMapControls(), defaultRaceMapSettings.getManeuverTypesToShow(),
-                defaultRaceMapSettings.isShowDouglasPeuckerPoints());
+                defaultRaceMapSettings.isShowDouglasPeuckerPoints(), defaultRaceMapSettings.isShowEstimatedDuration(),
+                defaultRaceMapSettings.getStartCountDownFontSizeScaling(), defaultRaceMapSettings.isShowManeuverLossVisualization());
 
         
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, null, Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
-        raceMap = new RaceMap(new RaceMapLifecycle(StringMessages.INSTANCE), raceMapSettings, sailingServiceAsync, asyncActionsExecutor, null, timer, competitorSelectionModel, 
-                StringMessages.INSTANCE, startAnalysisDTO.regattaAndRaceIdentifier,
-                raceMapResources, /* showHeaderPanel */ true);
+        raceMap = new RaceMap(null, null, new RaceMapLifecycle(StringMessages.INSTANCE), raceMapSettings,
+                sailingServiceAsync,
+                asyncActionsExecutor, null, timer, competitorSelectionModel, 
+                new RaceCompetitorSet(competitorSelectionModel), StringMessages.INSTANCE,
+                startAnalysisDTO.regattaAndRaceIdentifier, raceMapResources, /* showHeaderPanel */ true, new DefaultQuickRanksDTOProvider());
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.setSize("100%", "100%");
         card_map_container.getElement().getStyle().setHeight(getHeightForRaceMapInPixels(), Unit.PX);

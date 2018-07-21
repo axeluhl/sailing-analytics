@@ -25,9 +25,10 @@ import com.sap.sse.common.filter.AbstractListFilter;
  */
 public abstract class LabeledAbstractFilterablePanel<T> extends AbstractFilterablePanel<T> {
     
+    /**
+     */
     public LabeledAbstractFilterablePanel(Label label, Iterable<T> all, final ListDataProvider<T> filtered) {
         super(all, filtered);
         insert(label, 0);
     }
-    
 }

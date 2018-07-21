@@ -127,12 +127,13 @@ public class SystemInformationActivityHelper {
     private void showLicenseDialog() {
         Notices notices = new Notices();
         LicenseHelper licenseHelper = new LicenseHelper();
-        notices.addNotice(licenseHelper.getAndroidSupportNotice());
-        notices.addNotice(licenseHelper.getAdvancedRecyclerViewNotice());
+        notices.addNotice(licenseHelper.getAndroidSupportNotice(activity));
+        notices.addNotice(licenseHelper.getAdvancedRecyclerViewNotice(activity));
         notices.addNotice(licenseHelper.getJsonSimpleNotice());
-        notices.addNotice(licenseHelper.getDialogNotice());
+        notices.addNotice(licenseHelper.getDialogNotice(activity));
         LicensesDialog.Builder builder = new LicensesDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.license_information));
+        builder.setThemeResourceId(R.style.AppTheme_AlertDialog);
         builder.setNotices(notices);
         builder.build().show();
     }

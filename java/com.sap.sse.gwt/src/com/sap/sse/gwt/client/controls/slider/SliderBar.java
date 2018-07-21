@@ -655,17 +655,21 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         if (!isMinMaxInitialized() || curValue == null) {
             return;
         }
-        this.curValue = Math.max(minValue, Math.min(maxValue, curValue));
-        double remainder = (this.curValue - minValue) % stepSize;
-        this.curValue -= remainder;
+
+        Double newValue = Math.max(minValue, Math.min(maxValue, curValue));
+        double remainder = (newValue - minValue) % stepSize;
+        newValue -= remainder;
         // Go to next step if more than halfway there
-        if ((remainder > (stepSize / 2)) && ((this.curValue + stepSize) <= maxValue)) {
-            this.curValue += stepSize;
+        if ((remainder > (stepSize / 2)) && ((newValue + stepSize) <= maxValue)) {
+            newValue += stepSize;
         }
+
+        boolean isValueChanged = !newValue.equals(this.curValue) && this.curValue != null;
+        this.curValue = newValue;
         // Redraw the knob
         drawKnob();
         // Fire the ValueChangeEvent if the value actually changed
-        if (fireEvent && !curValue.equals(this.curValue)) {
+        if (fireEvent && isValueChanged) {
             ValueChangeEvent.fire(this, this.curValue);
         }
     }

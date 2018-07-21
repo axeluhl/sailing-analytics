@@ -1,9 +1,11 @@
 package com.sap.sse.gwt.client.sapheader;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -22,13 +24,16 @@ import com.google.gwt.user.client.ui.Widget;
  * </ul>
  */
 public class SAPHeader extends Composite {
+    
+    private static final String LOGO_URL = "https://www.sap.com/sponsorships";
+    
     private static SAPHeaderUiBinder uiBinder = GWT.create(SAPHeaderUiBinder.class);
 
     interface SAPHeaderUiBinder extends UiBinder<Widget, SAPHeader> {
     }
 
     @UiField
-    DivElement applicationNameUi;
+    AnchorElement applicationNameAnchor;
     @UiField
     DivElement pageTitleUi;
     @UiField
@@ -37,11 +42,16 @@ public class SAPHeader extends Composite {
     DivElement subTitleUi;
     @UiField
     SimplePanel rightSideUi;
+    @UiField
+    AnchorElement logoAnchor;
 
-    public SAPHeader(String applicationName) {
+    public SAPHeader(String applicationName, String applicationBaseUrl) {
         SAPHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        applicationNameUi.setInnerText(applicationName != null ? applicationName : "&nbsp;");
+        applicationNameAnchor.setInnerText(applicationName != null ? applicationName : "&nbsp;");
+        logoAnchor.setHref(LOGO_URL);
+        String sapSailingUrl = applicationBaseUrl + "?locale=" + LocaleInfo.getCurrentLocale().getLocaleName();
+        applicationNameAnchor.setHref(sapSailingUrl);
     }
 
     public void setHeaderTitle(String title) {

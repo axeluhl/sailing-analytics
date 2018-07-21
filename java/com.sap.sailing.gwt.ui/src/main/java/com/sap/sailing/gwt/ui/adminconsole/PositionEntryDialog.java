@@ -1,22 +1,26 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Date;
+
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class PositionEntryDialog extends DataEntryDialog<Pair<Position, TimePoint>> {
+public class PositionEntryDialog extends DataEntryDialogWithDateTimeBox<Pair<Position, TimePoint>> {
     private final DoubleBox lat;
     private final DoubleBox lng;
-    private final BetterDateTimeBox timePointBox;
+    private final DateAndTimeInput timePointBox;
     private final StringMessages stringMessages;
     
     private static final double ERROR_VAL = Double.MIN_VALUE;
@@ -44,7 +48,7 @@ public class PositionEntryDialog extends DataEntryDialog<Pair<Position, TimePoin
         this.stringMessages = stringMessages;
         lat = createDoubleBox(10);
         lng = createDoubleBox(10);
-        timePointBox = new BetterDateTimeBox();
+        timePointBox = createDateTimeBox(new Date(), Accuracy.SECONDS);
     }
 
     @Override

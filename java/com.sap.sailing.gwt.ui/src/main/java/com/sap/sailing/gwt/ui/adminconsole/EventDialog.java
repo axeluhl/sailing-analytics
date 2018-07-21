@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -23,39 +22,41 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.domain.common.windfinder.AvailableWindFinderSpotCollections;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
-import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.listedit.GenericStringListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
+import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
-public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO> {
+public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDTO> {
     protected StringMessages stringMessages;
     protected TextBox nameEntryField;
     protected TextArea descriptionEntryField;
     protected TextBox venueEntryField;
-    protected BetterDateTimeBox startDateBox;
-    protected BetterDateTimeBox endDateBox;
+    protected DateAndTimeInput startDateBox;
+    protected DateAndTimeInput endDateBox;
     protected CheckBox isPublicCheckBox;
     protected UUID id;
-    protected TextBox officialWebsiteURLEntryField;
     protected TextBox baseURLEntryField;
-    protected Map<String, TextBox> sailorsInfoWebsiteURLEntryFields = new HashMap<>();
     protected CourseAreaListInlineEditorComposite courseAreaNameList;
     protected StringConstantsListEditorComposite leaderboardGroupList;
+    protected StringListInlineEditorComposite windFinderSpotCollectionIdsComposite;
     protected Map<String, LeaderboardGroupDTO> availableLeaderboardGroupsByName;
     protected ImagesListComposite imagesListComposite;
     protected VideosListComposite videosListComposite;
+    protected ExternalLinksComposite externalLinksComposite;
     
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -97,7 +98,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
             // remark: startDate == null and endDate == null is valid
             if (startDate != null && endDate != null) {
                 if (startDate.after(endDate)) {
-                    datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate(); 
+                    datesErrorMessage = stringMessages.startDateMustBeforeEndDate(); 
                 }
             } else if ((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
                 datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();
@@ -124,10 +125,10 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
      * @param leaderboardGroupsOfEvent even though not editable in this dialog, this parameter gives an editing subclass a chance to "park" the leaderboard group
      * assignments for re-association with the new {@link EventDTO} created by the {@link #getResult} method.
      */
-    public EventDialog(EventParameterValidator validator, SailingServiceAsync sailingService, StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
+    public EventDialog(EventParameterValidator validator, SailingServiceAsync sailingService,
+            StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
             Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
-        super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator,
-                callback);
+        super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
         this.availableLeaderboardGroupsByName = new HashMap<>();
         for (final LeaderboardGroupDTO lgDTO : availableLeaderboardGroups) {
@@ -137,16 +138,15 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         final ValueChangeHandler<Iterable<String>> valueChangeHandler = new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
-                validate();
+                validateAndUpdate();
             }
         };
         final ValueChangeHandler<Iterable<CourseAreaDTO>> courseAreaValueChangeHandler = new ValueChangeHandler<Iterable<CourseAreaDTO>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<CourseAreaDTO>> event) {
-                validate();
+                validateAndUpdate();
             }
         };
-
         courseAreaNameList = new CourseAreaListInlineEditorComposite(Collections.<CourseAreaDTO> emptyList(),
                 new GenericStringListInlineEditorComposite.ExpandedUi<CourseAreaDTO>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 50));
@@ -159,9 +159,17 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
                 new StringConstantsListEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
                         leaderboardGroupNames, stringMessages.selectALeaderboardGroup()));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
-        
         imagesListComposite = new ImagesListComposite(sailingService, stringMessages);
         videosListComposite = new VideosListComposite(stringMessages);
+        externalLinksComposite = new ExternalLinksComposite(stringMessages);
+        final List<String> suggestedWindFinderSpotCollections = AvailableWindFinderSpotCollections
+                .getAllAvailableWindFinderSpotCollectionsInAlphabeticalOrder() == null ? Collections.emptyList()
+                        : AvailableWindFinderSpotCollections
+                                .getAllAvailableWindFinderSpotCollectionsInAlphabeticalOrder();
+        windFinderSpotCollectionIdsComposite = new StringListInlineEditorComposite(Collections.<String> emptyList(),
+                new GenericStringListEditorComposite.ExpandedUi<String>(stringMessages,
+                        IconResources.INSTANCE.removeIcon(), /* suggestValues */
+                        suggestedWindFinderSpotCollections, stringMessages.enterIdOfWindFinderReviewedSpotCollection(), 35));
     }
 
     @Override
@@ -176,13 +184,9 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         }
         result.setName(nameEntryField.getText());
         result.setDescription(descriptionEntryField.getText());
-        result.setOfficialWebsiteURL(officialWebsiteURLEntryField.getText().trim().isEmpty() ? null : officialWebsiteURLEntryField.getText().trim());
+        result.setOfficialWebsiteURL(externalLinksComposite.getOfficialWebsiteURLValue());
         result.setBaseURL(baseURLEntryField.getText().trim().isEmpty() ? null : baseURLEntryField.getText().trim());
-        for (Map.Entry<String, TextBox> sailorsInfoWebsiteUrlEntry : sailorsInfoWebsiteURLEntryFields.entrySet()) {
-            TextBox sailorsInfoWebsiteURLEntryField = sailorsInfoWebsiteUrlEntry.getValue();
-            String sailorsInfoWebsiteURL = sailorsInfoWebsiteURLEntryField.getText().trim();
-            result.setSailorsInfoWebsiteURL(sailorsInfoWebsiteUrlEntry.getKey(), sailorsInfoWebsiteURL.isEmpty() ? null : sailorsInfoWebsiteURLEntryField.getText().trim());
-        }
+        result.setSailorsInfoWebsiteURLs(externalLinksComposite.getSailorsInfoWebsiteURLs());
         result.startDate = startDateBox.getValue();
         result.endDate = endDateBox.getValue();
         result.isPublic = isPublicCheckBox.getValue();
@@ -195,6 +199,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
             result.addVideo(video);
         }
         result.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
+        result.setWindFinderReviewedSpotsCollection(windFinderSpotCollectionIdsComposite.getValue());
         return result;
     }
 
@@ -206,7 +211,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(10 + GWTLocaleUtil.getLanguageCountWithDefault(), 2);
+        Grid formGrid = new Grid(8, 2);
         int rowIndex = 0;
         formGrid.setWidget(rowIndex,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(rowIndex++, 1, nameEntryField);
@@ -222,24 +227,18 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         formGrid.setWidget(rowIndex++, 1, endDateBox);
         formGrid.setWidget(rowIndex, 0, new Label(stringMessages.isPublic() + ":"));
         formGrid.setWidget(rowIndex++, 1, isPublicCheckBox);
-        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventOfficialWebsiteURL() + ":"));
-        formGrid.setWidget(rowIndex++, 1, officialWebsiteURLEntryField);
         formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventBaseURL() + ":"));
         formGrid.setWidget(rowIndex++, 1, baseURLEntryField);
-        for (Map.Entry<String, TextBox> sailorsInfoWebsiteUrlEntry : sailorsInfoWebsiteURLEntryFields.entrySet()) {
-            String suffix = " ["+ (sailorsInfoWebsiteUrlEntry.getKey() == null ? stringMessages.defaultLocale() + "*" : sailorsInfoWebsiteUrlEntry.getKey()) + "]";
-            formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventSailorsInfoWebsiteURL() + suffix + ":"));
-            formGrid.setWidget(rowIndex, 1, sailorsInfoWebsiteUrlEntry.getValue());
-            rowIndex++;
-        }
-        formGrid.setText(rowIndex, 1, "[*] " + stringMessages.defaultSailorsInfoLinkInfoText());
         TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
         tabPanel.ensureDebugId("EventDialogTabs");
-        tabPanel.setHeight("525px");
+        tabPanel.setHeight("400px");
         panel.add(tabPanel);
         final ScrollPanel eventTab = new ScrollPanel(formGrid);
         eventTab.ensureDebugId("EventTab");
         tabPanel.add(eventTab, stringMessages.event());
+        final ScrollPanel externalLinksCompositeTab = new ScrollPanel(externalLinksComposite);
+        externalLinksCompositeTab.ensureDebugId("ExternalLinksCompositeTab");
+        tabPanel.add(externalLinksCompositeTab, stringMessages.externalLinks());
         final ScrollPanel leaderboardGroupTab = new ScrollPanel(leaderboardGroupList);
         leaderboardGroupTab.ensureDebugId("LeaderboardGroupsTab");
         tabPanel.add(leaderboardGroupTab, stringMessages.leaderboardGroups());
@@ -252,21 +251,14 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         final ScrollPanel videosTab = new ScrollPanel(videosListComposite);
         videosTab.ensureDebugId("VideosTab");
         tabPanel.add(videosTab, stringMessages.videos());
+        final ScrollPanel windFinderTab = new ScrollPanel(windFinderSpotCollectionIdsComposite);
+        windFinderTab.ensureDebugId("WindFinderTab");
+        tabPanel.add(windFinderTab, stringMessages.windFinder());
         return panel;
     }
 
     @Override
     protected FocusWidget getInitialFocusWidget() {
         return nameEntryField;
-    }
-    
-    protected Map<String, TextBox> createTextBoxesForLocalesAndDefault(Map<String, String> initialValues) {
-        Map<String, TextBox> result = new LinkedHashMap<>();
-        for(String localeName : GWTLocaleUtil.getAvailableLocalesAndDefault()) {
-            TextBox sailorsInfoWebsiteURLEntryField = createTextBox(initialValues.get(localeName));
-            sailorsInfoWebsiteURLEntryField.setVisibleLength(50);
-            result.put(localeName, sailorsInfoWebsiteURLEntryField);
-        }
-        return result;
     }
 }

@@ -38,6 +38,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.management.AbstractMemoryMonitorAction;
 import com.sap.sse.datamining.impl.components.management.QueryManagerMemoryMonitor;
+import com.sap.sse.datamining.impl.components.management.ReducedDimensions;
 import com.sap.sse.datamining.impl.components.management.RuntimeMemoryInfoProvider;
 import com.sap.sse.datamining.impl.components.management.StrategyPerQueryTypeManager;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -100,7 +101,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         actions.add(new AbstractMemoryMonitorAction(0.10) {
             @Override
             public void performAction() {
-                memoryMonitor.logWarning("Yellow Alert free memory is below " + getThreshold() + "%!");
+                memoryMonitor.logWarning("Yellow Alert free memory is below " + (100*getThreshold()) + "%!");
                 int numberOfRunningStatisticQueries = dataMiningQueryManager.getNumberOfRunningQueriesOfType(QueryType.STATISTIC);
                 if (numberOfRunningStatisticQueries > 0) {
                     memoryMonitor.logWarning("Aborting random statistic query.");
@@ -113,7 +114,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         actions.add(new AbstractMemoryMonitorAction(0.05) {
             @Override
             public void performAction() {
-                memoryMonitor.logSevere("Red Alert free memory is below " + getThreshold() + "%!");
+                memoryMonitor.logSevere("Red Alert free memory is below " + (100*getThreshold()) + "%!");
                 if (dataMiningQueryManager.getNumberOfRunningQueries() > 0) {
                     memoryMonitor.logSevere("Aborting all queries.");
                     dataMiningQueryManager.abortAllQueries();
@@ -234,7 +235,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getReducedDimensionsMappedByLevelFor(
+    public ReducedDimensions getReducedDimensionsMappedByLevelFor(
             DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         return functionRegistry.getReducedDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
     }

@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.google.common.base.Function;
 import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.common.CSSConstants;
 
@@ -123,6 +126,15 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
         }
         
         return headers;
+    }
+    
+    public boolean containsColumnHeader(String headerToCheck) {
+        for (String header : getColumnHeaders()) {
+            if(header.contains(headerToCheck)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**
@@ -244,6 +256,30 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     }
     
     /**
+     * <p>Selects entries based on the given Predicate.</p>
+     * 
+     * <p>Note: If an entry is not contained in the table it will not be selected.</p>
+     */
+    public void selectEntries(Predicate<T> toSelectPredicate) {
+        for (T entry : getEntries()) {
+            if(toSelectPredicate.test(entry)) {
+                entry.appendToSelection();
+            } else {
+                entry.deselect();
+            }
+        }
+    }
+    
+    /**
+     * <p>Selects entries based on the given Predicate.</p>
+     * 
+     * <p>Note: If an entry is not contained in the table it will not be selected.</p>
+     */
+    public void selectAllEntries() {
+        selectEntries(e -> true);
+    }
+    
+    /**
      * <p>Returns all currently selected entries. If no entry is selected, an empty list is returned.</p>
      * 
      * @return
@@ -308,5 +344,14 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
         String image = images.get(0).getAttribute("src");
         
         return LOADING_ANIMATION_IMAGE.equals(image);
+    }
+    
+    public void waitForTableToShowData() {
+        new WebDriverWait(driver, 30).until(new Function<WebDriver, Boolean>() {
+            @Override
+            public Boolean apply(WebDriver driver) {
+                return !getRows().isEmpty();
+            }
+        });
     }
 }

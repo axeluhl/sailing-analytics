@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
+import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.home.communication.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.AbstractEventOverview;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class RegattaOverviewImpl extends AbstractEventOverview {
@@ -28,15 +29,19 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     private EventSteps eventStepsUi;
     private RegattaLiveRaces liveRacesUi;
 
-    public RegattaOverviewImpl(EventViewBase.Presenter presenter) {
+    private final FlagImageResolver flagImageResolver;
+
+    public RegattaOverviewImpl(EventViewBase.Presenter presenter, FlagImageResolver flagImageResolver) {
         super(presenter, presenter.isMultiRegattaEvent(), presenter.isMultiRegattaEvent());
+        this.flagImageResolver = flagImageResolver;
         FlowPanel container = new FlowPanel();
-        if(presenter.getRegatta() != null) {
+        if (presenter.getRegatta() != null) {
             this.setupProgress(container);
             this.setupLiveRaces(container);
         }
         if (!isMultiRegattaEvent()) {
             this.setupOverviewStage(container);
+            this.setupEventDescription(container);
         }
         this.setupMiniLeaderboard(container);
         initRacesNavigation(container);
@@ -44,12 +49,12 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
             this.setupUpdateBox(container);
             this.setupImpressions(container);
         }
-        this.setupStatisticsBox(container, presenter.isMultiRegattaEvent());
+        this.setupStatisticsBox(container, !presenter.isSingleRegattaEvent());
         setViewContent(container);
     }
     
     private void setupProgress(Panel container) {
-        eventStepsUi = new EventSteps();
+        eventStepsUi = new EventSteps(currentPresenter.getRegatta());
         refreshManager.add(eventStepsUi, new GetRegattaWithProgressAction(getEventId(), getRegattaId()));
         container.add(eventStepsUi);
     }
@@ -61,9 +66,9 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     }
     
     private void setupMiniLeaderboard(Panel container) {
-        MinileaderboardBox miniLeaderboard = new MinileaderboardBox(false);
+        MinileaderboardBox miniLeaderboard = new MinileaderboardBox(false, flagImageResolver);
         miniLeaderboard.setAction(MSG.showAll(), currentPresenter.getRegattaMiniLeaderboardNavigation(getRegattaId()));
-        if(currentPresenter.getRegatta() != null) {
+        if (currentPresenter.getRegatta() != null) {
             refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(getEventId(), getRegattaId(), 3));
         } else {
             // This forces the "There are no results available yet" message to show
@@ -78,7 +83,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     }
     
     @Override
-    protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
+    protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName, Collection<EventReferenceWithStateDTO> eventsOfSeries) {
         QuickfinderPresenter.getForSeriesEventOverview(quickfinder, seriesName, currentPresenter, eventsOfSeries);
     }
 

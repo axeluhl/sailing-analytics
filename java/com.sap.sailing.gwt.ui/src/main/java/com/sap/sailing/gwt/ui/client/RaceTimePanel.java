@@ -18,7 +18,9 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -57,7 +59,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     
     private final UserStatusEventHandler userStatusEventHandler = new UserStatusEventHandler() {
         @Override
-        public void onUserStatusChange(UserDTO user) {
+        public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
             RaceTimePanel.this.hasCanReplayDuringLiveRacesPermission = user != null && user.hasPermission(
                     Permission.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission(), SailingPermissionsForRoleProvider.INSTANCE);
         }
@@ -72,10 +74,13 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     
     private final Duration initialTimeAfterRaceStartInReplayMode;
     
-    public RaceTimePanel(RaceTimePanelLifecycle componentLifecycle, UserService userService, Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
+    public RaceTimePanel(Component<?> parent, ComponentContext<?> context, RaceTimePanelLifecycle componentLifecycle,
+            UserService userService,
+            Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
             RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts,
             RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode) {
-        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible, forcePaddingRightToAlignToCharts);
+        super(parent, context, timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible,
+                forcePaddingRightToAlignToCharts, userService);
         this.componentLifecycle = componentLifecycle;
         this.userService = userService;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
@@ -92,8 +97,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     @Override
     protected void onLoad() {
         super.onLoad();
-        userService.addUserStatusEventHandler(userStatusEventHandler);
-        userStatusEventHandler.onUserStatusChange(userService.getCurrentUser());
+        userService.addUserStatusEventHandler(userStatusEventHandler, true);
     }
     
     @Override
@@ -122,7 +126,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     protected String getTimeToStartLabelText(Date time) {
         String result = null;
         RaceTimesInfoDTO selectedRaceTimes = raceTimesInfoProvider.getRaceTimesInfo(selectedRace);
-        if (selectedRaceTimes.startOfRace != null) {
+        if (selectedRaceTimes != null && selectedRaceTimes.startOfRace != null) {
             if (time.before(selectedRaceTimes.startOfRace) || time.equals(selectedRaceTimes.startOfRace)) {
                 long timeToStartInMs = selectedRaceTimes.startOfRace.getTime() - time.getTime();
                 result = timeToStartInMs < 1000 ? stringMessages.start() : stringMessages.timeToStart(DateAndTimeFormatterUtil.formatElapsedTime(timeToStartInMs));
@@ -146,8 +150,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
 
     @Override
-    public SettingsDialogComponent<RaceTimePanelSettings> getSettingsDialogComponent() {
-        return componentLifecycle.getSettingsDialogComponent(getSettings());
+    public SettingsDialogComponent<RaceTimePanelSettings> getSettingsDialogComponent(RaceTimePanelSettings settings) {
+        return componentLifecycle.getSettingsDialogComponent(settings);
     }
 
     private void updateTimeInfo(RaceTimesInfoDTO raceTimesInfo) {
@@ -207,7 +211,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         timeSlider.setMaxValue(new Double(timeRangeProvider.getToTime().getTime()), false);
         timeSlider.setCurrentValue(new Double(timer.getTime().getTime()), true);
         timeSlider.clearMarkersAndLabelsAndTicks();
-        redrawAllMarkers(lastRaceTimesInfo);
+        if (lastRaceTimesInfo != null) {
+            redrawAllMarkers(lastRaceTimesInfo);
+        }
     }
 
     /**
@@ -235,7 +241,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             // neither do we know about the end time if both, startOfTracking and endOfTracking are null
             // and we have neither a valid newestTrackingEvent nor an endOfRace value; if we do, we would
             // have to be before the later one plus some leeway.
-            final Date endTimeOfLivePeriod;
+            Date endTimeOfLivePeriod;
             if (lastRaceTimesInfo.startOfTracking == null && lastRaceTimesInfo.endOfTracking == null) {
                 Date latestOfNewestTrackingEventAndEndOfRace = lastRaceTimesInfo.newestTrackingEvent;
                 if (latestOfNewestTrackingEventAndEndOfRace == null || (lastRaceTimesInfo.endOfRace != null && lastRaceTimesInfo.endOfRace.after(latestOfNewestTrackingEventAndEndOfRace))) {
@@ -245,6 +251,14 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                     new Date(latestOfNewestTrackingEventAndEndOfRace.getTime() + RaceTimesCalculationUtil.TIME_AFTER_LIVE);
             } else {
                 endTimeOfLivePeriod = lastRaceTimesInfo.endOfTracking == null ? null : lastRaceTimesInfo.endOfTracking;
+                if (lastRaceTimesInfo.endOfRace != null) {
+                    // this is a failsafe, if the tracking was never finsihed, the race was always assumed to be live.
+                    Date latestAllowedTime = new Date(
+                            lastRaceTimesInfo.endOfRace.getTime() + RaceTimesCalculationUtil.MAX_TIME_AFTER_RACE_END);
+                    if (endTimeOfLivePeriod == null || endTimeOfLivePeriod.after(latestAllowedTime)) {
+                        endTimeOfLivePeriod = latestAllowedTime;
+                    }
+                }
             }
             isLiveModeToBeMadePossible = endTimeOfLivePeriod == null /* meaning we don't know an end time */ ||
                                          endTimeOfLivePeriod.getTime() >= liveTimePointInMillis;
@@ -320,6 +334,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             // set time to start of race
             if (newRaceTimesInfo.startOfRace != null) {
                 timer.setTime(newRaceTimesInfo.startOfRace.getTime() +
+                        (initialTimeAfterRaceStartInReplayMode == null ? 0l : initialTimeAfterRaceStartInReplayMode.asMillis()));
+            } else if (newRaceTimesInfo.startOfTracking != null) {
+                timer.setTime(newRaceTimesInfo.startOfTracking.getTime() +
                         (initialTimeAfterRaceStartInReplayMode == null ? 0l : initialTimeAfterRaceStartInReplayMode.asMillis()));
             }
             break;
@@ -399,5 +416,10 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         for (final RaceTimesInfoProviderListener listener : listeners) {
             listener.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         }
+    }
+    
+    @Override
+    public String getId() {
+        return componentLifecycle.getComponentId();
     }
 }

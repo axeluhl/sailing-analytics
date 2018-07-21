@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,9 +34,13 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class QueryFactory {
 
-    public <DataSourceType, DataType, ExtractedType, ResultType> Query<ResultType> createQuery(DataSourceType dataSource, StatisticQueryDefinition<DataSourceType, DataType, ExtractedType, ResultType> queryDefinition,
-                                                                                               ResourceBundleStringMessages stringMessages, ExecutorService executor) {
-        return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale(), queryDefinition.getResultType(), new AdditionalStatisticQueryData()) {
+    public <DataSourceType, DataType, ExtractedType, ResultType> Query<ResultType> createQuery(
+            DataSourceType dataSource,
+            StatisticQueryDefinition<DataSourceType, DataType, ExtractedType, ResultType> queryDefinition,
+            ResourceBundleStringMessages stringMessages, ExecutorService executor) {
+        final Locale locale = queryDefinition.getLocale();
+        return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, locale,
+                queryDefinition.getResultType(), new AdditionalStatisticQueryData()) {
             @Override
             protected Processor<DataSourceType, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, ResultType>, Void> resultReceiver) {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);
@@ -45,13 +48,17 @@ public class QueryFactory {
                 Function<ExtractedType> extractionFunction = queryDefinition.getStatisticToCalculate();
                 Class<DataType> dataTypeToRetrieve = queryDefinition.getDataType();
                 
-                Processor<GroupedDataEntry<ExtractedType>, Map<GroupKey, ResultType>> aggregationProcessor = processorFactory.createAggregationProcessor(/*query*/ this, queryDefinition.getAggregatorDefinition());
-                Processor<GroupedDataEntry<DataType>, GroupedDataEntry<ExtractedType>> extractionProcessor = processorFactory.createExtractionProcessor(aggregationProcessor, extractionFunction, getParameterProviderFor(extractionFunction, stringMessages, queryDefinition.getLocale()));
-                
-                Processor<DataType, GroupedDataEntry<DataType>> groupingProcessor = processorFactory.createGroupingProcessor(dataTypeToRetrieve, extractionProcessor, getParameterProvidersFor(queryDefinition.getDimensionsToGroupBy(), stringMessages, queryDefinition.getLocale()));
-
+                Processor<GroupedDataEntry<ExtractedType>, Map<GroupKey, ResultType>> aggregationProcessor = processorFactory
+                        .createAggregationProcessor(/* query */ this, queryDefinition.getAggregatorDefinition());
+                Processor<GroupedDataEntry<DataType>, GroupedDataEntry<ExtractedType>> extractionProcessor = processorFactory
+                        .createExtractionProcessor(aggregationProcessor, extractionFunction, getParameterProviderFor(
+                                extractionFunction, stringMessages, locale));
+                Processor<DataType, GroupedDataEntry<DataType>> groupingProcessor = processorFactory
+                        .createGroupingProcessor(dataTypeToRetrieve, extractionProcessor, getParameterProvidersFor(
+                                queryDefinition.getDimensionsToGroupBy(), stringMessages, locale));
                 DataRetrieverChainBuilder<DataSourceType> chainBuilder = queryDefinition.getDataRetrieverChainDefinition().startBuilding(executor);
-                Map<DataRetrieverLevel<?, ?>, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(queryDefinition.getFilterSelection());
+                Map<DataRetrieverLevel<?, ?>, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(
+                        queryDefinition.getFilterSelection(), stringMessages, locale);
                 Map<DataRetrieverLevel<?, ?>, SerializableSettings> settingsMappedByRetrieverLevel = queryDefinition.getRetrieverSettings();
                 while (chainBuilder.canStepFurther()) {
                     chainBuilder.stepFurther();
@@ -88,29 +95,17 @@ public class QueryFactory {
     }
     
     private boolean functionNeedsLocalizationParameters(Function<?> function) {
-        Iterator<Class<?>> parameterTypesIterator = function.getParameters().iterator();
-        int parameterCount = 0;
-        while (parameterTypesIterator.hasNext()) {
-            parameterCount++;
-            parameterTypesIterator.next();
-        }
-        if (parameterCount != 2) {
-            return false;
-        }
-        
-        parameterTypesIterator = function.getParameters().iterator();
-        Class<?> firstParameter = parameterTypesIterator.next();
-        Class<?> secondParameter = parameterTypesIterator.next();
-        return firstParameter.isAssignableFrom(Locale.class) && secondParameter.isAssignableFrom(ResourceBundleStringMessages.class);
+        return function.needsLocalizationParameters();
     }
 
     @SuppressWarnings("unchecked")
-    private <DataType> Map<DataRetrieverLevel<?, ?>, FilterCriterion<?>> createFilterCriteria(Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection) {
+    private <DataType> Map<DataRetrieverLevel<?, ?>, FilterCriterion<?>> createFilterCriteria(
+            Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection,
+            ResourceBundleStringMessages stringMessages, Locale locale) {
         Map<DataRetrieverLevel<?, ?>, FilterCriterion<?>> criteriaMappedByRetrieverLevel = new HashMap<>();
         for (Entry<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> levelFilterSelection : filterSelection.entrySet()) {
             for (Entry<Function<?>, Collection<?>> levelFilterSelectionEntry : levelFilterSelection.getValue().entrySet()) {
                 Function<?> function = levelFilterSelectionEntry.getKey();
-                ParameterProvider parameterProvider = ParameterProvider.NULL;
                 Class<DataType> dataType = (Class<DataType>) function.getDeclaringType();
                 
                 if (!criteriaMappedByRetrieverLevel.containsKey(levelFilterSelection.getKey())) {
@@ -118,7 +113,8 @@ public class QueryFactory {
                 }
 
                 Collection<Object> filterValues = new ArrayList<>(levelFilterSelectionEntry.getValue());
-                ((CompoundFilterCriterion<DataType>) criteriaMappedByRetrieverLevel.get(levelFilterSelection.getKey())).addCriteria(new FunctionValuesFilterCriterion<>(dataType, function, parameterProvider, filterValues));
+                ((CompoundFilterCriterion<DataType>) criteriaMappedByRetrieverLevel.get(levelFilterSelection.getKey())).addCriteria(
+                        new FunctionValuesFilterCriterion<>(dataType, function, getParameterProviderFor(function, stringMessages, locale), filterValues));
             }
         }
         return criteriaMappedByRetrieverLevel;
@@ -135,14 +131,11 @@ public class QueryFactory {
             @Override
             protected Processor<DataSourceType, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, HashSet<Object>>, Void> resultReceiver) {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);
-                
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, HashSet<Object>>> valueCollector = processorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
-
-                Map<DataRetrieverLevel<?, ?>, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(filterSelection);
+                Map<DataRetrieverLevel<?, ?>, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(filterSelection, stringMessages, locale);
                 DataRetrieverChainBuilder<DataSourceType> chainBuilder = dataRetrieverChainDefinition.startBuilding(executor);
                 while (!chainBuilder.hasBeenInitialized() || chainBuilder.getCurrentRetrieverLevel().getLevel() < retrieverLevel.getLevel()) {
                     chainBuilder.stepFurther();
-
                     DataRetrieverLevel<?, ?> currentLevel = chainBuilder.getCurrentRetrieverLevel();
                     if (settings.containsKey(currentLevel)) {
                         chainBuilder.setSettings(settings.get(currentLevel));
@@ -155,7 +148,6 @@ public class QueryFactory {
                         chainBuilder.getCurrentRetrievedDataType(), valueCollector, getParameterProvidersFor(dimensions, stringMessages, locale), stringMessages, locale)) {
                     chainBuilder.addResultReceiver(groupingExtractor);
                 }
-                
                 return chainBuilder.build();
             }
         };

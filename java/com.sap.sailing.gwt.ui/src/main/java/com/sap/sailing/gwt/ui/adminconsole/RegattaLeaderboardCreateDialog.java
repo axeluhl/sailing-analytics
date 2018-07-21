@@ -11,10 +11,12 @@ import com.sap.sse.gwt.client.ErrorReporter;
 
 public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
 
-    public RegattaLeaderboardCreateDialog(Collection<StrippedLeaderboardDTO> existingLeaderboards, Collection<RegattaDTO> existingRegattas, StringMessages stringMessages,
-            ErrorReporter errorReporter, DialogCallback<LeaderboardDescriptor> callback) {
-        super(stringMessages.createRegattaLeaderboard(), new LeaderboardDescriptor(), existingRegattas, stringMessages, errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(stringMessages, existingLeaderboards), callback);
-
+    public RegattaLeaderboardCreateDialog(Collection<StrippedLeaderboardDTO> existingLeaderboards,
+            Collection<RegattaDTO> existingRegattas, StringMessages stringMessages, ErrorReporter errorReporter,
+            DialogCallback<LeaderboardDescriptor> callback) {
+        super(stringMessages.createRegattaLeaderboard(), new LeaderboardDescriptor(), existingRegattas, stringMessages,
+                errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(stringMessages, existingLeaderboards),
+                callback);
         nameTextBox = createTextBox(null);
         nameTextBox.ensureDebugId("NameTextBox");
         nameTextBox.setVisibleLength(50);

@@ -1,17 +1,12 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.MappableToDeviceFormatter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -21,36 +16,19 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
 public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, RefreshableSingleSelectionModel<DeviceMappingDTO>> {
-    static interface FilterChangedHandler {
-        void onFilterChanged(List<DeviceMappingDTO> filteredList);
-    }
-    private List<DeviceMappingDTO> allMappings = new ArrayList<>();
-    private final CheckBox showPingMappingsCb;
-    
-    private final List<FilterChangedHandler> filterHandlers = new ArrayList<>();
-
     public DeviceMappingTableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
         super(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
                 /* leaving EntityIdentityComparator null, reducing comparison to equals/hashCode which is well
                  * defined on DeviceMappingDTO
                  */ null);
-        showPingMappingsCb = new CheckBox(stringMessages.showPingMarkMappings());
-        showPingMappingsCb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                filterPingMappings();
-            }
-        });
-        mainPanel.insert(showPingMappingsCb, 0);
         table.setWidth("1000px", true);
         table.addStyleName("wrap-cols");
         ListHandler<DeviceMappingDTO> listHandler = getColumnSortHandler();
         TextColumn<DeviceMappingDTO> itemTypeCol = new TextColumn<DeviceMappingDTO>() {
             @Override
             public String getValue(DeviceMappingDTO mapping) {
-                if (mapping.mappedTo instanceof CompetitorDTO) return stringMessages.competitor();
-                else return stringMessages.mark();
+                return MappableToDeviceFormatter.formatType(mapping.mappedTo, stringMessages);
             }
         };
         itemTypeCol.setSortable(true);
@@ -65,14 +43,15 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Re
         TextColumn<DeviceMappingDTO> itemCol = new TextColumn<DeviceMappingDTO>() {
             @Override
             public String getValue(DeviceMappingDTO mapping) {
-                return mapping.mappedTo.toString();
+                return MappableToDeviceFormatter.formatName(mapping.mappedTo);
             }
         };
         itemCol.setSortable(true);
         listHandler.setComparator(itemCol, new Comparator<DeviceMappingDTO>() {
             @Override
             public int compare(DeviceMappingDTO o1, DeviceMappingDTO o2) {
-                return o1.mappedTo.toString().compareTo(o2.mappedTo.toString());
+                return MappableToDeviceFormatter.formatName(o1.mappedTo)
+                        .compareTo(MappableToDeviceFormatter.formatName(o2.mappedTo));
             }
         });
         table.addColumn(itemCol, stringMessages.mappedTo());
@@ -138,37 +117,26 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Re
         });
         table.addColumn(toCol, stringMessages.to());
 
-        table.addColumnSortHandler(listHandler);
-    }
-    
-    private void notifyFilterHandlers() {
-        for (FilterChangedHandler handler : filterHandlers) {
-            handler.onFilterChanged(getDataProvider().getList());
-        }
-    }
-    
-    private void filterPingMappings() {
-        boolean show = showPingMappingsCb.getValue();
-        getDataProvider().getList().clear();
-        for (DeviceMappingDTO mapping : allMappings) {
-            if (show || ! "PING".equals(mapping.deviceIdentifier.deviceType)) {
-                getDataProvider().getList().add(mapping);
+        TextColumn<DeviceMappingDTO> lastFixCol = new TextColumn<DeviceMappingDTO>() {
+            @Override
+            public String getValue(DeviceMappingDTO mapping) {
+                return mapping.lastFix==null?"":DateAndTimeFormatterUtil.formatDateAndTime(mapping.lastFix.asDate());
             }
-        }
-        notifyFilterHandlers();
-    }
-    
-    public void refresh(List<DeviceMappingDTO> mappings) {
-        allMappings = mappings;
-        filterPingMappings();
+        };
+        lastFixCol.setSortable(true);
+        listHandler.setComparator(lastFixCol, new Comparator<DeviceMappingDTO>() {
+            @Override
+            public int compare(DeviceMappingDTO o1, DeviceMappingDTO o2) {
+                return Util.compareToWithNull(o1.lastFix, o2.lastFix, /* nullIsLess */ false);
+            }
+        });
+        table.addColumn(lastFixCol, stringMessages.lastFix());
+
+        table.addColumnSortHandler(listHandler);
     }
     
     @Override
     public Widget asWidget() {
         return  mainPanel;
-    }
-    
-    public void addFilterChangedHandler(FilterChangedHandler handler) {
-        filterHandlers.add(handler);
     }
 }

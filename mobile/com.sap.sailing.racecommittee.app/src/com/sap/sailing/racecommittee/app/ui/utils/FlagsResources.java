@@ -105,8 +105,43 @@ public class FlagsResources {
             outline = outline.replace("XX", "01");
             break;
 
+        case OSCAR:
+            flag = "flag_oscar_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
         case PAPA:
             flag = "flag_papa_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
+        case SWC_FIVE:
+            flag = "flag_swc_five_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
+        case SWC_FOUR:
+            flag = "flag_swc_four_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
+        case SWC_ONE:
+            flag = "flag_swc_one_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
+        case SWC_THREE:
+            flag = "flag_swc_three_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
+        case SWC_TWO:
+            flag = "flag_swc_two_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
+        case SWC_ZERO:
+            flag = "flag_swc_zero_" + size + "dp";
             outline = outline.replace("XX", "01");
             break;
 

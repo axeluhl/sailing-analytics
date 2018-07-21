@@ -15,18 +15,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.parser.ParseException;
 
-import android.content.Context;
-import android.content.DialogInterface;
-import android.net.Uri;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
-import android.widget.Toast;
-
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
-import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
@@ -36,9 +28,9 @@ import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperSuccessLis
 import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
@@ -47,10 +39,16 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSeri
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.Uri;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
+import android.widget.Toast;
+
 public class CheckinManager {
     private final static String TAG = CheckinManager.class.getName();
-    private BaseCheckinData checkinData;
-    private final CheckinDataActivity activity;
+    private final CheckinDataActivity<CheckinData> activity;
     private final Context mContext;
     private final AppPreferences prefs;
     private String url;
@@ -61,7 +59,7 @@ public class CheckinManager {
         this(url, context, /* context is not necessarily a CheckinDataActivity */ null);
     }
 
-    private CheckinManager(String url, Context context, CheckinDataActivity activity) {
+    private CheckinManager(String url, Context context, CheckinDataActivity<CheckinData> activity) {
         sharedDomainFactory = new SharedDomainFactoryImpl(/* race log resolver not needed in this app */ null);
         this.url = url;
         mContext = context;
@@ -69,7 +67,7 @@ public class CheckinManager {
         this.activity = activity;
     }
 
-    public CheckinManager(String url, CheckinDataActivity activity) {
+    public CheckinManager(String url, CheckinDataActivity<CheckinData> activity) {
         this(url, activity, activity);
     }
     
@@ -117,10 +115,7 @@ public class CheckinManager {
         }
         if (urlData != null) {
             urlData.leaderboardName = leaderboardNameFromQR;
-
-            urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid
-                    .getUniqueId(mContext)));
-
+            urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid.getUniqueId(mContext)));
             urlData.getLeaderboardUrl = urlData.hostWithPort + prefs.getServerLeaderboardPath(urlData.leaderboardName);
         }
         return urlData;
@@ -144,11 +139,11 @@ public class CheckinManager {
                             }
                             return;
                         }
-
+                        final String leaderboardDisplayName = response.optString("displayName", leaderboardName);
                         HttpGetRequest getMarksRequest;
                         try {
                             getMarksRequest = new HttpGetRequest(new URL(urlData.getMarkUrl), mContext);
-                            getMarksFromServer(leaderboardName, getMarksRequest, urlData);
+                            getMarksFromServer(leaderboardName, leaderboardDisplayName, getMarksRequest, urlData);
                         } catch (MalformedURLException e1) {
                             ExLog.e(mContext, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + e1.getMessage());
                         }
@@ -165,7 +160,12 @@ public class CheckinManager {
                 });
     }
 
-    private void getMarksFromServer(final String leaderboardName, HttpGetRequest getMarksRequest, final URLData urlData) {
+    /**
+     * @param leaderboardDisplayName
+     *            the leaderboard's display name if one has been explicitly provided, otherwise the same as
+     *            {@code leaderboardName}
+     */
+    private void getMarksFromServer(final String leaderboardName, final String leaderboardDisplayName, HttpGetRequest getMarksRequest, final URLData urlData) {
         NetworkHelper.getInstance(mContext).executeHttpJsonRequestAsync(getMarksRequest,
                 new NetworkHelperSuccessListener() {
 
@@ -189,15 +189,24 @@ public class CheckinManager {
                                         org.json.simple.JSONObject simplePosition;
                                         simplePosition = JsonHelper.convertToSimple(positionJson);
                                         GPSFix gpsFix = deserializer.deserialize(simplePosition);
-                                        MarkPingInfo ping = new MarkPingInfo(mark.getId(), gpsFix, positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY));
-                                        pings.add(ping);
+                                        //accepts JSON messages without accuracy and with, without will simply be displayed as "set"
+                                        final MarkPingInfo ping;
+                                        if (!positionJson.has(FlatGPSFixJsonSerializer.FIELD_ACCURACY) ||
+                                                positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY) == FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER) {
+                                            ping = new MarkPingInfo(mark.getId(), gpsFix, FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER);
+                                        } else {
+                                            ping = new MarkPingInfo(mark.getId(), gpsFix, positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY));
+                                        }
+                                        if (ping != null) {
+                                            pings.add(ping);
+                                        }
                                     }
                                 }
                                 marks.add(mark);
                             }
                             urlData.marks = marks;
                             urlData.pings = pings;
-                            saveCheckinDataAndNotifyListeners(urlData, leaderboardName);
+                            saveCheckinDataAndNotifyListeners(urlData, leaderboardName, leaderboardDisplayName);
 
                         } catch (JSONException | ParseException | JsonDeserializationException e) {
                             ExLog.e(mContext, TAG, "Error getting data from call on URL: " + urlData.getMarkUrl
@@ -223,10 +232,16 @@ public class CheckinManager {
                 });
     }
 
-    private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName) {
+    /**
+     * @param leaderboardDisplayName
+     *            the leaderboard's display name if one has been explicitly provided, otherwise the same as
+     *            {@code leaderboardName}
+     */
+    private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName, String leaderboardDisplayName) {
         CheckinData data = new CheckinData();
         data.serverWithPort = urlData.hostWithPort;
         data.leaderboardName = leaderboardName;
+        data.leaderboardDisplayName = leaderboardDisplayName;
         data.marks = urlData.marks;
         data.pings = urlData.pings;
         data.deviceUid = urlData.deviceUuid.getStringRepresentation();
@@ -254,25 +269,20 @@ public class CheckinManager {
         }
     }
 
-    public void setCheckinData(BaseCheckinData data) {
-        checkinData = data;
+    private void setCheckinData(CheckinData data) {
         if (activity != null) {
-            activity.onCheckinDataAvailable(getCheckinData());
+            activity.onCheckinDataAvailable(data);
         } else if (dataChangedListner != null){
             dataChangedListner.handleData(data);
         }
     }
 
     public interface DataChangedListner{
-        void handleData(BaseCheckinData data);
+        void handleData(CheckinData data);
     }
 
-    public void setDataChangedListner(DataChangedListner listner){
-        dataChangedListner = listner;
-    }
-
-    public BaseCheckinData getCheckinData() {
-        return checkinData;
+    public void setDataChangedListner(DataChangedListner listener){
+        dataChangedListner = listener;
     }
 
     /**
@@ -324,9 +334,5 @@ public class CheckinManager {
         public DeviceIdentifier deviceUuid;
         public String getMarkUrl;
         public String getLeaderboardUrl;
-
-        public URLData() {
-
-        }
     }
 }

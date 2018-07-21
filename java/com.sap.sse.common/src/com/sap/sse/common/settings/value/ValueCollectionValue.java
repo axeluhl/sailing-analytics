@@ -43,7 +43,6 @@ public abstract class ValueCollectionValue<C extends Collection<Value>> implemen
         this.values.clear();
     }
     
-    @Override
     public <T> void addValue(T value, ValueConverter<T> converter) {
         this.values.add(converter.toValue(value));
     }

@@ -33,7 +33,15 @@ name to make sure you get to the event you're interested in.
 </thead>
 <tbody>
 	<tr>
-		<td><a href="eventsGetDoc.html">/api/v1/events</a></td>
+		<td><a href="eventCreateEvent.html">/api/v1/events/createEvent</a></td>
+		<td>Creates a new event</td>
+	</tr>
+	<tr>
+		<td><a href="eventUpdate].html">/api/v1/events/{event-id}/update</a></td>
+		<td>Updates an existing event</td>
+	</tr>
+	<tr>
+		<td><a href="eventGetDoc.html">/api/v1/events</a></td>
 		<td>Gets all events</td>
 	</tr>
 	<tr>
@@ -114,6 +122,30 @@ name to make sure you get to the event you're interested in.
 		<td>Executes the query for the regatta and gets the result</td>
 	</tr>
 	<tr>
+		<td><a href="regattaAddRaceColumns.html">/api/v1/regattas/{regattaname}/addracecolumns</a></td>
+		<td>Adds one or more race columns to a regatta</td>
+	</tr>
+	<tr>
+		<td><a href="regattaRemoveRaceColumn.html">/api/v1/regattas/{regattaname}/removeracecolumn</a></td>
+		<td>Removes a race column from a regatta</td>
+	</tr>
+	<tr>
+		<td><a href="regattaCompetitorsGet.html">/api/v1/regattas/{regattaname}/competitors</a></td>
+		<td>Obtains the competitors participating in a regatta</td>
+	</tr>
+	<tr>
+		<td><a href="regattasCompetitorsCreateAndAdd.html">/api/v1/regattas/{regattaname}/competitors/createandadd</a></td>
+		<td>Creates a competitor and adds it to the regatta</td>
+	</tr>
+	<tr>
+		<td>/api/v1/regattas/{regattaname}/competitors/{competitorId}/add</td>
+		<td>Registers a competitor with a regatta (POST)</td>
+	</tr>
+	<tr>
+		<td>/api/v1/regattas/{regattaname}/competitors/{competitorId}/remove</td>
+		<td>Removes a competitor from a regatta (POST)</td>
+	</tr>
+	<tr>
 		<td><a href="raceRunQueryGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/datamining/{queryidentifier}</a></td>
 		<td>Executes the query for the race and gets the result</td>
 	</tr>
@@ -146,8 +178,28 @@ name to make sure you get to the event you're interested in.
 		<td>Gets the details of a competitor in the context of a leaderboard</td>
 	</tr>
 	<tr>
-		<td><a href="leaderboardRaceMarksGetDoc.html">/api/v1/leaderboards/{name}/marks?race_column={name}&amp;fleet={name}</a></td>
+		<td><a href="leaderboardRaceAutocourse.html">/api/v1/leaderboards/{name}/autocourse</a></td>
+		<td>Automatically infers a trivial course for a race to have something to start with.</td>
+	</tr>
+	<tr>
+		<td><a href="leaderboardRaceMarksGetDoc.html">/api/v1/leaderboards/{name}/marks</a></td>
 		<td>Gets the marks of a race (from the RaceLog and if possible the TrackedRace)</td>
+	</tr>
+    <tr>
+        <td><a href="leaderboardRaceStartorderGetDoc.html">/api/v1/leaderboards/{name}/startorder</a></td>
+        <td>Gets the order in which competitors have started or are expected to start for a race</td>
+    </tr>
+	<tr>
+		<td><a href="leaderboardRaceSetTrackingTimes.html">/api/v1/leaderboards/{name}/settrackingtimes</a></td>
+		<td>Modifies the race's tracking interval</td>
+	</tr>
+	<tr>
+		<td><a href="leaderboardRaceStartTracking.html">/api/v1/leaderboards/{name}/starttracking</a></td>
+		<td>Starts tracking for a race log / smart phone-tracked race</td>
+	</tr>
+	<tr>
+		<td><a href="leaderboardRaceStopTracking.html">/api/v1/leaderboards/{name}/stoptracking</a></td>
+		<td>Stops tracking for a race</td>
 	</tr>
 	<tr>
 		<td><a href="leaderboardMarkGpsFixesPostDoc.html">/api/v1/leaderboards/{name}/marks/{id}/gps_fixes</a></td>
@@ -169,6 +221,39 @@ name to make sure you get to the event you're interested in.
 		<td><a href="competitorTeamImagePostDoc.html">/api/v1/competitors/{id}/team/image</a></td>
 		<td>Sets the team image</td>
 	</tr>
+    <tr>
+        <td><a href="maneuversGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/maneuvers</a></td>
+        <td>Gets all maneuvers performed by all competitors of a race</td>
+    </tr>
+    <tr>
+        <td><a href="statisticsGetDoc.html">/api/v1/statistics/years?[years={year}[&amp;years={year}]]</a></td>
+        <td>Gets statistics regarding regattas and races grouped by years</td>
+    </tr>
+    <tr>
+        <td><a href="allRacesGetDoc.html">/api/v1/trackedRaces/allRaces</a></td>
+        <td>Gets all TrackedRaces found on the local instance as well as the collected TrackedRaces from all remote instances
+            and provides them in a list sorted by race start time, together with a sequence number for each one. This is a
+            simple way to check how many races have been tracked altogether and which one may be an "anniversary race."
+        </td>
+    </tr>
+    <tr>
+        <td><a href="getRacesGetDoc.html">/api/v1/trackedRaces/getRaces</a></td>
+        <td>Gets all TrackedRaces found on the local instance with a valid start time.</td>
+    </tr>
+        <tr>
+        <td><a href="raceDetailsGetDoc.html">/api/v1/trackedRaces/raceDetails</a></td>
+        <td>Gets more information about a specified RegattaAndRace identifier</td>
+    </tr>
+    </tr>
+        <tr>
+        <td><a href="boats.html">/api/v1/boats</a></td>
+        <td>Obtains information about a single boat</td>
+    </tr>
+    </tr>
+        <tr>
+        <td><a href="putWind.html">/api/v1/wind/putWind</a></td>
+        <td>Allows to add wind values to 1-x races, similar to AdminConsole</td>
+    </tr>
 </tbody>
 </table>
 <div style="height: 1em;"></div>

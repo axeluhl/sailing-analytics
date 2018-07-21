@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SwissTimingReplayAdapterTest
 Bundle-SymbolicName: com.sap.sailing.domain.swisstimingreplayadapter.test
+Automatic-Module-Name: com.sap.sailing.domain.swisstimingreplayadapter.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -9,6 +10,6 @@ Fragment-Host: com.sap.sailing.domain.swisstimingreplayadapter
 Import-Package: org.json.simple,
  org.json.simple.parser
 Require-Bundle: com.sap.sailing.domain.test,
- org.junit4;bundle-version="4.8.2",
+ org.junit;bundle-version="4.8.2",
  com.sap.sse.common,
  org.mockito.mockito-core;bundle-version="1.10.14"

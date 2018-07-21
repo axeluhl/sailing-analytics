@@ -7,8 +7,6 @@ import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
-import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.AbstractRegattaCompetitionFleetRace;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionPresenter;
 
@@ -66,11 +64,6 @@ public class RegattaCompetitionFleetRace extends AbstractRegattaCompetitionFleet
     @Override
     protected String getRaceUntrackedStyleName() {
         return local_res.css().regattacompetition_phase_fleet_raceuntracked();
-    }
-    
-    @Override
-    protected boolean isUntrackedRace(RaceTrackingState trackingState) {
-        return super.isUntrackedRace(trackingState) || !ExperimentalFeatures.ENABLE_RACE_VIEWER_LINK_ON_MOBILE;
     }
     
 }

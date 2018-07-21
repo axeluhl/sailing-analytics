@@ -1,11 +1,12 @@
 package com.sap.sailing.domain.trackfiles;
 
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -15,6 +16,7 @@ public class TrackFileImportDeviceIdentifierImpl implements TrackFileImportDevic
     private final String fileName;
     private final String trackName;
     private final TimePoint timePoint;
+    private final String stringRepresentation;
     
     private static final ConcurrentMap<UUID, TrackFileImportDeviceIdentifier> cache = new ConcurrentHashMap<>();
     
@@ -30,10 +32,18 @@ public class TrackFileImportDeviceIdentifierImpl implements TrackFileImportDevic
     }
     
     public TrackFileImportDeviceIdentifierImpl(UUID id, String fileName, String trackName, TimePoint timePoint) {
+        this(id, computeStringRepresentation(id, trackName, fileName, timePoint), fileName,
+                trackName, timePoint);
+        cache.put(id, this);
+    }
+
+    public TrackFileImportDeviceIdentifierImpl(UUID id, String stringRepresentation, String fileName, String trackName,
+            TimePoint timePoint) {
         this.id = id;
         this.fileName = fileName;
         this.trackName = trackName;
         this.timePoint = timePoint;
+        this.stringRepresentation = stringRepresentation;
         cache.put(id, this);
     }
 
@@ -54,8 +64,7 @@ public class TrackFileImportDeviceIdentifierImpl implements TrackFileImportDevic
 
     @Override
     public String getStringRepresentation() {
-        return String.format("%s: %s\n  @%s(uploaded %s)",
-                id.toString(), trackName, fileName, timePoint);
+        return stringRepresentation;
     }
     
     @Override
@@ -91,5 +100,31 @@ public class TrackFileImportDeviceIdentifierImpl implements TrackFileImportDevic
             throw new TransformationException("Expected TrackFileImportDeviceIdentifier, but got " + deviceIdentifier.getClass());
         }
         return (TrackFileImportDeviceIdentifier) deviceIdentifier;
+    }
+
+    /**
+     * Computes unique string representation for this device identifier. This string representaion should be human
+     * readable.
+     * 
+     * old computed representation algorithm: String.format("%s: %s\n  @%s(uploaded %s)", id.toString(), trackName,
+     * fileName, timePoint)
+     * 
+     * @param id
+     * @param fileName
+     * @param trackName
+     * @param timePoint
+     * @return
+     */
+    
+    private static final String computeStringRepresentation(UUID id, String fileName, String trackName,
+            TimePoint timePoint) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(id.toString()).append(": ");
+        sb.append(trackName);
+        sb.append("\n  ");
+        sb.append("@").append(fileName);
+        sb.append("(uploaded ").append(DateTimeFormatter.ISO_INSTANT.format(timePoint.asDate().toInstant()))
+                .append(")");
+        return sb.toString();
     }
 }

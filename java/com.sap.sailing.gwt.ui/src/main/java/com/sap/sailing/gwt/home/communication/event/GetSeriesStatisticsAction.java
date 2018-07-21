@@ -43,7 +43,7 @@ public class GetSeriesStatisticsAction implements SailingAction<ResultWithTTL<Ev
     @Override
     @GwtIncompatible
     public ResultWithTTL<EventStatisticsDTO> execute(SailingDispatchContext context) throws DispatchException {
-        StatisticsCalculator statisticsCalculator = new StatisticsCalculator();
+        StatisticsCalculator statisticsCalculator = new StatisticsCalculator(context.getTrackedRaceStatisticsCache());
         EventActionUtil.forLeaderboardsOfEvent(context, seriesId, statisticsCalculator);
         return statisticsCalculator.getResult();
     }

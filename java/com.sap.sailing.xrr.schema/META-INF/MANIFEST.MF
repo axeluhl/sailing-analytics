@@ -6,8 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.sap.sailing.xrr.schema
-Import-Package: com.google.gwt.json.client,
- com.sap.sailing.server,
+Import-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl,
  com.sap.sailing.server.operationaltransformation,
  org.json.simple,
@@ -16,3 +15,4 @@ Import-Package: com.google.gwt.json.client,
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  com.sap.sse.common
+Automatic-Module-Name: com.sap.sailing.xrr.schema

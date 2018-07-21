@@ -23,6 +23,7 @@ start_tmux() {
 }
 
 start_servers() {
+	su - sailing -c "cd $GIT_REPOSITORY && git fetch && git merge origin/master" 2>>/var/log/sailing.err >>/var/log/sailing.out
 	NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
 	MEMORY_PER_INSTANCE_IN_MB=`cat /proc/meminfo  | grep MemTotal | awk '{printf("%i\n", ($2 / 1024 * 0.75 - 1500) / '$NUMBER_OF_INSTANCES' );}'`
 	echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance."
@@ -40,7 +41,6 @@ start_servers() {
                         echo "Use Plain-SSL ${INSTANCE_INTERNAL_IP4} 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
 			echo "Appending macro invocation to $APACHE_CONFIG_DIR/001-events.conf to map ${server_name}.sapsailing.com to event with ID $EVENT_ID with server running on local port $SERVER_PORT..." >>/var/log/sailing.out
             echo "## EVENT ${server_name}" >>$APACHE_CONFIG_DIR/001-events.conf
-			echo "Use Event ${server_name}.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
 			echo "Use Event-SSL ${server_name}.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
             # check if an secondary event shall be pasted to 001-events.conf
             if [[ ${HTTP_SEC_EVENT} && ${HTTP_SEC_EVENT_ID} ]]; then

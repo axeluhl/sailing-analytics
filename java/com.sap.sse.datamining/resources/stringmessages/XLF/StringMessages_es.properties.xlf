@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+	<file datatype="javapropertyresourcebundle" date="2017-03-03T16:43:54Z" original="/usr/sap/ljs/app/Converter_8942097082529348960/java/com.sap.sse.datamining/resources/stringmessages/StringMessages.properties" source-language="en" target-language="es">
+		<header>
+			<skl>
+				<internal-file crc="f7dde89d81cbbd5ecbf2e3b6c9500184" form="base64">H4sIAAAAAAAAAD2MzQrCMAzH73mKHvWmD5DD0ItILw4foMxYgm0KazuEsXc3rJuH5Pf/COkmGp0n7BrB0oudYAP0NaIOWPflqHojWJbmG+GSqhRcd9NXzoVl2DKzW31faMwY4S6pZPyInodAg7Yed5kEHpRrKD174TfTiPNpMYf5vBzhn93kKVzWhsVoBz9+8w8UzAAAAA==</internal-file>
+			</skl>
+			<phase-group>
+				<phase company-name="SAP AG" date="2017-01-26T16:57:14Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+			</phase-group>
+			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
+		</header>
+		<body>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Average" resname="Average">
+				<source>Average</source>
+				<target state="signed-off">Promedio</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Median" resname="Median">
+				<source>Median</source>
+				<target state="signed-off">Mediana</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Sum" resname="Sum">
+				<source>Sum</source>
+				<target state="signed-off">Totalizar</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Maximum" resname="Maximum">
+				<source>Maximum</source>
+				<target state="signed-off">Máximo</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Minimum" resname="Minimum">
+				<source>Minimum</source>
+				<target state="signed-off">Mínimo</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Count" resname="Count">
+				<source>Count</source>
+				<target state="signed-off">Recuento</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="CountDistinct" resname="CountDistinct">
+				<source>Count Distinct</source>
+				<target state="signed-off">Recuento de valores unívocos</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Meters" resname="Meters">
+				<source>m</source>
+				<target state="signed-off">m</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Knots" resname="Knots">
+				<source>kn</source>
+				<target state="signed-off">nudos</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Collecting" resname="Collecting">
+				<source>Collection</source>
+				<target state="signed-off">Colección</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="ResultSignifier" resname="ResultSignifier">
+				<source><ph id="1">{0}</ph> (<ph id="2">{1}</ph>)</source>
+				<target state="signed-off"><ph id="1">{0}</ph> (<ph id="2">{1}</ph>)</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SignifierInUnit" resname="SignifierInUnit">
+				<source><ph id="1">{0}</ph> in <ph id="2">{1}</ph></source>
+				<target state="signed-off"><ph id="1">{0}</ph> en <ph id="2">{1}</ph></target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

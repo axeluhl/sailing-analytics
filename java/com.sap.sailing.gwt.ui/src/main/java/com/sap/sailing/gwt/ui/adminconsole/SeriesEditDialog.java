@@ -223,7 +223,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         raceNamesEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
-                validate();
+                validateAndUpdate();
             }
         });
         
@@ -416,7 +416,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                         for (String raceToAdd : raceNamesToAdd) {
                             addValue(raceToAdd);
                         }
-                        validate();
+                        validateAndUpdate();
                     } else {
                         Window.alert(getStringMessages().pleaseSelectASeriesFirst());
                     }

@@ -5,8 +5,8 @@ import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.PlaceHolderDeviceIdentifier;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;

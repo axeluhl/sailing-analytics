@@ -271,7 +271,7 @@ public class TestServerQueryManagement {
             }
         });
         thread.start();
-        ConcurrencyTestsUtil.sleepFor(10);
+        ConcurrencyTestsUtil.sleepFor(50);
         assertThat(normalQuery.getState(), is(QueryState.RUNNING));
         normalQuery.enableProcess();
         ConcurrencyTestsUtil.sleepFor(110);

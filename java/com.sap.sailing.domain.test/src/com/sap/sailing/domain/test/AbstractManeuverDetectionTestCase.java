@@ -15,6 +15,9 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBasedTest {
+    /**
+     * A date parser for UTC+2 in format MM/dd/yyyy-HH:mm:ss.
+     */
     protected SimpleDateFormat dateFormat;
     protected static final int TACK_TOLERANCE = 7000;
     protected static final int JIBE_TOLERANCE = 7000;
@@ -41,7 +44,7 @@ public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBa
      * @param toleranceInMillis
      *            The tolerance of time, the maneuver should have happened in milliseconds.
      */
-    protected void assertManeuver(List<Maneuver> maneuverList, ManeuverType maneuverType,
+    protected void assertManeuver(Iterable<Maneuver> maneuverList, ManeuverType maneuverType,
             TimePoint maneuverTimePoint, int toleranceInMillis) {
         for (Maneuver maneuver : maneuverList) {
             assertNotNull(maneuver.getTimePoint());

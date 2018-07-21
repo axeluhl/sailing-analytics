@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.imprint.ImprintPlace;
+import com.sap.sailing.gwt.home.shared.places.morelogininformation.MoreLoginInformationPlace;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
@@ -38,6 +39,7 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPl
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileSettingsPlace;
 
 @WithTokenizers({ AboutUsPlace.Tokenizer.class, ContactPlace.Tokenizer.class, EventPlace.Tokenizer.class,
         EventsPlace.Tokenizer.class, SolutionsPlace.Tokenizer.class, WhatsNewPlace.Tokenizer.class,
@@ -65,16 +67,18 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfi
         LatestNewsPlace.Tokenizer.class,
         MiniLeaderboardPlace.Tokenizer.class,
         SeriesMiniOverallLeaderboardPlace.Tokenizer.class,//
-        ErrorPlace.Tokenizer.class, //
         ImprintPlace.Tokenizer.class,
         SeriesMiniOverallLeaderboardPlace.Tokenizer.class,
         // User management places:
         UserProfileDefaultPlace.Tokenizer.class,
         UserProfileDetailsPlace.Tokenizer.class,
         UserProfilePreferencesPlace.Tokenizer.class,
+        UserProfileSettingsPlace.Tokenizer.class,
         AuthenticationPlace.Tokenizer.class,
         ConfirmationPlace.Tokenizer.class,
         PasswordResetPlace.Tokenizer.class,
+        MoreLoginInformationPlace.Tokenizer.class,
+        // Other places
         ErrorPlace.Tokenizer.class
 })
 public interface ApplicationHistoryMapper extends PlaceHistoryMapper {

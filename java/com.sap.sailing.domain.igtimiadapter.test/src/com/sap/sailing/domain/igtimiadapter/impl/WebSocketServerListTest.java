@@ -23,7 +23,7 @@ public class WebSocketServerListTest {
     @Test
     public void testWebSocketServerList() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         final ClientImpl testAppClient = new ClientImpl("7fcdd217e0aa16090edb4ad55b09ec43b2021090e209541fc9b7003c2a2b70c6",
-                "aa569cf4909bdc7b0e04b11873f3c4ea20687421e010fcc25b771cca9e6f3f9a", "http://127.0.0.1:8888/igtimi/oauth/v1/authorizationcallback");
+                "aa569cf4909bdc7b0e04b11873f3c4ea20687421e010fcc25b771cca9e6f3f9a", "http", "127.0.0.1", "8888", "/igtimi/oauth/v1/authorizationcallback");
         MongoDBConfiguration mongoTestConfig = MongoDBConfiguration.getDefaultTestConfiguration();
         MongoDBService mongoTestService = mongoTestConfig.getService();
         final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient, PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),

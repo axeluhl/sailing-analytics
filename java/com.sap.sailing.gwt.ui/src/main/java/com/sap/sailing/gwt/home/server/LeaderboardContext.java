@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
@@ -33,6 +34,8 @@ import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil.RaceCallback;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.util.RegattaUtil;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -224,6 +227,16 @@ public class LeaderboardContext {
         
         return regattaDTO;
     }
+    
+    private int calculateRaceCount(Leaderboard sl) {
+        int result = 0;
+        for (RaceColumn column : sl.getRaceColumns()) {
+            if (!column.isCarryForward()) {
+                result += Util.size(column.getFleets());
+            }
+        }
+        return result;
+    }
 
     public void fillRegattaFields(RegattaMetadataDTO regattaDTO) {
         regattaDTO.setId(getLeaderboardName());
@@ -234,7 +247,7 @@ public class LeaderboardContext {
             }
         }
         regattaDTO.setCompetitorsCount(HomeServiceUtil.calculateCompetitorsCount(leaderboard));
-        regattaDTO.setRaceCount(HomeServiceUtil.calculateRaceCount(leaderboard));
+        regattaDTO.setRaceCount(calculateRaceCount(leaderboard));
         regattaDTO.setBoatClass(HomeServiceUtil.getBoatClassName(leaderboard));
         if (leaderboard instanceof RegattaLeaderboard) {
             regattaDTO.setStartDate(getStartDateWithEventFallback());
@@ -248,8 +261,15 @@ public class LeaderboardContext {
         RegattaRaceDataInfoCalculator regattaRaceDataInfoCalculator = new RegattaRaceDataInfoCalculator();
         forRaces(regattaRaceDataInfoCalculator);
         regattaDTO.setRaceDataInfo(regattaRaceDataInfoCalculator.getRaceDataInfo());
+        regattaDTO.setBuoyZoneRadius(getRegattaBuoyZoneRadius());
     }
-    
+
+    private Distance getRegattaBuoyZoneRadius() {
+        Regatta regatta = service.getRegattaByName(getLeaderboardName());
+        BoatClass boatClass = HomeServiceUtil.getBoatClass(leaderboard);
+        return RegattaUtil.getCalculatedRegattaBuoyZoneRadius(regatta, boatClass);
+    }
+
     private static boolean hasMultipleLeaderboardGroups(EventBase event) {
         return Util.size(event.getLeaderboardGroups()) > 1;
     }

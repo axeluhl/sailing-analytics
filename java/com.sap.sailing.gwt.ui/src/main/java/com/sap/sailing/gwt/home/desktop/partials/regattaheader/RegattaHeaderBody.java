@@ -4,12 +4,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.UIObject;
-import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
@@ -25,7 +23,6 @@ public class RegattaHeaderBody extends UIObject {
     interface RegattaHeaderBodyUiBinder extends UiBinder<Element, RegattaHeaderBody> {
     }
     
-    @UiField protected DivElement logoUi;
     @UiField protected SpanElement nameUi;
     @UiField protected DivElement labelUi;
     @UiField protected DivElement detailsItemContainerUi;
@@ -33,8 +30,6 @@ public class RegattaHeaderBody extends UIObject {
     public RegattaHeaderBody(RegattaMetadataDTO regattaMetadata, boolean showStateMarker) {
         RegattaHeaderResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
-        ImageResource logo = BoatClassImageResolver.getBoatClassIconResource(regattaMetadata.getBoatClass());
-        logoUi.getStyle().setBackgroundImage("url('" + logo.getSafeUri().asString() + "')");
         nameUi.setInnerText(regattaMetadata.getDisplayName());
         RegattaState state = regattaMetadata.getState();
         LabelTypeUtil.renderLabelTypeOrHide(labelUi, showStateMarker ? state.getStateMarker() : LabelType.NONE);

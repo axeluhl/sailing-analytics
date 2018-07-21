@@ -13,31 +13,6 @@ import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Environment;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.internal.view.ContextThemeWrapper;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewTreeObserver;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
@@ -65,7 +40,31 @@ import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 
-public class RegattaActivity extends AbstractRegattaActivity
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.internal.view.ContextThemeWrapper;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
         implements RegattaFragment.FragmentWatcher, UploadResponseHandler {
 
     private final static String TAG = RegattaActivity.class.getName();
@@ -114,7 +113,7 @@ public class RegattaActivity extends AbstractRegattaActivity
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
             int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
             toolbar.setPadding(sidePadding, 0, 0, 0);
-            getSupportActionBar().setTitle(leaderboard.name);
+            getSupportActionBar().setTitle(leaderboard.displayName);
             getSupportActionBar().setSubtitle(event.name);
             ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
             getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
@@ -274,7 +273,7 @@ public class RegattaActivity extends AbstractRegattaActivity
         sb.append(":");
         //get given port by check-in url or standard http(s) protocol port by defaultPort
         sb.append((url.getPort() == -1) ? url.getDefaultPort() : url.getPort());
-        sb.append(prefs.getServerCompetiorTeamPath(competitorId));
+        sb.append(prefs.getServerCompetitorTeamPath(competitorId));
 
         return new URL(sb.toString());
     }
@@ -419,15 +418,13 @@ public class RegattaActivity extends AbstractRegattaActivity
     }
 
     @Override
-    public void onCheckinDataAvailable(BaseCheckinData checkinData) {
+    public void onCheckinDataAvailable(CheckinData checkinData) {
         if (checkinData != null) {
-            CheckinData data = (CheckinData) checkinData;
             try {
-                if (data instanceof CompetitorCheckinData) {
-                    CompetitorCheckinData competitorCheckinData = (CompetitorCheckinData) data;
+                if (checkinData instanceof CompetitorCheckinData) {
+                    CompetitorCheckinData competitorCheckinData = (CompetitorCheckinData) checkinData;
                     DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
-                    DatabaseHelper.getInstance().storeCompetitorCheckinRow(this, competitorCheckinData.getEvent(), competitorCheckinData.getCompetitor(),
-                        competitorCheckinData.getLeaderboard(), competitorCheckinData.getCheckinUrl());
+                    DatabaseHelper.getInstance().storeCompetitorCheckinRow(this, competitorCheckinData);
                     competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
                     event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
                     leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);

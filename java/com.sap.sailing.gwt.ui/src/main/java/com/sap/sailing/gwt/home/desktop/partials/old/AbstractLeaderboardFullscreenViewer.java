@@ -8,21 +8,23 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sse.common.Color;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicatorResources;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
-public abstract class AbstractLeaderboardFullscreenViewer<T extends Widget> extends FullscreenContainer<T> implements
-        LeaderboardDelegate<T> {
+public abstract class AbstractLeaderboardFullscreenViewer extends FullscreenContainer<Widget> implements
+        LeaderboardDelegate {
 
-    private final Image autoRefreshControl = new Image("images/home/reload.svg");
-    private final Image settingsControl = new Image("images/home/settings.svg");
+    protected final Image autoRefreshControl = new Image(SharedHomeResources.INSTANCE.reload().getSafeUri());
+    protected final Image settingsControl = new Image(SharedHomeResources.INSTANCE.settings().getSafeUri());
 
     private final static BusyIndicatorResources RESOURCES = GWT.create(BusyIndicatorResources.class);
 
     private final Label lastScoringUpdateTime = new Label();
     private final Label lastScoringUpdateText = new Label();
+    protected final Widget lastScoringUpdatePanel;
     protected final Label lastScoringComment = new Label();
     protected final Label scoringScheme = new Label();
     protected final BusyIndicator busyIndicator = new SimpleBusyIndicator(false, 0.9f, RESOURCES.busyIndicatorCircleInverted());
@@ -31,7 +33,7 @@ public abstract class AbstractLeaderboardFullscreenViewer<T extends Widget> exte
         showLogo();
         showBorder();
         addToolbarBusyIndicator(busyIndicator);
-        addToolbarInfo(createPanel(lastScoringUpdateText, lastScoringUpdateTime));
+        addToolbarInfo(lastScoringUpdatePanel = createPanel(lastScoringUpdateText, lastScoringUpdateTime));
         addToolbarAction(autoRefreshControl);
         addToolbarAction(settingsControl);
     }
@@ -56,13 +58,14 @@ public abstract class AbstractLeaderboardFullscreenViewer<T extends Widget> exte
 
     protected Widget createPanel(Widget... contentWidgets) {
         FlowPanel panel = new FlowPanel();
-        for (Widget widget : contentWidgets)
+        for (Widget widget : contentWidgets) {
             panel.add(widget);
+        }
         return panel;
     }
 
     @Override
-    public void setLeaderboardPanel(T leaderboardPanel) {
+    public void setLeaderboardPanel(Widget leaderboardPanel) {
         showContent(leaderboardPanel);
     }
 

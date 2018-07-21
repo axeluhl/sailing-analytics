@@ -21,12 +21,13 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -62,9 +63,10 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
         Date toDate = dateFormat.parse("06/23/2011-15:29:50");
         assertNotNull(fromDate);
         assertNotNull(toDate);
-        List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
+        Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
-        maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
+        maneuversInvalid = new ArrayList<Maneuver>();
+        Util.addAll(maneuvers, maneuversInvalid);
 
         assertManeuver(maneuvers, ManeuverType.TACK,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:28:24")), TACK_TOLERANCE);
@@ -85,9 +87,10 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
         Date toDate = dateFormat.parse("06/23/2011-16:38:01");
         assertNotNull(fromDate);
         assertNotNull(toDate);
-        List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
+        Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
-        maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
+        maneuversInvalid = new ArrayList<Maneuver>();
+        Util.addAll(maneuvers, maneuversInvalid);
         
         assertManeuver(maneuvers, ManeuverType.TACK,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:28:24")), TACK_TOLERANCE);
@@ -145,7 +148,7 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
         assertManeuver(maneuvers, ManeuverType.TACK,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:28:21")), TACK_TOLERANCE);
         assertManeuver(maneuvers, ManeuverType.TACK,
-                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:31:29")), TACK_TOLERANCE);
+                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:31:36")), TACK_TOLERANCE);
         assertManeuver(maneuvers, ManeuverType.TACK,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:38:00")), TACK_TOLERANCE);
 

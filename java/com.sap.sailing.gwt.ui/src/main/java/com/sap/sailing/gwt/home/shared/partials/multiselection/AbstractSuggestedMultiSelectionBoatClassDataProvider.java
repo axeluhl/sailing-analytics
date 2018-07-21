@@ -40,9 +40,19 @@ public abstract class AbstractSuggestedMultiSelectionBoatClassDataProvider exten
         List<BoatClassMasterdata> boatClasses = Arrays.asList(BoatClassMasterdata.values());
         List<BoatClassDTO> suggestionItems = new ArrayList<>();
         for (BoatClassMasterdata bcm : filter.applyFilter(queryTokens, boatClasses)) {
-            suggestionItems.add(new BoatClassDTO(bcm.getDisplayName(), bcm.getHullLength().getMeters()));
+            suggestionItems.add(new BoatClassDTO(bcm.getDisplayName(), bcm.getHullLength(), bcm.getHullBeam()));
         }
         callback.setSuggestionItems(suggestionItems);
+    }
+    
+    @Override
+    public final String createSuggestionKeyString(BoatClassDTO value) {
+        return value.getName();
+    }
+    
+    @Override
+    public final String createSuggestionAdditionalDisplayString(BoatClassDTO value) {
+        return null;
     }
     
     @Override

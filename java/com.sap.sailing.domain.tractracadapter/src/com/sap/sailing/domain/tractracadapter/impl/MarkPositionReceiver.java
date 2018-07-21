@@ -43,9 +43,19 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<IControl, IP
     private final IRace tractracRace;
     final IControlPointPositionListener listener;
 
+    /**
+     * In order to establish single marks by their native names in case they are also
+     * part of gates or lines as virtual marks, it's a good idea to ensure their {@link Mark}
+     * domain objects are created before the gates / lines create theirs. However, this must
+     * not happen upon each mark position received. Therefore, we do this once per receiver
+     * and remember having done so in this flag.
+     */
+    private boolean singleMarksEnsuredAlready;
+
     public MarkPositionReceiver(final DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
-            IRace tractracRace, Simulator simulator, final DomainFactory domainFactory, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
-        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
+            IRace tractracRace, Simulator simulator, final DomainFactory domainFactory, IEventSubscriber eventSubscriber,
+            IRaceSubscriber raceSubscriber, long timeoutInMilliseconds) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber, timeoutInMilliseconds);
         // assumption: there is currently only one race per TracTrac Event object
         this.tractracRace = tractracRace;
         if (tractracEvent.getRaces().isEmpty()) {
@@ -77,6 +87,10 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<IControl, IP
             if ((received / 1000 + 1) % 80 == 0) {
                 System.out.println();
             }
+        }
+        if (!singleMarksEnsuredAlready) {
+            singleMarksEnsuredAlready = true;
+            ensureAllSingleMarksOfCourseAreaAreCreated(tractracRace);
         }
         Mark mark = getDomainFactory().getMark(new ControlPointAdapter(event.getA()), event.getC());
         DynamicTrackedRace trackedRace = getTrackedRace(tractracRace);

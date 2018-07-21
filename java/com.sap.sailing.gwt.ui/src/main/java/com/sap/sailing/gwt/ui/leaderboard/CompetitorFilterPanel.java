@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -44,7 +45,7 @@ import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
- * A text box that belongs to a {@link LeaderboardPanel} and allows the user to search for competitors by sail number
+ * A text box that belongs to a {@link ClassicLeaderboardPanel} and allows the user to search for competitors by sail number
  * and competitor name. When the user provides a non-empty search string, a new {@link Filter} for type {@link CompetitorDTO}
  * will be added that accepts competitors whose {@link CompetitorDTO#getSailID() sail number} or {@link CompetitorDTO#getName() name}
  * matches the user input. When the text box is emptied, 
@@ -88,14 +89,18 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
             competitorsFilterSets = createAndAddDefaultCompetitorsFilter();
             storeCompetitorsFilterSets(competitorsFilterSets);
         }
-        
         filter = new AbstractListFilter<CompetitorDTO>() {
             @Override
             public Iterable<String> getStrings(CompetitorDTO competitor) {
-                return Arrays.asList(competitor.getName().toLowerCase(), competitor.getSailID().toLowerCase());
+                final List<String> result = new ArrayList<>(Arrays.asList(competitor.getName().toLowerCase(), competitor.getShortName()));
+                if (competitor.hasBoat()) {
+                    result.add(((CompetitorWithBoatDTO) competitor).getSailID().toLowerCase());
+                }
+                return result;
             }
         };
         settingsButton = new Button();
+        settingsButton.ensureDebugId("leaderboardSettingsButton");
         settingsButton.setTitle(stringMessages.settings());
         settingsButton.setStyleName(css.button());
         settingsButton.addStyleName(css.settingsButton());
@@ -166,8 +171,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         if (competitorSelectionProvider.getCompetitorsFilterSet() == null || !Util.contains(competitorSelectionProvider.getCompetitorsFilterSet().getFilters(), this)) {
             FilterSet<CompetitorDTO, Filter<CompetitorDTO>> newFilterSetWithThis = new FilterSet<>(getName());
             if (competitorSelectionProvider.getCompetitorsFilterSet() != null) {
-                for (Filter<CompetitorDTO> oldFilter : competitorSelectionProvider.getCompetitorsFilterSet()
-                        .getFilters()) {
+                for (Filter<CompetitorDTO> oldFilter : competitorSelectionProvider.getCompetitorsFilterSet().getFilters()) {
                     newFilterSetWithThis.addFilter(oldFilter);
                 }
             }
@@ -197,11 +201,8 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
 
     @Override
     public boolean matches(CompetitorDTO competitor) {
-        final String[] keywords = searchTextBox.getText().split(" ");
-        final List<String> lowercaseKeywords = new ArrayList<>(keywords.length);
-        for (String keyword : keywords) {
-            lowercaseKeywords.add(keyword.toLowerCase());
-        }
+        final Iterable<String> lowercaseKeywords = Util
+                .splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchTextBox.getText().toLowerCase());
         return !Util.isEmpty(filter.applyFilter(lowercaseKeywords, Collections.singleton(competitor)));
     }
 
@@ -246,7 +247,6 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         SelectedCompetitorsFilter selectedCompetitorsFilter = new SelectedCompetitorsFilter();
         selectedCompetitorsFilter.setCompetitorSelectionProvider(competitorSelectionProvider);
         selectedCompetitorsFilterSet.addFilter(selectedCompetitorsFilter);
-        
         filterSet.addFilterSet(0, selectedCompetitorsFilterSet);
     }
     
@@ -334,14 +334,12 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
     
     private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {
         CompetitorsFilterSets filterSets = new CompetitorsFilterSets();
-        
         // 1. selected competitors filter
         insertSelectedCompetitorsFilter(filterSets);
-        
         // 2. Top 30 competitors by race rank
         int maxRaceRank = 30;
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNRaceRankCompetitorsFilterSet = 
-                new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.topNCompetitorsByRaceRank(maxRaceRank));
+                new FilterSet<>(stringMessages.topNCompetitorsByRaceRank(maxRaceRank));
         CompetitorRaceRankFilter raceRankFilter = new CompetitorRaceRankFilter();
         raceRankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
         raceRankFilter.setValue(maxRaceRank);
@@ -351,7 +349,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         // 3. Top 30 competitors by total rank
         int maxTotalRank = 30;
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNTotalRankCompetitorsFilterSet =
-                new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.topNCompetitorsByTotalRank(maxTotalRank));
+                new FilterSet<>(stringMessages.topNCompetitorsByTotalRank(maxTotalRank));
         CompetitorTotalRankFilter totalRankFilter = new CompetitorTotalRankFilter();
         totalRankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
         totalRankFilter.setValue(50);

@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
@@ -21,7 +22,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
  * otherwise.
  * </p>
  */
-public class GetMiniLeaderbordAction implements SailingAction<ResultWithTTL<GetMiniLeaderboardDTO>>, IsClientCacheable {
+public class GetMiniLeaderbordAction implements SailingAction<ResultWithTTL<GetMiniLeaderboardDTO>>, IsClientCacheable, ProvidesLeaderboardRouting {
     private UUID eventId;
     private String leaderboardName;
     private int limit = 0;
@@ -73,5 +74,10 @@ public class GetMiniLeaderbordAction implements SailingAction<ResultWithTTL<GetM
         key.append(leaderboardName);
         key.append("_");
         key.append(limit);
+    }
+
+    @Override
+    public String getLeaderboardName() {
+        return leaderboardName;
     }
 }

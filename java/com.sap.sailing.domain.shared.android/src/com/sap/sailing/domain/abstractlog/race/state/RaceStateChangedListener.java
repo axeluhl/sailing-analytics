@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.abstractlog.race.state;
 
-
 public interface RaceStateChangedListener {
     
     void onRacingProcedureChanged(ReadonlyRaceState state);

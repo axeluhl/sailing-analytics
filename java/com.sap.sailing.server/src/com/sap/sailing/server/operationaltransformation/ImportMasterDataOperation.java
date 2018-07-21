@@ -7,8 +7,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -27,14 +29,15 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
-import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl;
-import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -48,7 +51,6 @@ import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
@@ -72,6 +74,8 @@ public class ImportMasterDataOperation extends
     private static final long serialVersionUID = 3131715325307370303L;
 
     private static final Logger logger = Logger.getLogger(ImportMasterDataOperation.class.getName());
+    
+    private static final int BATCH_SIZE_FOR_IMPORTING_FIXES = 5000;
 
     private final TopLevelMasterData masterData;
 
@@ -123,15 +127,18 @@ public class ImportMasterDataOperation extends
             progress.setOverAllProgressPct(0.5);
             progress.setCurrentSubProgressPct(0);
             createWindTracks(toState);
+            progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_SENSOR_FIXES);
+            progress.setOverAllProgressPct(0.8);
+            progress.setCurrentSubProgressPct(0);
             importRaceLogTrackingGPSFixes(toState);
             if (masterData.getDeviceConfigurations() != null) {
                 importDeviceConfigurations(toState);
             }
+            toState.mediaTracksImported(masterData.getFilteredMediaTracks(), creationCount, override);
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
-            toState.mediaTracksImported(masterData.getFilteredMediaTracks(), override);
             return creationCount;
         } catch (Exception e) {
-            logger.severe("Error during execution of ImportMasterDataOperation");
+            logger.log(Level.SEVERE, "Error during execution of ImportMasterDataOperation", e);
             throw new RuntimeException("Error during execution of ImportMasterDataOperation", e);
         } finally {
             LockUtil.unlockAfterWrite(dataImportLock);
@@ -383,7 +390,7 @@ public class ImportMasterDataOperation extends
                 for (Wind fix : windTrackToReadFrom.getRawFixes()) {
                     Wind existingFix = windTrackToWriteTo.getFirstRawFixAtOrAfter(fix.getTimePoint());
                     if (existingFix == null || !(existingFix.equals(fix) && fix.getTimePoint().equals(existingFix.getTimePoint())
-                            && fix.getPosition().equals(existingFix.getPosition()))) {
+                            && Util.equalsWithNull(fix.getPosition(), existingFix.getPosition()))) {
                         windTrackToWriteTo.add(fix);
                     } else {
                         logger.info("Didn't add wind fix in import, because equal fix was already there.");
@@ -394,7 +401,7 @@ public class ImportMasterDataOperation extends
             }
             i++;
             progress.setCurrentSubProgressPct((double) i / numOfWindTracks);
-            progress.setOverAllProgressPct(0.5 + (0.5) * ((double) i / numOfWindTracks));
+            progress.setOverAllProgressPct(0.5 + (0.3) * ((double) i / numOfWindTracks));
         }
     }
     
@@ -404,25 +411,41 @@ public class ImportMasterDataOperation extends
         Map<DeviceIdentifier, Set<Timed>> raceLogTrackingFixes = masterData.getRaceLogTrackingFixes();
         if (raceLogTrackingFixes != null) {
             SensorFixStore store = toState.getSensorFixStore();
+            int i = 0;
+            final int numberOfDevices = raceLogTrackingFixes.size();
             for (Entry<DeviceIdentifier, Set<Timed>> entry : raceLogTrackingFixes.entrySet()) {
                 DeviceIdentifier device = entry.getKey();
+                final Collection<Timed> fixesToAddAsBatch = new ArrayList<>(BATCH_SIZE_FOR_IMPORTING_FIXES);
                 for (Timed fixToAdd : entry.getValue()) {
-                    try {
-                        if (fixToAdd instanceof CompactGPSFixMovingImpl) {
-                            CompactGPSFixMovingImpl gpsFix = (CompactGPSFixMovingImpl) fixToAdd;
-                            fixToAdd = new GPSFixMovingImpl(gpsFix.getPosition(), fixToAdd.getTimePoint(),
-                                    ((CompactGPSFixMovingImpl) fixToAdd).getSpeed());
-                        } else if (fixToAdd instanceof CompactGPSFixImpl) {
-                            CompactGPSFixImpl gpsFix = (CompactGPSFixImpl) fixToAdd;
-                            fixToAdd = new GPSFixImpl(gpsFix.getPosition(), fixToAdd.getTimePoint());
-                        } 
-                        store.storeFix(device, fixToAdd);
-                    } catch (NoCorrespondingServiceRegisteredException e) {
-                        logger.severe("Failed to store race log tracking fix while importing.");
-                        e.printStackTrace();
+                    if (fixToAdd instanceof VeryCompactGPSFixMovingImpl) {
+                        VeryCompactGPSFixMovingImpl gpsFix = (VeryCompactGPSFixMovingImpl) fixToAdd;
+                        fixToAdd = new GPSFixMovingImpl(gpsFix.getPosition(), fixToAdd.getTimePoint(),
+                                ((VeryCompactGPSFixMovingImpl) fixToAdd).getSpeed());
+                    } else if (fixToAdd instanceof VeryCompactGPSFixImpl) {
+                        VeryCompactGPSFixImpl gpsFix = (VeryCompactGPSFixImpl) fixToAdd;
+                        fixToAdd = new GPSFixImpl(gpsFix.getPosition(), fixToAdd.getTimePoint());
+                    } 
+                    fixesToAddAsBatch.add(fixToAdd);
+                    if (fixesToAddAsBatch.size() == BATCH_SIZE_FOR_IMPORTING_FIXES) {
+                        storeFixes(store, device, fixesToAddAsBatch);
                     }
                 }
+                if (!fixesToAddAsBatch.isEmpty()) {
+                    storeFixes(store, device, fixesToAddAsBatch);
+                }
+                i++;
+                progress.setCurrentSubProgressPct((double) i / numberOfDevices);
             }
+        }
+    }
+
+    private void storeFixes(SensorFixStore store, DeviceIdentifier device, final Collection<Timed> fixesToAddAsBatch) {
+        try {
+            store.storeFixes(device, fixesToAddAsBatch);
+            fixesToAddAsBatch.clear();
+        } catch (NoCorrespondingServiceRegisteredException e) {
+            logger.severe("Failed to store race log tracking fixes while importing.");
+            e.printStackTrace();
         }
     }
 
@@ -455,7 +478,8 @@ public class ImportMasterDataOperation extends
                                     trackedRegatta.unlockTrackedRacesAfterRead();
                                 }
                                 for (TrackedRace raceToRemove : toRemove) {
-                                    trackedRegatta.removeTrackedRace(raceToRemove);
+                                    trackedRegatta.removeTrackedRace(raceToRemove, Optional.of(toState
+                                            .getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()));
                                     RaceDefinition race = existingRegatta.getRaceByName(raceToRemove
                                             .getRaceIdentifier().getRaceName());
                                     if (race != null) {

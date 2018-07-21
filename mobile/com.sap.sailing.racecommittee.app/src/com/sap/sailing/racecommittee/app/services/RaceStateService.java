@@ -8,29 +8,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import android.annotation.TargetApi;
-import android.app.AlarmManager;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.BitmapFactory;
-import android.os.Binder;
-import android.os.Build;
-import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.util.Pair;
-
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.NotificationHelper;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventScheduler;
+import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -44,6 +30,21 @@ import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import android.annotation.TargetApi;
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.Build;
+import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.Pair;
 
 public class RaceStateService extends Service {
 
@@ -58,8 +59,6 @@ public class RaceStateService extends Service {
         }
     }
 
-    private final static int NOTIFICATION_ID = 42;
-
     private final IBinder mBinder = new RaceStateServiceBinder();
 
     private AlarmManager alarmManager;
@@ -73,9 +72,6 @@ public class RaceStateService extends Service {
 
     private Map<String, List<Pair<PendingIntent, RaceStateEvents>>> managedIntents;
 
-    private NotificationManager notificationManager;
-    private NotificationCompat.Builder notificationBuilder;
-
     @Override
     public void onCreate() {
         this.alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -85,26 +81,22 @@ public class RaceStateService extends Service {
         this.registeredStateEventSchedulers = new HashMap<>();
         this.managedIntents = new HashMap<>();
 
-        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        setupNotificationBuilder();
-
         super.onCreate();
+
+        Notification notification = setupNotification(null);
+        startForeground(NotificationHelper.getNotificationId(), notification);
         ExLog.i(this, TAG, "Started.");
     }
 
-    private void setupNotificationBuilder() {
+    private Notification setupNotification(String customContent) {
         Intent launcherIntent = new Intent(this, LoginActivity.class);
         launcherIntent.setAction(Intent.ACTION_MAIN);
         launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, launcherIntent, 0);
-        notificationBuilder = new NotificationCompat.Builder(this)
-            .setSmallIcon(R.drawable.ic_boat_white_24dp)
-            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-            .setContentTitle(getText(R.string.service_info))
-            .setContentText(getString(R.string.service_text_no_races))
-            .setContentIntent(contentIntent)
-            .setColor(getResources().getColor(R.color.constant_sap_blue_1))
-            .setOngoing(true);
+        CharSequence title = getText(R.string.service_info);
+        String content = customContent != null ? customContent : getString(R.string.service_text_no_races);
+        int color = getResources().getColor(R.color.constant_sap_blue_1);
+        return NotificationHelper.getNotification(this, title, content, contentIntent, color);
     }
 
     @Override
@@ -128,7 +120,7 @@ public class RaceStateService extends Service {
     @Override
     public void onDestroy() {
         unregisterAllRaces();
-
+        stopForeground(false);
         super.onDestroy();
     }
 
@@ -207,7 +199,7 @@ public class RaceStateService extends Service {
                     break;
 
                 default:
-                    String id = intent.getStringExtra(AppConstants.RACE_ID_KEY);
+                    String id = intent.getStringExtra(AppConstants.INTENT_EXTRA_RACE_ID);
                     ManagedRace race = dataManager.getDataStore().getRace(id);
                     if (race == null) {
                         ExLog.w(this, TAG, "No race for id " + id);
@@ -216,10 +208,12 @@ public class RaceStateService extends Service {
 
                     switch (action) {
                         case AppConstants.INTENT_ACTION_ALARM_ACTION:
-                            RaceStateEvent stateEvent = (RaceStateEvent) intent.getExtras().getSerializable(AppConstants.EXTRAS_RACE_STATE_EVENT);
-                            ExLog.i(this, TAG, String.format("Processing %s", stateEvent.toString()));
-                            race.getState().processStateEvent(stateEvent);
-                            clearAlarmByName(race, stateEvent.getEventName());
+                            long timePoint = intent.getLongExtra(AppConstants.INTENT_EXTRA_TIMEPOINT_MILLIS, 0);
+                            String eventName = intent.getStringExtra(AppConstants.INTENT_EXTRA_EVENTNAME);
+                            RaceStateEvent event = new RaceStateEventImpl(new MillisecondsTimePoint(timePoint), RaceStateEvents.valueOf(eventName));
+                            ExLog.i(this, TAG, String.format("Processing %s", event.toString()));
+                            race.getState().processStateEvent(event);
+                            clearAlarmByName(race, event.getEventName());
                             break;
                     }
             }
@@ -240,7 +234,7 @@ public class RaceStateService extends Service {
 
         private final ManagedRace managedRace;
 
-        public RemoveRaceAction(@NonNull ManagedRace race) {
+        /* package */ RemoveRaceAction(@NonNull ManagedRace race) {
             managedRace = race;
         }
 
@@ -278,10 +272,9 @@ public class RaceStateService extends Service {
 
     private void updateNotification() {
         int numRaces = managedIntents.keySet().size();
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder
-                .setContentText(getString(R.string.service_text_num_races, numRaces))
-                .build());
-        startForeground(NOTIFICATION_ID, notificationBuilder.build());
+        String content = getString(R.string.service_text_num_races, numRaces);
+        Notification notification = setupNotification(content);
+        startForeground(NotificationHelper.getNotificationId(), notification);
     }
 
     public void registerRace(ManagedRace race) {
@@ -321,10 +314,11 @@ public class RaceStateService extends Service {
     }
 
     private PendingIntent createAlarmPendingIntent(ManagedRace managedRace, RaceStateEvent event) {
-        Intent intent = new Intent(this, RaceStateService.class);
+        Intent intent = new Intent().setClass(this, RaceStateService.class);
         intent.setAction(AppConstants.INTENT_ACTION_ALARM_ACTION);
-        intent.putExtra(AppConstants.RACE_ID_KEY, managedRace.getId());
-        intent.putExtra(AppConstants.EXTRAS_RACE_STATE_EVENT, event);
+        intent.putExtra(AppConstants.INTENT_EXTRA_RACE_ID, managedRace.getId());
+        intent.putExtra(AppConstants.INTENT_EXTRA_TIMEPOINT_MILLIS, event.getTimePoint().asMillis());
+        intent.putExtra(AppConstants.INTENT_EXTRA_EVENTNAME, event.getEventName().name());
         return PendingIntent.getService(this, alarmManagerRequestCode++, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 

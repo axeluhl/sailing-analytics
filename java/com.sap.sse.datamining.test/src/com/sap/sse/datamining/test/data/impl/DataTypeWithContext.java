@@ -17,5 +17,4 @@ public interface DataTypeWithContext extends DataTypeInterface {
     
     @Dimension(messageKey="legNumber")
     public int getLegNumber();
-
 }

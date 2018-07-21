@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay.DisplayMode;
 
 public class DinghyWithSpinnakerVectorGraphics extends BoatClassVectorGraphics {
     
@@ -10,18 +11,28 @@ public class DinghyWithSpinnakerVectorGraphics extends BoatClassVectorGraphics {
     }
 
     @Override
-    protected void drawBoat(Context2d ctx, boolean isSelected, String color) {
+    protected void drawBoat(Context2d ctx, DisplayMode displayMode, String color) {
 
         ctx.translate(0,-823);
 
         //draw hull
-        if(isSelected) {
-            ctx.setFillStyle(color);
-            ctx.setStrokeStyle(color);
-        } else {
+        
+        switch (displayMode){
+        case DEFAULT:
             ctx.setFillStyle ("#FFFFFF");
             ctx.setStrokeStyle("#FFFFFF");
+            break;
+        case SELECTED:
+            ctx.setFillStyle (color);
+            ctx.setStrokeStyle(color);
+            break;
+        case NOT_SELECTED:
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
+            break;
         }
+        
         ctx.setLineWidth(1.0);
         ctx.beginPath();
         ctx.moveTo(7,871);
@@ -32,13 +43,22 @@ public class DinghyWithSpinnakerVectorGraphics extends BoatClassVectorGraphics {
         ctx.stroke();
         
         //draw cockpit
-        if(isSelected) {
-            ctx.setFillStyle ("#FFFFFF");
-            ctx.setStrokeStyle("#FFFFFF");
-        } else {
+        switch (displayMode){
+        case DEFAULT:
             ctx.setFillStyle(color);
             ctx.setStrokeStyle(color);
+            break;
+        case SELECTED:
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
+            break;
+        case NOT_SELECTED:
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle(color);
+            ctx.setStrokeStyle(color);
+            break;
         }
+        
         ctx.beginPath();
         ctx.moveTo(15,970);
         ctx.lineTo(14,899);

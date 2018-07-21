@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:text="@string/finished_tracking"
             android:textAppearance="?attr/textPanelHeader"
-            android:textSize="@dimen/textSize_18"/>
+            android:textSize="@dimen/textSize_18" />
 
         <ImageView
             android:id="@+id/list_lock"
@@ -38,14 +38,43 @@
         android:layout_height="match_parent"
         android:layout_below="@id/list">
 
-        <TextView
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:drawablePadding="@dimen/compound_padding"
-            android:drawableTop="?attr/dns"
-            android:gravity="center_horizontal"
-            android:text="@string/finished_edit"
-            android:textAppearance="?attr/textPanelCaption" />
+            android:layout_centerInParent="true">
+
+            <RelativeLayout
+                android:id="@+id/image_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true">
+
+                <ImageView
+                    android:id="@+id/list_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/compound_padding"
+                    android:src="?attr/dns" />
+
+                <ImageView
+                    android:id="@+id/panel_additional_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/list_icon"
+                    android:layout_alignRight="@id/list_icon"
+                    android:src="@drawable/ic_warning_yellow_small"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/image_layout"
+                android:gravity="center_horizontal"
+                android:text="@string/finished_edit"
+                android:textAppearance="?attr/textPanelCaption" />
+        </RelativeLayout>
     </RelativeLayout>
+
 </merge>

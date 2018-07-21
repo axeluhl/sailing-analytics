@@ -1,25 +1,29 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
-	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+<ui:UiBinder xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:ui="urn:ui:com.google.gwt.uibinder">
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewResources" />
     <g:HTMLPanel>
-	<div class="{local_res.css.whatsnew_nav}">
-	    <div class="{res.mediaCss.grid}">
-	      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-	          <g:Anchor ui:field="sailingAnalyticsNotesAnchor" href="javascript:;" styleName="{local_res.css.whatsnew_nav_link}"><ui:text from='{i18n.solutionsSAPHeadline}'/></g:Anchor>
-		      <g:Anchor ui:field="sailingSimulatorNotesAnchor" href="javascript:;" styleName="{local_res.css.whatsnew_nav_link}"><ui:text from='{i18n.solutionsSimulatorHeadline}'/></g:Anchor>
-	          <g:Anchor ui:field="raceCommitteeAppNotesAnchor" href="javascript:;" styleName="{local_res.css.whatsnew_nav_link}"><ui:text from='{i18n.solutionsRaceHeadline}'/></g:Anchor>
-		  </div>
-	    </div>
-	</div>
-    <div class="{res.mediaCss.grid}">
-	      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-    	    <g:HTML ui:field="sailingAnalyticsNotes" />
-		    <g:HTML ui:field="sailingSimulatorNotes" />
-			<g:HTML ui:field="raceCommitteeAppNotes" />
-    	</div>
-	</div>
-		    
-	</g:HTMLPanel>
+        <div class="{local_res.css.whatsnew_nav}">
+            <div class="{res.mediaCss.grid}">
+                <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+                    <g:Anchor href="javascript:;" styleName="{local_res.css.whatsnew_nav_link}" ui:field="sailingAnalyticsNotesAnchor"><ui:text from='{i18n.solutionsSAPHeadline}' /></g:Anchor>
+                    <g:Anchor href="javascript:;" styleName="{local_res.css.whatsnew_nav_link}" ui:field="sailingSimulatorNotesAnchor"><ui:text from='{i18n.solutionsSimulatorHeadline}' /></g:Anchor>
+                    <g:Anchor href="javascript:;" styleName="{local_res.css.whatsnew_nav_link}" ui:field="raceCommitteeAppNotesAnchor"><ui:text from='{i18n.solutionsRaceHeadline}' /></g:Anchor>
+                    <g:Anchor href="javascript:;" styleName="{local_res.css.whatsnew_nav_link}" ui:field="inSightAppNotesAnchor"><ui:text from='{i18n.solutionsInSightHeadline}' /></g:Anchor>
+                    <g:Anchor href="javascript:;" styleName="{local_res.css.whatsnew_nav_link}" ui:field="buoyPingerAppNotesAnchor"><ui:text from='{i18n.solutionsBuoyPingerHeadline}' /></g:Anchor>
+                </div>
+            </div>
+        </div>
+
+        <div class="{res.mediaCss.grid}">
+            <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+                <g:HTML ui:field="sailingAnalyticsNotes" />
+                <g:HTML ui:field="sailingSimulatorNotes" />
+                <g:HTML ui:field="raceCommitteeAppNotes" />
+                <g:HTML ui:field="inSightAppNotes" />
+                <g:HTML ui:field="buoyPingerAppNotes" />
+            </div>
+        </div>
+    </g:HTMLPanel>
 </ui:UiBinder>    

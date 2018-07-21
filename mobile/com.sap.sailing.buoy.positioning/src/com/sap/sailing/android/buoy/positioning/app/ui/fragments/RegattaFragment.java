@@ -33,10 +33,19 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
     private MarkAdapter adapter;
     private IntentReceiver mReceiver;
 
+    public static RegattaFragment newInstance() {
+        Bundle args = new Bundle();
+        RegattaFragment fragment = new RegattaFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @SuppressLint("InflateParams")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+
+        mReceiver = new IntentReceiver();
 
         View view = inflater.inflate(R.layout.fragment_buoy_postion_overview, container, false);
         adapter = new MarkAdapter(getActivity(), R.layout.mark_listview_row, null, 0);
@@ -44,7 +53,6 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
         markListView.setEmptyView(view.findViewById(R.id.no_marks));
         markListView.setAdapter(adapter);
         markListView.setOnItemClickListener(new ItemClickListener());
-        getLoaderManager().initLoader(MARKER_LOADER, null, this);
 
         return view;
     }
@@ -52,26 +60,28 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mReceiver = new IntentReceiver(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        getLoaderManager().restartLoader(MARKER_LOADER, null, this);
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(getString(R.string.database_changed));
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(mReceiver, filter);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
+
+        loadData();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).unregisterReceiver(mReceiver);
+
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
     }
 
-    public MarkAdapter getAdapter() {
-        return adapter;
+    public void loadData() {
+        getLoaderManager().restartLoader(MARKER_LOADER, null, this);
     }
 
     @Override
@@ -126,19 +136,12 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
     // Broadcast receiver to update ui on data changed
     private class IntentReceiver extends BroadcastReceiver {
 
-        private LoaderCallbacks<Cursor> loaderCallbacks;
-
-        public IntentReceiver(LoaderCallbacks<Cursor> callbacks) {
-            loaderCallbacks = callbacks;
-        }
-
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "Adapter will be notified");
             String action = intent.getAction();
             if (action.equals(getString(R.string.database_changed))) {
-                getLoaderManager().restartLoader(MARKER_LOADER, null, loaderCallbacks);
-                adapter.notifyDataSetChanged();
+                loadData();
             }
         }
     }

@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.communication.event;
 
 import java.util.Collection;
-import java.util.TreeSet;
+import java.util.LinkedHashSet;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.gwt.home.communication.race.FleetMetadataDTO;
@@ -11,7 +11,7 @@ public class RaceCompetitionFormatFleetDTO implements IsSerializable {
     
     private FleetMetadataDTO fleet;
     private int competitorCount = 0;
-    private TreeSet<SimpleRaceMetadataDTO> races = new TreeSet<>();
+    private LinkedHashSet<SimpleRaceMetadataDTO> races = new LinkedHashSet<>();
     
     protected RaceCompetitionFormatFleetDTO() {
     }

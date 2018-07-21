@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -50,6 +51,7 @@ public class TrackedRaceCenterTest {
         trackedRace = mock(DynamicTrackedRaceImpl.class);
         when(trackedRace.getCenterOfCourse(Matchers.any(TimePoint.class))).thenCallRealMethod();
         when(trackedRace.getApproximatePosition(Matchers.any(Waypoint.class), Matchers.any(TimePoint.class))).thenCallRealMethod();
+        when(trackedRace.getApproximatePosition(Matchers.any(Waypoint.class), Matchers.any(TimePoint.class), Matchers.any(MarkPositionAtTimePointCache.class))).thenCallRealMethod();
         RaceDefinition race = mock(RaceDefinition.class);
         when(trackedRace.getRace()).thenReturn(race);
         course = mock(Course.class);

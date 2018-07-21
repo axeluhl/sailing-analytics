@@ -2,11 +2,10 @@
 <resources>
     <string name="yes">Ja</string>
     <string name="no">Nein</string>
-    <string name="empty"></string>
     <string name="tracking_time">Tracking Zeit</string>
     <string name="app_name">SAP Sail InSight</string>
     <string name="options_menu_settings">Einstellungen</string>
-    <string name="options_menu_checkout">Checkout</string>
+    <string name="options_menu_checkout">Abmelden</string>
     <string name="options_add_team_photo">Team Foto hinzufügen</string>
     <string name="options_replace_team_photo">Team Foto ersetzen</string>
     <string name="settings_category_other">Andere Einstellungen</string>
@@ -14,8 +13,8 @@
     <string name="device_identifier">Geräte-ID</string>
     <string name="stop_tracking">Stoppe Tracking</string>
     <string name="start_tracking">Starte Tracking</string>
-    <string name="tracker_started">SAP Sail InSight gestartet</string>
-    <string name="tracker_stopped">SAP Sail InSight gestoppt</string>
+    <string name="tracker_started">Tracking wurde erfolgreich gestartet</string>
+    <string name="tracker_stopped">Tracking wurde erfolgreich gestoppt</string>
     <string name="title_activity_regatta">Regatta</string>
     <string name="title_activity_leaderboard">Leaderboard</string>
     <string name="title_activity_start">GPS Tracker einstellen</string>
@@ -23,14 +22,14 @@
     <string name="please_confirm">Bitte bestätigen</string>
     <string name="do_you_really_want_to_stop_tracking">Soll das Tracking wirklich beendet werden?</string>
     <string name="tracking_status_tracking">Tracking läuft</string>
-    <string name="tracking_status_no_gps_signal">Kein GPS Signal!</string>
-    <string name="tracking_mode_offline">Offline</string>
+    <string name="tracking_status_no_gps_signal">Keine GPS Änderungen oder Signal!</string>
+    <string name="tracking_mode_no_attempt">Initialisierung</string>
     <string name="tracking_mode">Modus</string>
     <string name="tracking_mode_live">Live</string>
     <string name="tracking_mode_battery_saving">Energie sparen</string>
     <string name="tracking_mode_caching">Offline</string>
     <string name="tracking_mode_api_error">API-Fehler</string>
-    <string name="tracking_unsent_fixes">Ungesendete Tracking-Fixes</string>
+    <string name="tracking_unsent_fixes">Ungesendete Nachrichten</string>
     <string name="add_team_photo">Team Foto hinzufügen</string>
     <string name="do_you_want_to_choose_existing_img_or_take_a_new_one">Bild auswählen oder neues Foto aufnehmen?</string>
     <string name="existing_image">Auswählen</string>
@@ -45,12 +44,18 @@
     <string name="error_could_not_complete_operation_on_server_try_again">Konnte Operation nicht durchführen. Bitte versuchen Sie es noch einmal.</string>
     <string name="error_sending_team_image_to_server">Fehler: Konnte Team-Foto nicht an den server senden.</string>
     <string name="regatta_starts_in">Regatta beginnt in:</string>
-    <string name="hours">Stunden</string>
-    <string name="minute">Minute</string>
-    <string name="minutes">Minuten</string>
-    <string name="days">Tage</string>
-    <string name="hour">Stunde</string>
-    <string name="day">Tag</string>
+    <plurals name="hour">
+        <item quantity="one">Stunde</item>
+        <item quantity="other">Stunden</item>
+    </plurals>
+    <plurals name="minute">
+        <item quantity="one">Minute</item>
+        <item quantity="other">Minuten</item>
+    </plurals>
+    <plurals name="day">
+        <item quantity="one">Tag</item>
+        <item quantity="other">Tage</item>
+    </plurals>
     <string name="please_listen_to_announcements">Bitte achten Sie auf die Durchsagen</string>
     <string name="no_qr_code">Sie haben keinen QR-Code?</string>
     <string name="scan_qr">QR-Code scannen</string>
@@ -79,5 +84,6 @@
     <string name="upload_in_progress">Wird hochgeladen&#8230;</string>
     <string name="upload_io_error">Fehler beim Hochladen: </string>
     <string name="upload_retry">Fehler beim Hochladen.\nZum Wiederholen hier tippen.</string>
+    <string name="tracking_status_gps_found">GPS Signal gefunden!</string>
 
 </resources>

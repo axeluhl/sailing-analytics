@@ -23,12 +23,13 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO;
+import com.sap.sse.common.Duration;
+import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurationDTO.RegattaConfigurationDTO> {
 
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-
     private final StringMessages stringMessages;
     private final DeviceConfigurationDTO.RegattaConfigurationDTO originalConfiguration;
 
@@ -36,6 +37,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
 
     private ListBox racingProcedureListBox;
     private ListBox designerModeEntryListBox;
+    private IntegerBox protestTimeInMinutesTextBox;
 
     private DisclosurePanel rrs26DisclosurePanel;
     private CheckBox rrs26EnabledBox;
@@ -43,6 +45,13 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
     private CheckBox rrs26RecallBox;
     private CheckBox rrs26ResultEntryBox;
     private ListBox rrs26StartModeFlagsBox;
+
+    private DisclosurePanel swcStartDisclosurePanel;
+    private CheckBox swcStartEnabledBox;
+    private ListBox swcStartClassFlagListBox;
+    private CheckBox swcStartRecallBox;
+    private CheckBox swcStartResultEntryBox;
+    private ListBox swcStartModeFlagsBox;
 
     private DisclosurePanel gateStartDisclosurePanel;
     private CheckBox gateStartEnabledBox;
@@ -82,6 +91,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         contentPanel = new VerticalPanel();
         setupGeneral();
         setupRRS26();
+        setupSWCStart();
         setupGateStart();
         setupESS();
         setupBasic();
@@ -89,6 +99,9 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         
         if (rrs26EnabledBox.getValue()) {
             rrs26DisclosurePanel.setOpen(true);
+        }
+        if (swcStartEnabledBox.getValue()) {
+            swcStartDisclosurePanel.setOpen(true);
         }
         if (gateStartEnabledBox.getValue()) {
             gateStartDisclosurePanel.setOpen(true);
@@ -107,9 +120,10 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
     }
 
     private void setupGeneral() {
-        Grid grid = new Grid(2, 2);
+        Grid grid = new Grid(3, 2);
         setupCourseDesignerListBox(grid, 0);
         setupRacingProcedureListBox(grid, 1);
+        setupProtestTimeTextBox(grid, 2);
         contentPanel.add(grid);
     }
 
@@ -142,6 +156,14 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         });
         grid.setWidget(gridRow, 0, new Label(stringMessages.courseDesignerMode()));
         grid.setWidget(gridRow, 1, designerModeEntryListBox);
+    }
+
+    private void setupProtestTimeTextBox(Grid grid, int gridRow) {
+        final Integer protestTimeDurationInMinutes = originalConfiguration.defaultProtestTimeDuration == null ? null :
+            (int) originalConfiguration.defaultProtestTimeDuration.asMinutes();
+        protestTimeInMinutesTextBox = createIntegerBox(protestTimeDurationInMinutes, 3);
+        grid.setWidget(gridRow, 0, new Label(stringMessages.protestTime()));
+        grid.setWidget(gridRow, 1, protestTimeInMinutesTextBox);
     }
 
     private ListBox setupClassFlagListBox(RacingProcedureConfigurationDTO config) {
@@ -237,8 +259,68 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
                 && originalConfiguration.rrs26Configuration.startModeFlags != null) {
             selectedFlags = originalConfiguration.rrs26Configuration.startModeFlags;
         }
-        ListBoxUtils.setupStartmodeFlagsListBox(rrs26StartModeFlagsBox, selectedFlags);
+        ListBoxUtils.setupRRS26StartmodeFlagsListBox(rrs26StartModeFlagsBox, selectedFlags);
         rrs26StartModeFlagsBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+            }
+        });
+    }
+
+    private void setupSWCStart() {
+        swcStartDisclosurePanel = new DisclosurePanel(stringMessages.sailingWorldCupStart());
+        VerticalPanel panel = new VerticalPanel();
+
+        Grid grid = new Grid(4, 3);
+        swcStartEnabledBox = new CheckBox(stringMessages.setConfiguration());
+        swcStartEnabledBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                boolean isActive = event.getValue();
+                swcStartClassFlagListBox.setEnabled(isActive);
+                swcStartRecallBox.setEnabled(isActive);
+                swcStartResultEntryBox.setEnabled(isActive);
+                swcStartModeFlagsBox.setEnabled(isActive);
+            }
+        });
+        swcStartClassFlagListBox = setupClassFlagListBox(originalConfiguration == null ? null
+                : originalConfiguration.swcStartConfiguration);
+        swcStartClassFlagListBox.setWidth("100%");
+        swcStartRecallBox = setupRecallBox(originalConfiguration==null?null:originalConfiguration.swcStartConfiguration);
+        swcStartResultEntryBox = setupResultEntryBox(originalConfiguration==null?null:originalConfiguration.swcStartConfiguration);
+        setupSWCStartModeFlags();
+
+        grid.setWidget(0, 0, new Label(stringMessages.classFlag() + ":"));
+        grid.setWidget(0, 1, swcStartClassFlagListBox);
+        grid.setWidget(0, 2, createHelpImage(stringMessages.classFlagHelpText("SWC Start")));
+        grid.setWidget(1, 0, swcStartRecallBox);
+        grid.setWidget(1, 2, createHelpImage(stringMessages.individualRecallHelpText()));
+        grid.setWidget(2, 0, swcStartResultEntryBox);
+        grid.setWidget(2, 2, createHelpImage(stringMessages.resultEntryHelpText()));
+        grid.setWidget(3, 0, new Label(stringMessages.startmodeFlags() + ":"));
+        grid.setWidget(3, 1, swcStartModeFlagsBox);
+        grid.setWidget(3, 2, createHelpImage(stringMessages.startmodeFlagsHelpText()));
+
+        swcStartEnabledBox.setValue(originalConfiguration != null && originalConfiguration.swcStartConfiguration != null);
+        ValueChangeEvent.fire(swcStartEnabledBox, swcStartEnabledBox.getValue());
+
+        panel.add(swcStartEnabledBox);
+        panel.add(grid);
+        swcStartDisclosurePanel.add(panel);
+        contentPanel.add(swcStartDisclosurePanel);
+    }
+
+    private void setupSWCStartModeFlags() {
+        swcStartModeFlagsBox = new ListBox();
+        swcStartModeFlagsBox.setMultipleSelect(true);
+        swcStartModeFlagsBox.setWidth("100%");
+        List<Flags> selectedFlags = new ArrayList<Flags>();
+        if (originalConfiguration != null && originalConfiguration.swcStartConfiguration != null
+                && originalConfiguration.swcStartConfiguration.startModeFlags != null) {
+            selectedFlags = originalConfiguration.swcStartConfiguration.startModeFlags;
+        }
+        ListBoxUtils.setupSWCStartmodeFlagsListBox(swcStartModeFlagsBox, selectedFlags);
+        swcStartModeFlagsBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
             }
@@ -274,6 +356,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         if (originalConfiguration.gateStartConfiguration != null) {
             gateStartGolfDownBox.setValue(originalConfiguration.gateStartConfiguration.hasAdditionalGolfDownTime);
         }
+        
         grid.setWidget(0, 0, new Label(stringMessages.classFlag() + ":"));
         grid.setWidget(0, 1, gateStartClassFlagListBox);
         grid.setWidget(0, 2, createHelpImage(stringMessages.classFlagHelpText("Gate Start")));
@@ -429,6 +512,8 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
             CourseDesignerMode mode = CourseDesignerMode.valueOf(designerModeEntryListBox.getValue(index));
             result.defaultCourseDesignerMode = mode == CourseDesignerMode.UNKNOWN ? null : mode;
         }
+        result.defaultProtestTimeDuration = protestTimeInMinutesTextBox.getValue() == null ? null :
+            Duration.ONE_MINUTE.times(protestTimeInMinutesTextBox.getValue());
         if (rrs26EnabledBox.getValue()) {
             result.rrs26Configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RRS26ConfigurationDTO();
             getRacingProcedureConfigurationResults(result.rrs26Configuration, rrs26ClassFlagListBox, rrs26RecallBox, rrs26ResultEntryBox);
@@ -439,6 +524,17 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
                 }
             }
             result.rrs26Configuration.startModeFlags = flags.isEmpty() ? null : flags;
+        }
+        if (swcStartEnabledBox.getValue()) {
+            result.swcStartConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.SWCStartConfigurationDTO();
+            getRacingProcedureConfigurationResults(result.swcStartConfiguration, swcStartClassFlagListBox, swcStartRecallBox, swcStartResultEntryBox);
+            List<Flags> flags = new ArrayList<Flags>();
+            for (int i = 0; i < swcStartModeFlagsBox.getItemCount(); i++) {
+                if (swcStartModeFlagsBox.isItemSelected(i)) {
+                    flags.add(Flags.valueOf(swcStartModeFlagsBox.getValue(i)));
+                }
+            }
+            result.swcStartConfiguration.startModeFlags = flags.isEmpty() ? null : flags;
         }
         if (gateStartEnabledBox.getValue()) {
             result.gateStartConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.GateStartConfigurationDTO();

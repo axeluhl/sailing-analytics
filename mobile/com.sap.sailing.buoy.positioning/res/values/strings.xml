@@ -1,6 +1,8 @@
 <resources>
 
     <string name="app_name" translatable="false">SAP Buoy Pinger</string>
+    <string name="log_file_template" translatable="false">sap_buoy_log_%s.txt</string>
+    <string name="crash_file_name" translatable="false">sap_buoy_crash_%s.txt</string>
     <string name="title_activity_start" translatable="false">SAP Buoy Pinger</string>
     <string name="course_type">Course Type</string>
     <string name="marks">Marks</string>
@@ -10,10 +12,11 @@
     <string name="reset_position">Reset Position</string>
     <string name="getting_marks">Getting race marks&#8230;</string>
     <string name="set">set</string>
+    <string name="unknown">n/a</string>
     <string name="not_set">not set</string>
-    <string name="mark_list_accuracy">(Accurary ca. %1$sm)</string>
-    <string name="buoy_detail_accuracy_ca" translatable="false">ca. %1$sm</string>
-    <string name="buoy_detail_distance" translatable="false">%1$sm</string>
+    <string name="mark_list_accuracy">(Accuracy ca. %1$sm)</string>
+    <string name="buoy_detail_accuracy_ca" translatable="false">ca. %1$.02fm</string>
+    <string name="buoy_detail_distance" translatable="false">%1$.02fm</string>
     <string name="accuracy">GPS Accuracy</string>
     <string name="distance">Distance to old buoy</string>
     <string name="position_set">The position has been set</string>

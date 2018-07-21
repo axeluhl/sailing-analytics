@@ -128,6 +128,12 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutRaceColumnNameChanged(RaceColumn raceColumn, String oldName, String newName) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.raceColumnNameChanged(raceColumn, oldName, newName);
+        }
+    }
+
     private Set<RaceColumnListener> getRaceColumnListeners() {
         synchronized (raceColumnListeners) {
             return new HashSet<RaceColumnListener>(raceColumnListeners);

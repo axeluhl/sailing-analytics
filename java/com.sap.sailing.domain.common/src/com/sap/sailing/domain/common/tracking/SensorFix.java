@@ -20,4 +20,11 @@ public interface SensorFix extends Timed {
      * @throws IllegalArgumentException if the valueName isn't known by this fix
      */
     double get(String valueName) throws IllegalArgumentException;
+
+    /**
+     * Obtains the data array containing the raw values making this sensor fix.
+     * The array returned is a copy, and writing to it will not affect this fix
+     * in any way.
+     */
+    Double[] get();
 }

@@ -31,6 +31,9 @@ interface AdminConsoleResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/users.png")
     ImageResource competitorsIcon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/sailboat.png")
+    ImageResource sailboatIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/blackdot.png")
     ImageResource blackdotIcon();
     
@@ -48,6 +51,16 @@ interface AdminConsoleResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/clock.png")
     ImageResource clockIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/pairinglist.png")
+    ImageResource pairingList();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/print_pairinglist.png")
+    ImageResource printPairingList();
+    
+    // Smaller variant of RegattaRaceStatesFlagsResources.flagBlue to solve layouting issues
+    @Source("com/sap/sailing/gwt/ui/client/images/blue_small.png")
+    ImageResource blueSmall();
 
     @Source("com/sap/sailing/gwt/ui/client/images/flag_blue.png")
     ImageResource flagIcon();
@@ -75,6 +88,9 @@ interface AdminConsoleResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/competitor_registrations.png")
     ImageResource competitorRegistrations();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boat_registrations.png")
+    ImageResource boatRegistrations();
 
     @Source("com/sap/sailing/gwt/ui/client/images/define_course.png")
     ImageResource defineCourse();

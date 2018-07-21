@@ -29,7 +29,7 @@ import com.sap.sse.common.Util;
 public class WindHelper {
     private static String TAG = WindHelper.class.getName();
 
-    public static void isTrackedRace(final Context context, final ManagedRace race){
+    public static void isTrackedRace(final Context context, final ManagedRace race) {
         try {
             Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(race.getId());
             String path = "/sailingserver/api/v1/events/"+ getEventId(context) + "/racestates";

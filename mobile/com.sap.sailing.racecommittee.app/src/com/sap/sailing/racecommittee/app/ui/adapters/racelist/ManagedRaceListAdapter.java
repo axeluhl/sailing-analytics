@@ -14,6 +14,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
@@ -25,6 +26,7 @@ import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
 import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesComparator;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
@@ -91,8 +93,16 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         for (final ManagedRace race : mAllRaces) {
             viewItemsRaces.put(race, new RaceListDataTypeRace(race, mInflater));
             final SeriesBase series = race.getSeries();
+            RaceState state = race.getState();
+            boolean draft = state.getFinishPositioningList() != null && state.getFinishPositioningList().hasConflicts();
+            boolean confirmed  = state.getConfirmedFinishPositioningList() != null && state.getConfirmedFinishPositioningList().hasConflicts();
+            boolean hasConflict = draft || confirmed;
             if (!viewItemsSeriesHeaders.containsKey(series)) {
-                viewItemsSeriesHeaders.put(series, new RaceListDataTypeHeader(new RaceGroupSeries(race), mInflater));
+                viewItemsSeriesHeaders.put(series, new RaceListDataTypeHeader(new RaceGroupSeries(race), mInflater, hasConflict));
+            } else {
+                if (hasConflict) {
+                    viewItemsSeriesHeaders.get(series).setHasConflict(true);
+                }
             }
         }
     }
@@ -173,6 +183,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                         BroadcastManager.getInstance(getContext()).addIntent(intent);
                     }
                 });
+                holder.protest_warning_image.setVisibility(header.hasConflict() ? View.VISIBLE : View.GONE);
                 convertView.setTag(R.id.race_list_header, raceListElement);
             }
         } else if (type == ViewType.RACE.index) {
@@ -192,6 +203,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             holder.race_name.setText(RaceHelper.getReverseRaceFleetName(race.getRace()));
             RaceState state = race.getRace().getState();
             if (state != null) {
+                CompetitorResults draft = state.getFinishPositioningList();
+                CompetitorResults confirmed = state.getConfirmedFinishPositioningList();
+                holder.warning_sign.setVisibility(((draft != null && draft.hasConflicts()) || confirmed != null && confirmed.hasConflicts()) ? View.VISIBLE : View.GONE);
                 if (state.getStartTime() != null) {
                     int startRes = R.string.race_started;
                     if (state.getFinishedTime() == null) {
@@ -389,10 +403,13 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (holder.explicit_factor != null) {
             holder.explicit_factor.setVisibility(View.GONE);
         }
+        if (holder.warning_sign != null) {
+            holder.warning_sign.setVisibility(View.GONE);
+        }
         holder.setMarker(0);
     }
 
-    private void updateFlag(ViewHolder holder,ManagedRace race, TimePoint now) {
+    private void updateFlag(ViewHolder holder, ManagedRace race, TimePoint now) {
         RaceState state = race.getState();
         if (state == null || state.getStartTime() == null) {
             return;
@@ -447,6 +464,14 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                         timer = TimeUtils.formatDuration(now, poleState.getNextStateValidFrom());
                     }
                 }
+            } else if (state.getStatus() == RaceLogRaceStatus.FINISHING) {
+                if (!currentState.isEmpty()) {
+                    flag = FlagsResources.getFlagDrawable(getContext(), currentState.get(0).getUpperFlag().name(), flag_size);
+                } else {
+                    flag = null;
+                }
+                arrow = null;
+                timer = TimeUtils.formatDurationSince(now.minus(state.getFinishingTime().asMillis()).asMillis());
             }
         } else {
             TimePoint flagDown = procedure.getIndividualRecallRemovalTime();
@@ -499,11 +524,13 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         /* package */ TextView race_unscheduled;
         /* package */ TextView flag_timer;
         /* package */ ImageView protest_image;
+        /* package */ ImageView protest_warning_image;
         /* package */ TextView boat_class;
         /* package */ TextView fleet_series;
         /* package */ ImageView has_dependent_races;
         /* package */ TextView depends_on;
         /* package */ TextView explicit_factor;
+        /* package */ ImageView warning_sign;
 
         /* package */ void findViews(View layout) {
             panel_left = ViewHelper.get(layout, R.id.panel_left);
@@ -520,15 +547,17 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             race_unscheduled = ViewHelper.get(layout, R.id.race_unscheduled);
             flag_timer = ViewHelper.get(layout, R.id.flag_timer);
             protest_image = ViewHelper.get(layout, R.id.protest_image);
+            protest_warning_image = ViewHelper.get(layout, R.id.protest_warning_image);
             boat_class = ViewHelper.get(layout, R.id.boat_class);
             fleet_series = ViewHelper.get(layout, R.id.fleet_series);
             has_dependent_races = ViewHelper.get(layout, R.id.has_dependent_races);
             depends_on = ViewHelper.get(layout, R.id.depends_on);
             explicit_factor = ViewHelper.get(layout, R.id.explicit_factor);
+            warning_sign = ViewHelper.get(layout, R.id.panel_additional_image);
         }
 
         /* package */ void showFlag(LayerDrawable flag, Drawable arrow, String timer) {
-            if (flag != null && arrow != null && timer != null) {
+            if (flag != null && timer != null) {
                 current_flag.setImageDrawable(flag);
                 flag_timer.setText(timer);
                 flag_timer.setCompoundDrawablesWithIntrinsicBounds(arrow, null, null, null);

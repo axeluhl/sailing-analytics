@@ -3,7 +3,7 @@ package com.sap.sailing.domain.swisstimingreplayadapter.impl;
 import com.sap.sailing.domain.swisstimingreplayadapter.CompetitorStatus;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayListener;
 
-public class SwissTimingReplayAdapter implements SwissTimingReplayListener {
+public abstract class SwissTimingReplayAdapter implements SwissTimingReplayListener {
 
     @Override
     public void keyFrameIndex(int keyFrameIndex) {}

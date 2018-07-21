@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Expeditionadapter
+Bundle-SymbolicName: com.sap.sailing.domain.expeditionadapter
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: org.osgi.framework
+Require-Bundle: com.sap.sailing.server.trackfiles,
+ com.sap.sailing.domain,
+ com.sap.sse.common,
+ com.sap.sailing.domain.common
+Bundle-Activator: com.sap.sailing.domain.expeditionadapter.impl.Activator
+Automatic-Module-Name: com.sap.sailing.domain.expeditionadapter

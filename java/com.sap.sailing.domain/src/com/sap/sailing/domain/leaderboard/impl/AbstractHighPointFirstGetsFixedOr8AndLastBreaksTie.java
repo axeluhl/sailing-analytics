@@ -37,7 +37,7 @@ public abstract class AbstractHighPointFirstGetsFixedOr8AndLastBreaksTie extends
     }
 
     @Override
-    public int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint) {
+    public int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard) {
         Double o1Highest = getHighestScore(o1Scores);
         Double o2Highest = getHighestScore(o2Scores);
         return o2Highest.compareTo(o1Highest);
@@ -46,8 +46,8 @@ public abstract class AbstractHighPointFirstGetsFixedOr8AndLastBreaksTie extends
     private double getHighestScore(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> scores) {
         double highestScore = 0;
         for (com.sap.sse.common.Util.Pair<RaceColumn, Double> score : scores) {
-            if ((score.getB() * score.getA().getFactor()) > highestScore) {
-                highestScore = score.getB() * score.getA().getFactor();
+            if ((score.getB() * getScoreFactor(score.getA())) > highestScore) {
+                highestScore = score.getB() * getScoreFactor(score.getA());
             }
         }
         return highestScore;

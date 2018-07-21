@@ -2,9 +2,9 @@ package com.sap.sailing.gwt.home.shared.places.searchresult;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class SearchResultPlace extends Place implements HasLocationTitle, HasMobileVersion {
     private final String searchText;
@@ -16,11 +16,11 @@ public class SearchResultPlace extends Place implements HasLocationTitle, HasMob
     
     @Override
     public String getLocationTitle() {
-        return TextMessages.INSTANCE.search();
+        return StringMessages.INSTANCE.search();
     }
 
     public String getTitle() {
-        return TextMessages.INSTANCE.sapSailing() + " - " + TextMessages.INSTANCE.search();
+        return StringMessages.INSTANCE.sapSailing() + " - " + StringMessages.INSTANCE.search();
     }
     
     public String getSearchText() {

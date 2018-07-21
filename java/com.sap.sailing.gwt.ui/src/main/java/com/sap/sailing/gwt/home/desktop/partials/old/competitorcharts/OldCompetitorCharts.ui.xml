@@ -1,6 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
-	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources" />
 	<ui:style>
@@ -20,7 +20,7 @@
 				<h3><ui:text from="{i18n.competitorsAnalytics}" /></h3>
 			</div>
 			<div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium8} {res.mediaCss.large6} {local_res.css.regattaleaderboard_meta_settings} {style.toolbar}">
-				<ui:text from="{i18n.chooseChart}" />
+				<ui:text from="{i18n.chooseChartType}" />
 				<g:ListBox ui:field="chartTypeSelectionListBox" />
 				<g:Anchor styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_fullscreen_button} {style.toolbarButton}" 
 					href="javascript:;" ui:field="fullscreenAnchor"></g:Anchor>

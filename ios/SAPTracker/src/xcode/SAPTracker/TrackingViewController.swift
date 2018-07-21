@@ -10,86 +10,123 @@ import Foundation
 
 class TrackingViewController : UIViewController {
     
-    struct Color {
-        static let GpsActive = UIColor(hex: 0x8AB54D)
-        static let GpsInactive = UIColor(hex: 0x445A2F)
-        static let Green = UIColor(hex: 0x408000)
-        static let Red = UIColor(hex: 0xFF0000)
-        static let Orange = UIColor(hex: 0xFF8000)
-    }
+    weak var checkIn: CheckIn!
+    weak var sessionController: SessionController!
     
-    @IBOutlet weak var gpsAccuracy: UILabel!
-    @IBOutlet weak var trackingStatusLabel: UILabel!
-    @IBOutlet weak var cachedFixesLabel: UILabel!
-    @IBOutlet weak var onlineModeLabel: UILabel!
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
+    @IBOutlet weak var stopTrackingButton: UIButton!
     
-    /* Register for notifications. Set up timer */
     override func viewDidLoad() {
         super.viewDidLoad()
-  
-        // set values
-        navigationItem.title = DataManager.sharedManager.selectedCheckIn!.leaderBoardName
-        cachedFixesLabel.text = String(format: "%d", DataManager.sharedManager.countCachedFixes())
-        
-        // set online/buffering label
-        networkAvailabilityChanged()
-        
-        // register for notifications
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"networkAvailabilityChanged", name:APIManager.NotificationType.networkAvailabilityChanged, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"newLocation:", name:LocationManager.NotificationType.newLocation, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"locationManagerFailed:", name:LocationManager.NotificationType.locationManagerFailed, object: nil)
-    }
-	
-	// MARK:- Buttons
-	
-	/* Stop tracking, go back to regattas view */
-	@IBAction func stopTrackingButtonTapped(sender: AnyObject) {
-		
-		let alertController = UIAlertController(title: NSLocalizedString("Stop tracking?", comment: ""), message: "", preferredStyle: .Alert)
-		let aCancel = UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .Cancel, handler: nil)
-		alertController.addAction(aCancel)
-		let aStop = UIAlertAction(title: NSLocalizedString("Stop", comment: ""), style: .Default) { action in
-			LocationManager.sharedManager.stopTracking()
-			SendGPSFixController.sharedManager.checkIn = nil
-			self.dismissViewControllerAnimated(true, completion: nil)
-		}
-		alertController.addAction(aStop)
-		presentViewController(alertController, animated: true, completion: nil)
-	}
-
-    // MARK:- Notifications
-    
-    deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        setup()
     }
     
-    func networkAvailabilityChanged() {
-        if (APIManager.sharedManager.networkAvailable) {
-            if !BatteryManager.sharedManager.batterySaving {
-                onlineModeLabel.text = NSLocalizedString("Online", comment: "")
-                onlineModeLabel.textColor = Color.Green
-            } else {
-                onlineModeLabel.text = NSLocalizedString("Battery Saving", comment: "")
-                onlineModeLabel.textColor = Color.Orange
-            }
-        } else {
-            onlineModeLabel.text = NSLocalizedString("Offline", comment: "")
-            onlineModeLabel.textColor = Color.Red
+    override func updateViewConstraints() {
+        super.updateViewConstraints()
+        tableViewHeight.constant = tableView.contentSize.height
+    }
+    
+    // MARK: - Setup
+    
+    fileprivate func setup() {
+        setupButtons()
+        setupLocalization()
+        setupNavigationBar()
+    }
+    
+    fileprivate func setupButtons() {
+        makeRed(button: stopTrackingButton)
+    }
+    
+    fileprivate func setupLocalization() {
+        stopTrackingButton.setTitle(Translation.TrackingView.StopTrackingButton.Title.String, for: .normal)
+    }
+    
+    fileprivate func setupNavigationBar() {
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
+        navigationItem.titleView = TitleView(title: checkIn.event.name, subtitle: checkIn.leaderboard.name)
+        navigationController?.navigationBar.setNeedsLayout()
+    }
+    
+    // MARK: - Actions
+    
+    @IBAction func stopTrackingButtonTapped(_ sender: Any) {
+        let alertController = UIAlertController(
+            title: Translation.TrackingView.StopTrackingAlert.Title.String,
+            message: Translation.TrackingView.StopTrackingAlert.Message.String,
+            preferredStyle: .alert
+        )
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] (action) in
+            self?.stopTracking()
         }
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel)
+        alertController.addAction(okAction)
+        alertController.addAction(cancelAction)
+        present(alertController, animated: true, completion: nil)
     }
     
-    func newLocation(notification: NSNotification) {
-        let horizontalAccuracy = notification.userInfo!["horizontalAccuracy"] as! Double
-        gpsAccuracy.text = "~ " + String(format: "%.0f", horizontalAccuracy) + " m"
-        trackingStatusLabel.text = NSLocalizedString("Tracking", comment: "")
-        trackingStatusLabel.textColor = Color.Green
-        cachedFixesLabel.text = String(format: "%d", DataManager.sharedManager.countCachedFixes())
+    fileprivate func stopTracking() {
+        LocationManager.sharedManager.stopTracking()
+        SVProgressHUD.show()
+        self.sessionController.gpsFixController.sendAll(completion: { (withSuccess) in
+            SVProgressHUD.popActivity()
+            self.dismiss(animated: true, completion: nil)
+        })
     }
     
-    func locationManagerFailed(notification: NSNotification) {
-        gpsAccuracy.text = NSLocalizedString("No GPS", comment: "")
-        trackingStatusLabel.text = NSLocalizedString("Not Tracking", comment: "")
-        trackingStatusLabel.textColor = Color.Red
+    @IBAction func optionButtonTapped(_ sender: Any) {
+        presentSettingsViewController()
     }
+    
+}
 
+// MARK: - UITableViewDataSourceDelegate
+
+extension TrackingViewController: UITableViewDataSource {
+    
+    struct CellIdentifier {
+        static let StatusCell = "StatusCell"
+        static let ModeCell = "ModeCell"
+        static let ChachedFixesCell = "CachedFixesCell"
+        static let GPSAccuracyCell = "GPSAccuracyCell"
+    }
+    
+    @nonobjc static let Rows = [
+        CellIdentifier.StatusCell,
+        CellIdentifier.ModeCell,
+        CellIdentifier.ChachedFixesCell,
+        CellIdentifier.GPSAccuracyCell
+    ]
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return TrackingViewController.Rows.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: TrackingViewController.Rows[indexPath.row]) ?? UITableViewCell()
+        if let gpsFixesCell = cell as? TrackingViewGPSFixesCell {
+            gpsFixesCell.checkIn = checkIn
+        }
+        return cell
+    }
+    
+}
+
+// MARK: - UITableViewDelegate
+
+extension TrackingViewController: UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 52
+    }
+    
+    func tableView(_ tableView: UITableView, estimatedHeightForFooterInSection section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cell.removeSeparatorInset()
+    }
+    
 }

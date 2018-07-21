@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.pages.gwt;
 
 import java.util.List;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.By.ByXPath;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -140,5 +141,9 @@ public class DataEntryPO extends CellTableRowPO {
                 releaseControl.perform();
             }
         };
+    }
+
+    protected void clickActionImage(String actionName) {
+        this.context.findElement(By.xpath(".//td/div/div[@name=\"" + actionName + "\"]/img")).click();
     }
 }

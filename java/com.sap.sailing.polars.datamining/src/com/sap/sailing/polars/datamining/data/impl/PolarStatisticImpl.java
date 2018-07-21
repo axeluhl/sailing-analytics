@@ -4,9 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
@@ -16,6 +14,8 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarStatistic;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 
 public class PolarStatisticImpl implements PolarStatistic {
 

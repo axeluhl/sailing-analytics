@@ -3,6 +3,7 @@ package com.sap.sse.datamining.impl.functions;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.logging.Level;
 
@@ -13,10 +14,10 @@ import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnType> {
-
     private final Method method;
-    private Class<ReturnType> returnType;
-    private AdditionalMethodWrappingFunctionData additionalData;
+    private final Class<ReturnType> returnType;
+    private final AdditionalMethodWrappingFunctionData additionalData;
+    private final String simpleName;
 
     /**
      * Throws an {@link IllegalArgumentException}, if the return type of the method and the given
@@ -25,10 +26,13 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     public MethodWrappingFunction(Method method, Class<ReturnType> returnType) throws IllegalArgumentException {
         super(isMethodADimension(method));
         checkThatReturnTypesMatch(method, returnType);
-
         this.method = method;
         this.returnType = returnType;
-        initializeAdditionalData();
+        this.additionalData = initializeAdditionalData();
+        final String parametersAsString = parametersAsString();
+        final StringBuilder simpleNameBuilder = new StringBuilder(method.getName().length()+parametersAsString.length()+2);
+        simpleNameBuilder.append(method.getName()).append('(').append(parametersAsString).append(')');
+        this.simpleName = simpleNameBuilder.toString();
     }
 
     private static boolean isMethodADimension(Method method) {
@@ -42,26 +46,24 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
         }
     }
 
-    private void initializeAdditionalData() {
-        additionalData = new AdditionalMethodWrappingFunctionData("", 0, Integer.MAX_VALUE);
-
-        if (method.getAnnotation(Dimension.class) != null) {
-            Dimension dimensionData = method.getAnnotation(Dimension.class);
-            additionalData = new AdditionalMethodWrappingFunctionData(dimensionData.messageKey(), 0,
-                    dimensionData.ordinal());
-        }
-
-        if (method.getAnnotation(Statistic.class) != null) {
-            Statistic statisticData = method.getAnnotation(Statistic.class);
-            additionalData = new AdditionalMethodWrappingFunctionData(statisticData.messageKey(),
-                    statisticData.resultDecimals(), statisticData.ordinal());
-        }
-
+    private AdditionalMethodWrappingFunctionData initializeAdditionalData() {
+        final AdditionalMethodWrappingFunctionData result;
         if (method.getAnnotation(Connector.class) != null) {
             Connector connectorData = method.getAnnotation(Connector.class);
-            additionalData = new AdditionalMethodWrappingFunctionData(connectorData.messageKey(), 0,
+            result = new AdditionalMethodWrappingFunctionData(connectorData.messageKey(), 0,
                     connectorData.ordinal());
+        } else if (method.getAnnotation(Statistic.class) != null) {
+            Statistic statisticData = method.getAnnotation(Statistic.class);
+            result = new AdditionalMethodWrappingFunctionData(statisticData.messageKey(),
+                    statisticData.resultDecimals(), statisticData.ordinal());
+        } else  if (method.getAnnotation(Dimension.class) != null) {
+            Dimension dimensionData = method.getAnnotation(Dimension.class);
+            result = new AdditionalMethodWrappingFunctionData(dimensionData.messageKey(), 0,
+                    dimensionData.ordinal());
+        } else {
+            result = new AdditionalMethodWrappingFunctionData("", 0, Integer.MAX_VALUE);
         }
+        return result;
     }
 
     @Override
@@ -80,13 +82,37 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     }
 
     @Override
+    public boolean needsLocalizationParameters() {
+        Iterator<Class<?>> parameterTypesIterator = getParameters().iterator();
+        int parameterCount = 0;
+        while (parameterTypesIterator.hasNext()) {
+            parameterCount++;
+            parameterTypesIterator.next();
+        }
+        if (parameterCount != 2) {
+            return false;
+        }
+        parameterTypesIterator = getParameters().iterator();
+        Class<?> firstParameter = parameterTypesIterator.next();
+        Class<?> secondParameter = parameterTypesIterator.next();
+        return firstParameter.isAssignableFrom(Locale.class) && secondParameter.isAssignableFrom(ResourceBundleStringMessages.class);
+    }
+
+    @Override
     public ReturnType tryToInvoke(Object instance) {
         return tryToInvoke(instance, new Object[0]);
     }
 
     @Override
     public ReturnType tryToInvoke(Object instance, ParameterProvider parameterProvider) {
-        return tryToInvoke(instance, parameterProvider.getParameters());
+        if (method.getParameterCount() == 0) {
+            return tryToInvoke(instance);
+        } else {
+            // copy only as many parameters as the function requires (see also bug 4034)
+            final Object[] paramValues = new Object[method.getParameterCount()];
+            System.arraycopy(parameterProvider.getParameters(), 0, paramValues, 0, paramValues.length);
+            return tryToInvoke(instance, paramValues);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -114,7 +140,7 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
 
     @Override
     public String getSimpleName() {
-        return method.getName() + "(" + parametersAsString() + ")";
+        return simpleName;
     }
 
     private String parametersAsString() {

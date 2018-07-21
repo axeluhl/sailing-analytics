@@ -1,5 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
+import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
+import com.sap.sailing.android.shared.ui.views.EditSetPreference;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.BuildConfig;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.utils.QRHelper;
+import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -13,15 +22,6 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceScreen;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
-
-import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
-import com.sap.sailing.android.shared.ui.views.EditSetPreference;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.BuildConfig;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.utils.QRHelper;
-import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
@@ -197,7 +197,16 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
         if (resultCode == Activity.RESULT_OK) {
             QRHelper.with(getActivity()).saveData(data.getStringExtra("SCAN_RESULT"));
-            AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
+
+            final AppPreferences appPreferences = AppPreferences.on(getActivity());
+            appPreferences.setNeedConfigRefresh(true);
+            // update device identifier in ui
+            EditTextPreference identifierPreference = findPreference(R.string.preference_identifier_key);
+            identifierPreference.setText(appPreferences.getDeviceIdentifier());
+            identifierPreference.setSummary(appPreferences.getDeviceIdentifier());
+            // update server url in ui
+            EditTextPreference serverUrlPreference = findPreference(R.string.preference_server_url_key);
+            serverUrlPreference.setText(appPreferences.getServerBaseURL());
         } else {
             Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }

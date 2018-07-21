@@ -22,6 +22,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -35,6 +36,7 @@ import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -57,11 +59,16 @@ import com.sap.sse.gwt.client.controls.IntegerBox;
  */
 public abstract class DataEntryDialog<T> {
     private final DialogBox dateEntryDialog;
-    private final Validator<T> validator;
+    private Validator<T> validator;
     private final Button okButton;
     private final Button cancelButton;
     private final Label statusLabel;
     private final FlowPanel panelForAdditionalWidget;
+    private final DockPanel buttonPanel;
+    private final FlowPanel rightButtonPanel;
+    private final FlowPanel leftButtonPanel;
+    
+    private boolean dialogInInvalidState = false;
 
     public static interface Validator<T> {
         /**
@@ -101,11 +108,8 @@ public abstract class DataEntryDialog<T> {
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
             Validator<T> validator, boolean animationEnabled, final DialogCallback<T> callback) {
         dateEntryDialog = new DialogBox();
-
         dateEntryDialog.setText(title);
-        // dateEntryDialog.setAnimationEnabled(animationEnabled);
         dateEntryDialog.setGlassEnabled(true);
-
         this.validator = validator;
         okButton = new Button(okButtonName);
         okButton.getElement().getStyle().setMargin(3, Unit.PX);
@@ -120,55 +124,84 @@ public abstract class DataEntryDialog<T> {
             messageLabel.addStyleName("dialogMessageLabel");
             dialogFPanel.add(messageLabel);
         }
-        
         panelForAdditionalWidget = new FlowPanel();
         panelForAdditionalWidget.setWidth("100%");
         dialogFPanel.add(panelForAdditionalWidget);
-        FlowPanel buttonPanel = new FlowPanel();
+        buttonPanel = new DockPanel();
+        buttonPanel.setWidth("100%");
         dialogFPanel.add(buttonPanel);
-        buttonPanel.setStyleName("additionalWidgets");
-        buttonPanel.add(okButton);
+        rightButtonPanel = new FlowPanel();
+        leftButtonPanel = new FlowPanel();
+        leftButtonPanel.setStyleName("additionalWidgetsLeft");
+        rightButtonPanel.setStyleName("additionalWidgetsRight");
+        rightButtonPanel.add(okButton);
+        buttonPanel.add(rightButtonPanel, DockPanel.EAST);
+        buttonPanel.add(leftButtonPanel, DockPanel.WEST);
         cancelButton = new Button(cancelButtonName);
         cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
         cancelButton.ensureDebugId("CancelButton");
-        buttonPanel.add(cancelButton);
+        rightButtonPanel.add(cancelButton);
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 dateEntryDialog.hide();
-                callback.cancel();
+                if (callback != null) {
+                    callback.cancel();
+                }
             }
         });
         dateEntryDialog.setWidget(dialogFPanel);
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 dateEntryDialog.hide();
-                callback.ok(getResult());
+                if (callback != null) {
+                    callback.ok(getResult());
+                }
             }
         });
     }
     
-    protected boolean validate() {
+    public void setValidator(Validator<T> validator) {
+        this.validator = validator;
+    }
+    
+    protected boolean validateAndUpdate() {
         String errorMessage = null;
+        T result = getResult();
         if (validator != null) {
-            errorMessage = validator.getErrorMessage(getResult());
+            errorMessage = validator.getErrorMessage(result);
         }
-        if (errorMessage == null || errorMessage.isEmpty()) {
+        boolean invalidState = errorMessage != null && !errorMessage.isEmpty();
+        if(invalidState != dialogInInvalidState) {
+            dialogInInvalidState = invalidState;
+            onInvalidStateChanged(invalidState);
+        }
+        if (!invalidState) {
             getStatusLabel().setText("");
-            getOkButton().setEnabled(true);
+            onChange(result);
         } else {
             getStatusLabel().setText(errorMessage);
             getStatusLabel().setStyleName("errorLabel");
-            getOkButton().setEnabled(false);
         }
-        return errorMessage == null;
+        
+        return !invalidState;
+    }
+
+    /**
+     * Allows subcasses to listen to changes of the data shown in the dialog.
+     */
+    protected void onChange(T result) {
     }
     
+    protected void onInvalidStateChanged(boolean invalidState) {
+        getOkButton().setEnabled(!invalidState);
+    }
+
     protected abstract T getResult();
 
     /**
      * Creates a text box with a key-up listener attached which ensures the value is updated after each
-     * key-up event and the entire dialog is {@link #validate() validated} in this case.
+     * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
      * 
      * @param initialValue initial value to show in text box; <code>null</code> is permissible
      */
@@ -176,29 +209,53 @@ public abstract class DataEntryDialog<T> {
         return createTextBoxInternal(initialValue, 30);
     }
 
-    public SuggestBox createSuggestBox(Iterable<String> suggestValues) {
+    /**
+     * This methods creates a {@link MultiWordSuggestOracle} where the given suggest values are
+     * {@link MultiWordSuggestOracle#addAll(java.util.Collection) added} and
+     * {@link MultiWordSuggestOracle#setDefaultSuggestionsFromText(java.util.Collection) set as default suggestions},
+     * first. Afterwards, this oracle is used to {@link #createSuggestBox(SuggestOracle) create} as {@link SuggestBox}.
+     * 
+     * @param suggestValues the plain text suggestions to use
+     * @return the new {@link SuggestBox} instance
+     * 
+     * @see #createSuggestBox(SuggestOracle)
+     */
+    protected SuggestBox createSuggestBox(Iterable<String> suggestValues) {
         List<String> suggestValuesAsCollection = new ArrayList<>();
         Util.addAll(suggestValues, suggestValuesAsCollection);
         final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
         oracle.addAll(suggestValuesAsCollection);
         oracle.setDefaultSuggestionsFromText(suggestValuesAsCollection);
-        final SuggestBox result = new SuggestBox(oracle);
+        return createSuggestBox(oracle);
+    }
+    
+    /**
+     * Creates a {@link SuggestBox} using the given {@link SuggestOracle}, a {@link TextBox} and the
+     * {@link com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay DefaultSuggestionDisplay} 
+     * 
+     * @param suggestOracle the {@link SuggestOracle} to in the {@link SuggestBox}
+     * @return the new {@link SuggestBox} instance
+     * 
+     * @see SuggestBox#SuggestBox(SuggestOracle)
+     */
+    protected SuggestBox createSuggestBox(SuggestOracle suggestOracle) {
+        final SuggestBox result = new SuggestBox(suggestOracle);
         result.getValueBox().addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                validate();
+                validateAndUpdate();
             }
         });
         result.getValueBox().addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                validate();
+                validateAndUpdate();
             }
         });
         result.getValueBox().addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                validate();
+                validateAndUpdate();
             }
         });
         DialogUtils.linkEnterToButton(getOkButton(), result.getValueBox());
@@ -208,7 +265,7 @@ public abstract class DataEntryDialog<T> {
     
     /**
      * Creates a text box with a key-up listener attached which ensures the value is updated after each
-     * key-up event and the entire dialog is {@link #validate() validated} in this case.
+     * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
      * 
      * @param initialValue initial value to show in text box; <code>null</code> is permissible
      * @param visibleLength the visible length of the text box
@@ -225,7 +282,7 @@ public abstract class DataEntryDialog<T> {
         textBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                validate();
+                validateAndUpdate();
             }
         });
         DialogUtils.linkEnterToButton(getOkButton(), textBox);
@@ -235,7 +292,7 @@ public abstract class DataEntryDialog<T> {
     
     /**
      * Creates a password text box with a key-up listener attached which ensures the value is updated after each
-     * key-up event and the entire dialog is {@link #validate() validated} in this case.
+     * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
      * 
      * @param initialValue initial value to show in text box; <code>null</code> is permissible
      */
@@ -245,7 +302,7 @@ public abstract class DataEntryDialog<T> {
 
     /**
      * Creates a password text box with a key-up listener attached which ensures the value is updated after each
-     * key-up event and the entire dialog is {@link #validate() validated} in this case.
+     * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
      * 
      * @param initialValue initial value to show in text box; <code>null</code> is permissible
      * @param visibleLength the visible length of the text box
@@ -262,7 +319,7 @@ public abstract class DataEntryDialog<T> {
         parrwordTextBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                validate();
+                validateAndUpdate();
             }
         });
         DialogUtils.linkEnterToButton(getOkButton(), parrwordTextBox);
@@ -272,7 +329,7 @@ public abstract class DataEntryDialog<T> {
     
     /**
      * Creates a text area with a key-up listener attached which ensures the value is updated after each
-     * key-up event and the entire dialog is {@link #validate() validated} in this case.
+     * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
      * 
      * @param initialValue Initial value to show in text area; <code>null</code> is permissible
      */
@@ -283,7 +340,7 @@ public abstract class DataEntryDialog<T> {
         textArea.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent arg0) {
-                validate();
+                validateAndUpdate();
             }
         });
         DialogUtils.linkEscapeToButton(getCancelButton(), textArea);
@@ -292,7 +349,7 @@ public abstract class DataEntryDialog<T> {
     
     /**
      * Creates a box for a long value with a key-up listener attached which ensures the value is updated after each
-     * key-up event and the entire dialog is {@link #validate() validated} in this case.
+     * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
      * 
      * @param initialValue initial value to show in the long box; <code>null</code> is permissible
      */
@@ -304,7 +361,7 @@ public abstract class DataEntryDialog<T> {
         longBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                validate();
+                validateAndUpdate();
             }
         });
         DialogUtils.linkEnterToButton(getOkButton(), longBox);
@@ -328,7 +385,7 @@ public abstract class DataEntryDialog<T> {
         doubleBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                validate();
+                validateAndUpdate();
             }
         });
         DialogUtils.linkEnterToButton(getOkButton(), doubleBox);
@@ -357,7 +414,7 @@ public abstract class DataEntryDialog<T> {
         dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                validate();
+                validateAndUpdate();
             }
         });
         DialogUtils.linkEnterToButton(getOkButton(), dateBox.getTextBox());
@@ -367,7 +424,7 @@ public abstract class DataEntryDialog<T> {
 
     /**
      * Creates a box for a integer value with a key-up listener attached which ensures the value is updated after each
-     * key-up event and the entire dialog is {@link #validate() validated} in this case.
+     * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
      * 
      * @param initialValue initial value to show in the integer box; <code>null</code> is permissible
      */
@@ -379,7 +436,7 @@ public abstract class DataEntryDialog<T> {
         intBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                validate();
+                validateAndUpdate();
             }
         });
         DialogUtils.linkEnterToButton(getOkButton(), intBox);
@@ -395,7 +452,7 @@ public abstract class DataEntryDialog<T> {
         longBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                validate();
+                validateAndUpdate();
             }
         });
         DialogUtils.linkEnterToButton(getOkButton(), longBox);
@@ -411,7 +468,7 @@ public abstract class DataEntryDialog<T> {
     }
     
     public FlowPanel createHeadline(String headlineText, boolean regularHeadline) {
-    	FlowPanel headlinePanel = new FlowPanel();
+        FlowPanel headlinePanel = new FlowPanel();
         Label headlineLabel = new Label(headlineText);
         if (regularHeadline) {
             headlinePanel.addStyleName("dialogInnerHeadline");
@@ -428,7 +485,7 @@ public abstract class DataEntryDialog<T> {
         result.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                validate();
+                validateAndUpdate();
             }
         });
         DialogUtils.linkEnterToButton(getOkButton(), result);
@@ -446,7 +503,7 @@ public abstract class DataEntryDialog<T> {
         result.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                validate();
+                validateAndUpdate();
             }
         });
         DialogUtils.linkEnterToButton(getOkButton(), result);
@@ -473,7 +530,7 @@ public abstract class DataEntryDialog<T> {
         result.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                validate();
+                validateAndUpdate();
             }
         });
         DialogUtils.linkEnterToButton(getOkButton(), result);
@@ -487,7 +544,7 @@ public abstract class DataEntryDialog<T> {
         result.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                validate();
+                validateAndUpdate();
             }
         });
         DialogUtils.linkEnterToButton(getOkButton(), result);
@@ -537,14 +594,14 @@ public abstract class DataEntryDialog<T> {
         if (additionalWidget != null) {
             panelForAdditionalWidget.add(additionalWidget);
         }
-        validate();
+        validateAndUpdate();
         dateEntryDialog.center();
         final FocusWidget focusWidget = getInitialFocusWidget();
         if (focusWidget != null) {
             Scheduler.get().scheduleFinally(new ScheduledCommand() { @Override public void execute() { focusWidget.setFocus(true); }});
         }
     }
-
+    
     /**
      * Defines the {@link #okButton} as the default initial focus widget. Subclasses may redefine. Return
      * {@code null} to not set the focus on any widget.
@@ -563,5 +620,13 @@ public abstract class DataEntryDialog<T> {
     
     protected void addAutoHidePartner(Element element) {
         dateEntryDialog.addAutoHidePartner(element);
+    }
+    
+    protected FlowPanel getLeftButtonPannel() {
+        return leftButtonPanel;
+    }
+    
+    protected FlowPanel getRightButtonPannel() {
+        return rightButtonPanel;
     }
 }

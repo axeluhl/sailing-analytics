@@ -1,24 +1,11 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
-    xmlns:ud="urn:import:com.sap.sse.security.ui.userprofile.desktop.userdetails"
     xmlns:um="urn:import:com.sap.sailing.gwt.home.shared.usermanagement.decorator"
-    xmlns:ms="urn:import:com.sap.sailing.gwt.home.shared.partials.multiselection">
+    xmlns:up="urn:import:com.sap.sailing.gwt.home.shared.places.user.profile.preferences">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:style>
-    </ui:style>
     <um:AuthorizedContentDecoratorDesktop ui:field="decoratorUi">
         <um:content>
-            <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
-                <div ui:field="notificationsTextUi" class="{res.mediaCss.column} {res.mediaCss.medium12} {res.mainCss.spacermargintopsmall} {res.mainCss.spacermarginbottomsmall}">
-                    <ui:text from="{i18n.userNotificationsOnlyIfMailAddressIsVerified}" />
-                </div>
-                <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mainCss.spacermargintopmediumsmall}">
-                    <ms:SuggestedMultiSelection ui:field="favoriteCompetitorsSelctionUi"/>
-                </div>
-                <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mainCss.spacermargintopmediumsmall}">
-                    <ms:SuggestedMultiSelection ui:field="favoriteBoatClassesSelctionUi"/>
-                </div>
-            </g:HTMLPanel>
+            <up:UserPreferences ui:field="userPreferencesUi"/>
        </um:content>
     </um:AuthorizedContentDecoratorDesktop>
 </ui:UiBinder>

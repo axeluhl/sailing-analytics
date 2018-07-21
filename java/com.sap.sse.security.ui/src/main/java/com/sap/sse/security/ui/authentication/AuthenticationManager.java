@@ -1,5 +1,8 @@
 package com.sap.sse.security.ui.authentication;
 
+import java.util.function.Consumer;
+
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -58,10 +61,7 @@ public interface AuthenticationManager {
      */
     void logout();
     
-    /**
-     * Refresh information of current user.
-     */
-    void refreshUserInfo();
+    void updateUserProperties(String fullName, String company, String localeName, AsyncCallback<Void> callback);
     
     /**
      * Provide the {@link AuthenticationContext} for the current user 
@@ -82,4 +82,14 @@ public interface AuthenticationManager {
          */
         void onSuccess(T result);
     }
+
+    /**
+     * This triggers a check if a hint should be shown for non authenticated users to advertise the possibility to
+     * create and account and log in. When such a hint should be shown, the given {@link Consumer} is called. The
+     * {@link Runnable} given to this {@link Consumer} needs to be called when the user dismissed the hint or looks at
+     * the detailed information.<br>
+     * The given hideUserHintCallback is called when a user is authenticated while the hint is shown, which means, the
+     * hint needs to be closed immediately.
+     */
+    void checkNewUserPopup(Runnable hideUserHintCallback, Consumer<Runnable> showUserHintCallback);
 }

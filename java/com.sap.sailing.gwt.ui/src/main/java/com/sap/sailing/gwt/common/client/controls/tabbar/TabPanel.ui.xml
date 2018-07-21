@@ -22,8 +22,13 @@
 		/* font-size: 0; */
 		margin-bottom: -1px;
 	}
+	
 	.tabExtension {
 		float: right;
+		margin-top: .5em;
+	}
+	
+	.tabExtension > * {
 		margin-left: 0.5em;
 	}
 	</ui:style>
@@ -33,12 +38,10 @@
 			<div class="{res.mediaCss.grid}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 					<g:FlowPanel ui:field="tabExtension" addStyleNames="{style.tabExtension}" />
-					<c:TabBar ui:field="tabBar"
-						addStyleNames="{style.navigation}" />
+					<c:TabBar ui:field="tabBar" addStyleNames="{style.navigation}" />
 				</div>
 			</div>
 		</g:HTMLPanel>
-		<g:SimplePanel ui:field="tabContentPanelUi"
-			addStyleNames="{style.content}" />
+		<g:SimplePanel ui:field="tabContentPanelUi" addStyleNames="{style.content}" />
 	</g:FlowPanel>
 </ui:UiBinder>

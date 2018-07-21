@@ -1,11 +1,32 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
-		xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials">
-    <ui:style>
-	   	.outerBox {
-			padding-top: 10px;
-		}
+        xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages"/>
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="lb_res" type="com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources" />
+    <ui:style type="com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardTabView.Style">
+        .mainPanel {
+            position: relative;
+        }
+        .buttons {
+            text-align: right;
+            position: absolute;
+        }
+        .showLiveRacesActive {
+            background-color: red;
+        }
     </ui:style>
-    <g:HTMLPanel styleName="{style.outerBox}">
-		<dp:old.leaderboard.OldLeaderboard ui:field='leaderboard'/>
-    </g:HTMLPanel>
+    <g:FlowPanel addStyleNames="{res.mediaCss.grid} {style.mainPanel}">
+        <g:FlowPanel ui:field="liveRacesContainer" addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmedium}">
+            <dp:liveraces.LiveRacesList ui:field="liveRaces" />
+        </g:FlowPanel>
+        <g:FlowPanel ui:field="buttonContainer" addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopsmall} {style.buttons}">
+            <g:Anchor href="javascript:;" ui:field="collapseLiveRacesButton" title="{i18n.showLiveNow}" 
+                    addStyleNames="{res.mainCss.button} {lb_res.css.regattaleaderboard_meta_liveraces_button} {style.showLiveRacesActive}" />
+            <g:Anchor href="javascript:;" ui:field="fullscreenButton" title="{i18n.openFullscreenView}"
+                    addStyleNames="{res.mainCss.button} {lb_res.css.regattaleaderboard_meta_fullscreen_button}" />
+        </g:FlowPanel>
+        <g:FlowPanel styleName="{res.mediaCss.column} {res.mediaCss.small12}">
+            <dp:old.leaderboard.OldLeaderboard ui:field='leaderboard'/>
+        </g:FlowPanel>
+    </g:FlowPanel>
 </ui:UiBinder>

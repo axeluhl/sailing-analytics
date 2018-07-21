@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.common.client.AbstractMapTokenizer;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public abstract class AbstractSeriesPlace extends Place {
     private final SeriesContext ctx;
@@ -23,7 +23,7 @@ public abstract class AbstractSeriesPlace extends Place {
     }
 
     public String getTitle(String eventName) {
-        return TextMessages.INSTANCE.sapSailing() + " - " + eventName;
+        return StringMessages.INSTANCE.sapSailing() + " - " + eventName;
     }
 
     public String getSeriesUuidAsString() {

@@ -18,5 +18,7 @@ public interface Client {
     
     String getSecret();
     
-    String getRedirectUri();
+    String getDefaultRedirectUri();
+
+    String getRedirectUri(String redirectProtocol, String redirectHost, String redirectPort);
 }

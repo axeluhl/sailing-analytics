@@ -3,22 +3,22 @@
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-    <ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.upcoming.EventsOverviewUpcomingResources" />
+    <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
  
 
 	<g:HTMLPanel addStyleNames="{local_res.css.eventsoverviewupcoming} {local_res.css.accordion}">
 	    <g:HTMLPanel ui:field="header" addStyleNames="{local_res.css.eventsoverviewupcoming_header} {local_res.css.accordion_trigger}">
-	      <img src="images/mobile/calender-icon-blue.svg" class="{local_res.css.eventsoverviewupcoming_header_icon} {local_res.css.eventsoverviewupcoming_headeritem}"></img>
+	      <img src="{local_res.calendar.getSafeUri}" class="{local_res.css.eventsoverviewupcoming_header_icon} {local_res.css.eventsoverviewupcoming_headeritem}"></img>
 	      <h3 class="{local_res.css.eventsoverviewupcoming_header_title} {local_res.css.eventsoverviewupcoming_headeritem}">
-	        <ui:text from="{i18n_ubi.seriesHeaderUpcoming}" />
+	        <ui:text from="{i18n.seriesHeaderUpcoming}" />
 	      </h3>
 	      <div class="{local_res.css.eventsoverviewupcoming_header_info} {local_res.css.eventsoverviewupcoming_headeritem}">
 	        <div ui:field="eventsCount" class="{local_res.css.eventsoverviewupcoming_header_info_text}">
 	          
 	        </div>
-	        <img src="images/home/arrow-down-grey.png" alt="" class="{local_res.css.eventsoverviewupcoming_header_info_arrow}"></img>
+	        <img src="{shr.arrowDownGrey.getSafeUri}" alt="" class="{local_res.css.eventsoverviewupcoming_header_info_arrow}"></img>
 	      </div>
 	    </g:HTMLPanel>
 	    <div class="{local_res.css.eventsoverviewupcoming_content} {local_res.css.accordion_content}">

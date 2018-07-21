@@ -28,7 +28,8 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
     private final List<RegattaDTO> availableRegattas;
     private final ListBox availableRegattasListBox;
     
-    public AbstractEventManagementPanel(SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
+    public AbstractEventManagementPanel(SailingServiceAsync sailingService,
+            RegattaRefresher regattaRefresher,
             ErrorReporter errorReporter, boolean actionButtonsEnabled, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, stringMessages);
         this.availableRegattas = new ArrayList<RegattaDTO>();
@@ -37,7 +38,8 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
         this.availableRegattasListBox.ensureDebugId("AvailableRegattasListBox");
         
         // TrackedEventsComposite should exist in every *ManagementPanel. 
-        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, errorReporter,
+                regattaRefresher,
                 stringMessages, /* multiselection */ true, actionButtonsEnabled);
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
     }

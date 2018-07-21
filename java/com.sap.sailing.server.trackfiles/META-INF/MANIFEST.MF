@@ -7,7 +7,8 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.server.trackfiles,
- com.sap.sailing.server.trackfiles.common
+ com.sap.sailing.server.trackfiles.common,
+ com.sap.sailing.server.trackfiles.impl
 Require-Bundle: 
  com.sap.sailing.domain,
  com.sap.sailing.domain.common,
@@ -21,4 +22,5 @@ Import-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.common.sensordata,
  org.osgi.framework;version="1.7.0"
 Bundle-Activator: com.sap.sailing.server.trackfiles.impl.Activator
+Automatic-Module-Name: com.sap.sailing.server.trackfiles
 

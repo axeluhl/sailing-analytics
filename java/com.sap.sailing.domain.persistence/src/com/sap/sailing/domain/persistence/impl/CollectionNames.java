@@ -2,6 +2,7 @@ package com.sap.sailing.domain.persistence.impl;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 
 /**
  * Defines literals providing the names for MongoDB collections. The literal documentation described the semantics
@@ -67,16 +68,27 @@ public enum CollectionNames {
      */
     REGATTA_FOR_RACE_ID, 
     
-    /**
-     * Stores the race log events for a tracked race.
-     */
 
     
     /**
-     * Stores competitors for smartphone tracking.
+     * Legacy store for competitors before implementation of bug2822
+     * Contains the old competitors with contained boats.
+     */
+    COMPETITORS_BAK,
+
+    /**
+     * Stores competitors with or without boat references.
      */
     COMPETITORS,
-    
+
+    /**
+     * Stores boats.
+     */
+    BOATS,
+
+    /**
+     * Stores the race log events for a tracked race.
+     */
     RACE_LOGS,
     
     REGATTA_LOGS,
@@ -100,4 +112,15 @@ public enum CollectionNames {
      * URLs providing race results
      */
     RESULT_URLS,
+    
+    /**
+     * DB representations of {@link RaceTrackingConnectivityParameters} objects, serialized in a type-specific
+     * way by corresponding implementations of the RaceTrackingConnectivityParametersMongoHandler} interface.
+     */
+    CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED,
+    
+    /**
+     * Contains the known anniversaries
+     */
+    ANNIVERSARIES
 }

@@ -28,23 +28,24 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.declination.Declination;
+import com.sap.sailing.declination.impl.DeclinationImporter;
 import com.sap.sailing.declination.impl.DeclinationRecordImpl;
 import com.sap.sailing.declination.impl.DeclinationStore;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class DeclinationStoreTest extends AbstractDeclinationTest {
+public abstract class DeclinationStoreTest<I extends DeclinationImporter> extends AbstractDeclinationTest<I> {
     private DeclinationStore store;
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
     
     @Before
     public void setUp() {
-        store = new DeclinationStore();
+        store = new DeclinationStore(importer);
     }
     
     @Test
@@ -325,7 +326,7 @@ public class DeclinationStoreTest extends AbstractDeclinationTest {
     @Test
     public void copyExistingDeclinationsToNewFormat() throws IOException, ClassNotFoundException, ParseException {
         File resourcesDir = new File("../com.sap.sailing.declination/resources/");
-        DeclinationStore store = new DeclinationStore();
+        DeclinationStore store = new DeclinationStore(importer);
         assertTrue(resourcesDir.isDirectory());
         for (File f : resourcesDir.listFiles()) {
             if (f.getName().startsWith("declination-") && f.getName().endsWith(".txt") &&

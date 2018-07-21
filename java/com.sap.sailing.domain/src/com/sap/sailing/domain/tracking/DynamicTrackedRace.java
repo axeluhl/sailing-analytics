@@ -6,6 +6,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmed
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -81,13 +82,20 @@ public interface DynamicTrackedRace extends TrackedRace {
     DynamicGPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
     
     /**
-     * Gets an existing {@link DynamicSensorFixTrack} or creates and returns a new one if there is none yet.
+     * Gets an existing {@link DynamicSensorFixTrack} or creates and returns a new one if there is none yet. If a
+     * Competitor is given who is not part of this race, no track is created.
+     * 
      * @see #getDynamicSensorTrack(Competitor, String)
      * 
-     * @param competitor the competitor to get the track for
-     * @param trackName the name of the track to get
-     * @param newTrackFactory factory to create a new track instance if there isn't one yet for the competitor and the given track name.
-     * @return the track for the competitor and track name
+     * @param competitor
+     *            the competitor to get the track for
+     * @param trackName
+     *            the name of the track to get
+     * @param newTrackFactory
+     *            factory to create a new track instance if there isn't one yet for the competitor and the given track
+     *            name.
+     * @return the track for the competitor and track name of null if the given {@link Competitor} isn't part of this
+     *         race
      */
     <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getOrCreateSensorTrack(
             Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory);
@@ -187,6 +195,22 @@ public interface DynamicTrackedRace extends TrackedRace {
     
     void setStatus(TrackedRaceStatus newStatus);
     
+    /**
+     * Updates the status of one {@link TrackingDataLoader}. This influences the overall status of the TrackedRace with the following rules:
+     * <ul>
+     * <li>The {@link TrackedRace} is initially in the state PREPARED</li>
+     * <li>If the {@code status} of the {@code source} loader is set to {@link TrackedRaceStatusEnum#REMOVED}, the {@link TrackedRace}
+     * will to to status {@link TrackedRaceStatusEnum#REMOVED}.</li>
+     * <li>Otherwise, if there are no loaders left, the {@link TrackedRace}'s status goes to {@link TrackedRaceStatusEnum#FINISHED}.</li>
+     * <li>If any loader's state is ERROR, this will also be the case for the {@link TrackedRace}</li>
+     * <li>Otherwise: If any loader's state is LOADING, the {@link TrackedRace} will also be in loading state with the progress being the average progress of all loaders (including those not being in loading state)</li>
+     * <li>Otherwise: If all loaders are in PREPARED state, this will also be the case for the {@link TrackedRace}</li>
+     * <li>Otherwise: The {@link TrackedRace} is in TRACKING state</li>
+     * </ul>
+     * Loaders in status {@link TrackedRaceStatusEnum#FINISHED} or {@link TrackedRaceStatusEnum#REMOVED} will be removed.
+     * 
+     * @see TrackedRace#getStatus()
+     */
     void onStatusChanged(TrackingDataLoader source, TrackedRaceStatus status);
 
     /**

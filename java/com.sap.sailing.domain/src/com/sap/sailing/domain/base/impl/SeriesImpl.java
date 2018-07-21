@@ -15,7 +15,6 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.impl.RenamableImpl;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -24,6 +23,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.RenamableImpl;
 
 /**
  * A series listens on its columns; however, a veto for column addition isn't done here but in a {@link RegattaLeaderboard}.
@@ -359,6 +359,11 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     @Override
     public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
         raceColumnListeners.notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
+    }
+
+    @Override
+    public void raceColumnNameChanged(RaceColumn raceColumn, String oldName, String newName) {
+        raceColumnListeners.notifyListenersAboutRaceColumnNameChanged(raceColumn, oldName, newName);
     }
 
     @Override

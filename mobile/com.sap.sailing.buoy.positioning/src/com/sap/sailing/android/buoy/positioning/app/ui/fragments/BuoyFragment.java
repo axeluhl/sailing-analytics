@@ -1,21 +1,16 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
-import java.text.DecimalFormat;
-
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.location.GpsStatus;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,30 +33,35 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
-public class BuoyFragment extends BaseFragment implements LocationListener {
+public class BuoyFragment extends BaseFragment
+    implements android.location.LocationListener {
+    
     private static final String TAG = BuoyFragment.class.getName();
-    private static final int GPS_MIN_DISTANCE = 1;
+
     private static final int GPS_MIN_TIME = 1000;
-    private static final String N_A = "n/a";
+    private float minLocationUpdateDistanceInMeters = 0f;
+
     private TextView accuracyTextView;
     private TextView distanceTextView;
     private Button setPositionButton;
     private MapFragment mapFragment;
     private Location lastKnownLocation;
     private LatLng savedPosition;
-    private LocationManager locationManager;
     private pingListener pingListener;
     private SignalQualityIndicatorView signalQualityIndicatorView;
     private boolean initialLocationUpdate;
     private IntentReceiver mReceiver;
     private PositioningActivity positioningActivity;
     private LocalBroadcastManager mBroadcastManager;
-    private GPSListener mGpsListener;
+
+    protected LocationManager locationManager;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,13 +75,22 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         setUpSetPositionButton(layout, clickListener);
 
         signalQualityIndicatorView = ViewHelper.get(layout, R.id.signal_quality_indicator);
-        signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
+        signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal);
 
         mReceiver = new IntentReceiver();
-        mGpsListener = new GPSListener();
         mBroadcastManager = LocalBroadcastManager.getInstance(inflater.getContext());
         initMapFragment();
 
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            /**
+             * prior to JellyBean, the minimum time for location updates parameter MIGHT be ignored,
+             * so providing a minimum distance value greater than 0 is recommended
+             */
+            minLocationUpdateDistanceInMeters = .5f;
+        }
+        
         return layout;
     }
 
@@ -92,9 +101,8 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         positioningActivity = (PositioningActivity) getActivity();
         mapFragment.getMap().setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         initialLocationUpdate = true;
-        initLocationProvider();
         MarkInfo mark = positioningActivity.getMarkInfo();
-        signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
+        signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal);
         if (mark != null) {
             setUpTextUI(lastKnownLocation);
             GoogleMap map = mapFragment.getMap();
@@ -106,7 +114,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             }
         }
         initMarkerReceiver();
-        checkGPS();
     }
 
     private void initMapFragment() {
@@ -116,7 +123,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         transaction.replace(R.id.map, mapFragment);
         transaction.commit();
     }
-
+    
     private void setUpSetPositionButton(View layout, ClickListener clickListener) {
         setPositionButton = ViewHelper.get(layout, R.id.marker_set_position_button);
         disablePositionButton();
@@ -125,27 +132,8 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
 
     private void disablePositionButton() {
         setPositionButton.setEnabled(false);
-        boolean gpsEnabled = LocationHelper.isGPSEnabled(getActivity());
-        int buttonTextId = gpsEnabled ? R.string.set_position_no_gps_yet : R.string.set_position_disabled_gps;
-        String text = getString(buttonTextId);
-        setPositionButton.setText(text);
-    }
-
-    private void checkGPS() {
-        if (lastKnownLocation == null) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog)
-                .setMessage(R.string.error_message_no_position)
-                .setPositiveButton(android.R.string.ok, null);
-            if (!LocationHelper.isGPSEnabled(getActivity())) {
-                builder.setNegativeButton(R.string.settings, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        LocationHelper.openLocationSettings(getActivity());
-                    }
-                });
-            }
-            builder.show();
-        }
+        int resId = LocationHelper.isGPSEnabled(getActivity()) ? R.string.set_position_no_gps_yet : R.string.set_position_disabled_gps;
+        setPositionButton.setText(resId);
     }
 
     private void initMarkerReceiver() {
@@ -156,32 +144,34 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME, minLocationUpdateDistanceInMeters , this);
+        lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
-        // Unsubscribe from location updates for power saving
         locationManager.removeUpdates(this);
-        locationManager.removeGpsStatusListener(mGpsListener);
+        
         mBroadcastManager.unregisterReceiver(mReceiver);
     }
 
-    public void setUpTextUI(Location location) {
-        String accuracyText = N_A;
-        String distanceText = N_A;
-        DecimalFormat accuracyFormatter = new DecimalFormat("#.##");
-        String accuracyString = getString(R.string.buoy_detail_accuracy_ca);
-        String distanceString = getString(R.string.buoy_detail_distance);
+    private void setUpTextUI(Location location) {
+        String accuracyText = this.getString(R.string.unknown);
+        String distanceText = this.getString(R.string.unknown);
         if (location != null) {
-            accuracyText = String.format(accuracyString, accuracyFormatter.format(location.getAccuracy()));
+            accuracyText = getString(R.string.buoy_detail_accuracy_ca, location.getAccuracy());
             MarkPingInfo markPing = positioningActivity.getMarkPing();
             if (markPing != null) {
                 double savedLatitude = Double.parseDouble(markPing.getLatitude());
                 double savedLongitude = Double.parseDouble(markPing.getLongitude());
                 savedPosition = new LatLng(savedLatitude, savedLongitude);
                 float[] results = new float[1];
-                Location.distanceBetween(location.getLatitude(), location.getLongitude(), savedLatitude, savedLongitude,
-                        results);
+                Location.distanceBetween(location.getLatitude(), location.getLongitude(), savedLatitude, savedLongitude, results);
                 float distance = results[0];
-                distanceText = String.format(distanceString, accuracyFormatter.format(distance));
+                distanceText = getString(R.string.buoy_detail_distance, distance);
             }
         }
 
@@ -192,6 +182,10 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         distanceTextView.setText(distanceText);
     }
 
+    
+    /**
+     * Methods implemented through LocationManager
+     */ 
     @Override
     public void onLocationChanged(Location location) {
         if (getActivity() instanceof PositioningActivity) {
@@ -212,7 +206,28 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 15));
             initialLocationUpdate = false;
         }
+    }
+    
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+      //no-op
+    }
 
+    @Override
+    public void onProviderDisabled(String provider) {
+        //provider (GPS) disabled by the user while tracking
+        disablePositionButton();
+        setUpTextUI(null);
+        signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal);
+        
+        LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        //provider (GPS) (re)enabled by the user while tracking
+        //call disablePositionButton() so that its text says "searching for GPS" again
+        disablePositionButton();
     }
 
     private void configureMap(GoogleMap map) {
@@ -221,55 +236,19 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         }
     }
 
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        if (getActivity() instanceof PositioningActivity) {
-            initLocationProvider();
-        }
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-        if (getActivity() instanceof PositioningActivity) {
-            initLocationProvider();
-        }
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        if (getActivity() instanceof PositioningActivity) {
-            initLocationProvider();
-        }
-    }
-
-    private void initLocationProvider() {
-        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        locationManager.removeUpdates(this);
-        locationManager.removeGpsStatusListener(mGpsListener);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME, GPS_MIN_DISTANCE, this);
-        locationManager.addGpsStatusListener(mGpsListener);
-        
-        Location initialLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        
-        if (initialLocation != null) {
-            onLocationChanged(initialLocation);
-        }
-    }
-
-    public void updateMap() {
+    private void updateMap() {
         GoogleMap map = mapFragment.getMap();
         map.clear();
 
         if (savedPosition != null) {
-            MarkerOptions savedLocactionOptions = new MarkerOptions();
-            savedLocactionOptions.position(savedPosition);
-            savedLocactionOptions.visible(true);
-            map.addMarker(savedLocactionOptions);
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(savedPosition);
+            markerOptions.visible(true);
+            map.addMarker(markerOptions);
         }
-
     }
 
-    public void reportGPSQuality(float gpsAccuracy) {
+    private void reportGPSQuality(float gpsAccuracy) {
         GPSQuality quality = GPSQuality.noSignal;
 
         if (gpsAccuracy > 48) {
@@ -279,30 +258,15 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         } else if (gpsAccuracy <= 10) {
             quality = GPSQuality.great;
         }
-        signalQualityIndicatorView.setSignalQuality(quality.toInt());
-
+        signalQualityIndicatorView.setSignalQuality(quality);
     }
 
-    public void handleSuccessfulResponse(){
+    private void handleSuccessfulResponse() {
         Toast.makeText(getActivity(), getString(R.string.position_set), Toast.LENGTH_SHORT).show();
     }
 
     public void setPingListener(pingListener listener) {
         pingListener = listener;
-    }
-
-    public enum GPSQuality {
-        noSignal(0), poor(2), good(3), great(4);
-
-        private final int gpsQuality;
-
-        GPSQuality(int quality) {
-            this.gpsQuality = quality;
-        }
-
-        public int toInt() {
-            return this.gpsQuality;
-        }
     }
 
     public interface pingListener {
@@ -343,28 +307,9 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                 setUpTextUI(lastKnownLocation);
                 updateMap();
             }
-            if (action.equals(getString(R.string.ping_reached_server))){
+            if (action.equals(getString(R.string.ping_reached_server))) {
                 Log.d(TAG, "Response reached Buoy Fragment");
                 handleSuccessfulResponse();
-            }
-        }
-    }
-
-    private class GPSListener implements GpsStatus.Listener {
-
-        @Override
-        public void onGpsStatusChanged(int event) {
-            switch (event) {
-                case GpsStatus.GPS_EVENT_STOPPED: {
-                    if (isAdded()) {
-                        disablePositionButton();
-                        distanceTextView.setText(N_A);
-                        accuracyTextView.setText(N_A);
-                        mapFragment.getMap().setMyLocationEnabled(false);
-                        reportGPSQuality(0);
-                        break;
-                    }
-                }
             }
         }
     }

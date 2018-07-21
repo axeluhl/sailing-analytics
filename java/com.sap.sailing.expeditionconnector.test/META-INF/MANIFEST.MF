@@ -9,5 +9,6 @@ Fragment-Host: com.sap.sailing.expeditionconnector
 Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain.test,
  com.sap.sailing.udpconnector,
- org.junit4;bundle-version="4.8.2",
+ org.junit;bundle-version="4.8.2",
  com.sap.sse.common
+Automatic-Module-Name: com.sap.sailing.expeditionconnector.test

@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.shared.utils;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
@@ -27,7 +27,7 @@ public class Countdown {
     public enum Unit {DAYS, HOURS, MINUTES, SECONDS}
     
     public static class RemainingTime {
-        private static TextMessages i18n = GWT.create(TextMessages.class);
+        private static StringMessages i18n = GWT.create(StringMessages.class);
         public RemainingTime(long value, Unit unit) {
             this.value = value;
             this.unit = unit;

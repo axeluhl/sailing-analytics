@@ -9,13 +9,14 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.event.EventLinkAndMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.start.EventQuickfinderDTO;
+import com.sap.sailing.gwt.home.mobile.partials.anniversary.MobileAnniversaries;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.stage.Stage;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class StartViewImpl extends Composite implements StartView {
@@ -30,7 +31,8 @@ public class StartViewImpl extends Composite implements StartView {
 
     @UiField(provided = true)
     Stage stage;
-
+    @UiField
+    MobileAnniversaries anniversariesUi;
     @UiField Quickfinder quickFinderUi;
     @UiField AnchorElement showAllEventsUi;
 
@@ -56,14 +58,19 @@ public class StartViewImpl extends Composite implements StartView {
             String group;
             EventState state = event.getState();
             if(state == EventState.FINISHED) {
-                group = TextMessages.INSTANCE.searchResultSortNewest();
+                group = i18n.searchResultSortNewest();
             } else if(state == EventState.RUNNING) {
-                group = TextMessages.INSTANCE.live();
+                group = i18n.live();
             } else {
-                group = TextMessages.INSTANCE.seriesHeaderUpcoming();
+                group = i18n.seriesHeaderUpcoming();
             }
             PlaceNavigation<?> eventPlaceNavigation = currentPresenter.getEventNavigation(event);
             quickFinderUi.addItemToGroup(group, event.getDisplayName(), eventPlaceNavigation);
         }
+    }
+
+    @Override
+    public AnniversariesView getAnniversariesView() {
+        return this.anniversariesUi;
     }
 }

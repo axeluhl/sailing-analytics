@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,19 +26,21 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
+import com.sap.sailing.domain.test.PositionAssert;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -46,6 +49,7 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 
@@ -88,8 +92,8 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
-                }, /* trackedRegattaRegistry */ null, mock(RaceLogResolver.class),
-                /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, ReceiverType.RACECOURSE);
+                }, /* trackedRegattaRegistry */ null, mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class),
+                /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
         for (final Receiver receiver : typeControllers) {
             addReceiverToStopDuringTearDown(receiver);
@@ -101,7 +105,8 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
-                }, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class));
+                }, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class),
+                Optional.empty());
         WindSource windSource = new WindSourceImpl(WindSourceType.WEB);
         Mongo myFirstMongo = newMongo();
         DB firstDatabase = myFirstMongo.getDB(dbConfiguration.getDatabaseName());
@@ -123,9 +128,9 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         result.lockForRead();
         try {
             for (Wind wind : result.getRawFixes()) {
-                assertEquals(pos, wind.getPosition());
-                assertEquals(10., wind.getKnots(), 0.000000000001);
-                assertEquals(myBearingDeg, wind.getBearing().getDegrees(), 0.000000001);
+                PositionAssert.assertPositionEquals(pos, wind.getPosition(), /* deg delta */ 0.000001);
+                assertEquals(10., wind.getKnots(), 0.01);
+                assertEquals(myBearingDeg, wind.getBearing().getDegrees(), 0.01);
                 myBearingDeg += 1.1;
             }
         } finally {

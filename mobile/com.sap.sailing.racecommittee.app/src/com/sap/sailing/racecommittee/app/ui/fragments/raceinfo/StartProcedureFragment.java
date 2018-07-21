@@ -62,7 +62,7 @@ public class StartProcedureFragment extends BaseFragment {
         if (getView() != null && getArguments() != null) {
             switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
                 case START_MODE_PLANNED:
-                    if (AppUtils.with(getActivity()).isLand()) {
+                    if (AppUtils.with(getActivity()).isLandscape()) {
                         mHeader.setVisibility(View.GONE);
                     }
                     break;

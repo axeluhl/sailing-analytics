@@ -334,16 +334,6 @@
             "key": "ASL2.0"
         },
         {
-            "name": "GWT-Bootstrap",
-            "version": "2.3.2.0",
-            "owner": "GWT-Bootstrap",
-            "homepage": "http://gwtbootstrap.github.com/",
-            "acknowledgements": [
-                "Copyright ${year} GWT-Bootstrap"
-            ],
-            "key": "ASL2.0"
-        },
-        {
             "name": "gwt-google-apis",
             "version": "ajaxloader-svn",
             "owner": "Google, Inc.",
@@ -635,6 +625,16 @@
             "key": "ASL2.0"
         },
         {
+            "name": "netcdfAll",
+            "version": "4.6.8",
+            "owner": "Unidata",
+            "homepage": "http://www.unidata.ucar.edu/",
+            "acknowledgements": [
+                "Copyright 1993-2015 University Corporation for Atmospheric Research/Unidata"
+            ],
+            "key": "UNIDATA"
+        },
+        {
             "name": "Pull API for parsing MIME messages - MIMEpull",
             "version": "1.9.4",
             "owner": "Oracle and/or its affiliates",
@@ -697,7 +697,7 @@
         },
         {
             "name": "video-js",
-            "version": "4.12.10",
+            "version": "5.20.3",
             "owner": "Brightcove, Inc.",
             "homepage": "https://github.com/videojs/video.js",
             "acknowledgements": [
@@ -707,7 +707,7 @@
         },
         {
             "name": "video-js-vimeo",
-            "version": "master-20140814",
+            "version": "2.0.0",
             "owner": "Benoit Tremblay",
             "homepage": "http://github.com/eXon/videojs-vimeo/",
             "acknowledgements": [
@@ -717,13 +717,33 @@
         },
         {
             "name": "video-js-youtube",
-            "version": "1.2.5",
+            "version": "2.0.8",
             "owner": "Benoit Tremblay",
             "homepage": "http://github.com/eXon/videojs-youtube/",
             "acknowledgements": [
                 "Copyright (c) 2015 Benoit Tremblay <trembl.ben@gmail.com>"
             ],
             "key": "MITL"
+        },
+        {
+            "name": "three.js",
+            "version": "76",
+            "owner": "\"Mr.doob\"",
+            "homepage": "https://threejs.org/",
+            "acknowledgements": [
+                "Copyright © 2010-2017 three.js authors"
+            ],
+            "key": "MIT"
+        },
+        {
+            "name": "video-js-panorma",
+            "version": "0.1.5",
+            "owner": "Wensheng Yan",
+            "homepage": "https://github.com/yanwsh/videojs-panorama/",
+            "acknowledgements": [
+                "Copyright 2016 yanwsh@gmail.com"
+            ],
+            "key": "Apache License 2.0"
         }
     ],
     "licenses": [
@@ -746,6 +766,10 @@
         {
             "key": "JDOML",
             "file": "jdoml.txt"
+        },
+        {
+            "key": "UNIDATA",
+            "file": "unidata.txt"
         }
     ]
 }

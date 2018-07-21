@@ -30,13 +30,12 @@ public class CompetitorTable extends AbsolutePanel {
 
     private void initTable(List<CompetitorDTO> competitorNames) {
         CellTable.Resources tableRes = GWT.create(CompetitorTableStyleResource.class);
-
-        table = new BaseCelltable<CompetitorDTO>(15, tableRes);
+        table = new BaseCelltable<>(15, tableRes);
         table.getElement().getStyle().setWidth(100, Unit.PCT);
         table.setSkipRowHoverStyleUpdate(true);
         table.setSkipRowHoverCheck(true);
         table.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
-        final SingleSelectionModel<CompetitorDTO> selectionModel = new SingleSelectionModel<CompetitorDTO>();
+        final SingleSelectionModel<CompetitorDTO> selectionModel = new SingleSelectionModel<>();
         table.setSelectionModel(selectionModel);
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {

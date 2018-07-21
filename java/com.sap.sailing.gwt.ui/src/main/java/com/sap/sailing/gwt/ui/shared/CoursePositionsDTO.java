@@ -21,7 +21,7 @@ public class CoursePositionsDTO implements IsSerializable {
      * {@link #startLineAdvantageousSide}, {@link #startLineAdvantageInMeters} and {@link #startLineLengthInMeters} are
      * also both <code>null</code>.
      */
-    public Double startLineAngleToCombinedWind;
+    public Double startLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind;
     public NauticalSide startLineAdvantageousSide;
     public Double startLineAdvantageInMeters;
     public Double startLineLengthInMeters;
@@ -31,7 +31,7 @@ public class CoursePositionsDTO implements IsSerializable {
      * {@link #finishLineAdvantageousSide}, {@link #finishLineAdvantageInMeters} and
      * {@link #finishLineAdvantageInMeters} are also both <code>null</code>.
      */
-    public Double finishLineAngleToCombinedWind;
+    public Double finishLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind;
     public NauticalSide finishLineAdvantageousSide;
     public Double finishLineAdvantageInMeters;
     public Double finishLineLengthInMeters;

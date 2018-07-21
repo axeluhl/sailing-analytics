@@ -265,38 +265,4 @@
             </RelativeLayout>
         </LinearLayout>
     </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/map_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/content_layout"
-        android:visibility="gone">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <WebView
-                android:id="@+id/web_view"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/position_hide"
-            style="?attr/buttonSolidNormal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginEnd="@dimen/wind_hide_button_right_margin"
-            android:layout_marginRight="@dimen/wind_hide_button_right_margin"
-            android:layout_marginTop="@dimen/wind_hide_button_top_margin"
-            android:text="@string/wind_map_button_hide"/>
-
-    </RelativeLayout>
 </RelativeLayout>

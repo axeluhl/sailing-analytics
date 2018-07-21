@@ -441,6 +441,9 @@
                         
                         <configuration>
                             <signingTech>ANDROID</signingTech>
+                            <certs>true</certs>
+                            <verbose>true</verbose>
+                            <alias>localSigning</alias>
                             <archiveDirectory>${project.build.directory}</archiveDirectory>
                             <processMainArtifact>false</processMainArtifact>
                             <processAttachedArtifacts>false</processAttachedArtifacts>

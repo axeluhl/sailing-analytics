@@ -15,7 +15,8 @@ import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sse.gwt.dispatch.shared.commands.CollectionResult;
 
-public class RaceListContainer<T extends RaceMetadataDTO<?>> extends Composite implements RefreshableWidget<CollectionResult<T>> {
+public class RaceListContainer<T extends RaceMetadataDTO<?>> extends Composite
+        implements RefreshableWidget<CollectionResult<T>> {
 
     private static RaceListContainerUiBinder uiBinder = GWT.create(RaceListContainerUiBinder.class);
 
@@ -26,6 +27,10 @@ public class RaceListContainer<T extends RaceMetadataDTO<?>> extends Composite i
     @UiField DivElement infoUi;
     @UiField DivElement noContentPlaceholderUi;
     @UiField(provided = true) AbstractRaceList<T> raceListUi;
+    @UiField DivElement iconWind;
+    @UiField DivElement iconVideo;
+    @UiField DivElement iconAudio;
+
     private String noContentPlaceholderText;
 
     public RaceListContainer(String title, AbstractRaceList<T> raceList) {
@@ -55,11 +60,17 @@ public class RaceListContainer<T extends RaceMetadataDTO<?>> extends Composite i
                 noContentPlaceholderUi.getStyle().clearDisplay();
                 raceListUi.setVisible(false);
             }
+            iconWind.getStyle().setDisplay(Display.NONE);
+            iconVideo.getStyle().setDisplay(Display.NONE);
+            iconAudio.getStyle().setDisplay(Display.NONE);
         } else {
             noContentPlaceholderUi.getStyle().setDisplay(Display.NONE);
             getElement().getStyle().clearDisplay();
             raceListUi.setVisible(true);
             this.raceListUi.setTableData(data);
+            iconWind.getStyle().setDisplay(raceListUi.hasWind() ? Display.INLINE_BLOCK : Display.NONE);
+            iconVideo.getStyle().setDisplay(raceListUi.hasVideos() ? Display.INLINE_BLOCK : Display.NONE);
+            iconAudio.getStyle().setDisplay(raceListUi.hasAudios() ? Display.INLINE_BLOCK : Display.NONE);
         }
     }
     

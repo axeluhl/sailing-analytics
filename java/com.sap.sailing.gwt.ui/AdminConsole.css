@@ -80,10 +80,6 @@ fieldset legend {
 	color: #FF0000;
 }
 
-.linkNoBorder {
-	border: none;
-}
-
 .refreshLink {
 	border: none;
 	position: relative;
@@ -93,11 +89,6 @@ fieldset legend {
 .valignMiddle {
 	position: relative;
     vertical-align: middle;
-}
-
-.boldLabel {
-	font-size: 14px;
-	font-weight: bold;
 }
 
 .boldAnchor {
@@ -112,7 +103,6 @@ fieldset legend {
 
 .dialogMessageLabel {
 	font-weight: bold;
-	width: 300px;
 }
 
 select {

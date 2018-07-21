@@ -17,8 +17,11 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class TestRaceLogRemovalInRegatta extends AbstractTestStoringAndRetrievingRaceLogInRegatta {
     private final String blueFleetName = "Blue";
@@ -51,7 +54,8 @@ public class TestRaceLogRemovalInRegatta extends AbstractTestStoringAndRetrievin
         Fleet blueFleet = qualification.getFleetByName(blueFleetName);
         RaceLog yellowLog = qualification.getRaceColumnByName(raceColumnName).getRaceLog(yellowFleet);
         RaceLog blueLog = qualification.getRaceColumnByName(raceColumnName).getRaceLog(blueFleet);
-        RaceLogProtestStartTimeEvent expectedEventYellow = new RaceLogProtestStartTimeEventImpl(now, author, 0, MillisecondsTimePoint.now());
+        TimeRange protestTime = new TimeRangeImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now().plus(Duration.ONE_MINUTE.times(90)));
+        RaceLogProtestStartTimeEvent expectedEventYellow = new RaceLogProtestStartTimeEventImpl(now, author, 0, protestTime);
         yellowLog.add(expectedEventYellow);
         RaceLogStartTimeEvent expectedEventBlue = new RaceLogStartTimeEventImpl(now, author, 0, MillisecondsTimePoint.now());
         blueLog.add(expectedEventBlue);

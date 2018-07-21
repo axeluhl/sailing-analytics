@@ -2,9 +2,8 @@ package com.sap.sailing.gwt.common.authentication;
 
 import java.util.HashMap;
 
-import com.google.gwt.http.client.UrlBuilder;
-import com.google.gwt.user.client.Window;
 import com.sap.sse.gwt.client.AbstractEntryPointLinkFactory;
+import com.sap.sse.gwt.settings.UrlBuilderUtil;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthenticationLinkFactory;
 
 public final class SailingAuthenticationEntryPointLinkFactory extends AbstractEntryPointLinkFactory implements
@@ -17,7 +16,7 @@ public final class SailingAuthenticationEntryPointLinkFactory extends AbstractEn
     
     @Override
     public final String createUserProfileLink() {
-        return createEntryPointLink("/gwt/Home.html#/user/profile/:", new HashMap<String, String>());
+        return createEntryPointLink("/gwt/Home.html", "/user/profile/:", new HashMap<String, String>());
     }
     
     @Override
@@ -30,13 +29,12 @@ public final class SailingAuthenticationEntryPointLinkFactory extends AbstractEn
         return createFullQualifiedLink("/gwt/Home.html", "/user/passwordreset/:");
     }
     
-    private String createFullQualifiedLink(String baseUrl, String hash) {
-        String path = createEntryPointLink(baseUrl, new HashMap<String, String>());
-        UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
-        for (String parameter : Window.Location.getParameterMap().keySet()) {
-            urlBuilder.removeParameter(parameter);
-        }
-        return urlBuilder.setPath(path).setHash(hash).buildString();
+    @Override
+    public String createMoreInfoAboutLoginLink() {
+        return createFullQualifiedLink("/gwt/Home.html", "/about/account/:");
     }
-
+    
+    private String createFullQualifiedLink(String path, String hash) {
+        return UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParametersAndPathAndHash(path, hash).buildString();
+    }
 }

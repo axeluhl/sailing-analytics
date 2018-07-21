@@ -4,8 +4,10 @@ import java.net.URI;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore.CompetitorUpdateListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 
@@ -13,8 +15,8 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
     private static final long serialVersionUID = 1172181354320184263L;
     private final String idAsString;
     private final String newName;
+    private final String newShortName;
     private final Color newDisplayColor;
-    private final String newSailId;
     private final String newEmail;
     private final Nationality newNationality;
     private final URI newTeamImageUri;
@@ -30,14 +32,14 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
      *            if <code>null</code>, the competitor obtains the "NONE" nationality, usually represented by a white
      *            flag
      */
-    public UpdateCompetitor(String idAsString, String newName, Color newDisplayColor, String newEmail,
-            String newSailId, Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
+    public UpdateCompetitor(String idAsString, String newName, String newShortName, Color newDisplayColor, String newEmail,
+            Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
             Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String newSearchTag) {
         super();
         this.idAsString = idAsString;
         this.newName = newName;
+        this.newShortName = newShortName; 
         this.newDisplayColor = newDisplayColor;
-        this.newSailId = newSailId;
         this.newNationality = newNationality;
         this.newTeamImageUri = newTeamImageUri;
         this.newEmail = newEmail;
@@ -48,7 +50,8 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
     }
 
     /**
-     * {@link #internalApplyTo(RacingEventService)} already replicates the effects
+     * {@link #internalApplyTo(RacingEventService)} already replicates the effects; see {@link RacingEventServiceImpl#RacingEventServiceImpl()}
+     * where a {@link CompetitorUpdateListener} is registered that handles replication of any updates to a competitor.
      */
     @Override
     public boolean isRequiresExplicitTransitiveReplication() {
@@ -57,8 +60,8 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
     
     @Override
     public Competitor internalApplyTo(RacingEventService toState) throws Exception {
-        Competitor result = toState.getBaseDomainFactory().getCompetitorStore()
-                .updateCompetitor(idAsString, newName, newDisplayColor, newEmail, newSailId, newNationality,
+        Competitor result = toState.getBaseDomainFactory().getCompetitorAndBoatStore()
+                .updateCompetitor(idAsString, newName, newShortName, newDisplayColor, newEmail, newNationality,
                         newTeamImageUri, newFlagImageUri, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, newSearchTag);
         return result;
     }

@@ -23,7 +23,9 @@ class StatisticsBoxItem extends Widget {
         setElement(uiBinder.createAndBindUi(this));
         iconUi.setSrc(iconUrl);
         nameUi.setInnerText(name);
-        valueUi.setInnerText(payload == null ? "n/a" : String.valueOf(payload));
+        final String text = payload == null ? "n/a" : String.valueOf(payload);
+        valueUi.setInnerText(text);
+        valueUi.setTitle(text);
     }
 
 }

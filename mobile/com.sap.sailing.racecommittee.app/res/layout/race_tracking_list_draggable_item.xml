@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="72dp"
@@ -22,40 +21,72 @@
             android:textAppearance="?attr/textSmall"
             android:textColor="?attr/white"
             android:textIsSelectable="false"
-            tools:text="100"/>
+            tools:text="100" />
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="12"
             android:orientation="horizontal">
 
+            <LinearLayout
+                android:id="@+id/penalty_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:orientation="horizontal"
+                android:paddingBottom="4dp"
+                android:paddingTop="4dp">
+
+                <ImageView
+                    android:id="@+id/warning_sign"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="6dp"
+                    android:paddingRight="6dp"
+                    tools:src="@drawable/ic_warning_red" />
+
+                <TextView
+                    android:id="@+id/item_penalty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginRight="16dp"
+                    android:background="@drawable/penalty_text_background"
+                    android:paddingLeft="6dp"
+                    android:paddingRight="6dp"
+                    tools:text="OCS" />
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/vessel_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_centerVertical="true"
                 android:padding="5dp"
                 android:textAppearance="?attr/textSmall"
-                tools:text="GDR001"/>
+                tools:text="GDR001" />
 
             <TextView
                 android:id="@+id/competitor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/penalty_layout"
+                android:layout_toRightOf="@id/vessel_id"
                 android:padding="5dp"
                 android:singleLine="true"
                 android:textAppearance="?attr/textSmall"
-                tools:text="Cool Runnings"/>
-        </LinearLayout>
+                tools:text="Cool Runnings" />
+        </RelativeLayout>
 
         <ImageView
             android:id="@+id/edit_item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:src="?attr/create"/>
+            android:src="?attr/create" />
 
         <RelativeLayout
             android:id="@id/drag_handle"
@@ -68,7 +99,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:background="@drawable/dragster"
-                android:contentDescription="@string/drag_handle_description"/>
+                android:contentDescription="@string/drag_handle_description" />
         </RelativeLayout>
     </LinearLayout>
 

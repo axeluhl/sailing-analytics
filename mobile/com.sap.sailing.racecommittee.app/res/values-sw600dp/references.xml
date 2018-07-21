@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <item name="race_penalty_button_bar" type="layout">@layout/race_penalty_button_bar_xlarge</item>
     <item name="race_schedule_start_time" type="layout">@layout/race_schedule_start_time_xlarge</item>
     <item name="race_time_picker" type="layout">@layout/race_time_picker_xlarge</item>
 

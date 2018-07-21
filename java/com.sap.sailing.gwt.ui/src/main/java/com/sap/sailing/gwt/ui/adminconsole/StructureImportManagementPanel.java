@@ -35,6 +35,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -298,7 +299,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                 @Override
                 public void onFailure(Throwable caught) {
                     busyIndicator.setBusy(false);
-                    errorReporter.reportError("Error trying to load regattas");
+                    errorReporter.reportError(stringMessages.errorLoadingRegattas(jsonURL, caught.getMessage()));
                 }
 
                 @Override
@@ -341,7 +342,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
      */
     private RegattaDTO createRegattaDefaults(RegattaDTO regatta) {
         RegattaDTO result = new RegattaDTO("Default", ScoringSchemeType.LOW_POINT);
-        result.boatClass = new BoatClassDTO(BoatClassDTO.DEFAULT_NAME, /* hull length in meters */ 5);
+        result.boatClass = new BoatClassDTO(BoatClassDTO.DEFAULT_NAME, /* hull length */ new MeterDistance(5), /* hull beam */ new MeterDistance(1.8));
         result.series = regatta.series;
         result.rankingMetricType = RankingMetrics.ONE_DESIGN;
         return result;
@@ -437,9 +438,9 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         EventDTO result = null;
         int selIndex = sailingEventsListBox.getSelectedIndex();
         if (selIndex > 0) { // the zero index represents the 'no selection' text
-            String itemText = sailingEventsListBox.getItemText(selIndex);
+            String itemValue = sailingEventsListBox.getValue(selIndex);
             for (EventDTO eventDTO : existingEvents) {
-                if (eventDTO.getName().equals(itemText)) {
+                if (eventDTO.getName().equals(itemValue)) {
                     result = eventDTO;
                     break;
                 }

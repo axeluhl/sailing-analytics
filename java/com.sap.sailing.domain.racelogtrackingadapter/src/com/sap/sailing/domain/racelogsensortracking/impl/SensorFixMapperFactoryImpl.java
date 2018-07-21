@@ -7,7 +7,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMapping
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
-import com.sap.sailing.domain.tracking.Track;
+import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sse.common.Timed;
 
 public class SensorFixMapperFactoryImpl implements SensorFixMapperFactory {
@@ -20,7 +20,7 @@ public class SensorFixMapperFactoryImpl implements SensorFixMapperFactory {
     
     @Override
     @SuppressWarnings("unchecked")
-    public <FixT extends Timed, TrackT extends Track<?>> SensorFixMapper<FixT, TrackT, Competitor>
+    public <FixT extends Timed, TrackT extends DynamicTrack<FixT>> SensorFixMapper<FixT, TrackT, Competitor>
             createCompetitorMapper(Class<? extends RegattaLogDeviceMappingEvent<?>> eventType) {
         for (ServiceReference<SensorFixMapper<?, ?, ?>> serviceReference : tracker.getServiceReferences()) {
             SensorFixMapper<?, ?, ?> service = tracker.getService(serviceReference);

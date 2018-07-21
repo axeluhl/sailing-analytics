@@ -21,7 +21,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRac
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ess.ESSRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -29,8 +29,8 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartPathFinderFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartTimingFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.LineStartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFactorFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
@@ -79,8 +79,6 @@ public class SetupPanelFragment extends BasePanelFragment {
             default:
                 layout = inflater.inflate(R.layout.race_panel_setup, container, false);
         }
-
-        mFactorFormat = new DecimalFormat(container.getContext().getString(R.string.race_factor_format));
 
         mStateListener = new RaceStateChangedListener();
         mProcedureListener = new RaceProcedureChangedListener();
@@ -148,6 +146,13 @@ public class SetupPanelFragment extends BasePanelFragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        mFactorFormat = new DecimalFormat(getActivity().getString(R.string.race_factor_format));
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
 
@@ -176,9 +181,9 @@ public class SetupPanelFragment extends BasePanelFragment {
                 mButtonRaceGroup.setVisibility(View.GONE);
             }
 
-            if (getRaceState().getRacingProcedure() instanceof RRS26RacingProcedure) {
+            if (getRaceState().getRacingProcedure() instanceof ConfigurableStartModeFlagRacingProcedure) {
                 if (mButtonMode != null) {
-                    RRS26RacingProcedure typedProcedure = getRaceState().getTypedRacingProcedure();
+                    ConfigurableStartModeFlagRacingProcedure typedProcedure = getRaceState().getTypedRacingProcedure();
                     mButtonMode.setPanelImage(FlagsResources.getFlagDrawable(getActivity(), typedProcedure.getStartModeFlag().name(), getResources().getInteger(R.integer.flag_size)));
                     mButtonMode.setVisibility(View.VISIBLE);
                 }
@@ -344,7 +349,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                 mButtonProcedure.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
             if (mButtonMode != null && !mButtonMode.equals(view)) {
-                resetFragment(mButtonMode.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), LineStartModeFragment.class);
+                resetFragment(mButtonMode.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), StartModeFragment.class);
                 mButtonMode.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
             if (mButtonPathfinder != null && !mButtonPathfinder.equals(view)) {
@@ -379,7 +384,6 @@ public class SetupPanelFragment extends BasePanelFragment {
             state.getRacingProcedure().addChangedListener(mProcedureListener);
 
             refreshPanel();
-            uncheckMarker(null);
         }
 
         @Override
@@ -387,7 +391,6 @@ public class SetupPanelFragment extends BasePanelFragment {
             super.onCourseDesignChanged(state);
 
             refreshPanel();
-            uncheckMarker(null);
         }
 
         @Override
@@ -395,7 +398,6 @@ public class SetupPanelFragment extends BasePanelFragment {
             super.onWindFixChanged(state);
 
             refreshPanel();
-            uncheckMarker(null);
         }
 
         @Override
@@ -403,24 +405,16 @@ public class SetupPanelFragment extends BasePanelFragment {
             super.onStatusChanged(state);
 
             checkStatus();
-            uncheckMarker(null);
         }
     }
 
     private class RaceProcedureChangedListener extends BaseRacingProcedureChangedListener {
-
-        private PanelButton mView;
-
-        public RaceProcedureChangedListener() {
-            mView = new PanelButton(getActivity());
-        }
 
         @Override
         public void onActiveFlagsChanged(ReadonlyRacingProcedure racingProcedure) {
             super.onActiveFlagsChanged(racingProcedure);
 
             refreshPanel();
-            uncheckMarker(mView);
         }
     }
 
@@ -466,7 +460,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                     break;
 
                 case PanelButton.LEVEL_TOGGLED:
-                    replaceFragment(LineStartModeFragment.newInstance(LineStartModeFragment.START_MODE_PLANNED));
+                    replaceFragment(StartModeFragment.newInstance(StartModeFragment.START_MODE_PLANNED));
                     break;
 
                 default:

@@ -33,8 +33,9 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetit
     private final IControlPassingsListener listener;
     
     public MarkPassingReceiver(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
-            Simulator simulator, DomainFactory domainFactory, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
-        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
+            Simulator simulator, DomainFactory domainFactory, IEventSubscriber eventSubscriber,
+            IRaceSubscriber raceSubscriber, long timeoutInMilliseconds) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber, timeoutInMilliseconds);
         listener = new IControlPassingsListener() {
             @Override
             public void gotControlPassings(IRaceCompetitor raceCompetitor, IControlPassings controlPassings) {
@@ -55,48 +56,51 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetit
     }
 
     protected void handleEvent(Util.Triple<IRaceCompetitor, IControlPassings, Void> event) {
-        System.out.print("L"); // as in "Leg"
-        DynamicTrackedRace trackedRace = getTrackedRace(event.getA().getRace());
-        if (trackedRace != null) {
-            Course course = trackedRace.getRace().getCourse();
-            Iterator<Waypoint> waypointsIter = course.getWaypoints().iterator();
-            Map<Waypoint, MarkPassing> passingsByWaypoint = new HashMap<Waypoint, MarkPassing>();
-            // Note: the entries always describe all mark passings for the competitor so far in the current race in
-            // order
-            for (IControlPassing passing : event.getB().getPassings()) {
-                IControl controlPointPassed = passing.getControl();
-                com.sap.sailing.domain.base.ControlPoint domainControlPoint = getDomainFactory()
-                        .getOrCreateControlPoint(new ControlPointAdapter(controlPointPassed));
-                Waypoint passed = findWaypointForControlPoint(trackedRace, waypointsIter, domainControlPoint,
-                        getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()));
-                if (passed != null) {
-                    TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
-                    MarkPassing markPassing = getDomainFactory().createMarkPassing(time, passed,
-                            getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()));
-                    passingsByWaypoint.put(passed, markPassing);
+    	if (!event.getA().getCompetitor().isNonCompeting()) {
+            System.out.print("L"); // as in "Leg"
+            DynamicTrackedRace trackedRace = getTrackedRace(event.getA().getRace());
+            if (trackedRace != null) {
+                Course course = trackedRace.getRace().getCourse();
+                Iterator<Waypoint> waypointsIter = course.getWaypoints().iterator();
+                Map<Waypoint, MarkPassing> passingsByWaypoint = new HashMap<Waypoint, MarkPassing>();
+                // Note: the entries always describe all mark passings for the competitor so far in the current race in order
+                for (IControlPassing passing : event.getB().getPassings()) {
+                    IControl controlPointPassed = passing.getControl();
+                    com.sap.sailing.domain.base.ControlPoint domainControlPoint = getDomainFactory()
+                            .getOrCreateControlPoint(new ControlPointAdapter(controlPointPassed));
+                    Waypoint passed = findWaypointForControlPoint(trackedRace, waypointsIter, domainControlPoint);
+                    if (passed != null) {
+                        TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
+                        Competitor competitor = getDomainFactory().resolveCompetitor(event.getA().getCompetitor());
+                        MarkPassing markPassing = getDomainFactory().createMarkPassing(time, passed, competitor);
+                        passingsByWaypoint.put(passed, markPassing);
+                    } else {
+                        logger.warning("Didn't find waypoint in course " + course + " for mark passing around " + passing.getControl());
+                    }
+                }
+                List<MarkPassing> markPassings = new ArrayList<MarkPassing>();
+                for (Waypoint waypoint : course.getWaypoints()) {
+                    MarkPassing passing = passingsByWaypoint.get(waypoint);
+                    if (passing != null) {
+                        markPassings.add(passing);
+                    }
+                }
+                logger.fine("Received mark passings in race " + trackedRace.getRace().getName() + ": " + markPassings);
+                Competitor competitor = getDomainFactory().resolveCompetitor(event.getA().getCompetitor());
+                if (competitor != null) {
+                    if (getSimulator() != null) {
+                        getSimulator().delayMarkPassings(competitor, markPassings);
+                    } else {
+                        trackedRace.updateMarkPassings(competitor, markPassings);
+                    }
                 } else {
-                    logger.warning("Didn't find waypoint in course " + course + " for mark passing around "
-                            + passing.getControl());
+                    logger.warning("Didn't find competitor for mark passings");
                 }
-            }
-            List<MarkPassing> markPassings = new ArrayList<MarkPassing>();
-            for (Waypoint waypoint : course.getWaypoints()) {
-                MarkPassing passing = passingsByWaypoint.get(waypoint);
-                if (passing != null) {
-                    markPassings.add(passing);
-                }
-            }
-            logger.fine("Received mark passings in race "+trackedRace.getRace().getName()+": "+markPassings);
-            if (getSimulator() != null) {
-                getSimulator().delayMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()), markPassings);
             } else {
-                trackedRace.updateMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()),
-                        markPassings);
+                logger.warning("Couldn't find tracked race for race " + event.getA().getRace().getName()
+                        + ". Dropping mark passing event " + event);
             }
-        } else {
-            logger.warning("Couldn't find tracked race for race " + event.getA().getRace().getName()
-                    + ". Dropping mark passing event " + event);
-        }
+    	}
     }
 
     /**
@@ -105,7 +109,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetit
      * returns <code>false</code>.
      */
     private Waypoint findWaypointForControlPoint(TrackedRace trackedRace, Iterator<Waypoint> waypointsIter,
-            com.sap.sailing.domain.base.ControlPoint domainControlPoint, Competitor competitor) {
+            com.sap.sailing.domain.base.ControlPoint domainControlPoint) {
         while (waypointsIter.hasNext()) {
             Waypoint waypoint = waypointsIter.next();
             if (waypoint.getControlPoint() == domainControlPoint) {

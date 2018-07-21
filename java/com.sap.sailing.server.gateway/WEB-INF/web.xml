@@ -102,7 +102,14 @@
 		<servlet-name>RCCompetitors</servlet-name>
 		<url-pattern>/rc/competitors</url-pattern>
 	</servlet-mapping>
-		
+    <servlet>
+        <servlet-name>RCCompetitorsAndBoats</servlet-name>
+        <servlet-class>com.sap.sailing.server.gateway.impl.rc.CompetitorsAndBoatsJsonExportServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RCCompetitorsAndBoats</servlet-name>
+        <url-pattern>/rc/competitorsAndBoats</url-pattern>
+    </servlet-mapping> 	
 	<!-- RACE COMMITTEE END -->
 	<servlet>
 		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
@@ -115,14 +122,41 @@
 
 	<servlet>
 		<servlet-name>WindImportServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.expeditionimport.WindImportServlet</servlet-class>
+		<servlet-class>com.sap.sailing.server.gateway.windimport.expedition.WindImportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>WindImportServlet</servlet-name>
 		<url-pattern>/expedition-import</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
+        <servlet>
+                <servlet-name>GribWindImportServlet</servlet-name>
+                <servlet-class>com.sap.sailing.server.gateway.windimport.grib.GribWindImportServlet</servlet-class>
+        </servlet>
+        <servlet-mapping>
+                <servlet-name>GribWindImportServlet</servlet-name>
+                <url-pattern>/grib-wind-import</url-pattern>
+        </servlet-mapping>
+  
+        <servlet>
+                <servlet-name>NmeaWindImportServlet</servlet-name>
+                <servlet-class>com.sap.sailing.server.gateway.windimport.nmea.NmeaWindImportServlet</servlet-class>
+        </servlet>
+        <servlet-mapping>
+                <servlet-name>NmeaWindImportServlet</servlet-name>
+                <url-pattern>/nmea-wind-import</url-pattern>
+        </servlet-mapping>
+        
+        <servlet>
+                <servlet-name>BravoWindImportServlet</servlet-name>
+                <servlet-class>com.sap.sailing.server.gateway.windimport.bravo.BravoWindImportServlet</servlet-class>
+        </servlet>
+        <servlet-mapping>
+                <servlet-name>BravoWindImportServlet</servlet-name>
+                <url-pattern>/bravo-wind-import</url-pattern>
+        </servlet-mapping>
+        
+        <servlet>
 		<servlet-name>ExpeditionWindMeasureStatusGetServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.ExpeditionWindMeasureStatusGetServlet</servlet-class>
 	</servlet>
@@ -138,14 +172,6 @@
 	<servlet-mapping>
 		<servlet-name>WindStatusHtmlServlet</servlet-name>
 		<url-pattern>/windStatus</url-pattern>
-	</servlet-mapping>
-	<servlet>
-		<servlet-name>WindStatusJsonServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.WindStatusJsonServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>WindStatusJsonServlet</servlet-name>
-		<url-pattern>/windStatusJson</url-pattern>
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>TrackFilesExportPostServlet</servlet-name>
@@ -172,6 +198,14 @@
 		<url-pattern>/sensordata/import</url-pattern>
 	</servlet-mapping>
 	<servlet>
+		<servlet-name>ExpeditionAllInOneImportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.trackfiles.impl.ExpeditionAllInOneImportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ExpeditionAllInOneImportServlet</servlet-name>
+		<url-pattern>/expedition/import</url-pattern>
+	</servlet-mapping>
+	<servlet>
 		<servlet-name>FileUploadServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.FileUploadServlet</servlet-class>
 	</servlet>
@@ -179,16 +213,6 @@
 		<servlet-name>FileUploadServlet</servlet-name>
 		<url-pattern>/fileupload</url-pattern>
 	</servlet-mapping>
-	
-    <servlet>
-        <servlet-name>websockettest</servlet-name>
-        <servlet-class>com.sap.sailing.server.gateway.impl.WebSocketTestServlet</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>websockettest</servlet-name>
-        <url-pattern>/websockettest</url-pattern>
-    </servlet-mapping>
 	
     <servlet>
     	<servlet-name>Jersey REST API</servlet-name>

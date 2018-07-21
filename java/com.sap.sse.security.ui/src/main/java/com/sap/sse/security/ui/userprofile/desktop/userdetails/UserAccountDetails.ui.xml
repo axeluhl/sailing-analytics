@@ -68,7 +68,6 @@
             </div>
             <div class="{local_res.css.useraccountdetails_content_detail} {res.mediaCss.medium6} {res.mediaCss.mediumoffset6} {res.mediaCss.small12}">
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
-              <!-- <ui:text from='{i18n_ubi.passwordConfirmation}' /> -->
                 <ui:text from="{i18n_sec.passwordRepeat}" />
               </label>
               <g:PasswordTextBox ui:field="newPasswordConfirmationUi" addStyleNames="{local_res.css.useraccountdetails_content_detail_input}" />

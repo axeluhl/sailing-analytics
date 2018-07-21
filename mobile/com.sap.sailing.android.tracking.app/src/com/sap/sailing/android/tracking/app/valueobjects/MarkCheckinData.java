@@ -5,10 +5,10 @@ import com.sap.sailing.domain.base.Mark;
 
 public class MarkCheckinData extends CheckinData {
 
-    public Mark mark;
+    private Mark mark;
 
-    public MarkCheckinData(MarkUrlData markUrlData) {
-        super(markUrlData);
+    public MarkCheckinData(MarkUrlData markUrlData, String leaderboardDisplayName) {
+        super(markUrlData, leaderboardDisplayName);
         mark = markUrlData.getMark();
     }
 

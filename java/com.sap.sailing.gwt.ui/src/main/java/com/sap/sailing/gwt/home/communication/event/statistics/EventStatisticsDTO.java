@@ -2,8 +2,9 @@ package com.sap.sailing.gwt.home.communication.event.statistics;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
@@ -15,9 +16,9 @@ public class EventStatisticsDTO implements DTO {
     private int trackedRacesCount;
     private long numberOfGPSFixes;
     private long numberOfWindFixes;
-    private String competitorInfo;
-    private Double competitorSpeedInKnots;
-    private Double totalDistanceTraveled;
+    private SimpleCompetitorDTO fastestCompetitor;
+    private Double fastestCompetitorSpeedInKnots;
+    private Distance totalDistanceTraveled;
 
     @SuppressWarnings("unused")
     private EventStatisticsDTO() {
@@ -35,12 +36,10 @@ public class EventStatisticsDTO implements DTO {
         this.numberOfGPSFixes = numberOfGPSFixes;
         this.numberOfWindFixes = numberOfWindFixes;
         if (maxSpeed != null) {
-            this.competitorInfo = maxSpeed.getA().getName();
-            this.competitorSpeedInKnots = maxSpeed.getB().getKnots();
+            this.fastestCompetitor = new SimpleCompetitorDTO(maxSpeed.getA());
+            this.fastestCompetitorSpeedInKnots = maxSpeed.getB().getKnots();
         }
-        if (totalDistanceTraveled != null) {
-            this.totalDistanceTraveled = totalDistanceTraveled.getSeaMiles();
-        }
+        this.totalDistanceTraveled = totalDistanceTraveled;
     }
 
     public int getRegattasFoughtCount() {
@@ -82,16 +81,16 @@ public class EventStatisticsDTO implements DTO {
     public long getNumberOfWindFixes() {
         return numberOfWindFixes;
     }
-
-    public String getCompetitorInfo() {
-        return competitorInfo;
+    
+    public SimpleCompetitorDTO getFastestCompetitor() {
+        return fastestCompetitor;
+    }
+    
+    public Double getFastestCompetitorSpeedInKnots() {
+        return fastestCompetitorSpeedInKnots;
     }
 
-    public Double getCompetitorSpeed() {
-        return competitorSpeedInKnots;
-    }
-
-    public Double getTotalDistanceTraveled() {
+    public Distance getTotalDistanceTraveled() {
         return totalDistanceTraveled;
     }
 }

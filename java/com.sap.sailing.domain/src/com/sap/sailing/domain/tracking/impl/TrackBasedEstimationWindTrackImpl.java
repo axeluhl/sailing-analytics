@@ -10,8 +10,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
@@ -24,11 +23,12 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
@@ -40,10 +40,12 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.AbstractTimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.SerializableComparator;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.util.ThreadPoolUtil;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 /**
@@ -504,21 +506,16 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         if (delayForCacheInvalidationInMilliseconds == 0) {
             invalidateCache();
         } else {
-            final Timer cacheInvalidationTimer = new Timer(
-                    "TrackBasedEstimationWindTrackImpl cache invalidation timer for race " + getTrackedRace().getRace(), /* isDaemon */ true);
-            cacheInvalidationTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    // no locking required here; the incremental cache refresh protects the inner cache structures from concurrent modifications
-                    cacheInvalidationTimer.cancel(); // terminates the timer thread
-                    if (getTrackedRace().getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
-                        // during loading, only invalidate the cache after the interval expired but don't trigger incremental re-calculation
-                        invalidateCache();
-                    } else {
-                        refreshCacheIncrementally();
-                    }
-                }
-            }, delayForCacheInvalidationInMilliseconds);
+            ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().
+                    schedule(()->{
+                        // no locking required here; the incremental cache refresh protects the inner cache structures from concurrent modifications
+                        if (getTrackedRace().getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
+                            // during loading, only invalidate the cache after the interval expired but don't trigger incremental re-calculation
+                            invalidateCache();
+                        } else {
+                            refreshCacheIncrementally();
+                        }
+                    }, delayForCacheInvalidationInMilliseconds, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -692,7 +689,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         @Override
         public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
             if (oldStatus.getStatus() == TrackedRaceStatusEnum.LOADING) {
-                if (newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
+                if (newStatus.getStatus() != TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.REMOVED) {
                     suspended = false;
                 }
             } else if (newStatus.getStatus() == TrackedRaceStatusEnum.LOADING) {
@@ -744,6 +741,16 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
                 TimePoint endOfInvalidation = interval.to();
                 scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
             }
+        }
+        
+        @Override
+        public void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix) {
+            // no action required
+        }
+        
+        @Override
+        public void competitorSensorTrackAdded(DynamicSensorFixTrack<Competitor, ?> track) {
+            // no action required
         }
     }
 

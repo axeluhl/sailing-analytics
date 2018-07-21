@@ -45,7 +45,7 @@ shorthand URL notations with ":" and "@" to denote basic authentication, with th
 		    <code>curl -D /tmp/header -b JSESSIONID=5e94c93e-b515-4bcd-8df8-0c786805a9e0 http://127.0.0.1:8888/security/api/restsecurity/access_token</code>
 		  </div>
 		  <div>Using POST username and password form parameters:<br>
-		    <code>curl -d "username=admin&password=admin"-D /tmp/header http://127.0.0.1:8888/security/api/restsecurity/access_token</code>
+		    <code>curl -d "username=admin&password=admin" -D /tmp/header http://127.0.0.1:8888/security/api/restsecurity/access_token</code>
 		  </div>
 		  <div>Using a bearer access token:<br>
 		    <code>curl -D /tmp/header -H "Authorization: Bearer MVPg/uCV1QGqMDmDtUuOQBrSrB1NlIldm0LW+dnxZ2A=" http://127.0.0.1:8888/security/api/restsecurity/access_token</code>

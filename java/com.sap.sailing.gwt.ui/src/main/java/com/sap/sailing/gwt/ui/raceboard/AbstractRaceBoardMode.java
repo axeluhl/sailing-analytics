@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
@@ -17,8 +18,13 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * Abstract base class for implementing a {@link RaceBoardMode}. The {@link #applyTo(RaceBoardPanel)} method registers
@@ -42,7 +48,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * {@link #updatedLeaderboard(LeaderboardDTO)} eventually, but in between, other callbacks to the same method
  * may occur, triggered by other, automatic adjustments or initialization of the {@link Timer}. To solve this
  * problem, subclasses may decide to use a separate {@link GetLeaderboardByNameAction} action and execute
- * it using the {@link #getLeaderboardPanel()}.{@link LeaderboardPanel#getExecutor() getExecutor()}. In the
+ * it using the {@link #getLeaderboardPanel()}.{@link ClassicLeaderboardPanel#getExecutor() getExecutor()}. In the
  * dedicated callback the subclass can then be sure that the {@link LeaderboardDTO} received matches the
  * time previously set on the {@link Timer}.
  * 
@@ -53,7 +59,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
     private Timer timer;
     private RegattaAndRaceIdentifier raceIdentifier;
     private RaceTimePanel raceTimePanel;
-    private LeaderboardPanel leaderboardPanel;
+    private SingleRaceLeaderboardPanel leaderboardPanel;
     private RaceBoardPanel raceBoardPanel;
     
     private Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo;
@@ -69,6 +75,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
         this.raceTimePanel.addRaceTimesInfoProviderListener(this);
         this.leaderboardPanel = raceBoardPanel.getLeaderboardPanel();
         this.leaderboardPanel.addLeaderboardUpdateListener(this);
+        leaderboardPanel.setAutoExpandPreSelected(true);
         this.timer = raceBoardPanel.getTimer();
         this.raceIdentifier = raceBoardPanel.getSelectedRaceIdentifier();
     }
@@ -91,7 +98,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
         return raceTimePanel;
     }
 
-    protected LeaderboardPanel getLeaderboardPanel() {
+    protected SingleRaceLeaderboardPanel getLeaderboardPanel() {
         return leaderboardPanel;
     }
 
@@ -188,5 +195,28 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
 
     protected RaceColumnDTO getRaceColumn() {
         return raceColumn;
+    }
+    
+    protected void setTimerOrUseCustomStart(final TimePoint startPlayingAt) {
+        final PlayModes playMode = getTimer().getPlayMode();
+        TimePoint startPlayingAtOverride = null;
+        if (playMode != PlayModes.Live && getRaceTimesInfoForRace() != null) {
+            final RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = raceBoardPanel.getSettings().getPerspectiveOwnSettings();
+            if (perspectiveOwnSettings != null) {
+                final Duration initialDurationAfterRaceStartInReplay = perspectiveOwnSettings.getInitialDurationAfterRaceStartInReplay();
+                if (initialDurationAfterRaceStartInReplay != null) {
+                    final Date relativeTo;
+                    if (getRaceTimesInfoForRace().getStartOfRace() != null) {
+                        relativeTo = getRaceTimesInfoForRace().getStartOfRace();
+                    } else {
+                        relativeTo = getRaceTimesInfoForRace().getStartOfTracking();
+                    }
+                    startPlayingAtOverride = new MillisecondsTimePoint(
+                            relativeTo.getTime() + initialDurationAfterRaceStartInReplay.asMillis());
+                }
+            }
+        }
+        getTimer().setTime(
+                startPlayingAtOverride != null ? startPlayingAtOverride.asMillis() : startPlayingAt.asMillis());
     }
 }

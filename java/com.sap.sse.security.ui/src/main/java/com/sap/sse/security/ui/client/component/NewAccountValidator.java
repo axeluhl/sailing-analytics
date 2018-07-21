@@ -13,7 +13,7 @@ public class NewAccountValidator {
     private static final int MINIMUM_USERNAME_LENGTH = 3;
     private static final int MINIMUM_PASSWORD_LENGTH = 5;
     
-    private final StringMessages stringMessages;
+    protected final StringMessages stringMessages;
     
     public NewAccountValidator(com.sap.sse.security.ui.client.i18n.StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -43,7 +43,7 @@ public class NewAccountValidator {
         return result;
     }
 
-    private String validateUsername(String username) {
+    protected String validateUsername(String username) {
         final String result;
         if (username == null || username.length() < MINIMUM_USERNAME_LENGTH) {
             result = stringMessages.usernameMustHaveAtLeastNCharacters(MINIMUM_USERNAME_LENGTH);

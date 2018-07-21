@@ -49,11 +49,12 @@ public class CombinedWindPanel extends FlowPanel {
                 final RaceMapSettings newRaceMapSettings = new RaceMapSettings(oldRaceMapSettings.getZoomSettings(),
                         oldRaceMapSettings.getHelpLinesSettings(), oldRaceMapSettings.getTransparentHoverlines(), 
                         oldRaceMapSettings.getHoverlineStrokeWeight(), oldRaceMapSettings.getTailLengthInMilliseconds(), oldRaceMapSettings.isWindUp(),
-                        oldRaceMapSettings.getBuoyZoneRadiusInMeters(), oldRaceMapSettings.isShowOnlySelectedCompetitors(),
+                        oldRaceMapSettings.getBuoyZoneRadius(), oldRaceMapSettings.isShowOnlySelectedCompetitors(),
                         oldRaceMapSettings.isShowSelectedCompetitorsInfo(), oldRaceMapSettings.isShowWindStreamletColors(),
                         newShowStreamletsOverlaySetting, oldRaceMapSettings.isShowSimulationOverlay(),
                         oldRaceMapSettings.isShowMapControls(), oldRaceMapSettings.getManeuverTypesToShow(),
-                        oldRaceMapSettings.isShowDouglasPeuckerPoints());
+                        oldRaceMapSettings.isShowDouglasPeuckerPoints(), oldRaceMapSettings.isShowEstimatedDuration(),
+                        oldRaceMapSettings.getStartCountDownFontSizeScaling(), oldRaceMapSettings.isShowManeuverLossVisualization());
                 map.updateSettings(newRaceMapSettings);
             }
         });

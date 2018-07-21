@@ -8,11 +8,14 @@ import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 
 public class SolutionsActivity extends AbstractActivity implements SolutionsView.Presenter {
     
+    private final MobileApplicationClientFactory clientFactory;
+
     public SolutionsActivity(SolutionsPlace place, MobileApplicationClientFactory clientFactory) {
+        this.clientFactory = clientFactory;
     }
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
-        panel.setWidget(new SolutionsViewImpl(this));
+        panel.setWidget(new SolutionsViewImpl(this, clientFactory.getNavigator()));
     }
 }

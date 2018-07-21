@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clickable="true">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true">
 
     <com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:headerText="@string/tracking_list_01"/>
+        app:headerText="@string/tracking_list_01" />
 
     <RelativeLayout
         android:id="@+id/bottom_bar"
@@ -26,7 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentTop="true"
-            android:background="?attr/sap_gray"/>
+            android:background="?attr/sap_gray" />
 
         <Button
             android:id="@+id/confirm"
@@ -37,7 +37,7 @@
             android:layout_marginBottom="@dimen/side_padding"
             android:layout_marginTop="@dimen/side_padding"
             android:text="@string/confirm_tracking_list"
-            android:textSize="@dimen/textSize_18"/>
+            android:textSize="@dimen/textSize_18" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -59,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:src="?attr/button_prev"/>
+                android:src="?attr/button_prev" />
 
             <ImageView
                 android:id="@+id/nav_next"
@@ -67,7 +67,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:src="?attr/button_next"/>
+                android:src="?attr/button_next" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -80,13 +80,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="5dp"
-                    tools:src="@drawable/ic_dot"/>
+                    tools:src="@drawable/ic_dot" />
 
                 <ImageView
                     android:id="@+id/dot_2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:src="@drawable/ic_dot"/>
+                    tools:src="@drawable/ic_dot" />
             </LinearLayout>
         </RelativeLayout>
 
@@ -96,42 +96,20 @@
             android:layout_above="@id/panel_switcher"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/spinner_header"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/side_padding"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/page_title"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:text="@string/tracking_list_01"
-                    android:textAppearance="?textXSmall"
-                    android:visibility="invisible"/>
-
-                <Spinner
-                    android:id="@+id/sort_spinner"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    android:background="@drawable/spinner_background_light"
-                    android:spinnerMode="dropdown"/>
-            </LinearLayout>
+            <include
+                android:id="@+id/tools_layout"
+                layout="@layout/competitor_tools_layout" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/list_positioning_all"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/list_positioning_chosen"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="visible"/>
+                android:visibility="visible" />
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>

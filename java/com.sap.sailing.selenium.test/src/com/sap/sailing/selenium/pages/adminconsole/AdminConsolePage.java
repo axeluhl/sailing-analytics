@@ -10,14 +10,18 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPage;
 import com.sap.sailing.selenium.pages.HostPageWithAuthentication;
+import com.sap.sailing.selenium.pages.adminconsole.advanced.MasterDataImportPO;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.igtimi.IgtimiAccountsManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesBoatsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.wind.WindPanelPO;
 
 /**
  * <p>The page object representing the administration console. The console consists of multiple tabs with its content
@@ -42,11 +46,17 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     private static final String TRACTRAC_EVENTS_TAB_LABEL = "TracTrac Events"; //$NON-NLS-1$
     private static final String TRACTRAC_EVENTS_TAB_IDENTIFIER = "TracTracEventManagement"; //$NON-NLS-1$
     
+    private static final String IGTIMI_ACCOUNTS_TAB_LABEL = "Igtimi Accounts"; //$NON-NLS-1$
+    private static final String IGTIMI_ACCOUNTS_TAB_IDENTIFIER = "IgtimiAccounts"; //$NON-NLS-1$
+    
     private static final String TRACKED_RACES_TAB_PARENT_LABEL = "Tracked races"; //$NON-NLS-1$
     private static final String TRACKED_RACES_TAB_PARENT_IDENTIFIER = "RacesPanel"; //$NON-NLS-1$
     
     private static final String TRACKED_RACES_TAB_LABEL = "Tracked races"; //$NON-NLS-1$
     private static final String TRACKED_RACES_TAB_IDENTIFIER = "TrackedRacesManagement"; //$NON-NLS-1$
+    
+    private static final String WIND_TAB_LABEL = "Wind"; //$NON-NLS-1$
+    private static final String WIND_TAB_IDENTIFIER = "WindPanel"; //$NON-NLS-1$
     
     private static final String LEADERBOARD_CONFIGURATION_TAB_PARENT_LABEL = "Leaderboards"; //$NON-NLS-1$
     private static final String LEADERBOARD_CONFIGURATION_TAB_PARENT_IDENTIFIER = "LeaderboardPanel"; //$NON-NLS-1$
@@ -59,9 +69,17 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     
     private static final String COMPETITOR_PANEL_TAB_LABEL = "Competitors"; //$NON-NLS-1$
     private static final String COMPETITOR_PANEL_TAB_IDENTIFIER = "CompetitorPanel"; //$NON-NLS-1$
-    
+
+    private static final String BOAT_PANEL_TAB_LABEL = "Boats"; //$NON-NLS-1$
+    private static final String BOAT_PANEL_TAB_IDENTIFIER = "BoatPanel"; //$NON-NLS-1$
+
     private static final String SMARTPHONETRACKINGPANEL_PANEL_TAB_LABEL = "Smartphone Tracking"; //$NON-NLS-1$
     private static final String SMARTPHONETRACKINGPANEL_PANEL_TAB_IDENTIFIER = "SmartphoneTrackingPanel"; //$NON-NLS-1$
+
+    private static final String ADVANCED_PARENT_LABEL = "Advanced";
+    private static final String ADVANCED_TAB_PARENT_IDENTIFIER = "AdvancedTab";
+    private static final String ADVANCED_MASTERDATA_LABEL = "Master Data Import";
+    private static final String ADVANCED_MASTERDATA_IDENTIFIER = "MasterDataImport";
     /**
      * <p>Goes to the administration console and returns the representing page object.</p>
      * 
@@ -105,10 +123,22 @@ public class AdminConsolePage extends HostPageWithAuthentication {
                 TRACTRAC_EVENTS_TAB_IDENTIFIER, false));
     }
     
+    public IgtimiAccountsManagementPanelPO goToIgtimi() {
+        goToTab(TRACTRAC_EVENTS_TAB_PARENT_LABEL, TRACTRAC_EVENTS_TAB_PARENT_IDENTIFIER, true);
+        return new IgtimiAccountsManagementPanelPO(this.driver, goToTab(IGTIMI_ACCOUNTS_TAB_LABEL,
+                IGTIMI_ACCOUNTS_TAB_IDENTIFIER, false));
+    }
+    
     public TrackedRacesManagementPanelPO goToTrackedRaces() {
         goToTab(TRACKED_RACES_TAB_PARENT_LABEL, TRACKED_RACES_TAB_PARENT_IDENTIFIER, true);
         return new TrackedRacesManagementPanelPO(this.driver, goToTab(TRACKED_RACES_TAB_LABEL,
                 TRACKED_RACES_TAB_IDENTIFIER, false));
+    }
+    
+    public WindPanelPO goToWind() {
+        goToTab(TRACKED_RACES_TAB_PARENT_LABEL, TRACKED_RACES_TAB_PARENT_IDENTIFIER, true);
+        return new WindPanelPO(this.driver, goToTab(WIND_TAB_LABEL,
+                WIND_TAB_IDENTIFIER, false));
     }
     
     public LeaderboardConfigurationPanelPO goToLeaderboardConfiguration() {
@@ -128,7 +158,19 @@ public class AdminConsolePage extends HostPageWithAuthentication {
         return new TrackedRacesCompetitorsPanelPO(this.driver, goToTab(COMPETITOR_PANEL_TAB_LABEL,
                 COMPETITOR_PANEL_TAB_IDENTIFIER, false));
     }
+
+    public TrackedRacesBoatsPanelPO goToTrackedRacesBoats() {
+        goToTab(TRACKED_RACES_TAB_PARENT_LABEL, TRACKED_RACES_TAB_PARENT_IDENTIFIER, true);
+        return new TrackedRacesBoatsPanelPO(this.driver, goToTab(BOAT_PANEL_TAB_LABEL,
+                BOAT_PANEL_TAB_IDENTIFIER, false));
+    }
     
+    public MasterDataImportPO goToMasterDateImport() {
+        goToTab(ADVANCED_PARENT_LABEL, ADVANCED_TAB_PARENT_IDENTIFIER, true);
+        return new MasterDataImportPO(this.driver,
+                goToTab(ADVANCED_MASTERDATA_LABEL, ADVANCED_MASTERDATA_IDENTIFIER, false));
+    }
+
     public SmartphoneTrackingEventManagementPanelPO goToSmartphoneTrackingPanel() {
         goToTab(TRACTRAC_EVENTS_TAB_PARENT_LABEL, TRACTRAC_EVENTS_TAB_PARENT_IDENTIFIER, true);
         return new SmartphoneTrackingEventManagementPanelPO(this.driver, goToTab(SMARTPHONETRACKINGPANEL_PANEL_TAB_LABEL,
@@ -151,6 +193,6 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     }
     
     private WebElement goToTab(String label, final String id, boolean isVertical) {
-        return goToTab(administrationTabPanel, label, id, isVertical);
+        return goToTab(administrationTabPanel, label, id, isVertical ? TabPanelType.VERTICAL_TAB_LAYOUT_PANEL : TabPanelType.TAB_LAYOUT_PANEL);
     }
 }

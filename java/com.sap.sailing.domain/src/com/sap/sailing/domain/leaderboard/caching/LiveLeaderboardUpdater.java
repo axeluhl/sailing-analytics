@@ -12,7 +12,9 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.sharding.ShardingContext;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -169,9 +171,7 @@ public class LiveLeaderboardUpdater implements Runnable {
                         result = currentLiveLeaderboard;
                     }
                     if (result == null) {
-                        if (logger.isLoggable(Level.FINEST)) { 
-                            logger.finest("waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails);
-                        }
+                        logger.finest(()->"waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails);
                         ensureRunning();
                         try {
                             this.wait();
@@ -184,18 +184,12 @@ public class LiveLeaderboardUpdater implements Runnable {
                         if (columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails) &&
                                 (!addOverallDetails || currentLiveLeaderboardHasOverallDetails)) {
                             result = currentLiveLeaderboard;
-                            if (logger.isLoggable(Level.FINEST)) { 
-                                logger.finest("successfully waited for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails);
-                            }
+                            logger.finest(()->"successfully waited for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails);
                         } else {
-                            if (logger.isLoggable(Level.FINEST)) { 
-                                logger.finest("waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails+" unsuccessful. Need to try again...");
-                            }
+                            logger.finest(()->"waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails+" unsuccessful. Need to try again...");
                         }
                     } else {
-                        if (logger.isLoggable(Level.FINEST)) { 
-                            logger.finest("leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails+" was provided in the meantime");
-                        }
+                        logger.finest(()->"leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails+" was provided in the meantime");
                     }
                     // now we either have a result (good, we're done), or the thread stopped running (then we need to renew the request)
                     // or the thread still runs but the result may have expired and therefore be null (renew the request)
@@ -220,9 +214,15 @@ public class LiveLeaderboardUpdater implements Runnable {
 
     private synchronized void start() {
         running = true;
-        thread = new Thread(this, "LiveLeaderboardUpdater for leaderboard "+getLeaderboard().getName());
-        thread.setDaemon(true);
-        thread.start();
+        try {
+            thread = new Thread(this, "LiveLeaderboardUpdater for leaderboard "+getLeaderboard().getName());
+            thread.setDaemon(true);
+            thread.start();
+        } catch (Exception e) {
+            running = false;
+            logger.log(Level.SEVERE, "Error creating LiveLeaderboardUpdater thread for leadedrboard "+getLeaderboard().getName(), e);
+            throw e;
+        }
     }
 
     /**
@@ -276,6 +276,7 @@ public class LiveLeaderboardUpdater implements Runnable {
     public void run() {
         assert running;
         try {
+            ShardingContext.setShardingConstraint(ShardingType.LEADERBOARDNAME, leaderboard.getName());
             logger.info("Starting " + LiveLeaderboardUpdater.class.getSimpleName() + " thread for leaderboard "
                     + leaderboard.getName());
             // interrupt the current thread if not producing a single result within the overall timeout
@@ -328,6 +329,8 @@ public class LiveLeaderboardUpdater implements Runnable {
                 notifyAll();
             }
             logger.log(Level.SEVERE, "exception updating live leaderboard "+leaderboard.getName(), e);
+        } finally {
+            ShardingContext.clearShardingConstraint(ShardingType.LEADERBOARDNAME);
         }
     }
 

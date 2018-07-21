@@ -24,7 +24,6 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable.ColumnFormatter;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -86,9 +85,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     private LabeledAbstractFilterablePanel<TracTracRaceRecordDTO> racesFilterablePanel;
     private FlushableCellTable<TracTracRaceRecordDTO> racesTable;
-    private static final String ZERO_AS_STRING = "0";
     
-    public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public TracTracEventManagementPanel(final SailingServiceAsync sailingService,
+            ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, true, stringMessages);
         this.errorReporter = errorReporter;
@@ -276,32 +275,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         correctWindCheckBox.setWordWrap(false);
         correctWindCheckBox.setValue(Boolean.TRUE);
 
-        final TextBox offsetToStartTimeOfSimulatedRaceTextBox = new TextBox();
-        offsetToStartTimeOfSimulatedRaceTextBox.setWidth("40px");
-        offsetToStartTimeOfSimulatedRaceTextBox.setEnabled(false);
-        offsetToStartTimeOfSimulatedRaceTextBox.setValue(ZERO_AS_STRING);
-        
-        final CheckBox simulateWithStartTimeNowCheckBox = new CheckBox(stringMessages.simulateAsLiveRace());
-        simulateWithStartTimeNowCheckBox.ensureDebugId("SimulateWithStartTimeNowCheckBox");
-        simulateWithStartTimeNowCheckBox.setWordWrap(false);
-        simulateWithStartTimeNowCheckBox.setValue(Boolean.FALSE);
-        simulateWithStartTimeNowCheckBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                offsetToStartTimeOfSimulatedRaceTextBox.setEnabled(simulateWithStartTimeNowCheckBox.getValue());
-                offsetToStartTimeOfSimulatedRaceTextBox.setFocus(simulateWithStartTimeNowCheckBox.getValue());
-            }
-        });
-
-        final FlowPanel simulateAsLiveRacePanel = new FlowPanel();
-        simulateAsLiveRacePanel.add(simulateWithStartTimeNowCheckBox);
-        
-        final Label offsetToStartLabel = new Label(stringMessages.simulateWithOffset());
-        
-        final HorizontalPanel simulateWithOffsetPanel = new HorizontalPanel();
-        simulateWithOffsetPanel.add(offsetToStartLabel);
-        simulateWithOffsetPanel.add(offsetToStartTimeOfSimulatedRaceTextBox);
-        
+        final SimulationPanel simulationPanel = new SimulationPanel(stringMessages);
         final CheckBox ignoreTracTracMarkPassingsCheckbox = new CheckBox(stringMessages.useInternalAlgorithm());
         ignoreTracTracMarkPassingsCheckbox.setWordWrap(false);
         ignoreTracTracMarkPassingsCheckbox.setValue(Boolean.FALSE);
@@ -309,12 +283,11 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         layoutTable.setWidget(++row, 0, trackSettingsLabel);
         layoutTable.setWidget(row, 1, trackWindCheckBox);
         layoutTable.setWidget(++row, 1, correctWindCheckBox);
-        layoutTable.setWidget(++row, 1, simulateAsLiveRacePanel);
-        layoutTable.setWidget(++row, 1, simulateWithOffsetPanel);
+        layoutTable.setWidget(++row, 1, simulationPanel);
         layoutTable.setWidget(++row, 1, ignoreTracTracMarkPassingsCheckbox);
         
         // Filter
-        Label racesFilterLabel = new Label(stringMessages.filterRacesByName() + ":");
+        Label racesFilterLabel = new Label(stringMessages.filterRaces() + ":");
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         racesTable = new FlushableCellTable<TracTracRaceRecordDTO>(10000, tableResources);
         racesTable.ensureDebugId("TrackableRacesCellTable");
@@ -419,8 +392,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             @Override
             public void onClick(ClickEvent event) {
                 Duration offsetToStartTimeOfSimulatedRace = null;
-                if(simulateWithStartTimeNowCheckBox.getValue().booleanValue()) {
-                    offsetToStartTimeOfSimulatedRace = getMillisecondsDurationFromMinutesAsString(offsetToStartTimeOfSimulatedRaceTextBox.getValue());
+                if (simulationPanel.isSimulate()) {
+                    offsetToStartTimeOfSimulatedRace = getMillisecondsDurationFromMinutesAsString(simulationPanel.getOffsetToStartTimeInMinutes());
                 }
                 trackSelectedRaces(trackWindCheckBox.getValue(), correctWindCheckBox.getValue(),
                         offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassingsCheckbox.getValue());
@@ -489,12 +462,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     
     private String getBoatClassNamesAsString(TracTracRaceRecordDTO object) {
         StringBuilder boatClassNames = new StringBuilder();
-        
         for (String boatClassName : object.boatClassNames) {
             boatClassNames.append(boatClassName);
             boatClassNames.append(", ");
         }
-        
         return boatClassNames.substring(0, boatClassNames.length() - 2);
     }
     

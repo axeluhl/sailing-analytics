@@ -72,7 +72,7 @@ public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.View
             holder.mSwitch.setVisibility(View.VISIBLE);
         }
 
-        if (AppUtils.with(mContext).is10inch() && AppUtils.with(mContext).isLand()) {
+        if (AppUtils.with(mContext).is10inch() && AppUtils.with(mContext).isLandscape()) {
             int minHeight = mContext.getResources().getDimensionPixelSize(R.dimen.selector_header_min_height);
             int height = mParent.getMeasuredHeight() / mItems.size();
             int maxHeight = mContext.getResources().getDimensionPixelSize(R.dimen.selector_header_height);

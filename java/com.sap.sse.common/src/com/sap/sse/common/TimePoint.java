@@ -16,12 +16,32 @@ public interface TimePoint extends Comparable<TimePoint>, Serializable {
 
     Date asDate();
     
+    /**
+     * @return a time point that is {@code milliseconds} later than {@code this} time point, except in case the
+     *         resulting time point would be after the {@link #EndOfTime} in which case {@link #EndOfTime} is returned
+     *         instead of provoking an overflow with wrap-around.
+     */
     TimePoint plus(long milliseconds);
     
+    /**
+     * @return a time point that is {@code duration} later than {@code this} time point, except in case the
+     *         resulting time point would be after the {@link #EndOfTime} in which case {@link #EndOfTime} is returned
+     *         instead of provoking an overflow with wrap-around.
+     */
     TimePoint plus(Duration duration);
     
+    /**
+     * @return a time point that is {@code milliseconds} earlier than {@code this} time point, except in case the
+     *         resulting time point would be before the {@link #BeginningOfTime} in which case {@link #BeginningOfTime} is returned
+     *         instead of provoking an underflow with wrap-around.
+     */
     TimePoint minus(long milliseconds);
     
+    /**
+     * @return a time point that is {@code duration} earlier than {@code this} time point, except in case the
+     *         resulting time point would be before the {@link #BeginningOfTime} in which case {@link #BeginningOfTime} is returned
+     *         instead of provoking an underflow with wrap-around.
+     */
     TimePoint minus(Duration duration);
     
     /**

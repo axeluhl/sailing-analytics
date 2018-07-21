@@ -6,18 +6,14 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
-
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.Context;
-import android.content.Loader;
-import android.os.Bundle;
-import android.util.Log;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
@@ -33,10 +29,12 @@ import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.data.deserializer.LeaderboardDeserializer;
 import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.CourseBaseHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
+import com.sap.sailing.racecommittee.app.data.handlers.LeaderboardResultDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.ManagedRacesDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.MarksDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.NullDataHandler;
@@ -50,6 +48,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.CourseBaseParser;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.DeviceConfigurationParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
+import com.sap.sailing.racecommittee.app.data.parsers.LeaderboardDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.RaceColumnsParser;
@@ -58,6 +57,7 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
 import com.sap.sailing.racecommittee.app.utils.UrlHelper;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -66,21 +66,23 @@ import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBase
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.BoatJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorAndBoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.NationalityJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.PersonJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RaceColumnFactorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.TeamJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
 import com.sap.sse.common.Util;
+
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
+import android.content.Loader;
+import android.net.Uri;
+import android.os.Bundle;
+import android.util.Log;
 
 /**
  * Enables accessing of data.
@@ -178,7 +180,7 @@ public class OnlineDataManager extends DataManager {
                     .getAuthor(), globalConfiguration, RaceGroupDeserializer.create(domainFactory, RegattaConfigurationJsonDeserializer.create()));
                 DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(context, OnlineDataManager.this);
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
-                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAM_COURSE_AREA_FILTER, courseAreaId.toString()));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_COURSE_AREA_FILTER, courseAreaId.toString()));
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_CLIENT_UUID, MessageSendingService.uuid));
                 URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/racegroups", params);
                 return new OnlineDataLoader<>(context, url, parser, handler);
@@ -220,7 +222,8 @@ public class OnlineDataManager extends DataManager {
             @Override
             public Loader<DataLoaderResult<CourseBase>> create(int id, Bundle args) throws Exception {
                 ExLog.i(context, TAG, "Creating Course-OnlineDataLoader " + id);
-                JsonDeserializer<CourseBase> courseBaseDeserializer = new CourseBaseDeserializer(new WaypointDeserializer(new ControlPointDeserializer(new MarkDeserializer(domainFactory), new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))));
+                JsonDeserializer<CourseBase> courseBaseDeserializer = new CourseBaseDeserializer(new WaypointDeserializer(
+                        new ControlPointDeserializer(new MarkDeserializer(domainFactory), new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))));
                 DataParser<CourseBase> parser = new CourseBaseParser(courseBaseDeserializer);
                 DataHandler<CourseBase> handler = new CourseBaseHandler(OnlineDataManager.this, managedRace);
 
@@ -242,28 +245,70 @@ public class OnlineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createCompetitorsLoader(
-            final ManagedRace managedRace, LoadClient<Collection<Competitor>> callback) {
-        return new DataLoaderCallbacks<>(callback, new LoaderCreator<Collection<Competitor>>() {
+    public LoaderCallbacks<DataLoaderResult<Map<Competitor, Boat>>> createCompetitorsLoader(
+            final ManagedRace managedRace, LoadClient<Map<Competitor, Boat>> callback) {
+        return new DataLoaderCallbacks<>(callback, new LoaderCreator<Map<Competitor, Boat>>() {
             @Override
-            public Loader<DataLoaderResult<Collection<Competitor>>> create(int id, Bundle args) throws Exception {
+            public Loader<DataLoaderResult<Map<Competitor, Boat>>> create(int id, Bundle args) throws Exception {
                 ExLog.i(context, TAG, "Creating Competitor-OnlineDataLoader " + id);
-                JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory.getCompetitorStore(), new TeamJsonDeserializer(new PersonJsonDeserializer(new NationalityJsonDeserializer(domainFactory))), new BoatJsonDeserializer(new BoatClassJsonDeserializer(domainFactory)));
-                DataParser<Collection<Competitor>> parser = new CompetitorsDataParser(competitorDeserializer);
-                DataHandler<Collection<Competitor>> handler = new CompetitorsDataHandler(OnlineDataManager.this, managedRace);
-
+                CompetitorAndBoatJsonDeserializer competitorAndBoatDeserializer = CompetitorAndBoatJsonDeserializer.create(domainFactory);
+                DataParser<Map<Competitor, Boat>> parser = new CompetitorsDataParser(competitorAndBoatDeserializer);
+                DataHandler<Map<Competitor, Boat>> handler = new CompetitorsDataHandler(OnlineDataManager.this, managedRace);
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
-
                 String raceGroupName = identifier.getRaceGroup().getName();
                 String raceColumnName = identifier.getRaceColumnName();
                 String fleetName = identifier.getFleet().getName();
-
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumnName));
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleetName));
-                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/competitors", params);
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/competitorsAndBoats", params);
                 return new OnlineDataLoader<>(context, url, parser, handler);
+            }
+        }, getContext());
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Map<Competitor, Boat>>> createStartOrderLoader(
+        final ManagedRace managedRace, LoadClient<Map<Competitor, Boat>> callback) {
+        return new DataLoaderCallbacks<>(callback, new LoaderCreator<Map<Competitor, Boat>>() {
+            @Override
+            public Loader<DataLoaderResult<Map<Competitor, Boat>>> create(int id, Bundle args) throws Exception {
+                ExLog.i(context, TAG, "Creating StartOrder-Competitor-OnlineDataLoader " + id);
+                CompetitorAndBoatJsonDeserializer competitorAndBoatDeserializer = CompetitorAndBoatJsonDeserializer.create(domainFactory);
+                DataParser<Map<Competitor, Boat>> parser = new CompetitorsDataParser(competitorAndBoatDeserializer);
+                DataHandler<Map<Competitor, Boat>> handler = new CompetitorsDataHandler(OnlineDataManager.this, managedRace);
+                Uri.Builder uri = Uri.parse(preferences.getServerBaseURL()).buildUpon();
+                uri.appendPath("sailingserver");
+                uri.appendPath("api");
+                uri.appendPath("v1");
+                uri.appendPath("leaderboards");
+                uri.appendPath(managedRace.getIdentifier().getRaceGroup().getName());
+                uri.appendPath("startorder");
+                uri.appendQueryParameter(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, managedRace.getIdentifier().getRaceColumnName());
+                uri.appendQueryParameter(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, managedRace.getIdentifier().getFleet().getName());
+                return new OnlineDataLoader<>(context, new URL(uri.build().toString()), parser, handler);
+            }
+        }, getContext());
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<LeaderboardResult>> createLeaderboardLoader(final ManagedRace managedRace,
+        LoadClient<LeaderboardResult> callback) {
+        return new DataLoaderCallbacks<>(callback, new LoaderCreator<LeaderboardResult>() {
+            @Override
+            public Loader<DataLoaderResult<LeaderboardResult>> create(int id, Bundle args) throws Exception {
+                JsonDeserializer<LeaderboardResult> competitorDeserializer = new LeaderboardDeserializer();
+                DataParser<LeaderboardResult> parser = new LeaderboardDataParser(competitorDeserializer);
+                DataHandler<LeaderboardResult> handler = new LeaderboardResultDataHandler(OnlineDataManager.this);
+
+                Uri.Builder uri = Uri.parse(preferences.getServerBaseURL()).buildUpon();
+                uri.appendPath("sailingserver");
+                uri.appendPath("api");
+                uri.appendPath("v1");
+                uri.appendPath("leaderboards");
+                uri.appendPath(managedRace.getIdentifier().getRaceGroup().getName());
+                return new OnlineDataLoader<>(context, new URL(uri.build().toString()), parser, handler);
             }
         }, getContext());
     }

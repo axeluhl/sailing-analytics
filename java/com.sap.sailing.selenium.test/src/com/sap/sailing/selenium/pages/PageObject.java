@@ -10,7 +10,9 @@ import java.util.function.BooleanSupplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -19,6 +21,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.sap.sailing.selenium.core.AjaxCallsComplete;
 import com.sap.sailing.selenium.core.AjaxCallsExecuted;
@@ -59,16 +62,19 @@ public class PageObject {
     
     public static final int DEFAULT_POLLING_INTERVAL = 5;
     
-    private static final MessageFormat TAB_EXPRESSION = new MessageFormat(
+    private static final MessageFormat TAB_PANEL_EXPRESSION = new MessageFormat(
+            ".//div[contains(@class, \"gwt-TabBarItem\")]/div[text()=\"{0}\"]/..");
+    
+    private static final MessageFormat TAB_LAYOUT_PANEL_EXPRESSION = new MessageFormat(
             ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
     
-    private static final MessageFormat VERTICAL_TAB_EXPRESSION = new MessageFormat(
+    private static final MessageFormat VERTICAL_TAB_LAYOUT_PANEL_EXPRESSION = new MessageFormat(
             ".//div[contains(@class, \"gwt-VerticalTabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
     
     /**
-     * </p>The default timeout of 10 seconds for the lookup of other elements.</p>
+     * </p>The default timeout of 15 seconds for the lookup of other elements.</p>
      */
-    protected static final int DEFAULT_LOOKUP_TIMEOUT = 5;
+    protected static final int DEFAULT_LOOKUP_TIMEOUT = 60;
     
     /**
      * <p>The web driver to use.</p>
@@ -287,6 +293,70 @@ public class PageObject {
     }
     
     /**
+     * <p>Waits for an element with the specified selenium id to appear in the given search context. If multiple
+     *   elements exists, the element closest to the context is returned.</p>
+     * 
+     * @param context
+     *   The search context to use for the search.
+     * @param id
+     *   The selenium id of the element.
+     * @return
+     *   The first matching element in the given context.
+     */
+    protected WebElement waitForElementBySeleniumId(SearchContext context, String id, int timeout) {
+        FluentWait<SearchContext> wait = createFluentWait(context, timeout, DEFAULT_POLLING_INTERVAL);
+        return (WebElement) wait.until(new Function<SearchContext, Object>() {
+            @Override
+            public Object apply(SearchContext context) {
+                try {
+                    return context.findElement(new BySeleniumId(id));
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+        });
+    }
+    
+    /**
+     * <p>
+     * Finds and returns the first element with the specified selenium id in the given search context. If multiple
+     * elements exists, the first found element is returned. If no matching element can be found, {@code null} is
+     * returned.
+     * </p>
+     * 
+     * @param context
+     *            The search context to use for the search.
+     * @param id
+     *            The selenium id of the element.
+     * @return The first matching element in the given context.
+     */
+    protected WebElement findElementOrNullBySeleniumId(SearchContext context, String id) {
+        final List<WebElement> elements = context.findElements(new BySeleniumId(id));
+        WebElement result;
+        if (elements.isEmpty()) {
+            result = null;
+        } else {
+            result = elements.get(0);
+        }
+        return result;
+    }
+    
+    /**
+     * <p>
+     * Finds and returns the first element with the specified selenium id in the given search context. If multiple
+     * elements exists, the first found element is returned. If no matching element can be found, {@code null} is
+     * returned.
+     * </p>
+     * 
+     * @param id
+     *            The selenium id of the element.
+     * @return The first matching element in the given context.
+     */
+    protected WebElement findElementOrNullBySeleniumId(String id) {
+        return findElementOrNullBySeleniumId(this.context, id);
+    }
+    
+    /**
      * <p>Finds and returns the first element with the specified selenium id in the given search context. If multiple
      *   elements exists, the element closest to the context is returned.</p>
      * 
@@ -438,6 +508,21 @@ public class PageObject {
     }
     
     /**
+     * Waits for the element with the given seleniumId and returns a {@link PageArea} instance representing the element. The 
+     * {@link WebDriver} is used as search context.
+     * 
+     * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
+     * @param seleniumId the selenium id of the desired element
+     * @param timeout the timeout in seconds to wait for the element
+     * @return {@link PageArea} representing the first matching element
+     * 
+     * @see #findElementBySeleniumId(SearchContext, String)
+     */
+    protected <T extends PageArea> T waitForPO(PageAreaSupplier<T> supplier, String seleniumId, int timeout) {
+        return supplier.get(driver, waitForElementBySeleniumId(driver, seleniumId, timeout));
+    }
+    
+    /**
      * Returns a {@link PageArea} instance representing the element with the specified selenium id in the search
      * context of this page area.
      * 
@@ -455,13 +540,22 @@ public class PageObject {
         T get(WebDriver driver, WebElement element);
     }
     
-    protected WebElement goToTab(WebElement tabPanel, String tabName, final String id, boolean isVertical) {
-        final String expression;
-        if (isVertical) {
-            expression = VERTICAL_TAB_EXPRESSION.format(new Object[] {tabName});
-        } else {
-            expression = TAB_EXPRESSION.format(new Object[] {tabName});
+    protected WebElement goToTab(WebElement tabPanel, String tabName, final String id, TabPanelType tabPanelType) {
+        final MessageFormat expressionFormat;
+        switch(tabPanelType) {
+        case TAB_PANEL:
+            expressionFormat = TAB_PANEL_EXPRESSION;
+            break;
+        case TAB_LAYOUT_PANEL:
+            expressionFormat = TAB_LAYOUT_PANEL_EXPRESSION;
+            break;
+        case VERTICAL_TAB_LAYOUT_PANEL:
+            expressionFormat = VERTICAL_TAB_LAYOUT_PANEL_EXPRESSION;
+            break;
+            default:
+                throw new IllegalArgumentException("TabPanelType \"" + tabPanelType + "\" is unsupported");
         }
+        final String expression = expressionFormat.format(new Object[] {tabName});
         WebElement tab = tabPanel.findElement(By.xpath(expression));
         WebDriverWait waitForTab = new WebDriverWait(driver, 20); // here, wait time is 20 seconds
         waitForTab.until(ExpectedConditions.visibilityOf(tab)); // this will wait for tab to be visible for 20 seconds
@@ -476,5 +570,78 @@ public class PageObject {
         } // wait for a bit to make sure the UI had a change to trigger any asynchronous background update/refresh
         waitForAjaxRequests(); // switching tabs can trigger asynchronous updates, replacing UI elements
         return content;
+    }
+    
+    public enum TabPanelType {
+        TAB_PANEL, TAB_LAYOUT_PANEL, VERTICAL_TAB_LAYOUT_PANEL
+    }
+    
+    /**
+     * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
+     */
+    protected void waitForAlertAndAccept() throws InterruptedException {
+        waitForAlertAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS);
+    }
+
+    /**
+     * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
+     */
+    protected void waitForAlertAndAccept(int timeoutInSeconds) throws InterruptedException {
+        int i = 0;
+        while (i < timeoutInSeconds) {
+            i++;
+            try {
+                Alert alert = driver.switchTo().alert();
+                alert.accept();
+                return;
+            } catch (NoAlertPresentException e) {
+                Thread.sleep(1000);
+            }
+        }
+        throw new NoAlertPresentException();
+    }
+    
+    /**
+     * Waits for an alert box to appear and dismisses the alert. If no alert shows up, an Exception is thrown.
+     */
+    protected void waitForAlertAndDismiss() throws InterruptedException {
+        waitForAlertAndDismiss(DEFAULT_WAIT_TIMEOUT_SECONDS);
+    }
+    
+    /**
+     * Waits for an alert box to appear and dismisses the alert. If no alert shows up, an Exception is thrown.
+     */
+    protected void waitForAlertAndDismiss(int timeoutInSeconds) throws InterruptedException {
+        int i = 0;
+        while (i < timeoutInSeconds) {
+            i++;
+            try {
+                Alert alert = driver.switchTo().alert();
+                alert.accept();
+                return;
+            } catch (NoAlertPresentException e) {
+                Thread.sleep(1000);
+            }
+        }
+        throw new NoAlertPresentException();
+    }
+    
+    public boolean isElementEntirelyVisible(WebElement element) {
+        try {
+            if (element.isDisplayed()) {
+                final int windowWidth = driver.manage().window().getSize().getWidth();
+                if (windowWidth >= element.getLocation().x
+                        + element.getSize().width) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            // The element may currently only partially visible which makes some of the calls fail
+            return false;
+        }
     }
 }

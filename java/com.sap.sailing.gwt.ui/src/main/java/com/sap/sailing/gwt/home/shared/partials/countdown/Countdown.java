@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewRaceTickerStageDTO;
 import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewRegattaTickerStageDTO;
 import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewTickerStageDTO;
@@ -29,7 +28,6 @@ import com.sap.sse.gwt.client.LinkUtil;
 public class Countdown extends Composite {
 
     private static final StringMessages I18N = StringMessages.INSTANCE;
-    private static final TextMessages I18N_UBI = TextMessages.INSTANCE;
     private static final LocalCss CSS = CountdownResources.INSTANCE.css();
     private static final MainCss MAIN_CSS = SharedResources.INSTANCE.mainCss();
 
@@ -100,13 +98,13 @@ public class Countdown extends Composite {
         private void linkToRaceViewer(EventOverviewRaceTickerStageDTO data) {
             String url = ""; // TODO implement correctly
             // String url = navigationProvider.getRaceViewerURL(data.getRegattaAndRaceIdentifier());
-            this.update(MAIN_CSS.buttonprimary(), MAIN_CSS.buttonred(), I18N_UBI.watchNow(), null, url);
+            this.update(MAIN_CSS.buttonprimary(), MAIN_CSS.buttonred(), I18N.watchNow(), null, url);
         }
 
         private void linkToRegatta(EventOverviewRegattaTickerStageDTO data) {
             PlaceNavigation<?> nav = navigationProvider.getRegattaNavigation(data.getRegattaIdentifier().getRegattaName());
             if (nav != null) {
-                this.update(MAIN_CSS.buttonred(), MAIN_CSS.buttonprimary(), I18N_UBI.regattaDetails(), nav, nav.getTargetUrl());
+                this.update(MAIN_CSS.buttonred(), MAIN_CSS.buttonprimary(), I18N.regattaDetails(), nav, nav.getTargetUrl());
             }
         }
         

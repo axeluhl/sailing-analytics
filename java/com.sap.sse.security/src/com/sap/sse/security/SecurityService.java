@@ -53,6 +53,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @param validationBaseURL if <code>null</code>, no validation will be attempted
      */
     User createSimpleUser(String username, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException;
+    
+    /**
+     * @param validationBaseURL if <code>null</code>, no validation will be attempted
+     */
+    User createSimpleUser(String username, String email, String password, String fullName, String company, Locale locale, String validationBaseURL) throws UserManagementException, MailException;
 
     void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException;
 
@@ -138,7 +143,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @param key must not be <code>null</code>
      * @param value must not be <code>null</code>
      */
-    Void setPreference(String username, String key, String value);
+    void setPreference(String username, String key, String value);
 
     void setPreferenceObject(String name, String preferenceKey, Object preference);
 
@@ -152,6 +157,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @return <code>null</code> if no preference for the user identified by <code>username</code> is found
      */
     String getPreference(String username, String key);
+    
+    /**
+     * @return all preferences of the given user
+     */
+    Map<String, String> getAllPreferences(String username);
 
     /**
      * Issues a new access token and remembers it so that later the user identified by <code>username</code> can be

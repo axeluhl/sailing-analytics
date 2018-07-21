@@ -23,10 +23,12 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -44,12 +46,14 @@ import com.sap.sse.util.ClonerImpl;
 
 /**
  * Tests the compressing / de-compressing functionality of {@link LeaderboardDTO} and {@link IncrementalLeaderboardDTO}.
- * See also bug 1417.<p>
+ * See also bug 1417.
+ * <p>
  * 
  * The data of a meaningful and non-trivial {@link LeaderboardDTO} is obtained by using an instrumented version of
  * <code>SailingServiceImpl.getLeaderboardByName(...)</code> which serializes the leaderboard at the end of the method
- * to a file used by this test. The leaderboard that this test wants to use is that of the 505 Worlds 2013, obtained
- * for an expanded Race R9 at time 2013-05-03T17:21:40Z.  
+ * to a file used by this test. The leaderboard that this test wants to use is that of the 505 Worlds 2013, obtained for
+ * an expanded Race R9 at time 2013-05-03T19:17:09Z after the last competitor tracked has finished the last leg. The
+ * total distance traveled in meters has to be expanded for this test to work.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -232,15 +236,19 @@ public class LeaderboardDTODiffingTest {
     
     @Test
     public void testCompetitorListChange() {
-        newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
-        CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
-                /* imageURL */ null, /* flagImageURL */ null, new BoatDTO("LSC", "GER 1234"), new BoatClassDTO("505", 5.05), /* timeOnTimeFactor */ null,
-                /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        newVersion.competitors = new ArrayList<>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
+        BoatDTO boat = new BoatDTO("123", "LSC", new BoatClassDTO("505", BoatClassMasterdata._5O5.getHullLength(), BoatClassMasterdata._5O5.getHullBeam()), "GER 1234");
+        CompetitorDTO somebodyNew = new CompetitorWithBoatDTOImpl("Someone New", "SN", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
+                /* imageURL */ null, /* flagImageURL */ null,
+                /* timeOnTimeFactor */ null,
+                /* timeOnDistanceAllowancePerNauticalMile */ null, 
+                /* searchTag */ null,
+                boat);
         newVersion.competitors.add(13, somebodyNew); // insert a competitor; this should mess up all others' indexes; check if this works
         CompetitorDTO wolfgang = getPreviousCompetitorByName("HUNGER +JESS");
         newVersion.competitors.remove(wolfgang);
         newVersion.rows.remove(wolfgang); // remove another competitor
-        List<CompetitorDTO> newCompetitorsBeforeStripping = new ArrayList<CompetitorDTO>(newVersion.competitors);
+        List<CompetitorDTO> newCompetitorsBeforeStripping = new ArrayList<>(newVersion.competitors);
         newVersion.strip(previousVersion);
         assertAllRowsKeysAreIdenticalToAllLeaderboardRowDTOCompetitors(newVersion);
         assertNull(newVersion.competitors); // but there should be an added competitor that we can't see through the public interface
@@ -250,16 +258,20 @@ public class LeaderboardDTODiffingTest {
 
     @Test
     public void testSuppressionChange() {
-        final List<CompetitorDTO> newSuppressedCompetitors = new ArrayList<CompetitorDTO>();
+        final List<CompetitorDTO> newSuppressedCompetitors = new ArrayList<>();
         Util.addAll(newVersion.getSuppressedCompetitors(), newSuppressedCompetitors);
         newVersion.setSuppressedCompetitors(newSuppressedCompetitors);
-        newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
-        CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
-                /* imageURL */ null, /* flagImageURL */ null, new BoatDTO("LSC", "GER 1234"), new BoatClassDTO("505", 5.05), /* timeOnTimeFactor */ null,
-                /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        newVersion.competitors = new ArrayList<>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
+        BoatDTO boat = new BoatDTO("123", "LSC", new BoatClassDTO("505", BoatClassMasterdata._5O5.getHullLength(), BoatClassMasterdata._5O5.getHullBeam()), "GER 1234");
+        CompetitorDTO somebodyNew = new CompetitorWithBoatDTOImpl("Someone New", "SN", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
+                /* imageURL */ null, /* flagImageURL */ null, 
+                /* timeOnTimeFactor */ null,
+                /* timeOnDistanceAllowancePerNauticalMile */ null,
+                /* searchTag */ null,
+                boat);
         newVersion.setSuppressed(newVersion.competitors.get(13), true); // suppress an existing competitor; compaction should reduce this to a single number only
         newVersion.setSuppressed(somebodyNew, true); // check that mixed mode with existing and new competitors works as well
-        List<CompetitorDTO> newSuppressedCompetitorsBeforeStripping = new ArrayList<CompetitorDTO>();
+        List<CompetitorDTO> newSuppressedCompetitorsBeforeStripping = new ArrayList<>();
         Util.addAll(newVersion.getSuppressedCompetitors(), newSuppressedCompetitorsBeforeStripping);
         newVersion.strip(previousVersion);
         assertAllRowsKeysAreIdenticalToAllLeaderboardRowDTOCompetitors(newVersion);
@@ -276,15 +288,19 @@ public class LeaderboardDTODiffingTest {
 
     @Test
     public void testDisplayNameChange() {
-        newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
-        CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
-                /* imageURL */ null, /* flagImageURL */ null, new BoatDTO("LSC", "GER 1234"), new BoatClassDTO("505", 5.05), /* timeOnTimeFactor */ null,
-                /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        newVersion.competitors = new ArrayList<>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
+        BoatDTO boat = new BoatDTO("123", "LSC", new BoatClassDTO("505", BoatClassMasterdata._5O5.getHullLength(), BoatClassMasterdata._5O5.getHullBeam()), "GER 1234");
+        CompetitorDTO somebodyNew = new CompetitorWithBoatDTOImpl("Someone New", "SN", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
+                /* imageURL */ null, /* flagImageURL */ null,
+                /* timeOnTimeFactor */ null,
+                /* timeOnDistanceAllowancePerNauticalMile */ null, 
+                /* searchTag */ null,
+                boat);
         newVersion.competitors.add(somebodyNew);
-        newVersion.competitorDisplayNames = new HashMap<CompetitorDTO, String>(newVersion.competitorDisplayNames);
+        newVersion.competitorDisplayNames = new HashMap<>(newVersion.competitorDisplayNames);
         newVersion.competitorDisplayNames.put(newVersion.competitors.get(13), "Humba");
         newVersion.competitorDisplayNames.put(somebodyNew, "Trala");
-        final HashMap<CompetitorDTO, String> newDisplayNamesBeforeStripping = new HashMap<CompetitorDTO, String>();
+        final HashMap<CompetitorDTO, String> newDisplayNamesBeforeStripping = new HashMap<>();
         newDisplayNamesBeforeStripping.putAll(newVersion.competitorDisplayNames);
         newVersion.strip(previousVersion);
         assertAllRowsKeysAreIdenticalToAllLeaderboardRowDTOCompetitors(newVersion);
@@ -302,19 +318,23 @@ public class LeaderboardDTODiffingTest {
     @Test
     public void testCompetitorOrderingInRaceChange() {
         RaceColumnDTO r9 = newVersion.getRaceColumnByName("R9");
-        Map<String, List<CompetitorDTO>> newCompetitorOrderingPerRace = new HashMap<String, List<CompetitorDTO>>(newVersion.getCompetitorOrderingPerRaceColumnName());
+        Map<String, List<CompetitorDTO>> newCompetitorOrderingPerRace = new HashMap<>(newVersion.getCompetitorOrderingPerRaceColumnName());
         newVersion.setCompetitorOrderingPerRace(newCompetitorOrderingPerRace);
-        List<CompetitorDTO> newOrdering = new ArrayList<CompetitorDTO>(newVersion.getCompetitorsFromBestToWorst(r9));
+        List<CompetitorDTO> newOrdering = new ArrayList<>(newVersion.getCompetitorsFromBestToWorst(r9));
         newVersion.setCompetitorsFromBestToWorst(r9, newOrdering);
-        newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
-        CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
-                /* imageURL */ null, /* flagImageURL */ null, new BoatDTO("LSC", "GER 1234"), new BoatClassDTO("505", 5.05), /* timeOnTimeFactor */ null,
-                /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        newVersion.competitors = new ArrayList<>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
+        BoatDTO boat = new BoatDTO("123", "LSC", new BoatClassDTO("505", BoatClassMasterdata._5O5.getHullLength(), BoatClassMasterdata._5O5.getHullBeam()), "GER 1234");
+        CompetitorDTO somebodyNew = new CompetitorWithBoatDTOImpl("Someone New", "SN", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
+                /* imageURL */ null, /* flagImageURL */ null, 
+                /* timeOnTimeFactor */ null,
+                /* timeOnDistanceAllowancePerNauticalMile */ null,
+                /* searchTag */ null,
+                boat);
         newVersion.competitors.add(somebodyNew);
         newOrdering.add(somebodyNew);
         CompetitorDTO formerRank13 = newOrdering.remove(13);
         newOrdering.add(12, formerRank13);
-        List<CompetitorDTO> newOrderBeforeStripping = new ArrayList<CompetitorDTO>(newOrdering);
+        List<CompetitorDTO> newOrderBeforeStripping = new ArrayList<>(newOrdering);
         newVersion.strip(previousVersion);
         assertAllRowsKeysAreIdenticalToAllLeaderboardRowDTOCompetitors(newVersion);
         for (int i=1; i<9; i++) {
@@ -323,7 +343,7 @@ public class LeaderboardDTODiffingTest {
         assertEquals(newVersion.getCompetitorsFromBestToWorst(r9).size()-1, newVersion.getCompetitorsFromBestToWorst(r9).indexOf(somebodyNew));
         for (CompetitorDTO compactSuppressedCompetitor : newVersion.getCompetitorsFromBestToWorst(r9)) {
             if (compactSuppressedCompetitor != somebodyNew) {
-                assertFalse(compactSuppressedCompetitor instanceof CompetitorDTOImpl); // assert that the existing competitor was compacted
+                assertFalse(compactSuppressedCompetitor instanceof CompetitorWithBoatDTOImpl); // assert that the existing competitor was compacted
             }
         }
         LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);

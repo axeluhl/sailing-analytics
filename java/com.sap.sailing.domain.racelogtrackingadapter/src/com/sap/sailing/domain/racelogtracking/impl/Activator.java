@@ -22,8 +22,8 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.SmartphoneUUIDIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
-import com.sap.sailing.server.MasterDataImportClassLoaderService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixJsonDeserializer;
@@ -35,6 +35,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdent
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.GPSFixJsonHandlerImpl;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneUUIDJsonHandler;
+import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.util.ServiceTrackerFactory;
@@ -87,6 +88,8 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(MasterDataImportClassLoaderService.class,
                 new MasterDataImportClassLoaderServiceImpl(), null));
         registrations.add(context.registerService(SensorFixMapper.class, new BravoDataFixMapper(), null));
+        registrations.add(context.registerService(SensorFixMapper.class, new BravoExtendedDataFixMapper(), null));
+        registrations.add(context.registerService(SensorFixMapper.class, new ExpeditionExtendedDataFixMapper(), null));
         
         sensorFixMapperTracker = createSensorFixMapperServiceTracker(context);
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
@@ -97,7 +100,14 @@ public class Activator implements BundleActivator {
                 regattaLogSensorDataTrackerTrackedRegattaListener, null));
         registrations.add(context.registerService(Replicable.class,
                 regattaLogSensorDataTrackerTrackedRegattaListener, null));
-        
+        new Thread(()->{
+            try {
+                registrations.add(context.registerService(RaceTrackingConnectivityParametersHandler.class,
+                    new RaceLogConnectivityParamsHandler(racingEventServiceTracker.waitForService(0)), getDict(RaceLogConnectivityParams.TYPE)));
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Exception trying to register race log tracking connectivity params persistence handler", e);
+            }
+        }, "RaceLog tracking activator registering connectivity params persistence handler").start();
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName());
     }
 

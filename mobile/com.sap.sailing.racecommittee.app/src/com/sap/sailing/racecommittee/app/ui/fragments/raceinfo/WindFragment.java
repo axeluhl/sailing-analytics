@@ -22,11 +22,9 @@ import com.sap.sailing.domain.base.racegroup.CurrentRaceComparator;
 import com.sap.sailing.domain.base.racegroup.CurrentRaceFilter;
 import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
 import com.sap.sailing.domain.base.racegroup.impl.CurrentRaceFilterImpl;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
@@ -45,8 +43,10 @@ import com.sap.sailing.racecommittee.app.utils.RangeInputFilter;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sailing.racecommittee.app.utils.WindHelper;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import android.annotation.SuppressLint;
@@ -56,6 +56,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.LocalBroadcastManager;
@@ -65,8 +66,6 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -83,7 +82,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
 
     private View mHeaderLayout;
     private View mContentLayout;
-    private View mMapLayout;
 
     private TextView mHeaderText;
     private TextView mHeaderWindSensor;
@@ -98,8 +96,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     private EditText mWindInputDirection;
     private EditText mWindInputSpeed;
     private Button mContentMapShow;
-    private WebView mMapWebView;
-    private Button mMapHide;
     private ImageView mEditCourse;
     private ImageView mEditSpeed;
 
@@ -149,7 +145,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
 
         mHeaderLayout = ViewHelper.get(layout, R.id.header_layout);
         mContentLayout = ViewHelper.get(layout, R.id.content_layout);
-        mMapLayout = ViewHelper.get(layout, R.id.map_layout);
 
         mHeaderText = ViewHelper.get(layout, R.id.header_text);
         mHeaderWindSensor = ViewHelper.get(layout, R.id.wind_sensor);
@@ -174,8 +169,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
             mWindInputSpeed.addTextChangedListener(new DecimalInputTextWatcher(mWindInputSpeed, 1));
         }
         mContentMapShow = ViewHelper.get(layout, R.id.position_show);
-        mMapWebView = ViewHelper.get(layout, R.id.web_view);
-        mMapHide = ViewHelper.get(layout, R.id.position_hide);
 
         mReceiver = new IsTrackedReceiver(mContentMapShow);
 
@@ -212,15 +205,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         super.notifyTick(now);
 
         refreshUI(true);
-    }
-
-    @Override
-    public boolean onBackPressed() {
-        if (mMapHide == null && mContentLayout.getVisibility() == View.GONE) {
-            setupLayouts(false);
-            return true;
-        }
-        return super.onBackPressed();
     }
 
     /**
@@ -321,15 +305,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
             mContentMapShow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    setupLayouts(true);
-                }
-            });
-        }
-        if (mMapHide != null) {
-            mMapHide.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    setupLayouts(false);
+                    loadRaceMap(/* showWindCharts */ true, /* showStreamlets */ false, /* showSimulation */ false, /* showMapControls */ true);
                 }
             });
         }
@@ -375,7 +351,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     private void setupLayouts(boolean showMap) {
         if (mHeaderLayout != null) {
             if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PLANNED) {
-                if (AppUtils.with(getActivity()).isLand()) {
+                if (AppUtils.with(getActivity()).isLandscape()) {
                     mHeaderLayout.setVisibility(View.GONE);
                 }
             } else {
@@ -385,18 +361,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         if (mContentLayout != null) {
             mContentLayout.setVisibility(showMap ? View.GONE : View.VISIBLE);
         }
-        if (mMapLayout != null) {
-            WebSettings settings = mMapWebView.getSettings();
-            if (showMap) {
-                settings.setJavaScriptEnabled(true);
-                loadRaceMap(/* showWindCharts */ true, /* showStreamlets */ false, /* showSimulation */ false, /* showMapControls */ true);
-                mMapLayout.setVisibility(View.VISIBLE);
-            } else {
-                mMapWebView.loadUrl("about:blank");
-                settings.setJavaScriptEnabled(false);
-                mMapLayout.setVisibility(View.GONE);
-            }
-        }
     }
 
     private boolean loadRaceMap(boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls) {
@@ -404,7 +368,9 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         if (race != null) {
             // build complete race map url
             String mapUrl = WindHelper.generateMapURL(getActivity(), race, showWindCharts, showStreamlets, showSimulation, showMapControls);
-            mMapWebView.loadUrl(mapUrl);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(mapUrl));
+            startActivity(intent);
             return true;
         }
         return false;

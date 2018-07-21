@@ -17,4 +17,7 @@ public interface HasGPSFixPolarContext {
     @Connector(scanForStatistics=false)
     HasCompetitorPolarContext getCompetitorPolarContext();
 
+    @Dimension(messageKey="IsFoiling")
+    boolean isFoiling();
+    
 }

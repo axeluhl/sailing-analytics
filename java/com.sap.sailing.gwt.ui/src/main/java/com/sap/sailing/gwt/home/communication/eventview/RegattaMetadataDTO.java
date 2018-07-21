@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
+import com.sap.sse.common.Distance;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegattaMetadata {
@@ -18,6 +19,7 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     private RegattaState state;
     private boolean flexibleLeaderboard;
     private RaceDataInfo raceDataInfo;
+    private Distance buoyZoneRadius;
     
     public RegattaMetadataDTO() {
     }
@@ -122,7 +124,15 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     public void setRaceDataInfo(RaceDataInfo raceDataInfo) {
         this.raceDataInfo = raceDataInfo;
     }
-    
+
+    public Distance getBuoyZoneRadius() {
+        return buoyZoneRadius;
+    }
+
+    public void setBuoyZoneRadius(Distance buoyZoneRadius) {
+        this.buoyZoneRadius = buoyZoneRadius;
+    }
+
     /**
      * Holder class for flags, which inform about GPS, wind, video or audio data availability. 
      */

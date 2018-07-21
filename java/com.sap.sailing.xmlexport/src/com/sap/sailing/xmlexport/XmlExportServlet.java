@@ -20,6 +20,10 @@ public class XmlExportServlet extends SailingServerHttpServlet {
                     final LeaderboardData leaderboardData = new LeaderboardData(req, res, getService());
                     leaderboardData.perform();
                     return;
+                } else if ("foiling".equalsIgnoreCase(action)) {
+                	final FoilingData foilingData = new FoilingData(req, res, getService());
+                	foilingData.perform();
+                	return;
                 }
                 throw new ServletException("Unknown domain " + action);
             }

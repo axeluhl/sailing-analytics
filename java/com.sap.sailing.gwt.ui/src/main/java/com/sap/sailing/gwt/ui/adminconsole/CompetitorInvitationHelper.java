@@ -30,7 +30,6 @@ public class CompetitorInvitationHelper {
             Window.alert(stringMessages.selectAtLeastOneCompetitorForInvitation());
         } else {
             boolean emailProvidedForAll = isEmailProvidedForAll(competitors);
-
             if (emailProvidedForAll) {
                 openChooseEventDialogAndSendMails(competitors, leaderboardName);
             } else {
@@ -56,8 +55,8 @@ public class CompetitorInvitationHelper {
             public void ok(Pair<EventDTO, String> result) {
                 sailingService.inviteCompetitorsForTrackingViaEmail(result.getB(), result.getA(), leaderboardName,
                         competitors,
-                        stringMessages.appstoreSapSailingInsight(),
-                                stringMessages.playstoreTrackingApp(),
+                        stringMessages.appstoreSapSailInsight(),
+                                stringMessages.playstoreInsightApp(),
                         getLocaleInfo(), new AsyncCallback<Void>() {
 
                             @Override

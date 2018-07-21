@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+	<file datatype="javapropertyresourcebundle" date="2017-04-19T13:56:15Z" original="/usr/sap/ljs/app/Converter_429408536936316109/java/com.sap.sailing.server/resources/stringmessages/StringMessages.properties" source-language="en" target-language="es">
+		<header>
+			<skl>
+				<internal-file crc="8ee9f762b976b9f98d3355409c00d411" form="base64">H4sIAAAAAAAAAKVUTW/aQBC9+1eM1AOtRBFJb0g+UFJUpCpBITnkuDbjMM1619pdmyLEf+/smg9DbBU1F4xn3rw3b2a9RqQ4U4/4KpwTD9mPCpWLDQdhO9wBKTB1Cnq97c2u1wOdAXqQD9xyIDKBYSoRXTfR5+233Zer6CSKJZpEC7M8sDRCHja8rPNEUbNwsdLrR7SldPYXqbcnchJjH2T5EA1N24cKTUW4vsT4HOh9MkBPrPzSAj+BPGCshNxYeqfthyH2uShiuJtIYa0vmZIiu8Llokx+Y+piH4NMG/AoSD0szHElLGR7LHwFhUdLICpBUiQSo08wHMGR/l7k2IebUdC/Q5saKhxp1d7Ad73cxPcN2pYmeI08cxAGT6KDhqFFqg1OtDHshIUOnpqsZ7UtGl0eGktutXIh/QE3qc4LdOS0mTMSbT2gg5fJMRs4Cg9Z7jcDkhR6WlGfjWDlRNe5j3bFYOEqOXZx1vd/rSE9U+rsvWMPneKtizjX+uexei64gNSrP64HM+P6q2pZ65qkBOuEcWA1t3bdR9GH2xE4yrFdNtiYvhfzfTcERVEY/Ydy4VBugJF8tbETWyZHoZninhnAf+MXXQbXPCukiqVAaUcZpSHNszI6h8V4Dgueik+HC8ZRagfwpMGVRvF9mJ1X9aHgJVmEiiw52OjSQGnRALeWEW+b23Ir9KfnDRKUej2IfH5ep+Nnj92/RJQXhvgmntXPiH8rkW7ief2MrJClq838FFJqP5R+9Bd0t0VsXAYAAA==</internal-file>
+			</skl>
+			<phase-group>
+				<phase company-name="SAP AG" date="2017-04-06T12:41:23Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+			</phase-group>
+			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Java properties Flexible File Converter" tool-version="1.1.0"/>
+		</header>
+		<body>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="raceInRegattaOfEvent" resname="raceInRegattaOfEvent">
+				<source>race <ph id="1">{0}</ph> in regatta ''<ph id="2">{1}</ph>'' of event ''<ph id="3">{2}</ph>''</source>
+				<target state="translated">Carrera <ph id="1">{0}</ph> en regata ''<ph id="2">{1}</ph>'’ de evento ''<ph id="3">{2}</ph>''</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="raceInFleetInRegattaOfEvent" resname="raceInFleetInRegattaOfEvent">
+				<source>race <ph id="1">{0}</ph> (<ph id="2">{3}</ph>) in regatta ''<ph id="3">{1}</ph>'' of event ''<ph id="4">{2}</ph>''</source>
+				<target state="translated">Carrera <ph id="1">{0}</ph> (<ph id="2">{3}</ph>)en regata ''<ph id="3">{1}</ph>'’ de evento ''<ph id="4">{2}</ph>''</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="leaderboardOfEvent" resname="leaderboardOfEvent">
+				<source>leaderboard ''<ph id="1">{0}</ph>'' of event ''<ph id="2">{1}</ph>''</source>
+				<target state="translated">Clasificación ''<ph id="1">{0}</ph>'' de evento ''<ph id="2">{1}</ph>''</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="leaderboardShowResultsLinkTitle" resname="leaderboardShowResultsLinkTitle">
+				<source>Show results</source>
+				<target state="signed-off">Mostrar resultados</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="racesOverviewLinkTitle" resname="racesOverviewLinkTitle">
+				<source>Show races overview</source>
+				<target state="signed-off">Mostrar resumen de carreras</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="raceboardShowRaceLinkTitle" resname="raceboardShowRaceLinkTitle">
+				<source>Show race</source>
+				<target state="signed-off">Mostrar carrera</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="raceboardRaceAnalysisLinkTitle" resname="raceboardRaceAnalysisLinkTitle">
+				<source>Show race analysis</source>
+				<target state="signed-off">Mostrar análisis de carrera</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassRaceFinishedSubject" resname="boatClassRaceFinishedSubject">
+				<source>Race for boat class <ph id="1">{0}</ph> has finished - new results available</source>
+				<target state="signed-off">La carrera para la clase de embarcación <ph id="1">{0}</ph> ha terminado, hay nuevos resultados disponibles</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassRaceFinishedBody" resname="boatClassRaceFinishedBody">
+				<source>New results for boat class <ph id="1">{0}</ph> in <ph id="2">{1}</ph> are available.</source>
+				<target state="signed-off">Hay disponibles nuevos resultados para la clase de embarcación <ph id="1">{0}</ph> en <ph id="2">{1}</ph>.</target>
+				<note annotates="source" from="Developer">0: boatClassName, 1: raceDescription</note>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassScoreCorrectionSubject" resname="boatClassScoreCorrectionSubject">
+				<source>New results are available for boat class <ph id="1">{0}</ph></source>
+				<target state="signed-off">Nuevos resultados disponibles para la clase de embarcación <ph id="1">{0}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassScoreCorrectionBody" resname="boatClassScoreCorrectionBody">
+				<source>New results for boat class <ph id="1">{0}</ph> in <ph id="2">{1}</ph> are available.</source>
+				<target state="signed-off">Hay disponibles nuevos resultados para la clase de embarcación <ph id="1">{0}</ph> en <ph id="2">{1}</ph>.</target>
+				<note annotates="source" from="Developer">0: boatClassName, 1: leaderboardDescription</note>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="competitorPassesFinishSubject" resname="competitorPassesFinishSubject">
+				<source>Competitor <ph id="1">{0}</ph> passed finish line in a race</source>
+				<target state="signed-off">El competidor <ph id="1">{0}</ph> ha cruzado la línea de meta en una carrera</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="competitorPassesFinishBody" resname="competitorPassesFinishBody">
+				<source>Competitor <ph id="1">{0}</ph> passed finish line in <ph id="2">{1}</ph>.</source>
+				<target state="signed-off">El competidor <ph id="1">{0}</ph> ha cruzado la línea de meta en <ph id="2">{1}</ph>.</target>
+				<note annotates="source" from="Developer">0: competitorName, 1: raceDescription</note>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="competitorScoreCorrectionSubject" resname="competitorScoreCorrectionSubject">
+				<source>New results are available for competitor <ph id="1">{0}</ph></source>
+				<target state="signed-off">Nuevos resultados disponibles para el competidor <ph id="1">{0}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="competitorScoreCorrectionBody" resname="competitorScoreCorrectionBody">
+				<source>New results for competitor <ph id="1">{0}</ph> in <ph id="2">{1}</ph> are available.</source>
+				<target state="signed-off">Hay disponibles nuevos resultados para el competidor <ph id="1">{0}</ph> en <ph id="2">{1}</ph>.</target>
+				<note annotates="source" from="Developer">0: competitorName, 1: leaderboardDescription</note>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassUpcomingRaceSubject" resname="boatClassUpcomingRaceSubject">
+				<source>A race for boat class <ph id="1">{0}</ph> will start soon</source>
+				<target state="signed-off">Muy pronto se iniciará una carrera para la clase de embarcación <ph id="1">{0}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassUpcomingRaceBody" resname="boatClassUpcomingRaceBody">
+				<source>For boat class <ph id="1">{0}</ph> <ph id="2">{1}</ph> will start approximately at <ph id="3">{2}</ph>.</source>
+				<target state="signed-off">Para la clase de embarcación <ph id="1">{0}</ph> <ph id="2">{1}</ph> se iniciará aproximadamente a las <ph id="3">{2}</ph>.</target>
+				<note annotates="source" from="Developer">0: boatClassName, 1: raceDescription, 2: time</note>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="subscriptionInformation" resname="subscriptionInformation">
+				<source>You are receiving notifications from SAP Sailing Analytics. To turn off notifications, please visit your user profile at the link below.</source>
+				<target state="signed-off">Está recibiendo notificaciones de SAP Sailing Analytics. Para desconectarlas, examine su perfil de usuario en el siguiente enlace.</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="userProfile" resname="userProfile">
+				<source>User Profile</source>
+				<target state="signed-off">Perfil de usuario</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="imprint" resname="imprint">
+				<source>Imprint</source>
+				<target state="signed-off">Marca</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="privacy" resname="privacy">
+				<source>Privacy</source>
+				<target state="signed-off">Privacidad</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="salutation" resname="salutation">
+				<source>Hallo <ph id="1">{0}</ph>,</source>
+				<target state="signed-off">Hola <ph id="1">{0}</ph>,</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

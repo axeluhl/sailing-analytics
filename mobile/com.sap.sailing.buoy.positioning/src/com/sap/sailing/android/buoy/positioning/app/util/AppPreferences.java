@@ -1,6 +1,7 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
 import android.content.Context;
+
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.shared.util.BaseAppPreferences;
 
@@ -36,9 +37,5 @@ public class AppPreferences extends BaseAppPreferences {
     public long getDataRefreshInterval(){
         return preferences.getLong(context.getString(R.string.preference_data_refresh_interval_seconds_key),
             context.getResources().getInteger(R.integer.preference_data_refresh_interval_seconds_default));
-    }
-
-    public static boolean getPrintDatabaseOperationDebugMessages() {
-        return false;
     }
 }

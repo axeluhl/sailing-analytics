@@ -52,6 +52,12 @@
     </dependency>
     <dependency>
       <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sailing.expeditionconnector.common</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.sap.sailing</groupId>
       <artifactId>com.sap.sailing.domain.common</artifactId>
       <version>${project.version}</version>
       <classifier>sources</classifier>
@@ -99,12 +105,6 @@
       <classifier>sources</classifier>
     </dependency>
     <dependency>
-      <groupId>com.github.gwtbootstrap</groupId>
-      <artifactId>gwt-bootstrap</artifactId>
-      <version>2.3.2.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>com.sap.sailing</groupId>
       <artifactId>com.sap.sse.security.common</artifactId>
       <version>${project.version}</version>
@@ -116,6 +116,12 @@
       <version>${project.version}</version>
       <classifier>sources</classifier>
     </dependency>
+    <dependency>
+    	<groupId>com.sap.sailing</groupId>
+    	<artifactId>com.sap.sse.datamining.ui</artifactId>
+    	<version>${project.version}</version>
+    	<classifier>sources</classifier>
+    </dependency>
   </dependencies>
 
   <build>
@@ -123,7 +129,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>${gwt.version}</version>
+        <version>${gwt.plugin.version}</version>
         <executions>
           <!-- GWT version detected from dependencyManagement -->
           <execution>
@@ -131,7 +137,7 @@
               <!-- <userAgents>chrome</userAgents> -->
               <modules>
                 <module>com.sap.sailing.gwt.home.Home</module>
-                <module>com.sap.sailing.gwt.AutoPlay</module>
+                <module>com.sap.sailing.gwt.autoplay.AutoPlay</module>
                 <module>com.sap.sailing.gwt.ui.AdminConsole</module>
                 <module>com.sap.sailing.gwt.ui.Leaderboard</module>
                 <module>com.sap.sailing.gwt.ui.LeaderboardEditing</module>
@@ -142,6 +148,7 @@
                 <module>com.sap.sailing.gwt.ui.VideoPopup</module>
                 <module>com.sap.sailing.gwt.ui.YoutubePopup</module>
                 <module>com.sap.sailing.gwt.ui.Simulator</module>
+                <module>com.sap.sailing.gwt.ui.PairingList</module>
                 <module>com.sap.sailing.gwt.regattaoverview.RegattaOverview</module>
               </modules>
 							<!-- uncomment the following for PRETTY-printed, non-obfuscated output 
@@ -183,7 +190,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>gwt-maven-plugin</artifactId>
-            <version>${gwt.version}</version>
+            <version>${gwt.plugin.version}</version>
             <executions>
               <execution>
                 <configuration combine.self="override">

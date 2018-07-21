@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.factories;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -26,7 +27,7 @@ public class DataMiningDTOFactory {
      * The display name of the resulting DTO is the {@link Function#getSimpleName() simple name} of the given function.
      */
     public FunctionDTO createFunctionDTO(Function<?> function) {
-        return createFunctionDTO(function, function.getSimpleName());
+        return createFunctionDTO(function, ()->function.getSimpleName());
     }
     
     /**
@@ -36,15 +37,16 @@ public class DataMiningDTOFactory {
      * If the function has no message key, the function name is used as display name.
      */
     public FunctionDTO createFunctionDTO(Function<?> function, ResourceBundleStringMessages stringMessages, Locale locale) {
-        return createFunctionDTO(function, function.getLocalizedName(locale, stringMessages));
+        return createFunctionDTO(function, ()->function.getLocalizedName(locale, stringMessages));
     }
     
-    private FunctionDTO createFunctionDTO(Function<?> function, String displayName) {
+    private FunctionDTO createFunctionDTO(Function<?> function, FunctionDTO.DisplayNameProvider displayNameProvider) {
         String functionName = function.getSimpleName();
         String sourceTypeName = function.getDeclaringType().getName();
         String returnTypeName = function.getReturnType().getName();
         List<String> parameterTypeNames = getParameterTypeNames(function);
-        return new FunctionDTO(function.isDimension(), functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, function.getOrdinal());
+        return new FunctionDTO(function.isDimension(), functionName, sourceTypeName, returnTypeName, parameterTypeNames,
+                displayNameProvider, function.getOrdinal());
     }
 
     private List<String> getParameterTypeNames(Function<?> function) {
@@ -101,7 +103,8 @@ public class DataMiningDTOFactory {
                                          localizedRetrievedDataType, retrieverLevel.getDefaultSettings());
     }
     
-    public <ResultType> QueryResultDTO<ResultType> createResultDTO(QueryResult<ResultType> result) {
+    public <ResultType extends Serializable> QueryResultDTO<ResultType> createResultDTO(
+            QueryResult<ResultType> result) {
         return new QueryResultDTO<ResultType>(result.getState(), result.getResultType(), result.getResults(), result.getAdditionalData());
     }
 

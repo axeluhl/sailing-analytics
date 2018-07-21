@@ -40,6 +40,16 @@ public interface GenericSerializableSettings extends Settings, Setting, Serializ
     public static final String PATH_SEPARATOR = ".";
     
     /**
+     * When serializing {@link ValueCollectionSetting}s using diffing, this token is used as key for the added values.
+     */
+    public static final String ADDED_TOKEN = "added";
+    
+    /**
+     * When serializing {@link ValueCollectionSetting}s using diffing, this token is used as key for the removed values.
+     */
+    public static final String REMOVED_TOKEN = "removed";
+    
+    /**
      * Obtains all child settings.
      */
     Map<String, Setting> getChildSettings();

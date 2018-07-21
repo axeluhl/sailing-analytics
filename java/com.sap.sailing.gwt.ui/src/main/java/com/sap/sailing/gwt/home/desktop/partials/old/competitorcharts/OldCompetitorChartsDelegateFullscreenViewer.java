@@ -6,8 +6,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
 import com.sap.sse.common.Color;
 
@@ -40,7 +40,7 @@ public class OldCompetitorChartsDelegateFullscreenViewer extends FullscreenConta
     
     private Widget createLabeledChartTypeSelectionControl() {
         FlowPanel panel = getWidgetWithMarginTop(new FlowPanel(), -30, Unit.PX);
-        panel.add(getWidgetWitDisplay(new Label(TextMessages.INSTANCE.chooseChart() + " "), Display.INLINE));
+        panel.add(getWidgetWitDisplay(new Label(StringMessages.INSTANCE.chooseChartType() + " "), Display.INLINE));
         panel.add(getWidgetWithColor(chartTypeSelection, Color.BLACK));
         return panel;
     }

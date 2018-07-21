@@ -4,8 +4,8 @@ import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
@@ -41,7 +41,7 @@ public class TrackFileImportDeviceIdentifierJsonHandler implements DeviceIdentif
         String fileName = (String) json.get(Fields.FILE_NAME.name());
         String trackName = (String) json.get(Fields.TRACK_NAME.name());
         TimePoint uploaded = loadTimePoint(json.get(Fields.UPLOADED_MILLIS.name()));
-        return new TrackFileImportDeviceIdentifierImpl(uuid, fileName, trackName, uploaded);
+        return new TrackFileImportDeviceIdentifierImpl(uuid, stringRepresentation, fileName, trackName, uploaded);
     }
 
     @Override

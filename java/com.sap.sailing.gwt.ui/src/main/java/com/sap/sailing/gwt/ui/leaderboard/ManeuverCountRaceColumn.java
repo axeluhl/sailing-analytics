@@ -1,14 +1,13 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.TextCell;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -18,18 +17,18 @@ import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
-import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.DataExtractor;
 
-public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue {
+public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue<LeaderboardRowDTO> {
     private final StringMessages stringMessages;
     private final RaceNameProvider raceNameProvider;
 
     private final String headerStyle;
     private final String columnStyle;
 
-    private final MinMaxRenderer minmaxRenderer;
+    private final MinMaxRenderer<LeaderboardRowDTO> minmaxRenderer;
 
-    private abstract class AbstractManeuverDetailField<T extends Comparable<?>> implements LegDetailField<T> {
+    private abstract class AbstractManeuverDetailField<T extends Comparable<?>> implements DataExtractor<T, LeaderboardRowDTO> {
         public T get(LeaderboardRowDTO row) {
             LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceName());
             if (fieldsForRace == null) {
@@ -85,7 +84,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
         }
     }
 
-    public ManeuverCountRaceColumn(LeaderboardPanel leaderboardPanel, RaceNameProvider raceNameProvider,
+    public ManeuverCountRaceColumn(LeaderboardPanel<?> leaderboardPanel, RaceNameProvider raceNameProvider,
             StringMessages stringConstants, List<DetailType> maneuverDetailSelection, String headerStyle,
             String columnStylee, String detailHeaderStyle, String detailColumnStyle, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
         super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), DetailType.NUMBER_OF_MANEUVERS.getDefaultSortingOrder(), 
@@ -95,7 +94,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
         this.raceNameProvider = raceNameProvider;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStylee;
-        this.minmaxRenderer = new MinMaxRenderer(this, getComparator());
+        this.minmaxRenderer = new MinMaxRenderer<LeaderboardRowDTO>(this, getComparator());
     }
 
     private Double getAverageManeuverLossInMeters(LeaderboardEntryDTO row, ManeuverType... maneuverTypes) {
@@ -106,7 +105,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
                 if (legDetail != null) {
                     if (legDetail.averageManeuverLossInMeters != null) {
                         for (ManeuverType maneuverType : maneuverTypes) {
-                            final Integer maneuverCount = legDetail.numberOfManeuvers.get(maneuverType);
+                            final Integer maneuverCount = legDetail.numberOfManeuvers==null?null:legDetail.numberOfManeuvers.get(maneuverType);
                             if (maneuverCount != null && maneuverCount != 0) {
                                 totalLossInMeters += legDetail.averageManeuverLossInMeters.get(maneuverType) * maneuverCount;
                                 count += maneuverCount;
@@ -124,7 +123,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
         if (row != null && row.legDetails != null) {
             for (LegEntryDTO legDetail : row.legDetails) {
                 if (legDetail != null) {
-                    if (legDetail.numberOfManeuvers.get(maneuverType) != null) {
+                    if (legDetail.numberOfManeuvers != null && legDetail.numberOfManeuvers.get(maneuverType) != null) {
                         if (totalNumberOfManeuvers == null) {
                             totalNumberOfManeuvers = (double) legDetail.numberOfManeuvers.get(maneuverType);
                         } else {
@@ -167,7 +166,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     }
 
     @Override
-    public Header<SafeHtml> getHeader() {
+    public SortableExpandableColumnHeader getHeader() {
         SortableExpandableColumnHeader result = new SortableExpandableColumnHeader(
         /* title */stringMessages.maneuverTypes(), /* tooltip */ stringMessages.numberOfManeuversInRaceTooltip(),
         /* iconURL */null, getLeaderboardPanel(), this, stringMessages);
@@ -230,39 +229,40 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
 
     @Override
     public void updateMinMax() {
-        minmaxRenderer.updateMinMax(getDisplayedLeaderboardRowsProvider());
+        minmaxRenderer.updateMinMax(getDisplayedLeaderboardRowsProvider().getRowsToDisplay().values());
     }
 
     @Override
     protected Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDetailColumnMap(
-            LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
+            LeaderboardPanel<?> leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
             String detailColumnStyle) {
         Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
-        result.put(DetailType.TACK, new FormattedDoubleDetailTypeColumn(DetailType.TACK, new NumberOfTacks(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.TACK, new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.TACK, new NumberOfTacks(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         
-        result.put(DetailType.JIBE, new FormattedDoubleDetailTypeColumn(DetailType.JIBE, new NumberOfJibes(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.JIBE, new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.JIBE, new NumberOfJibes(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         
         result.put(DetailType.PENALTY_CIRCLE,
-                new FormattedDoubleDetailTypeColumn(DetailType.PENALTY_CIRCLE, new NumberOfPenaltyCircles(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.PENALTY_CIRCLE, new NumberOfPenaltyCircles(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         
         result.put(DetailType.AVERAGE_TACK_LOSS_IN_METERS,
-                new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_TACK_LOSS_IN_METERS, new AverageTackLossInMeters(),
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.AVERAGE_TACK_LOSS_IN_METERS, new AverageTackLossInMeters(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         
         result.put(DetailType.AVERAGE_JIBE_LOSS_IN_METERS,
-                new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_JIBE_LOSS_IN_METERS, new AverageJibeLossInMeters(),
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.AVERAGE_JIBE_LOSS_IN_METERS, new AverageJibeLossInMeters(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         
         result.put(DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS,
-                new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS, new AverageManeuverLossInMeters(),
+                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS, new AverageManeuverLossInMeters(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         
         return result;
     }
 
-    public static DetailType[] getAvailableManeuverDetailColumnTypes() {
-        return new DetailType[] { DetailType.TACK, DetailType.AVERAGE_TACK_LOSS_IN_METERS,
-                DetailType.JIBE, DetailType.AVERAGE_JIBE_LOSS_IN_METERS, DetailType.PENALTY_CIRCLE, DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS };
+    public static List<DetailType> getAvailableManeuverDetailColumnTypes() {
+        return Arrays.asList(new DetailType[] { DetailType.TACK, DetailType.AVERAGE_TACK_LOSS_IN_METERS,
+                DetailType.JIBE, DetailType.AVERAGE_JIBE_LOSS_IN_METERS, DetailType.PENALTY_CIRCLE,
+                DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS });
     }
 
     @Override

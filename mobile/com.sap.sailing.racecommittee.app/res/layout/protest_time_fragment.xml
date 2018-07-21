@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -27,7 +26,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:src="?attr/chevron_left_24dp"/>
+                android:src="?attr/chevron_left_24dp" />
 
             <TextView
                 android:id="@+id/header_caption"
@@ -35,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/protest_dialog_title"
-                android:textAppearance="?attr/textHeader"/>
+                android:textAppearance="?attr/textHeader" />
         </LinearLayout>
 
         <View
@@ -43,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/header_line"
             android:layout_alignParentBottom="true"
-            android:background="?attr/black"/>
+            android:background="?attr/black" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -60,7 +59,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentTop="true"
-            android:background="?attr/sap_gray"/>
+            android:background="?attr/sap_gray" />
 
         <Button
             android:id="@+id/choose"
@@ -71,7 +70,7 @@
             android:layout_marginBottom="@dimen/default_margin_half"
             android:layout_marginTop="@dimen/default_margin_half"
             android:text="@string/choose"
-            android:textSize="@dimen/textSize_18"/>
+            android:textSize="@dimen/textSize_18" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -93,7 +92,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:src="?attr/button_prev"/>
+                android:src="?attr/button_prev" />
 
             <ImageView
                 android:id="@+id/nav_next"
@@ -101,7 +100,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:src="?attr/button_next"/>
+                android:src="?attr/button_next" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -114,13 +113,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="5dp"
-                    tools:src="@drawable/ic_dot"/>
+                    tools:src="@drawable/ic_dot" />
 
                 <ImageView
                     android:id="@+id/dot_2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:src="@drawable/ic_dot"/>
+                    tools:src="@drawable/ic_dot" />
             </LinearLayout>
         </RelativeLayout>
 
@@ -138,26 +137,71 @@
                 android:layout_height="match_parent"
                 android:verticalSpacing="2dp"
                 android:visibility="gone"
-                tools:visibility="gone"/>
+                tools:visibility="gone" />
 
             <RelativeLayout
                 android:id="@+id/protest_time_time_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleX="@integer/picker_scale"
-                android:scaleY="@integer/picker_scale"
                 android:visibility="gone"
-                tools:visibility="gone">
+                tools:visibility="visible">
 
-                <include
-                    android:id="@+id/protest_time_time_picker"
-                    layout="@layout/time_picker"
+                <RelativeLayout
+                    android:id="@+id/time_picker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:layout_gravity="center"
-                    android:paddingLeft="@dimen/default_padding"
-                    android:paddingRight="@dimen/default_padding"/>
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true">
+
+                    <include
+                        android:id="@+id/protest_time_time_picker"
+                        layout="@layout/time_picker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:paddingLeft="@dimen/default_padding"
+                        android:paddingRight="@dimen/default_padding"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/protest_time_time_picker"
+                        android:layout_centerHorizontal="true"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="24dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/protest_duration"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:textAppearance="?attr/textXSmall"
+                                tools:text="@string/protest_duration" />
+
+                            <ImageView
+                                android:id="@+id/change_duration"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="8dp"
+                                android:src="?attr/create" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/protest_end"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textXSmall"
+                            tools:text="@string/protest_end_time" />
+                    </LinearLayout>
+                </RelativeLayout>
             </RelativeLayout>
         </FrameLayout>
     </RelativeLayout>

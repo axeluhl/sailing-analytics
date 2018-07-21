@@ -36,12 +36,18 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeHighPointFirstGetsTenOrEight();
         case HIGH_POINT_FIRST_GETS_TWELVE_OR_EIGHT:
             return stringMessages.scoringSchemeHighPointFirstGetsTwelveOrEight();
+        case HIGH_POINT_FIRST_GETS_TWELVE_OR_EIGHT_2017:
+            return stringMessages.scoringSchemeHighPointFirstGetsTwelveOrEight2017();
         case LOW_POINT_WITH_ELIMINATIONS_AND_ROUNDS_WINNER_GETS_07:
             return stringMessages.scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07();
         case LOW_POINT_LEAGUE_OVERALL:
             return stringMessages.scoringSchemeLowPointForLeagueOverallLeaderboard();
         case LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY:
             return stringMessages.scoringSchemeLowPointTieBreakBasedOnLastSeriesOnly();
+        case LOW_POINT_WITH_AUTOMATIC_RDG:
+            return stringMessages.scoringSchemeLowPointWithAutomaticRdg();
+        case LOW_POINT_FIRST_TO_WIN_TWO_RACES:
+            return stringMessages.scoringSchemeLowPointSystemFirstTwoWins();
         }
         return null;
     }
@@ -52,6 +58,10 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeHighPointFirstGetsTenOrEightDescription();
         case HIGH_POINT_FIRST_GETS_TWELVE_OR_EIGHT:
             return stringMessages.scoringSchemeHighPointFirstGetsTwelveOrEightDescription();
+        case HIGH_POINT_FIRST_GETS_TWELVE_OR_EIGHT_2017:
+            return stringMessages.scoringSchemeHighPointFirstGetsTwelveOrEight2017Description();
+        case HIGH_POINT_FIRST_GETS_ONE:
+            return stringMessages.scoringSchemeHighPointFirstGetsOneDescription();
         case HIGH_POINT_ESS_OVERALL:
             return stringMessages.scoringSchemeHighPointEssOverallDescription();
         case HIGH_POINT_ESS_OVERALL_12:
@@ -64,6 +74,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeHighPointMatchRacingDescription();
         case LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY:
             return stringMessages.scoringSchemeLowPointTieBreakBasedOnLastSeriesOnlyDescription();
+        case LOW_POINT_FIRST_TO_WIN_TWO_RACES:
+            return stringMessages.scoringSchemeLowPointSystemFirstTwoWinsDescription();
         default:
             return format(scoringSchemeType, stringMessages);
         }

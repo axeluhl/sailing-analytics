@@ -149,7 +149,7 @@ public class BitmapHelper {
      *
      * @param context the context
      * @param drawableResId the resource ID of the drawable to tint
-     * @param color the color in which the drawable should be tinted
+     * @param color the color in which the drawable should be tinted, in the form {@code 0xAARRGGBB}
      * @return the tinted Drawable
      */
     public static Drawable getTintedDrawable(Context context, @DrawableRes int drawableResId, int color) {

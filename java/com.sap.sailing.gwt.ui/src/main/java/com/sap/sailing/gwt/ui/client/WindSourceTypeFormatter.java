@@ -8,6 +8,8 @@ public class WindSourceTypeFormatter {
         switch (windSourceType) {
         case COMBINED:
             return stringMessages.combinedWindSourceTypeName();
+        case LEG_MIDDLE:
+            return stringMessages.legMiddleWindSourceTypeName();
         case COURSE_BASED:
             return stringMessages.courseBasedWindSourceTypeName();
         case TRACK_BASED_ESTIMATION:
@@ -18,6 +20,8 @@ public class WindSourceTypeFormatter {
             return stringMessages.webWindSourceTypeName();
         case RACECOMMITTEE:
             return stringMessages.raceCommitteeWindSourceTypeName();
+        case WINDFINDER:
+            return stringMessages.windFinderWindSourceTypeName();
         }
         return null;
     }
@@ -26,6 +30,8 @@ public class WindSourceTypeFormatter {
         switch (windSourceType) {
         case COMBINED:
             return stringMessages.combinedWindSourceTypeTooltip();
+        case LEG_MIDDLE:
+            return stringMessages.legMiddleWindSourceTypeTooltip();
         case COURSE_BASED:
             return stringMessages.courseBasedWindSourceTypeTooltip();
         case TRACK_BASED_ESTIMATION:
@@ -36,6 +42,8 @@ public class WindSourceTypeFormatter {
             return stringMessages.webWindSourceTypeTooltip();
         case RACECOMMITTEE:
             return stringMessages.raceCommitteeWindSourceTypeTooltip();
+        case WINDFINDER:
+            return stringMessages.windFinderWindSourceTypeTooltip();
         }
         return null;
     }

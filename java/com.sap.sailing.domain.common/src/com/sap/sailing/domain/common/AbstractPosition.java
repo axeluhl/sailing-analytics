@@ -1,10 +1,14 @@
 package com.sap.sailing.domain.common;
 
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianPosition;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.util.RoundingUtil;
 
 public class AbstractPosition implements Position {
     private static final long serialVersionUID = -3057027562787541064L;
@@ -16,6 +20,8 @@ public class AbstractPosition implements Position {
     public boolean equals(Object o) {
         if (o == null) {
             return false;
+        } if (this == o) {
+            return true;
         } else {
             return o instanceof Position && getLatRad() == ((Position) o).getLatRad()
                     && getLngRad() == ((Position) o).getLngRad();
@@ -241,4 +247,27 @@ public class AbstractPosition implements Position {
         return greatCircle;
     }
 
+    @Override
+    public String getAsDegreesAndDecimalMinutesWithCardinalPoints() {
+        final String lat = (getLatDeg()>=0 ? "N" : "S") + getDegreesAndDecimalMinutesOfNonNegativeAngle(Math.abs(getLatDeg()), /* degreePlaces */ 2, /* minuteDecimals */ 3);
+        final String lng = (getLngDeg()>=0 ? "E" : "W") + getDegreesAndDecimalMinutesOfNonNegativeAngle(Math.abs(getLngDeg()), /* degreePlaces */ 3, /* minuteDecimals */ 3);
+        return lat+" "+lng;
+    }
+    
+    private String getDegreesAndDecimalMinutesOfNonNegativeAngle(double nonNegativeAngle, int degreePlaces, int minuteDecimals) {
+        final double abs = Math.abs(nonNegativeAngle);
+        int integerDegrees = (int) nonNegativeAngle;
+        double minutes = RoundingUtil.format((abs-(int) abs)*60.0, 3);
+        if (minutes >= 60.0) {
+            minutes -= 60.0;
+            integerDegrees++;
+        }
+        return Util.padPositiveValue(integerDegrees, degreePlaces, 0, /* round */ true) + "°"+
+                Util.padPositiveValue(minutes, 2, minuteDecimals, /* round */ true)+"'";
+    }
+    
+    @Override
+    public String getAsSignedDecimalDegrees() {
+        return "("+getLatDeg()+", "+getLngDeg()+")";
+    }
 }

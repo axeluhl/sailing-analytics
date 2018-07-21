@@ -69,7 +69,6 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     public void displayUserConfirmationScreen(BaseCheckinData data) {
         CheckinData chData = (CheckinData) data;
         checkinWithApiAndStartRegattaActivity(chData);
-
     }
 
     private void checkinWithApiAndStartRegattaActivity(CheckinData checkinData) {
@@ -89,14 +88,15 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         if (BuildConfig.DEBUG) {
             ExLog.i(getActivity(), TAG, "Batch-insert of checkinData completed.");
         }
-        startRegatta(checkinData.leaderboardName, checkinData.checkinDigest);
+        startRegatta(checkinData.leaderboardDisplayName, checkinData.checkinDigest);
     }
-
+    
     @Override
     public void handleScannedOrUrlMatchedUri(Uri uri) {
-        CheckinManager manager = new CheckinManager(uri.toString(), (CheckinDataActivity) getActivity());
+        @SuppressWarnings("unchecked")
+        final CheckinDataActivity<CheckinData> activity = (CheckinDataActivity<CheckinData>) getActivity();
+        CheckinManager manager = new CheckinManager(uri.toString(), activity);
         manager.callServerAndGenerateCheckinData();
-
     }
 
     /**
@@ -159,9 +159,8 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
 
             // -1, because there's a header row
             Cursor cursor = (Cursor) adapter.getItem(position - 1);
-            String checkinDigest = cursor.getString(cursor.getColumnIndex("leaderboard_checkin_digest"));
-
-            String leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
+            String checkinDigest = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_CHECKIN_DIGEST));
+            String leaderboardName = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_DISPLAY_NAME));
             startRegatta(leaderboardName, checkinDigest);
         }
     }

@@ -107,7 +107,7 @@ public class RGBColor extends AbstractColor {
             }
         }
 
-        Util.Triple<Float, Float, Float> HSVColor = new Util.Triple<Float, Float, Float>(hue, saturation, brightness);
+        Util.Triple<Float, Float, Float> HSVColor = new Util.Triple<Float, Float, Float>(hue * 360, saturation, brightness);
         return HSVColor;
     }
 

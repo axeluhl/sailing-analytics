@@ -13,19 +13,19 @@ public class SystemInformationPanel extends FlowPanel {
 
     private final Label buildVersionText;
     
-    public SystemInformationPanel(final ServerInfoRetriever buildVersionRetriever, final ErrorReporter errorReporter) {
+    public SystemInformationPanel(final ServerInfoRetriever buildVersionRetriever, final ErrorReporter errorReporter, final StringMessages stringMessages) {
         super();
         buildVersionText = new Label("");
         addFloatingWidget(buildVersionText);
         buildVersionRetriever.getServerInfo(new AsyncCallback<ServerInfoDTO>() {
             @Override
             public void onSuccess(ServerInfoDTO result) {
-                buildVersionText.setText("Version: " + result.getBuildVersion());
+                buildVersionText.setText(stringMessages.version(result.getBuildVersion()));
             }
             
             @Override
             public void onFailure(Throwable caught) {
-                buildVersionText.setText("Version: " + "Unknown");
+                buildVersionText.setText(stringMessages.version(stringMessages.unknown()));
             }
         });
     }
@@ -34,5 +34,4 @@ public class SystemInformationPanel extends FlowPanel {
         w.getElement().getStyle().setFloat(Style.Float.LEFT);
         add(w);
     }
-    
 }

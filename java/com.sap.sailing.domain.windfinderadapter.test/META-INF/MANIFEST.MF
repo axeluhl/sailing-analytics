@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Test
+Bundle-SymbolicName: com.sap.sailing.domain.windfinderadapter.test
+Automatic-Module-Name: com.sap.sailing.domain.windfinderadapter.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Fragment-Host: com.sap.sailing.domain.windfinderadapter
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.junit,
+ org.mockito.mockito-core;bundle-version="1.10.14",
+ org.objenesis;bundle-version="2.1.0",
+ org.hamcrest;bundle-version="1.1.0"

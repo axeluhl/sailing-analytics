@@ -1,6 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -9,6 +10,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
 public class RecordMarkGPSFixForExistingTrack extends RecordMarkGPSFix {
+    private static final Logger logger = Logger.getLogger(RecordMarkGPSFixForExistingTrack.class.getName());
     private static final long serialVersionUID = -3953907832324217209L;
     private final Serializable markId;
 
@@ -31,8 +33,16 @@ public class RecordMarkGPSFixForExistingTrack extends RecordMarkGPSFix {
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
         DynamicTrackedRace trackedRace = getTrackedRace(toState);
-        Mark mark = getMarkById(trackedRace);
-        trackedRace.recordFix(mark, getFix(), /* onlyWhenInTrackingTimeInterval */ false); // record the fix in any case
+	if (trackedRace != null) {
+	    Mark mark = getMarkById(trackedRace);
+	    if (mark != null) {
+	        trackedRace.recordFix(mark, getFix(), /* onlyWhenInTrackingTimeInterval */ false); // record the fix in any case
+	    } else {
+	        logger.warning("Received GPS fix for mark with ID "+markId+" which was not found in tracked race "+trackedRace.getRace().getName()+
+	                " in regatta "+trackedRace.getTrackedRegatta().getRegatta().getName()+
+	                ". Maybe this event was processed after the mark had been removed.");
+	    }
+	}
         return null;
     }
 

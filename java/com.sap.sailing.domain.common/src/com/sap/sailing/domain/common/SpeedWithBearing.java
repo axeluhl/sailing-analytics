@@ -1,10 +1,14 @@
 package com.sap.sailing.domain.common;
 
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.datamining.annotations.Statistic;
 
 
 
 public interface SpeedWithBearing extends Speed {
+    @Statistic(messageKey="bearing", resultDecimals=1)
     Bearing getBearing();
 
     /**

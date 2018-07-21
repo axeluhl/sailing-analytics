@@ -9,6 +9,10 @@
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="4"/>
 </listAttribute>
+<listAttribute key="org.eclipse.debug.ui.favoriteGroups">
+<listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
+<listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
+</listAttribute>
 <stringAttribute key="projectName" value="com.sap.sailing.gwt.ui"/>
 <booleanAttribute key="showLaunchOutput" value="false"/>
 <stringAttribute key="url" value="http://127.0.0.1:8888/gwt/Home.html"/>

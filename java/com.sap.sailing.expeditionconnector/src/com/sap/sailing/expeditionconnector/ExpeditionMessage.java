@@ -2,11 +2,11 @@ package com.sap.sailing.expeditionconnector;
 
 import java.util.Set;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.udpconnector.UDPMessage;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 
 public interface ExpeditionMessage extends UDPMessage {
@@ -50,6 +50,89 @@ public interface ExpeditionMessage extends UDPMessage {
 #0,4,135.0,5,2.06,6,345.5,94,350.8,95,2.35*05
      */
     /**
+     * variable ID for boat speed
+     */
+    final int ID_BSP = 1;
+
+    /**
+     * variable ID for apparent wind angle (probably in decimal degrees)
+     */
+    final int ID_AWA = 2;
+
+    /**
+     * variable ID for apparent wind speed (probably in decimal knots) 
+     */
+    final int ID_AWS = 3;
+
+    /**
+     * variable ID for true wind angle, relative to keel, in decimal degrees
+     */
+    final int ID_TWA = 4;
+    
+    /**
+     * variable ID for true wind speed in decimal knots
+     */
+    final int ID_TWS = 5;
+    
+    /**
+     * Variable ID for what Expedition thinks is the true wind direction ("from"), in decimal degrees. Some
+     * users prefer to not enter the current declination for a time / place into their Expedition
+     * client. In this case, the values presented for this key are the magnetic wind direction instead.
+     * They should then be corrected by adding the current declination.
+     */
+    final int ID_TWD = 6;
+    
+    /**
+     * variable ID for course
+     */
+    final int ID_COURSE = 9;
+
+    /**
+     * variable ID for leeway
+     */
+    final int ID_LWY = 10;
+
+    /**
+     * variable ID for "set" (?)
+     */
+    final int ID_SET = 11;
+
+    /**
+     * variable ID for drift
+     */
+    final int ID_DRIFT = 12;
+
+    /**
+     * variable ID for magnetic heading, meaning the keel's direction, in decimal degrees
+     */
+    final int ID_HEADING = 13;
+    
+    /**
+     * variable ID for depth in meters
+     */
+    final int ID_DEPTH = 17;
+
+    /**
+     * variable ID for roll (heel), probably in degrees
+     */
+    final int ID_ROLL = 18;
+
+    /**
+     * variable ID for pitch, probably in degrees
+     */
+    final int ID_PITCH = 19;
+
+    /**
+     * variable ID for rudder, probably in degrees
+     */
+    final int ID_RUDDER = 20;
+
+    /**
+     * variable ID for forestay load (unit unknown yet)
+     */
+    final int ID_FORESTAY_LOAD = 22;
+
+    /**
      * variable ID for the GPS-measured latitude, in decimal degrees
      */
     final int ID_GPS_LAT = 48;
@@ -67,35 +150,7 @@ public interface ExpeditionMessage extends UDPMessage {
     /**
      * variable ID for the GPS-measured speed over ground (SoG)
      */
-    final int ID_GPS_SOG = 50;
-    
-    /**
-     * variable ID for the GPS-measured time as days since 31.12.1899 UTC, meaning 1.0 is 1.1.1900 0:00:00 UTC
-     */
-    final int ID_GPS_TIME = 146;
-    
-    /**
-     * variable ID for magnetic heading, meaning the keel's direction, in decimal degrees
-     */
-    final int ID_HEADING = 13;
-    
-    /**
-     * variable ID for true wind angle, relative to keel, in decimal degrees
-     */
-    final int ID_TWA = 4;
-    
-    /**
-     * Variable ID for what Expedition thinks is the true wind direction ("from"), in decimal degrees. Some
-     * users prefer to not enter the current declination for a time / place into their Expedition
-     * client. In this case, the values presented for this key are the magnetic wind direction instead.
-     * They should then be corrected by adding the current declination.
-     */
-    final int ID_TWD = 6;
-    
-    /**
-     * variable ID for true wind speed in decimal knots
-     */
-    final int ID_TWS = 5;
+    final int ID_GPS_SOG = 51;
     
     /**
      * True wind direction over ground ("from") in decimal degrees, cleansed using the GPS device
@@ -106,7 +161,47 @@ public interface ExpeditionMessage extends UDPMessage {
      * True wind speed over ground, cleansed using the GPS device
      */
     final int ID_GWS = 95;
-            
+    
+    /**
+     * variable ID for the GPS-measured time as days since 31.12.1899 UTC, meaning 1.0 is 1.1.1900 0:00:00 UTC
+     */
+    final int ID_GPS_TIME = 146;
+    
+    /**
+     * variable ID for tack angle, probably in degrees
+     */
+    final int ID_TACK_ANGLE = 152;
+    
+    /**
+     * variable ID for rake in degrees
+     */
+    final int ID_RAKE_DEG = 172;
+    
+    /**
+     * variable ID for deflector percentage
+     */
+    final int ID_DFLCTR_PP = 173;
+    
+    /**
+     * variable ID for target heel angle
+     */
+    final int ID_TG_HEEL = 174;
+    
+    /**
+     * variable ID for forestay pressure
+     */
+    final int ID_FORESTAY_PRES = 175;
+    
+    /**
+     * variable ID for deflector in millimeters
+     */
+    final int ID_DFLECTR_MM = 176;
+    
+    /**
+     * variable ID for target boat speed (P?), presumably in knots
+     */
+    final int ID_TARG_BSP_P = 238;
+    
     /**
      * A message's checksum determines whether the package is to be considered valid.
      */

@@ -126,7 +126,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                                         widthInPxBox.setValue(imageSize.getA());
                                         heightInPxBox.setValue(imageSize.getB());
                                     }
-                                    validate();
+                                    validateAndUpdate();
                                 }
 
                                 @Override
@@ -135,13 +135,19 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                                 }
                             });
                 }
-                validate();
+                validateAndUpdate();
             }
         });
         
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
-                        MediaConstants.imageTagSuggestions, "Enter tags for the image", 30));
+                        MediaConstants.imageTagSuggestions, stringMessages.enterTagsForTheImage(), 30));
+        tagsListEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
+                validateAndUpdate();
+            }
+        });
     }
 
     @Override
@@ -172,27 +178,27 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
 
         Grid grid = new Grid(11, 2);
 
-        grid.setWidget(0, 0, new Label("Created at:"));
+        grid.setWidget(0, 0, new Label(stringMessages.createdAt() + ":"));
         grid.setWidget(0, 1, createdAtLabel);
         grid.setWidget(1, 0, new HTML("&nbsp;"));
         grid.setWidget(1, 1, busyIndicator);
-        grid.setWidget(2,  0, new Label("Image URL:"));
+        grid.setWidget(2,  0, new Label(stringMessages.imageURL() + ":"));
         grid.setWidget(2, 1, imageURLAndUploadComposite);
         grid.setWidget(3, 0, new HTML("&nbsp;"));
 
         grid.setWidget(4,  0, new Label(stringMessages.title() + ":"));
         grid.setWidget(4, 1, titleTextBox);
-        grid.setWidget(5,  0, new Label("Subtitle:"));
+        grid.setWidget(5,  0, new Label(stringMessages.subtitle() + ":"));
         grid.setWidget(5, 1, subtitleTextBox);
-        grid.setWidget(6, 0, new Label("Copyright:"));
+        grid.setWidget(6, 0, new Label(stringMessages.copyright() + ":"));
         grid.setWidget(6, 1, copyrightTextBox);
-        grid.setWidget(7, 0, new Label("Width in px:"));
+        grid.setWidget(7, 0, new Label(stringMessages.widthInPx() + ":"));
         grid.setWidget(7, 1, widthInPxBox);
-        grid.setWidget(8, 0, new Label("Height in px:"));
+        grid.setWidget(8, 0, new Label(stringMessages.heightInPx() + ":"));
         grid.setWidget(8, 1, heightInPxBox);
 
         grid.setWidget(9, 0, new HTML("&nbsp;"));
-        grid.setWidget(10, 0, new Label("Tags:"));
+        grid.setWidget(10, 0, new Label(stringMessages.tags() + ":"));
         grid.setWidget(10, 1, tagsListEditor);
 
         panel.add(grid);

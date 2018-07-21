@@ -3,7 +3,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Calendar;
-import java.util.Locale;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -96,7 +95,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
             }
         }
 
-        mDatePicker = (NumberPicker) layout.findViewById(R.id.date_picker);
+        mDatePicker = ViewHelper.get(layout, R.id.date_picker);
         if (mDatePicker != null) {
             Calendar start = (Calendar) calendar.clone();
             Calendar finishing = (Calendar) calendar.clone();
@@ -133,50 +132,9 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
             }
         }
 
-        mTimePicker = (TimePicker) layout.findViewById(R.id.time_picker);
-        if (mTimePicker != null) {
-            ViewHelper.disableSave(mTimePicker);
-            ThemeHelper.setPickerColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
-                .getColor(getActivity(), R.attr.sap_yellow_1));
-            mTimePicker.setIs24HourView(true);
-            mTimePicker.setCurrentHour(calendar.get(Calendar.HOUR_OF_DAY));
-            mTimePicker.setCurrentMinute(calendar.get(Calendar.MINUTE));
-        }
-
-        mSecondPicker = (NumberPicker) layout.findViewById(R.id.second_picker);
-        if (mSecondPicker != null) {
-            ViewHelper.disableSave(mSecondPicker);
-            ThemeHelper.setPickerColor(getActivity(), mSecondPicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
-                .getColor(getActivity(), R.attr.sap_yellow_1));
-            mSecondPicker.setVisibility(View.VISIBLE);
-            mSecondPicker.setMinValue(0);
-            mSecondPicker.setMaxValue(59);
-            mSecondPicker.setValue(calendar.get(Calendar.SECOND));
-            mSecondPicker.setFormatter(new NumberPicker.Formatter() {
-                @Override
-                public String format(int i) {
-                    return String.format(Locale.US, "%02d", i);
-                }
-            });
-            mSecondPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-                @Override
-                public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                    if (mTimePicker != null) {
-                        Calendar pickerTime = (Calendar) calendar.clone();
-                        pickerTime.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
-                        pickerTime.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
-                        if (oldVal == 0 && newVal == 59) {
-                            pickerTime.add(Calendar.MINUTE, -1);
-                        }
-                        if (oldVal == 59 && newVal == 0) {
-                            pickerTime.add(Calendar.MINUTE, 1);
-                        }
-                        mTimePicker.setCurrentHour(pickerTime.get(Calendar.HOUR_OF_DAY));
-                        mTimePicker.setCurrentMinute(pickerTime.get(Calendar.MINUTE));
-                    }
-                }
-            });
-        }
+        mTimePicker = ViewHelper.get(layout, R.id.time_picker);
+        mSecondPicker = ViewHelper.get(layout, R.id.second_picker);
+        TimeUtils.initTimePickerWithSeconds(getActivity(), calendar, mTimePicker, mSecondPicker);
 
         View setTime = layout.findViewById(R.id.set_date_time);
         if (setTime != null) {

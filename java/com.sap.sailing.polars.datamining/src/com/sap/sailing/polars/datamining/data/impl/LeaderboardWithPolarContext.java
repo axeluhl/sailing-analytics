@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.datamining.data.impl;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.polars.datamining.data.HasLeaderboardGroupPolarContext;
 import com.sap.sailing.polars.datamining.data.HasLeaderboardPolarContext;
@@ -22,6 +23,11 @@ public class LeaderboardWithPolarContext implements HasLeaderboardPolarContext {
     @Override
     public HasLeaderboardGroupPolarContext getLeaderboardGroupPolarContext() {
         return leaderboardGroupPolarContext;
+    }
+    
+    @Override
+    public BoatClass getBoatClass() {
+        return leaderboard.getBoatClass();
     }
 
 }

@@ -8,21 +8,38 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.Filter;
+import com.sap.sse.gwt.client.suggestion.AbstractListSuggestOracle;
 
 public class RacesByCompetitorTextBoxFilter extends AbstractListSuggestBoxFilter<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
     
     private final RacesByCompetitorFilter filter = new RacesByCompetitorFilter();
     
     public RacesByCompetitorTextBoxFilter() {
-        super(StringMessages.INSTANCE.competitorsFilter());
+        super(new AbstractListSuggestOracle<SimpleCompetitorDTO>() {
+            @Override
+            protected Iterable<String> getMatchingStrings(SimpleCompetitorDTO value) {
+                return Arrays.asList(value.getName(), value.getShortInfo());
+            }
+
+            @Override
+            protected String createSuggestionKeyString(SimpleCompetitorDTO value) {
+                return value.getShortInfo();
+            }
+
+            @Override
+            protected String createSuggestionAdditionalDisplayString(SimpleCompetitorDTO value) {
+                return value.getName();
+            }
+        }, StringMessages.INSTANCE.competitorsFilter());
     }
     
     @Override
     protected Filter<SimpleRaceMetadataDTO> getFilter(String searchValue) {
         this.filter.keywords.clear();
         if (searchValue != null && !searchValue.isEmpty()) {
-            this.filter.keywords.add(searchValue.trim());
+            Util.addAll(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchValue), this.filter.keywords);
         }
         return filter;
     }
@@ -31,28 +48,14 @@ public class RacesByCompetitorTextBoxFilter extends AbstractListSuggestBoxFilter
     protected void onSuggestionSelected(SimpleCompetitorDTO selectedItem) {
     }
     
-    @Override
-    protected String createSuggestionAdditionalDisplayString(SimpleCompetitorDTO value) {
-        return value.getName();
-    }
-    
-    @Override
-    protected String createSuggestionKeyString(SimpleCompetitorDTO value) {
-        return value.getSailID();
-    }
-    
-    @Override
-    protected Iterable<String> getMatchingStrings(SimpleCompetitorDTO value) {
-        return Arrays.asList(value.getName(), value.getSailID());
-    }
-    
     private class RacesByCompetitorFilter implements Filter<SimpleRaceMetadataDTO> {
 
         private final List<String> keywords = new ArrayList<>();
         
         @Override
         public boolean matches(SimpleRaceMetadataDTO object) {
-            return keywords.isEmpty() || !Util.isEmpty(suggestionMatchingFilter.applyFilter(keywords, object.getCompetitors()));
+            AbstractListFilter<SimpleCompetitorDTO> filter = getSuggestOracle().getSuggestionMatchingFilter();
+            return keywords.isEmpty() || !Util.isEmpty(filter.applyFilter(keywords, object.getCompetitors()));
         }
 
         @Override

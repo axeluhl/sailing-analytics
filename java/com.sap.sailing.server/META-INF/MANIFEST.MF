@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Sailing Server
 Bundle-SymbolicName: com.sap.sailing.server
+Automatic-Module-Name: com.sap.sailing.server
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.server.impl.Activator
 Bundle-Vendor: SAP
@@ -48,10 +49,13 @@ Export-Package: com.sap.sailing.server,
    com.sap.sailing.gwt.ui.test,
    com.sap.sailing.server.replication.test,
    com.sap.sailing.domain.racelogtrackingadapter.test,
-   com.sap.sailing.server.testsupport",
+   com.sap.sailing.server.testsupport,
+   com.sap.sailing.domain.test",
  com.sap.sailing.server.impl.preferences.model,
  com.sap.sailing.server.masterdata,
  com.sap.sailing.server.operationaltransformation,
  com.sap.sailing.server.operationaltransformation.racelog,
  com.sap.sailing.server.security,
- com.sap.sailing.server.simulation
+ com.sap.sailing.server.simulation,
+ com.sap.sailing.server.statistics,
+ com.sap.sailing.server.util

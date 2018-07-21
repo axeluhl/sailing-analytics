@@ -73,7 +73,8 @@
     <dimen name="flags">64dp</dimen>
 
     <dimen name="competitor_dialog_width">420dp</dimen>
-    <dimen name="competitor_edit_width">200dp</dimen>
+    <dimen name="competitor_edit_width">270dp</dimen>
+    <dimen name="competitor_edit_picker_width">200dp</dimen>
     <dimen name="dialog_top_padding">24dp</dimen>
 
     <dimen name="abort_dialog_height">215dp</dimen>
@@ -95,6 +96,7 @@
     <dimen name="management_text_small">@dimen/textSize_18</dimen>
 
     <dimen name="header_margin_top">13dp</dimen>
+    <dimen name="dialog_margin">24dp</dimen>
 
     <dimen name="wind_input">55dp</dimen>
 
@@ -129,5 +131,7 @@
 
     <!-- photo -->
     <dimen name="photo_shutter_size">45dp</dimen>
+
+    <dimen name="search_view_size">125dp</dimen>
 
 </resources>

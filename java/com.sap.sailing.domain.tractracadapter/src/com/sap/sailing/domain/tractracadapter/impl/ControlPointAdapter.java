@@ -49,4 +49,14 @@ public class ControlPointAdapter extends AbstractWithID implements TracTracContr
     public boolean getHasTwoPoints() {
         return controlPoint.isMultiple();
     }
+
+    @Override
+    public UUID getFirstMarkId() {
+        return controlPoint.getControlPoints().get(0).getId();
+    }
+
+    @Override
+    public UUID getSecondMarkId() {
+        return controlPoint.getControlPoints().get(1).getId();
+    }
 }

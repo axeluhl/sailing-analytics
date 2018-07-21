@@ -2,17 +2,9 @@ package com.sap.sailing.declination.test;
 
 import java.text.SimpleDateFormat;
 
-import org.junit.Before;
+import com.sap.sailing.declination.impl.DeclinationImporter;
 
-import com.sap.sailing.declination.impl.NOAAImporterForTesting;
-
-public abstract class AbstractDeclinationTest {
-    protected NOAAImporterForTesting importer;
+public abstract class AbstractDeclinationTest<I extends DeclinationImporter> {
+    protected I importer;
     protected final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    
-    @Before
-    public void setUp() {
-        importer = new NOAAImporterForTesting();
-    }
-    
 }

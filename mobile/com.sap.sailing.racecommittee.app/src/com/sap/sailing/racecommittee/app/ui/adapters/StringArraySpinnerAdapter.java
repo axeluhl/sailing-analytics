@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.adapters;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -18,7 +19,8 @@ import com.sap.sailing.racecommittee.app.R;
 
 public class StringArraySpinnerAdapter implements SpinnerAdapter {
 
-    private ArrayList<String> mArray;
+    private static final float TEXT_SIZE = 22;
+    private List<String> mArray;
     private int mSelectedItem = -1;
 
     public StringArraySpinnerAdapter(@NonNull String[] data) {
@@ -38,6 +40,7 @@ public class StringArraySpinnerAdapter implements SpinnerAdapter {
         if (mainText != null) {
             mainText.setText(mArray.get(position));
             mainText.setTextColor(context.getResources().getColor(R.color.constant_black));
+            mainText.setTextSize(TEXT_SIZE);
         }
 
         if (mSelectedItem == position) {
@@ -93,6 +96,7 @@ public class StringArraySpinnerAdapter implements SpinnerAdapter {
         if (mainText != null) {
             mainText.setText(mArray.get(position));
             mainText.setTextColor(context.getResources().getColor(R.color.constant_black));
+            mainText.setTextSize(TEXT_SIZE);
         }
 
         return layout;

@@ -13,8 +13,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.SuggestOracle.Callback;
-import com.google.gwt.user.client.ui.SuggestOracle.Request;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
@@ -22,7 +20,9 @@ import com.sap.sailing.gwt.home.shared.partials.filter.AbstractAsyncSuggestBoxFi
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractFilterWidget;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractSuggestBoxFilter;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider.SuggestionItemsCallback;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.suggestion.AbstractSuggestOracle;
 
 public final class SuggestedMultiSelection<T> extends Composite implements SuggestedMultiSelectionDataProvider.Display<T> {
 
@@ -107,31 +107,39 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
         removeAllButtonUi.setEnabled(itemContainerUi.getWidgetCount() > 0);
     }
     
-    private static abstract class AbstractSuggestedMultiSelectionFilter<T> extends AbstractAsyncSuggestBoxFilter<T, T> {
-        private final SuggestedMultiSelectionDataProvider<T, ?> dataProvider;
+    private static class SuggestedMultiSelectionFilter<T> extends AbstractAsyncSuggestBoxFilter<T, T> {
         private final SelectionCallback<T> selectionCallback;
 
-        protected AbstractSuggestedMultiSelectionFilter(SuggestedMultiSelectionDataProvider<T, ?> dataProvider,
+        private SuggestedMultiSelectionFilter(final SuggestedMultiSelectionDataProvider<T, ?> dataProvider,
                 SelectionCallback<T> selectionCallback, String placeholderText) {
-            super(placeholderText);
-            this.dataProvider = dataProvider;
+            super(new AbstractSuggestOracle<T>() {
+                @Override
+                protected void getSuggestions(final Request request, final Callback callback,
+                        final Iterable<String> queryTokens) {
+                    dataProvider.getSuggestionItems(queryTokens, request.getLimit(), new SuggestionItemsCallback<T>() {
+                        @Override
+                        public void setSuggestionItems(Collection<T> suggestionItems) {
+                            setSuggestions(request, callback, suggestionItems, queryTokens);
+                        }
+                    });
+                }
+
+                @Override
+                protected String createSuggestionKeyString(T value) {
+                    return dataProvider.createSuggestionKeyString(value);
+                }
+
+                @Override
+                protected String createSuggestionAdditionalDisplayString(T value) {
+                    return dataProvider.createSuggestionAdditionalDisplayString(value);
+                }
+            }, placeholderText);
             this.selectionCallback = selectionCallback;
         }
         
         @Override
-        protected void getSuggestions(final Request request, final Callback callback,
-                final Iterable<String> queryTokens) {
-            dataProvider.getSuggestionItems(queryTokens, request.getLimit(), new SuggestionItemsCallback<T>() {
-                @Override
-                public void setSuggestionItems(Collection<T> suggestionItems) {
-                    setSuggestions(request, callback, suggestionItems, queryTokens);
-                }
-            });
-        }
-        
-        @Override
         protected final void onSuggestionSelected(T selectedItem) {
-            AbstractSuggestedMultiSelectionFilter.this.clear();
+            SuggestedMultiSelectionFilter.this.clear();
             selectionCallback.onSuggestionSelected(selectedItem);
         }
     }
@@ -150,28 +158,19 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
     }
     
     public static SuggestedMultiSelection<SimpleCompetitorWithIdDTO> forCompetitors(
-            final SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, ?> dataProvider, String headerTitle) {
+            final SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, ?> dataProvider, String headerTitle,
+            FlagImageResolver flagImageResolver) {
         return new SuggestedMultiSelection<>(dataProvider, new WidgetProvider<SimpleCompetitorWithIdDTO>() {
             @Override
             public IsWidget getItemDescriptionWidget(SimpleCompetitorWithIdDTO item) {
-                return new SuggestedMultiSelectionCompetitorItemDescription(item);
+                return new SuggestedMultiSelectionCompetitorItemDescription(item, flagImageResolver);
             }
 
             @Override
             public AbstractSuggestBoxFilter<SimpleCompetitorWithIdDTO, SimpleCompetitorWithIdDTO> getSuggestBoxFilter(
                     SelectionCallback<SimpleCompetitorWithIdDTO> selectionCallback) {
-                return new AbstractSuggestedMultiSelectionFilter<SimpleCompetitorWithIdDTO>(dataProvider,
-                        selectionCallback, StringMessages.INSTANCE.add(StringMessages.INSTANCE.competitor())) {
-                    @Override
-                    protected String createSuggestionKeyString(SimpleCompetitorWithIdDTO value) {
-                        return value.getSailID();
-                    }
-
-                    @Override
-                    protected String createSuggestionAdditionalDisplayString(SimpleCompetitorWithIdDTO value) {
-                        return value.getName();
-                    }
-                };
+                return new SuggestedMultiSelectionFilter<SimpleCompetitorWithIdDTO>(dataProvider,
+                        selectionCallback, StringMessages.INSTANCE.add(StringMessages.INSTANCE.competitor()));
             }
         }, headerTitle);
     }
@@ -187,18 +186,8 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
             @Override
             public AbstractSuggestBoxFilter<BoatClassDTO, BoatClassDTO> getSuggestBoxFilter(
                     SelectionCallback<BoatClassDTO> selectionCallback) {
-                return new AbstractSuggestedMultiSelectionFilter<BoatClassDTO>(dataProvider, selectionCallback,
-                        StringMessages.INSTANCE.add(StringMessages.INSTANCE.boatClass())) {
-                    @Override
-                    protected String createSuggestionKeyString(BoatClassDTO value) {
-                        return value.getName();
-                    }
-
-                    @Override
-                    protected String createSuggestionAdditionalDisplayString(BoatClassDTO value) {
-                        return null;
-                    }
-                };
+                return new SuggestedMultiSelectionFilter<BoatClassDTO>(dataProvider, selectionCallback,
+                        StringMessages.INSTANCE.add(StringMessages.INSTANCE.boatClass()));
             }
         }, headerTitle);
     }

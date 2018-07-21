@@ -2,6 +2,8 @@ package com.sap.sailing.domain.base;
 
 import java.util.UUID;
 
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 
 /**
@@ -13,11 +15,6 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
  * 
  */
 public interface Event extends EventBase {
-    Iterable<Regatta> getRegattas();
-    
-    void addRegatta(Regatta regatta);
-    
-    void removeRegatta(Regatta regatta);
     
     /**
      * For events, the ID is always a UUID.
@@ -46,4 +43,31 @@ public interface Event extends EventBase {
      * leaderboard groups in <code>leaderboardGroups</code>.
      */
     void setLeaderboardGroups(Iterable<LeaderboardGroup> leaderboardGroups);
+    
+    /**
+     * An event may happen in the vicinity of one or more WindFinder (https://www.windfinder.com) weather stations.
+     * Which ones those are can be defined using {@link #setWindFinderReviewedSpotsCollection(Iterable)}, and this
+     * getter returns the IDs last set.
+     * 
+     * @return an always valid (non-{@code null}) but possibly empty and unmodifiable set of strings; the set is "live,"
+     *         meaning it will change as the underlying data changes
+     */
+    Iterable<String> getWindFinderReviewedSpotsCollectionIds();
+    
+    /**
+     * This method may return WindFinder spot IDs based on the tracked races reachable from this event's associated
+     * leaderboard groups and their wind sources. The {@link WindSource#getId() wind source IDs} of all wind sources of
+     * type {@link WindSourceType#WINDFINDER} will be collected and returned.
+     * 
+     * @return an always valid (non-{@code null}) but possibly empty set of strings that is a non-live copy computed
+     *         just for this call
+     */
+    Iterable<String> getAllFinderSpotIdsUsedByTrackedRacesInEvent();
+
+    /**
+     * Set the IDs of the reviewed WindFinder spot collections to consider during this event.
+     * Setting this to a non-empty value shall lead to a corresponding display of a WindFinder
+     * logo / link on the event's UI representation.
+     */
+    void setWindFinderReviewedSpotsCollection(Iterable<String> reviewedSpotsCollectionIds);
 }

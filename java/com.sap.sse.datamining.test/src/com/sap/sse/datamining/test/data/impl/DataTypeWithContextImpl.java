@@ -37,5 +37,4 @@ public class DataTypeWithContextImpl extends SuperType implements DataTypeWithCo
     public int getSpeedInKnots() {
         return 0;
     }
-
 }

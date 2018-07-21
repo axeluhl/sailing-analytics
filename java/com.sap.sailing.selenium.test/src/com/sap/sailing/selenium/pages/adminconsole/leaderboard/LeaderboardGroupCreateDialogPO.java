@@ -7,6 +7,7 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
+import com.sap.sailing.selenium.pages.gwt.CheckBoxPO;
 
 public class LeaderboardGroupCreateDialogPO extends DataEntryDialogPO {
 
@@ -28,5 +29,11 @@ public class LeaderboardGroupCreateDialogPO extends DataEntryDialogPO {
     public void setDescription(String description) {
         this.descriptionField.clear();
         this.descriptionField.sendKeys(description);
+    }
+    
+    public void setUseOverallLeaderboard(boolean selected) {
+        WebElement element = findElementBySeleniumId("UseOverallLeaderboardCheckBox");
+        CheckBoxPO checkbox = new CheckBoxPO(driver, element);
+        checkbox.setSelected(selected);
     }
 }

@@ -5,16 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.preference.PreferenceManager;
-import android.provider.Settings.Secure;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.text.TextUtils;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -28,6 +18,16 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.TrapezoidCourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.WindWardLeeWardCourseLayouts;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.preference.PreferenceManager;
+import android.provider.Settings.Secure;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 /**
  * Wrapper for {@link SharedPreferences} for all hidden and non-hidden preferences and state variables.
@@ -223,6 +223,8 @@ public class AppPreferences {
         switch (type) {
             case RRS26:
                 return key(R.string.preference_racing_procedure_rrs26_classflag_key);
+            case SWC:
+                return key(R.string.preference_racing_procedure_swc_classflag_key);
             case GateStart:
                 return key(R.string.preference_racing_procedure_gatestart_classflag_key);
             case ESS:
@@ -245,6 +247,8 @@ public class AppPreferences {
         switch (type) {
             case RRS26:
                 return key(R.string.preference_racing_procedure_rrs26_hasxray_key);
+            case SWC:
+                return key(R.string.preference_racing_procedure_swc_hasxray_key);
             case GateStart:
                 return key(R.string.preference_racing_procedure_gatestart_hasxray_key);
             case ESS:
@@ -267,6 +271,8 @@ public class AppPreferences {
         switch (type) {
         case RRS26:
             return key(R.string.preference_racing_procedure_rrs26_resultentryenabled_key);
+        case SWC:
+            return key(R.string.preference_racing_procedure_swc_resultentryenabled_key);
         case GateStart:
             return key(R.string.preference_racing_procedure_gatestart_resultentryenabled_key);
         case ESS:
@@ -282,6 +288,15 @@ public class AppPreferences {
     
     public Set<Flags> getRRS26StartmodeFlags() {
         Set<String> flagNames = helper.getStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), new HashSet<String>());
+        Set<Flags> flags = new HashSet<>();
+        for (String flagName : flagNames) {
+            flags.add(Flags.valueOf(flagName));
+        }
+        return flags;
+    }
+
+    public Set<Flags> getSWCStartmodeFlags() {
+        Set<String> flagNames = helper.getStringSet(key(R.string.preference_racing_procedure_swc_startmode_flags_key), new HashSet<String>());
         Set<Flags> flags = new HashSet<>();
         for (String flagName : flagNames) {
             flags.add(Flags.valueOf(flagName));
@@ -423,6 +438,14 @@ public class AppPreferences {
         helper.getEditor().putStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), flagNames).commit();
     }
 
+    public void setSWCStartmodeFlags(Set<Flags> flags) {
+        Set<String> flagNames = new HashSet<>();
+        for (Flags flag : flags) {
+            flagNames.add(flag.name());
+        }
+        helper.getEditor().putStringSet(key(R.string.preference_racing_procedure_swc_startmode_flags_key), flagNames).commit();
+    }
+
     public void setSendingActive(boolean activate) {
         ExLog.i(context, this.getClass().toString(), "setSendingActive: " + activate);
         helper.getEditor().putBoolean(context.getResources().getString(R.string.preference_isSendingActive_key), activate).commit();
@@ -472,6 +495,34 @@ public class AppPreferences {
     public int getDependentRacesOffset() {
         return helper.getInt(context.getString(R.string.preference_dependent_races_offset_key), context.getResources()
             .getInteger(R.integer.preference_dependent_races_offset_default));
+    }
+
+    public int getProtestTimeDurationInMinutes() {
+        return helper.getInt(context.getString(R.string.preference_protest_time_duration_key), context.getResources()
+            .getInteger(R.integer.preference_protest_time_duration_default));
+    }
+
+    public int getProtestTimeDurationInMinutesCustom() {
+        return helper.getInt(context.getString(R.string.preference_protest_time_duration_custom_key), -1);
+    }
+
+    public boolean isDefaultProtestTimeCustomEditable() {
+        return helper.getBoolean(context.getString(R.string.preference_protest_time_duration_custom_editable_key),
+                context.getResources().getBoolean(R.bool.preference_protest_time_duration_custom_editable_default));
+    }
+
+    public void setDefaultProtestTimeDurationInMinutes(int protestTimeInMinutes) {
+        helper.getEditor().putInt(context.getString(R.string.preference_protest_time_duration_key), protestTimeInMinutes).commit();
+    }
+
+    public void setDefaultProtestTimeDurationInMinutesCustom(int protestTimeInMinutest) {
+        helper.getEditor().putInt(context.getString(R.string.preference_protest_time_duration_custom_key), protestTimeInMinutest).commit();
+    }
+
+    public void setDefaultProtestTimeDurationInMinutesCustomEditable(boolean editable) {
+        helper.getEditor()
+            .putBoolean(context.getString(R.string.preference_protest_time_duration_custom_editable_key), editable)
+            .commit();
     }
 
     public String getTheme() {

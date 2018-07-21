@@ -20,6 +20,10 @@ public class MetaLeaderboardRaceColumnDTO extends RaceColumnDTO {
     public void addRace(BasicRaceDTO race) {
         raceList.add(race);
     }
+    
+    public ArrayList<BasicRaceDTO> getRaceList() {
+        return raceList;
+    }
 
     @Override
     public int hashCode() {

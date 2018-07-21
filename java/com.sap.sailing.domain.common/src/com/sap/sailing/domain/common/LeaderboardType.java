@@ -2,6 +2,7 @@ package com.sap.sailing.domain.common;
 
 public enum LeaderboardType {
     RegattaLeaderboard(false, true), RegattaMetaLeaderboard(true, true),
+    RegattaLeaderboardWithEliminations(false, true),
     FlexibleLeaderboard(false, false), FlexibleMetaLeaderboard(true, false);
     
     boolean isRegattaLeaderboard;
@@ -26,10 +27,10 @@ public enum LeaderboardType {
 
     public String toString() {
         String result = "";
-        if(isMetaLeaderboard) {
+        if (isMetaLeaderboard) {
             result += "Meta, ";
         }
-        result += isRegattaLeaderboard ? "Regatta" : "Flexible";
+        result += isRegattaLeaderboard ? "Regatta" + (this==RegattaLeaderboardWithEliminations?" w/ Elimination":"") : "Flexible";
         return result;
     }
 }

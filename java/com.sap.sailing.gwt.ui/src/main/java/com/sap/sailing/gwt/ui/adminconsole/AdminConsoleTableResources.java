@@ -54,6 +54,10 @@ public interface AdminConsoleTableResources extends CellTable.Resources {
          */
         String cellTableCheckboxDeselected();
         
+        /**
+         * Applied to the disabled rows
+         */
+        String cellTableDisabledRow();
     }
 
     @Override

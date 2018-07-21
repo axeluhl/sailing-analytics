@@ -15,7 +15,9 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -55,12 +57,12 @@ public class TestColumnSwapping {
         leaderboardCreationDate = new Date();
         try {
             // get Leaderboard with name and current date
-            leaderboardOriginalDTO = new LeaderboardDTO(null, null, ScoringSchemeType.LOW_POINT, /* higherScoreIsBetter */ false, new LeaderboardDTO.UUIDGenerator() {
+            leaderboardOriginalDTO = new LeaderboardDTO(new Date(), null, null, ScoringSchemeType.LOW_POINT, /* higherScoreIsBetter */ false, new LeaderboardDTO.UUIDGenerator() {
                 @Override
                 public String generateRandomUUID() {
                     return UUID.randomUUID().toString();
                 }
-            }, /* hasOverallDetails */ false);
+            }, /* hasOverallDetails */ false, new BoatClassDTO(BoatClassMasterdata._49ER.getDisplayName(), BoatClassMasterdata._49ER.getHullLength(), BoatClassMasterdata._49ER.getHullBeam()));
             leaderboardOriginalDTO.addRace("Race1", /* explicitFactor */ null, 2., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, true, null, null, false);
             leaderboardOriginalDTO.addRace("Race3", /* explicitFactor */ null, 2., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, true, null, null, false);
             leaderboardOriginalDTO.addRace("Race2", /* explicitFactor */ null, 2., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, true, null, null, false);
@@ -119,12 +121,12 @@ public class TestColumnSwapping {
 
     @Test
     public void testLeaderBoardDTOMethods() {
-        lb = new LeaderboardDTO(null, null, ScoringSchemeType.LOW_POINT, /* higherScoreIsBetter */ false, new LeaderboardDTO.UUIDGenerator() {
+        lb = new LeaderboardDTO(new Date(), null, null, ScoringSchemeType.LOW_POINT, /* higherScoreIsBetter */ false, new LeaderboardDTO.UUIDGenerator() {
             @Override
             public String generateRandomUUID() {
                 return UUID.randomUUID().toString();
             }
-        }, /* hasOverallDetails */ false);
+        }, /* hasOverallDetails */ false, new BoatClassDTO(BoatClassMasterdata._49ER.getDisplayName(), BoatClassMasterdata._49ER.getHullLength(), BoatClassMasterdata._49ER.getHullBeam()));
         assertNotNull("Leaderboard != NULL", lb);
         lb.addRace("1", /* explicitFactor */ null, 1., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, false, null, null, false);
         lb.addRace("2", /* explicitFactor */ null, 1., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, false, null, null, false);

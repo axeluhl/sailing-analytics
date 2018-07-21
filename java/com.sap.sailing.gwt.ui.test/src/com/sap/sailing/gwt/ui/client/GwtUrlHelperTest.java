@@ -16,7 +16,7 @@ public class GwtUrlHelperTest extends GWTTestCase {
     
     @Test
     public void testEncodeQueryStringWithWhitespace() {
-        testCase("Test%20Test", "Test Test");
+        testCase("Test+Test", "Test Test");
     }
     
     @Test
@@ -36,7 +36,7 @@ public class GwtUrlHelperTest extends GWTTestCase {
     
     @Test
     public void testEncodeQueryStringComplex() {
-        testCase("Test%20%2B%20Test%20%2F%20Test%20%26%20Test", "Test + Test / Test & Test");
+        testCase("Test+%2B+Test+%2F+Test+%26+Test", "Test + Test / Test & Test");
     }
     
     private void testCase(String expectedEncodedString, String decodedString) {

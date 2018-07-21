@@ -26,6 +26,7 @@ import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagem
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
 import com.sap.sailing.selenium.pages.leaderboard.LeaderboardPage;
 import com.sap.sailing.selenium.pages.leaderboard.LeaderboardSettingsDialogPO;
+import com.sap.sailing.selenium.pages.leaderboard.LeaderboardSettingsPanelPO;
 import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO;
 import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO.LeaderboardEntry;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
@@ -60,13 +61,14 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
     public void testCorrectDisplayOfAllColumns() {
         LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, true);
         LeaderboardTablePO leaderboardTable = leaderboard.getLeaderboardTable();
-        LeaderboardSettingsDialogPO settings = leaderboard.getLeaderboardSettings();
+        LeaderboardSettingsDialogPO settingsDialog = leaderboard.getLeaderboardSettings();
+        LeaderboardSettingsPanelPO settings = settingsDialog.getLeaderboardSettingsPanelPO();
         settings.setRacesToDisplay(leaderboardTable.getRaceNames());
         settings.showAllOverallDetails();
         settings.showAllRaceDetails();
         settings.showAllLegDetails();
         settings.showAllManeuverDetails();
-        settings.pressOk();
+        settingsDialog.pressOk();
         boolean stateHasChanged;
         do {
             List<String> headers = leaderboardTable.getColumnHeaders();

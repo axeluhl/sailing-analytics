@@ -15,6 +15,7 @@ import com.sap.sailing.selenium.pages.common.ConfirmDialogPO;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
+import com.sap.sailing.selenium.pages.regattaoverview.RegattaOverviewPage;
 
 public class EventConfigurationPanelPO extends PageArea {
     
@@ -24,7 +25,8 @@ public class EventConfigurationPanelPO extends PageArea {
     private static final String ID_CREATE_DEFAULT_LEADERBOARD_GROUP_CONFIRM_DIALOG = "CreateDefaultLeaderboardGroupConfirmDialog";
     private static final String ID_CREATE_DEFAULT_REGATTA_CONFIRM_DIALOG = "CreateDefaultRegattaDialog";
     private static final String ID_CREATE_DEFAULT_REGATTA_LEADERBOARD_CONFIRM_DIALOG = "CreateDefaultRegattaLeaderboardDialog";
-    private static final String ID_LINK_LEADERBORAD_TO_GROUP_DIALOG = "LinkRegattaLeaderboardToLeaderboardGroupOfEventDialog";
+    public static final String ID_LINK_LEADERBORAD_TO_GROUP_DIALOG = "LinkRegattaLeaderboardToLeaderboardGroupOfEventDialog";
+    public static final String ID_LINK_EVENT_OVERVIEW_URL_LABEL = "EventOverviewURLLabel";
     
     public static class EventEntryPO extends DataEntryPO {
 
@@ -64,12 +66,18 @@ public class EventConfigurationPanelPO extends PageArea {
     
     public void createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(String eventName, String eventDesc,
             String venue, Date eventStartDate, Date eventEndDate, boolean isPublic, String regattaName, String boatClass,
-            Date regattaStartDate, Date regattaEndDate) {
-        createEvent(eventName, eventDesc, venue, eventStartDate, eventEndDate, isPublic).pressYes();
-        getPO(LeaderboardGroupCreateDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_DIALOG).pressOk();
-        getPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_REGATTA_CONFIRM_DIALOG).pressYes();
-        createRegatta(regattaName, boatClass, regattaStartDate, regattaEndDate).pressOk();
-        getPO(ConfirmDialogPO::new, ID_LINK_LEADERBORAD_TO_GROUP_DIALOG).pressOk();
+            Date regattaStartDate, Date regattaEndDate, boolean useOverallLeaderboard, String...courseAreaNames) {
+        createEvent(eventName, eventDesc, venue, eventStartDate, eventEndDate, isPublic, courseAreaNames).pressYes();
+        LeaderboardGroupCreateDialogPO leaderboardGroupCreateDialogPO = getPO(LeaderboardGroupCreateDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_DIALOG);
+        leaderboardGroupCreateDialogPO.setUseOverallLeaderboard(useOverallLeaderboard);
+        leaderboardGroupCreateDialogPO.pressOk();
+        waitForPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_REGATTA_CONFIRM_DIALOG, 5).pressYes();
+        if(courseAreaNames.length > 0) {
+            createRegatta(regattaName, boatClass, regattaStartDate, regattaEndDate, eventName, "Default").pressOk();
+        } else {
+            createRegatta(regattaName, boatClass, regattaStartDate, regattaEndDate).pressOk();
+        }
+        waitForPO(ConfirmDialogPO::new, ID_LINK_LEADERBORAD_TO_GROUP_DIALOG, 5).pressOk();
     }
     
     public void createEventWithExistingLeaderboardGroups(String eventName, String eventDesc, String venue,
@@ -97,19 +105,45 @@ public class EventConfigurationPanelPO extends PageArea {
         return new GenericCellTablePO<>(this.driver, this.eventsCellTable, EventEntryPO.class);
     }
     
-    private ConfirmDialogPO createEvent(String name, String desc, String venue, Date start, Date end, boolean isPublic) {
+    private ConfirmDialogPO createEvent(String name, String desc, String venue, Date start, Date end, boolean isPublic, String... courseAreaNames) {
         createEventButton.click();
         EventCreateDialogPO createDialog = getPO(EventCreateDialogPO::new, ID_EVENT_CREATE_DIALOG);
         createDialog.setValues(name, desc, venue, start, end, isPublic);
+        if(courseAreaNames.length > 0) {
+            CourseAreasTabPO courseAreasTab = createDialog.goToCourseAreasTab();
+            for (String courseAreaName : courseAreaNames) {
+                courseAreasTab.addNewCourse(courseAreaName);
+            }
+        }
         createDialog.pressOk();
-        return getPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_CONFIRM_DIALOG);
+        return waitForPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_CONFIRM_DIALOG, 5);
+    }
+    
+    private ConfirmDialogPO createRegatta(String name, String boatClass, Date start, Date end, String eventToLink, String courseAreaToLink) {
+        RegattaCreateDialogPO createDialog = getPO(RegattaCreateDialogPO::new, ID_REGATTA_CREATE_DIALOG);
+        createDialog.setValues(name, boatClass, start, end);
+        if(eventToLink != null && courseAreaToLink != null) {
+            createDialog.setEventAndCourseArea(eventToLink, courseAreaToLink);
+        }
+        createDialog.pressOk();
+        return waitForPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_REGATTA_LEADERBOARD_CONFIRM_DIALOG, 30);
     }
     
     private ConfirmDialogPO createRegatta(String name, String boatClass, Date start, Date end) {
-        RegattaCreateDialogPO createDialog = getPO(RegattaCreateDialogPO::new, ID_REGATTA_CREATE_DIALOG);
-        createDialog.setValues(name, boatClass, start, end);
-        createDialog.pressOk();
-        return getPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_REGATTA_LEADERBOARD_CONFIRM_DIALOG);
+        return createRegatta(name, boatClass, start, end, null, null);
+    }
+    
+    public RegattaOverviewPage goToRegattaOverviewOfEvent(String eventName) {
+        return RegattaOverviewPage.goToPage(driver, getRegattaOverviewUrlOfEvent(eventName));
+    }
+    
+    public String getRegattaOverviewUrlOfEvent(String eventName) {
+        CellTablePO<EventEntryPO> eventsTable = getEventsTable();
+        eventsTable.selectEntry(eventsTable.getEntry(eventName));
+        waitForElement(ID_LINK_EVENT_OVERVIEW_URL_LABEL);
+        WebElement element = findElementBySeleniumId(ID_LINK_EVENT_OVERVIEW_URL_LABEL);
+        String regattaOverviewLink = element.getAttribute("href");
+        return regattaOverviewLink;
     }
     
 }

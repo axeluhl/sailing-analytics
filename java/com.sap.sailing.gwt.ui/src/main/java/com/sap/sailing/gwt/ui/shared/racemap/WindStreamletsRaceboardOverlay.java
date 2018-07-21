@@ -13,7 +13,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.controls.ControlPosition;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
@@ -31,6 +30,8 @@ import com.sap.sailing.gwt.ui.simulator.streamlets.Swarm;
 import com.sap.sailing.gwt.ui.simulator.streamlets.VectorField;
 import com.sap.sailing.gwt.ui.simulator.streamlets.WindInfoForRaceVectorField;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
@@ -144,7 +145,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         context2d.closePath();
         context2d.stroke();
         context2d.setFillStyle("white");
-        String label = "Wind Speed in Knots";
+        String label = stringMessages.windSpeedInKnots();
         TextMetrics txtmet;
         txtmet = context2d.measureText(label);
         context2d.fillText(label, x + (w*maxIdx - txtmet.getWidth())/2.0, y - 5.0);
@@ -217,7 +218,8 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         sailingService.getWindSourcesInfo(raceIdentifier, new MarkedAsyncCallback<>(new AsyncCallback<WindInfoForRaceDTO>() {
             @Override
             public void onFailure(Throwable caught) {
-                Window.setStatus(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
+                        Notification.notify(stringMessages.errorFetchingWindStreamletData(caught.getMessage()),
+                                NotificationType.WARNING);
             }
 
             @Override
@@ -256,7 +258,8 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
                 new MarkedAsyncCallback<>(new AsyncCallback<WindInfoForRaceDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        Window.setStatus(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
+                        Notification.notify(stringMessages.errorFetchingWindStreamletData(caught.getMessage()),
+                                NotificationType.WARNING);
                     }
 
                     @Override
@@ -266,18 +269,20 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
                         // confidences
                         for (Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
                             WindTrackInfoDTO windTrackForSource = windInfoForRace.windTrackInfoByWindSource.get(e.getKey());
-                            final WindTrackInfoDTO resultWindTrackInfoDTO = result.windTrackInfoByWindSource.get(e.getKey());
-                            windTrackForSource.resolutionOutsideOfWhichNoFixWillBeReturned = resultWindTrackInfoDTO.resolutionOutsideOfWhichNoFixWillBeReturned;
-                            if (windTrackForSource.windFixes == null) {
-                                windTrackForSource.windFixes = resultWindTrackInfoDTO.windFixes;
-                            } else {
-                                windTrackForSource.windFixes.addAll(resultWindTrackInfoDTO.windFixes);
-                            }
-                            if (resultWindTrackInfoDTO.maxWindConfidence > windTrackForSource.maxWindConfidence) {
-                                windTrackForSource.maxWindConfidence = resultWindTrackInfoDTO.maxWindConfidence;
-                            }
-                            if (resultWindTrackInfoDTO.minWindConfidence < windTrackForSource.minWindConfidence) {
-                                windTrackForSource.minWindConfidence = resultWindTrackInfoDTO.minWindConfidence;
+                            if (windTrackForSource != null) {
+                                final WindTrackInfoDTO resultWindTrackInfoDTO = result.windTrackInfoByWindSource.get(e.getKey());
+                                windTrackForSource.resolutionOutsideOfWhichNoFixWillBeReturned = resultWindTrackInfoDTO.resolutionOutsideOfWhichNoFixWillBeReturned;
+                                if (windTrackForSource.windFixes == null) {
+                                    windTrackForSource.windFixes = resultWindTrackInfoDTO.windFixes;
+                                } else {
+                                    windTrackForSource.windFixes.addAll(resultWindTrackInfoDTO.windFixes);
+                                }
+                                if (resultWindTrackInfoDTO.maxWindConfidence > windTrackForSource.maxWindConfidence) {
+                                    windTrackForSource.maxWindConfidence = resultWindTrackInfoDTO.maxWindConfidence;
+                                }
+                                if (resultWindTrackInfoDTO.minWindConfidence < windTrackForSource.minWindConfidence) {
+                                    windTrackForSource.minWindConfidence = resultWindTrackInfoDTO.minWindConfidence;
+                                }
                             }
                         }
                     }

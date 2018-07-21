@@ -2,35 +2,37 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.LineDetails;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class LineAnalysisTest extends TrackBasedTest {
     private TimePoint now;
     private DynamicTrackedRace trackedRace;
+    private CompetitorWithBoat competitor;
 
     @Before
     public void setUp() {
-        final List<Competitor> emptyCompetitorList = Collections.emptyList();
+        competitor = createCompetitorWithBoat("Test");
         now = MillisecondsTimePoint.now();
-        trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", emptyCompetitorList, now, /* useMarkPassingCalculator */ false);
+        trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", createCompetitorAndBoatsMap(competitor), now, /* useMarkPassingCalculator */ false);
     }
     
     @Test
@@ -55,6 +57,37 @@ public class LineAnalysisTest extends TrackBasedTest {
         final LineDetails finishLine = trackedRace.getFinishLine(aBitAfterNow);
         assertEquals(advantage.getMeters(), finishLine.getAdvantage().getMeters(), 0.1);
         assertEquals(NauticalSide.PORT, finishLine.getAdvantageousSideWhileApproachingLine());
+    }
+    
+    @Test
+    public void testDistanceToLineWithOrthogonalProjectionOnLine() {
+        Mark left = getMark("Left lee gate buoy");
+        Mark right = getMark("Right lee gate buoy");
+        final Position leftPos = trackedRace.getOrCreateTrack(left).getEstimatedPosition(now, /* extrapolate */ false);
+        final Position rightPos = trackedRace.getOrCreateTrack(right).getEstimatedPosition(now, /* extrapolate */ false);
+        final Bearing lineBearingFromLeftToRight = leftPos.getBearingGreatCircle(rightPos);
+        final Bearing awayFromCourseSideOrthogonalToLine = lineBearingFromLeftToRight.add(new DegreeBearingImpl(90));
+        final Position lineMiddle = leftPos.translateGreatCircle(lineBearingFromLeftToRight, leftPos.getDistance(rightPos).scale(0.5));
+        final Distance distanceBehindLine = new MeterDistance(10);
+        final Position behindMiddleOfLine = lineMiddle.translateGreatCircle(awayFromCourseSideOrthogonalToLine, distanceBehindLine);
+        trackedRace.getTrack(competitor).add(new GPSFixMovingImpl(behindMiddleOfLine, now, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(45))));
+        assertEquals(distanceBehindLine.getMeters(), trackedRace.getDistanceToStartLine(competitor, now).getMeters(), 0.01);
+    }
+
+    @Test
+    public void testDistanceToLineWithOrthogonalProjectionOutsideLine() {
+        Mark left = getMark("Left lee gate buoy");
+        Mark right = getMark("Right lee gate buoy");
+        final Position leftPos = trackedRace.getOrCreateTrack(left).getEstimatedPosition(now, /* extrapolate */ false);
+        final Position rightPos = trackedRace.getOrCreateTrack(right).getEstimatedPosition(now, /* extrapolate */ false);
+        final Bearing lineBearingFromLeftToRight = leftPos.getBearingGreatCircle(rightPos);
+        final Bearing awayFromCourseSideOrthogonalToLine = lineBearingFromLeftToRight.add(new DegreeBearingImpl(90));
+        final Position outsideOfLine = rightPos.translateGreatCircle(lineBearingFromLeftToRight, new MeterDistance(30)); // 30m right of start boat
+        final Distance distanceBehindLine = new MeterDistance(10);
+        final Position behindOutsideOfLine = outsideOfLine.translateGreatCircle(awayFromCourseSideOrthogonalToLine, distanceBehindLine);
+        trackedRace.getTrack(competitor).add(new GPSFixMovingImpl(behindOutsideOfLine, now, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(45))));
+        // the distance is that of the hypotenuse formed by the two cathesuses of 10m and 30m length, respectively:
+        assertEquals(Math.sqrt(10.*10.+30.*30.), trackedRace.getDistanceToStartLine(competitor, now).getMeters(), 0.01);
     }
 
     private Mark getMark(String name) {

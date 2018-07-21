@@ -1,14 +1,12 @@
 package com.sap.sailing.gwt.home.mobile.places.user.profile.preferences;
 
 import com.sap.sailing.gwt.home.mobile.places.user.profile.UserProfileViewBase;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
+import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserPreferencesView;
 
 public interface UserProfilePreferencesView extends UserProfileViewBase {
     
     public interface Presenter extends UserProfileViewBase.Presenter {
-        SuggestedMultiSelectionBoatClassDataProvider getFavoriteBoatClassesDataProvider();
-        SuggestedMultiSelectionCompetitorDataProvider getFavoriteCompetitorsDataProvider();
+        UserPreferencesView.Presenter getUserPreferencesPresenter();
     }
 }
 

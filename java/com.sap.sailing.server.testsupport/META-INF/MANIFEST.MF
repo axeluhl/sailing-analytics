@@ -35,3 +35,4 @@ Require-Bundle: com.sap.sailing.server,
  org.apache.shiro.web;bundle-version="1.2.2",
  org.apache.shiro.core;bundle-version="1.2.2",
  javax.servlet;bundle-version="3.1.0"
+Automatic-Module-Name: com.sap.sailing.server.testsupport

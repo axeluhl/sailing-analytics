@@ -2,43 +2,68 @@
 //  AboutViewController.swift
 //  SAPTracker
 //
-//  Created by computing on 11/11/14.
-//  Copyright (c) 2014 com.sap.sailing. All rights reserved.
+//  Created by Raimund Wege on 04.07.16.
+//  Copyright © 2016 com.sap.sailing. All rights reserved.
 //
 
 import Foundation
 
 class AboutViewController: UIViewController {
     
-    @IBOutlet weak var versionDescriptionLabel: UILabel!
+    @IBOutlet weak var partnershipTextView: UITextView!
+    @IBOutlet weak var licenseInformationButton: UIButton!
+    @IBOutlet weak var termsButton: UIButton!
+    @IBOutlet weak var versionTitleLabel: UILabel!
     @IBOutlet weak var versionLabel: UILabel!
-	@IBOutlet weak var textView: UITextView!
     
     override func viewDidLoad() {
-        super.viewDidLoad();
-        versionDescriptionLabel.text = NSLocalizedString("Version", comment: "")
-        if let text = NSBundle.mainBundle().infoDictionary?["CFBundleVersion"] as? String {
-            versionLabel.text = text
-        } else {
-            versionLabel.text = "-"
-        }
-		
-		// add logo to top left
-		let imageView = UIImageView(image: UIImage(named: "sap_logo"))
-		let barButtonItem = UIBarButtonItem(customView: imageView)
-		navigationItem.leftBarButtonItem = barButtonItem
-    }
-
-	override func viewDidLayoutSubviews() {		
-		textView.scrollRectToVisible(CGRect(x: 0, y: 0, width: 1, height: 1), animated: false)
-	}
-    
-    @IBAction func done(sender: AnyObject) {
-        presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
+        super.viewDidLoad()
+        setup()
     }
     
-    @IBAction func openEULA(sender: AnyObject) {
-        UIApplication.sharedApplication().openURL(URLs.EULA)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        partnershipTextView.scrollRectToVisible(CGRect(x: 0, y: 0, width: 1, height: 1), animated: false)
+    }
+    
+    // MARK: - Setup
+    
+    fileprivate func setup() {
+        setupButtons()
+        setupLocalization()
+        setupNavigationBar()
+        setupVersion()
+    }
+    
+    fileprivate func setupButtons() {
+        makeBlue(button: licenseInformationButton)
+        makeBlue(button: termsButton)
+    }
+    
+    fileprivate func setupLocalization() {
+        navigationItem.title = Translation.AboutView.Title.String
+        partnershipTextView.text = Translation.AboutView.PartnershipTextView.Text.String
+        licenseInformationButton.setTitle(Translation.LicenseView.Title.String, for: .normal)
+        termsButton.setTitle(Translation.AboutView.TermsButton.Title.String, for: .normal)
+        versionTitleLabel.text = Translation.AboutView.VersionTitleLabel.Text.String
+    }
+    
+    fileprivate func setupNavigationBar() {
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
+    }
+    
+    fileprivate func setupVersion() {
+        versionLabel.text = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "-"
+    }
+    
+    // MARK: - Actions
+    
+    @IBAction func doneButtonTapped(_ sender: Any) {
+        presentingViewController!.dismiss(animated: true, completion: nil)
+    }
+    
+    @IBAction func termsButtonTapped(_ sender: Any) {
+        UIApplication.shared.openURL(URLs.Terms)
     }
     
 }

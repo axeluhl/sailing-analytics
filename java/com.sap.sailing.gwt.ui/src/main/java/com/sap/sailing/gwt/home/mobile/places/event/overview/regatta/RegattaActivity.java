@@ -10,11 +10,15 @@ import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.AbstractEventOverview;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
 public class RegattaActivity extends AbstractEventActivity<RegattaOverviewPlace> implements EventViewBase.Presenter {
 
-    public RegattaActivity(RegattaOverviewPlace place, EventViewDTO eventDTO, NavigationPathDisplay navigationPathDisplay, MobileApplicationClientFactory clientFactory) {
+    private final FlagImageResolver flagImageResolver;
+
+    public RegattaActivity(RegattaOverviewPlace place, EventViewDTO eventDTO, NavigationPathDisplay navigationPathDisplay, MobileApplicationClientFactory clientFactory, FlagImageResolver flagImageResolver) {
         super(place, eventDTO, clientFactory);
+        this.flagImageResolver = flagImageResolver;
         initNavigationPath(navigationPathDisplay);
     }
     
@@ -25,9 +29,11 @@ public class RegattaActivity extends AbstractEventActivity<RegattaOverviewPlace>
 
     @Override
     protected EventViewBase initView() {
-        final AbstractEventOverview view = new RegattaOverviewImpl(this);
+        final AbstractEventOverview view = new RegattaOverviewImpl(this, flagImageResolver);
+        initSailorInfo(view);
         initSeriesNavigation(view);
         initQuickfinder(view, true);
+        initWindfinderNavigations(view);
         if (!isMultiRegattaEvent()) {
             initMedia(view);
         }

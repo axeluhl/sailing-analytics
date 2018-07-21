@@ -7,9 +7,10 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.osgi.framework;version="1.5.0"
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.junit4;bundle-version="4.8.2",
+Require-Bundle: org.junit;bundle-version="4.8.2",
  com.sap.sailing.velum.resultimport,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain,
  com.sap.sailing.resultimport,
  com.sap.sse.common
+Automatic-Module-Name: com.sap.sailing.velum.resultimport.test

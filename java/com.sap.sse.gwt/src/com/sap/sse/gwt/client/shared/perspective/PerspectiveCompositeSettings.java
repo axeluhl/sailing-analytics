@@ -1,9 +1,10 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
-import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 
@@ -24,7 +25,7 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 public class PerspectiveCompositeSettings<PS extends Settings> extends CompositeSettings {
     private final PS perspectiveOwnSettings;
     
-    public PerspectiveCompositeSettings(PS perspectiveOwnSettings, Map<Serializable, Settings> settingsPerComponent) {
+    public PerspectiveCompositeSettings(PS perspectiveOwnSettings, Map<String, Settings> settingsPerComponent) {
         super(settingsPerComponent);
         this.perspectiveOwnSettings = perspectiveOwnSettings;
     }
@@ -44,4 +45,21 @@ public class PerspectiveCompositeSettings<PS extends Settings> extends Composite
         return getSettingsPerComponentId() != null || perspectiveOwnSettings != null;
     }
 
+    /**
+     * These are the settings to be seen by serializer implementations through {@link SettingsMap} interface.
+     * For the serialization, the perspectiveOwnSettings are included in addition to the child components' settings.
+     * 
+     * @see com.sap.sse.gwt.client.shared.components.CompositeSettings#getSettingsByKey()
+     */
+    @Override
+    public Map<String, Settings> getSettingsPerComponentId() {
+        Map<String, Settings> allSettings;
+        if(perspectiveOwnSettings == null) {
+            allSettings = super.getSettingsPerComponentId();
+        } else {
+            allSettings = new HashMap<>(super.getSettingsPerComponentId());
+            allSettings.put(null, perspectiveOwnSettings);
+        }
+        return allSettings;
+    }
 }

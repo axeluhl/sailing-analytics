@@ -17,27 +17,21 @@ import com.sap.sse.common.WithID;
  * @param <FixT> the type of fix this track holds
  */
 public class SensorFixTrackImpl<ItemType extends WithID & Serializable, FixT extends SensorFix> extends
-        DynamicTrackImpl<FixT> implements DynamicSensorFixTrack<ItemType, FixT> {
+        DynamicMappedTrackImpl<ItemType, FixT> implements DynamicSensorFixTrack<ItemType, FixT> {
 
     private static final long serialVersionUID = 6383421895429843002L;
     
-    private final Iterable<String> valueNames;
-    private final ItemType trackedItem;
     private final String trackName;
     private final TrackListenerCollection<ItemType, FixT, SensorFixTrackListener<ItemType, FixT>> listeners;
 
     /**
      * @param trackedItem the item this track is mapped to
      * @param trackName the name of the track by which it can be obtained from the {@link TrackedRace}.
-     * @param valueNames the name of the values that can be obtained by fixes contained in the track
      * @param nameForReadWriteLock the name to use for the lock object that is used internally
      */
-    public SensorFixTrackImpl(ItemType trackedItem, String trackName, Iterable<String> valueNames,
-            String nameForReadWriteLock) {
-        super(nameForReadWriteLock);
-        this.trackedItem = trackedItem;
+    public SensorFixTrackImpl(ItemType trackedItem, String trackName, String nameForReadWriteLock) {
+        super(trackedItem, nameForReadWriteLock);
         this.trackName = trackName;
-        this.valueNames = valueNames;
         this.listeners = new TrackListenerCollection<>();
     }
     
@@ -48,7 +42,7 @@ public class SensorFixTrackImpl<ItemType extends WithID & Serializable, FixT ext
         try {
             final boolean firstFixInTrack = getRawFixes().isEmpty();
             result = addWithoutLocking(fix, replace);
-            this.notifyListeners((listener) -> listener.fixReceived(fix, trackedItem, trackName, firstFixInTrack));
+            this.notifyListeners((listener) -> listener.fixReceived(fix, getTrackedItem(), trackName, firstFixInTrack));
         } finally {
             unlockAfterWrite();
         }
@@ -60,11 +54,6 @@ public class SensorFixTrackImpl<ItemType extends WithID & Serializable, FixT ext
     }
 
     @Override
-    public Iterable<String> getValueNames() {
-        return valueNames;
-    }
-
-    @Override
     public void addListener(SensorFixTrackListener<ItemType, FixT> listener) {
         this.listeners.addListener(listener);
     }
@@ -72,11 +61,6 @@ public class SensorFixTrackImpl<ItemType extends WithID & Serializable, FixT ext
     @Override
     public void removeListener(SensorFixTrackListener<ItemType, FixT> listener) {
         this.listeners.removeListener(listener);
-    }
-
-    @Override
-    public ItemType getTrackedItem() {
-        return trackedItem;
     }
 
     @Override

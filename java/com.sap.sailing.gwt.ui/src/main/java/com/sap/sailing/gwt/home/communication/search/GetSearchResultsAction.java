@@ -43,7 +43,7 @@ public class GetSearchResultsAction implements SailingAction<ListResult<SearchRe
     @Override
     @GwtIncompatible
     public ListResult<SearchResultDTO> execute(SailingDispatchContext ctx) throws DispatchException {
-        KeywordQuery searchQuery = new KeywordQuery(searchText.split("[ \t]+"));
+        KeywordQuery searchQuery = new KeywordQuery(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchText));
         RacingEventService service = ctx.getRacingEventService();
         if (remoteServerName == null) {
             return getListResult(service.search(searchQuery), ctx.getRequestBaseURL(), false);

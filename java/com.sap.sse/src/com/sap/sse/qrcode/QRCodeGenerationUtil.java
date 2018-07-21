@@ -27,7 +27,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
  *
  */
 public class QRCodeGenerationUtil {
-    public static InputStream create(String text, int sizeInPixels) throws WriterException, IOException {
+    public static InputStream create(String text, int sizeInPixels) throws Exception {
          Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<EncodeHintType,
          ErrorCorrectionLevel>();
          hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);

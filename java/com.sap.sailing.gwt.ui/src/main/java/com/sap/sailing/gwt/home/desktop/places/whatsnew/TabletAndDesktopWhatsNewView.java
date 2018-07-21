@@ -30,15 +30,21 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
     @UiField HTML sailingAnalyticsNotes;
     @UiField HTML sailingSimulatorNotes;
     @UiField HTML raceCommitteeAppNotes;
+    @UiField HTML inSightAppNotes;
+    @UiField HTML buoyPingerAppNotes;
     
     @UiField Anchor sailingAnalyticsNotesAnchor;
     @UiField Anchor sailingSimulatorNotesAnchor;
     @UiField Anchor raceCommitteeAppNotesAnchor;
+    @UiField Anchor inSightAppNotesAnchor;
+    @UiField Anchor buoyPingerAppNotesAnchor;
 
     private final PlaceNavigation<WhatsNewPlace> sailingAnalyticNotesNavigation; 
     private final PlaceNavigation<WhatsNewPlace> sailingSimulatorNoteNavigation; 
     private final PlaceNavigation<WhatsNewPlace> raceCommitteeAppNotesNavigation; 
-    
+    private final PlaceNavigation<WhatsNewPlace> inSightAppNotesNavigation;
+    private final PlaceNavigation<WhatsNewPlace> buoyPingerAppNotesNavigation;
+
     private final List<Anchor> links;
     private final List<HTML> contentWidgets;
     
@@ -51,22 +57,34 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
         sailingAnalyticsNotes.setHTML(WhatsNewResources.INSTANCE.getSailingAnalyticsNotesHtml().getText());
         sailingSimulatorNotes.setHTML(WhatsNewResources.INSTANCE.getSailingSimulatorNotesHtml().getText());
         raceCommitteeAppNotes.setHTML(WhatsNewResources.INSTANCE.getRaceCommitteeAppNotesHtml().getText());
-  
+        inSightAppNotes.setHTML(WhatsNewResources.INSTANCE.getInSightAppNotesHtml().getText());
+        buoyPingerAppNotes.setHTML(WhatsNewResources.INSTANCE.getBuoyPingerAppNotesHtml().getText());
+
         sailingAnalyticNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics); 
         sailingSimulatorNoteNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingSimulator); 
-        raceCommitteeAppNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceCommiteeApp);
-        
+        raceCommitteeAppNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceManagerApp);
+        inSightAppNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.InSightApp);
+        buoyPingerAppNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.BuoyPingerApp);
+
         sailingAnalyticsNotesAnchor.setHref(sailingAnalyticNotesNavigation.getTargetUrl());
         sailingSimulatorNotesAnchor.setHref(sailingSimulatorNoteNavigation.getTargetUrl());
         raceCommitteeAppNotesAnchor.setHref(raceCommitteeAppNotesNavigation.getTargetUrl());
-        
-        links = Arrays.asList(new Anchor[] { sailingAnalyticsNotesAnchor, sailingSimulatorNotesAnchor, raceCommitteeAppNotesAnchor });
-        contentWidgets = Arrays.asList(new HTML[] { sailingAnalyticsNotes, sailingSimulatorNotes, raceCommitteeAppNotes });
+        inSightAppNotesAnchor.setHref(inSightAppNotesNavigation.getTargetUrl());
+        buoyPingerAppNotesAnchor.setHref(buoyPingerAppNotesNavigation.getTargetUrl());
+
+        links = Arrays.asList(new Anchor[] { sailingAnalyticsNotesAnchor, sailingSimulatorNotesAnchor, raceCommitteeAppNotesAnchor, inSightAppNotesAnchor, buoyPingerAppNotesAnchor });
+        contentWidgets = Arrays.asList(new HTML[] { sailingAnalyticsNotes, sailingSimulatorNotes, raceCommitteeAppNotes, inSightAppNotes, buoyPingerAppNotes });
 
         switch(navigationTab) {
+            case BuoyPingerApp:
+                setActiveContent(buoyPingerAppNotes, buoyPingerAppNotesAnchor);
+                break;
+            case InSightApp:
+                setActiveContent(inSightAppNotes, inSightAppNotesAnchor);
+                break;
             case PostRaceAnalytics:
                 break;
-            case RaceCommiteeApp:
+            case RaceManagerApp:
                 setActiveContent(raceCommitteeAppNotes, raceCommitteeAppNotesAnchor);
                 break;
             case SailingAnalytics:

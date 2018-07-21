@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="13772" systemVersion="16G1212" minimumToolsVersion="Xcode 4.3" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="BoatCheckIn" representedClassName=".BoatCheckIn" parentEntity="CheckIn" syncable="YES">
+        <attribute name="boatID" attributeType="String" syncable="YES"/>
+        <attribute name="color" attributeType="String" syncable="YES"/>
+        <attribute name="sailID" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="CheckIn" representedClassName="CheckIn" elementID="Regatta" syncable="YES">
+        <attribute name="isTraining" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="name" attributeType="String" syncable="YES"/>
+        <attribute name="serverURL" attributeType="String" elementID="serverUrl" syncable="YES"/>
+        <relationship name="event" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Event" inverseName="checkIn" inverseEntity="Event" syncable="YES"/>
+        <relationship name="gpsFixes" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="GPSFix" inverseName="checkIn" inverseEntity="GPSFix" syncable="YES"/>
+        <relationship name="leaderboard" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Leaderboard" inverseName="checkIn" inverseEntity="Leaderboard" elementID="leaderBoard" syncable="YES"/>
+    </entity>
+    <entity name="CompetitorCheckIn" representedClassName=".CompetitorCheckIn" parentEntity="CheckIn" syncable="YES">
+        <attribute name="boatClassName" attributeType="String" syncable="YES"/>
+        <attribute name="competitorID" attributeType="String" indexed="YES" elementID="competitorId" syncable="YES"/>
+        <attribute name="countryCode" attributeType="String" syncable="YES"/>
+        <attribute name="nationality" attributeType="String" syncable="YES"/>
+        <attribute name="sailID" attributeType="String" elementID="sailId" syncable="YES"/>
+        <attribute name="teamImageData" optional="YES" attributeType="Binary" elementID="userImage" syncable="YES"/>
+        <attribute name="teamImageRetry" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="teamImageURL" optional="YES" attributeType="String" elementID="imageUrl" syncable="YES"/>
+    </entity>
+    <entity name="Event" representedClassName="Event" syncable="YES">
+        <attribute name="endDate" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="eventID" attributeType="String" indexed="YES" elementID="eventId" syncable="YES"/>
+        <attribute name="name" attributeType="String" syncable="YES"/>
+        <attribute name="startDate" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <relationship name="checkIn" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CheckIn" inverseName="event" inverseEntity="CheckIn" elementID="regatta" syncable="YES"/>
+    </entity>
+    <entity name="GPSFix" representedClassName="GPSFix" syncable="YES">
+        <attribute name="course" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="latitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="longitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="speed" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestamp" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <relationship name="checkIn" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CheckIn" inverseName="gpsFixes" inverseEntity="CheckIn" elementID="regatta" syncable="YES"/>
+    </entity>
+    <entity name="Leaderboard" representedClassName="Leaderboard" elementID="LeaderBoard" syncable="YES">
+        <attribute name="name" attributeType="String" indexed="YES" syncable="YES"/>
+        <relationship name="checkIn" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CheckIn" inverseName="leaderboard" inverseEntity="CheckIn" elementID="regatta" syncable="YES"/>
+    </entity>
+    <entity name="MarkCheckIn" representedClassName=".MarkCheckIn" parentEntity="CheckIn" syncable="YES">
+        <attribute name="markID" attributeType="String" indexed="YES" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="BoatCheckIn" positionX="-164" positionY="216" width="128" height="90"/>
+        <element name="CheckIn" positionX="-299" positionY="6" width="128" height="135"/>
+        <element name="CompetitorCheckIn" positionX="-299" positionY="215" width="128" height="163"/>
+        <element name="Event" positionX="-137" positionY="-63" width="128" height="118"/>
+        <element name="GPSFix" positionX="-470" positionY="0" width="128" height="133"/>
+        <element name="Leaderboard" positionX="-137" positionY="69" width="128" height="73"/>
+        <element name="MarkCheckIn" positionX="-434" positionY="216" width="128" height="58"/>
+    </elements>
+</model>

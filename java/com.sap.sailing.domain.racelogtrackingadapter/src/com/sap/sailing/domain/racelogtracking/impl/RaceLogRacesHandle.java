@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
-import java.util.Set;
-
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -28,12 +26,7 @@ public class RaceLogRacesHandle implements RaceHandle {
     @Override
     public RaceDefinition getRace(long timeoutInMilliseconds) {
         long start = System.currentTimeMillis();
-        Set<RaceDefinition> raceDefs = tracker.getRaces();
-
-        RaceDefinition result = null;
-        if (raceDefs != null && !raceDefs.isEmpty()) {
-            result = tracker.getRaces().iterator().next();
-        }
+        RaceDefinition result = tracker.getRace();
         boolean interrupted = false;
         synchronized (tracker) {
             while ((timeoutInMilliseconds == -1 || System.currentTimeMillis() - start < timeoutInMilliseconds)
@@ -47,13 +40,13 @@ public class RaceLogRacesHandle implements RaceHandle {
                             tracker.wait(timeToWait);
                         }
                     }
-                    result = tracker.getRaces().isEmpty() ? null : tracker.getRaces().iterator().next();
+                    result = tracker.getRace();
                 } catch (InterruptedException e) {
                     interrupted = true;
                 }
             }
         }
-        return result == null ? null : result;
+        return result;
     }
 
     @Override

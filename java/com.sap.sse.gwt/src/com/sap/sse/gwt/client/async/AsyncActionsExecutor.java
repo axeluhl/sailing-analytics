@@ -38,13 +38,14 @@ public class AsyncActionsExecutor {
         }
         
         public void execute() {
+//            GWT.log("Action name " + action.getClass().getName());
             this.action.execute(new MarkedAsyncCallback<T>(this, getCategory()));
         }
         
         @Override
         public void onSuccess(T result) {
             try {
-                GWT.log("Execution success for action of type " + getType() + ", category "+getCategory());
+//                GWT.log("Execution success for action of type " + getType() + ", category "+getCategory());
                 this.callback.onSuccess(result);
             } finally {
                 AsyncActionsExecutor.this.callCompleted(this);

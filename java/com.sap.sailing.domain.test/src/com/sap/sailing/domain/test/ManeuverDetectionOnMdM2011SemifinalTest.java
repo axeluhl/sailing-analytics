@@ -9,7 +9,6 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TimeZone;
@@ -25,7 +24,6 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
@@ -35,6 +33,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -77,7 +76,7 @@ public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBased
     public void testManeuversForDennis() throws NoWindException {
         Competitor dennis = getCompetitorByName("Gehrlein");
         NavigableSet<MarkPassing> dennisMarkPassings = getTrackedRace().getMarkPassings(dennis);
-        List<Maneuver> maneuvers = getTrackedRace().getManeuvers(dennis, dennisMarkPassings.first().getTimePoint(),
+        Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(dennis, dennisMarkPassings.first().getTimePoint(),
                 dennisMarkPassings.last().getTimePoint(), /* waitForLatest */ true);
         Calendar c = new GregorianCalendar(TimeZone.getTimeZone("Europe/Berlin"));
         c.set(2011, 10-1, 30, 13, 32, 42);
@@ -96,7 +95,7 @@ public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBased
         assertManeuver(maneuvers, ManeuverType.JIBE, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
     }
 
-    private void assertManeuver(List<Maneuver> maneuvers, ManeuverType type, Tack newTack,
+    private void assertManeuver(Iterable<Maneuver> maneuvers, ManeuverType type, Tack newTack,
             MillisecondsTimePoint timePoint, int toleranceInMilliseconds) {
         for (Maneuver maneuver : maneuvers) {
             if (maneuver.getType() == type && (newTack == null || newTack == maneuver.getNewTack()) &&

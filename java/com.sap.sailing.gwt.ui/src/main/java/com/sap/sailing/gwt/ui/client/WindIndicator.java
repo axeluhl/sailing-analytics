@@ -5,6 +5,9 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.Context2d.LineCap;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.ui.Composite;
+import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * WindIndicator Widget allows visualizing the wind direction and other wind related information.
@@ -20,14 +23,9 @@ public class WindIndicator extends Composite {
     private static final int MAX_NUMBER_OF_TICKS = 6;
 
     private Canvas canvas;
-    /**
-     * direction from where the wind blows
-     */
-    private double fromDeg = 0.0;
-    /**
-     * wind speed in knots
-     */
-    private double speedInKnots = 0.0;
+    
+    private SpeedWithBearing windFrom = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
+    
     /**
      * cloud coverage from 0.0 to 1.0
      */
@@ -55,8 +53,8 @@ public class WindIndicator extends Composite {
      * 
      * @param fromDeg
      */
-    public void setFromDeg(double fromDeg) {
-        this.fromDeg = fromDeg;
+    public void setWindFrom(SpeedWithBearing windFrom) {
+        this.windFrom = windFrom;
         this.updateRendering();
     }
 
@@ -66,7 +64,7 @@ public class WindIndicator extends Composite {
      * @return
      */
     public double getFromDeg() {
-        return fromDeg;
+        return windFrom.getBearing().getDegrees();
     }
 
     /**
@@ -115,7 +113,7 @@ public class WindIndicator extends Composite {
         ctx.setLineCap(LineCap.SQUARE);
         ctx.beginPath();
         ctx.moveTo(minSize / 2, minSize / 2);
-        double dirRad = (fromDeg - 90) * Math.PI / 180;
+        double dirRad = windFrom.getBearing().getRadians();
         double strokeTipX = minSize/2 + (((double) minSize) / STROKE_LENGTH_RATIO)*Math.cos(dirRad);
         double strokeTipY = minSize/2 + (((double) minSize) / STROKE_LENGTH_RATIO)*Math.sin(dirRad);
         ctx.lineTo(strokeTipX, strokeTipY);
@@ -144,8 +142,8 @@ public class WindIndicator extends Composite {
     }
 
     private void setTitle() {
-        int speedInKnotsTimes10 = (int) (speedInKnots*10);
-        int forceTimes10 = (int) (getSpeedInBeaufort()*10);
+        int speedInKnotsTimes10 = (int) (windFrom.getKnots()*10);
+        int forceTimes10 = (int) (windFrom.getBeaufort()*10);
         int intFromDeg = (int) getFromDeg();
         setTitle(""+speedInKnotsTimes10/10+"."+speedInKnotsTimes10%10+"kts ("+
                 forceTimes10/10+"."+forceTimes10%10+"bft) from "+(intFromDeg<10?"00":intFromDeg<100?"0":"")+intFromDeg+" deg");
@@ -171,7 +169,7 @@ public class WindIndicator extends Composite {
     }
 
     private int getTickLength(int i) {
-        int bft = (int) (getSpeedInBeaufort()+0.5); // round
+        int bft = (int) (windFrom.getBeaufort()+0.5); // round
         int zeroOneOrTwo = (bft == 1 ? (i == 1 ? 1 : 0) : 2*(i+1)<=bft ? 2 : 2*i+1 == bft ? 1 : 0);
         return zeroOneOrTwo;
     }
@@ -187,22 +185,5 @@ public class WindIndicator extends Composite {
 
     private boolean hasTick(int i) {
         return getTickLength(i) > 0;
-    }
-
-    /**
-     * Calculates Beaufort from Knots applying some empirical formula B=(v / 0.8360m/s)^2/3
-     * 
-     * @see http://de.wikipedia.org/wiki/Beaufortskala
-     * @see http://en.wikipedia.org/wiki/Beaufort_scale
-     * @param knots speed in knots
-     * @return wind speed in Beaufort
-     */
-    private double getSpeedInBeaufort() {
-        return Math.exp(Math.log(speedInKnots*1.852/3.6 / 0.8360)*2/3);
-    }
-
-    public void setSpeedInKnots(Double speed) {
-        this.speedInKnots = speed;
-        this.updateRendering();
     }
 }

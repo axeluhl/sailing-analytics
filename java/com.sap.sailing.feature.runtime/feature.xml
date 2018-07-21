@@ -18,103 +18,146 @@
    </license>
 
    <requires>
-      <import plugin="javax.servlet" version="3.1.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jetty.deploy" version="9.2.2" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jetty.server" version="9.2.2" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jetty.util" version="9.2.2" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jetty.webapp" version="9.2.2" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jetty.xml" version="9.2.2" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.osgi"/>
-      <import plugin="org.eclipse.osgi.services"/>
-      <import plugin="slf4j.api"/>
-      <import plugin="org.eclipse.jetty.osgi.boot"/>
-      <import plugin="org.eclipse.jetty.websocket.api"/>
-      <import plugin="org.eclipse.jetty.websocket.client"/>
-      <import plugin="org.eclipse.jetty.websocket.common"/>
-      <import plugin="org.eclipse.jetty.websocket.server"/>
-      <import plugin="org.eclipse.jetty.websocket.servlet"/>
-      <import plugin="org.apache.felix.gogo.command"/>
-      <import plugin="org.apache.felix.gogo.runtime"/>
-      <import plugin="org.apache.felix.gogo.shell"/>
-      <import plugin="org.eclipse.jetty.jmx"/>
+      <import feature="com.sap.sse.feature.runtime" version="1.0.0.qualifier"/>
    </requires>
 
    <plugin
-         id="org.eclipse.jetty.osgi.boot"
+         id="routeconverter"
          download-size="0"
          install-size="0"
-         version="9.2.2.v20140723"
+         version="2.12.2.201406032322"
          unpack="false"/>
 
    <plugin
-         id="jul.to.slf4j"
+         id="org.apache.commons.codec"
          download-size="0"
          install-size="0"
-         version="1.6.4"
+         version="1.6.0.v201305230611"
          unpack="false"/>
 
    <plugin
-         id="slf4j.jdk14"
+         id="org.apache.poi"
          download-size="0"
          install-size="0"
-         version="1.6.4"
-         fragment="true"
+         version="3.9.0.v201405241750"
          unpack="false"/>
 
    <plugin
-         id="slf4j.api"
+         id="org.apache.poi.ooxml"
          download-size="0"
          install-size="0"
-         version="1.6.4"
+         version="3.9.0.v201405241905"
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.equinox.common"
+         id="org.apache.poi.ooxml.schemas"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.9.0.v201405241750"
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.equinox.simpleconfigurator"
+         id="org.dom4j"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.6.1.v201312101416"
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.equinox.launcher"
+         id="org.apache.xmlbeans"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="2.3.0.v201605172150"
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.equinox.console"
+         id="org.apache.commons.math"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="2.1.0.v201105210652"
          unpack="false"/>
 
    <plugin
-         id="org.apache.felix.shell"
+         id="com.googlecode.java-diff-utils"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.3.0.qualifier"
          unpack="false"/>
 
    <plugin
-         id="org.apache.felix.shell.remote"
+         id="org.apache.httpcomponents.httpclient"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="4.2.6.v201311072007"
          unpack="false"/>
 
    <plugin
-         id="lz4-java"
+         id="org.apache.httpcomponents.httpcore"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="4.2.5.v201311072007"
          unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm"
+         download-size="0"
+         install-size="0"
+         version="5.0.1.v201404251740"
+         unpack="false"/>
+
+   <plugin
+         id="org.hyperic.sigar"
+         download-size="0"
+         install-size="0"
+         version="1.6.4.1"
+         unpack="false"/>
+
+   <plugin
+         id="com.sun.jersey.contribs.jersey-multipart"
+         download-size="0"
+         install-size="0"
+         version="1.17.0"
+         unpack="false"/>
+
+   <plugin
+         id="javax.validation"
+         download-size="0"
+         install-size="0"
+         version="1.0.0.GA_v201205091237"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.fileupload"
+         download-size="0"
+         install-size="0"
+         version="1.2.2.v20111214-1400"
+         unpack="false"/>
+
+   <plugin
+         id="org.jdom"
+         download-size="0"
+         install-size="0"
+         version="1.1.1.v201101151400"
+         unpack="false"/>
+
+   <plugin
+         id="org.jvnet.mimepull"
+         download-size="0"
+         install-size="0"
+         version="1.9.4"
+         unpack="false"/>
+
+   <plugin
+         id="net.sf.marineapi"
+         download-size="0"
+         install-size="0"
+         version="0.5.0.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="org.mp4parser.isoparser"
+         download-size="0"
+         install-size="0"
+         version="1.9.31"/>
 
 </feature>

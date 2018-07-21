@@ -9,21 +9,21 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class PolarDiagramGPS extends PolarDiagramBase {
 
     private static final long serialVersionUID = -9219705955440602679L;
     private final PolarDataService polarData;
-    private double avgSpeed;
+    private double avgSpeedInKnots;
 
     public PolarDiagramGPS(BoatClass boatClass, PolarDataService polarData) throws SparseSimulationDataException {
         this.boatClass = boatClass;
@@ -53,7 +53,7 @@ public class PolarDiagramGPS extends PolarDiagramBase {
         SpeedWithBearing beatPort;
         SpeedWithBearing beatStar;
         int avgCount = 0;
-        avgSpeed = 0;
+        avgSpeedInKnots = 0;
         for (int i = 0; i < windSpeeds.size(); i++) {
             try {
                 beatPort = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.UPWIND,
@@ -71,14 +71,14 @@ public class PolarDiagramGPS extends PolarDiagramBase {
                 beatAngles.add(avgBeatAngle);
                 Speed avgBeatSpeed = new KnotSpeedImpl((beatStar.getKnots() + beatPort.getKnots()) / 2.0);
                 beatSpeed.add(avgBeatSpeed);
-                avgSpeed += avgBeatSpeed.getKnots();
+                avgSpeedInKnots += avgBeatSpeed.getKnots();
                 avgCount++;
             } else {
                 beatAngles.add(null);
                 beatSpeed.add(null);
             }
         }
-        avgSpeed /= avgCount;
+        avgSpeedInKnots /= avgCount;
 
         // initialize jibe-angles and -speeds
         SpeedWithBearing jibePort;
@@ -175,7 +175,7 @@ public class PolarDiagramGPS extends PolarDiagramBase {
     }
 
     public double getAvgSpeed() {
-        return this.avgSpeed;
+        return this.avgSpeedInKnots;
     }
 
 }

@@ -65,7 +65,7 @@ public class CurrentRaceFilterImplTest {
         _505RaceRows.add(_505RaceRow);
         _505Series.add(new SeriesWithRowsImpl("Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false, _505RaceRows));
         final RaceGroup _505 = new RaceGroupImpl("505", /* displayName */ null,
-                new BoatClassImpl(BoatClassMasterdata._5O5.getDisplayName(), BoatClassMasterdata._5O5),
+                new BoatClassImpl(BoatClassMasterdata._5O5.getDisplayName(), BoatClassMasterdata._5O5), /* canBoatsOfCompetitorsChangePerRace */ false,
                 /* courseArea */ null, _505Series, /* regattaConfiguration */ null);
         return _505;
     }
@@ -75,7 +75,7 @@ public class CurrentRaceFilterImplTest {
         final List<RaceRow> yesRaceRows = Arrays.asList(createRaceRow(1, 9, "R", "Yellow"), createRaceRow(1, 9, "R", "Blue"));
         yesSeries.add(new SeriesWithRowsImpl("Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, yesRaceRows));
         final RaceGroup yes = new RaceGroupImpl("YES", /* displayName */ null,
-                new BoatClassImpl(BoatClassMasterdata._470.getDisplayName(), BoatClassMasterdata._470),
+                new BoatClassImpl(BoatClassMasterdata._470.getDisplayName(), BoatClassMasterdata._470), /* canBoatsOfCompetitorsChangePerRace */ false,
                 /* courseArea */ null, yesSeries, /* regattaConfiguration */ null);
         return yes;
     }
@@ -89,7 +89,7 @@ public class CurrentRaceFilterImplTest {
         final List<RaceRow> isafMedalRaceRows = Arrays.asList(createRaceRow(1, 1, "M", "Medal"));
         isafSeries.add(new SeriesWithRowsImpl("Medal", /* isMedal */ true, /* isFleetsCanRunInParallel */ true, isafMedalRaceRows));
         final RaceGroup isaf = new RaceGroupImpl("ISAF", /* displayName */ null,
-                new BoatClassImpl(BoatClassMasterdata._470.getDisplayName(), BoatClassMasterdata._470),
+                new BoatClassImpl(BoatClassMasterdata._470.getDisplayName(), BoatClassMasterdata._470), /* canBoatsOfCompetitorsChangePerRace */ false,
                 /* courseArea */ null, isafSeries, /* regattaConfiguration */ null);
         return isaf;
     }
@@ -109,7 +109,7 @@ public class CurrentRaceFilterImplTest {
         final List<RaceRow> essDay4RaceRows = Arrays.asList(createRaceRow(16, 5, "R", "Default"));
         essSeries.add(new SeriesWithRowsImpl("Day 4", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, essDay4RaceRows));
         final RaceGroup ess = new RaceGroupImpl("ESS", /* displayName */ null,
-                new BoatClassImpl(BoatClassMasterdata.EXTREME_40.getDisplayName(), BoatClassMasterdata.EXTREME_40),
+                new BoatClassImpl(BoatClassMasterdata.EXTREME_40.getDisplayName(), BoatClassMasterdata.EXTREME_40), /* canBoatsOfCompetitorsChangePerRace */ false,
                 /* courseArea */ null, essSeries, /* regattaConfiguration */ null);
         return ess;
     }
@@ -119,7 +119,7 @@ public class CurrentRaceFilterImplTest {
         final List<RaceRow> leagueRaceRows = Arrays.asList(createRaceRow(1, 15, "F", "Red"), createRaceRow(1, 15, "F", "Green"), createRaceRow(1, 15, "F", "Blue"));
         leagueSeries.add(new SeriesWithRowsImpl("Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false, leagueRaceRows));
         final RaceGroup league = new RaceGroupImpl("League", /* displayName */ null,
-                new BoatClassImpl(BoatClassMasterdata.J70.getDisplayName(), BoatClassMasterdata.J70),
+                new BoatClassImpl(BoatClassMasterdata.J70.getDisplayName(), BoatClassMasterdata.J70), /* canBoatsOfCompetitorsChangePerRace */ false,
                 /* courseArea */ null, leagueSeries, /* regattaConfiguration */ null);
         return league;
     }
@@ -413,7 +413,7 @@ public class CurrentRaceFilterImplTest {
         for (int i=0; i < numberOfRaces; i++) {
             _505RaceCells.add(new RaceCellImpl(raceColumnNamePrefix+(i+firstRaceColumnNumber),
                     /* race log */ null, /* factor */ firstRaceColumnNumber, /* explicitFactor */ null,
-                    /* zeroBasedIndexInFleet */ i));
+                    /* zeroBasedIndexInFleet */ i, /* targetTime */ null));
         }
         final RaceRowImpl _505RaceRow = new RaceRowImpl(new FleetImpl(fleetName), _505RaceCells);
         return _505RaceRow;

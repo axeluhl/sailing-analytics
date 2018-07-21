@@ -10,7 +10,6 @@ import java.util.Collections;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.impl.PositionWithConfidenceImpl;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.BearingCluster;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
@@ -19,10 +18,11 @@ import com.sap.sailing.domain.common.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.common.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.common.confidence.HasConfidence;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class BearingTest {
     @Test
@@ -44,6 +44,16 @@ public class BearingTest {
     @Test
     public void testEmptyBearingWithConfidenceClusterHasNullAverage() {
         assertNull(new BearingWithConfidenceCluster<Void>(null).getAverage(null));
+    }
+    
+    @Test
+    public void testNegativeAngle() {
+        assertEquals(-10., new DegreeBearingImpl(-10.).getDegrees(), 0.000001);
+    }
+    
+    @Test
+    public void testNegativeAngleOverflow() {
+        assertEquals(-10., new DegreeBearingImpl(-370.).getDegrees(), 0.000001);
     }
     
     @Test

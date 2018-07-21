@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.sap.sailing.server.gateway.serialization.test
 Bundle-SymbolicName: com.sap.sailing.server.gateway.serialization.test
+Automatic-Module-Name: com.sap.sailing.server.gateway.serialization.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -9,7 +10,7 @@ Fragment-Host: com.sap.sailing.server.gateway.serialization
 Require-Bundle: com.sap.sailing.domain;bundle-version="1.0.0",
  com.sap.sailing.domain.common;bundle-version="1.0.0",
  org.hamcrest;bundle-version="1.1.0",
- org.junit4;bundle-version="4.8.2",
+ org.junit;bundle-version="4.8.2",
  com.sap.sailing.domain.shared.android,
  org.json.simple,
  org.mockito.mockito-core;bundle-version="1.9.5",

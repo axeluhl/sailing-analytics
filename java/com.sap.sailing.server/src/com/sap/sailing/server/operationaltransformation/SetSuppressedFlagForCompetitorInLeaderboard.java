@@ -20,8 +20,10 @@ public class SetSuppressedFlagForCompetitorInLeaderboard extends AbstractLeaderb
     public Void internalApplyTo(RacingEventService toState) throws Exception {
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
         Competitor competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString);
-        leaderboard.setSuppressed(competitor, suppressed);
-        toState.updateStoredLeaderboard(leaderboard);
+        if (competitor != null) {
+	        leaderboard.setSuppressed(competitor, suppressed);
+	        toState.updateStoredLeaderboard(leaderboard);
+        }
         return null;
     }
 

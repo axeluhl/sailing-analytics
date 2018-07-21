@@ -17,12 +17,12 @@ import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
  *
  */
 public class MasterDataImportObjectCreationCountImpl implements MasterDataImportObjectCreationCount {
-    
     private static final long serialVersionUID = -3677005970701170818L;
     private int leaderboardCount = 0;
     private int leaderboardGroupCount = 0;
     private int eventCount = 0;
     private int regattaCount = 0;
+    private int mediaTrackCount = 0;
     
     private Set<String> createdLeaderboards = new HashSet<String>(); 
     private Set<String> createdLeaderboardGroups = new HashSet<String>(); 
@@ -52,7 +52,11 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
     public void addOneRegatta(String id) {
         createdRegattas.add(id);
         regattaCount++;
-        
+    }
+    
+    @Override
+    public void addOneMediaTrack() {
+    	mediaTrackCount++;
     }
 
     public void add(MasterDataImportObjectCreationCountImpl toAdd) {
@@ -100,6 +104,11 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
     @Override
     public int getRegattaCount() {
         return regattaCount;
+    }
+    
+    @Override
+    public int getMediaTrackCount() {
+    	return mediaTrackCount;
     }
 
     @Override

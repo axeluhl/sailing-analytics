@@ -1,10 +1,9 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.SerializablePosition;
 import com.sap.sse.common.CountryCodeFactory;
+import com.sap.sse.common.Distance;
 
 /**
  * Used to define a populated place in the world.<br />
@@ -17,7 +16,7 @@ public class PlacemarkImpl implements Placemark {
     
     private String name;
     private String countryCode;
-    private SerializablePosition position;
+    private Position position;
     private long population;
     
     PlacemarkImpl() {}
@@ -25,7 +24,7 @@ public class PlacemarkImpl implements Placemark {
     /**
      * Creates a new Placemark with the given parameters as attributes.
      */
-    public PlacemarkImpl(String name, String countryCode, SerializablePosition position, long population) {
+    public PlacemarkImpl(String name, String countryCode, Position position, long population) {
         this.name = name;
         this.countryCode = countryCode;
         this.position = position;
@@ -35,7 +34,7 @@ public class PlacemarkImpl implements Placemark {
     /**
      * Creates a new Placemark with the given parameters as attributes and a <code>population</code> of <code>0</code>;
      */
-    public PlacemarkImpl(String name, String countryCode, String countryName, SerializablePosition position, String type) {
+    public PlacemarkImpl(String name, String countryCode, String countryName, Position position, String type) {
         this(name, countryCode, position, 0);
     }
 
@@ -48,7 +47,7 @@ public class PlacemarkImpl implements Placemark {
     }
     
     public Position getPosition() {
-        return position.getPosition();
+        return position;
     }
 
     public long getPopulation() {
@@ -58,7 +57,7 @@ public class PlacemarkImpl implements Placemark {
 
     @Override
     public Distance distanceFrom(Position position) {
-        return this.position.getPosition().getDistance(position);
+        return this.position.getDistance(position);
     }
     @Override
     public Distance distanceFrom(double latDeg, double lngDeg) {

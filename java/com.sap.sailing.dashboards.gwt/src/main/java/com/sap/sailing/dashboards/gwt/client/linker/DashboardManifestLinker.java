@@ -1,7 +1,7 @@
 package com.sap.sailing.dashboards.gwt.client.linker;
 
 import com.google.gwt.core.ext.linker.Shardable;
-import com.sap.sse.gwt.client.linker.ManifestLinker;
+import com.sap.sse.gwt.linker.ManifestLinker;
 
 /**
  * @author Alexander Ries (D062114)

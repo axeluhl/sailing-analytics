@@ -19,12 +19,10 @@ public class ParallelGroupedNumberDataMinAggregationProcessor
         return DEFINITION;
     }
 
-    
     public ParallelGroupedNumberDataMinAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Number>, ?>> resultReceivers) {
         super(executor, resultReceivers, "Minimum");
     }
-
 
     @Override
     protected Number compareValuesAndReturnNewResult(Number currentResult, Number newValue) {

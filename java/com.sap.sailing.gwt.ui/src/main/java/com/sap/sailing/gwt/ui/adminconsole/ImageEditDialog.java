@@ -26,7 +26,5 @@ public class ImageEditDialog extends ImageDialog {
         List<String> tags = new ArrayList<String>();
         tags.addAll(imageDTO.getTags());
         tagsListEditor.setValue(tags);
-//        image = loadImageFromURL(imageDTO.getSourceRef());
-//        imageHolder.setWidget(image);
     }
 }

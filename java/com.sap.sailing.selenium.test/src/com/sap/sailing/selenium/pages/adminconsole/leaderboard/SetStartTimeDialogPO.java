@@ -8,7 +8,7 @@ import org.openqa.selenium.WebElement;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
-import com.sap.sailing.selenium.pages.gwt.BetterDateTimeBoxPO;
+import com.sap.sailing.selenium.pages.gwt.DateAndTimeInputPO;
 
 public class SetStartTimeDialogPO extends DataEntryDialogPO {
     
@@ -28,7 +28,7 @@ public class SetStartTimeDialogPO extends DataEntryDialogPO {
     }
     
     public void setStartTimeValue(Date startTime) {
-        BetterDateTimeBoxPO.create(driver, startTimeTimeBox, true).setDate(startTime);
+        DateAndTimeInputPO.create(driver, startTimeTimeBox).setValue(startTime, true);
     }
 
     public void pressSetStartTime() {

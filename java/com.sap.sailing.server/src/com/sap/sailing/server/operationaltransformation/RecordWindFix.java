@@ -16,8 +16,13 @@ public class RecordWindFix extends AbstractWindOperation {
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
-        trackedRace.recordWind(getWind(), getWindSource(), /* applyFilter */ false);
+        // it's fair to not wait for the tracked race to arrive here because we're receiving a replication operation
+        // and the synchronous race-creating operation must have been processed synchronously before this operation
+        // could even have been received
+        DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getExistingTrackedRace(getRaceIdentifier());
+	if (trackedRace != null) {
+	    trackedRace.recordWind(getWind(), getWindSource(), /* applyFilter */ false);
+	}
         return null;
     }
 

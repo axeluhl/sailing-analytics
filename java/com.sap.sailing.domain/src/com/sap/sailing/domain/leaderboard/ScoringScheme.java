@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -25,6 +26,13 @@ import com.sap.sse.common.Util;
  *
  */
 public interface ScoringScheme extends Serializable {
+    /**
+     * The factor by which a medal race score is multiplied by default in the overall point scheme.
+     * 
+     * @see #getFactor()
+     */
+    static final double DEFAULT_MEDAL_RACE_FACTOR = 2.0;
+    
     /**
      * If this returns <code>true</code>, a higher score is better. For example, the Extreme Sailing Series uses this
      * scoring scheme, as opposed to the olympic sailing classes which use a low-point system.
@@ -50,7 +58,6 @@ public interface ScoringScheme extends Serializable {
      * If the <code>competitor</code> has no {@link RaceColumn#getTrackedRace(Competitor) tracked race} in the column in which
      * the competitor participated, <code>null</code> is returned, meaning the competitor has no score assigned for that
      * race.
-     * @param timePoint TODO
      */
     Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor,
             int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher,
@@ -62,20 +69,29 @@ public interface ScoringScheme extends Serializable {
      * or regatta.
      * 
      * @param numberOfCompetitorsInLeaderboardFetcher
-     *            if it returns <code>null</code>, the caller cannot determine the number of competitors in the single race;
-     *            otherwise, this parameter tells the number of competitors in the same race as <code>competitor</code>,
-     *            not in the entire <code>raceColumn</code> (those may be more in case of split fleets). The scoring scheme
-     *            may use this number, if available, to infer a penalty score.
+     *            if it returns <code>null</code>, the caller cannot determine the number of competitors in the single
+     *            race; otherwise, this parameter tells the number of competitors in the same race as
+     *            <code>competitor</code>, not in the entire <code>raceColumn</code> (those may be more in case of split
+     *            fleets). The scoring scheme may use this number, if available, to infer a penalty score.
+     * @param timePoint
+     *            an optional timePoint that may help the scheme to determine the penalty related to a certain point in
+     *            time only.
+     * @param leaderboard
+     *            may be required in case a "penalty" such as a redress needs to inspect the scores of other race
+     *            columns as well; implementations need to take great care not to cause endless recursions by
+     *            naively asking the leaderboard for scores which would recurse into this method
      */
     Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
-            Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher);
+            Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
+            TimePoint timePoint, Leaderboard leaderboard);
 
     /**
      * @param competitor1Scores scores of the first competitor, in the order of race columns in the leaderboard
      * @param competitor2Scores scores of the second competitor, in the order of race columns in the leaderboard
+     * @param leaderboard TODO
      */
     int compareByBetterScore(Competitor o1,
-            List<Util.Pair<RaceColumn, Double>> competitor1Scores, Competitor o2, List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter, TimePoint timePoint);
+            List<Util.Pair<RaceColumn, Double>> competitor1Scores, Competitor o2, List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard);
 
     /**
      * In case two competitors scored in different numbers of races, this scoring scheme decides whether this
@@ -88,8 +104,10 @@ public interface ScoringScheme extends Serializable {
 
     /**
      * Usually, when all other sorting criteria end up in a tie, the last race sailed is used to decide.
+     * @param o1 TODO
+     * @param o2 TODO
      */
-    int compareByLastRace(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter);
+    int compareByLastRace(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Competitor o1, Competitor o2);
 
     /**
      * Under certain circumstances, a scoring scheme may decide that the scores of a column are not (yet) to be used
@@ -108,5 +126,52 @@ public interface ScoringScheme extends Serializable {
      * ordering of the list containing the total points matches the order in the group.
      * @throws NoWindException 
      */
-    int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint) throws NoWindException;
+    int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint);
+
+    /**
+     * Returning {@code true} makes the number of wins in a medal series the primary ranking criteria.
+     * The number of wins that makes a competitor the overall winner must be returned by {@link #getTargetAmountOfMedalRaceWins()}.
+     */
+    default boolean isMedalWinAmountCriteria() {
+        return false;
+    }
+    
+    /**
+     * Returning {@code true} makes the {@link RaceColumn#isCarryForward() carry forward score} in a
+     * {@link Series#isMedal() medal series} a secondary ranking criteria for competitors that have an equal overall
+     * score.
+     */
+    default boolean isCarryForwardInMedalsCriteria() {
+        return false;
+    }
+    
+    /**
+     * Returning {@code true} makes the last medal race (having valid scores) a secondary ranking criteria for
+     * competitors that have an equal overall score.
+     */
+    default boolean isLastMedalRaceCriteria() {
+        return false;
+    }
+
+    /**
+     * If {@link #isMedalWinAmountCriteria()} returns {@code true}, this will be the amount of races that must be won,
+     * in order to win the medal series instantly
+     */
+    default int getTargetAmountOfMedalRaceWins() {
+        throw new IllegalStateException("This call is not valid for this scoringSheme");
+    }
+
+    /**
+     * Usually, the scores in each leaderboard column count as they are for the overall score. However, if a column is a
+     * medal race column it usually counts double. Under certain circumstances, columns may also count with factors
+     * different from 1 or 2. For example, we've seen cases in the Extreme Sailing Series where the race committee
+     * defined that in the overall series leaderboard the last two columns each count 1.5 times their scores.
+     */
+    default double getScoreFactor(RaceColumn raceColumn) {
+        Double factor = raceColumn.getExplicitFactor();
+        if (factor == null) {
+            factor = raceColumn.isMedalRace() ? DEFAULT_MEDAL_RACE_FACTOR : 1.0;
+        }
+        return factor;
+    }
 }

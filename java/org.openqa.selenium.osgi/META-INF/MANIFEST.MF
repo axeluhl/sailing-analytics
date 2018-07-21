@@ -38,7 +38,6 @@ Bundle-ClassPath: lib/apache-mime4j-0.6.jar,
  lib/testng-6.8.5.jar,
  lib/xalan-2.7.1.jar,
  lib/xercesImpl-2.10.0.jar,
- lib/xml-apis-1.4.01.jar,
  selenium-java-2.40.0.jar,
  lib/guava-15.0.jar
 Bundle-Vendor: openqa
@@ -61,6 +60,7 @@ Export-Package: com.google.common.annotations,
  com.google.common.xml,
  com.thoughtworks.selenium,
  com.thoughtworks.selenium.condition,
+ org.json,
  org.openqa.selenium,
  org.openqa.selenium.browserlaunchers,
  org.openqa.selenium.browserlaunchers.locators,
@@ -93,5 +93,5 @@ Export-Package: com.google.common.annotations,
  org.openqa.selenium.support.events.internal,
  org.openqa.selenium.support.pagefactory,
  org.openqa.selenium.support.pagefactory.internal,
- org.openqa.selenium.support.ui,
- org.json
+ org.openqa.selenium.support.ui
+Automatic-Module-Name: org.openqa.selenium.osgi

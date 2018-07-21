@@ -8,5 +8,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.osgi.framework;version="1.5.0"
 Bundle-ActivationPolicy: lazy
 Fragment-Host: com.sap.sailing.sailwave.resultimport
-Require-Bundle: org.junit4;bundle-version="4.8.2",
+Require-Bundle: org.junit;bundle-version="4.8.2",
  com.sap.sse.common
+Automatic-Module-Name: com.sap.sailing.sailwave.resultimport.test

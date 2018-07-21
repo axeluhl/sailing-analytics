@@ -1,6 +1,5 @@
 package com.sap.sse.common;
 
-
 /**
  * A factory for creating {@link TypeBasedServiceFinder}s, for a specific type of service.
  * The desired service type is specified by the {@link Class} object passed to the

@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.communication.event;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.statistics.EventStatisticsDTO;
@@ -22,7 +23,7 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
  * The {@link ResultWithTTL result's} time to live is <i>5 minutes</i>.
  * </p>
  */
-public class GetRegattaStatisticsAction implements SailingAction<ResultWithTTL<EventStatisticsDTO>>, IsClientCacheable {
+public class GetRegattaStatisticsAction implements SailingAction<ResultWithTTL<EventStatisticsDTO>>, IsClientCacheable, ProvidesLeaderboardRouting {
     
     private UUID eventId;
     private String regattaId;
@@ -44,7 +45,7 @@ public class GetRegattaStatisticsAction implements SailingAction<ResultWithTTL<E
     @Override
     @GwtIncompatible
     public ResultWithTTL<EventStatisticsDTO> execute(SailingDispatchContext context) throws DispatchException {
-        StatisticsCalculator statisticsCalculator = new StatisticsCalculator();
+        StatisticsCalculator statisticsCalculator = new StatisticsCalculator(context.getTrackedRaceStatisticsCache());
         statisticsCalculator.doForLeaderboard(EventActionUtil.getLeaderboardContext(context, eventId, regattaId));
         return statisticsCalculator.getResult();
     }
@@ -52,5 +53,10 @@ public class GetRegattaStatisticsAction implements SailingAction<ResultWithTTL<E
     @Override
     public void cacheInstanceKey(StringBuilder key) {
         key.append(eventId).append("_").append(regattaId);
+    }
+
+    @Override
+    public String getLeaderboardName() {
+        return regattaId;
     }
 }

@@ -14,6 +14,10 @@ import com.sap.sse.replication.impl.ReplicationServlet;
 /**
  * Identifies a master server instance from which a replica can obtain an initial load and continuous updates.
  * 
+ * TODO bug 2465: add the set of {@link Replicable}s that are replicated from the master represented by this descriptor,
+ * considering that this may be a subset only of the replicables running on this instance or the master server. Example:
+ * replicating only the SecurityService from some other server but being a master regarding all other Replicables.
+ * 
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
@@ -55,7 +59,12 @@ public interface ReplicationMasterDescriptor {
 
     String getExchangeName();
 
-    void stopConnection();
+    /**
+     * @param deleteExchange
+     *            Only to be used by the master itself when no longer delivering messages to the exchange, or to tear
+     *            down after a test
+     */
+    void stopConnection(boolean deleteExchange);
 
     String getMessagingHostname();
 
@@ -63,5 +72,7 @@ public interface ReplicationMasterDescriptor {
      * @return a RabbitMQ channel created with the replication connectivity parameters defined by this descriptor
      */
     Channel createChannel() throws IOException;
+
+    Iterable<Replicable<?, ?>> getReplicables();
 
 }

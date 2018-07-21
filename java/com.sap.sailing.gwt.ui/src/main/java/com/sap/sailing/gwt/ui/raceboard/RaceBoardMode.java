@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 
 /**
  * The {@link RaceBoardEntryPoint} implements a versatile race viewer perspective that comes with a leaderboard, charts

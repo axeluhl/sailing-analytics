@@ -2,15 +2,15 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" 
 	xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
-	xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials"
-	>
+	xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials">
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-  
   <mp:section.MobileSection ui:field="itemContainerUi" edgeToEdgeContent="true">
 		<mp:header>
 			<mp:sectionHeader.SectionHeaderContent sectionTitle="{i18n.results}" ui:field="headerUi" />
 		</mp:header>
+		<mp:footer>
+		    <mp:toggleButton.BigButton ui:field="showLeaderboardButtonUi" label="{i18n.showLeaderboard}" visible="false" />
+		</mp:footer>
   </mp:section.MobileSection>
-  
 </ui:UiBinder>

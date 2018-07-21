@@ -1,8 +1,8 @@
 package com.sap.sailing.polars.datamining.components.aggregators;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
@@ -10,13 +10,13 @@ import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.polars.datamining.data.HasBackendPolarBoatClassContext;
 import com.sap.sailing.polars.datamining.shared.PolarBackendData;
 import com.sap.sailing.polars.datamining.shared.PolarBackendDataImpl;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
@@ -33,7 +33,7 @@ import com.sap.sse.datamining.shared.GroupKey;
 public class PolarBackendDataAggregationProcessor extends AbstractParallelGroupedDataAggregationProcessor<HasBackendPolarBoatClassContext, PolarBackendData> {
 
     private static final String POLARS_MESSAGE_KEY = "Polars";
-    private final Map<GroupKey, PolarBackendData> resultMap = new HashMap<>();
+    private final ConcurrentHashMap<GroupKey, PolarBackendData> resultMap = new ConcurrentHashMap<>();
     
     public PolarBackendDataAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, PolarBackendData>, ?>> resultReceivers) {
@@ -45,6 +45,11 @@ public class PolarBackendDataAggregationProcessor extends AbstractParallelGroupe
     
     public static AggregationProcessorDefinition<HasBackendPolarBoatClassContext, PolarBackendData> getDefinition() {
         return DEFINITION;
+    }
+    
+    @Override
+    protected boolean needsSynchronization() {
+        return false;
     }
 
     @Override

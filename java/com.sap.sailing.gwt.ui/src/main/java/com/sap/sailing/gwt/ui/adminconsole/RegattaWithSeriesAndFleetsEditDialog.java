@@ -25,15 +25,22 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
 
     private RegattaConfigurationDTO currentRegattaConfiguration;
 
+    protected static class RegattaParameterValidator extends AbstractRegattaParameterValidator {
+        public RegattaParameterValidator(StringMessages stringMessages) {
+            super(stringMessages);
+        }
+    }
+    
     public RegattaWithSeriesAndFleetsEditDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents, EventDTO correspondingEvent, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
         super(regatta, regatta.series, existingEvents, correspondingEvent, stringMessages.editRegatta(), stringMessages.ok(), stringMessages,
-                null, callback);
+                new RegattaParameterValidator(stringMessages), callback);
         ensureDebugId("RegattaWithSeriesAndFleetsEditDialog");
         currentRegattaConfiguration = regatta.configuration;
 
         nameEntryField.setEnabled(false);
         boatClassEntryField.setEnabled(false);
+        canBoatsOfCompetitorsChangePerRaceCheckBox.setEnabled(false);
         scoringSchemeListBox.setEnabled(false);
         sailingEventsListBox.setEnabled(true);
         courseAreaListBox.setEnabled(true);

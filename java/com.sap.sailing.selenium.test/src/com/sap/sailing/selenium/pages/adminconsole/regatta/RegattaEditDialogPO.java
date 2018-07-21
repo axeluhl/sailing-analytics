@@ -21,8 +21,14 @@ public class RegattaEditDialogPO extends DataEntryDialogPO {
     @FindBy(how = BySeleniumId.class, using = "UseStartTimeInferenceCheckBox")
     private WebElement useStartTimeInferenceCheckbox;
 
+    @FindBy(how = BySeleniumId.class, using = "CanBoatsOfCompetitorsChangePerRaceCheckBox")
+    private WebElement canBoatsOfCompetitorsChangePerRaceCheckbox;
+    
     @FindBy(how = BySeleniumId.class, using = "CourseAreaListBox")
     private WebElement courseAreaListBox;
+    
+    @FindBy(how = BySeleniumId.class, using = "AddSeriesButton")
+    private WebElement addSeriesButton;
 
     public RegattaEditDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -31,5 +37,24 @@ public class RegattaEditDialogPO extends DataEntryDialogPO {
     public void setUseStartTimeInference(boolean b) {
         CheckBoxPO checkbox = new CheckBoxPO(driver, useStartTimeInferenceCheckbox);
         checkbox.setSelected(b);
+    }
+
+    public void setCanBoatsOfCompetitorsChangePerRaceCheckBox(boolean b) {
+        CheckBoxPO checkbox = new CheckBoxPO(driver, canBoatsOfCompetitorsChangePerRaceCheckbox);
+        checkbox.setSelected(b);
+    }
+
+    public SeriesCreateDialogPO addSeries() {
+        this.addSeriesButton.click();
+        
+        WebElement dialog = findElementBySeleniumId(this.driver, "SeriesCreateDialog");
+        
+        return new SeriesCreateDialogPO(this.driver, dialog);
+    }
+    
+    public void addSeries(String seriesName) {
+        SeriesCreateDialogPO seriesCreateDialog = addSeries();
+        seriesCreateDialog.setSeriesName(seriesName);
+        seriesCreateDialog.pressOk();
     }
 }

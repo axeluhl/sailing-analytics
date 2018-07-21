@@ -25,6 +25,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.controls.slider.SliderBar;
 import com.sap.sse.gwt.client.controls.slider.TimeSlider;
+import com.sap.sse.gwt.client.controls.slider.TimeSlider.BarOverlay;
 import com.sap.sse.gwt.client.player.PlayStateListener;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.TimeRangeChangeListener;
@@ -33,11 +34,14 @@ import com.sap.sse.gwt.client.player.TimeZoomChangeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.ui.client.UserService;
 
-public class TimePanel<T extends TimePanelSettings> extends SimplePanel implements Component<T>, TimeListener, TimeZoomChangeListener,
+public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeComponent<T> implements TimeListener, TimeZoomChangeListener,
     TimeRangeChangeListener, PlayStateListener, RequiresResize {
     protected final Timer timer;
     protected final TimeRangeWithZoomProvider timeRangeProvider;
@@ -62,7 +66,8 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private final Button backToLivePlayButton;
     protected final StringMessages stringMessages;
     protected final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_FULL); 
-    protected final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss"); 
+    protected final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
+    protected final DateTimeFormat timeFormatterDetailed = DateTimeFormat.getFormat("HH:mm:ss:SS"); 
     private final ImageResource playSpeedImg;
     private final ImageResource playModeLiveActiveImg;
     private final ImageResource playModeReplayActiveImg;
@@ -73,6 +78,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private final Button slowDownButton;
     private final Button speedUpButton;
     private final Button toggleAdvancedModeButton;
+    private final Button resetZoomButton;
 
     private final FlowPanel controlsPanel;
     private final SimplePanel timePanelSlider;
@@ -90,6 +96,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     protected static TimePanelCss timePanelCss = TimePanelCssResources.INSTANCE.css();
 
     private final boolean forcePaddingRightToAlignToCharts;
+    private UserService userService;
 
     /**
      * @param forcePaddingRightToAlignToCharts
@@ -97,8 +104,12 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
      *            charts such as the competitor chart or the wind chart shown above it, otherwise the padding depends
      *            on the flag set by {@link #setLiveGenerallyPossible(boolean)}
      */
-    public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
-            boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts) {
+    public TimePanel(Component<?> parent, ComponentContext<?> context, Timer timer,
+            TimeRangeWithZoomProvider timeRangeProvider,
+            StringMessages stringMessages,
+            boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts, UserService userService) {
+        super(parent, context);
+        this.userService = userService;
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;
@@ -290,7 +301,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
        
         timePanelCss.ensureInjected();
         controlsPanel.add(createSettingsButton());
-        setWidget(timePanelInnerWrapper);
+        initWidget(timePanelInnerWrapper);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
         
         controlsPanel.add(playSpeedControlPanel);
@@ -298,6 +309,16 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         controlsPanel.add(timeDelayPanel);
         controlsPanel.add(timeControlPanel);
         controlsPanel.add(timeToStartControlPanel);
+        
+        resetZoomButton = new Button(stringMessages.resetZoom());
+        resetZoomButton.setEnabled(false);
+        resetZoomButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                timeRangeProvider.resetTimeZoom();
+            }
+        });
+        controlsPanel.add(resetZoomButton);
         
         hideControlsPanel();
     }
@@ -404,10 +425,14 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     protected String getTimeLabelText(Date time) {
         final String timeLabelText;
+        DateTimeFormat formatter = timeFormatter;
+        if (timer.getRefreshInterval() < 1000) {
+            formatter = timeFormatterDetailed;
+        }
         if (lastReceivedDataTimepoint == null) {
-            timeLabelText = timeFormatter.format(time);
+            timeLabelText = formatter.format(time);
         } else {
-            timeLabelText = timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")";
+            timeLabelText = formatter.format(time) + " (" + formatter.format(lastReceivedDataTimepoint) + ")";
         }
         return timeLabelText;
     }
@@ -522,10 +547,12 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     
     @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+        resetZoomButton.setEnabled(true);
     }
 
     @Override
     public void onTimeZoomReset() {
+        resetZoomButton.setEnabled(false);
     }
 
     @Override
@@ -591,8 +618,8 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     }
 
     @Override
-    public SettingsDialogComponent<T> getSettingsDialogComponent() {
-        return new TimePanelSettingsDialogComponent<T>(getSettings(), stringMessages);
+    public SettingsDialogComponent<T> getSettingsDialogComponent(T settings) {
+        return new TimePanelSettingsDialogComponent<T>(settings, stringMessages, userService);
     }
 
     @Override
@@ -642,7 +669,11 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     @Override
     public String getId() {
-        return getLocalizedShortName();
+        return "TimePanel";
+    }
+
+    public void setBarOverlays(Iterable<BarOverlay> overlays) {
+        timeSlider.setBarOverlays(overlays);
     }
 
 }

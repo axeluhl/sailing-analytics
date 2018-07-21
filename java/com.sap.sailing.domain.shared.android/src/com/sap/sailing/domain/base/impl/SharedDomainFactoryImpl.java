@@ -16,9 +16,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseArea;
@@ -64,7 +66,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
     private final Map<String, BoatClass> boatClassCache;
     
-    protected final CompetitorStore competitorStore;
+    protected final CompetitorAndBoatStore competitorAndBoatStore;
     
     private final Map<Serializable, CourseArea> courseAreaCache;
     
@@ -114,10 +116,10 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
      * Uses a transient competitor store
      */
     public SharedDomainFactoryImpl(RaceLogResolver raceLogResolver) {
-        this(new TransientCompetitorStoreImpl(), raceLogResolver);
+        this(new TransientCompetitorAndBoatStoreImpl(), raceLogResolver);
     }
     
-    public SharedDomainFactoryImpl(CompetitorStore competitorStore, RaceLogResolver raceLogResolver) {
+    public SharedDomainFactoryImpl(CompetitorAndBoatStore competitorStore, RaceLogResolver raceLogResolver) {
         this.raceLogResolver = raceLogResolver;
         waypointCacheReferenceQueue = new ReferenceQueue<Waypoint>();
         nationalityCache = new HashMap<String, Nationality>();
@@ -126,7 +128,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         controlPointWithTwoMarksCache = new HashMap<Serializable, ControlPointWithTwoMarks>();
         controlPointWithTwoMarksIdCache = new HashMap<String, Serializable>();
         boatClassCache = new HashMap<String, BoatClass>();
-        this.competitorStore = competitorStore;
+        this.competitorAndBoatStore = competitorStore;
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
         // FIXME ass also bug 3347: mapping to lower case should rather work through a common unification / canonicalization of boat class names
         mayStartWithNoUpwindLeg = Collections.singleton(BoatClassMasterdata.unifyBoatClassName(BoatClassMasterdata.EXTREME_40.getDisplayName()));
@@ -155,17 +157,27 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
     
     @Override
+    public Mark getOrCreateMark(String name, MarkType markType) {
+        return getOrCreateMark(name, name, markType);
+    }
+    
+    @Override
+    public Mark getOrCreateMark(Serializable id, String name, MarkType markType) {
+        return getOrCreateMark(id, name, markType, /* color */ null, /* shape */ null, /* pattern */ null);
+    }
+
+    @Override
     public Mark getOrCreateMark(Serializable id, String name) {
-        return getOrCreateMark(id, name, null, null, null, null);
+        return getOrCreateMark(id, name, /* type */ null, /* color */ null, /* shape */ null, /* pattern */ null);
     }
 
     @Override
     public Mark getOrCreateMark(String toStringRepresentationOfID, String name) {
-        return getOrCreateMark(toStringRepresentationOfID, name, null, null, null, null);
+        return getOrCreateMark(toStringRepresentationOfID, name, /* type */ null, /* color */ null, /* shape */ null, /* pattern */ null);
     }
     
     @Override
-    public Mark getOrCreateMark(Serializable id, String name, MarkType type, String color, String shape, String pattern) {
+    public Mark getOrCreateMark(Serializable id, String name, MarkType type, Color color, String shape, String pattern) {
         Mark result = markCache.get(id);
         if (result == null) {
             result = new MarkImpl(id, name, type, color, shape, pattern);
@@ -176,7 +188,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
     @Override
     public Mark getOrCreateMark(String toStringRepresentationOfID, String name, MarkType type,
-            String color, String shape, String pattern) {
+            Color color, String shape, String pattern) {
         Serializable id = toStringRepresentationOfID;
         if (markIdCache.containsKey(toStringRepresentationOfID)) {
             id = markIdCache.get(toStringRepresentationOfID);
@@ -322,29 +334,60 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public CompetitorStore getCompetitorStore() {
-        return competitorStore;
+    public CompetitorAndBoatStore getCompetitorAndBoatStore() {
+        return competitorAndBoatStore;
     }
 
     @Override
     public Competitor getExistingCompetitorById(Serializable competitorId) {
-        return getCompetitorStore().getExistingCompetitorById(competitorId);
+        return getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
     }
 
     @Override
-    public boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result) {
-        return getCompetitorStore().isCompetitorToUpdateDuringGetOrCreate(result);
+    public CompetitorWithBoat getExistingCompetitorWithBoatById(Serializable competitorId) {
+        return getCompetitorAndBoatStore().getExistingCompetitorWithBoatById(competitorId);
     }
 
     @Override
-    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email,
-            URI flagImage, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor,
+    public boolean isCompetitorToUpdateDuringGetOrCreate(Competitor competitor) {
+        return getCompetitorAndBoatStore().isCompetitorToUpdateDuringGetOrCreate(competitor);
+    }
+
+    @Override
+    public DynamicCompetitor getOrCreateCompetitor(Serializable competitorId, String name, String shortname, Color displayColor, String email,
+            URI flagImage, DynamicTeam team, Double timeOnTimeFactor,
             Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
         }
-        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, displayColor, email, flagImage, team,
-                boat, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
+        return getCompetitorAndBoatStore().getOrCreateCompetitor(competitorId, name, shortname, displayColor, email, flagImage, team,
+                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
+    }
+
+    @Override
+    public DynamicCompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName,
+            Color displayColor, String email, URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor,
+            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
+        }
+        return getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email, flagImageURI, team,
+                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+    }
+
+    @Override
+    public DynamicBoat getExistingBoatById(Serializable boatId) {
+        return getCompetitorAndBoatStore().getExistingBoatById(boatId);
+    }
+
+    @Override
+    public boolean isBoatToUpdateDuringGetOrCreate(Boat boat) {
+        return getCompetitorAndBoatStore().isBoatToUpdateDuringGetOrCreate(boat);
+    }
+
+    @Override
+    public DynamicBoat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color) {
+        return getCompetitorAndBoatStore().getOrCreateBoat(id, name, boatClass, sailId, color);
     }
 
     @Override

@@ -11,6 +11,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
@@ -88,23 +89,44 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     private boolean mUpdateList = true;
     private View mProgress;
     private final Set<ManagedRace> mAllRaces;
-    
+
     private BaseRaceStateChangedListener stateListener = new BaseRaceStateChangedListener() {
+
+        @Override
+        public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
+            super.onFinishingPositioningsChanged(state);
+
+            update(state);
+        }
+
+        @Override
+        public void onFinishingPositionsConfirmed(ReadonlyRaceState state) {
+            super.onFinishingPositionsConfirmed(state);
+
+            update(state);
+        }
+
         @Override
         public void onStartTimeChanged(ReadonlyRaceState state) {
+            super.onStartTimeChanged(state);
+
             update(state);
         }
 
         @Override
         public void onStatusChanged(ReadonlyRaceState state) {
+            super.onStatusChanged(state);
+
             update(state);
         }
 
-        public void update(ReadonlyRaceState state) {
+        void update(ReadonlyRaceState state) {
             dataChanged(state);
             filterChanged();
+            updateConflictSign();
         }
     };
+
     public RaceListFragment() {
         mFilterMode = FilterMode.ACTIVE;
         mSelectedRace = null;
@@ -310,6 +332,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public void onResume() {
         super.onResume();
+
         TickSingleton.INSTANCE.registerListener(this);
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_PROTEST);
@@ -338,6 +361,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public void onStart() {
         super.onStart();
+
         unregisterOnAllRaces();
         registerOnAllRaces();
         for (ManagedRace race : mManagedRacesById.values()) {
@@ -348,6 +372,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public void onStop() {
         unregisterOnAllRaces();
+
         super.onStop();
     }
 
@@ -420,6 +445,23 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mAdapter.onRacesChanged();
         mAdapter.notifyDataSetChanged();
         filterChanged();
+        updateConflictSign();
+    }
+
+    private void updateConflictSign() {
+        boolean showSign = false;
+        for (ManagedRace race : mAllRaces) {
+            CompetitorResults results = race.getState().getFinishPositioningList();
+            if (results != null && results.hasConflicts()) {
+                showSign = true;
+                break;
+            }
+        }
+        if (showSign) {
+            mAllRacesButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_warning_yellow_24dp, 0);
+        } else {
+            mAllRacesButton.setCompoundDrawables(null, null, null, null);
+        }
     }
 
     public void openDrawer() {
@@ -446,23 +488,30 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
     private void showProtestTimeDialog(String raceGroupSeriesDisplayName) {
         // Find the race group for which the
+        List<ManagedRace> races = new ArrayList<>();
         for (RaceGroupSeriesFleet raceGroupSeriesFleet : mRacesByGroup.keySet()) {
             Boolean matchingRaceGroup = raceGroupSeriesDisplayName.equals(
                     new RaceGroupSeries(raceGroupSeriesFleet.getRaceGroup(), raceGroupSeriesFleet.getSeries()).getDisplayName());
             if (matchingRaceGroup) {
-                List<ManagedRace> races = mRacesByGroup.get(raceGroupSeriesFleet);
                 if (!isRaceListDirty(races)) {
-                    ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
+                    // collect all races for a single fragment in case of portrait mode;
+                    // show multiple fragments after one another in case of non-portrait (landscape) mode
                     View view = getActivity().findViewById(R.id.protest_time_fragment);
-                    if (AppUtils.with(getActivity()).isPort() && view != null) {
-                        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                        transaction.replace(R.id.protest_time_fragment, fragment);
-                        transaction.commit();
+                    if (AppUtils.with(getActivity()).isPortrait() && view != null) {
+                        races.addAll(mRacesByGroup.get(raceGroupSeriesFleet));
                     } else {
+                        races = mRacesByGroup.get(raceGroupSeriesFleet);
+                        ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
                         fragment.show(getFragmentManager(), null);
                     }
                 }
             }
+        }
+        if (AppUtils.with(getActivity()).isPortrait() && (getActivity().findViewById(R.id.protest_time_fragment)) != null) {
+            ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            transaction.replace(R.id.protest_time_fragment, fragment);
+            transaction.commit();
         }
     }
 

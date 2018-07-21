@@ -13,6 +13,8 @@ import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.ISubscriberFactory;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import com.tractrac.subscription.lib.api.SubscriptionLocator;
+import com.tractrac.util.lib.api.exceptions.TimeOutException;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -32,7 +34,7 @@ public class Main {
 	 */
 	public static void main(String[] args) throws URISyntaxException,
 			MalformedURLException, FileNotFoundException, IOException,
-			SubscriberInitializationException, CreateModelException {
+			SubscriberInitializationException, CreateModelException, TimeOutException {
 
 		URI paramURI = parseArguments(args);
 

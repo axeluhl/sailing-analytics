@@ -30,7 +30,7 @@ public class StartAnalysisDTO implements Serializable, Comparable<StartAnalysisD
     }
 
     public List<CompetitorDTO> getCompetitorDTOsFromStartAnaylsisCompetitorDTOs() {
-        List<CompetitorDTO> competitorDTOs = new ArrayList<CompetitorDTO>();
+        List<CompetitorDTO> competitorDTOs = new ArrayList<>();
         for (StartAnalysisCompetitorDTO startAnalysisCompetitorDTO : startAnalysisCompetitorDTOs) {
             competitorDTOs.add(startAnalysisCompetitorDTO.competitorDTO);
         }

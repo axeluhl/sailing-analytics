@@ -13,5 +13,5 @@ public interface SwissTimingConfiguration {
     
     String getHostname();
     
-    int getPort();
+    Integer getPort();
 }

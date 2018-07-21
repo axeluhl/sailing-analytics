@@ -1,6 +1,6 @@
 package com.sap.sailing.polars;
 
-import com.sap.sailing.polars.impl.PolarDataServiceImpl;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sse.replication.OperationWithResult;
 
 /**
@@ -11,6 +11,6 @@ import com.sap.sse.replication.OperationWithResult;
  *
  * @param <T>
  */
-public interface PolarDataOperation<T> extends OperationWithResult<PolarDataServiceImpl, T> {
+public interface PolarDataOperation<T> extends OperationWithResult<PolarDataService, T> {
 
 }

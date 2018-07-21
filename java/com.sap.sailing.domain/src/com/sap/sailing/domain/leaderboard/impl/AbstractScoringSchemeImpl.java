@@ -124,16 +124,16 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      * Assuming both competitors scored in the same number of races, compares the sorted scores.
      */
     @Override
-    public int compareByBetterScore(Competitor o1, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint) {
+    public int compareByBetterScore(Competitor o1, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard) {
         final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
         // needs to compare net points; therefore, divide the total points by the column factor for comparison:
         List<Double> o1NetScores = new ArrayList<>();
         for (com.sap.sse.common.Util.Pair<RaceColumn, Double> o1ColumnAndScore : o1Scores) {
-            o1NetScores.add(o1ColumnAndScore.getB()/o1ColumnAndScore.getA().getFactor());
+            o1NetScores.add(o1ColumnAndScore.getB() / getScoreFactor(o1ColumnAndScore.getA()));
         }
         List<Double> o2NetScores = new ArrayList<>();
         for (com.sap.sse.common.Util.Pair<RaceColumn, Double> o2ColumnAndScore : o2Scores) {
-            o2NetScores.add(o2ColumnAndScore.getB()/o2ColumnAndScore.getA().getFactor());
+            o2NetScores.add(o2ColumnAndScore.getB() / getScoreFactor(o2ColumnAndScore.getA()));
         }
         Collections.sort(o1NetScores, pureScoreComparator);
         Collections.sort(o2NetScores, pureScoreComparator);
@@ -161,13 +161,12 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     }
 
     /**
-     * @param o1ScoresIncludingDiscarded scores that include the points for those races that have been discarded (net points)
-     * @param o2ScoresIncludingDiscarded scores that include the points for those races that have been discarded (net points)
+     * @param o1ScoresIncludingDiscarded scores that include the points for those races that have been discarded (total points)
+     * @param o2ScoresIncludingDiscarded scores that include the points for those races that have been discarded (total points)
      */
     @Override
     public int compareByLastRace(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1ScoresIncludingDiscarded,
-            List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2ScoresIncludingDiscarded,
-            boolean nullScoresAreBetter) {
+            List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2ScoresIncludingDiscarded, boolean nullScoresAreBetter, Competitor o1, Competitor o2) {
         int result = 0;
         final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
         ListIterator<Pair<RaceColumn, Double>> o1Iter = o1ScoresIncludingDiscarded.listIterator(o1ScoresIncludingDiscarded.size());

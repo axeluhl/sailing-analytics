@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
+    <string name="log_file_template" translatable="false">sap_log_%s.txt</string>
+    <string name="crash_file_name" translatable="false">sap_crash_%s.txt</string>
     <string name="options_menu_live">Connection Information</string>
     <string name="remove">Remove</string>
     <string name="enter_new_item">Enter new item</string>
@@ -78,5 +80,11 @@
     <!-- Competitor list footer text -->
     <string name="footer_text">More information on</string>
     <string name="footer_text_link">https://www.sapsailing.com</string>
+
+    <string name="yesterday">Yesterday</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="time_ago" translatable="false">%1$dh %2$02d\' %3$02d\"</string>
+    <string name="date_short" translatable="false">yyyy-MM-dd</string>
 
 </resources>

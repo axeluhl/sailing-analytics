@@ -7,4 +7,6 @@ public interface ContainerElement {
     @Dimension(messageKey="Name")
     public String getName();
 
+    @Dimension(messageKey="StringFromInt")
+    public String getStringFromInt(int i);
 }

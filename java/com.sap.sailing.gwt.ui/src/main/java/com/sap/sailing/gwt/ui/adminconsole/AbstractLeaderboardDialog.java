@@ -8,24 +8,23 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public abstract class AbstractLeaderboardDialog extends DataEntryDialog<LeaderboardDescriptor> {
+public abstract class AbstractLeaderboardDialog<LD extends LeaderboardDescriptor> extends DataEntryDialog<LD> {
     protected final StringMessages stringMessages;
     protected TextBox nameTextBox;
     protected TextBox displayNameTextBox;
-    protected LeaderboardDescriptor leaderboardDescriptor;
+    protected LD leaderboardDescriptor;
 
     protected DiscardThresholdBoxes discardThresholdBoxes;
-    protected static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
-    public AbstractLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDescriptor, StringMessages stringMessages,
-            Validator<LeaderboardDescriptor> validator,  DialogCallback<LeaderboardDescriptor> callback) {
+    public AbstractLeaderboardDialog(String title, LD leaderboardDescriptor, StringMessages stringMessages,
+            Validator<LD> validator,  DialogCallback<LD> callback) {
         super(title, null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
         this.leaderboardDescriptor = leaderboardDescriptor;
     }
 
     @Override
-    protected LeaderboardDescriptor getResult() {
+    protected LD getResult() {
         leaderboardDescriptor.setName(nameTextBox.getValue().trim()); // avoid trailing blank issues; leaderboard names may appear in URLs
         leaderboardDescriptor.setDisplayName(displayNameTextBox.getValue().trim().isEmpty() ? null : displayNameTextBox.getValue());
         leaderboardDescriptor.setDiscardThresholds(discardThresholdBoxes==null?null:discardThresholdBoxes.getDiscardThresholds());

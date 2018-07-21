@@ -50,10 +50,14 @@ img.statisticsbox_content_item_icon {
      -moz-transform: translateY(-50%);
       -ms-transform: translateY(-50%);
           transform: translateY(-50%);
-  width: 3.1em;
   text-align: center;
-  padding: 0.230769230769231em 0;
+  padding: 0.230769230769231em;
   background: #ebebeb;
   border: 1px solid #dedede;
   border-radius: 0.384615384615385em;
+  display: inline-block;
+  max-width: 35%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

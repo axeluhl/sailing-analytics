@@ -2,17 +2,19 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.sap.sailing.domain.common.FixType;
+import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sse.common.Distance;
 
 /**
  * A class for course fix graphics based on SVG graphics drawn to a HTML5 canvas
  * The SVG files for the drawing can be found in the package com.sap.sailing.gwt.ui.svg.fixes
- * A general description how to convert SVG files to 'drawing commands' can be found at http://wiki.sapsailing.com/wiki/boatgraphicssvg 
+ * A general description how to convert SVG files to 'drawing commands' can be found at http://wiki.sapsailing.com/wiki/howto/development/boatgraphicssvg
  * @author Jonas Dann
  */
 
 public class FixVectorGraphics {
-    protected double fixHeightInMeters;
-    protected double fixWidthInMeters;
+    protected Distance fixHeight;
+    protected Distance fixWidth;
     
     private final String color;
     private final FixType type;
@@ -28,8 +30,8 @@ public class FixVectorGraphics {
     public FixVectorGraphics(FixType type, String color) {
         this.type = type;
         this.color = color;
-        this.fixHeightInMeters = 2.1;
-        this.fixWidthInMeters = 1.5;
+        this.fixHeight = new MeterDistance(2.1);
+        this.fixWidth = new MeterDistance(1.5);
     }
     
     public void drawMarkToCanvas(Context2d ctx, double width, double height, double scaleFactor) {
@@ -101,12 +103,12 @@ public class FixVectorGraphics {
         ctx.restore();
     }
     
-    public double getFixHeightInMeters() {
-        return fixHeightInMeters;
+    public Distance getFixHeight() {
+        return fixHeight;
     }
 
-    public double getFixWidthInMeters() {
-        return fixWidthInMeters;
+    public Distance getFixWidth() {
+        return fixWidth;
     }
 
     public FixType getType() {

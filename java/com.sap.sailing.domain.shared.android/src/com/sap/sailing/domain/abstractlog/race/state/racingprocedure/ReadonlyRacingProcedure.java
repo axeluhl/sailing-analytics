@@ -52,9 +52,13 @@ public interface ReadonlyRacingProcedure extends RaceStateEventProcessor, RaceSt
     void removeChangedListener(RacingProcedureChangedListener listener);
 
     /**
-     * Returns <code>true</code> if the start phase of this {@link ReadonlyRacingProcedure is active given the current time and start time.
-     * @param startTime start time to be used to determine whether the start phase is active or not.
-     * @param now {@link TimePoint} used as the current time on determining whether the start phase is active or not.
+     * Returns <code>true</code> if the start phase of this {@link ReadonlyRacingProcedure is active given the current
+     * time and start time.
+     * 
+     * @param startTime
+     *            start time to be used to determine whether the start phase is active or not. Must not be {@code null}
+     * @param now
+     *            {@link TimePoint} used as the current time on determining whether the start phase is active or not.
      */
     boolean isStartphaseActive(TimePoint startTime, TimePoint now);
 

@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -13,7 +12,6 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -36,15 +34,15 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
+import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 /**
@@ -56,17 +54,25 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  * 
  */
 public class SwissTimingEventManagementPanel extends AbstractEventManagementPanel {
+    private static final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+    
     private final LabeledAbstractFilterablePanel<SwissTimingRaceRecordDTO> filterablePanelEvents;
     private final ListDataProvider<SwissTimingRaceRecordDTO> raceList;
-    private final CellTable<SwissTimingRaceRecordDTO> raceTable;
+    private final FlushableCellTable<SwissTimingRaceRecordDTO> raceTable;
     private final Map<String, SwissTimingConfigurationDTO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
+    private final TextBox eventIdBox;
     private final TextBox jsonUrlBox;
     private final TextBox hostnameTextbox;
     private final IntegerBox portIntegerbox;
     private final List<SwissTimingRaceRecordDTO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDTO>();
+    private final String manage2sailBaseAPIUrl = "http://manage2sail.com/api/public/links/event/";
+    private final String manage2sailAPIaccessToken = "?accesstoken=bDAv8CwsTM94ujZ";
+    private final String manage2sailUrlAppendix = "&mediaType=json&includeRaces=true";
+    private final String eventIdPattern = "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}";
 
-    public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService,
+            ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringConstants) {
         super(sailingService, regattaRefresher, errorReporter, true, stringConstants);
         this.errorReporter = errorReporter;
@@ -83,7 +89,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         captionPanelConnections.setContentWidget(verticalPanel);
         captionPanelConnections.setStyleName("bold");
 
-        Grid connectionsGrid = new Grid(5, 2);
+        Grid connectionsGrid = new Grid(6, 2);
         verticalPanel.add(connectionsGrid);
         
         previousConfigurations = new HashMap<String, SwissTimingConfigurationDTO>();
@@ -102,89 +108,50 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             }
         });
         fillConfigurations();
-
+        
         jsonUrlBox = new TextBox();
         jsonUrlBox.getElement().getStyle().setWidth(50, Unit.EM);
 
         connectionsGrid.setWidget(0, 0, new Label(stringMessages.swissTimingEvents() + ":"));
         connectionsGrid.setWidget(0, 1, previousConfigurationsComboBox);
-        connectionsGrid.setWidget(1, 0, new Label("Manage2Sail Event-URL (json):"));
-        connectionsGrid.setWidget(1, 1, jsonUrlBox);
+        
+        eventIdBox = new TextBox();
+        eventIdBox.getElement().getStyle().setWidth(30, Unit.EM);
+        eventIdBox.setTitle(stringMessages.manage2SailEventIdBoxTooltip());
+        connectionsGrid.setWidget(1, 0, new Label(stringMessages.manage2SailEventIdBox() + ":"));
+        connectionsGrid.setWidget(1, 1, eventIdBox);
+        eventIdBox.addChangeHandler(event -> {
+            if (eventIdBox.getValue() != "") {
+                updateUrlFromEventId(eventIdBox.getValue());
+            }
+        });
+
+        connectionsGrid.setWidget(2, 0, new Label(stringMessages.manage2SailEventURLBox() + ":"));
+        connectionsGrid.setWidget(2, 1, jsonUrlBox);
+        jsonUrlBox.addChangeHandler(event -> {
+            if (jsonUrlBox.getValue() != "") {
+                updateEventIdFromUrl(jsonUrlBox.getValue());
+            }
+        });
 
         hostnameTextbox = new TextBox();
         portIntegerbox = new IntegerBox();
 
-        connectionsGrid.setWidget(2, 0,  new Label(stringConstants.hostname() + ":"));
-        connectionsGrid.setWidget(2, 1, hostnameTextbox);
+        connectionsGrid.setWidget(3, 0,  new Label(stringConstants.hostname() + ":"));
+        connectionsGrid.setWidget(3, 1, hostnameTextbox);
         
-        connectionsGrid.setWidget(3, 0, new Label(stringConstants.port() + ":"));
-        connectionsGrid.setWidget(3, 1, portIntegerbox);
+        connectionsGrid.setWidget(4, 0, new Label(stringMessages.manage2SailPort() + ":"));
+        connectionsGrid.setWidget(4, 1, portIntegerbox);
 
         Button btnListRaces = new Button(stringConstants.listRaces());
-        connectionsGrid.setWidget(4, 1, btnListRaces);
+        connectionsGrid.setWidget(5, 1, btnListRaces);
         btnListRaces.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 fillRaces(sailingService);
             }
         });
-
-        TextColumn<SwissTimingRaceRecordDTO> raceNameColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
-            @Override
-            public String getValue(SwissTimingRaceRecordDTO object) {
-                return object.getName();
-            }
-        };
-
-        TextColumn<SwissTimingRaceRecordDTO> regattaNameColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
-            @Override
-            public String getValue(SwissTimingRaceRecordDTO object) {
-                return object.regattaName;
-            }
-        };
-
-        TextColumn<SwissTimingRaceRecordDTO> seriesNameColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
-            @Override
-            public String getValue(SwissTimingRaceRecordDTO object) {
-                return object.seriesName;
-            }
-        };
-
-        TextColumn<SwissTimingRaceRecordDTO> raceIdColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
-            @Override
-            public String getValue(SwissTimingRaceRecordDTO object) {
-                return object.raceId;
-            }
-        };
         
-        TextColumn<SwissTimingRaceRecordDTO> boatClassColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
-            @Override
-            public String getValue(SwissTimingRaceRecordDTO object) {
-                return object.boatClass != null ? object.boatClass : "";
-            }
-        };
-
-        TextColumn<SwissTimingRaceRecordDTO> genderColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
-            @Override
-            public String getValue(SwissTimingRaceRecordDTO object) {
-                return object.gender != null ? object.gender : "";
-            }
-        };
-
-        TextColumn<SwissTimingRaceRecordDTO> raceStatusColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
-            @Override
-            public String getValue(SwissTimingRaceRecordDTO object) {
-                return object.raceStatus != null ? object.raceStatus : "";
-            }
-        };
-
-        TextColumn<SwissTimingRaceRecordDTO> raceStartTimeColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
-            @Override
-            public String getValue(SwissTimingRaceRecordDTO object) {
-                return object.raceStartTime==null?"":dateFormatter.render(object.raceStartTime) + " " + timeFormatter.render(object.raceStartTime);
-            }
-        };
-
         HorizontalPanel racesSplitPanel = new HorizontalPanel();
         mainPanel.add(racesSplitPanel);
         
@@ -236,33 +203,17 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         useInternalMarkPassingAlgorithmCheckbox.setWordWrap(false);
         useInternalMarkPassingAlgorithmCheckbox.setValue(Boolean.FALSE);
         trackableRacesPanel.add(useInternalMarkPassingAlgorithmCheckbox);
-
+        
         // text box for filtering the cell table
         HorizontalPanel filterPanel = new HorizontalPanel();
         filterPanel.setSpacing(5);
         trackableRacesPanel.add(filterPanel);
 
-        Label lblFilterEvents = new Label(stringConstants.filterRacesByName() + ":");
+        Label lblFilterEvents = new Label(stringConstants.filterRaces() + ":");
         filterPanel.add(lblFilterEvents);
         filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
         
-        raceNameColumn.setSortable(true);
-        raceStartTimeColumn.setSortable(true);
-        boatClassColumn.setSortable(true);
-        raceIdColumn.setSortable(true);
-        genderColumn.setSortable(true);
-        raceStatusColumn.setSortable(true);
-        
-        AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceTable = new BaseCelltable<SwissTimingRaceRecordDTO>(/* pageSize */10000, tableRes);
-        raceTable.addColumn(regattaNameColumn, stringConstants.regatta());
-        raceTable.addColumn(seriesNameColumn, stringConstants.series());
-        raceTable.addColumn(raceNameColumn, stringConstants.name());
-        //raceTable.addColumn(raceIdColumn, stringConstants.id());
-        raceTable.addColumn(raceStatusColumn, stringConstants.status());
-        raceTable.addColumn(boatClassColumn, stringConstants.boatClass());
-        raceTable.addColumn(genderColumn, "Gender");
-        raceTable.addColumn(raceStartTimeColumn, stringConstants.startTime());
+        raceTable = new FlushableCellTable<SwissTimingRaceRecordDTO>(/* pageSize */10000, tableRes);
         raceTable.setWidth("300px");
         raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
         filterablePanelEvents = new LabeledAbstractFilterablePanel<SwissTimingRaceRecordDTO>(lblFilterEvents,
@@ -287,19 +238,99 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 return raceTable;
             }
         };
-        raceTable.setSelectionModel(new RefreshableMultiSelectionModel<SwissTimingRaceRecordDTO>(
-                new EntityIdentityComparator<SwissTimingRaceRecordDTO>() {
-                    @Override
-                    public boolean representSameEntity(SwissTimingRaceRecordDTO dto1, SwissTimingRaceRecordDTO dto2) {
-                        return dto1.raceId.equals(dto2.raceId);
-                    }
-                    @Override
-                    public int hashCode(SwissTimingRaceRecordDTO t) {
-                        return t.raceId.hashCode();
-                    }
-                }, filterablePanelEvents.getAllListDataProvider()) {
-        });
+        
+        final EntityIdentityComparator<SwissTimingRaceRecordDTO> entityIdentityComparator = new EntityIdentityComparator<SwissTimingRaceRecordDTO>() {
+            @Override
+            public boolean representSameEntity(SwissTimingRaceRecordDTO dto1, SwissTimingRaceRecordDTO dto2) {
+                return dto1.raceId.equals(dto2.raceId);
+            }
+            @Override
+            public int hashCode(SwissTimingRaceRecordDTO t) {
+                return t.raceId.hashCode();
+            }
+        };
 
+        TextColumn<SwissTimingRaceRecordDTO> raceNameColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                return object.getName();
+            }
+        };
+
+        TextColumn<SwissTimingRaceRecordDTO> regattaNameColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                return object.regattaName;
+            }
+        };
+
+        SelectionCheckboxColumn<SwissTimingRaceRecordDTO> selectionColumn = new SelectionCheckboxColumn<SwissTimingRaceRecordDTO>(
+                tableRes.cellTableStyle().cellTableCheckboxSelected(),
+                tableRes.cellTableStyle().cellTableCheckboxDeselected(),
+                tableRes.cellTableStyle().cellTableCheckboxColumnCell(), entityIdentityComparator, raceList, raceTable);
+
+        TextColumn<SwissTimingRaceRecordDTO> seriesNameColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                return object.seriesName;
+            }
+        };
+
+        TextColumn<SwissTimingRaceRecordDTO> raceIdColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                return object.raceId;
+            }
+        };
+        
+        TextColumn<SwissTimingRaceRecordDTO> boatClassColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                return object.boatClass != null ? object.boatClass : "";
+            }
+        };
+
+        TextColumn<SwissTimingRaceRecordDTO> genderColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                return object.gender != null ? object.gender : "";
+            }
+        };
+
+        TextColumn<SwissTimingRaceRecordDTO> raceStatusColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                return object.raceStatus != null ? object.raceStatus : "";
+            }
+        };
+
+        TextColumn<SwissTimingRaceRecordDTO> raceStartTimeColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                return object.raceStartTime==null?"":dateFormatter.render(object.raceStartTime) + " " + timeFormatter.render(object.raceStartTime);
+            }
+        };
+
+        raceNameColumn.setSortable(true);
+        raceStartTimeColumn.setSortable(true);
+        boatClassColumn.setSortable(true);
+        raceIdColumn.setSortable(true);
+        genderColumn.setSortable(true);
+        raceStatusColumn.setSortable(true);
+        
+
+        raceTable.addColumn(selectionColumn, selectionColumn.getHeader());
+        raceTable.addColumn(regattaNameColumn, stringConstants.regatta());
+        raceTable.addColumn(seriesNameColumn, stringConstants.series());
+        raceTable.addColumn(raceNameColumn, stringConstants.name());
+        //raceTable.addColumn(raceIdColumn, stringConstants.id());
+        raceTable.addColumn(raceStatusColumn, stringConstants.status());
+        raceTable.addColumn(boatClassColumn, stringConstants.boatClass());
+        raceTable.addColumn(genderColumn, stringConstants.gender());
+        raceTable.addColumn(raceStartTimeColumn, stringConstants.startTime());
+
+        raceTable.setSelectionModel(selectionColumn.getSelectionModel(), selectionColumn.getSelectionManager());
+        
         trackableRacesPanel.add(raceTable);
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), regattaNameColumn, seriesNameColumn,
@@ -321,6 +352,31 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         useInternalMarkPassingAlgorithmCheckbox.getValue());
             }
         });
+    }
+
+    /**
+     * This function tries to infer a valid JsonUrl for any input given that matches the pattern of an event Id from
+     * M2S. If there is an event id detected the Json Url gets updated and the event Id textbox is filled with the
+     * detected event Id. The ID pattern is defined in {@link eventIdPattern}.
+     */
+    private void updateUrlFromEventId(String eventIdTextbox) {
+        if (eventIdTextbox.matches(".*" + eventIdPattern + ".*")) {
+            final String inferredEventId = eventIdTextbox.replaceFirst(".*(" + eventIdPattern + ").*", "$1");
+            jsonUrlBox.setValue(
+                    manage2sailBaseAPIUrl + inferredEventId + manage2sailAPIaccessToken + manage2sailUrlAppendix);
+            eventIdBox.setValue(inferredEventId);
+        }
+    }
+
+    /**
+     * Similar to {@link #updateUrlFromEventId} this function tries to extract a M2S event Id by looking at the given
+     * url in the Json Url Textbox. The value of {@link eventIdBox} is then set to the event ID inferred from the Json Url.
+     */
+    private void updateEventIdFromUrl(String jsonUrlTextBox) {
+        if (jsonUrlTextBox.matches("http://manage2sail.com/.*" + eventIdPattern + ".*")) {
+            final String inferredEventId = jsonUrlTextBox.replaceFirst(".*(" + eventIdPattern + ").*", "$1");
+            eventIdBox.setValue(inferredEventId);
+        }
     }
 
     private ListHandler<SwissTimingRaceRecordDTO> getRaceTableColumnSortHandler(List<SwissTimingRaceRecordDTO> raceRecords,

@@ -99,4 +99,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String error();
     String refresh();
     String preferredLanguage();
+    String cannotResetInvalidURL();
+    String showMoreInfoLogin();
+    String moreInfo();
+    String dismiss();
 }

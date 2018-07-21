@@ -1,5 +1,7 @@
 package com.sap.sailing.android.shared.ui.activities;
 
-public abstract class AbstractRegattaActivity extends CheckinDataActivity {
+import com.sap.sailing.android.shared.data.BaseCheckinData;
+
+public abstract class AbstractRegattaActivity<C extends BaseCheckinData> extends CheckinDataActivity<C> {
 
 }

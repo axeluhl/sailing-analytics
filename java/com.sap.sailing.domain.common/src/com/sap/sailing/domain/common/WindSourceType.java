@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common;
 
+import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
+
 /**
  * Possible sources for wind data. Used to key and select between different {@link WindTrack}s. Literals
  * are given in descending order of precedence. Particularly, the {@link #COURSE_BASED} source should
@@ -43,7 +45,20 @@ public enum WindSourceType {
      * their measures are stored in the race log.
      * 
      */
-    RACECOMMITTEE(false, 0.9, /* useSpeed */ true);
+    RACECOMMITTEE(false, 0.9, /* useSpeed */ true),
+    
+    /**
+     * Like {@link #COMBINED}, only that when combined with an ID into a {@link WindSourceWithAdditionalID} then the
+     * position for the wind is taken to be the middle of the tracked leg whose number is identified by the ID.
+     */
+    LEG_MIDDLE(/* can be stored */ false, /* base confidence */ 0.9, /* useSpeed */ true),
+    
+    /**
+     * A wind measurement spot as provided by https://www.windfinder.com; when used with a
+     * {@link WindSourceWithAdditionalID}, the {@link WindSourceWithAdditionalID#getId() ID} is
+     * the WindFinder's "Spot ID" such as "10044N" for Kiel Lighthouse.
+     */
+    WINDFINDER(/* can be stored */ true, /* base confidence */ 0.3, /* useSpeed */ true);
     
     private final boolean canBeStored;
     

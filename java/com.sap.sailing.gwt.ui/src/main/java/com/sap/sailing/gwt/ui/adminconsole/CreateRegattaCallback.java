@@ -64,9 +64,10 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
             seriesStructure.put(seriesDTO.getName(), seriesPair);
         }
         sailingService.createRegatta(newRegatta.getName(), newRegatta.boatClass==null?null:newRegatta.boatClass.getName(),
-                newRegatta.startDate, newRegatta.endDate, 
+                newRegatta.canBoatsOfCompetitorsChangePerRace, newRegatta.startDate, newRegatta.endDate, 
                 new RegattaCreationParametersDTO(seriesStructure), true,
-                newRegatta.scoringScheme, newRegatta.defaultCourseAreaUuid, newRegatta.useStartTimeInference,
+                newRegatta.scoringScheme, newRegatta.defaultCourseAreaUuid, newRegatta.buoyZoneRadiusInHullLengths, newRegatta.useStartTimeInference,
+                newRegatta.controlTrackingFromStartAndFinishTimes,
                 newRegatta.rankingMetricType, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {

@@ -29,7 +29,6 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
@@ -138,8 +137,8 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         
         DomainFactory receiverDomainFactory = new DomainFactoryImpl((srlid)->null);
         LeaderboardGroup clone = cloneBySerialization(leaderboardGroup, receiverDomainFactory);
-        assertEquals(FACTOR, overallLeaderboard.getRaceColumnByName("Test Leaderboard").getFactor(), 0.00000001);
-        assertEquals(FACTOR, clone.getOverallLeaderboard().getRaceColumnByName("Test Leaderboard").getFactor(), 0.00000001);
+        assertEquals(FACTOR, overallLeaderboard.getScoringScheme().getScoreFactor(overallLeaderboard.getRaceColumnByName("Test Leaderboard")), 0.00000001);
+        assertEquals(FACTOR, clone.getOverallLeaderboard().getScoringScheme().getScoreFactor(clone.getOverallLeaderboard().getRaceColumnByName("Test Leaderboard")), 0.00000001);
     }
     
     @Test
@@ -188,12 +187,11 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         DomainFactory senderDomainFactory = new DomainFactoryImpl((srlid)->null);
         DomainFactory receiverDomainFactory = new DomainFactoryImpl((srlid)->null);
         String competitorName = "Tina Maximiliane Lutz";
-        Competitor sendersCompetitor1 = new CompetitorImpl(123, competitorName, Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
+        Competitor sendersCompetitor1 = new CompetitorImpl(123, competitorName, "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                         new PersonImpl(competitorName, senderDomainFactory.getOrCreateNationality("GER"),
                         /* dateOfBirth */ null, "This is famous "+competitorName)),
                         new PersonImpl("Rigo van Maas", senderDomainFactory.getOrCreateNationality("GER"),
-                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                        senderDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                        /* dateOfBirth */null, "This is Rigo, the coach")), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Competitor receiversCompetitor1 = cloneBySerialization(sendersCompetitor1, receiverDomainFactory);
         Competitor receiversSecondCopyOfCompetitor1 = cloneBySerialization(sendersCompetitor1, receiverDomainFactory);
         assertSame(receiversCompetitor1, receiversSecondCopyOfCompetitor1);

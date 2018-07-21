@@ -24,12 +24,6 @@
       <classifier>sources</classifier>
     </dependency>
     <dependency>
-      <groupId>com.github.gwtbootstrap</groupId>
-      <artifactId>gwt-bootstrap</artifactId>
-      <version>2.3.2.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <!-- This dependency is required because the GWT Maven Plugin searches 
         other GWT modules only in Maven dependencies -->
       <groupId>com.github.branflake2267</groupId>
@@ -91,7 +85,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>${gwt.version}</version>
+        <version>${gwt.plugin.version}</version>
         <executions>
           <!-- GWT version detected from dependencyManagement -->
           <execution>
@@ -122,7 +116,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>gwt-maven-plugin</artifactId>
-            <version>${gwt.version}</version>
+            <version>${gwt.plugin.version}</version>
             <executions>
               <execution>
                 <configuration combine.self="override">

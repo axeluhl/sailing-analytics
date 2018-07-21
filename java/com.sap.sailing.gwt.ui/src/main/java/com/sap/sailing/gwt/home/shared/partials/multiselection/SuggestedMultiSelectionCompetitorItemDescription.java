@@ -21,11 +21,11 @@ class SuggestedMultiSelectionCompetitorItemDescription extends Widget {
     @UiField SpanElement sailIdUi;
     @UiField SpanElement nameUi;
     
-    SuggestedMultiSelectionCompetitorItemDescription(SimpleCompetitorDTO competitor) {
+    SuggestedMultiSelectionCompetitorItemDescription(SimpleCompetitorDTO competitor, FlagImageResolver flagImageResolver) {
         setElement(uiBinder.createAndBindUi(this));
-        flagImageUi.getStyle().setBackgroundImage("url('" + FlagImageResolver.getFlagImageUri(
+        flagImageUi.getStyle().setBackgroundImage("url('" + flagImageResolver.getFlagImageUri(
                 competitor.getFlagImageURL(), competitor.getTwoLetterIsoCountryCode()).asString() + "')");
-        sailIdUi.setInnerText(competitor.getSailID());
+        sailIdUi.setInnerText(competitor.getShortInfo());
         nameUi.setInnerText(competitor.getName());
     }
     

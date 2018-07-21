@@ -22,6 +22,16 @@ public abstract class AbstractSuggestedMultiSelectionCompetitorDataProvider exte
     }
     
     @Override
+    public final String createSuggestionKeyString(SimpleCompetitorWithIdDTO value) {
+        return value.getShortInfo();
+    }
+    
+    @Override
+    public String createSuggestionAdditionalDisplayString(SimpleCompetitorWithIdDTO value) {
+        return value.getName();
+    }
+    
+    @Override
     public void initNotifications(boolean notifyAboutResults) {
         this.notifyAboutResults = notifyAboutResults;
         for (SuggestedMultiSelectionCompetitorDataProvider.Display display : displays) {
