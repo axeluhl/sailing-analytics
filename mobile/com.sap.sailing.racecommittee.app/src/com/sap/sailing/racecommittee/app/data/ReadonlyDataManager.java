@@ -20,8 +20,8 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
 
-import android.app.LoaderManager;
-import android.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
 
 /**
  * <p>

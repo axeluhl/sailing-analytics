@@ -58,7 +58,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 
 public class OfflineDataManager extends DataManager {

@@ -11,7 +11,7 @@ import com.sap.sailing.racecommittee.app.ui.views.decoration.ItemStrokeDecoratio
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 import android.app.Dialog;
-import android.app.DialogFragment;
+import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;

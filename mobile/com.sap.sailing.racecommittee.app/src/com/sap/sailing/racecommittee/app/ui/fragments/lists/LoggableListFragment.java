@@ -2,8 +2,8 @@ package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
 import com.sap.sailing.android.shared.logging.LifecycleLogger;
 
-import android.app.Fragment;
-import android.app.ListFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
 import android.os.Bundle;
 
 public abstract class LoggableListFragment extends ListFragment {

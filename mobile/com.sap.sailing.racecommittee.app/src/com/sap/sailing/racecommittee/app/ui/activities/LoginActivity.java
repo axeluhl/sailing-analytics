@@ -49,9 +49,9 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
-import android.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -236,7 +236,7 @@ public class LoginActivity extends BaseActivity
         resetPosition();
         updateSignInButtonState();
         if (getFragmentManager().findFragmentByTag(AreaPositionListFragmentTag) == null) {
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.position_fragment, positionFragment, AreaPositionListFragmentTag);
             transaction.commitAllowingStateLoss();
         }
@@ -245,14 +245,14 @@ public class LoginActivity extends BaseActivity
     private void addCourseAreaListFragment(Serializable eventId) {
         resetCourseArea();
         updateSignInButtonState();
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.area_fragment, CourseAreaListFragment.newInstance(eventId), CourseAreaListFragmentTag);
         transaction.commitAllowingStateLoss();
     }
 
     private void addEventListFragment() {
         resetEvent();
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.event_fragment, EventListFragment.newInstance());
         transaction.commitAllowingStateLoss();
     }
@@ -326,7 +326,7 @@ public class LoginActivity extends BaseActivity
 
         // setup the login list views fragment
         loginListViews = new LoginListViews();
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.login_listview, loginListViews);
         transaction.commitAllowingStateLoss();
 
@@ -441,7 +441,7 @@ public class LoginActivity extends BaseActivity
 
         if (!preferences.isOfflineMode()) {
             // reload the configuration if needed...
-            getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
+            getSupportLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         } else {
             dismissProgressSpinner();
             slideUpBackdropDelayed();
@@ -544,7 +544,7 @@ public class LoginActivity extends BaseActivity
 
         addEventListFragment();
 
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.area_fragment, new Fragment());
         transaction.replace(R.id.position_fragment, new Fragment());
         transaction.commit();

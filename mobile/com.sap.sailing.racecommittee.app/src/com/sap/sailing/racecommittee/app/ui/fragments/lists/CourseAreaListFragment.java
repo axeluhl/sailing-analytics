@@ -14,7 +14,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseArea
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
 import android.app.Activity;
-import android.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.os.Bundle;
 
 public class CourseAreaListFragment extends NamedListFragment<CourseArea> {

@@ -38,9 +38,9 @@ import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.app.FragmentManager;
+import android.support.v4.app.FragmentManager;
 import android.content.DialogInterface;
-import android.content.Loader;
+import android.support.v4.content.Loader;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -381,7 +381,7 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     }
 
     private void showMarkDialog(int type, CourseListDataElementWithIdImpl element) {
-        FragmentManager manager = getFragmentManager();
+        FragmentManager manager = getActivity().getSupportFragmentManager();
         mMarksDialog = CourseMarksDialogFragment.newInstance(mMarks, element, type);
         mMarksDialog.setListener(this);
         mMarksDialog.show(manager, "course_marks");

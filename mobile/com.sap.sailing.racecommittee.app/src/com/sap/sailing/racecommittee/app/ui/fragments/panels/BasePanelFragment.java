@@ -8,9 +8,6 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -21,6 +18,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.ImageView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 
 public abstract class BasePanelFragment extends RaceFragment {
 
@@ -173,7 +173,7 @@ public abstract class BasePanelFragment extends RaceFragment {
         FragmentManager manager = getFragmentManager();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             if (getParentFragment() != null) {
-                manager = getActivity().getFragmentManager();
+                manager = getActivity().getSupportFragmentManager();
             }
         }
         FragmentTransaction transaction = manager.beginTransaction();

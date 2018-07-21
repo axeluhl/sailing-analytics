@@ -77,9 +77,9 @@ import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer
 import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
 import com.sap.sse.common.Util;
 
-import android.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
-import android.content.Loader;
+import android.support.v4.content.Loader;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;

@@ -9,7 +9,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferen
 import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
 
 import android.annotation.TargetApi;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -91,7 +91,7 @@ public class PreferenceActivity extends AppCompatActivity {
         if (fragment == null) {
             fragment = MainPreferenceFragment.newInstance();
         }
-        getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)

@@ -24,8 +24,8 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelect
 import com.sap.sse.common.Named;
 
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;

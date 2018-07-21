@@ -9,7 +9,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelec
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
 import android.app.Activity;
-import android.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
 
 public class EventListFragment extends NamedListFragment<EventBase> {
 

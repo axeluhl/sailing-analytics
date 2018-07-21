@@ -15,10 +15,10 @@ import com.sap.sailing.racecommittee.app.ui.fragments.panels.FlagPanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.SetupPanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.support.v4.app.FragmentTransaction;
 
 public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProcedure> extends RaceFragment {
 
@@ -80,7 +80,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                 args.putAll(fragment.getArguments());
             }
             fragment.setArguments(args);
-            FragmentTransaction transaction = getActivity().getFragmentManager().beginTransaction();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(id, fragment);
             transaction.commit();
         }

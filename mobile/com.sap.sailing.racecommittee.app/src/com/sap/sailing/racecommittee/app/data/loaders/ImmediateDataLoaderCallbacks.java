@@ -5,7 +5,7 @@ import java.util.concurrent.Callable;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 
 import android.content.Context;
-import android.content.Loader;
+import android.support.v4.content.Loader;
 import android.os.Bundle;
 
 /**
