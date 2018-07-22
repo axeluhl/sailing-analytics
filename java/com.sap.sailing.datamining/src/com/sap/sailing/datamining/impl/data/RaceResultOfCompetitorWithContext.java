@@ -209,15 +209,8 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
 
     @Override
     public Boolean isWin() {
-        Leaderboard leaderboard = getLeaderboard();
         final TimePoint now = MillisecondsTimePoint.now();
-        double points = leaderboard.getTotalPoints(competitor, raceColumn, now);
-        if (leaderboard.getScoringScheme().isHigherBetter()) {
-            double competitorCount = Util.size(leaderboard.getCompetitors());
-            return points >= (competitorCount - 0.05);
-        } else {
-            return points <= 1.05;
-        }
+        return getLeaderboard().isWin(competitor, raceColumn, now);
     }
     
 }

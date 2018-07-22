@@ -318,6 +318,45 @@ public class PageObject {
     }
     
     /**
+     * <p>
+     * Finds and returns the first element with the specified selenium id in the given search context. If multiple
+     * elements exists, the first found element is returned. If no matching element can be found, {@code null} is
+     * returned.
+     * </p>
+     * 
+     * @param context
+     *            The search context to use for the search.
+     * @param id
+     *            The selenium id of the element.
+     * @return The first matching element in the given context.
+     */
+    protected WebElement findElementOrNullBySeleniumId(SearchContext context, String id) {
+        final List<WebElement> elements = context.findElements(new BySeleniumId(id));
+        WebElement result;
+        if (elements.isEmpty()) {
+            result = null;
+        } else {
+            result = elements.get(0);
+        }
+        return result;
+    }
+    
+    /**
+     * <p>
+     * Finds and returns the first element with the specified selenium id in the given search context. If multiple
+     * elements exists, the first found element is returned. If no matching element can be found, {@code null} is
+     * returned.
+     * </p>
+     * 
+     * @param id
+     *            The selenium id of the element.
+     * @return The first matching element in the given context.
+     */
+    protected WebElement findElementOrNullBySeleniumId(String id) {
+        return findElementOrNullBySeleniumId(this.context, id);
+    }
+    
+    /**
      * <p>Finds and returns the first element with the specified selenium id in the given search context. If multiple
      *   elements exists, the element closest to the context is returned.</p>
      * 
@@ -585,5 +624,24 @@ public class PageObject {
             }
         }
         throw new NoAlertPresentException();
+    }
+    
+    public boolean isElementEntirelyVisible(WebElement element) {
+        try {
+            if (element.isDisplayed()) {
+                final int windowWidth = driver.manage().window().getSize().getWidth();
+                if (windowWidth >= element.getLocation().x
+                        + element.getSize().width) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            // The element may currently only partially visible which makes some of the calls fail
+            return false;
+        }
     }
 }
