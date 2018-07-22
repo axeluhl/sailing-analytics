@@ -12,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -397,7 +398,7 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
 
     public void disableToggle() {
         setClickable(false);
-        mLayer.setBackgroundColor(getResources().getColor(R.color.constant_sap_yellow_1));
+        mLayer.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.constant_sap_yellow_1));
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override

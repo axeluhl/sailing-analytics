@@ -9,11 +9,12 @@ import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferen
 import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
 
 import android.annotation.TargetApi;
-import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -107,7 +108,7 @@ public class PreferenceActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(getResources().getColor(R.color.settings_navbar));
+            window.setStatusBarColor(ContextCompat.getColor(this, R.color.settings_navbar));
         }
     }
 

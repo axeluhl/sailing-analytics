@@ -5,6 +5,7 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 import android.content.Context;
 import android.support.annotation.ColorRes;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -46,7 +47,7 @@ public class AccuracyView extends LinearLayout {
 
     public void setAccuracy(float accuracy) {
         if (accuracy <= 0) {
-            setText(getContext().getString(R.string.not_available), getContext().getResources().getColor(R.color.sap_red));
+            setText(getContext().getString(R.string.not_available), ContextCompat.getColor(getContext(), R.color.sap_red));
             hide(mSegment01);
             hide(mSegment02);
             hide(mSegment03);

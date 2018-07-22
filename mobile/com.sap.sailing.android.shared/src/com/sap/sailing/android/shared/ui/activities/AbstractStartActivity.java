@@ -1,7 +1,7 @@
 package com.sap.sailing.android.shared.ui.activities;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.sap.sailing.android.shared.BuildConfig;
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.data.BaseCheckinData;
@@ -62,9 +62,9 @@ public abstract class AbstractStartActivity<C extends BaseCheckinData> extends C
         super.onResume();
         // checkForUpdates();
 
-        int googleServicesResultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        int googleServicesResultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
         if (googleServicesResultCode != ConnectionResult.SUCCESS) {
-            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(googleServicesResultCode, this, 0);
+            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(this, googleServicesResultCode, 0);
             dialog.show();
         }
     }

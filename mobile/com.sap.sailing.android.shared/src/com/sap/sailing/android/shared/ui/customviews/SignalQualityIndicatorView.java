@@ -7,6 +7,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -76,13 +77,13 @@ public class SignalQualityIndicatorView extends View {
 
     private void initPaint() {
         paintNone = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paintNone.setColor(getResources().getColor(R.color.signal_none));
+        paintNone.setColor(ContextCompat.getColor(getContext(), R.color.signal_none));
         paintPoor = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paintPoor.setColor(getResources().getColor(R.color.signal_poor));
+        paintPoor.setColor(ContextCompat.getColor(getContext(), R.color.signal_poor));
         paintGood = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paintGood.setColor(getResources().getColor(R.color.signal_good));
+        paintGood.setColor(ContextCompat.getColor(getContext(), R.color.signal_good));
         paintGreat = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paintGreat.setColor(getResources().getColor(R.color.signal_great));
+        paintGreat.setColor(ContextCompat.getColor(getContext(), R.color.signal_great));
     }
 
     @Override

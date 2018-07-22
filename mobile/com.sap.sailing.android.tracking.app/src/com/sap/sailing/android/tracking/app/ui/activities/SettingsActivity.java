@@ -40,7 +40,7 @@ public class SettingsActivity extends AppCompatActivity {
             toolbar.setPadding(sidePadding, 0, 0, 0);
         }
 
-        getFragmentManager().beginTransaction().replace(R.id.content_frame, new GeneralPreferenceFragment()).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new GeneralPreferenceFragment()).commit();
     }
 
     /*

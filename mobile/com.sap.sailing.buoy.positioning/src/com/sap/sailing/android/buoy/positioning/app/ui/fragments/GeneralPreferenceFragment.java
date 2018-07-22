@@ -5,8 +5,8 @@ import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 
 import android.os.Bundle;
-import android.preference.EditTextPreference;
-import android.preference.Preference;
+import android.support.v7.preference.EditTextPreference;
+import android.support.v7.preference.Preference;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 

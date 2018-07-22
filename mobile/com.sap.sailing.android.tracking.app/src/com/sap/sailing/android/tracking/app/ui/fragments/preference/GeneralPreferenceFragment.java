@@ -6,10 +6,10 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
 import android.os.Bundle;
-import android.preference.ListPreference;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.SwitchPreference;
+import android.support.v7.preference.ListPreference;
+import android.support.v7.preference.Preference;
+import android.support.v7.preference.Preference.OnPreferenceChangeListener;
+import android.support.v7.preference.SwitchPreferenceCompat;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment implements OnPreferenceChangeListener {   
     @Override
@@ -43,7 +43,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment implements
         super.onPause();
 
         //SwitchPreference prefEnergy = findPreference(R.string.preference_energy_saving_enabled_key);
-        SwitchPreference prefDeclination = findPreference(R.string.preference_heading_with_declination_subtracted_key);
+        SwitchPreferenceCompat prefDeclination = findPreference(R.string.preference_heading_with_declination_subtracted_key);
 
         AppPreferences prefs = new AppPreferences(getActivity());
 
