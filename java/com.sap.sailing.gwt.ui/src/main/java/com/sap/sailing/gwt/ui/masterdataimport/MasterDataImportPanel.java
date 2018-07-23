@@ -15,7 +15,6 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -35,6 +34,8 @@ import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.progressbar.CustomProgressBar;
 
 public class MasterDataImportPanel extends VerticalPanel {
@@ -268,7 +269,7 @@ public class MasterDataImportPanel extends VerticalPanel {
                 buffer.append(regattaName + "\n");
             }
         }
-        Window.alert(buffer.toString());
+        Notification.notify(buffer.toString(), NotificationType.SUCCESS);
 
     }
 
@@ -319,7 +320,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     private void showErrorAlert(String string) {
-        Window.alert(string);
+        Notification.notify(string, NotificationType.ERROR);
     }
 
     private void addContentToLeftPanel(VerticalPanel contentPanel) {
