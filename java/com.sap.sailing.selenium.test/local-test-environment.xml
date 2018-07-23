@@ -102,6 +102,12 @@
   </driver-definition>
   -->
   <!-- <driver-definition class="org.openqa.selenium.ie.InternetExplorerDriver">
+    <capabilities>
+      <capability>
+        <name>ignoreZoomSetting</name>
+        <value>true</value>
+      </capability>
+    </capabilities>
   </driver-definition> -->
   <!-- <driver-definition class="com.sap.sailing.selenium.core.HeadlessFirefoxDriver">
   </driver-definition> -->
