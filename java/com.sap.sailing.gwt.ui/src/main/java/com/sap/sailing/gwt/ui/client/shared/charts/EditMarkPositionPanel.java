@@ -739,10 +739,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
             }
             raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
         } else {
-            if (currentFixPositionChooser != null) {
-                currentFixPositionChooser.cancel();
-                currentFixPositionChooser = null;
-            }
+            cancelFixPositionChooserAndNotification();
             marksPanel.deselectMark();
             selectedMark = null;
             if (sideBySideComponentViewer != null) {
@@ -756,6 +753,17 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
             raceMap.registerAllCourseMarkInfoWindowClickHandlers();
         }
         super.setVisible(visible);
+    }
+
+    private void cancelFixPositionChooserAndNotification() {
+        if (currentFixPositionChooser != null) {
+            currentFixPositionChooser.cancel();
+            currentFixPositionChooser = null;
+            if (notificationTimer.isRunning()) {
+                notificationTimer.run();
+                notificationTimer.cancel();
+            }
+        }
     }
 
     private void checkIfTracking(Runnable continuation) {
@@ -864,10 +872,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     
     private void selectMark(MarkDTO mark) {
         if (selectedMark != mark) {
-            if (currentFixPositionChooser != null) {
-                currentFixPositionChooser.cancel();
-                currentFixPositionChooser = null;
-            }
+            cancelFixPositionChooserAndNotification();
         }
         selectedMark = mark;
         if (selectedMark != null) {
