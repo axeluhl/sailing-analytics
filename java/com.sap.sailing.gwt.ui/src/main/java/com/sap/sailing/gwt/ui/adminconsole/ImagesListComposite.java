@@ -287,6 +287,7 @@ public class ImagesListComposite extends Composite {
 
             @Override
             public void ok(ImageDTO newImage) {
+                updateImageListDataProvider(newImage);
                 callResizingServlet(newImage);
             }
         });
@@ -301,10 +302,23 @@ public class ImagesListComposite extends Composite {
 
             @Override
             public void ok(ImageDTO updatedImage) {
+                updateImageListDataProvider(updatedImage);
                 callResizingServlet(updatedImage);
             }
         });
         dialog.show();
+    }
+    
+    private void updateImageListDataProvider(ImageDTO image) {
+        for(int i = 0; i < imageListDataProvider.getList().size(); i++) {
+            ImageDTO dataProviderImage = imageListDataProvider.getList().get(i);
+            if(dataProviderImage.getSourceRef().equals(image.getSourceRef())) {
+                imageListDataProvider.getList().remove(dataProviderImage);
+                i--;
+            }
+        }
+        imageListDataProvider.getList().add(image);
+        updateTableVisisbilty();
     }
     
     private String imageToJSON(ImageDTO image) {
@@ -334,16 +348,15 @@ public class ImagesListComposite extends Composite {
         obj.put("Date", new JSONNumber(image.getCreatedAtDate().getTime()));
         obj.put("Copyright", new JSONString(image.getCopyright()));
         JSONArray tags = new JSONArray();
-        JSONArray alreadyResizedTags = new JSONArray();
+        JSONObject uriMap = new JSONObject();
+        for(String key : image.getUriMap().keySet()) {
+            uriMap.put(key, new JSONString(image.getResizedImgeUri(key)));
+        }
         for(String tag : image.getTags()) {
-            if(!image.getMap().containsKey(tag)) {
-                tags.set(tags.size(), new JSONString(tag));
-            }else {
-                alreadyResizedTags.set(alreadyResizedTags.size(), new JSONString(tag));
-            }
+           tags.set(tags.size(), new JSONString(tag));
         }
         obj.put("Tags", tags);
-        obj.put("AlreadyResizedTags", alreadyResizedTags);
+        obj.put("UriMap", uriMap);
         return obj.toString();
     }
     
@@ -352,19 +365,20 @@ public class ImagesListComposite extends Composite {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,"/sailingserver/imageResize");
         builder.setHeader("Content-Type", "application/json");
         try {
-            Request response = builder.sendRequest(imageToJSON(image), new RequestCallback() {
+            builder.sendRequest(imageToJSON(image), new RequestCallback() {
                 
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    JSONObject obj = JSONParser.parseStrict(response.getText()).isObject();
-                    JSONObject convertedStrings = obj.get("Sizes").isObject();
-                    HashMap<String,String> map = new HashMap<String, String>();
+                    String responseText = response.getText();
+                    JSONObject obj = JSONParser.parseStrict(responseText).isObject();
+                    JSONObject uriJSONMap = obj.get("UriMap").isObject();
+                    HashMap<String,String> uriHashMap = new HashMap<String, String>();
                     
-                    for(String key : convertedStrings.keySet()) {
-                        map.put(key, convertedStrings.get(key).isString().stringValue());
+                    for(String key : uriJSONMap.keySet()) {
+                        uriHashMap.put(key, uriJSONMap.get(key).isString().stringValue());
                     }
                     
-                    ConvertedImageDTO image = new ConvertedImageDTO(obj.get("URI").isString().stringValue(),new Date(Long.valueOf(obj.get("Date").isNumber().toString())),obj.get("FileType").isString().stringValue(), map);
+                    ConvertedImageDTO image = new ConvertedImageDTO(obj.get("URI").isString().stringValue(),new Date(Long.valueOf(obj.get("Date").isNumber().toString())),obj.get("FileType").isString().stringValue(), uriHashMap);
                     List<String> tags = new ArrayList<>();
                     JSONArray jsonTags = obj.get("Tags").isArray();
                     for(int i = 0; i < jsonTags.size(); i++) {
@@ -375,16 +389,7 @@ public class ImagesListComposite extends Composite {
                     image.setSubtitle(obj.get("Subtitle").isString().stringValue());
                     image.setSizeInPx(Integer.valueOf(obj.get("Width").isNumber().toString()), Integer.valueOf(obj.get("Height").isNumber().toString()));
                                         
-                    /*for(int i = 0; i < imageListDataProvider.getList().size(); i++) {
-                        ImageDTO dataProviderImage = imageListDataProvider.getList().get(i);
-                        if(dataProviderImage.getSourceRef().equals(image.getSourceRef())) {
-                            imageListDataProvider.getList().remove(dataProviderImage);
-                            i--;
-                        }
-                    }*/
-                    imageListDataProvider.getList().remove(image);
-                    imageListDataProvider.getList().add((ImageDTO)image);
-                    updateTableVisisbilty();
+                    updateImageListDataProvider(image);
                 }
                 
                 @Override

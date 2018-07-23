@@ -2,6 +2,7 @@ package com.sap.sse.common.media;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,11 +14,6 @@ public class ImageConverter {
     public static String resizeAndConvertToBase64(InputStream is, int minWidth, int maxWidth, int minHeight,
             int maxHeight, String imageFormat, boolean upsize) {
         BufferedImage img = isToBi(is);
-        return resizeAndConvertToBase64(img, minWidth, maxWidth, minHeight, maxHeight, imageFormat, upsize);
-    }
-    
-    public static String resizeAndConvertToBase64(BufferedImage img, int minWidth, int maxWidth, int minHeight,
-            int maxHeight, String imageFormat, boolean upsize) {
         if(img.getWidth()>maxWidth || img.getHeight() > maxHeight || (upsize && (img.getWidth() < minWidth || img.getHeight() < minHeight))) {
             int[] dimensions = calculateActualDimensions(img.getWidth(), img.getHeight(), minWidth, maxWidth, minHeight,
                     maxHeight, upsize);
@@ -65,8 +61,30 @@ public class ImageConverter {
         return null;
     }
 
-    private static BufferedImage resize(BufferedImage img, int demandWidth, int demandHeight) {
+    public static BufferedImage resize(BufferedImage img, int demandWidth, int demandHeight) {
         return resizeScale(img, demandWidth, demandHeight);
+    }
+    
+    public static BufferedImage resize(BufferedImage img, int minWidth, int maxWidth, int minHeight,
+            int maxHeight, String imageFormat, boolean upsize) {
+        int[] dimensions = calculateActualDimensions(img.getWidth(), img.getHeight(), minWidth, maxWidth, minHeight,
+                maxHeight, upsize);
+        if(dimensions != null) {
+            return resize(img, dimensions[0], dimensions[1]);
+        }
+        return null;
+    }
+    
+    public static InputStream biToIs(BufferedImage img, String fileType) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ImageIO.write(img, fileType, bos);
+            byte[] arr = bos.toByteArray();
+            return new ByteArrayInputStream(arr);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static String convertToBase64(InputStream is, String imageFormat) {

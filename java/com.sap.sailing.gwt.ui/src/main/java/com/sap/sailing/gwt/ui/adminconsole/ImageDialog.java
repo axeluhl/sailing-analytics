@@ -69,39 +69,81 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             Integer imageHeight = imageToValidate.getHeightInPx();
             
             if (imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
-                errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
+                errorMessage = stringMessages.pleaseEnterNonEmptyUrlOrUploadImage();
             } else if (imageWidth == null || imageHeight == null) {
                 errorMessage = stringMessages.couldNotRetrieveImageSizeYet();
-            } else if (!doResize.isEnabled()) {
+            } else if (!doResize.getValue()){
                 if (imageToValidate.hasTag(MediaTagConstants.LOGO) && !isValidSize(imageWidth, imageHeight,
                         MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH,
                         MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT)) {
-                    errorMessage = getSizeErrorMessage("Logo", MediaConstants.MIN_LOGO_IMAGE_WIDTH,
+                    errorMessage = getSizeErrorMessage(MediaTagConstants.LOGO, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
                             MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT,
                             MediaConstants.MAX_LOGO_IMAGE_HEIGHT, stringMessages);
                 } else if (imageToValidate.hasTag(MediaTagConstants.TEASER) && !isValidSize(imageWidth, imageHeight,
                         MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH,
                         MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT)) {
-                    errorMessage = getSizeErrorMessage("Event-Teaser", MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
+                    errorMessage = getSizeErrorMessage(MediaTagConstants.TEASER, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
                             MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT,
                             MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, stringMessages);
                 } else if (imageToValidate.hasTag(MediaTagConstants.STAGE) && !isValidSize(imageWidth, imageHeight,
                         MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH,
                         MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT)) {
-                    errorMessage = getSizeErrorMessage("Stage", MediaConstants.MIN_STAGE_IMAGE_WIDTH,
+                    errorMessage = getSizeErrorMessage(MediaTagConstants.STAGE, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
                             MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT,
                             MediaConstants.MAX_STAGE_IMAGE_HEIGHT, stringMessages);
+                }
+            }else {
+                errorMessage = imageRatioFits(imageToValidate);
+                if(errorMessage == null) {
+                    if (imageToValidate.hasTag(MediaTagConstants.LOGO) && (imageWidth < MediaConstants.MIN_LOGO_IMAGE_WIDTH || imageHeight < MediaConstants.MIN_LOGO_IMAGE_HEIGHT)) {
+                        errorMessage = getImageToSmallErrorMessage(MediaTagConstants.LOGO, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
+                                MediaConstants.MIN_LOGO_IMAGE_HEIGHT, stringMessages);
+                    } else if (imageToValidate.hasTag(MediaTagConstants.TEASER) && (imageWidth < MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH || imageHeight < MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT)) {
+                        errorMessage = getImageToSmallErrorMessage(MediaTagConstants.TEASER, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
+                                MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, stringMessages);
+                    } else if (imageToValidate.hasTag(MediaTagConstants.STAGE) && (imageWidth < MediaConstants.MIN_STAGE_IMAGE_WIDTH || imageHeight < MediaConstants.MIN_STAGE_IMAGE_HEIGHT)) {
+                        errorMessage = getImageToSmallErrorMessage(MediaTagConstants.STAGE, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
+                                MediaConstants.MIN_STAGE_IMAGE_HEIGHT, stringMessages);
+                    }
                 }
             }
             return errorMessage;
         }
         
+        private String imageRatioFits(ImageDTO imageToValidate) {
+
+            double minMaxRatio = Integer.MAX_VALUE;//the lowest ratio that is defined as the maximum ratio from one of the tags
+            double maxMinRatio = 0;//the highest ratio that is defined as the minimum ratio from one of the tags
+            if(imageToValidate.hasTag(MediaTagConstants.LOGO)) {
+                minMaxRatio = Double.min(minMaxRatio, ((double)MediaConstants.MAX_LOGO_IMAGE_WIDTH)/MediaConstants.MIN_LOGO_IMAGE_HEIGHT);
+                maxMinRatio = Double.max(maxMinRatio, ((double)MediaConstants.MIN_LOGO_IMAGE_WIDTH)/MediaConstants.MAX_LOGO_IMAGE_HEIGHT);
+            }
+            if(imageToValidate.hasTag(MediaTagConstants.TEASER)) {
+                minMaxRatio = Double.min(minMaxRatio, ((double)MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH)/MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT);
+                maxMinRatio = Double.max(maxMinRatio, ((double)MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH)/MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT);
+            }
+            if(imageToValidate.hasTag(MediaTagConstants.STAGE)) {
+                minMaxRatio = Double.min(minMaxRatio, ((double)MediaConstants.MAX_STAGE_IMAGE_WIDTH)/MediaConstants.MIN_STAGE_IMAGE_HEIGHT);
+                maxMinRatio = Double.max(maxMinRatio, ((double)MediaConstants.MIN_STAGE_IMAGE_WIDTH)/MediaConstants.MAX_STAGE_IMAGE_HEIGHT);
+            }
+            double ratio = ((double)imageToValidate.getWidthInPx())/imageToValidate.getHeightInPx();
+            if(ratio < maxMinRatio || ratio > minMaxRatio) {
+                return stringMessages.imageResizeError(maxMinRatio, minMaxRatio, ratio);
+            }
+            return null;
+        }
+
         private boolean isValidSize(int width, int height, int minWidth, int maxWidth, int minHeight, int maxHeight) {
             return width >= minWidth && width <= maxWidth && height >= minHeight && height <= maxHeight;
         }
         
         private String getSizeErrorMessage(String imageType, int minWidth, int maxWidth, int minHeight, int maxHeight, StringMessages stringMessages) {
             String errorMessage = stringMessages.imageSizeError(imageType, minWidth, maxWidth, minHeight, maxHeight);
+            return errorMessage;
+        }
+        
+        private String getImageToSmallErrorMessage(String imageType, int minWidth, int minHeight, StringMessages stringMessages) {
+            String errorMessage = stringMessages.imageToSmallError(imageType,minWidth,minHeight);
             return errorMessage;
         }
     }

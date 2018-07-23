@@ -33,7 +33,6 @@ public class ImageResizingServlet extends AbstractJsonHttpServlet {
         String jsonString = new BufferedReader(new InputStreamReader(req.getInputStream())).readLine();
         JSONObject obj = getObjFromJSON(jsonString);
         JSONArray tags = null;
-        JSONArray alreadyResizedTags = null;
         List<String> sizeTags = new ArrayList<>();
         if(obj != null) {
             String fileType = ((String)obj.get("URI")).substring(((String)obj.get("URI")).lastIndexOf(".")+1);
@@ -43,33 +42,25 @@ public class ImageResizingServlet extends AbstractJsonHttpServlet {
             is.close();
         
             tags = (JSONArray) obj.get("Tags");
-            alreadyResizedTags = (JSONArray) obj.get("AlreadyResizedTags");
             for(Object tag : tags) {
-                if(((String)tag).equalsIgnoreCase(MediaTagConstants.LOGO)||((String)tag).equalsIgnoreCase(MediaTagConstants.STAGE)||((String)tag).equalsIgnoreCase(MediaTagConstants.TEASER)||((String)tag).equalsIgnoreCase(MediaTagConstants.GALLERY)) {
+                if(((String)tag).equalsIgnoreCase(MediaTagConstants.LOGO)||((String)tag).equalsIgnoreCase(MediaTagConstants.STAGE)||((String)tag).equalsIgnoreCase(MediaTagConstants.TEASER)) {
                     sizeTags.add((String)tag);
                 }
             }
-            JSONObject sizes = new JSONObject();
-            if(sizeTags.size() == 0) {
-                if(alreadyResizedTags.size() == 0) {//If there are already resized tags, this means, that there already is a converted image for all size tag and that the default case does not have to create a converted image without size tag
-                    resizeAndAddToAr(img, sizes, "", obj, fileType);//Does not actually resize, because of the empty tag
-                }
-            }else {
-                for(String sizeTag : sizeTags) {
-                    resizeAndAddToAr(img, sizes, sizeTag, obj, fileType);
+            JSONObject uriMap = (JSONObject) obj.get("UriMap");
+            if(uriMap == null) {
+                uriMap = new JSONObject();
+                obj.put("UriMap", uriMap);
+            }
+            for(String sizeTag : sizeTags) {
+                if(uriMap.get(sizeTag) == null) {
+                    resizeAndAddToAr(img, uriMap, sizeTag, fileType);
                 }
             }
-            obj.put("Sizes", sizes);
             resp.getWriter().write(obj.toJSONString());
         }else {
             //ERROR
         }
-        if(alreadyResizedTags != null) {
-            for(Object tag : alreadyResizedTags) {
-                tags.add(tag);
-            }
-        }
-        obj.remove("AlreadyResizedTags");
     }
 
     private InputStream getInputStreamFromURIString(String uri) {
@@ -92,24 +83,37 @@ public class ImageResizingServlet extends AbstractJsonHttpServlet {
         return null;
     }
     
-    private void resizeAndAddToAr(BufferedImage img, JSONObject sizes, String tag,JSONObject obj, String fileType) {
-        String imgString;
+    private void resizeAndAddToAr(BufferedImage img, JSONObject uriMap, String tag, String fileType) {
+        String imgUri = "";
         switch(tag) {
         case MediaTagConstants.LOGO:
-            imgString = ImageConverter.resizeAndConvertToBase64(img, MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT, fileType, false);
-            sizes.put(MediaTagConstants.LOGO, imgString);
+            try (InputStream resizedImage = ImageConverter.biToIs(ImageConverter.resize(img, MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT, fileType, false),fileType)){
+                imgUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(resizedImage, fileType, resizedImage.available()).toString();
+            } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException
+                    | InvalidPropertiesException e) {
+                e.printStackTrace();
+            }
+            uriMap.put(MediaTagConstants.LOGO, imgUri);
             break;
         case MediaTagConstants.STAGE:
-            imgString = ImageConverter.resizeAndConvertToBase64(img, MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT, fileType, false);
-            sizes.put(MediaTagConstants.STAGE, imgString);
+            try(InputStream resizedImage = ImageConverter.biToIs(ImageConverter.resize(img, MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT, fileType, false),fileType)) {
+                imgUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(resizedImage, fileType, resizedImage.available()).toString();
+            } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException
+                    | InvalidPropertiesException e) {
+                e.printStackTrace();
+            }
+            uriMap.put(MediaTagConstants.LOGO, imgUri);
             break;
         case MediaTagConstants.TEASER:
-            imgString = ImageConverter.resizeAndConvertToBase64(img, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, fileType, false);
-            sizes.put(MediaTagConstants.TEASER, imgString);
+            try (InputStream resizedImage = ImageConverter.biToIs(ImageConverter.resize(img, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, fileType, false),fileType)){
+                imgUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(resizedImage, fileType, resizedImage.available()).toString();
+            } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException
+                    | InvalidPropertiesException e) {
+                e.printStackTrace();
+            }
+            uriMap.put(MediaTagConstants.LOGO, imgUri);
             break;
-        default://case for Gallery or for no size tags
-            imgString = ImageConverter.convertToBase64(img,fileType);
-            sizes.put(MediaTagConstants.GALLERY, imgString);
+        default://can not occur, because we only loop over the sizeTags, which are the same as the switch cases
             break;
         }
     }

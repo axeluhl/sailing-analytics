@@ -3,15 +3,17 @@ package com.sap.sse.gwt.client.media;
 import java.util.Date;
 import java.util.Map;
 
+import com.google.gwt.json.client.JSONObject;
+
 public class ConvertedImageDTO extends ImageDTO {
 
     private String fileType;
-    Map<String,String> map;
+    Map<String,String> resizedImageUri;
     
-    public ConvertedImageDTO(String imageRef, Date createdAtDate, String fileType, Map<String,String> base64CodeMap) {
+    public ConvertedImageDTO(String imageRef, Date createdAtDate, String fileType, Map<String,String> resizedImageUri) {
         super(imageRef, createdAtDate);
         this.fileType = fileType;
-        this.map = base64CodeMap;
+        this.resizedImageUri = resizedImageUri;
     }
     
     public ConvertedImageDTO(String imageRef, Date createdAtDate) {
@@ -22,12 +24,12 @@ public class ConvertedImageDTO extends ImageDTO {
         return fileType;
     }
     
-    public String getBase64Code(String key) {
-        return map.get(key);
+    public String getResizedImgeUri(String key) {
+        return resizedImageUri.get(key);
     }
     
-    public Map<String,String> getMap() {
-        return map;
+    public Map<String,String> getUriMap() {
+        return resizedImageUri;
     }
     
     protected ConvertedImageDTO() {

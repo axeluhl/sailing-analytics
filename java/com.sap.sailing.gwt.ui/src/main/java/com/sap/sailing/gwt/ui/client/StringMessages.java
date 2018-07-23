@@ -411,6 +411,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String successfullyUpdatedResultImportUrls();
     String errorRemovingResultImportUrls(String message);
     String pleaseEnterNonEmptyUrl();
+    String pleaseEnterNonEmptyUrlOrUploadImage();
     String addResultImportUrl();
     String errorAddingResultImportUrl(String message);
     String remoteServerInstances();
@@ -1478,6 +1479,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String addEventLogo();
     String noImagesDefinedYet();
     String imageSizeError(String imageType, int minWidth, int maxWidth, int minHeight, int maxHeight);
+    String imageToSmallError(String imageType, int minWidth, int minHeight);
+    String imageResizeError(double minRatio, double maxRatio, double ratio);
     String couldNotRetrieveImageSizeYet();
     @Override
     String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
