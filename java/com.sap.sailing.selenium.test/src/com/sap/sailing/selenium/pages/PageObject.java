@@ -60,7 +60,7 @@ public class PageObject {
     
     public static final int DEFAULT_WAIT_TIMEOUT_SECONDS = 120;
     
-    public static final int DEFAULT_POLLING_INTERVAL = 5;
+    public static final int DEFAULT_POLLING_INTERVAL = 1;
     
     private static final MessageFormat TAB_PANEL_EXPRESSION = new MessageFormat(
             ".//div[contains(@class, \"gwt-TabBarItem\")]/div[text()=\"{0}\"]/..");
