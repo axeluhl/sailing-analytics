@@ -1,6 +1,7 @@
 package com.sap.sailing.selenium.pages.common;
 
 import org.openqa.selenium.Alert;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -57,7 +58,11 @@ public abstract class DataEntryDialogPO extends PageArea {
     }
     
     public void pressOk(boolean accept) {
-        scrollToViewAndClick(this.okButton);
+        // This generically triggers revalidation in dialogs to ensure that the ok button gets enabled
+        ((JavascriptExecutor) driver).executeScript("!!document.activeElement ? document.activeElement.blur() : 0");
+        
+        scrollToViewAndClickWhenElementIsEntirelyVisible(this.okButton);
+        new WebDriverWait(driver, 10).until(driver -> this.okButton.isEnabled());
         
         ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
         Alert alert = condition.apply(this.driver);

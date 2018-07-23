@@ -630,8 +630,10 @@ public class PageObject {
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(false);", webElement);
     }
     
-    protected void scrollToViewAndClick(WebElement webElement) {
+    protected void scrollToViewAndClickWhenElementIsEntirelyVisible(WebElement webElement) {
         scrollToView(webElement);
+        // Browsers may use smooth scrolling
+        new WebDriverWait(driver, 10).until(t -> isElementEntirelyVisible(webElement));
         webElement.click();
     }
     
