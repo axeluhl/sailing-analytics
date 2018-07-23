@@ -57,8 +57,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.expeditionconnector.common,
  org.mp4parser.isoparser;bundle-version="1.9.31",
- com.sap.sailing.domain.windfinderadapter,
- com.sap.sse.datamining.ui;bundle-version="1.0.0"
+ com.sap.sse.datamining.ui
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.servlet;version="3.1.0",
@@ -77,6 +76,7 @@ TrackLifecycle: true
 Export-Package: com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.confidence.impl,
  com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.impl,
  com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.tracking.impl,
+ com.sap.sailing.gwt.common.communication.routing,
  com.sap.sailing.gwt.home.communication,
  com.sap.sailing.gwt.home.server,
  com.sap.sailing.gwt.server,

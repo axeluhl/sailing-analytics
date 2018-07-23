@@ -318,6 +318,45 @@ public class PageObject {
     }
     
     /**
+     * <p>
+     * Finds and returns the first element with the specified selenium id in the given search context. If multiple
+     * elements exists, the first found element is returned. If no matching element can be found, {@code null} is
+     * returned.
+     * </p>
+     * 
+     * @param context
+     *            The search context to use for the search.
+     * @param id
+     *            The selenium id of the element.
+     * @return The first matching element in the given context.
+     */
+    protected WebElement findElementOrNullBySeleniumId(SearchContext context, String id) {
+        final List<WebElement> elements = context.findElements(new BySeleniumId(id));
+        WebElement result;
+        if (elements.isEmpty()) {
+            result = null;
+        } else {
+            result = elements.get(0);
+        }
+        return result;
+    }
+    
+    /**
+     * <p>
+     * Finds and returns the first element with the specified selenium id in the given search context. If multiple
+     * elements exists, the first found element is returned. If no matching element can be found, {@code null} is
+     * returned.
+     * </p>
+     * 
+     * @param id
+     *            The selenium id of the element.
+     * @return The first matching element in the given context.
+     */
+    protected WebElement findElementOrNullBySeleniumId(String id) {
+        return findElementOrNullBySeleniumId(this.context, id);
+    }
+    
+    /**
      * <p>Finds and returns the first element with the specified selenium id in the given search context. If multiple
      *   elements exists, the element closest to the context is returned.</p>
      * 
@@ -541,9 +580,9 @@ public class PageObject {
      * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
      */
     protected void waitForAlertAndAccept() throws InterruptedException {
-        waitForAlertAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS);
+       waitForAlertAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS);
     }
-
+     
     /**
      * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
      */
@@ -561,29 +600,54 @@ public class PageObject {
         }
         throw new NoAlertPresentException();
     }
-    
+
     /**
-     * Waits for an alert box to appear and dismisses the alert. If no alert shows up, an Exception is thrown.
+     * Waits for an notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
      */
-    protected void waitForAlertAndDismiss() throws InterruptedException {
-        waitForAlertAndDismiss(DEFAULT_WAIT_TIMEOUT_SECONDS);
+    protected void waitForNotificationAndDismiss() throws InterruptedException {
+        waitForNotificationAndDismiss(DEFAULT_WAIT_TIMEOUT_SECONDS);
     }
-    
+
     /**
-     * Waits for an alert box to appear and dismisses the alert. If no alert shows up, an Exception is thrown.
+     * Waits for an notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
      */
-    protected void waitForAlertAndDismiss(int timeoutInSeconds) throws InterruptedException {
+    protected void waitForNotificationAndDismiss(int timeoutInSeconds) throws InterruptedException {
         int i = 0;
         while (i < timeoutInSeconds) {
             i++;
             try {
-                Alert alert = driver.switchTo().alert();
-                alert.accept();
-                return;
+                List<WebElement> notifications = driver.findElements(By.id("notificationBar"));
+                if (notifications.size() > 0) {
+                    notifications.get(0).findElements(By.cssSelector("*"))
+                            .forEach(notification -> notification.click());
+                    ;
+                    return;
+                } else {
+                    throw new NoAlertPresentException();
+                }
             } catch (NoAlertPresentException e) {
                 Thread.sleep(1000);
             }
         }
         throw new NoAlertPresentException();
+    }
+    
+    public boolean isElementEntirelyVisible(WebElement element) {
+        try {
+            if (element.isDisplayed()) {
+                final int windowWidth = driver.manage().window().getSize().getWidth();
+                if (windowWidth >= element.getLocation().x
+                        + element.getSize().width) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            // The element may currently only partially visible which makes some of the calls fail
+            return false;
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.preferences;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.CompetitorSuggestionResult;
@@ -17,6 +16,8 @@ import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggested
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 
 /**
@@ -95,7 +96,7 @@ public class UserPreferencesPresenter<C extends ClientFactoryWithDispatch & Erro
                     new AsyncCallback<CompetitorSuggestionResult>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert("Error while loading competitor suggestion");
+                            Notification.notify("Error while loading competitor suggestion", NotificationType.ERROR);
                         }
 
                         @Override

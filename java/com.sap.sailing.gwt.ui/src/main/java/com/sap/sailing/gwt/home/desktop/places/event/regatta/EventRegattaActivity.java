@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
@@ -50,7 +53,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
         currentView = new TabletAndDesktopRegattaEventView(flagImageResolver);
         if (this.ctx.getRegattaAnalyticsManager() == null) {
             ctx.withRegattaAnalyticsManager(new RegattaAnalyticsDataManager(
-                    clientFactory.getSailingService(),
+                    clientFactory,
                     asyncActionsExecutor,
                     new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds),
                     clientFactory.getErrorReporter(), flagImageResolver));
@@ -157,5 +160,11 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     @Override
     public UserService getUserService() {
         return clientFactory.getUserService();
+    }
+    
+    @Override
+    public void getAvailableDetailTypesForLeaderboard(String leaderboardName, RegattaAndRaceIdentifier raceOrNull,
+            AsyncCallback<Iterable<DetailType>> asyncCallback) {
+        clientFactory.getSailingService(()-> leaderboardName).getAvailableDetailTypesForLeaderboard(leaderboardName, raceOrNull, asyncCallback);
     }
 }

@@ -146,7 +146,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         });
     }
     
-    private void updateMappings() {
+    public void updateMappings() {
         try {
             updateMappingsInternal();
         } catch (Exception e) {

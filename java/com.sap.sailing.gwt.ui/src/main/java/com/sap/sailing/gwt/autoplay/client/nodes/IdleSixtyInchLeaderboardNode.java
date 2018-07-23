@@ -93,11 +93,11 @@ public class IdleSixtyInchLeaderboardNode extends FiresPlaceNode {
 
     private void startWithLeaderbaord(final MultiRaceLeaderboardSettings leaderboardSettings,
             CompetitorSelectionProvider provider, String leaderboardName) {
-        MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null, null, cf.getSailingService(),
-                new AsyncActionsExecutor(), leaderboardSettings, false, provider, timer, null, leaderboardName,
-                cf.getErrorReporter(), StringMessages.INSTANCE, false, null, false, null, false, true, false, false,
-                false, new SixtyInchLeaderboardStyle(true), FlagImageResolverImpl.get(),
-                Arrays.asList(DetailType.values()));
+        MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null, null,
+                cf.getSailingService(() -> leaderboardName), new AsyncActionsExecutor(), leaderboardSettings, false,
+                provider, timer, null, leaderboardName, cf.getErrorReporter(), StringMessages.INSTANCE, false, null,
+                false, null, false, true, false, false, false, new SixtyInchLeaderboardStyle(true),
+                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
 
         IdleSixtyInchLeaderboardPlace place = new IdleSixtyInchLeaderboardPlace(leaderboardPanel, provider,
                 durationConsumer);

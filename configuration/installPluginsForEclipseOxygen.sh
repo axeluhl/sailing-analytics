@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# You need an installation of the Neon SR2 release of "Eclipse IDE for Eclipse Committers" matching you OS and JDK (32 vs 64 Bit):
+# You need an installation of the Oxygen SR2 release of "Eclipse IDE for Eclipse Committers" matching you OS and JDK (32 vs 64 Bit):
 # http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/oxygen2
 
 if [[ $1 == "" ]]; then

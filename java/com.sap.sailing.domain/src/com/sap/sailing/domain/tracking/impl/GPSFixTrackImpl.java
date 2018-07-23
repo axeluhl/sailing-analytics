@@ -1171,20 +1171,13 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         Bearing lastCourse = null;
         TimePoint lastTimePoint = null;
         double lastCourseChangeAngleInDegrees = 0;
-        TimePoint fixTimePointAfterToTimePoint = null;
         try {
             lockForRead();
-            TimePoint timePoint = fromTimePoint;
-            for (Iterator<FixType> iterator = getFixesIterator(fromTimePoint, false); iterator
-                    .hasNext(); timePoint = iterator.next().getTimePoint()) {
-                if (timePoint == null) {
-                    continue;
-                }
-                if (timePoint.after(toTimePoint)) {
-                    fixTimePointAfterToTimePoint = timePoint;
-                    timePoint = toTimePoint;
-                }
-                SpeedWithBearing estimatedSpeed = getEstimatedSpeed(timePoint);
+            FixType firstFix = getLastFixAtOrBefore(fromTimePoint);
+            TimePoint currentTimePoint = firstFix == null ? fromTimePoint : firstFix.getTimePoint();
+            for (Iterator<FixType> iterator = getFixesIterator(currentTimePoint, false); iterator
+                    .hasNext(); currentTimePoint = iterator.next().getTimePoint()) {
+                SpeedWithBearing estimatedSpeed = getEstimatedSpeed(currentTimePoint);
                 if (estimatedSpeed != null) {
                     Bearing course = estimatedSpeed.getBearing();
                     /*
@@ -1195,44 +1188,20 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                     double courseChangeAngleInDegrees = lastCourse == null ? 0
                             : lastCourse.getDifferenceTo(course, new DegreeBearingImpl(lastCourseChangeAngleInDegrees))
                                     .getDegrees();
+                    double turningRateInDegreesPerSecond = lastTimePoint == null ? 0
+                            : Math.abs(courseChangeAngleInDegrees
+                                    / lastTimePoint.until(currentTimePoint).asSeconds());
 
-                    // Fix distorted turning rate due to inappropriate interpolation of getEstimatedSpeed() at first
-                    // and last step
-                    double courseChangeInDegreesForTurningRateCalculation = courseChangeAngleInDegrees;
-                    Duration durationBetweenStepsForTurningRateCalculation = lastTimePoint == null ? null
-                            : lastTimePoint.until(timePoint);
-                    if (fromTimePoint.equals(lastTimePoint)) {
-                        FixType firstFix = getLastFixAtOrBefore(fromTimePoint);
-                        if (firstFix != null && !firstFix.getTimePoint().equals(fromTimePoint)) {
-                            SpeedWithBearing firstFixEstimatedSpeed = getEstimatedSpeed(firstFix.getTimePoint());
-                            if (firstFixEstimatedSpeed != null) {
-                                durationBetweenStepsForTurningRateCalculation = firstFix.getTimePoint()
-                                        .until(timePoint);
-                                courseChangeInDegreesForTurningRateCalculation = courseChangeAngleInDegrees
-                                        + firstFixEstimatedSpeed.getBearing().getDifferenceTo(lastCourse).getDegrees();
-                            }
-                        }
-                    } else if (fixTimePointAfterToTimePoint != null && lastCourse != null) {
-                        SpeedWithBearing lastFixEstimatedSpeed = getEstimatedSpeed(fixTimePointAfterToTimePoint);
-                        if (lastFixEstimatedSpeed != null) {
-                            durationBetweenStepsForTurningRateCalculation = lastTimePoint == null ? null
-                                    : lastTimePoint.until(fixTimePointAfterToTimePoint);
-                            courseChangeInDegreesForTurningRateCalculation = courseChangeAngleInDegrees + estimatedSpeed
-                                    .getBearing().getDifferenceTo(lastFixEstimatedSpeed.getBearing()).getDegrees();
-                        }
-                    }
-
-                    double turningRateInDegreesPerSecond = durationBetweenStepsForTurningRateCalculation == null ? 0
-                            : Math.abs(courseChangeInDegreesForTurningRateCalculation
-                                    / durationBetweenStepsForTurningRateCalculation.asSeconds());
-
-                    speedWithBearingSteps.add(new SpeedWithBearingStepImpl(timePoint, estimatedSpeed,
+                    speedWithBearingSteps.add(new SpeedWithBearingStepImpl(currentTimePoint, estimatedSpeed,
                             courseChangeAngleInDegrees, turningRateInDegreesPerSecond));
+                    if (currentTimePoint.after(toTimePoint)) {
+                        break;
+                    }
                     lastCourse = course;
                     lastCourseChangeAngleInDegrees = courseChangeAngleInDegrees;
-                    lastTimePoint = timePoint;
+                    lastTimePoint = currentTimePoint;
                 }
-                if (!timePoint.before(toTimePoint)) {
+                if (!currentTimePoint.before(toTimePoint)) {
                     break;
                 }
             }

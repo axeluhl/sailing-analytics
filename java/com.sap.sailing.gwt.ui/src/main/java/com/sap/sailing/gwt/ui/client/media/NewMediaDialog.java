@@ -13,10 +13,11 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.media.client.MediaBase;
 import com.google.gwt.typedarrays.shared.Int8Array;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -39,7 +40,11 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
@@ -63,7 +68,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     private TextBox titleBox;
 
-    protected TextBox startTimeBox;
+    protected DateAndTimeInput startTimeBox;
 
     private SimplePanel infoLabel; // showing either mime type or youtube id
 
@@ -83,6 +88,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     private Button defaultTimeButton;
 
     private SimpleBusyIndicator busyIndicator;
+    boolean manuallyEditedStartTime = false;
 
     public NewMediaDialog(MediaServiceAsync mediaService, TimePoint defaultStartTime, StringMessages stringMessages,
             RegattaAndRaceIdentifier raceIdentifier, DialogCallback<MediaTrack> dialogCallback) {
@@ -92,25 +98,13 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         this.stringMessages = stringMessages;
         this.raceIdentifier = raceIdentifier;
         this.mediaService = mediaService;
-        registerNativeMethods();
     }
 
     @Override
     protected MediaTrack getResult() {
         mediaTrack.title = titleBox.getValue();
-        updateStartTimeFromUi();
-        updateDurationFromUi();
         connectMediaWithRace();
         return mediaTrack;
-    }
-
-    private void updateDurationFromUi() {
-        String duration = durationBox.getValue();
-        if (duration != null && !duration.trim().isEmpty()) {
-            mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(duration);
-        } else {
-            mediaTrack.duration = null;
-        }
     }
 
     protected void connectMediaWithRace() {
@@ -119,18 +113,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         mediaTrack.assignedRaces = assignedRaces;
     }
 
-    protected void updateStartTimeFromUi() {
-        String startTimeText = startTimeBox.getValue();
-        if (startTimeText != null && !startTimeText.equals("")) {
-            try {
-                Date startTime = TimeFormatUtil.DATETIME_FORMAT.parse(startTimeText);
-                mediaTrack.startTime = new MillisecondsTimePoint(startTime);
-            } catch (IllegalArgumentException ex) {
-                // TODO: highlight format error in UI
-            }
-        }
-    }
-
+    //used for audio only tracks, using native mediaelement to determine time
     private void loadMediaDuration() {
         MediaBase mediaBase = Audio.createIfSupported();
         if (mediaBase != null) {
@@ -150,7 +133,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     }-*/;
 
     public void loadedmetadata(MediaElement mediaElement) {
-        mediaTrack.startTime = this.defaultStartTime;
+        if (!manuallyEditedStartTime) {
+            mediaTrack.startTime = this.defaultStartTime;
+        }
         double duration = mediaElement.getDuration();
         if (duration > 0) {
             mediaTrack.duration = new MillisecondsDurationImpl((long) Math.round(duration * 1000));
@@ -166,7 +151,19 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         Grid formGrid = new Grid(6, 2);
         formGrid.setCellSpacing(3);
         formGrid.setWidget(0, 0, new Label(stringMessages.url() + ":"));
-        urlBox = createUrlBox();
+        urlBox = createTextBox(null);
+        urlBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        manuallyEditedStartTime = false;
+                        updateFromUrl();
+                    }
+                });
+            }
+        });
         formGrid.setWidget(0, 1, urlBox);
         formGrid.setWidget(1, 0, new Label(stringMessages.name() + ":"));
         titleBox = createTextBox(null);
@@ -177,13 +174,23 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         infoLabel.setWidget(new Label(""));
         formGrid.setWidget(2, 1, infoLabel);
         formGrid.setWidget(3, 0, new Label(stringMessages.startTime() + ":"));
-        startTimeBox = createTextBox(null);
+        
+        startTimeBox = new DateAndTimeInput(Accuracy.MILLISECONDS);
         FlowPanel startTimePanel = new FlowPanel();
         startTimePanel.add(startTimeBox);
+        startTimeBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Date> event) {
+                manuallyEditedStartTime = true;
+                mediaTrack.startTime = new MillisecondsTimePoint(event.getValue());
+            }
+        });
+        
         defaultTimeButton = new Button(StringMessages.INSTANCE.resetStartTimeToDefault());
         defaultTimeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                manuallyEditedStartTime = true;
                 mediaTrack.startTime = defaultStartTime;
                 refreshUI();
             }
@@ -192,27 +199,22 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         formGrid.setWidget(3, 1, startTimePanel);
         formGrid.setWidget(4, 0, new Label(stringMessages.duration() + ":"));
         durationBox = createTextBox(null);
+        durationBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                String duration = durationBox.getValue();
+                if (duration != null && !duration.trim().isEmpty()) {
+                    mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(duration);
+                } else {
+                    mediaTrack.duration = null;
+                }
+            }
+        });
         formGrid.setWidget(4, 1, durationBox);
         busyIndicator = new SimpleBusyIndicator();
         formGrid.setWidget(5, 0, busyIndicator);
         mainPanel.add(formGrid);
         return mainPanel;
-    }
-
-    private TextBox createUrlBox() {
-        TextBox result = createTextBox(null);
-        result.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                        updateFromUrl();
-                    }
-                });
-            }
-        });
-        return result;
     }
 
     protected void updateFromUrl() {
@@ -221,7 +223,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         if (youtubeId != null) {
             mediaTrack.url = youtubeId;
             mediaTrack.mimeType = MimeType.youtube;
-            loadYoutubeMetadata(youtubeId);
+            loadYoutubeMetadata();
         } else {
             mediaTrack.url = url;
             loadMediaDuration();
@@ -249,6 +251,29 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         }
     }
 
+    private void loadYoutubeMetadata() {
+        if(mediaTrack.url != null && !mediaTrack.url.isEmpty()) {
+            mediaService.checkYoutubeMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
+                
+                @Override
+                public void onFailure(Throwable caught) {
+                    infoLabel.setWidget(new Label(caught.getMessage()));
+                }
+                
+                @Override
+                public void onSuccess(VideoMetadataDTO result) {
+                    if (result.isDownloadable()) {
+                        mediaTrack.duration = result.getDuration();
+                        mediaTrack.title = result.getMessage();
+                        refreshUI();
+                    } else {
+                        infoLabel.setWidget(new Label(result.getMessage()));
+                    }
+                }
+            });
+        }
+    }
+
     private String sliceBefore(String lastPathSegment, String slicer) {
         int paramSegment = lastPathSegment.indexOf(slicer);
         if (paramSegment > 0) {
@@ -257,65 +282,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         return lastPathSegment;
     }
 
-    private native void registerNativeMethods() /*-{
-        var that = this;
-        window.youtubeMetadataCallback = function(metadata) {
-            var title = metadata.entry.media$group.media$title.$t;
-            var duration = metadata.entry.media$group.yt$duration.seconds;
-            var description = metadata.entry.media$group.media$description.$t;
-            that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::youtubeMetadataCallback(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(title, duration, description);
-        }
-    }-*/;
-
-    /**
-     * Inspired by https://developers.google.com/web-toolkit/doc/latest/tutorial/Xsite
-     * 
-     * @param youtubeId
-     */
-    public native void loadYoutubeMetadata(String youtubeId) /*-{
-        var that = this;
-        //Create temporary script element.
-        window.youtubeMetadataCallbackScript = document.createElement("script");
-        window.youtubeMetadataCallbackScript.src = "http://gdata.youtube.com/feeds/api/videos/"
-                + youtubeId
-                + "?alt=json&orderby=published&format=6&callback=youtubeMetadataCallback";
-        document.body.appendChild(window.youtubeMetadataCallbackScript);
-
-        // Cancel meta data capturing after has 2-seconds timeout.
-        setTimeout(
-            function() {
-                //Remove temporary script element.
-                if (window != null && window.youtubeMetadataCallbackScript != null) {
-                    document.body.removeChild(window.youtubeMetadataCallbackScript);
-                    delete window.youtubeMetadataCallbackScript;
-                }
-                that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setBusy(Z)(false);
-            }, 2000);
-    }-*/;
-    
     public void setBusy(boolean busy) {
         busyIndicator.setBusy(busy);
     }
 
-    public void youtubeMetadataCallback(String title, String durationInSeconds, String description) {
-        busyIndicator.setBusy(false);
-        mediaTrack.title = title;
-        try {
-            long duration = (long) Math.round(1000 * Double
-                    .valueOf(durationInSeconds));
-            if (duration > 0) {
-                mediaTrack.duration = new MillisecondsDurationImpl(duration);
-            } else {
-                mediaTrack.duration = null;
-            }
-        } catch (NumberFormatException ex) {
-            mediaTrack.duration = null;
-        }
-        mediaTrack.startTime = this.defaultStartTime;
-        refreshUI();
-    }
-
-    private void refreshUI() {
+    protected void refreshUI() {
         titleBox.setValue(mediaTrack.title, DONT_FIRE_EVENTS);
         if (mediaTrack.isYoutube()) {
             infoLabelLabel.setText(stringMessages.youtubeId() + ":");
@@ -335,10 +306,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
             }
         }
         TimePoint startTime = mediaTrack.startTime != null ? mediaTrack.startTime : defaultStartTime; 
-        String startTimeText = TimeFormatUtil.DATETIME_FORMAT.format(startTime.asDate());
-
-        startTimeBox.setText(startTimeText);
-        updateStartTimeFromUi();
+        startTimeBox.setValue(startTime == null ? null : startTime.asDate());
         if (mediaTrack.duration != null) {
             durationBox.setText(TimeFormatUtil.durationToHrsMinSec(mediaTrack.duration));
         } else {
@@ -372,11 +340,10 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     /**
      * For a given url that points to an mp4 video, attempts are made to parse the header, to determine the actual
-     * starttime of the video and to check for a 360° flag. The video will be analyzed by the backendserver, either via
+     * starttime of the video and to check for a 360Â° flag. The video will be analyzed by the backendserver, either via
      * direct download, or proxied by the client, if a video is only available locally. If the video header cannot be
      * read, default values are used instead.
      */
-    // TODO Eclipse doesn't find any calls to this private method; can it be removed?
     private void checkMetadata(String url, Label lbl, AsyncCallback<VideoMetadataDTO> asyncCallback) {
         // check on server first
         mediaService.checkMetadata(mediaTrack.url, new AsyncCallback<VideoMetadataDTO>() {
@@ -434,12 +401,12 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     protected void mp4MetadataResult(VideoMetadataDTO result) {
         if (!result.isDownloadable()) {
-            Window.alert(stringMessages.couldNotDownload(mediaTrack.url));
+            Notification.notify(stringMessages.couldNotDownload(mediaTrack.url), NotificationType.ERROR);
             manualMimeTypeSelection(result.getMessage(), mediaTrack);
         } else {
             mediaTrack.duration = result.getDuration();
             mediaTrack.mimeType = result.isSpherical() ? MimeType.mp4panorama : MimeType.mp4;
-            if (result.getRecordStartedTime() != null) {
+            if (result.getRecordStartedTime() != null && !manuallyEditedStartTime) {
                 mediaTrack.startTime = new MillisecondsTimePoint(result.getRecordStartedTime());
             }
             refreshUI();

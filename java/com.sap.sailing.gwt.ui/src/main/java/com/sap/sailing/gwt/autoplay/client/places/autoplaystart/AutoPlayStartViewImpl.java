@@ -208,6 +208,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
     }
 
     private void updateURL(String urlWithSettings) {
+        configuratedUrl = urlWithSettings;
         configStarter.setText(urlWithSettings);
         configStarter.setHref(urlWithSettings);
     }

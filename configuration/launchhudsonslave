@@ -1,0 +1,25 @@
+#!/bin/bash
+AWS=/root/.local/bin/aws
+REGION=eu-west-1
+HUDSON_SLAVE_AMI_ID=ami-63e9f689
+echo Launching instance...
+instanceid=`$AWS ec2 run-instances --image-id $HUDSON_SLAVE_AMI_ID --count 1 --instance-type c5d.4xlarge --key-name Axel --security-groups "Sailing Analytics App" --region $REGION --placement AvailabilityZone=eu-west-1c --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Hudson Ubuntu Slave}]' --instance-initiated-shutdown-behavior terminate | tee /tmp/slavelaunch.out | jq .Instances[0].InstanceId | sed -e 's/"//g'`
+if [ "$instanceid" = "" ]; then
+  echo Error launching instance
+  exit 1
+else
+  echo Instance ID is $instanceid
+  while [ "`$AWS ec2 describe-instances --region $REGION --instance-ids $instanceid | jq .Reservations[0].Instances[0].State.Name`" != "\"running\"" ]; do
+    echo Instance $instanceid not running yet\; trying again...
+    sleep 5
+  done
+  echo Instance $instanceid seems running now
+  private_ip=`$AWS ec2 describe-instances --region $REGION --instance-ids $instanceid | jq .Reservations[0].Instances[0].PrivateIpAddress | sed -e 's/"//g'`
+  echo Probing for SSH on private IP $private_ip
+  while su - hudson -c "ssh -o ConnectTimeout=10,StrictHostKeyChecking=no hudson@$private_ip ls >/dev/null"; do
+    echo SSH daemon not reachable yet. Trying again...
+  done
+  echo SSH daemon reached. State should be ready to connect to now.
+  su - hudson -c "ssh -o StrictHostKeyChecking=no hudson@$private_ip \"/opt/sapjvm_8/bin/java -jar slave.jar; sudo /sbin/shutdown -h now\""
+  $AWS ec2 terminate-instances --instance-ids $instanceid
+fi
