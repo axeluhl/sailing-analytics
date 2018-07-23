@@ -18,8 +18,10 @@ import org.junit.Rule;
 import org.junit.rules.TestWatchman;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.FrameworkMethod;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -27,12 +29,12 @@ import org.openqa.selenium.html5.WebStorage;
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.sap.sse.common.Duration;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.selenium.core.Managed;
 import com.sap.sailing.selenium.core.SeleniumRunner;
 import com.sap.sailing.selenium.core.TestEnvironment;
 import com.sap.sailing.selenium.core.WindowManager;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * <p>Abstract base class for unit tests with Selenium. This class is already annotated as required to get executed
@@ -92,6 +94,14 @@ public abstract class AbstractSeleniumTest {
             webStorage.getLocalStorage().clear();
         } else {
             ((JavascriptExecutor)getWebDriver()).executeScript("window.localStorage.clear();");
+        }
+        try {
+            // In IE 11 we sometimes see the problem that IE somehow automatically changes the zoom level to 75%.
+            // Selenium tests with InternetExplorerDriver fail if the zoom level is not set to 100% due to the fact that coordinates determined aren't correct.
+            // With this we enforce a zoom level of 100% before running a test.
+            // To make this work correctly you also need to set InternetExplorerDriver.IGNORE_ZOOM_SETTING to true (this should be pre-configured in local-test-environment.xml when activating IE driver)
+            getWebDriver().findElement(By.tagName("html")).sendKeys(Keys.chord(Keys.CONTROL, "0"));
+        } catch (Exception e) {
         }
     }
     
