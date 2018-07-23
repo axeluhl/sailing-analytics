@@ -176,7 +176,12 @@ public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
                 DesiredCapabilities capabilities = new DesiredCapabilities(capabilityDefinitions);
                 Constructor<WebDriver> constructor = clazz.getConstructor(Capabilities.class);
                 WebDriver driver = constructor.newInstance(capabilities);
-                driver.manage().window().maximize();
+                try {
+                    driver.manage().window().maximize();
+                } catch (Exception e) {
+                    // Depending on the combination of OS and WebDriver implementation this may fail
+                    // e.g. chrome with xvfb can't do this successfully.
+                }
                 
                 File screenshots = resolveScreenshotFolder();
                 
