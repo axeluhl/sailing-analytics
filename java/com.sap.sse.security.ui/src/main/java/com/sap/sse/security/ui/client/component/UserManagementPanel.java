@@ -24,6 +24,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.Permission;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.Role;
@@ -80,12 +82,12 @@ public class UserManagementPanel extends DockPanel {
                             for (UserDeletedEventHandler userDeletedHandler : userDeletedHandlers) {
                                 userDeletedHandler.onUserDeleted(userToDelete);
                             }
-                            Window.alert(result.getMessage());
+                            Notification.notify(result.getMessage(), NotificationType.SUCCESS);
                         }
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert(stringMessages.errorDeletingUser());
+                            Notification.notify(stringMessages.errorDeletingUser(), NotificationType.ERROR);
                         }
                     });
                 }
