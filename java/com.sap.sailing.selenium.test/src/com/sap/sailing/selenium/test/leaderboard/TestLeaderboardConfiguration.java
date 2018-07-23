@@ -188,6 +188,16 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         final WebDriverWindow defaultWindow = manager.getCurrentWindow();
         final WebDriverWindow extraWindow = manager.openNewWindow();
         try {
+            extraWindow.switchToWindow();
+            // On WebDriver implementations that support it, the window is maximized
+            // This makes our Tests work much better on Windows
+            getWebDriver().manage().window().maximize();
+        } catch (Exception e) {
+            // maximizing isn't supported on all Systems / WebDriver implementations
+        } finally {
+            defaultWindow.switchToWindow();
+        }
+        try {
             defaultAndExtraWindow.accept(defaultWindow, extraWindow);
         } finally {
             extraWindow.close();
