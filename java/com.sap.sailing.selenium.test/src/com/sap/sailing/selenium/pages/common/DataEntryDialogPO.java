@@ -75,6 +75,9 @@ public abstract class DataEntryDialogPO extends PageArea {
             // Wait, since we do a callback usually
             waitForAjaxRequests();
         }
+        
+        // This waits until the dialog is physically closed to make sure further don't fail because the dialog still covers other elements
+        new WebDriverWait(driver, 20).until(driver -> !((WebElement)context).isDisplayed());
     }
     
     public void pressCancel() {
