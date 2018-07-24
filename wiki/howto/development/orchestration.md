@@ -74,9 +74,9 @@ We offer the following log levels: `DEBUG`, `INFO` (default), `WARNING`, `PANIC`
 ### General
 In general, the orchestrator accepts a set of sub parameters. The first level of parameters describe the type of action to be executed (basically a use-case). The parameters behind, are used to specify the use-case specific parameters.
 
-To show all available <commands> just call the orchestrator without any parameters.
+To show all available commands just call the orchestrator without any parameters.
 
-Non use-case specific <commands> are example commands like the `version` of the orchestrator. To do so, just use 
+Non use-case specific commands are example commands like the `version` of the orchestrator. To do so, just use 
 
 ```
 ./bin/orchestrator-linux-amd64 version
@@ -84,11 +84,12 @@ Non use-case specific <commands> are example commands like the `version` of the 
 
 It will show the `version`, `build revision` (git commit) and the `branch`, from where the software was built. The agent should have the same version as the orchestrator and will be transferred to a target at each execution to make sure the target has the correct version.
 
-If you want to skip some steps done by the orchestrator on AWS level, you can use a <command> called `agent-only` as parameter. This will require a empty EC2 instance, where only agent actions (like bootstrapping,...) are executed. This step helps do debug actions of the agent, as you do not need to fire up a new EC2 instance all the time, but can use a already existing one. A sample call of this command looks like
+If you want to skip some steps done by the orchestrator on AWS level, you can use a command called `agent-only` as parameter. This will require a empty EC2 instance, where only agent actions (like bootstrapping,...) are executed. This step helps do debug actions of the agent, as you do not need to fire up a new EC2 instance all the time, but can use a already existing one. A sample call of this command looks like
 
 ```
 ./bin/orchestrator-linux-amd64 agent-only event="test-steffen123-1:1. Steffen Liga" servername=test-steffen123-1 internalhostname=ec2-34-242-13-180.eu-west-1.compute.amazonaws.com externalip=34.242.13.180 internalip=172.31.22.105 scenario=master analyticsenvironment=live-master-server analyticsrelease=build-201807231413
 ```
+
 ### Use case: Create Master Server
 This is the first ready to use and implemented use-case. It will spawn a new EC2 instance (you need to use an AMI in your instance template from the "NEXTGEN" base using Ubuntu 16 with systemd) and spawn/configure a new java instance on it. Furthermore it makes sure, that apache2 is configured correctly and if so the workflow continues to create according target groups (default and master), attach the just created EC2 instance, create according rules in the load balancer and finally create an Cloudwatch alarm for all target groups to get notified, if a failure occurs inside a target group.
 
