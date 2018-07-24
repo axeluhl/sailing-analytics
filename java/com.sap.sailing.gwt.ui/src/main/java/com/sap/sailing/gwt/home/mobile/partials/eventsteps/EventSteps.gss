@@ -21,6 +21,9 @@
 .eventsteps_phases_phaseinactive {
   color: #999;
 }
+.eventsteps_phases_phase_link {
+  color: #000;
+}
 /* .eventsteps_phases_phase:nth-child(2n-1) { */
 /*   padding-right: 0.333333333333333em; */
 /* } */

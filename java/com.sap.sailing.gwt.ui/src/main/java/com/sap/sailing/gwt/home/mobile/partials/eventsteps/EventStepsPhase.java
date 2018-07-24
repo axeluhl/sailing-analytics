@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
@@ -16,7 +17,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaProgressFleetDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaProgressSeriesDTO;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.LinkUtil;
 
 public class EventStepsPhase extends Composite {
 
@@ -26,13 +29,15 @@ public class EventStepsPhase extends Composite {
     interface EventStepsPhaseUiBinder extends UiBinder<Widget, EventStepsPhase> {
     }
     
+    @UiField AnchorElement anchorUi;
     @UiField DivElement nameUi;
     @UiField ImageElement checkUi;
     @UiField DivElement progressUi;
     @UiField DivElement fleetsContainerUi;
 
-    public EventStepsPhase(RegattaProgressSeriesDTO seriesProgress) {
+    public EventStepsPhase(RegattaProgressSeriesDTO seriesProgress, PlaceNavigation<?> placeNavigation) {
         initWidget(uiBinder.createAndBindUi(this));
+        LinkUtil.configureForAction(anchorUi, () -> placeNavigation.goToPlace());
         nameUi.setInnerText(DEFAULT_SERIES_NAME.equals(seriesProgress.getName()) ? I18N.races() : seriesProgress.getName());
         if (seriesProgress.isCompleted()) {
             progressUi.setInnerText(I18N.racesCount(seriesProgress.getTotalRaceCount()));
