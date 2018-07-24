@@ -11,8 +11,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.selenium.core.WebDriverWindow;
-import com.sap.sailing.selenium.core.WindowManager;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
@@ -62,33 +60,31 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
     
     @Test
     public void testCorrectDisplayOfRaceColumnWithAndWithoutStartTimeInference() {
-        WindowManager manager = this.environment.getWindowManager();
-        WebDriverWindow adminConsoleWindow = manager.getCurrentWindow();
-        WebDriverWindow leaderboardWindow = manager.openNewWindow();
-        leaderboardWindow.switchToWindow();
-        LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, /* race details */ false);
-        LeaderboardTablePO leaderboardTable = leaderboard.getLeaderboardTable();
-        List<String> races = leaderboardTable.getRaceNames();
-        assertThat("Expected only D3", races, equalTo(Arrays.asList("D3")));
-        int d3ColumnIndex = leaderboardTable.getColumnIndex("D3");
-        for (LeaderboardEntry e : leaderboardTable.getEntries()) {
-            String raceColumnContent = e.getColumnContent(d3ColumnIndex);
-            assertTrue(Integer.parseInt(raceColumnContent) > 0); // all competitors have a positive score in R3
-        }
-        adminConsoleWindow.switchToWindow();
-        // Go to the administration console and unset the "useStartTimeInference" flag
-        RegattaStructureManagementPanelPO regattaManagementPanel = adminConsole.goToRegattaStructure();
-        RegattaListCompositePO regattaList = regattaManagementPanel.getRegattaList();
-        RegattaEditDialogPO regattaEditDialog = regattaList.editRegatta(regatta);
-        regattaEditDialog.setUseStartTimeInference(false);
-        regattaEditDialog.pressOk();
-        leaderboardWindow.switchToWindow();
-        leaderboard.refresh();
-        for (LeaderboardEntry e : leaderboardTable.getEntries()) {
-            String raceColumnContent = e.getColumnContent(d3ColumnIndex);
-            assertEquals("", raceColumnContent); // all competitors have an empty score because there is no start time anymore
-        }
-        leaderboardWindow.close();
+        this.environment.getWindowManager().withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {
+            leaderboardWindow.switchToWindow();
+            LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, /* race details */ false);
+            LeaderboardTablePO leaderboardTable = leaderboard.getLeaderboardTable();
+            List<String> races = leaderboardTable.getRaceNames();
+            assertThat("Expected only D3", races, equalTo(Arrays.asList("D3")));
+            int d3ColumnIndex = leaderboardTable.getColumnIndex("D3");
+            for (LeaderboardEntry e : leaderboardTable.getEntries()) {
+                String raceColumnContent = e.getColumnContent(d3ColumnIndex);
+                assertTrue(Integer.parseInt(raceColumnContent) > 0); // all competitors have a positive score in R3
+            }
+            adminConsoleWindow.switchToWindow();
+            // Go to the administration console and unset the "useStartTimeInference" flag
+            RegattaStructureManagementPanelPO regattaManagementPanel = adminConsole.goToRegattaStructure();
+            RegattaListCompositePO regattaList = regattaManagementPanel.getRegattaList();
+            RegattaEditDialogPO regattaEditDialog = regattaList.editRegatta(regatta);
+            regattaEditDialog.setUseStartTimeInference(false);
+            regattaEditDialog.pressOk();
+            leaderboardWindow.switchToWindow();
+            leaderboard.refresh();
+            for (LeaderboardEntry e : leaderboardTable.getEntries()) {
+                String raceColumnContent = e.getColumnContent(d3ColumnIndex);
+                assertEquals("", raceColumnContent); // all competitors have an empty score because there is no start time anymore
+            }
+        });
     }
     
     private AdminConsolePage configureRegattaAndLeaderboard() {
