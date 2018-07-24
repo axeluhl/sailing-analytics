@@ -35,11 +35,11 @@ public class EventStepsPhase extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         nameUi.setInnerText(DEFAULT_SERIES_NAME.equals(seriesProgress.getName()) ? I18N.races() : seriesProgress.getName());
         if (seriesProgress.isCompleted()) {
-            progressUi.setInnerText(String.valueOf(seriesProgress.getTotalRaceCount()));
+            progressUi.setInnerText(I18N.racesCount(seriesProgress.getTotalRaceCount()));
         } else {
             checkUi.getStyle().setDisplay(Display.NONE);
             int current = seriesProgress.getProgressRaceCount(), total = seriesProgress.getTotalRaceCount();
-            progressUi.setInnerText(I18N.currentOfTotal(current, total));
+            progressUi.setInnerText(I18N.currentOfTotalRaces(current, total));
         }
         if (seriesProgress.getProgressRaceCount() == 0) {
             addStyleName(EventStepsResources.INSTANCE.css().eventsteps_phases_phaseinactive());

@@ -49,10 +49,10 @@ public class MultiRegattaListStepsBody extends UIObject implements RequiresResiz
         mediumNameDummyUi.setInnerText(seriesNameMedium = caculateSeriesNameMedium());
         seriesNameShort = caculateSeriesNameShort();
         if (seriesProgress.isCompleted()) {
-            progressUi.setInnerText(String.valueOf(seriesProgress.getTotalRaceCount()));
+            progressUi.setInnerText(I18N.racesCount(seriesProgress.getTotalRaceCount()));
         } else {
             checkUi.getStyle().setDisplay(Display.NONE);
-            progressUi.setInnerText(I18N.currentOfTotal(
+            progressUi.setInnerText(I18N.currentOfTotalRaces(
                     seriesProgress.getProgressRaceCount(), seriesProgress.getTotalRaceCount()));
         }
         addFleetProgresses(seriesProgress.getFleetState(), seriesProgress.getMaxRacesPerFleet());
