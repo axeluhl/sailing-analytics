@@ -175,11 +175,13 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTra
     void resumeValidityCaching();
     
     /**
-     * Gets a list of bearings between the provided time range (inclusive the boundaries). The bearings are retrieved by
-     * means of {@link GPSFixTrack#getEstimatedSpeed(TimePoint)}. The first and last bearing steps will be always
-     * sampled at provided {@code fromTimePoint} and {@code toTimePoint}, whereas the steps between are sampled at time
-     * points of non-raw GPS fixes. The idea of this concept is to produce at least two bearing steps as result, in
-     * order to provide the caller at least a {@code totalCourseChangeAngleInDegrees > 0} between the given time range.
+     * Gets a list of speed with bearing steps considering the provided time range. The bearings are retrieved by means
+     * of {@link GPSFixTrack#getEstimatedSpeed(TimePoint)}. The steps are sampled at time points of non-raw GPS fixes.
+     * When there is no non-raw fix contained at {@code fromTimePoint}, the time point of the first step will be the
+     * time point of the first non-raw fix before {@code fromTimePoint}. Analogously, when there is no non-raw fix
+     * contained at {@code toTimePoint}, the last step's time point will be the first non-raw fix after
+     * {@code toTimePoint}. The idea of this concept is to produce at least two steps as part of the result, in order to
+     * provide the caller at least a {@code |totalCourseChangeAngleInDegrees > 0|} between the given time range.
      * 
      * @param fromTimePoint
      *            The from time point (inclusive) for resulting bearing steps

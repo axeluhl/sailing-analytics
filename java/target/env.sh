@@ -88,7 +88,6 @@ ADDITIONAL_JAVA_ARGS="-Dpersistentcompetitors.clear=false -XX:ThreadPriorityPoli
 # Uncomment for use with SAP JVM only:
 #ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -XX:+GCHistory -XX:GCHistoryFilename=logs/sapjvm_gc@PID.prf"
 
-JAVA_HOME=/opt/jdk1.8.0_20
 if [[ ! -d $JAVA_HOME ]] && [[ -f "/usr/libexec/java_home" ]]; then
     JAVA_HOME=`/usr/libexec/java_home`
 fi

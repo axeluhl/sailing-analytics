@@ -435,6 +435,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String insertWaypointAfterSelected();
     String addGate();
     String scoringSchemeLowPointSystem();
+    String scoringSchemeLowPointSystemFirstTwoWins();
+    String scoringSchemeLowPointSystemFirstTwoWinsDescription();
     String scoringSchemeHighPointSystem();
     String scoringSchemeLowPointWinnerGetsZero();
     String scoringSchemeWinnerGetsFive();
@@ -1182,6 +1184,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showUncorrectedTotalPoints();
     String setStartTimeReceived();
     String setStartTimeReceivedDescription();
+    String setStartTimeReceivedNotice();
     String lastScoreCorrectionsTime();
     String lastScoreCorrectionsComment();
     String setTimeToNow();
@@ -1295,13 +1298,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     @Override
     String removeUploadedFile();
     String showCompetitorBoatColumn();
-    String showCompetitorSailIdColumn();
-    String showCompetitorSailIdColumnTooltip(String alwaysShowCompetitorNationalityColumnTitle);
     String showCompetitorShortNameColumn();
-    String showCompetitorShortNameColumnTooltip(String alwaysShowCompetitorNationalityColumnTitle);
+    String showCompetitorShortNameColumnTooltip(String showCompetitorNationalityColumnTitle);
     String showCompetitorFullNameColumn();
-    String alwaysShowCompetitorNationalityColumn();
-    String alwaysShowCompetitorNationalityColumnTooltip();
+    String showCompetitorNationalityColumn();
+    String showCompetitorNationalityColumnTooltip();
     String loadingDimensionValues();
     String inviteBuoyTenders();
     String orMultipleEmails();
@@ -1974,7 +1975,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windFinderWindSourceTypeTooltip();
     String windFinder();
     String enterTagsForTheVideo();
-    String enterIdOfWindfinderReviewedSpotCollection();
+    String enterIdOfWindFinderReviewedSpotCollection();
     String enterTagsForTheImage();
     String unableToResolveWindFinderSpotId(String id, String message);
     String windFinderWeatherData();
@@ -2070,6 +2071,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String multiVideoDoNoAdd();
     String multiVideoOffsetInput();
     String multiVideoDescription();
+    String maneuverAngle();
+    String jibeAngle();
+    String tackAngle();
     String multiUrlChangeMediaTrack();
     String multiUrlChangeReplace();
     String multiUrlChangeFind();
@@ -2081,10 +2085,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String resetZoom();
     String lastEvent(String locationOrVenue);
     String teaserOverallLinkToolTip();
+    String middleManeuverAngle();
+    String extrapolatedManeuverStartPosition();
+    String projectedExtrapolatedManeuverStartPosition();
+    String projectedManeuverEndPosition();
+    String bearingAtManeuverEndPosition();
     String gender();
     String manage2SailEventIdBox();
     String manage2SailEventURLBox();
     String manage2SailEventIdBoxTooltip();
     String manage2SailPort();
     String doResize();
+    String windFinderSpotCollectionsList();
 }

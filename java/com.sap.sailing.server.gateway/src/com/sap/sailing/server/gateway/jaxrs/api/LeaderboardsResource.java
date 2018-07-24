@@ -1200,7 +1200,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             raceColumnsAsJson.add(raceColumnAsJson);
             raceColumnAsJson.put(RaceColumnConstants.RACE_COLUMN_NAME, rc.getName());
             raceColumnAsJson.put(RaceColumnConstants.EXPLICIT_FACTOR, rc.getExplicitFactor());
-            raceColumnAsJson.put(RaceColumnConstants.FACTOR, rc.getFactor());
+            raceColumnAsJson.put(RaceColumnConstants.FACTOR, leaderboard.getScoringScheme().getScoreFactor(rc));
         }
         return json;
     }
