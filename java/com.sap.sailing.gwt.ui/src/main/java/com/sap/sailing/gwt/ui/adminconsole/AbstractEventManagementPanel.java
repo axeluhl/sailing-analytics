@@ -22,6 +22,8 @@ import com.sap.sailing.gwt.ui.shared.RaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel {
     protected final TrackedRacesListComposite trackedRacesListComposite;
@@ -121,7 +123,7 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
                     builder.append(")");
                     builder.append("\n");
                 }
-                Window.alert(builder.toString());
+                Notification.notify(builder.toString(), NotificationType.ERROR);
                 result = false;
             } else {
                 result = true;

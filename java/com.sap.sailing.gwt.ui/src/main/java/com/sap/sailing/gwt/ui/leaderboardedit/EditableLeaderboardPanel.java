@@ -31,7 +31,6 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
@@ -633,7 +632,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                     @Override
                     public void onSuccess(Void noarg) {
                         updateScoreCorrectionInformation(lastScoreCorrectionComment, lastScoreCorrectionTime);
-                        Window.alert(stringMessages.successfullyUpdatedScores());
+                        Notification.notify(stringMessages.successfullyUpdatedScores(), NotificationType.SUCCESS);
                     }
 
                     @Override

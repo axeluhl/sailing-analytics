@@ -8,6 +8,8 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
  * Default Presenter implementation for {@link UserDetailsView}.
@@ -47,13 +49,14 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
                 new AsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
-                Window.alert(i18n_sec.successfullyUpdatedUserProperties(
-                        authenticationManager.getAuthenticationContext().getCurrentUser().getName()));
+                Notification.notify(i18n_sec.successfullyUpdatedUserProperties(
+                        authenticationManager.getAuthenticationContext().getCurrentUser().getName()),
+                        NotificationType.INFO);
             }
             
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert(i18n_sec.errorUpdatingUserProperties(caught.getMessage()));
+                Notification.notify(i18n_sec.errorUpdatingUserProperties(caught.getMessage()), NotificationType.ERROR);
             }
         });
     }
@@ -67,12 +70,12 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
                 new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
-                        Window.alert(i18n_sec.successfullyUpdatedEmail(username, email));
+                        Notification.notify(i18n_sec.successfullyUpdatedEmail(username, email), NotificationType.INFO);
                     }
                     
                     @Override
                     public void onFailure(Throwable caught) {
-                        Window.alert(i18n_sec.errorUpdatingEmail(caught.getMessage()));
+                        Notification.notify(i18n_sec.errorUpdatingEmail(caught.getMessage()), NotificationType.ERROR);
                     }
                 });
     }
@@ -82,7 +85,7 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
         final String username = authenticationManager.getAuthenticationContext().getCurrentUser().getName();
         String errorMessage = validator.validateUsernameAndPassword(username, newPassword, newPasswordConfirmation);
         if (errorMessage != null && !errorMessage.isEmpty()) {
-            Window.alert(errorMessage);
+            Notification.notify(errorMessage, NotificationType.ERROR);
             return;
         }
         userManagementService.updateSimpleUserPassword(username, oldPassword, null, newPassword, 
@@ -92,20 +95,20 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
                         if (caught instanceof UserManagementException) {
                             String message = ((UserManagementException) caught).getMessage();
                             if (UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS.equals(message)) {
-                                Window.alert(i18n_sec.passwordDoesNotMeetRequirements());
+                                Notification.notify(i18n_sec.passwordDoesNotMeetRequirements(), NotificationType.ERROR);
                             } else if (UserManagementException.INVALID_CREDENTIALS.equals(message)) {
-                                Window.alert(i18n_sec.invalidCredentials());
+                                Notification.notify(i18n_sec.invalidCredentials(), NotificationType.ERROR);
                             } else {
-                                Window.alert(i18n_sec.errorChangingPassword(caught.getMessage()));
+                                Notification.notify(i18n_sec.errorChangingPassword(caught.getMessage()), NotificationType.ERROR);
                             }
                         } else {
-                            Window.alert(i18n_sec.errorChangingPassword(caught.getMessage()));
+                            Notification.notify(i18n_sec.errorChangingPassword(caught.getMessage()), NotificationType.ERROR);
                         }
                     }
 
                     @Override
                     public void onSuccess(Void result) {
-                        Window.alert(i18n_sec.passwordSuccessfullyChanged());
+                        Notification.notify(i18n_sec.passwordSuccessfullyChanged(), NotificationType.SUCCESS);
                         view.clearPasswordFields();
                     }
                 });

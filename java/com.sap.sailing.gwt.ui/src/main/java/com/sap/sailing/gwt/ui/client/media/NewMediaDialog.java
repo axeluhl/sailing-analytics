@@ -18,7 +18,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.media.client.MediaBase;
 import com.google.gwt.typedarrays.shared.Int8Array;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -41,6 +40,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
@@ -400,7 +401,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
     protected void mp4MetadataResult(VideoMetadataDTO result) {
         if (!result.isDownloadable()) {
-            Window.alert(stringMessages.couldNotDownload(mediaTrack.url));
+            Notification.notify(stringMessages.couldNotDownload(mediaTrack.url), NotificationType.ERROR);
             manualMimeTypeSelection(result.getMessage(), mediaTrack);
         } else {
             mediaTrack.duration = result.getDuration();
