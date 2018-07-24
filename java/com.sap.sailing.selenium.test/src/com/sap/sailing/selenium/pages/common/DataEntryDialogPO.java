@@ -30,6 +30,9 @@ public abstract class DataEntryDialogPO extends PageArea {
     
     protected DataEntryDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
+        
+        // This ensures that we wait until the dialog is opened and not just attached to the DOM
+        waitUntil(element::isDisplayed);
     }
     
     @Override
