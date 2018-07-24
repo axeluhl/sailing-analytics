@@ -7,7 +7,7 @@ The orchestrator takes care on all actions in regards of AWS and to execute the 
 ![architecture](https://wiki.sapsailing.com/wiki/images/orchestration/architecture.png)
 
 ### Build and Test
-Currently we provide a Makefile, which implements all required steps to build and test the software. Optionally you can of course also use `go test` directly. Just make sure that the `PREFIX` enviroment is set and points to the working directory of the orchestrator. You can also use `source env.sh` to do this, which also set the `GOPATH` correctly. By default, all go dependencies should be downloaded to `$HOME/.go`. They should not be stored in the git project location.
+Currently we provide a Makefile, which implements all required steps to build and test the software. Optionally you can of course also use `go test` directly. Just make sure that the `PREFIX` enviroment is set and points to the project directory (contains `configs` and `bin` subdirectories). You can also use `source env.sh` to do this, which on top sets the `GOPATH` correctly. By default, all go dependencies should be downloaded to `$HOME/.go`. They should not be stored in the git project location.
 
 To build the software, just call `make build`. Make sure that all dependencies are downloaded before via `make dep`. 
 To test the software, just call `make test` and to check the tests, call `make checktest`. There are also make steps for `fmt` and others. Just check out the Makefile in the project root. 
@@ -19,7 +19,7 @@ You can get the current release of the orchestration software currently from [he
 ![hudson artifacts](https://wiki.sapsailing.com/wiki/images/orchestration/hudson-artifacts.png)
 
 Once downloaded, you just need to extract the archive locally to your machine. You will find the orchestrator and agent binaries in `bin` and all configurations in `configs` (like the instance templates or secrets).
-To get going, place your private key inside the secrets folder and name it `id_rsa`. This key must be pre-deployed in the used AWS AMI image. Furthermore, please create an according `conf_aws.json` file (copy `conf_aws.json.sample` and fill in the values). A good example is
+To get going, place your private key inside the secrets folder and name it `id_rsa`. This key must be pre-deployed in the used AWS AMI image. Furthermore, create a file called `conf_aws.json` (copy `conf_aws.json.sample` and fill in the values). A good example is
 
 ```
 {
@@ -72,7 +72,7 @@ LOG=DEBUG ./bin/orchestrator-linux-amd64 <commands>
 We offer the following log levels: `DEBUG`, `INFO` (default), `WARNING`, `PANIC`, `FATAL`.
 
 ### General
-In general, the orchestrator accepts a set of sub parameters. The first level of parameters describe the type of action to be executed (basically a use-case). The parameters behind, are used to specify the use-case specific parameters.
+In general, the orchestrator accepts a set of arguments. The first level of parameters describe the type of action to be executed (basically a use-case). The following arguments are used to specify the use-case specific parameters.
 
 To show all available commands just call the orchestrator without any parameters.
 
@@ -91,7 +91,7 @@ If you want to skip some steps done by the orchestrator on AWS level, you can us
 ```
 
 ### Use case: Create Master Server
-This is the first ready to use and implemented use-case. It will spawn a new EC2 instance (you need to use an AMI in your instance template from the "NEXTGEN" base using Ubuntu 16 with systemd) and spawn/configure a new java instance on it. Furthermore it makes sure, that apache2 is configured correctly and if so the workflow continues to create according target groups (default and master), attach the just created EC2 instance, create according rules in the load balancer and finally create an Cloudwatch alarm for all target groups to get notified, if a failure occurs inside a target group.
+This is the first ready to use and implemented use-case. It will spawn a new EC2 instance (you need to use an AMI in your instance template from the "NEXTGEN" base using Ubuntu 16 with systemd) and spawn/configure a new java instance on it. Furthermore it makes sure, that apache2 is configured correctly and if so the workflow continues to create target groups (default and master), attach the just created EC2 instance, create according rules in the load balancer and finally create an Cloudwatch alarm for all target groups to get notified, if a failure occurs inside a target group.
 
 If a step during execution fails, the orchestrator decides if it can continue or not. If not the execution is stopped and actions done via the agent are rolled back. Rollback of AWS features is not yet implemented.
 
