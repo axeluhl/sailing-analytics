@@ -11,6 +11,7 @@ import java.util.function.BiConsumer;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.openqa.selenium.Dimension;
 
 import com.sap.sailing.selenium.core.WebDriverWindow;
 import com.sap.sailing.selenium.core.WindowManager;
@@ -194,6 +195,12 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             getWebDriver().manage().window().maximize();
         } catch (Exception e) {
             // maximizing isn't supported on all Systems / WebDriver implementations
+            try {
+                // Trying to set a proper screen size as fallback that should usable with all modern screens
+                getWebDriver().manage().window().setSize(new Dimension(1440, 900));
+            } catch (Exception exc) {
+                // In this case we just can't change the window
+            }
         } finally {
             defaultWindow.switchToWindow();
         }
