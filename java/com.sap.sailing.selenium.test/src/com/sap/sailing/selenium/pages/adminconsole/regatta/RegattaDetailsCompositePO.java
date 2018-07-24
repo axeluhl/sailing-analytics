@@ -6,15 +6,11 @@ import java.util.List;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
-
 import com.sap.sailing.selenium.pages.PageArea;
-
 import com.sap.sailing.selenium.pages.adminconsole.ActionsHelper;
-
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
@@ -101,6 +97,6 @@ public class RegattaDetailsCompositePO extends PageArea {
     }
     
     public void waitForRacesOfSeries(final String series, final List<String> races) {
-        new WebDriverWait(driver, 10).until(driver -> getRaceNames(series).equals(races));
+        waitUntil(() -> getRaceNames(series).equals(races));
     }
 }

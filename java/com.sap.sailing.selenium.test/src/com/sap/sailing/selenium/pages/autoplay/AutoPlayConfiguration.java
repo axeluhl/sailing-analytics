@@ -1,10 +1,7 @@
 package com.sap.sailing.selenium.pages.autoplay;
 
-import java.util.function.Function;
-
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
@@ -32,15 +29,8 @@ public class AutoPlayConfiguration extends PageArea {
         ListBoxPO.create(driver, configurationSelectionBox).selectOptionByLabel(mode);
         ListBoxPO.create(driver, eventSelectionBox).selectOptionByLabel(event);
         ListBoxPO.create(driver, leaderboardSelectionBox).selectOptionByLabel(leaderboard);
-        WebDriverWait wait = new WebDriverWait(driver, 10);
         //wait till the page processed the changes
-        wait.until(new Function<WebDriver, Boolean>() {
-            
-            @Override
-            public Boolean apply(WebDriver arg0) {
-                return getConfiguredUrl() != null && !getConfiguredUrl().isEmpty();
-            }
-        });
+        waitUntil(() -> getConfiguredUrl() != null && !getConfiguredUrl().isEmpty());
     }
 
     public String getConfiguredUrl() {

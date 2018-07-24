@@ -1,6 +1,6 @@
 package com.sap.sailing.selenium.pages.common;
 
-import java.util.function.Function;
+import java.util.function.BooleanSupplier;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.JavascriptExecutor;
@@ -9,7 +9,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
@@ -69,7 +68,7 @@ public abstract class DataEntryDialogPO extends PageArea {
         
         scrollToView(this.okButton);
         // Browsers may use smooth scrolling
-        new WebDriverWait(driver, 10).until(t -> isElementEntirelyVisible(this.okButton) && this.okButton.isEnabled());
+        waitUntil(() -> isElementEntirelyVisible(this.okButton) && this.okButton.isEnabled());
         this.okButton.click();
         
         
@@ -86,9 +85,9 @@ public abstract class DataEntryDialogPO extends PageArea {
         }
         
         // This waits until the dialog is physically closed to make sure further don't fail because the dialog still covers other elements
-        new WebDriverWait(driver, 20).until(new Function<WebDriver, Boolean>() {
+        waitUntil(new BooleanSupplier() {
             @Override
-            public Boolean apply(WebDriver driver) {
+            public boolean getAsBoolean() {
                 try {
                     return !((WebElement) context).isDisplayed();
                 } catch (StaleElementReferenceException e) {

@@ -3,11 +3,9 @@ package com.sap.sailing.selenium.pages.raceboard;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
@@ -45,9 +43,9 @@ public class RaceBoardPage extends HostPageWithAuthentication {
         super(driver);
     }
     public MapSettingsPO openMapSettings() {
-        new WebDriverWait(driver, 30).until(new Function<WebDriver, Boolean>() {
+        waitUntil(new BooleanSupplier() {
             @Override
-            public Boolean apply(WebDriver p) {
+            public boolean getAsBoolean() {
                 try {
                     return raceMapSettingsButton.isDisplayed() && raceMapSettingsButton.getLocation().y > 100;
                 } catch (Exception e) {
@@ -58,7 +56,6 @@ public class RaceBoardPage extends HostPageWithAuthentication {
         });
         raceMapSettingsButton.click();
         waitUntil(new BooleanSupplier() {
-
             @Override
             public boolean getAsBoolean() {
                 WebElement settingsDialog = null;
