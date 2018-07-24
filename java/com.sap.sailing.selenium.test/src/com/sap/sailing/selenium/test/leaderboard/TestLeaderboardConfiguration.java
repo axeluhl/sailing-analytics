@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
@@ -80,7 +81,9 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             assertThat(races.size(), equalTo(5));
             assertThat(table.getEntries().size(), equalTo(28)); // the regatta already has the races linked; regatta leaderboard obtains competitors from regatta 
             
-            AdminConsolePage adminConsole = AdminConsolePage.goToPage(adminConsoleWindow.switchToWindow(), getContextRoot());
+            final WebDriver adminConsoleWindowDriver = leaderboardWindow.switchToWindow();
+            setUpAuthenticatedSession(adminConsoleWindowDriver);
+            AdminConsolePage adminConsole = AdminConsolePage.goToPage(adminConsoleWindowDriver, getContextRoot());
             LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
             LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(this.regatta.toString());
             
@@ -121,7 +124,9 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             leaderboardDetails.linkRace(this.leaderboardRaces.get(3), this.trackedRaces.get(3));
             leaderboardDetails.linkRace(this.leaderboardRaces.get(4), this.trackedRaces.get(4));
             // Open the leaderboard in our second window
-            LeaderboardPage leaderboard = LeaderboardPage.goToPage(leaderboardWindow.switchToWindow(), getContextRoot(), LEADERBOARD, false);
+            final WebDriver leaderboardWindowDriver = leaderboardWindow.switchToWindow();
+            setUpAuthenticatedSession(leaderboardWindowDriver);
+            LeaderboardPage leaderboard = LeaderboardPage.goToPage(leaderboardWindowDriver, getContextRoot(), LEADERBOARD, false);
             LeaderboardTablePO table = leaderboard.getLeaderboardTable();
             // Go back to the administration console and delete third race
             adminConsoleWindow.switchToWindow();
@@ -156,7 +161,9 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             leaderboardDetails.linkRace(this.leaderboardRaces.get(4), this.trackedRaces.get(4));
             
             // Open the leaderboard in our second window
-            LeaderboardPage leaderboard = LeaderboardPage.goToPage(leaderboardWindow.switchToWindow(), getContextRoot(), LEADERBOARD, false);
+            final WebDriver leaderboardWindowDriver = leaderboardWindow.switchToWindow();
+            setUpAuthenticatedSession(leaderboardWindowDriver);
+            LeaderboardPage leaderboard = LeaderboardPage.goToPage(leaderboardWindowDriver, getContextRoot(), LEADERBOARD, false);
             LeaderboardTablePO table = leaderboard.getLeaderboardTable();
             
             // Go back to the administration console and rename the first race

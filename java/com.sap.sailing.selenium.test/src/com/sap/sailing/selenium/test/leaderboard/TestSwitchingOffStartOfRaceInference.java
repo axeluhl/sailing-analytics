@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
@@ -61,7 +62,9 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
     @Test
     public void testCorrectDisplayOfRaceColumnWithAndWithoutStartTimeInference() {
         this.environment.getWindowManager().withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {
-            LeaderboardPage leaderboard = LeaderboardPage.goToPage(leaderboardWindow.switchToWindow(), getContextRoot(), LEADERBOARD, /* race details */ false);
+            final WebDriver leaderboardWindowDriver = leaderboardWindow.switchToWindow();
+            setUpAuthenticatedSession(leaderboardWindowDriver);
+            LeaderboardPage leaderboard = LeaderboardPage.goToPage(leaderboardWindowDriver, getContextRoot(), LEADERBOARD, /* race details */ false);
             LeaderboardTablePO leaderboardTable = leaderboard.getLeaderboardTable();
             List<String> races = leaderboardTable.getRaceNames();
             assertThat("Expected only D3", races, equalTo(Arrays.asList("D3")));

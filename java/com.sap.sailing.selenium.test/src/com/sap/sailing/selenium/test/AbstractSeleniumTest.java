@@ -105,12 +105,12 @@ public abstract class AbstractSeleniumTest {
         }
     }
     
-    protected void setUpAuthenticatedSession() {
+    protected void setUpAuthenticatedSession(WebDriver webDriver) {
         logger.info("Authenticating session...");
         Cookie sessionCookie = authenticate(getContextRoot());
-        getWebDriver().get(getContextRoot() + "index.html"); // initialize web driver so setting a cookie for the local domain is possible
+        webDriver.get(getContextRoot() + "index.html"); // initialize web driver so setting a cookie for the local domain is possible
         final Cookie cookieWithoutDomain = new Cookie(sessionCookie.getName(), sessionCookie.getValue(), null, sessionCookie.getPath(), sessionCookie.getExpiry(), sessionCookie.isSecure(), sessionCookie.isHttpOnly());
-        getWebDriver().manage().addCookie(cookieWithoutDomain);
+        webDriver.manage().addCookie(cookieWithoutDomain);
         logger.info("...obtained session cookie "+sessionCookie);
     }
 
@@ -122,7 +122,7 @@ public abstract class AbstractSeleniumTest {
      */
     @Before
     public void setUp() {
-        setUpAuthenticatedSession();
+        setUpAuthenticatedSession(getWebDriver());
     }
     
     /**
