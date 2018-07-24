@@ -97,7 +97,11 @@ public class WindowManager {
         try {
             defaultAndExtraWindow.accept(defaultWindow, extraWindow);
         } finally {
-            extraWindow.close();
+            try {
+                extraWindow.close();
+            } catch (Exception e) {
+                // This call may fail depending on the WebDriver being used
+            }
             defaultWindow.switchToWindow();
         }
     }
