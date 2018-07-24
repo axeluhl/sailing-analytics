@@ -18,7 +18,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -34,6 +33,8 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
  * This dialog allows to change multiple urls for mediatracks at once. It will determine the longest common prefix, that
@@ -135,7 +136,7 @@ public class MultiURLChangeDialog extends DialogBox {
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert(stringMessages.multiUrlChangeCannotSave());
+                            Notification.notify(stringMessages.multiUrlChangeCannotSave(), NotificationType.ERROR);
                         }
                     });
                 }
@@ -150,7 +151,7 @@ public class MultiURLChangeDialog extends DialogBox {
 
         final String maxPrefixForAll = maxPrefixForAll();
         if (maxPrefixForAll.length() == 0) {
-            Window.alert(this.stringMessages.multiUrlNoPrefixWarning());
+            Notification.notify(this.stringMessages.multiUrlNoPrefixWarning(), NotificationType.WARNING);
         }
         replacePartIn.setText(maxPrefixForAll);
         updateUI();

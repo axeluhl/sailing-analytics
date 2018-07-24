@@ -580,9 +580,9 @@ public class PageObject {
      * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
      */
     protected void waitForAlertAndAccept() throws InterruptedException {
-        waitForAlertAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS);
+       waitForAlertAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS);
     }
-
+     
     /**
      * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
      */
@@ -600,25 +600,31 @@ public class PageObject {
         }
         throw new NoAlertPresentException();
     }
-    
+
     /**
-     * Waits for an alert box to appear and dismisses the alert. If no alert shows up, an Exception is thrown.
+     * Waits for an notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
      */
-    protected void waitForAlertAndDismiss() throws InterruptedException {
-        waitForAlertAndDismiss(DEFAULT_WAIT_TIMEOUT_SECONDS);
+    protected void waitForNotificationAndDismiss() throws InterruptedException {
+        waitForNotificationAndDismiss(DEFAULT_WAIT_TIMEOUT_SECONDS);
     }
-    
+
     /**
-     * Waits for an alert box to appear and dismisses the alert. If no alert shows up, an Exception is thrown.
+     * Waits for an notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
      */
-    protected void waitForAlertAndDismiss(int timeoutInSeconds) throws InterruptedException {
+    protected void waitForNotificationAndDismiss(int timeoutInSeconds) throws InterruptedException {
         int i = 0;
         while (i < timeoutInSeconds) {
             i++;
             try {
-                Alert alert = driver.switchTo().alert();
-                alert.accept();
-                return;
+                List<WebElement> notifications = driver.findElements(By.id("notificationBar"));
+                if (notifications.size() > 0) {
+                    notifications.get(0).findElements(By.cssSelector("*"))
+                            .forEach(notification -> notification.click());
+                    ;
+                    return;
+                } else {
+                    throw new NoAlertPresentException();
+                }
             } catch (NoAlertPresentException e) {
                 Thread.sleep(1000);
             }
