@@ -1,10 +1,9 @@
 package com.sap.sailing.selenium.core;
 
-import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 import org.openqa.selenium.Dimension;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -14,9 +13,9 @@ import org.openqa.selenium.WebDriver;
  *   Riccardo Nimser (D049941)
  */
 public class WindowManager {
-    private static final String JAVA_SCRIPT = "window.open('%s', '_blank')";
-    
-    private WebDriver driver;
+    private final WebDriver driver;
+
+    private final Supplier<WebDriver> webDriverFactory;
     
     /**
      * <p></p>
@@ -24,81 +23,26 @@ public class WindowManager {
      * @param driver
      *   
      */
-    public WindowManager(WebDriver driver) {
+    public WindowManager(WebDriver driver, Supplier<WebDriver> webDriverFactory) {
         this.driver = driver;
+        this.webDriverFactory = webDriverFactory;
         
-        setWindowMaximized();
-    }
-    
-    /**
-     * <p>Returns a handle to the window witch is currently active.</p>
-     * 
-     * @return
-     *   
-     */
-    private WebDriverWindow getCurrentWindow() {
-        return new WebDriverWindow(this.driver, this.driver.getWindowHandle());
-    }
-    
-    /**
-     * <p></p>
-     * 
-     * @return
-     */
-    private WebDriverWindow openNewWindow() {
-        return openNewWindow(false);
-    }
-    
-    private WebDriverWindow openNewWindow(boolean focus) {
-        return openNewWindow("", focus);
-    }
-    
-    private WebDriverWindow openNewWindow(String url, boolean focus) {
-        WebDriverWindow window = new WebDriverWindow(this.driver, createWindow(url));
-        
-        if(focus) {
-            window.switchToWindow();
-        }
-        
-        return window;
-    }
-    
-    private String createWindow(String url) {
-        // Record old handles
-        Set<String> oldHandles = this.driver.getWindowHandles();
-        
-        executeScript(url != null ? url : "");
-        
-        return getNewHandle(oldHandles);
-    }
-    
-    private void executeScript(String url) {
-        JavascriptExecutor executor = (JavascriptExecutor) this.driver;
-        executor.executeScript(String.format(JAVA_SCRIPT, url));
-    }
-    
-    private String getNewHandle(Set<String> oldHandles) {
-        Set<String> newHandles = this.driver.getWindowHandles();
-        newHandles.removeAll(oldHandles);
-
-        // Find the new window
-        for(String handle : newHandles)
-            return handle;
-
-        return null;
+        setWindowMaximized(this.driver);
     }
     
     public void withExtraWindow(BiConsumer<WebDriverWindow, WebDriverWindow> defaultAndExtraWindow) {
-        final WebDriverWindow defaultWindow = getCurrentWindow();
-        final WebDriverWindow extraWindow = openNewWindow();
+        final WebDriverWindow defaultWindow = new WebDriverWindow(this.driver, this.driver.getWindowHandle());
+        final WebDriver extraDriver = webDriverFactory.get();
+        final WebDriverWindow extraWindow = new WebDriverWindow(extraDriver, extraDriver.getWindowHandle());
+        
         extraWindow.switchToWindow();
-        setWindowMaximized();
+        setWindowMaximized(extraDriver);
         defaultWindow.switchToWindow();
         try {
             defaultAndExtraWindow.accept(defaultWindow, extraWindow);
         } finally {
             try {
-                extraWindow.close();
+                extraDriver.quit();
             } catch (Exception e) {
                 // This call may fail depending on the WebDriver being used
             }
@@ -106,7 +50,7 @@ public class WindowManager {
         }
     }
     
-    private void setWindowMaximized() {
+    private void setWindowMaximized(WebDriver driver) {
         try {
             driver.manage().window().maximize();
         } catch (Exception e) {

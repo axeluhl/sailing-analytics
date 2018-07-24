@@ -61,8 +61,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
     @Test
     public void testCorrectDisplayOfRaceColumnWithAndWithoutStartTimeInference() {
         this.environment.getWindowManager().withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {
-            leaderboardWindow.switchToWindow();
-            LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, /* race details */ false);
+            LeaderboardPage leaderboard = LeaderboardPage.goToPage(leaderboardWindow.switchToWindow(), getContextRoot(), LEADERBOARD, /* race details */ false);
             LeaderboardTablePO leaderboardTable = leaderboard.getLeaderboardTable();
             List<String> races = leaderboardTable.getRaceNames();
             assertThat("Expected only D3", races, equalTo(Arrays.asList("D3")));
@@ -78,6 +77,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
             RegattaEditDialogPO regattaEditDialog = regattaList.editRegatta(regatta);
             regattaEditDialog.setUseStartTimeInference(false);
             regattaEditDialog.pressOk();
+            
             leaderboardWindow.switchToWindow();
             leaderboard.refresh();
             for (LeaderboardEntry e : leaderboardTable.getEntries()) {

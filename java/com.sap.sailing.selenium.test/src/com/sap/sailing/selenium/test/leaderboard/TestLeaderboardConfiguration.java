@@ -79,8 +79,8 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             
             assertThat(races.size(), equalTo(5));
             assertThat(table.getEntries().size(), equalTo(28)); // the regatta already has the races linked; regatta leaderboard obtains competitors from regatta 
-            adminConsoleWindow.switchToWindow();
-            AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+            
+            AdminConsolePage adminConsole = AdminConsolePage.goToPage(adminConsoleWindow.switchToWindow(), getContextRoot());
             LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
             LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(this.regatta.toString());
             
@@ -121,8 +121,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             leaderboardDetails.linkRace(this.leaderboardRaces.get(3), this.trackedRaces.get(3));
             leaderboardDetails.linkRace(this.leaderboardRaces.get(4), this.trackedRaces.get(4));
             // Open the leaderboard in our second window
-            leaderboardWindow.switchToWindow();
-            LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, false);
+            LeaderboardPage leaderboard = LeaderboardPage.goToPage(leaderboardWindow.switchToWindow(), getContextRoot(), LEADERBOARD, false);
             LeaderboardTablePO table = leaderboard.getLeaderboardTable();
             // Go back to the administration console and delete third race
             adminConsoleWindow.switchToWindow();
@@ -157,9 +156,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             leaderboardDetails.linkRace(this.leaderboardRaces.get(4), this.trackedRaces.get(4));
             
             // Open the leaderboard in our second window
-            leaderboardWindow.switchToWindow();
-            
-            LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, false);
+            LeaderboardPage leaderboard = LeaderboardPage.goToPage(leaderboardWindow.switchToWindow(), getContextRoot(), LEADERBOARD, false);
             LeaderboardTablePO table = leaderboard.getLeaderboardTable();
             
             // Go back to the administration console and rename the first race

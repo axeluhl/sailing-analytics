@@ -1,6 +1,7 @@
 package com.sap.sailing.selenium.core.impl;
 
 import java.io.File;
+import java.util.function.Supplier;
 
 import org.openqa.selenium.WebDriver;
 
@@ -29,12 +30,12 @@ public class TestEnvironmentImpl implements TestEnvironment {
      * @param screenshotsFolder
      *   The folder where screenshots should be stored.
      */
-    public TestEnvironmentImpl(WebDriver driver, String root, File screenshotsFolder) {
-        this.driver = driver;
+    public TestEnvironmentImpl(Supplier<WebDriver> webDriverFactory, String root, File screenshotsFolder) {
+        this.driver = webDriverFactory.get();
         this.root = root;
         this.screenshotsFolder = screenshotsFolder;
         
-        this.manager = new WindowManager(driver);
+        this.manager = new WindowManager(driver, webDriverFactory);
     }
     
     @Override
