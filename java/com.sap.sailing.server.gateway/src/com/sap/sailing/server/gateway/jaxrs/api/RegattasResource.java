@@ -1833,10 +1833,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                     isFleetsCanRunInParallel, resultDiscardingThresholds, startsWithZeroScore,
                     firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring, maximumNumberOfDiscards,
                     fleets));
+        } else {
+            throw new IllegalStateException("RegattaName could not be resolved to regatta " + regattaName);
         }
-
-
-
         return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 }

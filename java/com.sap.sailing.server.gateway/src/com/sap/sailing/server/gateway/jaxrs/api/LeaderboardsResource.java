@@ -69,6 +69,7 @@ import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -82,6 +83,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.RaceColumnConstants;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.security.Permission;
@@ -1241,5 +1243,28 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             }
         }
         return response;
+    }
+
+    @GET
+    @Path("{leaderboardName}/denoteForTracking")
+    public Response denoteForTracking(@PathParam("leaderboardName") String leaderboardName,
+            @QueryParam("raceColumnName") String raceColumnName, @QueryParam("fleetName") String fleetName,
+            @QueryParam("raceName") String raceName) throws NotFoundException, NotDenotableForRaceLogTrackingException {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            throw new NotFoundException("leaderboard with name " + leaderboardName + " not found");
+        }
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        if (raceColumn == null) {
+            throw new NotFoundException("raceColumn with name " + raceColumnName + " not found");
+        }
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        if (fleet == null) {
+            throw new NotFoundException("fleet with name " + fleetName + " not found");
+        }
+
+        boolean result = getRaceLogTrackingAdapter().denoteRaceForRaceLogTracking(getService(), leaderboard, raceColumn,
+                fleet, raceName);
+        return (result ? Response.ok() : Response.notModified()).build();
     }
 }
