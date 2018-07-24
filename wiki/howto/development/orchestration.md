@@ -52,13 +52,7 @@ Inside the `config` folder you will find a folder called `instance_templates`. Y
 You are ready to use the orchestration tool! Please note, that currently only linux-amd64 versions are built. Windows versions can be easily added, as go can also run under Windows and the project currently does not have any dependencies to linux.
 
 ## Run the software
-All you need is to source the environment file `env.sh`, which you can find in the root folder. You will need to source it via
-
-```
-source env.sh
-```
-
-Then you can run the orchestrator using
+You can run the orchestrator using
 
 ```
 ./bin/orchestrator-linux-amd64 <commands>
@@ -69,7 +63,7 @@ As we use log levels, you can increase logging verbosity to a different level by
 ```
 LOG=DEBUG ./bin/orchestrator-linux-amd64 <commands>
 ```
-We offer the following log levels: `DEBUG`, `INFO` (default), `WARNING`, `PANIC`, `FATAL`.
+We offer the following log levels: `DEBUG`, `INFO` (default), `WARNING`, `PANIC`, `FATAL`. If execution fails, you may re-execute the orchestrator using a higher log level to get more insights, what has happened.
 
 ### General
 In general, the orchestrator accepts a set of arguments. The first level of parameters describe the type of action to be executed (basically a use-case). The following arguments are used to specify the use-case specific parameters.
