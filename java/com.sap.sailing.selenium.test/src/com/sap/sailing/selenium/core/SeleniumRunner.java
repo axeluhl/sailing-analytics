@@ -20,7 +20,6 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.TestClass;
 import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
@@ -177,18 +176,6 @@ public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
                 DesiredCapabilities capabilities = new DesiredCapabilities(capabilityDefinitions);
                 Constructor<WebDriver> constructor = clazz.getConstructor(Capabilities.class);
                 WebDriver driver = constructor.newInstance(capabilities);
-                try {
-                    driver.manage().window().maximize();
-                } catch (Exception e) {
-                    // Depending on the combination of OS and WebDriver implementation this may fail
-                    // e.g. chrome with xvfb can't do this successfully.
-                    try {
-                        // Trying to set a proper screen size as fallback that should usable with all modern screens
-                        driver.manage().window().setSize(new Dimension(1440, 900));
-                    } catch (Exception exc) {
-                        // In this case we just can't change the window
-                    }
-                }
                 
                 File screenshots = resolveScreenshotFolder();
                 

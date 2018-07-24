@@ -1,7 +1,9 @@
 package com.sap.sailing.selenium.core;
 
 import java.util.Set;
+import java.util.function.BiConsumer;
 
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
@@ -25,6 +27,8 @@ public class WindowManager {
      */
     public WindowManager(WebDriver driver) {
         this.driver = driver;
+        
+        setWindowMaximized();
     }
     
     /**
@@ -133,5 +137,34 @@ public class WindowManager {
             return handle;
 
         return null;
+    }
+    
+    public void withExtraWindow(BiConsumer<WebDriverWindow, WebDriverWindow> defaultAndExtraWindow) {
+        final WebDriverWindow defaultWindow = getCurrentWindow();
+        final WebDriverWindow extraWindow = openNewWindow();
+        extraWindow.switchToWindow();
+        setWindowMaximized();
+        defaultWindow.switchToWindow();
+        try {
+            defaultAndExtraWindow.accept(defaultWindow, extraWindow);
+        } finally {
+            extraWindow.close();
+            defaultWindow.switchToWindow();
+        }
+    }
+    
+    private void setWindowMaximized() {
+        try {
+            driver.manage().window().maximize();
+        } catch (Exception e) {
+            // Depending on the combination of OS and WebDriver implementation this may fail
+            // e.g. chrome with xvfb can't do this successfully.
+            try {
+                // Trying to set a proper screen size as fallback that should usable with all modern screens
+                driver.manage().window().setSize(new Dimension(1440, 900));
+            } catch (Exception exc) {
+                // In this case we just can't change the window
+            }
+        }
     }
 }

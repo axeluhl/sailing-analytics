@@ -6,15 +6,11 @@ import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.openqa.selenium.Dimension;
 
-import com.sap.sailing.selenium.core.WebDriverWindow;
-import com.sap.sailing.selenium.core.WindowManager;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
@@ -75,7 +71,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
     
     @Test
     public void testDynamicRaceLinking() {
-        withExtraWindow((leaderboardWindow, adminConsoleWindow) -> {
+        this.environment.getWindowManager().withExtraWindow((leaderboardWindow, adminConsoleWindow) -> {
             // Open the leaderboard and check for "empty" leaderboard
             LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, false);
             LeaderboardTablePO table = leaderboard.getLeaderboardTable();
@@ -114,7 +110,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
     
     @Test
     public void testDynamicRaceDeletion() {
-        withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {
+        this.environment.getWindowManager().withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {
             // Go to the administration console and link all 5 races
             AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
@@ -148,7 +144,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
     @Ignore("This test belongs to bug 1892 and currently fails. It is currently enabled on branch bug1892.")
     @Test
     public void testDynamicRenamingOfRace() {
-        withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {
+        this.environment.getWindowManager().withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {
             // Go to the administration console and link all 5 races
             AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
@@ -182,34 +178,6 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             assertThat("Race names do not match after renaming race 'D1' to 'Q'",
                     races, equalTo(Arrays.asList("Q", "D2", "D3", "D4", "D5")));
         });
-    }
-    
-    private void withExtraWindow(BiConsumer<WebDriverWindow, WebDriverWindow> defaultAndExtraWindow) {
-        final WindowManager manager = this.environment.getWindowManager();
-        final WebDriverWindow defaultWindow = manager.getCurrentWindow();
-        final WebDriverWindow extraWindow = manager.openNewWindow();
-        try {
-            extraWindow.switchToWindow();
-            // On WebDriver implementations that support it, the window is maximized
-            // This makes our Tests work much better on Windows
-            getWebDriver().manage().window().maximize();
-        } catch (Exception e) {
-            // maximizing isn't supported on all Systems / WebDriver implementations
-            try {
-                // Trying to set a proper screen size as fallback that should usable with all modern screens
-                getWebDriver().manage().window().setSize(new Dimension(1440, 900));
-            } catch (Exception exc) {
-                // In this case we just can't change the window
-            }
-        } finally {
-            defaultWindow.switchToWindow();
-        }
-        try {
-            defaultAndExtraWindow.accept(defaultWindow, extraWindow);
-        } finally {
-            extraWindow.close();
-            defaultWindow.switchToWindow();
-        }
     }
     
     private void configureLeaderboard() {
