@@ -1,0 +1,12 @@
+{
+  "image": "ami-9e627974",
+  "instance-type": "t2.large",
+  "vpc": "vpc-14b3477f",
+  "subnet": "subnet-eab34781",
+  "count": 1,
+  "security-groups": [
+	"sg-eaf31e85"
+  ],
+  "tags": {
+  }
+}
