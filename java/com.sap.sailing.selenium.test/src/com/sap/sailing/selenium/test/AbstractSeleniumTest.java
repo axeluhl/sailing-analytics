@@ -88,7 +88,6 @@ public abstract class AbstractSeleniumTest {
         }
         // clear local storage
         getWebDriver().get(contextRoot);
-        getWebDriver().manage().deleteAllCookies();
         // TODO get to know if all of our used drivers support WebStorage and if yes, remove the old JS solution
         if (getWebDriver() instanceof WebStorage) {
             final WebStorage webStorage = (WebStorage)getWebDriver();
