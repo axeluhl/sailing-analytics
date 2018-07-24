@@ -103,10 +103,6 @@ public abstract class DataEntryDialogPO extends PageArea {
     public void pressMakeDefault() {
         WebElement element = findElementBySeleniumId(ID_MAKE_DEFAULT_BUTTON);
         element.click();
-        final ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
-        final Alert alert = new WebDriverWait(driver, 10).until(condition::apply);
-        
-        alert.accept();
     }
     
     public boolean isMakeDefaultButtonVisible() {
