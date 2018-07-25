@@ -8,7 +8,9 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
+import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorWithEstimationDataSupportDecoratorImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.TrackTimeInfo;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -26,10 +28,10 @@ public class EstimationDataUtil {
     }
 
     public static List<CompetitorTrackWithEstimationData> getCompetitorTracksWithEstimationData(
-            TrackedRace trackedRace) {
+            TrackedRace trackedRace, PolarDataService polarDataService) {
         // TODO make iterative
         Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
-        ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl();
+        ManeuverDetectorWithEstimationDataSupportDecoratorImpl maneuverDetector = new ManeuverDetectorWithEstimationDataSupportDecoratorImpl(new ManeuverDetectorImpl(), polarDataService);
         List<CompetitorTrackWithEstimationData> competitorTracks = new ArrayList<>();
         for (Competitor competitor : competitors) {
             TrackTimeInfo trackTimeInfo = maneuverDetector.getTrackTimeInfo();

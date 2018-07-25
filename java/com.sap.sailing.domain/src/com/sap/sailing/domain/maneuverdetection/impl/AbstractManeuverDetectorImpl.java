@@ -49,11 +49,7 @@ public abstract class AbstractManeuverDetectorImpl implements ManeuverDetector {
         this.track = trackedRace != null ? trackedRace.getTrack(competitor) : null;
     }
 
-    /**
-     * Gets track's start time point, end time point and the time point of last raw fix.
-     * 
-     * @return {@code null} when there are no appropriate fixes contained within the analyzed track
-     */
+    @Override
     public TrackTimeInfo getTrackTimeInfo() {
         NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
         TimePoint earliestTrackRecord = null;

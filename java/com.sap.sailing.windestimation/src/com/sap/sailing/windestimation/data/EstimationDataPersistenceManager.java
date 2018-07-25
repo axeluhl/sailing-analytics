@@ -24,8 +24,8 @@ import com.sap.sailing.server.gateway.deserialization.impl.CompleteManeuverCurve
 import com.sap.sailing.server.gateway.deserialization.impl.DetailedBoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverMainCurveWithEstimationDataJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.ManeuverWindJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -55,7 +55,7 @@ public class EstimationDataPersistenceManager {
     private final CompleteManeuverCurveWithEstimationDataJsonDeserializer completeManeuverCurveDeserializer = new CompleteManeuverCurveWithEstimationDataJsonDeserializer(
             new ManeuverMainCurveWithEstimationDataJsonDeserializer(),
             new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer(),
-            new WindJsonDeserializer(new PositionJsonDeserializer()), new PositionJsonDeserializer());
+            new ManeuverWindJsonDeserializer(), new PositionJsonDeserializer());
     private final DetailedBoatClassJsonDeserializer boatClassDeserializer = new DetailedBoatClassJsonDeserializer();
     private final JSONParser jsonParser = new JSONParser();
 

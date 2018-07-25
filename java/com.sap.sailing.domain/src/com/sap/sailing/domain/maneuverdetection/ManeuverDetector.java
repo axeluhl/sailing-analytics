@@ -2,6 +2,7 @@ package com.sap.sailing.domain.maneuverdetection;
 
 import java.util.List;
 
+import com.sap.sailing.domain.maneuverdetection.impl.TrackTimeInfo;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.Maneuver;
 
@@ -35,5 +36,12 @@ public interface ManeuverDetector {
      * @return an empty list if no maneuvers were detected, otherwise the list with detected maneuvers.
      */
     List<Maneuver> detectManeuvers();
+
+    /**
+     * Gets track's start time point, end time point and the time point of last raw fix.
+     * 
+     * @return {@code null} when there are no appropriate fixes contained within the analyzed track
+     */
+    TrackTimeInfo getTrackTimeInfo();
 
 }

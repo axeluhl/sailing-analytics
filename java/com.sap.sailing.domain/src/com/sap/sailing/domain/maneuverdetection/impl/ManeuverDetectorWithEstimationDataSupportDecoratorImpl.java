@@ -61,6 +61,11 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
     public List<Maneuver> detectManeuvers() {
         return maneuverDetector.detectManeuvers();
     }
+    
+    @Override
+    public TrackTimeInfo getTrackTimeInfo() {
+        return maneuverDetector.getTrackTimeInfo();
+    }
 
     @Override
     public List<Maneuver> detectManeuvers(Iterable<CompleteManeuverCurve> maneuverCurves) {

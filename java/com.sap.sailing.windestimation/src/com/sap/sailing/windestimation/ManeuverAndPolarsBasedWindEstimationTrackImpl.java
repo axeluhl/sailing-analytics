@@ -2,6 +2,7 @@ package com.sap.sailing.windestimation;
 
 import java.util.List;
 
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
@@ -25,18 +26,21 @@ public class ManeuverAndPolarsBasedWindEstimationTrackImpl extends WindTrackImpl
 
     private final TrackedRace trackedRace;
     private final ManeuverAndPolarsBasedWindEstimator windEstimator;
+    private final PolarDataService polarDataService;
 
     public ManeuverAndPolarsBasedWindEstimationTrackImpl(ManeuverAndPolarsBasedWindEstimator windEstimator,
-            TrackedRace trackedRace, long millisecondsOverWhichToAverage, boolean waitForLatest) {
+            TrackedRace trackedRace, PolarDataService polarDataService, long millisecondsOverWhichToAverage,
+            boolean waitForLatest) {
         super(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE, /* useSpeed */true,
                 ManeuverAndPolarsBasedWindEstimationTrackImpl.class.getSimpleName());
         this.windEstimator = windEstimator;
         this.trackedRace = trackedRace;
+        this.polarDataService = polarDataService;
     }
 
     public void analyzeRace() {
         List<CompetitorTrackWithEstimationData> competitorTracks = EstimationDataUtil
-                .getCompetitorTracksWithEstimationData(trackedRace);
+                .getCompetitorTracksWithEstimationData(trackedRace, polarDataService);
         List<WindWithConfidence<TimePoint>> windTrack = windEstimator.estimateWind(competitorTracks);
         for (WindWithConfidence<TimePoint> windWithConfidence : windTrack) {
             // TODO how to set confidence for each wind fix individually?
