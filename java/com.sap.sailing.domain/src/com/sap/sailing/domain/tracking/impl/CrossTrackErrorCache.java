@@ -205,6 +205,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
         owner.addListener(this);
     }
     
+    @FunctionalInterface
     private interface CrossTrackErrorMeterRetriever {
         double getDistanceInMetersSumFromStart(CrossTrackErrorSumAndNumberOfFixes cacheEntry);
     }
@@ -220,12 +221,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
      */
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatest) throws NoWindException {
-        CrossTrackErrorMeterRetriever absoluteMetersRetriever = new CrossTrackErrorMeterRetriever() {
-            @Override
-            public double getDistanceInMetersSumFromStart(CrossTrackErrorSumAndNumberOfFixes cacheEntry) {
-                return cacheEntry.getAbsoluteDistanceInMetersSumFromStart();
-            }
-        };
+        CrossTrackErrorMeterRetriever absoluteMetersRetriever = cacheEntry->cacheEntry.getAbsoluteDistanceInMetersSumFromStart();
         return getAbsoluteOrSignedAverageCrossTrackError(competitor, from, to, upwindOnly, waitForLatest, absoluteMetersRetriever);
     }
 
@@ -240,12 +236,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
      */
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatest) throws NoWindException {
-        CrossTrackErrorMeterRetriever signedMetersRetriever = new CrossTrackErrorMeterRetriever() {
-            @Override
-            public double getDistanceInMetersSumFromStart(CrossTrackErrorSumAndNumberOfFixes cacheEntry) {
-                return cacheEntry.getSignedDistanceInMetersSumFromStart();
-            }
-        };
+        CrossTrackErrorMeterRetriever signedMetersRetriever = cacheEntry->cacheEntry.getSignedDistanceInMetersSumFromStart();
         return getAbsoluteOrSignedAverageCrossTrackError(competitor, from, to, upwindOnly, waitForLatest, signedMetersRetriever);
     }
 
@@ -268,7 +259,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                     final MarkPassing legStartMarkPassing = owner.getMarkPassing(competitor, leg.getFrom());
                     if (legStartMarkPassing != null) {
                         if (!upwindOnly || trackedLeg.getLegType(legStartMarkPassing.getTimePoint()) == LegType.UPWIND) {
-                            TimePoint start;
+                            final TimePoint start;
                             final TimePoint legStart = legStartMarkPassing.getTimePoint();
                             if (legStart.compareTo(from) < 0) {
                                 // the interval requested starts after this leg's start:
@@ -277,7 +268,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                                 start = legStart;
                             }
                             final MarkPassing legEndMarkPassing = owner.getMarkPassing(competitor, leg.getTo());
-                            TimePoint end;
+                            final TimePoint end;
                             if (legEndMarkPassing == null || legEndMarkPassing.getTimePoint().compareTo(to) >= 0) {
                                 // no next mark passing, or next mark passing is beyond the "to" time point; aggregate up to "to"
                                 end = to;
