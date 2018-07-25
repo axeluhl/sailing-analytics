@@ -65,5 +65,9 @@ public class RegattaCompetitionFleetRace extends AbstractRegattaCompetitionFleet
     protected String getRaceUntrackedStyleName() {
         return local_res.css().regattacompetition_phase_fleet_raceuntracked();
     }
+
+    public void removeBigRaceTitleCSS() {
+        raceNameUi.removeClassName(local_res.css().regattacompetition_phase_fleet_race_title_big());
+    }
     
 }

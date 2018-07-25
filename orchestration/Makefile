@@ -72,7 +72,7 @@ build:
 	$(foreach GOARCH, $(ARCHITECTURES), cd ${PREFIX}/src/sapsailing.com/orchestrator; GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOBUILD) ${LDFLAGS} -v -o $${PREFIX}/bin/orchestrator-$(GOOS)-$(GOARCH)))
 	$(foreach GOOS, $(PLATFORMS),\
 	$(foreach GOARCH, $(ARCHITECTURES), cd ${PREFIX}/src/sapsailing.com/agent; GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOBUILD) ${LDFLAGS} -v -o $${PREFIX}/bin/agent-$(GOOS)-$(GOARCH)))
-	@/usr/bin/chmod +x $${PREFIX}/bin/*
+	@chmod +x $${PREFIX}/bin/*
 	@echo "done."
 
 clean:
