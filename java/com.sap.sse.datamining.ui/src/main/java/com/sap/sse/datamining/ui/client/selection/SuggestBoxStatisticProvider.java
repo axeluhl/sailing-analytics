@@ -531,7 +531,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         @Override
         public int compareTo(ExtractionFunctionWithContext o) {
             int comparedDisplayName = extractionFunction.getDisplayName()
-                    .compareTo(o.getExtractionFunction().getDisplayName());
+                    .compareToIgnoreCase(o.getExtractionFunction().getDisplayName());
             if (comparedDisplayName != 0)
                 return comparedDisplayName;
 
