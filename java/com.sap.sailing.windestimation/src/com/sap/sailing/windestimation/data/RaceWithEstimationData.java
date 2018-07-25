@@ -7,15 +7,15 @@ import java.util.List;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class RaceWithEstimationData {
+public class RaceWithEstimationData<T> {
 
     private final String dbId;
     private final String regattaName;
     private final String raceName;
-    private final List<CompetitorTrackWithEstimationData> competitorTracks;
+    private final List<CompetitorTrackWithEstimationData<T>> competitorTracks;
 
     public RaceWithEstimationData(String dbId, String regattaName, String raceName,
-            List<CompetitorTrackWithEstimationData> competitorTracks) {
+            List<CompetitorTrackWithEstimationData<T>> competitorTracks) {
         this.dbId = dbId;
         this.regattaName = regattaName;
         this.raceName = raceName;
@@ -30,7 +30,7 @@ public class RaceWithEstimationData {
         return raceName;
     }
 
-    public List<CompetitorTrackWithEstimationData> getCompetitorTracks() {
+    public List<CompetitorTrackWithEstimationData<T>> getCompetitorTracks() {
         return competitorTracks;
     }
 

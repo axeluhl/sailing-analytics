@@ -10,12 +10,12 @@ import com.sap.sailing.windestimation.data.RaceWithEstimationData;
  * @author Vladislav Chumak (D069712)
  *
  */
-public interface WindEstimatorEvaluator {
+public interface WindEstimatorEvaluator<T> {
 
     WindEstimatorEvaluationResult evaluateWindEstimator(ManeuverAndPolarsBasedWindEstimatorFactory windEstimatorFactory,
-            Iterator<RaceWithEstimationData> racesIterator, long numberOfRaces);
+            Iterator<RaceWithEstimationData<T>> racesIterator, long numberOfRaces);
 
     WindEstimatorEvaluationResult evaluateWindEstimator(ManeuverAndPolarsBasedWindEstimator windEstimator,
-            RaceWithEstimationData race);
+            RaceWithEstimationData<T> race);
 
 }

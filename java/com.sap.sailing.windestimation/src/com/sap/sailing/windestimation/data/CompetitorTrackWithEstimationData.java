@@ -3,7 +3,6 @@ package com.sap.sailing.windestimation.data;
 import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -13,26 +12,32 @@ import com.sap.sse.common.TimePoint;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class CompetitorTrackWithEstimationData {
+public class CompetitorTrackWithEstimationData<T> {
 
     private final String competitorName;
     private final BoatClass boatClass;
-    private final List<CompleteManeuverCurveWithEstimationData> maneuverCurves;
+    private final List<T> elements;
     private final double avgIntervalBetweenFixesInSeconds;
     private final Distance distanceTravelled;
     private final TimePoint trackStartTimePoint;
     private final TimePoint trackEndTimePoint;
+    private final long fixesCountForPolars;
+    private final int markPassingsCount;
+    private final int waypointsCount;
 
-    public CompetitorTrackWithEstimationData(String competitorName, BoatClass boatClass,
-            List<CompleteManeuverCurveWithEstimationData> maneuverCurves, double avgIntervalBetweenFixesInSeconds,
-            Distance distanceTravelled, TimePoint trackStartTimePoint, TimePoint trackEndTimePoint) {
+    public CompetitorTrackWithEstimationData(String competitorName, BoatClass boatClass, List<T> elements,
+            double avgIntervalBetweenFixesInSeconds, Distance distanceTravelled, TimePoint trackStartTimePoint,
+            TimePoint trackEndTimePoint, long fixesCountForPolars, int markPassingsCount, int waypointsCount) {
         this.competitorName = competitorName;
         this.boatClass = boatClass;
-        this.maneuverCurves = maneuverCurves;
+        this.elements = elements;
         this.avgIntervalBetweenFixesInSeconds = avgIntervalBetweenFixesInSeconds;
         this.distanceTravelled = distanceTravelled;
         this.trackStartTimePoint = trackStartTimePoint;
         this.trackEndTimePoint = trackEndTimePoint;
+        this.fixesCountForPolars = fixesCountForPolars;
+        this.markPassingsCount = markPassingsCount;
+        this.waypointsCount = waypointsCount;
     }
 
     public String getCompetitorName() {
@@ -43,8 +48,8 @@ public class CompetitorTrackWithEstimationData {
         return boatClass;
     }
 
-    public List<CompleteManeuverCurveWithEstimationData> getManeuverCurves() {
-        return maneuverCurves;
+    public List<T> getElements() {
+        return elements;
     }
 
     public double getAvgIntervalBetweenFixesInSeconds() {
@@ -66,6 +71,18 @@ public class CompetitorTrackWithEstimationData {
 
     public TimePoint getTrackEndTimePoint() {
         return trackEndTimePoint;
+    }
+
+    public long getFixesCountForPolars() {
+        return fixesCountForPolars;
+    }
+
+    public int getMarkPassingsCount() {
+        return markPassingsCount;
+    }
+
+    public int getWaypointsCount() {
+        return waypointsCount;
     }
 
 }

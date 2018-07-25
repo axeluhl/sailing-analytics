@@ -2,6 +2,7 @@ package com.sap.sailing.windestimation;
 
 import java.util.List;
 
+import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -39,7 +40,7 @@ public class ManeuverAndPolarsBasedWindEstimationTrackImpl extends WindTrackImpl
     }
 
     public void analyzeRace() {
-        List<CompetitorTrackWithEstimationData> competitorTracks = EstimationDataUtil
+        List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> competitorTracks = EstimationDataUtil
                 .getCompetitorTracksWithEstimationData(trackedRace, polarDataService);
         List<WindWithConfidence<TimePoint>> windTrack = windEstimator.estimateWind(competitorTracks);
         for (WindWithConfidence<TimePoint> windWithConfidence : windTrack) {

@@ -11,11 +11,11 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
  * @author Vladislav Chumak (D069712)
  *
  */
-public class PersistedRacesWithEstimationDataIterator implements Iterator<RaceWithEstimationData> {
+public class PersistedRacesWithEstimationDataIterator<T> implements Iterator<RaceWithEstimationData<T>> {
 
     private final EstimationDataPersistenceManager persistenceManager;
     private String lastDbId = null;
-    private RaceWithEstimationData nextRaceWithEstimationData = null;
+    private RaceWithEstimationData<T> nextRaceWithEstimationData = null;
     private final long numberOfRaces;
     private long currentRaceNumber = 0;
     private int numberOfCharsDuringLastStatusLog = 0;
@@ -33,8 +33,8 @@ public class PersistedRacesWithEstimationDataIterator implements Iterator<RaceWi
     }
 
     @Override
-    public RaceWithEstimationData next() {
-        RaceWithEstimationData nextRaceWithEstimationData = this.nextRaceWithEstimationData;
+    public RaceWithEstimationData<T> next() {
+        RaceWithEstimationData<T> nextRaceWithEstimationData = this.nextRaceWithEstimationData;
         prepareNext();
         return nextRaceWithEstimationData;
     }
@@ -45,7 +45,7 @@ public class PersistedRacesWithEstimationDataIterator implements Iterator<RaceWi
         numberOfCharsDuringLastStatusLog = LoggingUtil.logInfo("Loading race " + nextRaceNumber + "/" + numberOfRaces
                 + " (" + (nextRaceNumber * 100 / numberOfRaces) + " %)");
         try {
-            nextRaceWithEstimationData = persistenceManager.getNextRaceWithEstimationData(lastDbId);
+            nextRaceWithEstimationData = (RaceWithEstimationData<T>) persistenceManager.getNextRaceWithEstimationData(lastDbId);
             if (nextRaceWithEstimationData != null) {
                 this.lastDbId = nextRaceWithEstimationData.getDbId();
                 this.currentRaceNumber = nextRaceNumber;

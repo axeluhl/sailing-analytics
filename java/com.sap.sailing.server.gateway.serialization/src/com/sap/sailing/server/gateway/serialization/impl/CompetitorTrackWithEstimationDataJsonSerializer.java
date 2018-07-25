@@ -26,7 +26,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
  *
  */
 public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTrackedRaceDataJsonSerializer {
-    public static final String elements = "elements";
+    public static final String ELEMENTS = "elements";
     public static final String BOAT_CLASS = "boatClass";
     public static final String COMPETITOR_NAME = "competitorName";
     public static final String AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS = "avgIntervalBetweenFixesInSeconds";
@@ -111,7 +111,7 @@ public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTra
                         : trackTimeInfo.getTrackEndTimePoint().asMillis());
                 forCompetitorJson.put(MARK_PASSINGS_COUNT, getMarkPassingsCount(trackedRace, competitor));
                 forCompetitorJson.put(WAYPOINTS_COUNT, getWaypointsCount(trackedRace));
-                forCompetitorJson.put(elements,
+                forCompetitorJson.put(ELEMENTS,
                         elementsJsonSerializer.serialize(trackedRace, competitor, from, to, trackTimeInfo));
             }
         }

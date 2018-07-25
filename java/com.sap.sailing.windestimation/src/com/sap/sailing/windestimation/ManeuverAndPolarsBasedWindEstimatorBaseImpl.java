@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
@@ -22,20 +23,20 @@ public abstract class ManeuverAndPolarsBasedWindEstimatorBaseImpl implements Man
     }
 
     public List<WindWithConfidence<TimePoint>> estimateWind(
-            Iterable<CompetitorTrackWithEstimationData> competitorTracks) {
-        List<CompetitorTrackWithEstimationData> filteredCompetitorTracks = filterOutImplausibleTracks(competitorTracks);
+            Iterable<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> competitorTracks) {
+        List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> filteredCompetitorTracks = filterOutImplausibleTracks(competitorTracks);
         List<WindWithConfidence<TimePoint>> windTrack = estimateWindByFilteredCompetitorTracks(
                 filteredCompetitorTracks);
         return windTrack;
     }
 
     protected abstract List<WindWithConfidence<TimePoint>> estimateWindByFilteredCompetitorTracks(
-            List<CompetitorTrackWithEstimationData> filteredCompetitorTracks);
+            List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> filteredCompetitorTracks);
 
-    public List<CompetitorTrackWithEstimationData> filterOutImplausibleTracks(
-            Iterable<CompetitorTrackWithEstimationData> competitorTracks) {
-        List<CompetitorTrackWithEstimationData> result = new ArrayList<>();
-        for (CompetitorTrackWithEstimationData track : competitorTracks) {
+    public List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> filterOutImplausibleTracks(
+            Iterable<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> competitorTracks) {
+        List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> result = new ArrayList<>();
+        for (CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> track : competitorTracks) {
             if (track.getAvgIntervalBetweenFixesInSeconds() <= 100.0 && track.getDuration().asSeconds() != 0
                     && track.getDistanceTravelled().getKilometers() / track.getDuration().asHours() >= 1.852) {
                 result.add(track);

@@ -1,8 +1,7 @@
 package com.sap.sailing.windestimation;
 
 import java.util.ArrayList;
-import java.util.List;
-
+import java.util.List;import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
@@ -23,11 +22,11 @@ public class ManeuverSequenceGraphBasedWindEstimatorImpl extends ManeuverAndPola
 
     @Override
     protected List<WindWithConfidence<TimePoint>> estimateWindByFilteredCompetitorTracks(
-            List<CompetitorTrackWithEstimationData> filteredCompetitorTracks) {
+            List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> filteredCompetitorTracks) {
         List<SingleTrackManeuverSequenceGraph> singleTrackGraphs = new ArrayList<>();
-        for (CompetitorTrackWithEstimationData track : filteredCompetitorTracks) {
+        for (CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> track : filteredCompetitorTracks) {
             SingleTrackManeuverSequenceGraph graph = new SingleTrackManeuverSequenceGraph(track.getBoatClass(),
-                    getPolarService(), track.getManeuverCurves());
+                    getPolarService(), track.getElements());
             singleTrackGraphs.add(graph);
         }
         CrossTrackManeuverSequenceGraph crossTrackGraph = new CrossTrackManeuverSequenceGraph(singleTrackGraphs,

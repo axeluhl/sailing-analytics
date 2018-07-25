@@ -22,7 +22,7 @@ import com.sap.sse.common.TimePoint;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class WindEstimationEvaluatorImpl implements WindEstimatorEvaluator {
+public class WindEstimationEvaluatorImpl implements WindEstimatorEvaluator<CompleteManeuverCurveWithEstimationData> {
 
     private final double maxWindCourseDeviationInDegrees;
     private final double maxWindSpeedDeviationInKnots;
@@ -38,7 +38,7 @@ public class WindEstimationEvaluatorImpl implements WindEstimatorEvaluator {
     @Override
     public WindEstimatorEvaluationResult evaluateWindEstimator(
             ManeuverAndPolarsBasedWindEstimatorFactory windEstimatorFactory,
-            Iterator<RaceWithEstimationData> racesIterator, long numberOfRaces) {
+            Iterator<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> racesIterator, long numberOfRaces) {
         return StreamSupport
                 .stream(new FixedBatchSpliteratorWrapper<>(
                         Spliterators.spliterator(racesIterator, numberOfRaces, Spliterator.NONNULL), numberOfRaces, 50),
@@ -49,14 +49,14 @@ public class WindEstimationEvaluatorImpl implements WindEstimatorEvaluator {
 
     @Override
     public WindEstimatorEvaluationResult evaluateWindEstimator(ManeuverAndPolarsBasedWindEstimator windEstimator,
-            RaceWithEstimationData raceWithEstimationData) {
+            RaceWithEstimationData<CompleteManeuverCurveWithEstimationData> raceWithEstimationData) {
         LoggingUtil.logInfo("Evaluating on " + raceWithEstimationData.getRegattaName() + " Race "
                 + raceWithEstimationData.getRaceName());
         Map<TimePoint, Wind> targetWindPerTimePoint = new HashMap<>();
-        for (CompetitorTrackWithEstimationData competitorTrackWithEstimationData : raceWithEstimationData
+        for (CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithEstimationData : raceWithEstimationData
                 .getCompetitorTracks()) {
             for (CompleteManeuverCurveWithEstimationData maneuver : competitorTrackWithEstimationData
-                    .getManeuverCurves()) {
+                    .getElements()) {
                 targetWindPerTimePoint.put(maneuver.getTimePoint(), maneuver.getWind());
             }
         }

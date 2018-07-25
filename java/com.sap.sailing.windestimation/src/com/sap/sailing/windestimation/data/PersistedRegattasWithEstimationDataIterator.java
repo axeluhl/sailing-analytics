@@ -9,13 +9,13 @@ import java.util.List;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class PersistedRegattasWithEstimationDataIterator implements Iterator<RegattaWithEstimationData> {
+public class PersistedRegattasWithEstimationDataIterator<T> implements Iterator<RegattaWithEstimationData<T>> {
 
-    private PersistedRacesWithEstimationDataIterator racesIterator;
-    private RaceWithEstimationData nextRegatta;
+    private PersistedRacesWithEstimationDataIterator<T> racesIterator;
+    private RaceWithEstimationData<T> nextRegatta;
 
     public PersistedRegattasWithEstimationDataIterator(EstimationDataPersistenceManager persistenceManager) {
-        racesIterator = new PersistedRacesWithEstimationDataIterator(persistenceManager);
+        racesIterator = new PersistedRacesWithEstimationDataIterator<T>(persistenceManager);
         nextRegatta = racesIterator.next();
     }
 
@@ -25,10 +25,10 @@ public class PersistedRegattasWithEstimationDataIterator implements Iterator<Reg
     }
 
     @Override
-    public RegattaWithEstimationData next() {
+    public RegattaWithEstimationData<T> next() {
         if (hasNext()) {
-            List<RaceWithEstimationData> racesList = new ArrayList<>();
-            RaceWithEstimationData race = nextRegatta;
+            List<RaceWithEstimationData<T>> racesList = new ArrayList<>();
+            RaceWithEstimationData<T> race = nextRegatta;
             String regattaName = race.getRegattaName();
             racesList.add(race);
             while (racesIterator.hasNext()) {

@@ -2,19 +2,17 @@ package com.sap.sailing.windestimation.data;
 
 import java.util.Iterator;
 
-import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
-
 /**
  * @author Vladislav Chumak (D069712)
  *
  */
-public class PersistedManeuverWithEstimationDataIterator implements Iterator<CompleteManeuverCurveWithEstimationData> {
+public class PersistedManeuverWithEstimationDataIterator<T> implements Iterator<T> {
 
-    private final PersistedCompetitorTrackWithEstimationDataIterator competitorTrackIterator;
-    private Iterator<CompleteManeuverCurveWithEstimationData> maneuversIteratorOfCurrentCompetitorTrack = null;
+    private final PersistedCompetitorTrackWithEstimationDataIterator<T> competitorTrackIterator;
+    private Iterator<T> maneuversIteratorOfCurrentCompetitorTrack = null;
 
     public PersistedManeuverWithEstimationDataIterator(
-            PersistedCompetitorTrackWithEstimationDataIterator competitorTrackIterator) {
+            PersistedCompetitorTrackWithEstimationDataIterator<T> competitorTrackIterator) {
         this.competitorTrackIterator = competitorTrackIterator;
     }
 
@@ -25,12 +23,12 @@ public class PersistedManeuverWithEstimationDataIterator implements Iterator<Com
     }
 
     @Override
-    public CompleteManeuverCurveWithEstimationData next() {
+    public T next() {
         if (maneuversIteratorOfCurrentCompetitorTrack != null && maneuversIteratorOfCurrentCompetitorTrack.hasNext()) {
             return maneuversIteratorOfCurrentCompetitorTrack.next();
         }
         while (competitorTrackIterator.hasNext()) {
-            maneuversIteratorOfCurrentCompetitorTrack = competitorTrackIterator.next().getManeuverCurves().iterator();
+            maneuversIteratorOfCurrentCompetitorTrack = competitorTrackIterator.next().getElements().iterator();
             if (maneuversIteratorOfCurrentCompetitorTrack.hasNext()) {
                 return maneuversIteratorOfCurrentCompetitorTrack.next();
             }

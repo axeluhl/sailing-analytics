@@ -7,13 +7,13 @@ import java.util.Iterator;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class PersistedCompetitorTrackWithEstimationDataIterator implements Iterator<CompetitorTrackWithEstimationData> {
+public class PersistedCompetitorTrackWithEstimationDataIterator<T> implements Iterator<CompetitorTrackWithEstimationData<T>> {
 
-    private final PersistedRacesWithEstimationDataIterator racesIterator;
-    private Iterator<CompetitorTrackWithEstimationData> competitorTracksIteratorOfCurrentRace = null;
+    private final PersistedRacesWithEstimationDataIterator<T> racesIterator;
+    private Iterator<CompetitorTrackWithEstimationData<T>> competitorTracksIteratorOfCurrentRace = null;
 
     public PersistedCompetitorTrackWithEstimationDataIterator(EstimationDataPersistenceManager persistenceManager) {
-        racesIterator = new PersistedRacesWithEstimationDataIterator(persistenceManager);
+        racesIterator = new PersistedRacesWithEstimationDataIterator<>(persistenceManager);
     }
 
     @Override
@@ -23,7 +23,7 @@ public class PersistedCompetitorTrackWithEstimationDataIterator implements Itera
     }
 
     @Override
-    public CompetitorTrackWithEstimationData next() {
+    public CompetitorTrackWithEstimationData<T> next() {
         if (competitorTracksIteratorOfCurrentRace != null && competitorTracksIteratorOfCurrentRace.hasNext()) {
             return competitorTracksIteratorOfCurrentRace.next();
         }
