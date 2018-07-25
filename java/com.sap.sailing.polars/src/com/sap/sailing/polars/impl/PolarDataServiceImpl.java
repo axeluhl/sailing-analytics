@@ -188,7 +188,12 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
                 boatClass, speedAtManeuverStart, type == ManeuverType.TACK ? LegType.UPWIND : LegType.DOWNWIND,
                 type == ManeuverType.TACK ? courseChangeDeg >= 0 ? Tack.PORT : Tack.STARBOARD
                         : courseChangeDeg >= 0 ? Tack.STARBOARD : Tack.PORT)) {
+<<<<<<< HEAD
             double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(type, trueWindSpeedAndAngle.getObject().getBearing());
+=======
+            double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(
+                    trueWindSpeedAndAngle.getObject().getBearing().getDegrees(), type);
+>>>>>>> refs/remotes/origin/master
             double diff = Math.abs(Math.abs(targetManeuverAngle) - Math.abs(courseChangeDeg));
             if (diff < minDiff) {
                 minDiff = diff;
