@@ -36,7 +36,8 @@ public abstract class GenericStringListInlineEditorComposite<ValueType> extends 
             this(stringMessages, removeImage, suggestValues, /* placeholderTextForAddTextbox */ null, textBoxSize);
         }
         
-        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, List<String> suggestValues, String placeholderTextForAddTextbox, int textBoxSize) {
+        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, List<String> suggestValues,
+                String placeholderTextForAddTextbox, int textBoxSize) {
             super(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox);
             this.textBoxSize = textBoxSize;
         }

@@ -47,11 +47,9 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
                             }
                             @Override
                             public void onSuccess(RaceDTO result) {
-                                if (result != null) {
-                                    selectedRaceDTO = result;
-                                    refreshSelectedRaceData();
-                                    TrackedRacesManagementPanel.this.regattaRefresher.fillRegattas();
-                                }
+                                selectedRaceDTO = result;
+                                refreshSelectedRaceData();
+                                TrackedRacesManagementPanel.this.regattaRefresher.fillRegattas();
                             }
                         });
                     }

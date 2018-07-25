@@ -5,6 +5,7 @@ import com.sap.sailing.domain.common.Positioned;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.datamining.annotations.Connector;
@@ -96,6 +97,12 @@ public interface CompleteManeuverCurveWithEstimationData extends Timed, Position
      * boundaries, the boundaries of the curve with unstable course and speed are used.
      */
     Bearing getRelativeBearingToNextMarkAfterManeuver();
+    
+    Distance getDistanceToClosestMark();
+    
+    Double getDeviationOfManeuverAngleFromTargetTackAngleInDegrees();
+    
+    Double getDeviationOfManeuverAngleFromTargetJibeAngleInDegrees();
 
     /**
      * Gets whether a mark was crossed within the maneuver curve.

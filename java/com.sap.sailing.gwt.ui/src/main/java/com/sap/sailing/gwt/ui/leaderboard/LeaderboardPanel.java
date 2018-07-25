@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.google.gwt.cell.client.AbstractSafeHtmlCell;
@@ -338,7 +339,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private Label scoreCorrectionCommentLabel;
     private Label liveRaceLabel;
 
-    protected boolean isEmbedded;
+    private final boolean isEmbedded;
 
     private ImageResource pauseIcon;
     private ImageResource playIcon;
@@ -777,7 +778,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     protected abstract void setDefaultRaceColumnSelection(LS settings);
 
-    private void setValuesWithReferenceOrder(Iterable<DetailType> valuesToSet, List<DetailType> referenceOrder,
+    private void setValuesWithReferenceOrder(Iterable<DetailType> valuesToSet, Collection<DetailType> referenceOrder,
             List<DetailType> collectionToSetValuesTo) {
         collectionToSetValuesTo.clear();
         collectionToSetValuesTo.addAll(referenceOrder);
@@ -897,30 +898,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
-            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
-            final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
-            final String flagImageURL = competitor.getFlagImageURL();
-            boolean boatColorShown = renderBoatColorIfNecessary(competitorFetcher.getCompetitor(object), sb);
-            if (isShowCompetitorNationality || flagImageURL == null || flagImageURL.isEmpty()) {
-                final ImageResource nationalityFlagImageResource;
-                if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
-                    nationalityFlagImageResource = flagImageResolver.getEmptyFlagImageResource();
-                } else {
-                    nationalityFlagImageResource = flagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
-                }
-                if (nationalityFlagImageResource != null) {
-                    style.renderNationalityFlag(nationalityFlagImageResource, sb);
-                    sb.appendHtmlConstant("&nbsp;");
-                }
-            }
-            if (flagImageURL != null && !flagImageURL.isEmpty()) {
-                style.renderFlagImage(flagImageURL, sb, competitor);
-                sb.appendHtmlConstant("&nbsp;");
-            }
-            sb.appendEscaped(competitor.getShortInfo());
-            if (boatColorShown) {
-                sb.appendHtmlConstant("</div>");
-            }
+            final CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
+            LeaderboardPanel.this.renderCompetitorText(competitor, isShowCompetitorShortName(),
+                    !isShowCompetitorFullName(), sb, builder -> builder.appendEscaped(competitor.getShortInfo()));
         }
 
         @Override
@@ -935,11 +915,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     private class BoatInfoColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
         private final BoatFetcher<T> boatFetcher;
-        private final CompetitorFetcher<T> competitorFetcher;
 
-        public BoatInfoColumn(CompetitorFetcher<T> competitorFetcher, BoatFetcher<T> boatFetcher, LeaderBoardStyle style) {            
+        public BoatInfoColumn(BoatFetcher<T> boatFetcher, LeaderBoardStyle style) {            
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
-            this.competitorFetcher = competitorFetcher;
             this.boatFetcher = boatFetcher;
             // This style is adding to avoid contained images CSS property "max-width: 100%", which could cause
             // an overflow to the next column (see https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3537)
@@ -955,12 +933,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
             BoatDTO boat = boatFetcher.getBoat(object);
-            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
-            boolean boatColorShown = renderBoatColorIfNecessary(competitor, sb);
             sb.appendEscaped(getShortInfo(boat));
-            if (boatColorShown) {
-                sb.appendHtmlConstant("</div>");
-            }
         }
         
         private String getShortInfo(BoatDTO boat) {
@@ -1177,8 +1150,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             return header;
         }
     }
-
-    public abstract boolean renderBoatColorIfNecessary(CompetitorDTO competitor, SafeHtmlBuilder sb);
 
     private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
         /**
@@ -3184,9 +3155,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
                     || !(getLeaderboardTable()
                             .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof LeaderboardPanel.BoatInfoColumn)) {
-                CompetitorFetcher<LeaderboardRowDTO> competitorFetcher = (LeaderboardRowDTO row) -> row.competitor;
                 BoatFetcher<LeaderboardRowDTO> boatFetcher = (LeaderboardRowDTO row) -> row.boat;
-                BoatInfoColumn<LeaderboardRowDTO> boatInfoColumn = new BoatInfoColumn<LeaderboardRowDTO>(competitorFetcher, boatFetcher, style);                
+                BoatInfoColumn<LeaderboardRowDTO> boatInfoColumn = new BoatInfoColumn<LeaderboardRowDTO>(boatFetcher, style);                
                 insertColumn(columnIndexWhereToInsertTheNextColumn, boatInfoColumn);
             }
             columnIndexWhereToInsertTheNextColumn++;
@@ -3585,17 +3555,43 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
         @Override
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
-            String competitorColor = getCompetitorColor(object.competitor);
-            String competitorColorBarStyle;
-            if (LeaderboardPanel.this.isEmbedded && competitorColor != null) {
-                competitorColorBarStyle = "style=\"border-bottom: 2px solid " + competitorColor + ";\"";
-            } else {
-                competitorColorBarStyle = "style=\"border: none;\"";
-            }
-            base.render(object, competitorColorBarStyle, sb);
+            LeaderboardPanel.this.renderCompetitorText(object.competitor, !isShowCompetitorShortName(),
+                    isShowCompetitorFullName(), sb, builder -> base.render(context, object, builder));
         }
     }
 
-    public abstract String getCompetitorColor(CompetitorDTO competitor);
+    protected abstract String getCompetitorColor(CompetitorDTO competitor);
+
+    private void renderCompetitorText(final CompetitorDTO competitor, final boolean withFlags, final boolean withColor,
+            final SafeHtmlBuilder sb, final Consumer<SafeHtmlBuilder> textRenderer) {
+        final String competitorColor = getCompetitorColor(competitor);
+        final boolean showColor = withColor && competitorColor != null;
+        final String divStyle = showColor ? style.determineBoatColorDivStyle(competitorColor) : "border: none;";
+        sb.appendHtmlConstant("<div style=\"" + divStyle + "\">");
+
+        if (withFlags) {
+            final String flagImageURL = competitor.getFlagImageURL();
+            if (isShowCompetitorNationality || flagImageURL == null || flagImageURL.isEmpty()) {
+                final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
+                final ImageResource nationalityFlagImageResource;
+                if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
+                    nationalityFlagImageResource = flagImageResolver.getEmptyFlagImageResource();
+                } else {
+                    nationalityFlagImageResource = flagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+                }
+                if (nationalityFlagImageResource != null) {
+                    style.renderNationalityFlag(nationalityFlagImageResource, sb);
+                    sb.appendHtmlConstant("&nbsp;");
+                }
+            }
+            if (flagImageURL != null && !flagImageURL.isEmpty()) {
+                style.renderFlagImage(flagImageURL, sb, competitor);
+                sb.appendHtmlConstant("&nbsp;");
+            }
+        }
+
+        textRenderer.accept(sb);
+        sb.appendHtmlConstant("</div>");
+    }
 
 }

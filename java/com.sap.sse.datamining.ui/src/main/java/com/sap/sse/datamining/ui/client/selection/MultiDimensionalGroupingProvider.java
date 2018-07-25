@@ -3,6 +3,7 @@ package com.sap.sse.datamining.ui.client.selection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -19,6 +20,7 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.SerializableSettings;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
@@ -37,6 +39,16 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
         implements GroupingProvider {
 
     private static final String GROUPING_PROVIDER_ELEMENT_STYLE = "groupingProviderElement";
+    private static final NaturalComparator NaturalComparator = new NaturalComparator();
+    private static final Comparator<FunctionDTO> DimensionComparator = (d1, d2) -> {
+        // Null values (to deselect the dimension) on top
+        if (d1 == null || d2 == null) {
+            if (d1 == d2) return 0;
+            if (d1 == null) return -1;
+            if (d2 == null) return 1;
+        }
+        return NaturalComparator.compare(d1.getDisplayName(), d2.getDisplayName());
+    };
 
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
@@ -62,8 +74,11 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
         dimensionToGroupByBoxes = new ArrayList<ValueListBox<FunctionDTO>>();
 
         mainPanel = new FlowPanel();
+        mainPanel.addStyleName("groupingProvider");
         Label groupByLabel = new Label(this.getDataMiningStringMessages().groupBy());
         groupByLabel.addStyleName(GROUPING_PROVIDER_ELEMENT_STYLE);
+        groupByLabel.addStyleName("queryProviderElementLabel");
+        groupByLabel.addStyleName("emphasizedLabel");
         mainPanel.add(groupByLabel);
 
         ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
@@ -77,7 +92,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
     }
 
     @Override
-    public boolean isAwatingReload() {
+    public boolean isAwaitingReload() {
         return isAwaitingReload;
     }
 
@@ -110,7 +125,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
                             ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
                             addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
                             if (!availableDimensions.isEmpty()) {
-                                Collections.sort(availableDimensions);
+                                Collections.sort(availableDimensions, DimensionComparator);
                                 firstDimensionToGroupByBox.setValue(availableDimensions.iterator().next(), true);
                             } else {
                                 notifyListeners();
@@ -202,8 +217,8 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
             if (dimensionToGroupByBox.getValue() != null) {
                 acceptableValues.add(dimensionToGroupByBox.getValue());
             }
-            Collections.sort(acceptableValues);
             acceptableValues.add(null);
+            Collections.sort(acceptableValues, DimensionComparator);
             dimensionToGroupByBox.setAcceptableValues(acceptableValues);
         }
     }

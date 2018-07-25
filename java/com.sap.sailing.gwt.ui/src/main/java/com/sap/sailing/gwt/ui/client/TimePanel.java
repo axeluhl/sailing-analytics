@@ -25,6 +25,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.controls.slider.SliderBar;
 import com.sap.sse.gwt.client.controls.slider.TimeSlider;
+import com.sap.sse.gwt.client.controls.slider.TimeSlider.BarOverlay;
 import com.sap.sse.gwt.client.player.PlayStateListener;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.TimeRangeChangeListener;
@@ -77,6 +78,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     private final Button slowDownButton;
     private final Button speedUpButton;
     private final Button toggleAdvancedModeButton;
+    private final Button resetZoomButton;
 
     private final FlowPanel controlsPanel;
     private final SimplePanel timePanelSlider;
@@ -308,6 +310,16 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
         controlsPanel.add(timeControlPanel);
         controlsPanel.add(timeToStartControlPanel);
         
+        resetZoomButton = new Button(stringMessages.resetZoom());
+        resetZoomButton.setEnabled(false);
+        resetZoomButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                timeRangeProvider.resetTimeZoom();
+            }
+        });
+        controlsPanel.add(resetZoomButton);
+        
         hideControlsPanel();
     }
     
@@ -535,10 +547,12 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     
     @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+        resetZoomButton.setEnabled(true);
     }
 
     @Override
     public void onTimeZoomReset() {
+        resetZoomButton.setEnabled(false);
     }
 
     @Override
@@ -656,6 +670,10 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     @Override
     public String getId() {
         return "TimePanel";
+    }
+
+    public void setBarOverlays(Iterable<BarOverlay> overlays) {
+        timeSlider.setBarOverlays(overlays);
     }
 
 }

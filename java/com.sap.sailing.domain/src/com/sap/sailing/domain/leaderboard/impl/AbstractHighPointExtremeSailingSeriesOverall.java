@@ -56,7 +56,6 @@ public abstract class AbstractHighPointExtremeSailingSeriesOverall extends HighP
      */
     @Override
     public int compareByBetterScore(Competitor o1, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint, Leaderboard leaderboard) {
-        assert o1Scores.size() == o2Scores.size();
         int o1Wins = getWins(o1Scores);
         int o2Wins = getWins(o2Scores);
         int result = o2Wins - o1Wins;
@@ -73,7 +72,7 @@ public abstract class AbstractHighPointExtremeSailingSeriesOverall extends HighP
     private int getWins(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> scores) {
         int wins = 0;
         for (com.sap.sse.common.Util.Pair<RaceColumn, Double> score : scores) {
-            if (Math.abs(score.getB() - maxPoints * score.getA().getFactor()) < 0.0000001) {
+            if (Math.abs(score.getB() - maxPoints * getScoreFactor(score.getA())) < 0.0000001) {
                 wins++;
             }
         }

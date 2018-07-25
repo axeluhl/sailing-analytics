@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.client.panels;
 
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.ListDataProvider;
@@ -32,7 +33,7 @@ public abstract class LabeledAbstractFilterablePanel<T> extends AbstractFilterab
      *            {@link TableWrapper#registerSelectionModelOnNewDataProvider} method so that the selection is preserved
      *            across setting and removing the filter
      */
-    public LabeledAbstractFilterablePanel(Label label, Iterable<T> all, CellTable<T> display, final ListDataProvider<T> filtered) {
+    public LabeledAbstractFilterablePanel(Label label, Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered) {
         super(all, display, filtered);
         insert(label, 0);
     }

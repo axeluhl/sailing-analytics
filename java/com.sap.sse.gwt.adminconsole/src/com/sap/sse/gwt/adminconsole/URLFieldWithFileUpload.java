@@ -12,7 +12,6 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -27,6 +26,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
  * A {@link TextBox} together with an upload button that can use the file storage service to
@@ -57,8 +58,8 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 final JSONObject resultJson = parseAfterReplacingSurroundingPreElement(event.getResults()).isObject();
-                Window.alert(stringMessages.removeResult(resultJson.get("status").isString().stringValue(),
-                        resultJson.get("message") == null ? "" : resultJson.get("message").isString().stringValue()));
+                Notification.notify(stringMessages.removeResult(resultJson.get("status").isString().stringValue(),
+                        resultJson.get("message") == null ? "" : resultJson.get("message").isString().stringValue()), NotificationType.INFO);
                 setURL("");
             }
         });
@@ -118,10 +119,10 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
                         uri = resultJson.get(0).isObject().get("file_uri").isString().stringValue();
                         setValue(uri, true);
                         removeButton.setEnabled(true);
-                        Window.alert(stringMessages.uploadSuccessful());
+                        Notification.notify(stringMessages.uploadSuccessful(), NotificationType.SUCCESS);
                     } else {
-                        Window.alert(stringMessages.fileUploadResult(resultJson.get(0).isObject().get("status").isString().stringValue(),
-                                resultJson.get(0).isObject().get("message").isString().stringValue()));
+                        Notification.notify(stringMessages.fileUploadResult(resultJson.get(0).isObject().get("status").isString().stringValue(),
+                                resultJson.get(0).isObject().get("message").isString().stringValue()), NotificationType.ERROR);
                     }
                 }
             }

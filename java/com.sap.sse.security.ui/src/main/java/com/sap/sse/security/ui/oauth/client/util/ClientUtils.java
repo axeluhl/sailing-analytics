@@ -5,6 +5,8 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -296,7 +298,7 @@ public class ClientUtils {
         String error = Location.getParameter("error");
         if (error != null) {
             String errorMessage = Location.getParameter("error_description");
-            Window.alert("Error: " + error + ":" + errorMessage);
+            Notification.notify(error + ":" + errorMessage, NotificationType.ERROR);
             reload();
             return false;
         }
@@ -383,7 +385,7 @@ public class ClientUtils {
     }
 
     public static void showSessionExpires() {
-        Window.alert("Your session seems to have expired!\n" + "You will be logged out");
+        Notification.notify("Your session seems to have expired! You will be logged out.", NotificationType.ERROR);
         ClientUtils.reload();
     }
 
@@ -394,7 +396,7 @@ public class ClientUtils {
         message += "Please Logout/reload the application";
         // String st = LogUtil.stackTraceToString(caught);
         // message += "Stack Trace:\n" + st;
-        Window.alert(message);
+        Notification.notify(message, NotificationType.ERROR);
     }
 
     public static void logout(UserManagementServiceAsync userManagementService) {
@@ -403,7 +405,7 @@ public class ClientUtils {
 
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert("Could not log out! " + caught);
+                Notification.notify("Could not log out! " + caught, NotificationType.ERROR);
                 ClientUtils.reload();
             }
 

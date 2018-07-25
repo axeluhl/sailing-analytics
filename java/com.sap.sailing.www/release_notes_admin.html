@@ -22,6 +22,52 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
 
+                    <h2 class="articleSubheadline">July 2018</h2>
+                    <ul class="bulletList">
+                        <li>When adding a YouTube video for tracked races ("Manage Media" in <tt>RaceBoard.html</tt> or "Tracked Races > Audio & Video" in <tt>AdminConsole.html</tt>) the respective video metadata is now read using YouTube API v3.
+                            This functionality used to work some years ago using API v2 but was broken since this API version was discontinued some time ago.
+                            Due to limitations of the new API we can't read the start timepoint of videos by now. You still need to provide this value manually.</li>
+                        <li>In the "Tracked races" tab, within the eponymous section of the AdminConsole, the "Set start
+                            time received" dialog can be used to remove the currently set start time received, by simply
+                            leaving the value empty and confirming the dialog.</li>
+                        <li>Up to 15 discards can now be configured for series and leaderboards. This enables, e.g., "Wednesday Night" scenarios
+                            where over the season, say, 20 races are run but due to changing participation only, say, the five best ones shall be scored.</li>
+                        <li>There is a new scoring scheme available to be selected upon regatta creation.
+                            The scoring scheme is named "Low Point System, First with two wins in medals is winner" and introduces the following specifics compared to the standard low point scheme:
+                            <ul>
+                                <li>Medal series does not feature doubling of points in the medal series by default.</li>
+                                <li>A competitor having two wins in the medal series is treated as overall winner.
+                                    If there is a carry forward column in the medal series, having one point there also counts as a win which means the best competitor in the qualification needs a win less than any other finalist to be the overall winner.</li>
+                                <li>If the medal series isn't started yet or no competitor has collected two wins, scoring by points is used.
+                                    This also applies if the regatta is aborted (e.g. due to weather conditions) before any competitor could win two races in the medal series.</li>
+                                <li>If two competitors have the same amount of points in the medal series the tie breaking criteria is the carry forward column of the medal series.
+                                    If there is no carry forward column in the medal series, the last medal race is used as tie breaking criteria.
+                                    For any non-medal series, the standard low point rules apply.</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">June 2018</h2>
+                    <ul class="bulletList">
+                        <li>Added the available WindFinder Spot Collections. The desired ones can be selected from the WindFinder Tab in the Event Dialog.</li>
+                        <li>Added the ability to change the url of multiple Mediatracks with a common prefix at once.
+                            This is useful e.g. for video migration scenarios when movin videaos from one server to another.
+                            This can be done from the adminconsole->tracked races->audio & videos tab</li>
+                        <li>In raceboard when you edit a video you do not need to explicitly press "Preview" before saving anymore.
+                            Saving now implicitly applies the changes.</li>
+                        <li>The URLs of our GWT services are extended to include a leaderboard name if a call is context sensitive to a specific leaderboard.
+                            This does not affect the functionality of any service but allows us to setup load balancing with leaderboard specific routing.
+                            The leaderboard names put into the URL are cleaned: Any character that isn't a latin upper/lowercase letter or digit is replaced with an underscore character.
+                            Currently, the following leaderboard specific URLs are used:
+                            <ul>
+                                <li>/gwt/service/sailing/leaderboard/[CLEANED-LEADERBOARD-NAME]</li>
+                                <li>/gwt/service/dispatch/leaderboard/[CLEANED-LEADERBOARD-NAME]</li>
+                            </ul>
+                            Be aware that request without leaderboard suffix may be sent from pages that do not show leaderboard specific contents.
+                            Due to this it is required to define a fallback rule for any unqualified request.
+                            </li>
+                    </ul>
+
                     <h2 class="articleSubheadline">May 2018</h2>
                     <ul class="bulletList">
                         <li>Added the ability to add multiple mp4 videos as mediatracks at once via the new multi video dialog, located at trackedraces -> Audio & Video.

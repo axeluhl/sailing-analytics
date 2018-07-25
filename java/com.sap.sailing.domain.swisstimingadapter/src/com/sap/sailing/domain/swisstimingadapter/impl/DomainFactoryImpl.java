@@ -127,10 +127,16 @@ public class DomainFactoryImpl implements DomainFactory {
         CompetitorWithBoat domainCompetitor = competitorAndBoatStore.getExistingCompetitorWithBoatById(competitorId);
         if (domainCompetitor == null || competitorAndBoatStore.isCompetitorToUpdateDuringGetOrCreate(domainCompetitor)) {
             List<DynamicPerson> teamMembers = new ArrayList<DynamicPerson>();
-            for (CrewMember crewMember: competitor.getCrew()) {
-            	DynamicPerson person = new PersonImpl(crewMember.getName().trim(), getOrCreateNationality(crewMember.getNationality()),
-            			/* dateOfBirth */ null, crewMember.getPosition());
-                teamMembers.add(person);
+            if (competitor.getCrew().isEmpty()) {
+                DynamicPerson dummyPerson = new PersonImpl(competitor.getName().trim(), getOrCreateNationality(competitor.getThreeLetterIOCCode()),
+                        /* dateOfBirth */ null, /* description */ "Team");
+                teamMembers.add(dummyPerson);
+            } else {
+                for (CrewMember crewMember: competitor.getCrew()) {
+                	DynamicPerson person = new PersonImpl(crewMember.getName().trim(), getOrCreateNationality(crewMember.getNationality()),
+                			/* dateOfBirth */ null, crewMember.getPosition());
+                    teamMembers.add(person);
+                }
             }
             DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
             final DynamicBoat domainBoat = competitorAndBoatStore.getOrCreateBoat(competitorId, /* name */ null, boatClass, competitor.getBoatID(), /* color */ null);

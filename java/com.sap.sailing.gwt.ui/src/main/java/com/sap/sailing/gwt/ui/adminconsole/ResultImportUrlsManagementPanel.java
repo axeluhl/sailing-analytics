@@ -8,7 +8,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -22,6 +21,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TextfieldEntryDialog;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -163,7 +164,7 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
 
             @Override
             public void onSuccess(Void result) {
-                Window.setStatus(stringMessages.successfullyUpdatedResultImportUrls());
+                Notification.notify(stringMessages.successfullyUpdatedResultImportUrls(), NotificationType.INFO);
             }
         });
     }
@@ -198,7 +199,7 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
                     @Override
                     public void onSuccess(Void result) {
                         urlListBox.addItem(url);
-                        Window.setStatus(stringMessages.successfullyUpdatedResultImportUrls());
+                        Notification.notify(stringMessages.successfullyUpdatedResultImportUrls(), NotificationType.INFO);
                     }
                 });
             }

@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -11,6 +10,8 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -36,7 +37,7 @@ public class DeviceConfigurationUserDetailComposite extends DeviceConfigurationD
             @Override
             public void onClick(ClickEvent event) {
                 if (identifierBox.getValue() == null || identifierBox.getValue().isEmpty()) {
-                    Window.alert(stringMessages.thereIsNoIdentifierSet());
+                    Notification.notify(stringMessages.thereIsNoIdentifierSet(), NotificationType.ERROR);
                 } else {
                     UserDTO currentUser = userService.getCurrentUser();
                     if (currentUser == null) {

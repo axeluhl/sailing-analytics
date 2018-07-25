@@ -78,7 +78,7 @@ public class GPSFixImportTest {
             }
             
             @Override
-            protected void additionalDataExtractor(ImportResultDTO jsonResult, TrackFileImportDeviceIdentifier device)
+            protected void additionalDataExtractor(ImportResult jsonResult, TrackFileImportDeviceIdentifier device)
                     throws TransformationException {
             }
             
@@ -161,7 +161,7 @@ public class GPSFixImportTest {
             }
         };
         AtomicBoolean failed = new AtomicBoolean(false);
-        ImportResultDTO holder = new ImportResultDTO(Logger.getLogger(GPSFixImportTest.class.getName())){
+        ImportResult holder = new ImportResult(Logger.getLogger(GPSFixImportTest.class.getName())){
             
             @Override
             public void add(Exception exception) {

@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.windfinder.AvailableWindFinderSpotCollections;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -32,6 +33,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.listedit.GenericStringListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
@@ -123,10 +125,10 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
      * @param leaderboardGroupsOfEvent even though not editable in this dialog, this parameter gives an editing subclass a chance to "park" the leaderboard group
      * assignments for re-association with the new {@link EventDTO} created by the {@link #getResult} method.
      */
-    public EventDialog(EventParameterValidator validator, SailingServiceAsync sailingService, StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
+    public EventDialog(EventParameterValidator validator, SailingServiceAsync sailingService,
+            StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
             Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
-        super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator,
-                callback);
+        super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
         this.availableLeaderboardGroupsByName = new HashMap<>();
         for (final LeaderboardGroupDTO lgDTO : availableLeaderboardGroups) {
@@ -145,7 +147,6 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                 validateAndUpdate();
             }
         };
-
         courseAreaNameList = new CourseAreaListInlineEditorComposite(Collections.<CourseAreaDTO> emptyList(),
                 new GenericStringListInlineEditorComposite.ExpandedUi<CourseAreaDTO>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 50));
@@ -158,13 +159,17 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                 new StringConstantsListEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
                         leaderboardGroupNames, stringMessages.selectALeaderboardGroup()));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
-        
         imagesListComposite = new ImagesListComposite(sailingService, stringMessages);
         videosListComposite = new VideosListComposite(stringMessages);
         externalLinksComposite = new ExternalLinksComposite(stringMessages);
+        final List<String> suggestedWindFinderSpotCollections = AvailableWindFinderSpotCollections
+                .getAllAvailableWindFinderSpotCollectionsInAlphabeticalOrder() == null ? Collections.emptyList()
+                        : AvailableWindFinderSpotCollections
+                                .getAllAvailableWindFinderSpotCollectionsInAlphabeticalOrder();
         windFinderSpotCollectionIdsComposite = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-                new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
-                        Collections.emptyList(), stringMessages.enterIdOfWindfinderReviewedSpotCollection(), 80));
+                new GenericStringListEditorComposite.ExpandedUi<String>(stringMessages,
+                        IconResources.INSTANCE.removeIcon(), /* suggestValues */
+                        suggestedWindFinderSpotCollections, stringMessages.enterIdOfWindFinderReviewedSpotCollection(), 35));
     }
 
     @Override

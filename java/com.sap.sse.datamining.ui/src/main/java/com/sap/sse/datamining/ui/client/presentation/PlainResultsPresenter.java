@@ -26,8 +26,6 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
 
     private static final String htmlWhitespace = "&nbsp;";
 
-    // private final CheckBox appendResultCheckBox;
-
     private final ScrollPanel scrollPanel;
     private final HTML resultsLabel;
 
@@ -39,9 +37,6 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
         signifiers = new LinkedHashSet<>();
         results = new HashMap<>();
 
-        // appendResultCheckBox = new CheckBox(stringMessages.appendResult());
-        // addControl(appendResultCheckBox);
-
         resultsLabel = new HTML();
         scrollPanel = new ScrollPanel(resultsLabel);
     }
@@ -49,11 +44,6 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
     @Override
     protected void internalShowNumericResults(Map<GroupKey, Number> resultValues,
             Map<GroupKey, Triple<Number, Number, Long>> errorMargins) {
-        // boolean appendResult = appendResultCheckBox.getValue();
-        // if (!appendResult) {
-        // signifiers.clear();
-        // results.clear();
-        // }
         signifiers.clear();
         results.clear();
 
