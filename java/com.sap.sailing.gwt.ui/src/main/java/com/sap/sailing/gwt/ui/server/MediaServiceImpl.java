@@ -222,17 +222,16 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
 
     private VideoMetadataDTO checkMetadataByFullFileDownload(URL input)
             throws ParserConfigurationException, SAXException, IOException {
-        File tmp = null;
+        final File tmp = File.createTempFile("upload", "metadataCheck");
         try {
-            tmp = File.createTempFile("upload", "metadataCheck");
-            ReadableByteChannel rbc = Channels.newChannel(input.openStream());
+            final ReadableByteChannel rbc = Channels.newChannel(input.openStream());
             try (FileOutputStream fos = new FileOutputStream(tmp)) {
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-                try (IsoFile isof = new IsoFile(Channels.newChannel(input.openStream()))) {
-                    boolean canDownload = true;
-                    Date recordStartedTimer = determineRecordingStart(isof);
-                    Duration duration = determineDuration(isof);
-                    boolean spherical = determine360(isof);
+                try (IsoFile isof = new IsoFile(tmp)) {
+                    final boolean canDownload = true;
+                    final Date recordStartedTimer = determineRecordingStart(isof);
+                    final Duration duration = determineDuration(isof);
+                    final boolean spherical = determine360(isof);
                     removeTempFiles(isof);
                     return new VideoMetadataDTO(canDownload, duration, spherical, recordStartedTimer, "");
                 }

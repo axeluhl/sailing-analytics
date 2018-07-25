@@ -10,7 +10,7 @@ import com.google.gwt.typedarrays.shared.Int8Array;
  */
 public class JSDownloadUtils {
     private static final Double REQUIRED_SIZE = 10000000.0;
-    protected static final Double MAX_MEMORY_USEAGE_FOR_DL = 1024.0 * 1024 * 1024 * 2;
+    protected static final Double MAX_MEMORY_USAGE_FOR_DL = 1024 * 1024 * 1024 * 2d;
     
     public interface JSDownloadCallback {
         void progress(Double current, Double total);
@@ -44,7 +44,7 @@ public class JSDownloadUtils {
                     getDataFast(url, callback, total, REQUIRED_SIZE);
                 } else {
                     //fallback will always work, if cors is supported, does not require any other server configuration
-                    getDataSlow(url, callback, REQUIRED_SIZE, MAX_MEMORY_USEAGE_FOR_DL);
+                    getDataSlow(url, callback, REQUIRED_SIZE, MAX_MEMORY_USAGE_FOR_DL);
                 }
             }
         });
@@ -145,14 +145,14 @@ public class JSDownloadUtils {
      * If range requests are not possible, the whole file is downloaded and then slices to the required parts 
      */
     private native static void getDataSlow(String url, JSDownloadCallback callback, Double REQUIRED_SIZE,
-            Double maxMemoryUseage) /*-{
+            Double maxMemoryUsage) /*-{
         try {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", url, true);
             xhr.responseType = "arraybuffer";
             xhr.onprogress = function(evt) {
                 //ensure not more memory is used by the tab than commonly available in browsers
-                if (evt.total > maxMemoryUseage || evt.loaded > maxMemoryUseage) {
+                if (evt.total > maxMemoryUsage || evt.loaded > maxMemoryUsage) {
                     xhr.abort();
                 }
                 callback.@com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback::progress(Ljava/lang/Double;Ljava/lang/Double;)(evt.loaded, evt.total);
