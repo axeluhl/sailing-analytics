@@ -191,7 +191,7 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
                         : courseChangeDeg >= 0 ? Tack.STARBOARD : Tack.PORT)) {
             double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(
                     trueWindSpeedAndAngle.getObject().getBearing().getDegrees(), type);
-            double diff = Math.abs(targetManeuverAngle) - Math.abs(courseChangeDeg);
+            double diff = Math.abs(Math.abs(targetManeuverAngle) - Math.abs(courseChangeDeg));
             if (diff < minDiff) {
                 minDiff = diff;
                 closestTwsTwa = trueWindSpeedAndAngle;
