@@ -20,7 +20,7 @@ public class HeadlessChromeDriver extends ChromeDriver {
     private static ChromeOptions constructChromeOptions(Capabilities capabilities) {
         final ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.merge(capabilities);
-        chromeOptions.addArguments("--headless", "--window-size=1920,1080");
+        chromeOptions.addArguments("--headless", "--window-size=1440,900");
         return chromeOptions;
     }
 }
