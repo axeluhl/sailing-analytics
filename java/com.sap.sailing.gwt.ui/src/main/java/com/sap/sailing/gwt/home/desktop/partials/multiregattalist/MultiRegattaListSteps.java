@@ -48,10 +48,11 @@ public class MultiRegattaListSteps extends Composite {
             double parts = Math.pow(seriesProgress.getMaxRacesPerFleet(), 0.4);
             sumParts += parts;
         }
+        final boolean showSeriesName = regattaProgress.getSeries().size() > 1;
         for(RegattaProgressSeriesDTO seriesProgress : regattaProgress.getSeries()) {
             double parts = Math.pow(seriesProgress.getMaxRacesPerFleet(), 0.4);
             double percentage = 100.0 * parts / sumParts;
-            MultiRegattaListStepsBody stepsBody = new MultiRegattaListStepsBody(seriesProgress);
+            MultiRegattaListStepsBody stepsBody = new MultiRegattaListStepsBody(seriesProgress, showSeriesName);
             allMultiregattaSteps.add(stepsBody);
             stepsBody.getElement().getStyle().setWidth(percentage, Unit.PCT);
             stepsContainerUi.appendChild(stepsBody.getElement());

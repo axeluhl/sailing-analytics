@@ -41,9 +41,10 @@ public class EventSteps extends Composite implements RefreshableWidget<RegattaWi
     @Override
     public void setData(RegattaWithProgressDTO data) {
         regattaProgessUi.clearContent();
+        final boolean showSeriesName = data.getProgress().getSeries().size() > 1;
         for (RegattaProgressSeriesDTO seriesProgress : data.getProgress().getSeries()) {
             final PlaceNavigation<?> navigation = racesNavigationFactory.apply(seriesProgress.getName());
-            regattaProgessUi.addContent(new EventStepsPhase(seriesProgress, navigation));
+            regattaProgessUi.addContent(new EventStepsPhase(seriesProgress, navigation, showSeriesName));
         }
     }
     

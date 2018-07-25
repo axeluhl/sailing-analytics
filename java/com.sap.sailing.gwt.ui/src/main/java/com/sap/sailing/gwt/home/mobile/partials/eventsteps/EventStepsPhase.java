@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.mobile.partials.eventsteps;
 
-import static com.sap.sailing.domain.common.LeaderboardNameConstants.DEFAULT_SERIES_NAME;
-
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -35,10 +33,14 @@ public class EventStepsPhase extends Composite {
     @UiField DivElement progressUi;
     @UiField DivElement fleetsContainerUi;
 
-    public EventStepsPhase(RegattaProgressSeriesDTO seriesProgress, PlaceNavigation<?> placeNavigation) {
+    EventStepsPhase(RegattaProgressSeriesDTO seriesProgress, PlaceNavigation<?> placeNavigation, boolean showName) {
         initWidget(uiBinder.createAndBindUi(this));
         LinkUtil.configureForAction(anchorUi, () -> placeNavigation.goToPlace());
-        nameUi.setInnerText(DEFAULT_SERIES_NAME.equals(seriesProgress.getName()) ? I18N.races() : seriesProgress.getName());
+        if (showName) {
+            nameUi.setInnerText(seriesProgress.getName());
+        } else {
+            nameUi.removeFromParent();
+        }
         if (seriesProgress.isCompleted()) {
             progressUi.setInnerText(I18N.racesCount(seriesProgress.getTotalRaceCount()));
         } else {
