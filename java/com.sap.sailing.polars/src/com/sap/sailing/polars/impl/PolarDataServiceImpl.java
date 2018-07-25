@@ -170,8 +170,10 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
         if (closestTwsTwa == null) {
             result = new Pair<>(0.0, null);
         } else {
-            double minDiffDeg = Math.abs(Math.abs(Math.abs(closestTwsTwa.getObject().getBearing().getDegrees() * 2)
-                    - Math.abs(courseChangeDeg)));
+            double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(
+                    closestTwsTwa.getObject().getBearing().getDegrees(), maneuverType);
+            double minDiffDeg = Math.abs(Math.abs(targetManeuverAngle)
+                    - Math.abs(courseChangeDeg));
             result = new Pair<>(1. / (1. + (minDiffDeg / 10.) * (minDiffDeg / 10.)), closestTwsTwa);
         }
         return result;
