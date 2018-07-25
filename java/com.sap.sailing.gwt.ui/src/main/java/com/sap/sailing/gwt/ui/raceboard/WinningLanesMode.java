@@ -77,14 +77,11 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
                 defaultSettings.isShowEstimatedDuration(),
                 defaultSettings.getStartCountDownFontSizeScaling(),
                 defaultSettings.isShowManeuverLossVisualization());
-        
         ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
-
             @Override
             public void onSettingsReloaded(RaceMapSettings patchedSettings) {
                 raceMap.updateSettings(patchedSettings);
             }
-            
         });
     }
 
@@ -139,5 +136,4 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
             adjustMapSettings();
         }
     }
-
 }
