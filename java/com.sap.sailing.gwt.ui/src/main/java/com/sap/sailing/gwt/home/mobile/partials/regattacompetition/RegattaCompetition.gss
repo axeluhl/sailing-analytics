@@ -180,18 +180,18 @@
   text-overflow: ellipsis;
 }
 
-.regattacompetition_phase_fleetfullwidth, .regattacompetition_phase_fleet_race_title {
+.regattacompetition_phase_fleet_race_title_big {
   width: 27%;
 }
 
 @media (min-width: 375px) {
-  .regattacompetition_phase_fleetfullwidth, .regattacompetition_phase_fleet_race_title {
+  .regattacompetition_phase_fleet_race_title_big {
     width: 33%;
   }
 }
 
 @media (min-width: 700px) {
-  .regattacompetition_phase_fleetfullwidth, .regattacompetition_phase_fleet_race_title {
+  .regattacompetition_phase_fleet_race_title_big {
     width: 40%;
   }
 }

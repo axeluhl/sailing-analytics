@@ -12,7 +12,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratorPanel;
@@ -24,6 +23,8 @@ import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -94,13 +95,13 @@ public class UserDetailsView extends FlowPanel {
                         new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.errorUpdatingRoles(selectedUser.getName(), caught.getMessage()));
+                                Notification.notify(stringMessages.errorUpdatingRoles(selectedUser.getName(), caught.getMessage()), NotificationType.ERROR);
                             }
 
                             @Override
                             public void onSuccess(SuccessInfo result) {
                                 if (!result.isSuccessful()) {
-                                    Window.alert(stringMessages.errorUpdatingRoles(selectedUser.getName(), result.getMessage()));
+                                    Notification.notify(stringMessages.errorUpdatingRoles(selectedUser.getName(), result.getMessage()), NotificationType.ERROR);
                                 } else {
                                     userListDataProvider.updateDisplays();
                                     if (userService.getCurrentUser().getName().equals(selectedUser.getName())) {
@@ -124,13 +125,13 @@ public class UserDetailsView extends FlowPanel {
                         new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.errorUpdatingPermissions(selectedUser.getName(), caught.getMessage()));
+                                Notification.notify(stringMessages.errorUpdatingPermissions(selectedUser.getName(), caught.getMessage()), NotificationType.ERROR);
                             }
 
                             @Override
                             public void onSuccess(SuccessInfo result) {
                                 if (!result.isSuccessful()) {
-                                    Window.alert(stringMessages.errorUpdatingPermissions(selectedUser.getName(), result.getMessage()));
+                                    Notification.notify(stringMessages.errorUpdatingPermissions(selectedUser.getName(), result.getMessage()), NotificationType.ERROR);
                                 } else {
                                     userListDataProvider.updateDisplays();
                                     if (userService.getCurrentUser().getName().equals(selectedUser.getName())) {
@@ -226,20 +227,20 @@ public class UserDetailsView extends FlowPanel {
                                                     if (caught instanceof UserManagementException) {
                                                         String message = ((UserManagementException) caught).getMessage();
                                                         if (UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS.equals(message)) {
-                                                            Window.alert(stringMessages.passwordDoesNotMeetRequirements());
+                                                            Notification.notify(stringMessages.passwordDoesNotMeetRequirements(), NotificationType.ERROR);
                                                         } else if (UserManagementException.INVALID_CREDENTIALS.equals(message)) {
-                                                            Window.alert(stringMessages.invalidCredentials());
+                                                            Notification.notify(stringMessages.invalidCredentials(), NotificationType.ERROR);
                                                         } else {
-                                                            Window.alert(stringMessages.errorChangingPassword(caught.getMessage()));
+                                                            Notification.notify(stringMessages.errorChangingPassword(caught.getMessage()), NotificationType.ERROR);
                                                         }
                                                     } else {
-                                                        Window.alert(stringMessages.errorChangingPassword(caught.getMessage()));
+                                                        Notification.notify(stringMessages.errorChangingPassword(caught.getMessage()), NotificationType.ERROR);
                                                     }
                                                 }
 
                                                 @Override
                                                 public void onSuccess(Void result) {
-                                                    Window.alert(stringMessages.passwordSuccessfullyChanged());
+                                                    Notification.notify(stringMessages.passwordSuccessfullyChanged(), NotificationType.SUCCESS);
                                                 }
                                             }));
                                 }
