@@ -26,6 +26,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorTrackWithEstimationDataJsonSerializer;
+
 /**
  * 
  * @author Vladislav Chumak (D069712)
@@ -33,7 +35,7 @@ import org.json.simple.parser.ParseException;
  */
 public class CompleteManeuverCurveWithEstimationDataImporter {
 
-    public static final String REST_API_BASE_URL = "https://www.sapsailing.com/sailingserver/api/v1";
+    public static final String REST_API_BASE_URL = "http://127.0.0.1:8888/sailingserver/api/v1";
     public static final String REST_API_REGATTAS_PATH = "/regattas";
     public static final String REST_API_RACES_PATH = "/races";
     public static final String REST_API_ESTIMATION_DATA_PATH = "/completeManeuverCurvesWithEstimationData";
@@ -110,6 +112,7 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
                         try {
                             importRace(regattaName, trackedRaceName, importStatistics);
                         } catch (Exception e) {
+                            e.printStackTrace();
                             importStatistics.errors += 1;
                             LoggingUtil
                                     .logInfo("Error while processing race nr. " + i + ": \"" + trackedRaceName + "\"");
@@ -151,12 +154,18 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
         if (httpResponse == null) {
             throw lastException;
         }
-        JSONObject resultJson = (JSONObject) getJsonFromResponse(httpResponse);
+        JSONObject resultJson;
+        try {
+            resultJson = (JSONObject) getJsonFromResponse(httpResponse);
+        } catch(Exception e) {
+            System.out.println(getEstimationData);
+            throw e;
+        }
         List<JSONObject> competitorTracks = new ArrayList<>();
         int maneuversCount = 0;
-        for (Object competitorTrackJson : (JSONArray) resultJson.get("bycompetitor")) {
+        for (Object competitorTrackJson : (JSONArray) resultJson.get(CompetitorTrackWithEstimationDataJsonSerializer.BYCOMPETITOR)) {
             JSONObject competitorTrack = (JSONObject) competitorTrackJson;
-            JSONArray maneuverCurves = (JSONArray) competitorTrack.get("maneuverCurves");
+            JSONArray maneuverCurves = (JSONArray) competitorTrack.get(CompetitorTrackWithEstimationDataJsonSerializer.ELEMENTS);
             if (!maneuverCurves.isEmpty()) {
                 competitorTracks.add(competitorTrack);
                 maneuversCount += maneuverCurves.size();
