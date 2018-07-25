@@ -250,10 +250,10 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     }
 
     /**
-     * @param absoluteMetersRetriever determines whether the absolute or signed cross track error will be aggregated
+     * @param absoluteOrSignedMetersRetriever determines whether the absolute or signed cross track error will be aggregated
      */
     private Distance getAbsoluteOrSignedAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
-            boolean upwindOnly, boolean waitForLatest, CrossTrackErrorMeterRetriever absoluteMetersRetriever)
+            boolean upwindOnly, boolean waitForLatest, CrossTrackErrorMeterRetriever absoluteOrSignedMetersRetriever)
             throws NoWindException {
         Track<CrossTrackErrorSumAndNumberOfFixes> cacheForCompetitor = cachePerCompetitor.get(competitor, waitForLatest);
         double distanceInMeters = 0;
@@ -294,7 +294,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                                 }
                                 CrossTrackErrorSumAndNumberOfFixes endAggregate = cacheForCompetitor.getLastFixAtOrBefore(end);
                                 if (endAggregate != null) {
-                                    distanceInMeters += absoluteMetersRetriever.getDistanceInMetersSumFromStart(endAggregate) - absoluteMetersRetriever.getDistanceInMetersSumFromStart(startAggregate);
+                                    distanceInMeters += absoluteOrSignedMetersRetriever.getDistanceInMetersSumFromStart(endAggregate) - absoluteOrSignedMetersRetriever.getDistanceInMetersSumFromStart(startAggregate);
                                     count += endAggregate.getFixCountFromStart() - startAggregate.getFixCountFromStart();
                                     startAggregate = endAggregate;
                                 }
