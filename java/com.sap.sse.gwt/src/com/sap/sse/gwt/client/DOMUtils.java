@@ -1,6 +1,8 @@
 package com.sap.sse.gwt.client;
 
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Utility class contained convenience methods regarding DOM operations.
@@ -11,27 +13,28 @@ public final class DOMUtils {
     }
 
     /**
-     * Scrolls the top of the provided {@link Element element} to the top of the viewport.
+     * Scrolls the top of the provided {@link Widget widget} to the topmost possible position in the viewport.
      * 
-     * @param element
-     *            {@link Element} to scroll to the top
+     * @param widget
+     *            {@link Widget} to scroll to the topmost possible position
      */
-    public static void scrollToTop(final Element element) {
-        int top = getOffsetTopOf(element);
-        Element current = element.getParentElement();
-        while (current != null) {
-            if (top != current.getScrollTop()) {
-                current.setScrollTop(top);
-            }
-            top += getOffsetTopOf(current) - current.getScrollTop();
-            current = current.getParentElement();
-        }
+    public static void scrollToTop(final Widget widget) {
+        getViewportElement().setScrollTop(widget.getAbsoluteTop());
     }
 
-    private static int getOffsetTopOf(final Element element) {
-        final int top = element.getOffsetTop();
-        final boolean parentIsOffsetParent = element.getParentElement() == element.getOffsetParent();
-        return parentIsOffsetParent ? top : top - element.getParentElement().getOffsetTop();
+    /**
+     * Scrolls the top of the provided {@link Element element} to the topmost possible position in the viewport.
+     * 
+     * @param element
+     *            {@link Element} to scroll to the topmost possible position
+     */
+    public static void scrollToTop(final Element element) {
+        getViewportElement().setScrollTop(element.getAbsoluteTop());
+    }
+
+    private static Element getViewportElement() {
+        final Document doc = Document.get();
+        return doc.isCSS1Compat() ? doc.getDocumentElement() : doc.getBody();
     }
 
 }

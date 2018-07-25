@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -78,8 +79,8 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
         @Override
         public void setData(ListResult<RaceCompetitionFormatSeriesDTO> data) {
             super.setData(data);
-            Scheduler.get().scheduleDeferred(
-                    () -> currentPresenter.getPreferredSeriesName().ifPresent(regattaCompetitionUi::scrollToSeries));
+            final Consumer<? super String> scrollCommand = regattaCompetitionUi::scrollToSeries;
+            Scheduler.get().scheduleDeferred(() -> currentPresenter.getPreferredSeriesName().ifPresent(scrollCommand));
         }
     }
     

@@ -42,6 +42,6 @@ public class RegattaCompetition extends Composite implements RegattaCompetitionV
     }
 
     public void scrollToSeries(final String seriesName) {
-        DOMUtils.scrollToTop(seriesNameToUiComponent.get(seriesName).getElement());
+        DOMUtils.scrollToTop(seriesNameToUiComponent.get(seriesName));
     }
 }
