@@ -170,9 +170,9 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
         if (closestTwsTwa == null) {
             result = new Pair<>(0.0, null);
         } else {
-            double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(maneuverType, closestTwsTwa.getObject().getBearing());
-            double minDiffDeg = Math.abs(
-                    Math.abs(targetManeuverAngle) - Math.abs(courseChangeDeg));
+            double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(maneuverType,
+                    closestTwsTwa.getObject().getBearing());
+            double minDiffDeg = Math.abs(Math.abs(targetManeuverAngle) - Math.abs(courseChangeDeg));
             result = new Pair<>(1. / (1. + (minDiffDeg / 10.) * (minDiffDeg / 10.)), closestTwsTwa);
         }
         return result;
@@ -188,12 +188,8 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
                 boatClass, speedAtManeuverStart, type == ManeuverType.TACK ? LegType.UPWIND : LegType.DOWNWIND,
                 type == ManeuverType.TACK ? courseChangeDeg >= 0 ? Tack.PORT : Tack.STARBOARD
                         : courseChangeDeg >= 0 ? Tack.STARBOARD : Tack.PORT)) {
-<<<<<<< HEAD
-            double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(type, trueWindSpeedAndAngle.getObject().getBearing());
-=======
-            double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(
-                    trueWindSpeedAndAngle.getObject().getBearing().getDegrees(), type);
->>>>>>> refs/remotes/origin/master
+            double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(type,
+                    trueWindSpeedAndAngle.getObject().getBearing());
             double diff = Math.abs(Math.abs(targetManeuverAngle) - Math.abs(courseChangeDeg));
             if (diff < minDiff) {
                 minDiff = diff;
@@ -254,7 +250,8 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
         }
         SpeedWithBearingWithConfidence<Void> speed = polarDataMiner.getAverageSpeedAndCourseOverGround(boatClass,
                 windSpeed, legType);
-        Bearing bearing = new DegreeBearingImpl(getManeuverAngleInDegreesFromTwa(maneuverType, speed.getObject().getBearing()));
+        Bearing bearing = new DegreeBearingImpl(
+                getManeuverAngleInDegreesFromTwa(maneuverType, speed.getObject().getBearing()));
         BearingWithConfidence<Void> bearingWithConfidence = new BearingWithConfidenceImpl<Void>(bearing,
                 speed.getConfidence(), null);
         return bearingWithConfidence;
