@@ -110,12 +110,15 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
 
     @Override
     protected void drawCenterChanged() {
+        draw();
     }
 
     @Override
     protected void draw() {
+        super.setCanvasSettings();
+        drawPaths();
     }    
-    
+
     private void createSimulationLegend(MapWidget map) {
         simulationLegend = Canvas.createIfSupported();
         simulationLegend.addStyleName("MapSimulationLegend");
@@ -134,13 +137,6 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         });
         map.setControls(ControlPosition.RIGHT_BOTTOM, simulationLegend);
         simulationLegend.getParent().addStyleName("MapSimulationLegendParentDiv");
-    }
-    
-    public void onBoundsChanged(boolean zoomChanged) {
-        // calibrate canvas
-        super.draw();
-        // draw simulation paths
-        this.drawPaths();
     }
     
     public void clearCanvas() {
@@ -173,7 +169,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         }
         drawLegend(simulationLegend);
         // calibrate canvas
-        super.draw();
+        super.setCanvasSettings();
         // draw paths
         Context2d ctxt = canvas.getContext2d();
         PathDTO[] paths = simulationResult.getPaths();

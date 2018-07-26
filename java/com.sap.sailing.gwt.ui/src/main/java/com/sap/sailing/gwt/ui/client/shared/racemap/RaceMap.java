@@ -440,6 +440,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private final Set<Date> remoteCallsToSkipInExecution = new HashSet<>();
     private boolean currentlyDragging = false;
 
+    private int zoomingAnimationsInProgress = 0;
+
     private class AdvantageLineUpdater implements QuickRanksListener {
         @Override
         public void rankChanged(String competitorIdAsString, QuickRankDTO oldQuickRank, QuickRankDTO quickRank) {
@@ -639,19 +641,41 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
               map.setSize("100%", "100%");
-              map.addZoomChangeHandler(new ZoomChangeMapHandler() {
-                  @Override
-                  public void onEvent(ZoomChangeMapEvent event) {
-                      if (!autoZoomIn && !autoZoomOut && !orientationChangeInProgress) {
-                          // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will restore old settings
-                          final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                          RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList, settings.getZoomSettings().isZoomToSelectedCompetitors());
-                          settings = new RaceMapSettings(settings, clearedZoomSettings);
-                            refreshMapWithoutAnimation();
-                      }
-                      // TODO bug489 when in wind-up mode, avoid zooming out too far; perhaps zoom back in if zoomed out too far
-                  }
-              });
+                map.addZoomChangeHandler(new ZoomChangeMapHandler() {
+                    @Override
+                    public void onEvent(ZoomChangeMapEvent event) {
+                        if (!autoZoomIn && !autoZoomOut && !orientationChangeInProgress) {
+                            // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will
+                            // restore old settings
+                            final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
+                            RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList,
+                                    settings.getZoomSettings().isZoomToSelectedCompetitors());
+                            settings = new RaceMapSettings(settings, clearedZoomSettings);
+                            simulationOverlay.setVisible(false);
+                            if (zoomingAnimationsInProgress == 0) {
+                                showLayoutsAfterAnimationFinishes();
+                            } else {
+                                showLayoutsAfterAnimationFinishes();
+                            }
+                        }
+                        // TODO bug489 when in wind-up mode, avoid zooming out too far; perhaps zoom back in if zoomed
+                        // out too far
+                    }
+
+                    private void showLayoutsAfterAnimationFinishes() {
+                        zoomingAnimationsInProgress++;
+                        new com.google.gwt.user.client.Timer() {
+                            @Override
+                            public void run() {
+                                if (zoomingAnimationsInProgress == 1) {
+                                    simulationOverlay.setVisible(settings.isShowSimulationOverlay());
+                                }
+                                zoomingAnimationsInProgress--;
+                            }
+
+                        }.schedule(500);
+                    }
+                });
               map.addDragEndHandler(new DragEndMapHandler() {
                   @Override
                   public void onEvent(DragEndMapEvent event) {
@@ -691,9 +715,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                       if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
                           streamletOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
                       }
-                      if ((simulationOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
-                            simulationOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
-                      }
                       currentMapBounds = map.getBounds();
                       currentZoomLevel = newZoomLevel;
                       headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
@@ -703,10 +724,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 map.addDragStartHandler(event -> {
                     currentlyDragging = true;
                 });
-                
-                map.addCenterChangeHandler(event -> GWT.log("cc"));
-                map.addProjectionChangeHandler(event -> GWT.log("proj-change"));
-                map.addTilesLoadedHandler(event -> GWT.log("tiles-loaded"));
               
               // If there was a time change before the API was loaded, reset the time
               if (lastTimeChangeBeforeInitialization != null) {
@@ -1969,7 +1986,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     public int getZoomLevel(LatLngBounds bounds) {
         int GLOBE_PXSIZE = 256; // a constant in Google's map projection
-        int MAX_ZOOM = 20; // maximum zoom-level that should be automatically selected
+        int MAX_ZOOM = 18; // maximum zoom-level that should be automatically selected
         double LOG2 = Math.log(2.0);
         double deltaLng = bounds.getNorthEast().getLongitude() - bounds.getSouthWest().getLongitude();
         double deltaLat = getMercatorLatitude(bounds.getNorthEast().getLatitude()) - getMercatorLatitude(bounds.getSouthWest().getLatitude());
