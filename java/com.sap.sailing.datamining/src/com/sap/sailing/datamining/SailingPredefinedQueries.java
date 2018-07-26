@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
+import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
@@ -17,7 +18,6 @@ import com.sap.sailing.datamining.impl.components.RaceOfCompetitorRetrievalProce
 import com.sap.sailing.datamining.impl.components.TrackedLegOfCompetitorRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedLegRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedRaceRetrievalProcessor;
-import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContext;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Distance;
@@ -62,7 +62,7 @@ public class SailingPredefinedQueries {
         AggregationProcessorDefinitionDTO aggregator = new AggregationProcessorDefinitionDTO("Average", Number.class.getName(), AverageWithStats.class.getName(), "");
 
         ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>();
-        retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(LeaderboardGroupWithContext.class.getName(), ""), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardGroupContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(1, LeaderboardRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(2, TrackedRaceRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedRaceContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(3, TrackedLegRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedLegContext.class.getName(), ""), null));
@@ -86,7 +86,7 @@ public class SailingPredefinedQueries {
         AggregationProcessorDefinitionDTO aggregator = new AggregationProcessorDefinitionDTO("Average", Number.class.getName(), AverageWithStats.class.getName(), "");
 
         ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>();
-        retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(LeaderboardGroupWithContext.class.getName(), ""), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardGroupContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(1, LeaderboardRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(2, TrackedRaceRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedRaceContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(3, TrackedLegRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedLegContext.class.getName(), ""), null));
@@ -110,7 +110,7 @@ public class SailingPredefinedQueries {
         AggregationProcessorDefinitionDTO aggregator = new AggregationProcessorDefinitionDTO("Sum", Distance.class.getName(), Distance.class.getName(), "");
 
         ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>();
-        retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(LeaderboardGroupWithContext.class.getName(), ""), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardGroupContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(1, LeaderboardRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(2, TrackedRaceRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedRaceContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(3, TrackedLegRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedLegContext.class.getName(), ""), null));
@@ -133,7 +133,7 @@ public class SailingPredefinedQueries {
         AggregationProcessorDefinitionDTO aggregator = new AggregationProcessorDefinitionDTO("Average", Number.class.getName(), AverageWithStats.class.getName(), "");
 
         ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>();
-        retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(LeaderboardGroupWithContext.class.getName(), ""), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardGroupContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(1, LeaderboardRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(2, TrackedRaceRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedRaceContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(3, TrackedLegRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedLegContext.class.getName(), ""), null));
@@ -154,7 +154,7 @@ public class SailingPredefinedQueries {
         AggregationProcessorDefinitionDTO aggregator = new AggregationProcessorDefinitionDTO("Sum", Distance.class.getName(), Distance.class.getName(), "");
 
         ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>();
-        retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(LeaderboardGroupWithContext.class.getName(), ""), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardGroupContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(1, LeaderboardRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(2, TrackedRaceRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedRaceContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(3, TrackedLegRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedLegContext.class.getName(), ""), null));
@@ -174,7 +174,7 @@ public class SailingPredefinedQueries {
         AggregationProcessorDefinitionDTO aggregator = new AggregationProcessorDefinitionDTO("Sum", Number.class.getName(), Number.class.getName(), "");
 
         ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>();
-        retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(LeaderboardGroupWithContext.class.getName(), ""), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardGroupContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(1, LeaderboardRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(2, TrackedRaceRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedRaceContext.class.getName(), ""), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(3, RaceOfCompetitorRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasRaceOfCompetitorContext.class.getName(), ""), null));
