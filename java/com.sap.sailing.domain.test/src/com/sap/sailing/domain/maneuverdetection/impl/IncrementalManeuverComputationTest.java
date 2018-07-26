@@ -130,11 +130,14 @@ public class IncrementalManeuverComputationTest extends AbstractManeuverDetectio
         performanceMeasurementStartedAt = System.currentTimeMillis();
         List<Maneuver> normallyDetectedManeuvers = normalManeuverDetector.detectManeuvers();
         long millisForNormalManeuverDetection = System.currentTimeMillis() - performanceMeasurementStartedAt;
+        int performanceBenefitOfIncrementalManeuverDetectionInPercent = (int) ((1.0 * (millisForNormalManeuverDetection - millisForIncrementalManeuverDetection)
+                / millisForNormalManeuverDetection) * 100);
         assertEquals("Incrementally calculated maneuvers differ from normally calculated maneuvers",
                 normallyDetectedManeuvers, incrementallyDetectedManeuvers);
         assertTrue(
-                "Incremental maneuver detection was not 30% faster in detecting maneuvers incrementally, than the full maneuver detection",
-                millisForIncrementalManeuverDetection * 1.3 < millisForNormalManeuverDetection);
+                "Incremental maneuver detection was not 20% faster in detecting maneuvers incrementally, than the full maneuver detection. The actual performance benefit was: "
+                        + performanceBenefitOfIncrementalManeuverDetectionInPercent + "%",
+                performanceBenefitOfIncrementalManeuverDetectionInPercent >= 20);
     }
 
 }
