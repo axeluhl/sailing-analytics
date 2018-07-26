@@ -29,7 +29,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
 
 public class MediaManagementControl extends AbstractMediaSelectionControl implements CloseHandler<PopupPanel> {
 
@@ -46,13 +45,13 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
     }
 
     public void show() {
-        Collection<MediaTrack> reachableVideoTracks = new ArrayList<>();
-        Collection<MediaTrack> reachableAudioTracks = new ArrayList<>();
-        addAssignedMediaTracksTo(reachableVideoTracks, reachableAudioTracks);
-        addOverlappingMediaTracksTo(reachableVideoTracks, reachableAudioTracks);
+        Collection<MediaTrack> videoTracks = new ArrayList<>();
+        Collection<MediaTrack> audioTracks = new ArrayList<>();
+        addAssignedMediaTracksTo(videoTracks, audioTracks);
+        addOverlappingMediaTracksTo(videoTracks, audioTracks);
         Panel grid = new VerticalPanel();
-        addAudioTracksToGridPanel(reachableAudioTracks, grid);
-        addVideoTracksToGridPanel(reachableVideoTracks, grid);
+        addVideoTracksToGridPanel(audioTracks, grid);
+        addVideoTracksToGridPanel(videoTracks, grid);
         addNewMediaButtonsTo(grid);
         dialogControl.add(grid);
         dialogControl.showRelativeTo(popupLocation);
@@ -104,19 +103,12 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
     private void addOverlappingMediaTracksTo(Collection<MediaTrack> reachableVideoTracks,
             Collection<MediaTrack> reachableAudioTracks) {
         for (MediaTrack mediaTrack : mediaPlayerManager.getOverlappingMediaTracks()) {
-            if (isPotentiallyPlayable(mediaTrack) && mediaTrack.mimeType != null) {
+            if (mediaTrack.mimeType != null) {
                 switch (mediaTrack.mimeType.mediaType) {
                 case video:
                     reachableVideoTracks.add(mediaTrack);
                 case audio: // intentional fall through
-                    if (mediaPlayerManager.getUserAgent().getType().equals(AgentTypes.FIREFOX)) {
-                        if (mediaTrack.isYoutube()) {
-                            // only youtube audio tracks work with firefox
-                            reachableAudioTracks.add(mediaTrack);
-                        }
-                    } else {
-                        reachableAudioTracks.add(mediaTrack);
-                    }
+                    reachableAudioTracks.add(mediaTrack);
                 case image: // no image media tracks produced by an image
                     break;
                 case unknown: // we won't overlay an unknown media source
@@ -127,33 +119,24 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
             }
         }
     }
-
+    
     private void addAssignedMediaTracksTo(Collection<MediaTrack> reachableVideoTracks,
             Collection<MediaTrack> reachableAudioTracks) {
         for (MediaTrack mediaTrack : mediaPlayerManager.getAssignedMediaTracks()) {
-            if (isPotentiallyPlayable(mediaTrack)) {
-                if (mediaTrack.mimeType == null) {
-                    reachableVideoTracks.add(mediaTrack); // allow user to remove this strange artifact
-                } else {
-                    switch (mediaTrack.mimeType.mediaType) {
-                    case video:
-                        reachableVideoTracks.add(mediaTrack);
-                    case audio: // intentional fall through
-                        if (mediaPlayerManager.getUserAgent().getType().equals(AgentTypes.FIREFOX)) {
-                            if (mediaTrack.isYoutube()) {
-                                // only youtube audio tracks work with firefox
-                                reachableAudioTracks.add(mediaTrack);
-                            }
-                        } else {
-                            reachableAudioTracks.add(mediaTrack);
-                        }
-                    case image: // images don't play as video tracks
-                        break;
-                    case unknown: // unknown formats won't be played either
-                        break;
-                    default:
-                        break;
-                    }
+            if (mediaTrack.mimeType == null) {
+                reachableVideoTracks.add(mediaTrack); // allow user to remove this strange artifact
+            } else {
+                switch (mediaTrack.mimeType.mediaType) {
+                case video:
+                    reachableVideoTracks.add(mediaTrack);
+                case audio: // intentional fall through
+                    reachableAudioTracks.add(mediaTrack);
+                case image: // images don't play as video tracks
+                    break;
+                case unknown: // unknown formats won't be played either
+                    break;
+                default:
+                    break;
                 }
             }
         }

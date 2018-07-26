@@ -10,11 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.dom.client.AudioElement;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.MediaElement;
+import com.google.gwt.dom.client.VideoElement;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.media.client.Audio;
+import com.google.gwt.media.client.Video;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ClosingEvent;
@@ -53,7 +54,6 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -123,22 +123,19 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     private void setStatus(final MediaTrack mediaTrack) {
         if (!mediaTrack.isYoutube()) {
-            // firefox crashes in the current version when trying to read the metadata from mp4 files
-            if (!userAgent.getType().equals(AgentTypes.FIREFOX)) {
-                Audio audio = Audio.createIfSupported();
-                if (audio != null) {
-                    AudioElement mediaReachableTester = audio.getAudioElement();
-                    addLoadMetadataHandler(mediaReachableTester, mediaTrack);
-                    mediaReachableTester.setPreload(MediaElement.PRELOAD_METADATA);
-                    mediaReachableTester.setSrc(UriUtils.fromString(mediaTrack.url).asString());
-                    mediaReachableTester.load();
-                } else {
-                    mediaTrack.status = Status.CANNOT_PLAY;
-                }
+            Video video = Video.createIfSupported();
+            if (video != null) {
+                VideoElement mediaReachableTester = video.getVideoElement();
+                addLoadMetadataHandler(mediaReachableTester, mediaTrack);
+                mediaReachableTester.setPreload(MediaElement.PRELOAD_METADATA);
+                mediaReachableTester.setSrc(UriUtils.fromString(mediaTrack.url).asString());
+                mediaReachableTester.load();
             } else {
-                mediaTrack.status = Status.REACHABLE;
+                GWT.log("Video tag unsupported : " + mediaTrack.title);
+                mediaTrack.status = Status.CANNOT_PLAY;
             }
         } else {
+            GWT.log("Reachable : " + mediaTrack.title);
             mediaTrack.status = Status.REACHABLE;
         }
     }
@@ -160,10 +157,12 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }-*/;
 
     public void loadedmetadata(MediaTrack mediaTrack) {
+        GWT.log("Reachable with videotag " + mediaTrack.title);
         mediaTrack.status = Status.REACHABLE;
     }
 
     public void mediaError(MediaTrack mediaTrack) {
+        GWT.log("Error with videotag " + mediaTrack.title);
         mediaTrack.status = Status.NOT_REACHABLE;
     }
 

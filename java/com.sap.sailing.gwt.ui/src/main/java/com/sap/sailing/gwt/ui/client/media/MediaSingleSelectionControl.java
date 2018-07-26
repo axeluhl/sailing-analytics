@@ -50,9 +50,7 @@ public class MediaSingleSelectionControl extends AbstractMediaSelectionControl i
 
     private void addPotentiallyPlayableMediaTracksTo(Collection<MediaTrack> mediaTracks) {
         for (MediaTrack mediaTrack : mediaPlayerManager.getAssignedMediaTracks()) {
-            if (isPotentiallyPlayable(mediaTrack)) {
-                mediaTracks.add(mediaTrack);
-            }
+            mediaTracks.add(mediaTrack);
         }
     }
 

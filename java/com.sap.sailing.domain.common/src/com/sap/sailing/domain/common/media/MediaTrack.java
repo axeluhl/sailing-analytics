@@ -45,6 +45,8 @@ public class MediaTrack implements Serializable {
     public TimePoint startTime;
     public Duration duration;
     public MimeType mimeType;
+    @Deprecated
+    // should not be used
     public Status status = Status.UNDEFINED;
     public Set<RegattaAndRaceIdentifier> assignedRaces;
 
