@@ -198,7 +198,13 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assert.assertFalse(mapSettings.isTransparentHoverlines());
         mapSettings.setWindUp(false);
         mapSettings.setTransparentHoverlines(false);
-        mapSettings.pressOk();
+        
+        // When just doing mapSettings.pressOk() this test often fails because the internally called waitForAjaxRequests
+        // often never terminates because many components do parallel calls in short cycles
+        // That's why we do not want to use waitForAjaxRequests here but instead wait a fix amount of time as workaround
+        // TODO this could be improved by using a specific category for saving settings so that we could explicitly wait for this
+        mapSettings.pressOk(false, false);
+        Thread.sleep(5000);
 
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
                 String.format(BMW_RACE, 1), "WINNING_LANES");

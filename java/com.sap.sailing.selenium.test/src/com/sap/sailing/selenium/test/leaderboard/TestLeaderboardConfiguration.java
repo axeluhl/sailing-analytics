@@ -130,7 +130,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             RegattaDetailsCompositePO regattaDetails = regattaStructure.getRegattaDetails(this.regatta);
             SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
             seriesDialog.deleteRace("D3");
-            seriesDialog.pressOk(true);
+            seriesDialog.pressOk(true, false);
             final List<String> expectedRaces = Arrays.asList("D1", "D2", "D4", "D5");
             regattaDetails.waitForRacesOfSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME, expectedRaces);
             // Now we can check the result with our expectation
@@ -169,7 +169,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             RegattaDetailsCompositePO regattaDetails = regattaStructure.getRegattaDetails(this.regatta);
             SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
             seriesDialog.renameRace("D1", "Q");
-            seriesDialog.pressOk(true);
+            seriesDialog.pressOk(true, false);
             
             // Now we can check the result with our expectation
             leaderboardWindow.switchToWindow();
