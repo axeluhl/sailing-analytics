@@ -22,7 +22,7 @@ public class LeaderboardRetrievalProcessor extends AbstractRetrievalProcessor<Ha
     protected Iterable<HasLeaderboardContext> retrieveData(HasLeaderboardGroupContext element) {
         Collection<HasLeaderboardContext> leaderboardsWithContext = new ArrayList<>();
         for (Leaderboard leaderboard : element.getLeaderboardGroup().getLeaderboards()) {
-            leaderboardsWithContext.add(new LeaderboardWithContext(leaderboard, element, element.getPolarDataService()));
+            leaderboardsWithContext.add(new LeaderboardWithContext(leaderboard, element));
         }
         return leaderboardsWithContext;
     }
