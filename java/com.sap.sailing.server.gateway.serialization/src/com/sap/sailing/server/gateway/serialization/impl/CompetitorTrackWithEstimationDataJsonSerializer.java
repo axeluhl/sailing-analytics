@@ -67,27 +67,27 @@ public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTra
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
             TrackTimeInfo trackTimeInfo = maneuverDetector.getTrackTimeInfo();
-            TimePoint from = null;
-            TimePoint to = null;
-            if (startBeforeStartLineInSeconds != null) {
-                from = trackTimeInfo.getTrackStartTimePoint()
-                        .minus(new MillisecondsDurationImpl(startBeforeStartLineInSeconds * 1000L));
-            } else if (startAfterFinishLineInSeconds != null) {
-                from = trackTimeInfo.getTrackEndTimePoint()
-                        .plus(new MillisecondsDurationImpl(startAfterFinishLineInSeconds * 1000L));
-            } else {
-                from = trackTimeInfo.getTrackStartTimePoint();
-            }
-            if (endAfterFinishLineInSeconds != null) {
-                to = trackTimeInfo.getTrackEndTimePoint()
-                        .plus(new MillisecondsDurationImpl(endAfterFinishLineInSeconds * 1000L));
-            } else if (endBeforeStartLineInSeconds != null) {
-                to = trackTimeInfo.getTrackStartTimePoint()
-                        .minus(new MillisecondsDurationImpl(endBeforeStartLineInSeconds * 1000L));
-            } else {
-                to = trackTimeInfo.getTrackEndTimePoint();
-            }
             if (trackTimeInfo != null) {
+                TimePoint from = null;
+                TimePoint to = null;
+                if (startBeforeStartLineInSeconds != null) {
+                    from = trackTimeInfo.getTrackStartTimePoint()
+                            .minus(new MillisecondsDurationImpl(startBeforeStartLineInSeconds * 1000L));
+                } else if (startAfterFinishLineInSeconds != null) {
+                    from = trackTimeInfo.getTrackEndTimePoint()
+                            .plus(new MillisecondsDurationImpl(startAfterFinishLineInSeconds * 1000L));
+                } else {
+                    from = trackTimeInfo.getTrackStartTimePoint();
+                }
+                if (endAfterFinishLineInSeconds != null) {
+                    to = trackTimeInfo.getTrackEndTimePoint()
+                            .plus(new MillisecondsDurationImpl(endAfterFinishLineInSeconds * 1000L));
+                } else if (endBeforeStartLineInSeconds != null) {
+                    to = trackTimeInfo.getTrackStartTimePoint()
+                            .minus(new MillisecondsDurationImpl(endBeforeStartLineInSeconds * 1000L));
+                } else {
+                    to = trackTimeInfo.getTrackEndTimePoint();
+                }
                 final JSONObject forCompetitorJson = new JSONObject();
                 byCompetitorJson.add(forCompetitorJson);
                 forCompetitorJson.put(COMPETITOR_NAME, competitor.getName());
