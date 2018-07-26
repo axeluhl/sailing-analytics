@@ -90,10 +90,12 @@ public abstract class AbstractSuggestOracle<T> extends SuggestOracle {
                 int index = displayString.length();
                 String matchToken = null;
                 for (String token : queryTokens) {
-                    int matchIndex = normalizedString.indexOf(token, cursor);
-                    if (matchIndex >= 0 && matchIndex < index) {
-                        index = matchIndex;
-                        matchToken = token;
+                    if (token != null && !token.isEmpty()) {
+                        int matchIndex = normalizedString.indexOf(token, cursor);
+                        if (matchIndex >= 0 && matchIndex < index) {
+                            index = matchIndex;
+                            matchToken = token;
+                        }
                     }
                 }
                 if (matchToken != null) {
