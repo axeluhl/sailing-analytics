@@ -134,7 +134,7 @@ public class QueryDefinitionParser {
         builder.appendText(arrayListClassName + "<" + retrieverLevelClassName + "> " + retrieverLevelsVariable + " = new " + arrayListClassName + "<>();").appendLineBreak();
         for (DataRetrieverLevelDTO retrieverLevel : retrieverChain.getRetrieverLevels()) {
             LocalizedTypeDTO retrievedType = retrieverLevel.getRetrievedDataType();
-            String retrievedTypeAsCode = "new " + localizedTypeClassName + "(" + typeStrategy.toCode(retrievedType.getTypeName()) + ", " + literal(retrievedType.getDisplayName()) + ")";
+            String retrievedTypeAsCode = "new " + localizedTypeClassName + "(" + typeStrategy.toCode(retrievedType.getTypeName()) + ", \"\")";
             String retrieverSettingsAsCode = "null";
             // TODO Handle the retriever level settings
             builder.appendText(retrieverLevelsVariable + ".add(new " + retrieverLevelClassName + "(" + retrieverLevel.getLevel() + ", " +
