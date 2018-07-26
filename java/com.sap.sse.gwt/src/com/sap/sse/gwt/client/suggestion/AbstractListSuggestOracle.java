@@ -18,8 +18,9 @@ public abstract class AbstractListSuggestOracle<C> extends AbstractSuggestOracle
 
     @Override
     protected final void getSuggestions(Request request, Callback callback, Iterable<String> queryTokens) {
-        Iterable<C> filteredList = suggestionMatchingFilter.applyFilter(getKeywordStrings(queryTokens), suggestionObjectList);
-        this.setSuggestions(request, callback, filteredList, queryTokens);
+        Iterable<String> keywords = getKeywordStrings(queryTokens);
+        Iterable<C> filteredList = suggestionMatchingFilter.applyFilter(keywords, suggestionObjectList);
+        this.setSuggestions(request, callback, filteredList, keywords);
     }
     
     protected Iterable<String> getKeywordStrings(Iterable<String> queryTokens) {
