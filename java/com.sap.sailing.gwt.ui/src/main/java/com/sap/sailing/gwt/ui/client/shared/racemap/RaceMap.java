@@ -436,6 +436,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private final ManeuverMarkersAndLossIndicators maneuverMarkersAndLossIndicators;
 
+    private final Set<Date> remoteCallsInExecution = new HashSet<>();
+    private final Set<Date> remoteCallsToSkipInExecution = new HashSet<>();
+    private boolean currentlyDragging = false;
+
     private class AdvantageLineUpdater implements QuickRanksListener {
         @Override
         public void rankChanged(String competitorIdAsString, QuickRankDTO oldQuickRank, QuickRankDTO quickRank) {
@@ -643,6 +647,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                           final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                           RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList, settings.getZoomSettings().isZoomToSelectedCompetitors());
                           settings = new RaceMapSettings(settings, clearedZoomSettings);
+                            refreshMapWithoutAnimation();
                       }
                       // TODO bug489 when in wind-up mode, avoid zooming out too far; perhaps zoom back in if zoomed out too far
                   }
@@ -656,7 +661,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                       final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                       RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList, settings.getZoomSettings().isZoomToSelectedCompetitors());
                       settings = new RaceMapSettings(settings, clearedZoomSettings);
-                  }
+                        currentlyDragging = false;
+                        removeTransitions();
+                    }
               });
               map.addIdleHandler(new IdleMapHandler() {
                   @Override
@@ -685,13 +692,21 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                           streamletOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
                       }
                       if ((simulationOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
-                          simulationOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
+                            simulationOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
                       }
                       currentMapBounds = map.getBounds();
                       currentZoomLevel = newZoomLevel;
                       headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
+                        refreshMapWithoutAnimation();
                   }
               });
+                map.addDragStartHandler(event -> {
+                    currentlyDragging = true;
+                });
+                
+                map.addCenterChangeHandler(event -> GWT.log("cc"));
+                map.addProjectionChangeHandler(event -> GWT.log("proj-change"));
+                map.addTilesLoadedHandler(event -> GWT.log("tiles-loaded"));
               
               // If there was a time change before the API was loaded, reset the time
               if (lastTimeChangeBeforeInitialization != null) {
@@ -874,65 +889,97 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return timer.getPlayMode() == PlayModes.Live;
     }
 
-    @Override
-    public void timeChanged(final Date newTime, final Date oldTime) {
-        if (newTime != null && isMapInitialized) {
-            if (raceIdentifier != null) {
-                RegattaAndRaceIdentifier race = raceIdentifier;
-                final Iterable<CompetitorDTO> competitorsToShow = getCompetitorsToShow();
-                if (race != null) {
-                    final long transitionTimeInMillis = calculateTimeForPositionTransitionInMillis(newTime, oldTime);
-                    final com.sap.sse.common.Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
-                            fixesAndTails.computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
-                    // Request map data update, possibly in two calls; see method details
-                    callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(fromAndToAndOverlap, race, newTime, transitionTimeInMillis, competitorsToShow);
-                    // draw the wind into the map, get the combined wind
-                    List<String> windSourceTypeNames = new ArrayList<String>();
-                    windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
-                    windSourceTypeNames.add(WindSourceType.WINDFINDER.name());
-                    windSourceTypeNames.add(WindSourceType.COMBINED.name());
-                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, newTime, 1000L, 1, windSourceTypeNames,
-                            /* onlyUpToNewestEvent==false means get us any data we can get by a best effort */ false);
-                    asyncActionsExecutor.execute(getWindInfoAction, GET_WIND_DATA_CATEGORY, new AsyncCallback<WindInfoForRaceDTO>() {
+    private void refreshMapWithoutAnimation() {
+        removeTransitions();
+        remoteCallsToSkipInExecution.addAll(remoteCallsInExecution);
+    }
+
+    private void updateMapWithWindInfo(final Date newTime, final long transitionTimeInMillis,
+            final Iterable<CompetitorDTO> competitorsToShow, final WindInfoForRaceDTO windInfo,
+            final List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow) {
+        showAdvantageLine(competitorsToShow, newTime, transitionTimeInMillis);
+        for (WindSource windSource : windInfo.windTrackInfoByWindSource.keySet()) {
+            WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
+            switch (windSource.getType()) {
+            case EXPEDITION:
+            case WINDFINDER:
+                // we filter out measured wind sources with very low confidence
+                if (windTrackInfoDTO.minWindConfidence > 0.0001) {
+                    windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource,
+                            windTrackInfoDTO));
+                }
+                break;
+            case COMBINED:
+                showCombinedWindOnMap(windSource, windTrackInfoDTO);
+                if (requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown) {
+                    updateCoordinateSystemFromSettings();
+                }
+                break;
+            default:
+                // Which wind sources are requested is defined in a list above this
+                // action. So we throw here an exception to notice a missing source.
+                throw new UnsupportedOperationException("There is currently no support for the enum value '"
+                        + windSource.getType() + "' in this method.");
+            }
+        }
+    }
+
+    private void refreshMap(final Date newTime, final long transitionTimeInMillis) {
+        final Iterable<CompetitorDTO> competitorsToShow = getCompetitorsToShow();
+        final com.sap.sse.common.Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = fixesAndTails
+                .computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
+        // Request map data update, possibly in two calls; see method details
+        callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(fromAndToAndOverlap,
+                raceIdentifier, newTime, transitionTimeInMillis, competitorsToShow);
+        // draw the wind into the map, get the combined wind
+        List<String> windSourceTypeNames = new ArrayList<String>();
+        windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
+        windSourceTypeNames.add(WindSourceType.WINDFINDER.name());
+        windSourceTypeNames.add(WindSourceType.COMBINED.name());
+        if (remoteCallsInExecution.add(newTime)) {
+            if (currentlyDragging) {
+                remoteCallsToSkipInExecution.add(newTime);
+            }
+            GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, raceIdentifier, newTime, 1000L,
+                    1, windSourceTypeNames,
+                    /* onlyUpToNewestEvent==false means get us any data we can get by a best effort */ false);
+            asyncActionsExecutor.execute(getWindInfoAction, GET_WIND_DATA_CATEGORY,
+                    new AsyncCallback<WindInfoForRaceDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error obtaining wind information: " + caught.getMessage(), true /*silentMode */);
+                            remoteCallsInExecution.remove(newTime);
+                            errorReporter.reportError("Error obtaining wind information: " + caught.getMessage(),
+                                    true /* silentMode */);
                         }
 
                         @Override
                         public void onSuccess(WindInfoForRaceDTO windInfo) {
+                            remoteCallsInExecution.remove(newTime);
                             List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>>();
                             if (windInfo != null) {
                                 lastCombinedWindTrackInfoDTO = windInfo;
-                                showAdvantageLine(competitorsToShow, newTime, transitionTimeInMillis);
-                                for (WindSource windSource : windInfo.windTrackInfoByWindSource.keySet()) {
-                                    WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
-                                    switch (windSource.getType()) {
-                                        case EXPEDITION:
-                                        case WINDFINDER:
-                                            // we filter out measured wind sources with very low confidence
-                                            if (windTrackInfoDTO.minWindConfidence > 0.0001) {
-                                                windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
-                                            }
-                                            break;
-                                        case COMBINED:
-                                            showCombinedWindOnMap(windSource, windTrackInfoDTO);
-                                            if (requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown) {
-                                                updateCoordinateSystemFromSettings();
-                                            }
-                                            break;
-                                    default:
-                                        // Which wind sources are requested is defined in a list above this
-                                        // action. So we throw here an exception to notice a missing source.
-                                        throw new UnsupportedOperationException(
-                                                "There is currently no support for the enum value '"
-                                                        + windSource.getType() + "' in this method.");
-                                    }
+                                if (remoteCallsToSkipInExecution.remove(newTime)) {
+                                    updateMapWithWindInfo(newTime, -1, competitorsToShow, windInfo, windSourcesToShow);
+                                    GWT.log("on-success-remove");
+                                } else {
+                                    updateMapWithWindInfo(newTime, transitionTimeInMillis, competitorsToShow, windInfo,
+                                            windSourcesToShow);
+                                    GWT.log("on-success-stay");
                                 }
                             }
                             showWindSensorsOnMap(windSourcesToShow);
                         }
                     });
+        }
+    }
+
+    @Override
+    public void timeChanged(final Date newTime, final Date oldTime) {
+        if (newTime != null && isMapInitialized) {
+            if (raceIdentifier != null) {
+                if (raceIdentifier != null) {
+                    final long transitionTimeInMillis = calculateTimeForPositionTransitionInMillis(newTime, oldTime);
+                    refreshMap(newTime, transitionTimeInMillis);
                 }
             }
         }
@@ -1402,7 +1449,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         PolylineOptions newOptions = createTailStyle(competitorDTO, displayHighlighted(competitorDTO));
                         fixesAndTails.getTail(competitorDTO).setOptions(newOptions);
                     }
-                    boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, newTime, timeForPositionTransitionMillis);
+                    boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, newTime,
+                            timeForPositionTransitionMillis);
                     if (usedExistingBoatCanvas && !updateTailsOnly) {
                         competitorDTOsOfUnusedBoatCanvases.remove(competitorDTO);
                     }
