@@ -91,8 +91,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
 
     private void addAudioTracksToGridPanel(Collection<MediaTrack> audioTracks, Panel grid) {
         if (!audioTracks.isEmpty()) {
-            // TODO
-            grid.add(new Label("i18n Audio Tracks"));
+            grid.add(new Label(stringMessages.audioFiles()));
             grid.add(createAudioButton(null, mediaPlayerManager.getPlayingAudioTrack()));
             for (MediaTrack audioTrack : audioTracks) {
                 grid.add(createAudioButton(audioTrack, mediaPlayerManager.getPlayingAudioTrack()));
