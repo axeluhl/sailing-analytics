@@ -60,7 +60,7 @@ public class DataRetrieverLevelDTO implements Serializable, Comparable<DataRetri
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((retrievedDataType == null) ? 0 : retrievedDataType.hashCode());
+        result = prime * result + ((retrievedDataType == null) ? 0 : retrievedDataType.getTypeName().hashCode());
         result = prime * result + retrieverLevel;
         result = prime * result + ((retrieverTypeName == null) ? 0 : retrieverTypeName.hashCode());
         return result;
@@ -78,7 +78,7 @@ public class DataRetrieverLevelDTO implements Serializable, Comparable<DataRetri
         if (retrievedDataType == null) {
             if (other.retrievedDataType != null)
                 return false;
-        } else if (!retrievedDataType.equals(other.retrievedDataType))
+        } else if (!retrievedDataType.getTypeName().equals(other.retrievedDataType.getTypeName()))
             return false;
         if (retrieverLevel != other.retrieverLevel)
             return false;
