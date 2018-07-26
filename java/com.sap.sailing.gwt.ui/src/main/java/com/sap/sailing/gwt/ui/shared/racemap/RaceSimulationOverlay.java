@@ -115,8 +115,10 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
 
     @Override
     protected void draw() {
-        super.setCanvasSettings();
-        drawPaths();
+        if (mapProjection != null) {
+            super.setCanvasSettings();
+            drawPaths();
+        }
     }    
 
     private void createSimulationLegend(MapWidget map) {
@@ -360,7 +362,9 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                                 visiblePaths[1] = Boolean.FALSE; // hide left-opportunist by default
                                 visiblePaths[2] = Boolean.FALSE; // hide right-opportunist by default
                                 clearCanvas();
-                                drawPaths();
+                                if (mapProjection != null) {
+                                    drawPaths();
+                                }
                             }
                         } else {
                             raceLeg = 0;
