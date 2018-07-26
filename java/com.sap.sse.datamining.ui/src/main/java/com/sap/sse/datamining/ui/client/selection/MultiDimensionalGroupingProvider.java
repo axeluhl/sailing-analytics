@@ -58,8 +58,10 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
     private final List<ValueListBox<FunctionDTO>> dimensionToGroupByBoxes;
 
     private boolean isAwaitingReload;
+    private boolean isUpdating;
     private DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition;
     private final List<FunctionDTO> availableDimensions;
+    private Iterable<FunctionDTO> dimensionsToSelect;
 
     public MultiDimensionalGroupingProvider(Component<?> parent, ComponentContext<?> context,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
@@ -114,6 +116,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
 
     private void updateAvailableDimensions() {
         if (currentRetrieverChainDefinition != null) {
+            isUpdating = true;
             dataMiningService.getDimensionsFor(currentRetrieverChainDefinition,
                     LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<HashSet<FunctionDTO>>() {
                         @Override
@@ -126,16 +129,21 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
                             addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
                             if (!availableDimensions.isEmpty()) {
                                 Collections.sort(availableDimensions, DimensionComparator);
-                                firstDimensionToGroupByBox.setValue(availableDimensions.iterator().next(), true);
+                                if (dimensionsToSelect != null) {
+                                    setSelectedDimensions(dimensionsToSelect);
+                                } else {
+                                    firstDimensionToGroupByBox.setValue(availableDimensions.iterator().next(), true);
+                                }
+                                dimensionsToSelect = null;
                             } else {
                                 notifyListeners();
                             }
+                            isUpdating = false;
                         }
-
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError(
-                                    "Error fetching the dimensions from the server: " + caught.getMessage());
+                            errorReporter.reportError("Error fetching the dimensions from the server: " + caught.getMessage());
+                            isUpdating = false;
                         }
                     });
         } else {
@@ -254,10 +262,22 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
 
     @Override
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
-        int index = 0;
-        for (FunctionDTO dimension : queryDefinition.getDimensionsToGroupBy()) {
-            dimensionToGroupByBoxes.get(index).setValue(dimension, true);
-            index++;
+        DataRetrieverChainDefinitionDTO newRetrieverChain = queryDefinition.getDataRetrieverChainDefinition();
+        if (!isAwaitingReload && !isUpdating && currentRetrieverChainDefinition.equals(newRetrieverChain)) {
+            setSelectedDimensions(queryDefinition.getDimensionsToGroupBy());
+        } else {
+            dimensionsToSelect = queryDefinition.getDimensionsToGroupBy();
+        }
+    }
+
+    private void setSelectedDimensions(Iterable<FunctionDTO> dimensions) {
+        int boxIndex = 0;
+        for (FunctionDTO dimension : dimensions) {
+            int index = availableDimensions.indexOf(dimension);
+            if (index != -1) {
+                dimensionToGroupByBoxes.get(boxIndex).setValue(availableDimensions.get(index), true);
+                boxIndex++;
+            }
         }
     }
 
