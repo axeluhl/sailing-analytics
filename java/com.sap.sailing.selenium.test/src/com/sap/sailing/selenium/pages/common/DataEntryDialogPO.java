@@ -103,6 +103,7 @@ public abstract class DataEntryDialogPO extends PageArea {
     public void pressMakeDefault() {
         WebElement element = findElementBySeleniumId(ID_MAKE_DEFAULT_BUTTON);
         element.click();
+        waitForNotificationAndDismiss();
     }
     
     public boolean isMakeDefaultButtonVisible() {
