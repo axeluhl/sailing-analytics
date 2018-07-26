@@ -18,7 +18,7 @@ public interface HasRaceOfCompetitorContext {
     HasTrackedRaceContext getTrackedRaceContext();
     
     @Connector(messageKey="Competitor")
-    @Statistic(messageKey="")
+    @Statistic(messageKey="Competitor")
     Competitor getCompetitor();
     
     @Dimension(messageKey="TackAtStart", ordinal=12)

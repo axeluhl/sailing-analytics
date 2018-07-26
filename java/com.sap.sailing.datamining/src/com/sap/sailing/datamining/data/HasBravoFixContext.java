@@ -16,7 +16,7 @@ public interface HasBravoFixContext {
     @Connector(ordinal=1)
     BravoFix getBravoFix();
     
-    @Connector(messageKey="Speed")
+    @Connector(messageKey="")
     SpeedWithBearing getSpeed();
     
     @Connector(messageKey="Wind")
