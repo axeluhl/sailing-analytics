@@ -80,6 +80,9 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     private final List<ExtractionFunctionWithContext> availableExtractionFunctions;
     private final ExtractionFunctionSuggestBox extractionFunctionSuggestBox;
     private final ValueListBox<AggregationProcessorDefinitionDTO> aggregatorListBox;
+    private final List<AggregationProcessorDefinitionDTO> availableAggregators;
+    
+    private AggregationProcessorDefinitionDTO aggregatorToSelect;
 
     public SuggestBoxStatisticProvider(Component<?> parent, ComponentContext<?> componentContext,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
@@ -129,6 +132,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         extractionFunctionSuggestBox.setWidth("540px");
         mainPanel.add(extractionFunctionSuggestBox);
 
+        availableAggregators = new ArrayList<>();
         aggregatorListBox = createAggregatorListBox();
         aggregatorListBox.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
         mainPanel.add(aggregatorListBox);
@@ -177,7 +181,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
                         awaitingRetrieverChainStatistics = dataRetrieverChainDefinitions.size();
                         availableExtractionFunctions.clear();
                         if (awaitingRetrieverChainStatistics == 0) {
-                            extractionFunctionSuggestBox.setSelectableValues(Collections.emptyList());
+                            extractionFunctionSuggestBox.setSelectableValues(availableExtractionFunctions);
                         } else {
                             for (DataRetrieverChainDefinitionDTO retrieverChain : dataRetrieverChainDefinitions) {
                                 if (retrieverChain.hasSettings()) {
@@ -242,26 +246,31 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     }
 
     private void updateAggregators() {
+        availableAggregators.clear();
         FunctionDTO extractionFunction = getExtractionFunction();
         if (extractionFunction == null) {
-            updateListBox(aggregatorListBox, Collections.emptyList());
+            updateListBox(aggregatorListBox, availableAggregators);
         } else {
-            dataMiningService.getAggregatorDefinitionsFor(extractionFunction,
-                    LocaleInfo.getCurrentLocale().getLocaleName(),
-                    new AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>>() {
-                        @Override
-                        public void onSuccess(HashSet<AggregationProcessorDefinitionDTO> aggregators) {
-                            List<AggregationProcessorDefinitionDTO> aggregatorsList = new ArrayList<>(aggregators);
-                            Collections.sort(aggregatorsList);
-                            updateListBox(aggregatorListBox, aggregatorsList);
+            dataMiningService.getAggregatorDefinitionsFor(extractionFunction, LocaleInfo.getCurrentLocale().getLocaleName(),
+                new AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>>() {
+                    @Override
+                    public void onSuccess(HashSet<AggregationProcessorDefinitionDTO> aggregators) {
+                        availableAggregators.addAll(aggregators);
+                        Collections.sort(availableAggregators);
+                        updateListBox(aggregatorListBox, availableAggregators);
+                        
+                        if (aggregatorToSelect != null && availableAggregators.contains(aggregatorToSelect)) {
+                            aggregatorListBox.setValue(aggregatorToSelect, true);
+                            aggregatorToSelect = null;
                         }
+                    }
 
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error fetching the aggregators for the extraction function'"
-                                    + extractionFunction + "': " + caught.getMessage());
-                        }
-                    });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error fetching the aggregators for the extraction function'"
+                                + extractionFunction + "': " + caught.getMessage());
+                    }
+                });
         }
     }
 
@@ -388,9 +397,18 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             extractionFunctionSuggestBox.setSelectableValues(availableExtractionFunctions);
         }
 
+        DataRetrieverChainDefinitionDTO oldRetrieverChain = getDataRetrieverChainDefinition();
         extractionFunctionSuggestBox.getValueBox().setValue(statistic.getDisplayString(), false);
         extractionFunctionSuggestBox.setExtractionFunction(statistic);
-        aggregatorListBox.setValue(queryDefinition.getAggregatorDefinition());
+        
+        AggregationProcessorDefinitionDTO aggregator = queryDefinition.getAggregatorDefinition();
+        if (retrieverChain.equals(oldRetrieverChain)) {
+            if (availableAggregators.contains(aggregator)) {
+                aggregatorListBox.setValue(aggregator);
+            }
+        } else {
+            aggregatorToSelect = aggregator;
+        }
     }
 
     @Override
