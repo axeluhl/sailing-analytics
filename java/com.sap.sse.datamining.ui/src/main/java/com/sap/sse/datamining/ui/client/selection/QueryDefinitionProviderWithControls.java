@@ -43,7 +43,6 @@ import com.sap.sse.datamining.ui.client.StatisticProvider;
 import com.sap.sse.datamining.ui.client.WithControls;
 import com.sap.sse.datamining.ui.client.developer.PredefinedQueryRunner;
 import com.sap.sse.datamining.ui.client.developer.QueryDefinitionViewer;
-import com.sap.sse.datamining.ui.client.selection.filter.HierarchicalDimensionListFilterSelectionProvider;
 import com.sap.sse.datamining.ui.client.settings.AdvancedDataMiningSettings;
 import com.sap.sse.datamining.ui.client.settings.AdvancedDataMiningSettingsDialogComponent;
 import com.sap.sse.gwt.client.ErrorReporter;
