@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.dom.client.VideoElement;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -25,7 +24,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.media.MediaTrack.Status;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -73,6 +71,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     private final Map<MediaTrack, VideoContainer> activeVideoContainers = new HashMap<MediaTrack, VideoContainer>();
     private Collection<MediaTrack> assignedMediaTracks = new ArrayList<>();
     private Collection<MediaTrack> overlappingMediaTracks = new ArrayList<>();
+    private Map<MediaTrack, Status> mediaTrackStatus = new HashMap<>();
 
     private final RegattaAndRaceIdentifier raceIdentifier;
     private final RaceTimesInfoProvider raceTimesInfoProvider;
@@ -86,6 +85,23 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     private final MediaPlayerLifecycle mediaPlayerLifecycle;
 
     private List<PlayerChangeListener> playerChangeListener = new ArrayList<>();
+
+    public enum Status {
+        UNDEFINED('?'),
+        CANNOT_PLAY('-'),
+        NOT_REACHABLE('#'),
+        REACHABLE('+');
+
+        private final char symbol;
+
+        private Status(char symbol) {
+            this.symbol = symbol;
+        }
+
+        public String toString() {
+            return String.valueOf(this.symbol);
+        }
+    }
 
     public MediaPlayerManagerComponent(Component<?> parent, ComponentContext<?> context,
             MediaPlayerLifecycle mediaPlayerLifecycle,
@@ -116,13 +132,15 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         Window.addWindowClosingHandler(this);
     }
 
-    private static boolean isPotentiallyPlayable(MediaTrack mediaTrack) {
-        return MediaTrack.Status.REACHABLE.equals(mediaTrack.status)
-                || MediaTrack.Status.UNDEFINED.equals(mediaTrack.status);
+    private boolean isPotentiallyPlayable(MediaTrack mediaTrack) {
+        Status status = mediaTrackStatus.get(mediaTrack);
+        return Status.REACHABLE.equals(status) || Status.UNDEFINED.equals(status);
     }
 
     private void setStatus(final MediaTrack mediaTrack) {
-        if (!mediaTrack.isYoutube()) {
+        if (mediaTrack.isYoutube()) {
+            mediaTrackStatus.put(mediaTrack, Status.REACHABLE);
+        } else {
             Video video = Video.createIfSupported();
             if (video != null) {
                 VideoElement mediaReachableTester = video.getVideoElement();
@@ -131,39 +149,33 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                 mediaReachableTester.setSrc(UriUtils.fromString(mediaTrack.url).asString());
                 mediaReachableTester.load();
             } else {
-                GWT.log("Video tag unsupported : " + mediaTrack.title);
-                mediaTrack.status = Status.CANNOT_PLAY;
+                mediaTrackStatus.put(mediaTrack, Status.CANNOT_PLAY);
             }
-        } else {
-            GWT.log("Reachable : " + mediaTrack.title);
-            mediaTrack.status = Status.REACHABLE;
         }
     }
 
     native void addLoadMetadataHandler(MediaElement mediaElement, MediaTrack mediaTrack) /*-{
-		var that = this;
-		mediaElement
-				.addEventListener(
-						'loadedmetadata',
-						function() {
-							that.@com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent::loadedmetadata(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
-						});
-		mediaElement
-				.addEventListener(
-						'error',
-						function() {
-							that.@com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent::mediaError(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
-						});
+        var that = this;
+        mediaElement
+                .addEventListener(
+                        'loadedmetadata',
+                        function() {
+                            that.@com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent::loadedmetadata(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
+                        });
+        mediaElement
+                .addEventListener(
+                        'error',
+                        function() {
+                            that.@com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent::mediaError(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
+                        });
     }-*/;
 
     public void loadedmetadata(MediaTrack mediaTrack) {
-        GWT.log("Reachable with videotag " + mediaTrack.title);
-        mediaTrack.status = Status.REACHABLE;
+        mediaTrackStatus.put(mediaTrack, Status.REACHABLE);
     }
 
     public void mediaError(MediaTrack mediaTrack) {
-        GWT.log("Error with videotag " + mediaTrack.title);
-        mediaTrack.status = Status.NOT_REACHABLE;
+        mediaTrackStatus.put(mediaTrack, Status.NOT_REACHABLE);
     }
 
     @Override
@@ -183,7 +195,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     private MediaTrack getDefaultAudio() {
         // TODO: implement a better heuristic than just taking the first to come
         for (MediaTrack mediaTrack : assignedMediaTracks) {
-            if (mediaTrack.mimeType != null && MediaType.audio.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
+            if (mediaTrack.mimeType != null && MediaType.audio.equals(mediaTrack.mimeType.mediaType)
+                    && isPotentiallyPlayable(mediaTrack)) {
                 return mediaTrack;
             }
         }
@@ -384,18 +397,10 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     public void playAudio(MediaTrack audioTrack) {
         if ((activeAudioPlayer == null) || (activeAudioPlayer.getMediaTrack() != audioTrack)) {
             muteAudio();
-            if ((audioTrack != null) && audioTrack.isYoutube()) { // --> Youtube videos can't be played for audio-only.
-                                                                  // So add a video player first.
-                playFloatingVideo(audioTrack);
-            }
+            playFloatingVideo(audioTrack);
             VideoContainer playingVideoContainer = activeVideoContainers.get(audioTrack);
-            if (playingVideoContainer != null) {
-                VideoPlayer playingVideoPlayer = playingVideoContainer.getVideoPlayer();
-                activeAudioPlayer = playingVideoPlayer;
-                activeAudioPlayer.setMuted(false);
-            } else {
-                assignNewAudioPlayer(audioTrack);
-            }
+            activeAudioPlayer = playingVideoContainer.getVideoPlayer();
+            activeAudioPlayer.setMuted(false);
             notifyStateChange();
         } else {
             // nothing changed
@@ -405,14 +410,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     @Override
     public void muteAudio() {
         if (activeAudioPlayer != null) { // --> then reset active audio player
-
-            if (activeVideoContainers.containsKey(activeAudioPlayer.getMediaTrack())) { // pre-change audioPlayer is one
-                                                                                        // of the
-                // videoPlayers
-                activeAudioPlayer.setMuted(true);
-            } else { // pre-change audioPlayer is a dedicated audio-only player
-                activeAudioPlayer.shutDown();
-            }
+            activeAudioPlayer.shutDown();
             activeAudioPlayer = null;
             notifyStateChange();
         } else {
@@ -484,6 +482,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         } else {
             videoPlayer = new VideoJSSyncPlayer(videoTrack, getRaceStartTime(), raceTimer);
         }
+
         return videoContainerFactory.createVideoContainer(videoPlayer, userService, getMediaService(), errorReporter,
                 playerCloseListener, popoutListener);
     }
@@ -527,22 +526,9 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         VideoContainer removedVideoContainer = activeVideoContainers.remove(videoTrack);
         if (removedVideoContainer != null) {
             removedVideoContainer.shutDown();
-            if (activeAudioPlayer != null && activeAudioPlayer.getMediaTrack() == videoTrack) {
-                assignNewAudioPlayer(null);
-            }
             notifyStateChange();
         } else {
             // nothing changed
-        }
-    }
-
-    private void assignNewAudioPlayer(MediaTrack audioTrack) {
-        if (audioTrack != null) {
-            activeAudioPlayer = new AudioHtmlPlayer(audioTrack);
-
-            synchPlayState(activeAudioPlayer);
-        } else {
-            activeAudioPlayer = null;
         }
     }
 

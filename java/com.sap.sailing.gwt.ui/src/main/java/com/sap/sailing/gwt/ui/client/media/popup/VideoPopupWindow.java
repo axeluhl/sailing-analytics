@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client.media.popup;
 
-import com.google.gwt.dom.client.VideoElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.user.client.Window;
@@ -39,12 +39,12 @@ public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenu
     
     
 
-    native void initPlay(VideoElement videoElement) /*-{
+    native void initPlay(Element videoElement) /*-{
 		var that = this;
-                var deferredPlayState = $wnd.deferredPlayState
-                if (deferredPlayState && !$wnd.videoPlayer) {
-                     that.@com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow::initPlayState(DZDZ)(deferredPlayState.deferredMediaTime, deferredPlayState.deferredIsMuted, deferredPlayState.deferredPlaybackSpeed, deferredPlayState.deferredIsPlaying);
-                }
+		var deferredPlayState = $wnd.deferredPlayState
+		if (deferredPlayState && !$wnd.videoPlayer) {
+			that.@com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow::initPlayState(DZDZ)(deferredPlayState.deferredMediaTime, deferredPlayState.deferredIsMuted, deferredPlayState.deferredPlaybackSpeed, deferredPlayState.deferredIsPlaying);
+		}
     }-*/;
 
     public void loadedmetadata() {

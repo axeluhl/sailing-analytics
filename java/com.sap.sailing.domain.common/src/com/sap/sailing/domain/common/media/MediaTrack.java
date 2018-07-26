@@ -25,6 +25,7 @@ public class MediaTrack implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @Deprecated
     public enum Status {
         UNDEFINED('?'), CANNOT_PLAY('-'), NOT_REACHABLE('#'), REACHABLE('+');
 
@@ -155,5 +156,4 @@ public class MediaTrack implements Serializable {
             return false;
         }
     }
-
 }
