@@ -51,7 +51,7 @@ public class SailingPredefinedQueries {
                 create_AvgSpeed_Per_Competitor());
         predefinedQueries.put(new PredefinedQueryIdentifier(QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE, "Distance traveled grouped by competitor/team name and leg type"),
                               create_SumTraveledDistance_Per_Competitor_LegType());
-        predefinedQueries.put(new PredefinedQueryIdentifier(QUERY_DISTANCE_TRAVELED_PER_COMPETITOR, "Distance traveled grouped by competitor/team name and leg type"),
+        predefinedQueries.put(new PredefinedQueryIdentifier(QUERY_DISTANCE_TRAVELED_PER_COMPETITOR, "Distance traveled grouped by competitor/team name"),
                 create_SumTraveledDistance_Per_Competitor());
         predefinedQueries.put(new PredefinedQueryIdentifier(QUERY_MANEUVERS_PER_COMPETITOR, "Maneuvers grouped by competitor/team name"),
                               create_SumManeuvers_Per_Competitor());
