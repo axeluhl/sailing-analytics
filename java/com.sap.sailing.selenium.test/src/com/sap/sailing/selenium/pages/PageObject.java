@@ -604,32 +604,32 @@ public class PageObject {
     /**
      * Waits for an notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
      */
-    protected void waitForNotificationAndDismiss() throws InterruptedException {
+    protected void waitForNotificationAndDismiss() {
         waitForNotificationAndDismiss(DEFAULT_WAIT_TIMEOUT_SECONDS);
     }
 
     /**
      * Waits for an notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
      */
-    protected void waitForNotificationAndDismiss(int timeoutInSeconds) throws InterruptedException {
-        int i = 0;
-        while (i < timeoutInSeconds) {
-            i++;
-            try {
-                List<WebElement> notifications = driver.findElements(By.id("notificationBar"));
-                if (notifications.size() > 0) {
-                    notifications.get(0).findElements(By.cssSelector("*"))
-                            .forEach(notification -> notification.click());
-                    ;
-                    return;
-                } else {
-                    throw new NoAlertPresentException();
+    protected void waitForNotificationAndDismiss(int timeoutInSeconds) {
+        WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
+        wait.until(new Function<WebDriver, Boolean>() {
+
+            @Override
+            public Boolean apply(WebDriver t) {
+                boolean clickedNotifications = false;
+                List<WebElement> notificationBar = driver.findElements(By.id("notificationBar"));
+                if (!notificationBar.isEmpty()) {
+                    // we got the enclosing panel
+                    List<WebElement> notifications = notificationBar.get(0).findElements(By.cssSelector("*"));
+                    if (!notifications.isEmpty()) {
+                        notifications.forEach(notification -> notification.click());
+                        clickedNotifications = true;
+                    }
                 }
-            } catch (NoAlertPresentException e) {
-                Thread.sleep(1000);
+                return clickedNotifications;
             }
-        }
-        throw new NoAlertPresentException();
+        });
     }
     
     protected void scrollToView(WebElement webElement) {
