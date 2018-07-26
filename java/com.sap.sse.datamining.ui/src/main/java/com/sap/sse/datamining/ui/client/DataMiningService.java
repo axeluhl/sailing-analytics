@@ -52,6 +52,8 @@ public interface DataMiningService extends RemoteService {
             StatisticQueryDefinitionDTO queryDefinition);
 
     HashSet<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers();
+    
+    StatisticQueryDefinitionDTO getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier);
 
     <ResultType extends Serializable> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session,
             PredefinedQueryIdentifier identifier, String localeInfoName);

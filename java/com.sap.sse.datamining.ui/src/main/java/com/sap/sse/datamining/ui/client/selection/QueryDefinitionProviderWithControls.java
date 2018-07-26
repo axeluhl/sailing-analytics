@@ -105,7 +105,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         queryDefinitionViewer.setActive(false);
         addQueryDefinitionChangedListener(queryDefinitionViewer);
         predefinedQueryRunner = new PredefinedQueryRunner(parent, context, session, getDataMiningStringMessages(),
-                                                          dataMiningService, errorReporter, resultsPresenter);
+                                                          dataMiningService, errorReporter, this, resultsPresenter);
 
         Button clearSelectionButton = new Button(getDataMiningStringMessages().clearSelection());
         clearSelectionButton.addClickHandler(new ClickHandler() {

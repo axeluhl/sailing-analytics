@@ -54,6 +54,8 @@ public interface DataMiningServiceAsync {
             StatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResultDTO<ResultType>> callback);
 
     void getPredefinedQueryIdentifiers(AsyncCallback<HashSet<PredefinedQueryIdentifier>> callback);
+    
+    void getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier, AsyncCallback<StatisticQueryDefinitionDTO> callback);
 
     <ResultType extends Serializable> void runPredefinedQuery(DataMiningSession session,
             PredefinedQueryIdentifier identifier, String localeInfoName,

@@ -348,6 +348,13 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         }
         return predefinedQueryNames;
     }
+    
+    @Override
+    public StatisticQueryDefinitionDTO getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier) {
+        SecurityUtils.getSubject().checkPermission(
+                Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, identifier.getIdentifier()));
+        return getDataMiningServer().getPredefinedQueryDefinitionDTO(identifier);
+    }
 
     @Override
     public <ResultType extends Serializable> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session,

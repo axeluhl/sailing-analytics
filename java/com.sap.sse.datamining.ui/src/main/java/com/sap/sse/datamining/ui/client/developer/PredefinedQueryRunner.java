@@ -7,7 +7,6 @@ import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -18,9 +17,11 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
+import com.sap.sse.datamining.ui.client.QueryDefinitionProvider;
 import com.sap.sse.datamining.ui.client.ResultsPresenter;
 import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -36,6 +37,7 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
+    private final QueryDefinitionProvider<?> queryDefinitionProvider;
     private final ResultsPresenter<?> resultsPresenter;
 
     private final Button showDialogButton;
@@ -46,12 +48,13 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
 
     public PredefinedQueryRunner(Component<?> parent, ComponentContext<?> context, DataMiningSession session,
             StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-            ResultsPresenter<?> resultsPresenter) {
+            QueryDefinitionProvider<?> queryDefinitionProvider, ResultsPresenter<?> resultsPresenter) {
         super(parent, context);
         this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
+        this.queryDefinitionProvider = queryDefinitionProvider;
         this.resultsPresenter = resultsPresenter;
 
         showDialogButton = new Button(stringMessages.runPredefinedQuery(), new ClickHandler() {
@@ -141,19 +144,29 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
     protected void runSelectedPredefinedQuery() {
         PredefinedQueryIdentifier predefinedQueryIdentifier = selectionListBox.getValue();
         resultsPresenter.showBusyIndicator();
-        dataMiningService.runPredefinedQuery(session, predefinedQueryIdentifier,
-                LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResultDTO<Serializable>>() {
+        dataMiningService.getPredefinedQueryDefinition(predefinedQueryIdentifier, new AsyncCallback<StatisticQueryDefinitionDTO>() {
+            @Override
+            public void onSuccess(StatisticQueryDefinitionDTO queryDefinition) {
+                queryDefinitionProvider.applyQueryDefinition(queryDefinition);
+                dataMiningService.runQuery(session, queryDefinition, new AsyncCallback<QueryResultDTO<Serializable>>() {
                     @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error running the query: " + caught.getMessage());
-                        resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
-                    }
-
-                    @Override
-            public void onSuccess(QueryResultDTO<Serializable> result) {
+                    public void onSuccess(QueryResultDTO<Serializable> result) {
                         resultsPresenter.showResult(result);
                     }
+                    @Override
+                    public void onFailure(Throwable error) {
+                        errorReporter.reportError("Error running the query: " + error.getMessage());
+                        resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
+                    }
                 });
+            }
+            @Override
+            public void onFailure(Throwable error) {
+                errorReporter.reportError("Error running the query: " + error.getMessage());
+                resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
+                
+            }
+        });
         dialogBox.hide();
     }
 
