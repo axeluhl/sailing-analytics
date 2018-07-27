@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -37,7 +38,6 @@ import com.sap.sse.datamining.ui.client.FilterSelectionChangedListener;
 import com.sap.sse.datamining.ui.client.FilterSelectionProvider;
 import com.sap.sse.datamining.ui.client.GroupingChangedListener;
 import com.sap.sse.datamining.ui.client.GroupingProvider;
-import com.sap.sse.datamining.ui.client.ResultsPresenter;
 import com.sap.sse.datamining.ui.client.StatisticChangedListener;
 import com.sap.sse.datamining.ui.client.StatisticProvider;
 import com.sap.sse.datamining.ui.client.WithControls;
@@ -78,7 +78,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     public QueryDefinitionProviderWithControls(Component<?> parent, ComponentContext<?> context,
             DataMiningSession session, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
             DataMiningSettingsControl settingsControl, DataMiningSettingsInfoManager settingsManager,
-            ResultsPresenter<?> resultsPresenter) {
+            Consumer<StatisticQueryDefinitionDTO> queryRunner) {
         super(parent, context, dataMiningService, errorReporter);
         providerListener = new ProviderListener();
         // Creating the header panel, that contains the retriever chain provider and the controls
@@ -103,8 +103,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         queryDefinitionViewer.getEntryWidget().addStyleName("dataMiningMarginRight");
         queryDefinitionViewer.setActive(false);
         addQueryDefinitionChangedListener(queryDefinitionViewer);
-        predefinedQueryRunner = new PredefinedQueryRunner(parent, context, session, getDataMiningStringMessages(),
-                                                          dataMiningService, errorReporter, this, resultsPresenter);
+        predefinedQueryRunner = new PredefinedQueryRunner(parent, context, getDataMiningStringMessages(),
+                                                          dataMiningService, errorReporter, this, queryRunner);
 
         Button clearSelectionButton = new Button(getDataMiningStringMessages().clearSelection());
         clearSelectionButton.addClickHandler(new ClickHandler() {
