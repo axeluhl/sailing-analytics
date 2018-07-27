@@ -73,6 +73,9 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.FinishTimeUpdateHandler;
+import com.sap.sailing.domain.tracking.impl.RaceAbortedHandler;
+import com.sap.sailing.domain.tracking.impl.StartTimeUpdateHandler;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.MetadataParser;
@@ -678,15 +681,15 @@ public class DomainFactoryImpl implements DomainFactory {
                 tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
                 raceDefinition.getId(), tractracRace, this);
         trackedRace.addCourseDesignChangedListener(courseDesignHandler);
-        TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(
+        StartTimeUpdateHandler startTimeHandler = new StartTimeUpdateHandler(
                 tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
                 raceDefinition.getId(), trackedRace.getTrackedRegatta().getRegatta());
         trackedRace.addStartTimeChangedListener(startTimeHandler);
-        TracTracRaceAbortedHandler raceAbortedHandler = new TracTracRaceAbortedHandler(
+        RaceAbortedHandler raceAbortedHandler = new RaceAbortedHandler(
                 tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
                 raceDefinition.getId());
         trackedRace.addRaceAbortedListener(raceAbortedHandler);
-        trackedRace.addListener(new TracTracFinishTimeUpdateHandler(tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
+        trackedRace.addListener(new FinishTimeUpdateHandler(tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
                 raceDefinition.getId(), trackedRace.getTrackedRegatta().getRegatta()).getListener());
     }
 

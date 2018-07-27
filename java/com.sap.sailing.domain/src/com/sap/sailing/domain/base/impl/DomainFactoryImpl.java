@@ -205,7 +205,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         raceDTO.status.status = trackedRace.getStatus() == null ? null : trackedRace.getStatus().getStatus();
         raceDTO.status.loadingProgress = trackedRace.getStatus() == null ? 0.0 : trackedRace.getStatus().getLoadingProgress();
     }
-
+    
     @Override
     public TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace) {
         TrackedRaceDTO trackedRaceDTO = new TrackedRaceDTO();

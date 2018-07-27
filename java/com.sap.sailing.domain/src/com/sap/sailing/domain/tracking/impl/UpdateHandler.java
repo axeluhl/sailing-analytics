@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.tractracadapter.impl;
+package com.sap.sailing.domain.tracking.impl;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -25,21 +25,28 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.tractracadapter.UpdateResponse;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sse.common.Duration;
 
+/**
+ * An update handler can be registered as a listener on a {@link TrackedRace} and can then propagate information to
+ * an external service. This can, e.g., be a tracking partner's system that is interested in receiving race status
+ * updates such as new start times or postponements.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class UpdateHandler {
-    
     private final static Logger logger = Logger.getLogger(UpdateHandler.class.getName());
     
     private JsonDeserializer<UpdateResponse> updateDeserializer;
     private final URI baseURI;
-    private final String tracTracUsername;
-    private final String tracTracPassword;
-    private final Serializable tracTracEventId;
+    private final String username;
+    private final String password;
+    private final Serializable eventId;
     private final Serializable raceId;
     private final String action;
     private final boolean active;
@@ -53,16 +60,16 @@ public class UpdateHandler {
     private final static String ResponseCodeForFailure = "FAILURE";
     private final static String UpdateUrlTemplate = "%s%s?eventid=%s&raceid=%s&username=%s&password=%s";
     
-    public UpdateHandler(URI updateURI, String action, String tracTracUsername, String tracTracPassword, Serializable tracTracEventId, Serializable raceId) {
+    public UpdateHandler(URI updateURI, String action, String username, String password, Serializable eventId, Serializable raceId) {
         this.baseURI = updateURI;
         this.action = action;
-        this.tracTracUsername = tracTracUsername;
-        this.tracTracPassword = tracTracPassword;
-        this.tracTracEventId = tracTracEventId;
+        this.username = username;
+        this.password = password;
+        this.eventId = eventId;
         this.raceId = raceId;
         this.updateDeserializer = new UpdateResponseDeserializer();
         if (updateURI != null && !updateURI.toString().equals("")) {
-            logger.info("Activating TracTrac update handler "+this+" for race with ID "+raceId);
+            logger.info("Activating update handler "+this+" for race with ID "+raceId);
             this.active = true;
         } else {
             this.active = false;
@@ -87,10 +94,10 @@ public class UpdateHandler {
      */
     protected List<BasicNameValuePair> getDefaultParametersAsNewList() {
         final List<BasicNameValuePair> result = new ArrayList<>();
-        result.add(new BasicNameValuePair("eventid", tracTracEventId.toString()));
+        result.add(new BasicNameValuePair("eventid", eventId.toString()));
         result.add(new BasicNameValuePair("raceid", this.raceId.toString()));
-        result.add(new BasicNameValuePair("username", tracTracUsername));
-        result.add(new BasicNameValuePair("password", tracTracPassword));
+        result.add(new BasicNameValuePair("username", username));
+        result.add(new BasicNameValuePair("password", password));
         return result;
     }
 
@@ -103,10 +110,10 @@ public class UpdateHandler {
         String url = String.format(UpdateUrlTemplate, 
                 serverUpdateURI.toString(),
                 this.action,
-                URLEncoder.encode(this.tracTracEventId.toString(), EncodingUtf8), 
+                URLEncoder.encode(this.eventId.toString(), EncodingUtf8), 
                 URLEncoder.encode(this.raceId.toString(), EncodingUtf8),
-                URLEncoder.encode(tracTracUsername, EncodingUtf8),
-                URLEncoder.encode(tracTracPassword, EncodingUtf8));
+                URLEncoder.encode(username, EncodingUtf8),
+                URLEncoder.encode(password, EncodingUtf8));
         
         for (Entry<String, String> entry : additionalParameters.entrySet()) {
             url += String.format("&%s=%s", 
@@ -123,7 +130,7 @@ public class UpdateHandler {
     protected void checkAndLogUpdateResponse(HttpURLConnection connection) throws IOException, ParseException {
         connection.setConnectTimeout(10000/*milliseconds*/);
         connection.connect();
-        BufferedReader reader = getResponseOnUpdateFromTracTrac(connection);
+        BufferedReader reader = getResponseOnUpdateFromProvider(connection);
         parseAndLogResponse(reader);
     }
 
@@ -133,13 +140,13 @@ public class UpdateHandler {
         JSONObject responseObject = Helpers.toJSONObjectSafe(responseBody);
         UpdateResponse updateResponse = updateDeserializer.deserialize(responseObject);
         if (updateResponse.getStatus().equals(ResponseCodeForFailure)) {
-            logger.severe("Failed to send data to TracTrac, got following response: " + updateResponse.getMessage());
+            logger.severe("Failed to send data to provider, got following response: " + updateResponse.getMessage());
         } else {
-            logger.info("Successfully sent data to TracTrac with response: " + updateResponse.getMessage());
+            logger.info("Successfully sent data to provider with response: " + updateResponse.getMessage());
         }
     }
 
-    private BufferedReader getResponseOnUpdateFromTracTrac(HttpURLConnection connection) throws IOException {
+    private BufferedReader getResponseOnUpdateFromProvider(HttpURLConnection connection) throws IOException {
         InputStream inputStream = connection.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         return reader;

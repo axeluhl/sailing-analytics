@@ -1,6 +1,4 @@
-package com.sap.sailing.domain.tractracadapter.impl;
-
-import com.sap.sailing.domain.tractracadapter.UpdateResponse;
+package com.sap.sailing.domain.tracking.impl;
 
 public class UpdateResponseImpl implements UpdateResponse {
     

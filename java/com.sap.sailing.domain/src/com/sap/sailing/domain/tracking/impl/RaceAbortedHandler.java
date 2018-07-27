@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.tractracadapter.impl;
+package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -15,14 +15,14 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.tracking.RaceAbortedListener;
 
-public class TracTracRaceAbortedHandler extends UpdateHandler implements RaceAbortedListener {
+public class RaceAbortedHandler extends UpdateHandler implements RaceAbortedListener {
     
     private final static String ACTION = "update_race_status";
     
-    private final static Logger logger = Logger.getLogger(TracTracRaceAbortedHandler.class.getName());
+    private final static Logger logger = Logger.getLogger(RaceAbortedHandler.class.getName());
     
-    public TracTracRaceAbortedHandler(URI updateURI, String tracTracUsername, String tracTracPassword, Serializable tracTracEventId, Serializable raceId) {
-        super(updateURI, ACTION, tracTracUsername, tracTracPassword, tracTracEventId, raceId);
+    public RaceAbortedHandler(URI updateURI, String username, String password, Serializable eventId, Serializable raceId) {
+        super(updateURI, ACTION, username, password, eventId, raceId);
     }
 
     @Override
