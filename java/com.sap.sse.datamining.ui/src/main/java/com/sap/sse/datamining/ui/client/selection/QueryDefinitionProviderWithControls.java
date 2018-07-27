@@ -94,9 +94,9 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                 new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
-                boolean active = queryDefinitionViewerToggleButton.isDown();
-                filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), !active);
-                queryDefinitionViewer.setActive(active);
+                        boolean active = queryDefinitionViewerToggleButton.isDown();
+                        filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), !active);
+                        queryDefinitionViewer.setActive(active);
                     }
                 });
         queryDefinitionViewer = new QueryDefinitionViewer(parent, context, getDataMiningStringMessages());
@@ -105,15 +105,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         addQueryDefinitionChangedListener(queryDefinitionViewer);
         predefinedQueryRunner = new PredefinedQueryRunner(parent, context, getDataMiningStringMessages(),
                                                           dataMiningService, errorReporter, this, queryRunner);
-
-        Button clearSelectionButton = new Button(getDataMiningStringMessages().clearSelection());
-        clearSelectionButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                filterSelectionProvider.clearSelection();
-            }
-        });
-        addControl(clearSelectionButton);
 
         Button reloadButton = new Button(getDataMiningStringMessages().reload());
         reloadButton.addClickHandler(new ClickHandler() {

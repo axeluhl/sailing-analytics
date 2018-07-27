@@ -261,6 +261,7 @@ input.magnifier {
 
 .filterDimensionsTitleLabel {
     padding-top: 5px;
+    display: inline-block;
 }
 
 .filterFilterDimensionsPanel {
@@ -323,8 +324,14 @@ input.magnifier {
 .dataMiningMarginLeft {
     margin-left: 5px;
 }
+.dataMiningMarginTop {
+    margin-top: 5px;
+}
 .dataMiningMarginRight {
     margin-right: 5px;
+}
+.dataMiningMarginBottom {
+    margin-bottom: 5px;
 }
 
 .resultsPresenterTabHeader * {
@@ -335,4 +342,8 @@ input.magnifier {
 
 .emphasizedLabel {
     font-weight: 600;
+}
+
+.floatRight {
+	float: right;
 }

@@ -24,7 +24,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String useClassGetName();
     String useStringLiteralsTooltip();
     String queryDefinitionViewer();
-    String runAsSubstantive();
+    String run();
     String queryNotValidBecause();
     String queryRunner();
     String runAQuery();
@@ -65,5 +65,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String filter();
     String filterShownDimensions();
     String selectDimensionsToFilterBy();
+    String clear();
     
 }

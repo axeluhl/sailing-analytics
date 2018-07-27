@@ -31,7 +31,9 @@ import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.RowHoverEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -72,8 +74,9 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
     
     private static final Unit LayoutUnit = Unit.PX;
     private static final double SelectionPresenterHeight = 100;
-    private static final double DimensionSelectionWidth = 300;
-    private static final double DimensionSelectionHeaderHeight = 40;
+    private static final double DimensionSelectionWidth = 350;
+    private static final double DimensionSelectionHeaderHeight = 30;
+    private static final double FilterFilterDimensionsHeight = 40;
     private static final double FilterSelectionTableWidth = 250;
 
     private final DataMiningSession session;
@@ -127,6 +130,11 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         filterDimensionsSelectionTitleLabel.addStyleName("dataMiningMarginLeft");
         filterDimensionsSelectionTitleLabel.addStyleName("filterDimensionsTitleLabel");
 
+        Button clearSelectionButton = new Button(stringMessages.clear());
+        clearSelectionButton.addStyleName("floatRight");
+        clearSelectionButton.addStyleName("dataMiningMarginRight");
+        clearSelectionButton.addClickHandler(e -> clearSelection());
+
         DataMiningDataGridResources resources = GWT.create(DataMiningDataGridResources.class);
         filterDimensionsList = new DataGrid<>(Integer.MAX_VALUE, resources);
         filterDimensionsList.setAutoHeaderRefreshDisabled(true);
@@ -168,9 +176,14 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractCo
         };
         filterDimensionsList.addColumn(dimensionColumn);
         
+        FlowPanel headerPanel = new FlowPanel();
+        headerPanel.addStyleName("dataMiningMarginTop");
+        headerPanel.add(filterDimensionsSelectionTitleLabel);
+        headerPanel.add(clearSelectionButton);
+        
         DockLayoutPanel filterDimensionsSelectionPanel = new DockLayoutPanel(LayoutUnit);
-        filterDimensionsSelectionPanel.addNorth(filterDimensionsSelectionTitleLabel, 20);
-        filterDimensionsSelectionPanel.addNorth(filterFilterDimensionsPanel, DimensionSelectionHeaderHeight);
+        filterDimensionsSelectionPanel.addNorth(headerPanel, DimensionSelectionHeaderHeight);
+        filterDimensionsSelectionPanel.addNorth(filterFilterDimensionsPanel, FilterFilterDimensionsHeight);
         filterDimensionsSelectionPanel.add(filterDimensionsList);
         
         dimensionFilterSelectionProviders = new HashMap<>();
