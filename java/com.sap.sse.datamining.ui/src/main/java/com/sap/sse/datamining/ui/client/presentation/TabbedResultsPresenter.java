@@ -11,8 +11,6 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
-import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -41,6 +39,7 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     protected final Map<String, CloseablePresenterTab> tabsMappedById;
     protected final DrillDownCallback drillDownCallback;
     protected final Map<String, ResultsPresenter<Settings>> registeredResultPresenterMap;
+    private final Set<CurrentPresenterChangedListener> listeners;
 
     public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context, DrillDownCallback drillDownCallback) {
         super(parent, context);
@@ -48,11 +47,19 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         tabPanel = new ScrolledTabLayoutPanel(30, Unit.PX, resources.arrowLeftIcon(), resources.arrowRightIcon());
         tabPanel.setAnimationDuration(0);
         tabsMappedById = new HashMap<>();
-        registeredResultPresenterMap = new HashMap<>();
         this.drillDownCallback = drillDownCallback;
+        registeredResultPresenterMap = new HashMap<>();
+        listeners = new HashSet<>();
 
         addNewTabTab();
         addTabAndFocus(new MultiResultsPresenter(this, context, drillDownCallback));
+        
+        tabPanel.addSelectionHandler(event -> {
+            String presenterId = ((CloseablePresenterTab) tabPanel.getTabWidget(event.getSelectedItem())).getId();
+            for (CurrentPresenterChangedListener listener : listeners) {
+                listener.currentPresenterChanged(presenterId);
+            }
+        });
     }
 
     private void addNewTabTab() {
@@ -62,14 +69,11 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         header.add(new Image(resources.plusIcon()));
         tabPanel.add(widget, header);
         // This is necessary to stop the selection of this pseudo tab
-        tabPanel.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
-            @Override
-            public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
-                if (event.getItem() == tabPanel.getWidgetCount() - 1) {
-                    event.cancel();
-                    addTabAndFocus(new MultiResultsPresenter(TabbedResultsPresenter.this, getComponentContext(),
-                            drillDownCallback));
-                }
+        tabPanel.addBeforeSelectionHandler(event -> {
+            if (event.getItem() == tabPanel.getWidgetCount() - 1) {
+                event.cancel();
+                addTabAndFocus(new MultiResultsPresenter(TabbedResultsPresenter.this, getComponentContext(),
+                        drillDownCallback));
             }
         });
     }
@@ -158,6 +162,16 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         
         tab.setText(getDataMiningStringMessages().runningQuery());
         tab.getPresenter().showBusyIndicator();
+    }
+
+    @Override
+    public void addCurrentPresenterChangedListener(CurrentPresenterChangedListener listener) {
+        listeners.add(listener);
+    }
+
+    @Override
+    public void removeCurrentPresenterChangedListener(CurrentPresenterChangedListener listener) {
+        listeners.remove(listener);
     }
 
     /**

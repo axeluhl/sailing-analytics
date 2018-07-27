@@ -10,6 +10,13 @@ import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
  * @author Lennart Hensler
  */
 public interface CompositeResultsPresenter<SettingsType extends Settings> extends ResultsPresenter<SettingsType> {
+    
+    @FunctionalInterface
+    public interface CurrentPresenterChangedListener {
+        
+        void currentPresenterChanged(String presenterId);
+        
+    }
 
     /**
      * @return The identifier for the currently active presenter
@@ -79,6 +86,9 @@ public interface CompositeResultsPresenter<SettingsType extends Settings> extend
      * @param presenterId The id of the presenter used to show the busy indicator
      */
     void showBusyIndicator(String presenterId);
+    
+    void addCurrentPresenterChangedListener(CurrentPresenterChangedListener listener);
+    void removeCurrentPresenterChangedListener(CurrentPresenterChangedListener listener);
     
     @Override
     default QueryResultDTO<?> getCurrentResult() {

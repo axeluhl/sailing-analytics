@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedSailingResultsPresenter;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.datamining.ui.client.AnchorDataMiningSettingsControl;
 import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
@@ -77,6 +78,13 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                             });
                         },
                         getStringMessages());
+                resultsPresenter.addCurrentPresenterChangedListener(presenterId -> {
+                    StatisticQueryDefinitionDTO queryDefinition = resultsPresenter.getQueryDefinition(presenterId);
+                    if (queryDefinition != null) {
+                        queryDefinitionProvider.applyQueryDefinition(queryDefinition);
+                    }
+                });
+                
                 DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
                 queryDefinitionProvider = new QueryDefinitionProviderWithControls(null, null, session,
                         dataMiningService, DataMiningEntryPoint.this, settingsControl, settingsManager,
@@ -91,6 +99,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                  * automatic execution of queries. Re-enable this, when this functionality is desired again.
                  */
                 // settingsControl.addSettingsComponent(queryRunner);
+                
                 SplitLayoutPanel splitPanel = new SplitLayoutPanel(10);
                 splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
                 splitPanel.add(selectionDockPanel);
