@@ -62,7 +62,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 SailingPermissionsForRoleProvider.INSTANCE);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
             
-            private QueryDefinitionProviderWithControls queryDefinitionProviderWithControls;
+            private QueryDefinitionProviderWithControls queryDefinitionProvider;
             private SimpleQueryRunner queryRunner;
             private final DataMiningSettingsInfoManager settingsManager = new DataMiningSettingsInfoManagerImpl(
                     getStringMessages());
@@ -71,16 +71,20 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
             public Widget get() {
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null);
                 CompositeResultsPresenter<?> resultsPresenter = new TabbedSailingResultsPresenter(/*parent*/ null, /*context*/ null, 
-                        /*drillDownCallback*/ groupKey -> queryDefinitionProviderWithControls.drillDown(groupKey, queryRunner::runQuery),
+                        /*drillDownCallback*/ groupKey -> {
+                            queryDefinitionProvider.drillDown(groupKey, () -> {
+                                queryRunner.run(queryDefinitionProvider.getQueryDefinition());
+                            });
+                        },
                         getStringMessages());
                 DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
-                queryDefinitionProviderWithControls = new QueryDefinitionProviderWithControls(null, null, session,
+                queryDefinitionProvider = new QueryDefinitionProviderWithControls(null, null, session,
                         dataMiningService, DataMiningEntryPoint.this, settingsControl, settingsManager,
                         resultsPresenter);
-                selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
+                selectionDockPanel.add(queryDefinitionProvider.getEntryWidget());
                 queryRunner = new SimpleQueryRunner(null, null, session, dataMiningService, DataMiningEntryPoint.this,
-                        queryDefinitionProviderWithControls, resultsPresenter);
-                queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
+                        queryDefinitionProvider, resultsPresenter);
+                queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
                 /*
                  * Running queries automatically when they've been changed is currently unnecessary, if not even
                  * counterproductive. This removes the query runner settings to prevent that the user can enable the

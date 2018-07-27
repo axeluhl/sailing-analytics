@@ -68,24 +68,19 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
         runButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                runQuery();
+                run(queryDefinitionProvider.getQueryDefinition());
             }
         });
 
         queryReleaseTimer = new Timer() {
             @Override
             public void run() {
-                runQuery();
+                SimpleQueryRunner.this.run(queryDefinitionProvider.getQueryDefinition());
             }
         };
         if (this.settings.isRunAutomatically()) {
             queryDefinitionProvider.addQueryDefinitionChangedListener(this);
         }
-    }
-
-    @Override
-    public void runQuery() {
-        run(queryDefinitionProvider.getQueryDefinition());
     }
 
     @Override
