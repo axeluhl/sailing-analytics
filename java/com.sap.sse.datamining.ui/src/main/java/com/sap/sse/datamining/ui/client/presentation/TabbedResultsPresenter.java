@@ -74,11 +74,6 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     }
 
     @Override
-    public QueryResultDTO<?> getCurrentResult() {
-        return getSelectedTab().getPresenter().getCurrentResult();
-    }
-
-    @Override
     public String getCurrentPresenterId() {
         return getSelectedTab().getId();
     }
@@ -88,12 +83,27 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         Set<String> idSet = new HashSet<>(tabsMappedById.keySet());
         return Collections.unmodifiableSet(idSet);
     }
+    
+    @Override
+    public boolean containsPresenter(String presenterId) {
+        return tabsMappedById.containsKey(presenterId);
+    }
+    
+    @Override
+    public QueryResultDTO<?> getResult(String presenterId) {
+        CloseablePresenterTab tab = getTab(presenterId);
+        return tab != null ?  tab.getPresenter().getCurrentResult() : null;
+    }
 
     @Override
     public void showResult(String presenterId, QueryResultDTO<?> result) {
+        CloseablePresenterTab oldTab = getTab(presenterId);
+        if (oldTab == null) {
+            return;
+        }
+        
         try {
             if (result != null) {
-                CloseablePresenterTab oldTab = getTab(presenterId);
                 if (registeredResultPresenterMap.containsKey(result.getResultType())) {
                     addTabAndFocus(registeredResultPresenterMap.get(result.getResultType()));
                     removeTab(oldTab);
@@ -105,7 +115,6 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
                 }
                 getTab(presenterId).setText(result.getResultSignifier());
             }
-
         } finally {
             getTab(presenterId).getPresenter().showResult(result);
         }
@@ -114,6 +123,10 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     @Override
     public void showError(String presenterId, String error) {
         CloseablePresenterTab tab = getTab(presenterId);
+        if (tab == null) {
+            return;
+        }
+        
         tab.setText(getDataMiningStringMessages().error());
         tab.getPresenter().showError(error);
     }
@@ -121,6 +134,10 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     @Override
     public void showError(String presenterId, String mainError, Iterable<String> detailedErrors) {
         CloseablePresenterTab tab = getTab(presenterId);
+        if (tab == null) {
+            return;
+        }
+        
         tab.setText(getDataMiningStringMessages().error());
         tab.getPresenter().showError(mainError, detailedErrors);
     }
@@ -128,6 +145,10 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     @Override
     public void showBusyIndicator(String presenterId) {
         CloseablePresenterTab tab = getTab(presenterId);
+        if (tab == null) {
+            return;
+        }
+        
         tab.setText(getDataMiningStringMessages().runningQuery());
         tab.getPresenter().showBusyIndicator();
     }
