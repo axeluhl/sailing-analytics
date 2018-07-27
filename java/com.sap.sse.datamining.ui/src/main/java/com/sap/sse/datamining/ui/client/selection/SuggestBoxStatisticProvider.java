@@ -174,44 +174,43 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     private void updateContent() {
         final String localeName = LocaleInfo.getCurrentLocale().getLocaleName();
         dataMiningService.getDataRetrieverChainDefinitions(localeName,
-                new AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO>>() {
-                    @Override
-                    public void onSuccess(ArrayList<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitions) {
-                        settingsMap.clear();
-                        awaitingRetrieverChainStatistics = dataRetrieverChainDefinitions.size();
-                        availableExtractionFunctions.clear();
-                        if (awaitingRetrieverChainStatistics == 0) {
-                            extractionFunctionSuggestBox.setSelectableValues(availableExtractionFunctions);
-                        } else {
-                            for (DataRetrieverChainDefinitionDTO retrieverChain : dataRetrieverChainDefinitions) {
-                                if (retrieverChain.hasSettings()) {
-                                    settingsMap.put(retrieverChain, retrieverChain.getDefaultSettings());
-                                }
-                                dataMiningService.getStatisticsFor(retrieverChain, localeName,
-                                        new AsyncCallback<HashSet<FunctionDTO>>() {
-                                            @Override
-                                            public void onSuccess(HashSet<FunctionDTO> statistics) {
-                                                collectStatistics(retrieverChain, statistics);
-                                            }
-
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                errorReporter.reportError(
-                                                        "Error fetching the statistics for the retriever chain '"
-                                                                + retrieverChain + "': " + caught.getMessage());
-                                                collectStatistics(retrieverChain, Collections.emptySet());
-                                            }
-                                        });
+            new AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO>>() {
+                @Override
+                public void onSuccess(ArrayList<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitions) {
+                    settingsMap.clear();
+                    awaitingRetrieverChainStatistics = dataRetrieverChainDefinitions.size();
+                    availableExtractionFunctions.clear();
+                    if (awaitingRetrieverChainStatistics == 0) {
+                        extractionFunctionSuggestBox.setSelectableValues(availableExtractionFunctions);
+                    } else {
+                        for (DataRetrieverChainDefinitionDTO retrieverChain : dataRetrieverChainDefinitions) {
+                            if (retrieverChain.hasSettings()) {
+                                settingsMap.put(retrieverChain, retrieverChain.getDefaultSettings());
                             }
+                            dataMiningService.getStatisticsFor(retrieverChain, localeName,
+                                new AsyncCallback<HashSet<FunctionDTO>>() {
+                                    @Override
+                                    public void onSuccess(HashSet<FunctionDTO> statistics) {
+                                        collectStatistics(retrieverChain, statistics);
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError("Error fetching the statistics for the retriever chain '"
+                                                        + retrieverChain + "': " + caught.getMessage());
+                                        collectStatistics(retrieverChain, Collections.emptySet());
+                                    }
+                                });
                         }
                     }
+                }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter
-                                .reportError("Error fetching the retriever chain definitions: " + caught.getMessage());
-                    }
-                });
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter
+                            .reportError("Error fetching the retriever chain definitions: " + caught.getMessage());
+                }
+            });
     }
 
     private void collectStatistics(DataRetrieverChainDefinitionDTO retrieverChain,
@@ -257,6 +256,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error fetching the aggregators for the extraction function'"
                                 + extractionFunction + "': " + caught.getMessage());
+                        aggregatorToSelect = null;
                     }
                 });
         }

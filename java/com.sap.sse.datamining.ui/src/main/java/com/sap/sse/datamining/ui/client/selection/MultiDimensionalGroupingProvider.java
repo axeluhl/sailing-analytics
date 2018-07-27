@@ -143,6 +143,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError("Error fetching the dimensions from the server: " + caught.getMessage());
+                            dimensionsToSelect = null;
                             isUpdating = false;
                         }
                     });
@@ -150,6 +151,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
             clearAvailableDimensionsAndGroupByBoxes();
             ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
             addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
+            dimensionsToSelect = null;
         }
     }
 
@@ -263,10 +265,10 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
     @Override
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
         DataRetrieverChainDefinitionDTO newRetrieverChain = queryDefinition.getDataRetrieverChainDefinition();
+        dimensionsToSelect = queryDefinition.getDimensionsToGroupBy();
         if (!isAwaitingReload && !isUpdating && currentRetrieverChainDefinition.equals(newRetrieverChain)) {
-            setSelectedDimensions(queryDefinition.getDimensionsToGroupBy());
-        } else {
-            dimensionsToSelect = queryDefinition.getDimensionsToGroupBy();
+            setSelectedDimensions(dimensionsToSelect);
+            dimensionsToSelect = null;
         }
     }
 
