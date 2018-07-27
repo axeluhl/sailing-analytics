@@ -151,7 +151,7 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
                 dataMiningService.runQuery(session, queryDefinition, new AsyncCallback<QueryResultDTO<Serializable>>() {
                     @Override
                     public void onSuccess(QueryResultDTO<Serializable> result) {
-                        resultsPresenter.showResult(result);
+                        resultsPresenter.showResult(queryDefinition, result);
                     }
                     @Override
                     public void onFailure(Throwable error) {

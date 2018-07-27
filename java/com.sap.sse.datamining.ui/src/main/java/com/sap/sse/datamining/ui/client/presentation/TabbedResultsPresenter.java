@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
@@ -94,9 +95,15 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         CloseablePresenterTab tab = getTab(presenterId);
         return tab != null ?  tab.getPresenter().getCurrentResult() : null;
     }
+    
+    @Override
+    public StatisticQueryDefinitionDTO getQueryDefinition(String presenterId) {
+        CloseablePresenterTab tab = getTab(presenterId);
+        return tab != null ?  tab.getPresenter().getCurrentQueryDefinition() : null;
+    }
 
     @Override
-    public void showResult(String presenterId, QueryResultDTO<?> result) {
+    public void showResult(String presenterId, StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result) {
         CloseablePresenterTab oldTab = getTab(presenterId);
         if (oldTab == null) {
             return;
@@ -116,7 +123,7 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
                 getTab(presenterId).setText(result.getResultSignifier());
             }
         } finally {
-            getTab(presenterId).getPresenter().showResult(result);
+            getTab(presenterId).getPresenter().showResult(queryDefinition, result);
         }
     }
 

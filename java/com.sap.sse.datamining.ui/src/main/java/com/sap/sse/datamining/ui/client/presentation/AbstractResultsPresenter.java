@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.client.ResultsPresenter;
@@ -35,6 +36,7 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
     private final HTML errorLabel;
     private final HTML labeledBusyIndicator;
 
+    private StatisticQueryDefinitionDTO currentQueryDefinition;
     private QueryResultDTO<?> currentResult;
     private boolean isCurrentResultSimple;
 
@@ -75,7 +77,7 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
     }
 
     @Override
-    public void showResult(QueryResultDTO<?> result) {
+    public void showResult(StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result) {
         if (result != null && !result.isEmpty()) {
             if (state != ResultsPresenterState.RESULT) {
                 mainPanel.setWidgetHidden(controlsPanel, false);
@@ -83,10 +85,12 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
                 state = ResultsPresenterState.RESULT;
             }
             this.currentResult = result;
+            this.currentQueryDefinition = queryDefinition;
             updateCurrentResultInfo();
             internalShowResults(getCurrentResult());
         } else {
             this.currentResult = null;
+            this.currentQueryDefinition = null;
             updateCurrentResultInfo();
             showError(getDataMiningStringMessages().noDataFound() + ".");
         }
@@ -104,6 +108,7 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
             state = ResultsPresenterState.ERROR;
         }
         currentResult = null;
+        currentQueryDefinition = null;
         updateCurrentResultInfo();
         presentationPanel.setWidget(errorLabel);
     }
@@ -125,6 +130,7 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
             state = ResultsPresenterState.BUSY;
         }
         currentResult = null;
+        currentQueryDefinition = null;
         updateCurrentResultInfo();
     }
 
@@ -150,6 +156,11 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
     @Override
     public QueryResultDTO<?> getCurrentResult() {
         return currentResult;
+    }
+    
+    @Override
+    public StatisticQueryDefinitionDTO getCurrentQueryDefinition() {
+        return currentQueryDefinition;
     }
 
     @Override

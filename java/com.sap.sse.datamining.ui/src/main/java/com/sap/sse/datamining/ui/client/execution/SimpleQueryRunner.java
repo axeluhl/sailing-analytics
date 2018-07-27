@@ -103,7 +103,7 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
                     }
                     @Override
                     protected void handleSuccess(QueryResultDTO<Serializable> result) {
-                        resultsPresenter.showResult(presenterId, result);
+                        resultsPresenter.showResult(presenterId, queryDefinition, result);
                     }
                 });
         } else {

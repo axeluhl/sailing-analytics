@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.ui.client;
 
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
 /**
@@ -28,19 +29,29 @@ public interface CompositeResultsPresenter<SettingsType extends Settings> extend
     
     /**
      * @param presenterId The id of the presenter to get the results from
-     * @return The results of the presenter (may be null) with the given id or <code>null</code>,
+     * @return The results of the presenter with the given id or <code>null</code>,
      *         if no presenter for the id exists. 
      */
     QueryResultDTO<?> getResult(String presenterId);
     
     /**
-     * Shows the given result in the presenter for the given id. Does nothing if no
-     * presenter for the given id exists.
+     * @param presenterId The id of the presenter to get the query definition from
+     * @return The query definition of the presenter with the given id or <code>null</code>,
+     *         if no presenter for the id exists. 
+     */
+    StatisticQueryDefinitionDTO getQueryDefinition(String presenterId);
+    
+    /**
+     * Displays the given result for the given query definition int the presenter for the given id.
+     * Does nothing if no presenter for the given id exists. The given result may be <code>null</code>
+     * to clear the presenter. The given query definition may be <code>null</code>, but this is
+     * discouraged unless the result is also <code>null</code>.
      * 
      * @param presenterId The id of the presenter used to show the result
-     * @param result The result to show
+     * @param queryDefinition The query definition of the result to display
+     * @param result The result to display
      */
-    void showResult(String presenterId, QueryResultDTO<?> result);
+    void showResult(String presenterId, StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result);
     
     /**
      * Shows the given error in the presenter for the given id. Does nothing if no
@@ -73,10 +84,15 @@ public interface CompositeResultsPresenter<SettingsType extends Settings> extend
     default QueryResultDTO<?> getCurrentResult() {
         return getResult(getCurrentPresenterId());
     }
+    
+    @Override
+    default StatisticQueryDefinitionDTO getCurrentQueryDefinition() {
+        return getQueryDefinition(getCurrentPresenterId());
+    }
 
     @Override
-    default void showResult(QueryResultDTO<?> result) {
-        showResult(getCurrentPresenterId(), result);
+    default void showResult(StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result) {
+        showResult(getCurrentPresenterId(), queryDefinition, result);
     }
 
     @Override
