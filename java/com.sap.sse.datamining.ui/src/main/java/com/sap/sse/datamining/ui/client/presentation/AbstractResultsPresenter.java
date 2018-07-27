@@ -14,12 +14,13 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
-import com.sap.sse.datamining.ui.client.ResultsPresenterWithControls;
+import com.sap.sse.datamining.ui.client.ResultsPresenter;
+import com.sap.sse.datamining.ui.client.WithControls;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public abstract class AbstractResultsPresenter<SettingsType extends Settings>
-        extends AbstractDataMiningComponent<SettingsType> implements ResultsPresenterWithControls<SettingsType> {
+        extends AbstractDataMiningComponent<SettingsType> implements ResultsPresenter<SettingsType>, WithControls {
 
     private enum ResultsPresenterState {
         BUSY, ERROR, RESULT

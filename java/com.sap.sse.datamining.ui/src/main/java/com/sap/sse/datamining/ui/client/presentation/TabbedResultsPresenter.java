@@ -1,7 +1,11 @@
 package com.sap.sse.datamining.ui.client.presentation;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -16,6 +20,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
+import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.ResultsPresenter;
 import com.sap.sse.datamining.ui.client.presentation.ResultsChart.DrillDownCallback;
 import com.sap.sse.datamining.ui.client.resources.DataMiningResources;
@@ -25,22 +30,25 @@ import com.sap.sse.gwt.client.shared.controls.ScrolledTabLayoutPanel;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings>
-        implements ResultsPresenter<Settings> {
+        implements CompositeResultsPresenter<Settings> {
 
     protected static final DataMiningResources resources = GWT.create(DataMiningResources.class);
+    private static final String IdPrefix = "Tab";
+    
+    private final AtomicInteger idCounter;
     protected final ScrolledTabLayoutPanel tabPanel;
-    protected final Map<Widget, ResultsPresenter<?>> presentersMappedByHeader;
+    protected final Map<String, CloseablePresenterTab> tabsMappedById;
     protected final DrillDownCallback drillDownCallback;
     protected final Map<String, ResultsPresenter<Settings>> registeredResultPresenterMap;
 
-    public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context,
-            DrillDownCallback drillDownCallback) {
+    public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context, DrillDownCallback drillDownCallback) {
         super(parent, context);
-        this.drillDownCallback = drillDownCallback;
+        idCounter = new AtomicInteger();
         tabPanel = new ScrolledTabLayoutPanel(30, Unit.PX, resources.arrowLeftIcon(), resources.arrowRightIcon());
         tabPanel.setAnimationDuration(0);
-        presentersMappedByHeader = new HashMap<>();
+        tabsMappedById = new HashMap<>();
         registeredResultPresenterMap = new HashMap<>();
+        this.drillDownCallback = drillDownCallback;
 
         addNewTabTab();
         addTabAndFocus(new MultiResultsPresenter(this, context, drillDownCallback));
@@ -66,39 +74,101 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     }
 
     @Override
-    public void showError(String error) {
-        getSelectedHeader().setText(getDataMiningStringMessages().error());
-        getSelectedPresenter().showError(error);
-    }
-
-    @Override
-    public void showError(String mainError, Iterable<String> detailedErrors) {
-        getSelectedHeader().setText(getDataMiningStringMessages().error());
-        getSelectedPresenter().showError(mainError, detailedErrors);
-    }
-
-    @Override
-    public void showBusyIndicator() {
-        getSelectedHeader().setText(getDataMiningStringMessages().runningQuery());
-        getSelectedPresenter().showBusyIndicator();
-    }
-
-    @Override
     public QueryResultDTO<?> getCurrentResult() {
-        return getSelectedPresenter().getCurrentResult();
+        return getSelectedTab().getPresenter().getCurrentResult();
     }
 
-    protected CloseableTabHeader getSelectedHeader() {
-        return (CloseableTabHeader) tabPanel.getTabWidget(tabPanel.getSelectedIndex());
+    @Override
+    public String getCurrentPresenterId() {
+        return getSelectedTab().getId();
     }
 
-    protected ResultsPresenter<?> getSelectedPresenter() {
-        return presentersMappedByHeader.get(getSelectedHeader());
+    @Override
+    public Iterable<String> getPresenterIds() {
+        Set<String> idSet = new HashSet<>(tabsMappedById.keySet());
+        return Collections.unmodifiableSet(idSet);
+    }
+
+    @Override
+    public void showResult(String presenterId, QueryResultDTO<?> result) {
+        try {
+            if (result != null) {
+                CloseablePresenterTab oldTab = getTab(presenterId);
+                if (registeredResultPresenterMap.containsKey(result.getResultType())) {
+                    addTabAndFocus(registeredResultPresenterMap.get(result.getResultType()));
+                    removeTab(oldTab);
+                } else {
+                    if (!(oldTab.getPresenter() instanceof MultiResultsPresenter)) {
+                        addTabAndFocus(new MultiResultsPresenter(this, getComponentContext(), drillDownCallback));
+                        removeTab(oldTab);
+                    }
+                }
+                getTab(presenterId).setText(result.getResultSignifier());
+            }
+
+        } finally {
+            getTab(presenterId).getPresenter().showResult(result);
+        }
+    }
+
+    @Override
+    public void showError(String presenterId, String error) {
+        CloseablePresenterTab tab = getTab(presenterId);
+        tab.setText(getDataMiningStringMessages().error());
+        tab.getPresenter().showError(error);
+    }
+
+    @Override
+    public void showError(String presenterId, String mainError, Iterable<String> detailedErrors) {
+        CloseablePresenterTab tab = getTab(presenterId);
+        tab.setText(getDataMiningStringMessages().error());
+        tab.getPresenter().showError(mainError, detailedErrors);
+    }
+
+    @Override
+    public void showBusyIndicator(String presenterId) {
+        CloseablePresenterTab tab = getTab(presenterId);
+        tab.setText(getDataMiningStringMessages().runningQuery());
+        tab.getPresenter().showBusyIndicator();
+    }
+
+    /**
+     * Register a {@link ResultsPresenter} to handle the retrieved {@link resultType}. Each {@link resultType} can only
+     * be registered once. Multiple registrations will cause an {@link IllegalStateException}. When
+     * {@link #showResult(QueryResultDTO)} executes it checks whether the {@link resultType} was registered before and
+     * triggers the corresponding {@link ResultsPresenter}.
+     * 
+     * @param resultType
+     *            of the datamining query.
+     * @param resultPresenter
+     *            which shall be used to handle the datamaining query result.
+     * 
+     * @throws IllegalStateException
+     *             if the {@link resultType} is already registered.
+     */
+    public void registerResultsPresenter(Class<?> resultType, ResultsPresenter<Settings> resultPresenter)
+            throws IllegalStateException {
+        String className = resultType.getName();
+        if (!registeredResultPresenterMap.containsKey(className)) {
+            registeredResultPresenterMap.put(className, resultPresenter);
+        } else {
+            throw new IllegalStateException(
+                    "Multiple registration for result type key: " + resultType.toString() + "not allowed.");
+        }
+    }
+    
+    protected CloseablePresenterTab getSelectedTab() {
+        return (CloseablePresenterTab) tabPanel.getTabWidget(tabPanel.getSelectedIndex());
+    }
+    
+    protected CloseablePresenterTab getTab(String id) {
+        return tabsMappedById.get(id);
     }
 
     protected void addTabAndFocus(ResultsPresenter<?> tabPresenter) {
-        CloseableTabHeader tabHeader = new CloseableTabHeader();
-        presentersMappedByHeader.put(tabHeader, tabPresenter);
+        String tabId = IdPrefix + idCounter.getAndIncrement();
+        CloseablePresenterTab tabHeader = new CloseablePresenterTab(tabId, tabPresenter);
+        tabsMappedById.put(tabId, tabHeader);
 
         tabPanel.insert(tabPresenter.getEntryWidget(), tabHeader, tabPanel.getWidgetCount() - 1);
         int presenterIndex = tabPanel.getWidgetIndex(tabPresenter.getEntryWidget());
@@ -106,9 +176,9 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         tabPanel.scrollToTab(presenterIndex);
     }
 
-    protected void removeTab(CloseableTabHeader header) {
-        header.removeFromParent();
-        presentersMappedByHeader.remove(header);
+    protected void removeTab(CloseablePresenterTab tab) {
+        tab.removeFromParent();
+        tabsMappedById.remove(tab.getId());
     }
 
     @Override
@@ -152,88 +222,52 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     }
 
     @Override
+    public String getId() {
+        return "TabbedResultsPresenter";
+    }
+
+    @Override
     public String getDependentCssClassName() {
         return "tabbedResultsPresenters";
     }
 
-    public class CloseableTabHeader extends FlowPanel {
+    private class CloseablePresenterTab extends FlowPanel {
 
-        private final Label label;
+        private final String id;
+        private final Label headerLabel;
+        private final ResultsPresenter<?> presenter;
 
-        public CloseableTabHeader() {
+        public CloseablePresenterTab(String id, ResultsPresenter<?> presenter) {
+            this.id = id;
+            this.presenter = presenter;
             this.addStyleName("resultsPresenterTabHeader");
             
-            label = new Label(getDataMiningStringMessages().empty());
-            this.add(label);
+            headerLabel = new Label(getDataMiningStringMessages().empty());
+            this.add(headerLabel);
             Image closeImage = new Image(resources.closeIcon());
             closeImage.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     if (tabPanel.getWidgetCount() > 2) {
-                        removeTab(CloseableTabHeader.this);
+                        removeTab(CloseablePresenterTab.this);
                     }
                 }
             });
             this.add(closeImage);
         }
+        
+        public String getId() {
+            return id;
+        }
+        
+        public ResultsPresenter<?> getPresenter() {
+            return presenter;
+        }
 
         public void setText(String text) {
-            label.setText(text);
+            headerLabel.setText(text);
             tabPanel.checkIfScrollButtonsNecessary();
         }
 
-    }
-
-    @Override
-    public String getId() {
-        return "TabbedResultsPresenter";
-    }
-
-    /**
-     * Register a {@link ResultsPresenter} to handle the retrieved {@link resultType}. Each {@link resultType} can only
-     * be registered once. Multiple registrations will cause an {@link IllegalStateException}. When
-     * {@link #showResult(QueryResultDTO)} executes it checks whether the {@link resultType} was registered before and
-     * triggers the corresponding {@link ResultsPresenter}.
-     * 
-     * @param resultType
-     *            of the datamining query.
-     * @param resultPresenter
-     *            which shall be used to handle the datamaining query result.
-     * 
-     * @throws IllegalStateException
-     *             if the {@link resultType} is already registered.
-     */
-    public void registerResultsPresenter(Class<?> resultType, ResultsPresenter<Settings> resultPresenter)
-            throws IllegalStateException {
-        String className = resultType.getName();
-        if (!registeredResultPresenterMap.containsKey(className)) {
-            registeredResultPresenterMap.put(className, resultPresenter);
-        } else {
-            throw new IllegalStateException(
-                    "Multiple registration for result type key: " + resultType.toString() + "not allowed.");
-        }
-    }
-
-    @Override
-    public void showResult(QueryResultDTO<?> result) {
-        try {
-            if (result != null) {
-                if (registeredResultPresenterMap.containsKey(result.getResultType())) {
-                    CloseableTabHeader oldHeader = getSelectedHeader();
-                    addTabAndFocus(registeredResultPresenterMap.get(result.getResultType()));
-                    removeTab(oldHeader);
-                } else {
-                    if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
-                        CloseableTabHeader oldHeader = getSelectedHeader();
-                        addTabAndFocus(new MultiResultsPresenter(this, getComponentContext(), drillDownCallback));
-                        removeTab(oldHeader);
-                    }
-                    getSelectedHeader().setText(result.getResultSignifier());
-                }
-            }
-
-        } finally {
-            getSelectedPresenter().showResult(result);
-        }
     }
 }

@@ -19,11 +19,11 @@ import com.sap.sailing.gwt.ui.datamining.presentation.TabbedSailingResultsPresen
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.datamining.ui.client.AnchorDataMiningSettingsControl;
+import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataMiningSettingsControl;
 import com.sap.sse.datamining.ui.client.DataMiningSettingsInfoManager;
-import com.sap.sse.datamining.ui.client.ResultsPresenter;
 import com.sap.sse.datamining.ui.client.execution.SimpleQueryRunner;
 import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithControls;
 import com.sap.sse.gwt.client.EntryPointHelper;
@@ -40,10 +40,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
 
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
-
     private DataMiningSession session;
-
-    private QueryDefinitionProviderWithControls queryDefinitionProviderWithControls;
 
     @Override
     protected void doOnModuleLoad() {
@@ -64,6 +61,8 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         authorizedContentDecorator.setPermissionToCheck(Permission.DATA_MINING,
                 SailingPermissionsForRoleProvider.INSTANCE);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
+            
+            private QueryDefinitionProviderWithControls queryDefinitionProviderWithControls;
             private SimpleQueryRunner queryRunner;
             private final DataMiningSettingsInfoManager settingsManager = new DataMiningSettingsInfoManagerImpl(
                     getStringMessages());
@@ -71,7 +70,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
             @Override
             public Widget get() {
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null);
-                ResultsPresenter<?> resultsPresenter = new TabbedSailingResultsPresenter(/*parent*/ null, /*context*/ null, 
+                CompositeResultsPresenter<?> resultsPresenter = new TabbedSailingResultsPresenter(/*parent*/ null, /*context*/ null, 
                         /*drillDownCallback*/ groupKey -> queryDefinitionProviderWithControls.drillDown(groupKey, queryRunner::runQuery),
                         getStringMessages());
                 DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);

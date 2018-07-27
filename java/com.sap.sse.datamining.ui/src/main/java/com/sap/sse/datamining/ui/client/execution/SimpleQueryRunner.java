@@ -11,12 +11,12 @@ import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
+import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.ManagedDataMiningQueriesCounter;
 import com.sap.sse.datamining.ui.client.QueryDefinitionProvider;
 import com.sap.sse.datamining.ui.client.QueryRunner;
-import com.sap.sse.datamining.ui.client.ResultsPresenter;
 import com.sap.sse.datamining.ui.client.settings.QueryRunnerSettings;
 import com.sap.sse.datamining.ui.client.settings.QueryRunnerSettingsDialogComponent;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -48,12 +48,12 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
     private final Timer queryReleaseTimer;
     private QueryRunnerSettings settings;
     private final QueryDefinitionProvider<?> queryDefinitionProvider;
-    private final ResultsPresenter<?> resultsPresenter;
+    private final CompositeResultsPresenter<?> resultsPresenter;
     private final Button runButton;
 
     public SimpleQueryRunner(Component<?> parent, ComponentContext<?> context, DataMiningSession session,
            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-            QueryDefinitionProvider<?> queryDefinitionProvider, ResultsPresenter<?> resultsPresenter) {
+            QueryDefinitionProvider<?> queryDefinitionProvider, CompositeResultsPresenter<?> resultsPresenter) {
         super(parent, context);
         this.session = session;
         this.dataMiningService = dataMiningService;
@@ -91,24 +91,23 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
     @Override
     public void run(StatisticQueryDefinitionDTO queryDefinition) {
         Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
+        String presenterId = resultsPresenter.getCurrentPresenterId();
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             counter.increase();
-            resultsPresenter.showBusyIndicator();
+            resultsPresenter.showBusyIndicator(presenterId);
             dataMiningService.runQuery(session, queryDefinition, new ManagedDataMiningQueryCallback<Serializable>(counter) {
-                        @Override
-                        protected void handleFailure(Throwable caught) {
-                            errorReporter.reportError("Error running the query: " + caught.getMessage());
-                            resultsPresenter
-                                    .showError(getDataMiningStringMessages().errorRunningDataMiningQuery() + ".");
-                        }
-
-                        @Override
-                        protected void handleSuccess(QueryResultDTO<Serializable> result) {
-                            resultsPresenter.showResult(result);
-                        }
-                    });
+                    @Override
+                    protected void handleFailure(Throwable caught) {
+                        errorReporter.reportError("Error running the query: " + caught.getMessage());
+                        resultsPresenter.showError(presenterId, getDataMiningStringMessages().errorRunningDataMiningQuery() + ".");
+                    }
+                    @Override
+                    protected void handleSuccess(QueryResultDTO<Serializable> result) {
+                        resultsPresenter.showResult(presenterId, result);
+                    }
+                });
         } else {
-            resultsPresenter.showError(getDataMiningStringMessages().queryNotValidBecause(), errorMessages);
+            resultsPresenter.showError(presenterId, getDataMiningStringMessages().queryNotValidBecause(), errorMessages);
         }
     }
 
