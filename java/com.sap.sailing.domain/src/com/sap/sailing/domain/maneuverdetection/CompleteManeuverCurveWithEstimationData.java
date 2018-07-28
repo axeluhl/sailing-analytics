@@ -100,9 +100,9 @@ public interface CompleteManeuverCurveWithEstimationData extends Timed, Position
     
     Distance getDistanceToClosestMark();
     
-    Double getDeviationOfManeuverAngleFromTargetTackAngleInDegrees();
+    Double getTargetTackAngleInDegrees();
     
-    Double getDeviationOfManeuverAngleFromTargetJibeAngleInDegrees();
+    Double getTargetJibeAngleInDegrees();
 
     /**
      * Gets whether a mark was crossed within the maneuver curve.
