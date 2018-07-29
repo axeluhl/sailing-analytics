@@ -85,9 +85,9 @@ public class BuoyFragment extends BaseFragment
         mBroadcastManager = LocalBroadcastManager.getInstance(inflater.getContext());
 
         positioningActivity = (PositioningActivity) getActivity();
-        SupportMapFragment mapFragment = (SupportMapFragment) positioningActivity
-                .getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+
+        SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager()
+            .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
@@ -108,9 +108,8 @@ public class BuoyFragment extends BaseFragment
         super.onResume();
         disablePositionButton();
         positioningActivity = (PositioningActivity) getActivity();
-        SupportMapFragment mapFragment = (SupportMapFragment) positioningActivity
-                .getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager()
+            .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         initialLocationUpdate = true;
         MarkInfo mark = positioningActivity.getMarkInfo();
@@ -243,14 +242,14 @@ public class BuoyFragment extends BaseFragment
     }
 
     private void updateMap() {
-        mMap.clear();
-
-        if (savedPosition != null) {
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(savedPosition);
-            markerOptions.visible(true);
-            mMap.addMarker(markerOptions);
+        if (savedPosition == null || mMap == null) {
+            return;
         }
+        mMap.clear();
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(savedPosition);
+        markerOptions.visible(true);
+        mMap.addMarker(markerOptions);
     }
 
     private void reportGPSQuality(float gpsAccuracy) {

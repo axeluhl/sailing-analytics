@@ -27,8 +27,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferen
 import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
-import android.app.Activity;
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -38,6 +36,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
@@ -160,11 +160,11 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
-        if (activity instanceof BaseActivity) {
-            BaseActivity baseActivity = (BaseActivity) activity;
+        if (context instanceof BaseActivity) {
+            BaseActivity baseActivity = (BaseActivity) context;
             baseActivity.setBackPressListener(this);
         }
     }
@@ -345,10 +345,10 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
         if (resultCode == CommonStatusCodes.SUCCESS && data != null) {
             Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
             if (QRHelper.with(getActivity()).saveData(barcode.displayValue)) {
-                    BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
-                }
+                BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
+            }
         } else {
-                Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -356,7 +356,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
         if (textView != null) {
             SpannableString string = new SpannableString(textView.getText());
             string.setSpan(new UnderlineSpan(), 0, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            string.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.constant_sap_blue_1)), 0, string
+            string.setSpan(new ForegroundColorSpan(ContextCompat.getColor(getContext(), R.color.constant_sap_blue_1)), 0, string
                 .length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             textView.setText(string);
         }

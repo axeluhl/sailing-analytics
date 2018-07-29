@@ -10,9 +10,10 @@ import com.sap.sailing.android.shared.ui.utils.MultiplePreferenceChangeListener;
 import com.sap.sailing.android.shared.ui.views.EditSetPreference;
 
 import android.os.Bundle;
+import android.support.v14.preference.MultiSelectListPreference;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.ListPreference;
-import android.support.v14.preference.MultiSelectListPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.Preference.OnPreferenceChangeListener;
 import android.support.v7.preference.PreferenceFragmentCompat;
@@ -135,4 +136,15 @@ public class BasePreferenceFragment extends PreferenceFragmentCompat {
      */
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) { }
+
+    @Override
+    public void onDisplayPreferenceDialog(Preference preference) {
+        if (preference instanceof EditSetPreference) {
+            DialogFragment dialogFragment = EditSetPreferenceDialogFragmentCompat.newInstance(preference);
+            dialogFragment.setTargetFragment(this, 0);
+            dialogFragment.show(getFragmentManager(), null);
+        } else {
+            super.onDisplayPreferenceDialog(preference);
+        }
+    }
 }
