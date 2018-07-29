@@ -14,7 +14,7 @@ import com.sap.sse.common.TimePoint;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverSequenceGraphBasedWindEstimatorImpl extends ManeuverAndPolarsBasedWindEstimatorBaseImpl {
+public class ManeuverSequenceGraphBasedWindEstimatorImpl extends AbstractWindEstimatorImpl<CompleteManeuverCurveWithEstimationData> {
 
     public ManeuverSequenceGraphBasedWindEstimatorImpl(PolarDataService polarService) {
         super(polarService);

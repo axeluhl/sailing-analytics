@@ -9,9 +9,8 @@ import java.util.Spliterators;
 import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.windestimation.ManeuverAndPolarsBasedWindEstimator;
+import com.sap.sailing.windestimation.WindEstimator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.LoggingUtil;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
@@ -22,7 +21,7 @@ import com.sap.sse.common.TimePoint;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class WindEstimationEvaluatorImpl implements WindEstimatorEvaluator<CompleteManeuverCurveWithEstimationData> {
+public class WindEstimationEvaluatorImpl<T> implements WindEstimatorEvaluator<T> {
 
     private final double maxWindCourseDeviationInDegrees;
     private final double maxWindSpeedDeviationInKnots;
@@ -36,28 +35,30 @@ public class WindEstimationEvaluatorImpl implements WindEstimatorEvaluator<Compl
     }
 
     @Override
-    public WindEstimatorEvaluationResult evaluateWindEstimator(
-            ManeuverAndPolarsBasedWindEstimatorFactory windEstimatorFactory,
-            Iterator<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> racesIterator, long numberOfRaces) {
+    public WindEstimatorEvaluationResult evaluateWindEstimator(WindEstimatorFactory<T> windEstimatorFactory,
+            TargetWindFixesExtractor<T> targetWindFixesExtractor, Iterator<RaceWithEstimationData<T>> racesIterator,
+            long numberOfRaces) {
         return StreamSupport
                 .stream(new FixedBatchSpliteratorWrapper<>(
                         Spliterators.spliterator(racesIterator, numberOfRaces, Spliterator.NONNULL), numberOfRaces, 50),
                         true)
-                .map(race -> evaluateWindEstimator(windEstimatorFactory.createNewEstimatorInstance(), race))
+                .map(race -> evaluateWindEstimator(windEstimatorFactory.createNewEstimatorInstance(),
+                        targetWindFixesExtractor, race))
                 .reduce((one, two) -> one.mergeBySum(two)).orElse(new WindEstimatorEvaluationResult());
     }
 
     @Override
-    public WindEstimatorEvaluationResult evaluateWindEstimator(ManeuverAndPolarsBasedWindEstimator windEstimator,
-            RaceWithEstimationData<CompleteManeuverCurveWithEstimationData> raceWithEstimationData) {
+    public WindEstimatorEvaluationResult evaluateWindEstimator(WindEstimator<T> windEstimator,
+            TargetWindFixesExtractor<T> targetWindFixesExtractor, RaceWithEstimationData<T> raceWithEstimationData) {
         LoggingUtil.logInfo("Evaluating on " + raceWithEstimationData.getRegattaName() + " Race "
                 + raceWithEstimationData.getRaceName());
         Map<TimePoint, Wind> targetWindPerTimePoint = new HashMap<>();
-        for (CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithEstimationData : raceWithEstimationData
+        for (CompetitorTrackWithEstimationData<T> competitorTrackWithEstimationData : raceWithEstimationData
                 .getCompetitorTracks()) {
-            for (CompleteManeuverCurveWithEstimationData maneuver : competitorTrackWithEstimationData
-                    .getElements()) {
-                targetWindPerTimePoint.put(maneuver.getTimePoint(), maneuver.getWind());
+            List<Wind> targetWindFixes = targetWindFixesExtractor
+                    .extractTargetWindFixes(competitorTrackWithEstimationData);
+            for (Wind wind : targetWindFixes) {
+                targetWindPerTimePoint.put(wind.getTimePoint(), wind);
             }
         }
         List<WindWithConfidence<TimePoint>> windTrack = windEstimator

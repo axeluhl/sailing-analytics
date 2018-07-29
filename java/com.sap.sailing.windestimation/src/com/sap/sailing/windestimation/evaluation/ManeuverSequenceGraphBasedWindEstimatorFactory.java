@@ -1,15 +1,17 @@
 package com.sap.sailing.windestimation.evaluation;
 
+import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.windestimation.ManeuverAndPolarsBasedWindEstimator;
 import com.sap.sailing.windestimation.ManeuverSequenceGraphBasedWindEstimatorImpl;
+import com.sap.sailing.windestimation.WindEstimator;
 
 /**
  * 
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverSequenceGraphBasedWindEstimatorFactory implements ManeuverAndPolarsBasedWindEstimatorFactory {
+public class ManeuverSequenceGraphBasedWindEstimatorFactory
+        implements WindEstimatorFactory<CompleteManeuverCurveWithEstimationData> {
 
     private final PolarDataService polarService;
 
@@ -18,7 +20,7 @@ public class ManeuverSequenceGraphBasedWindEstimatorFactory implements ManeuverA
     }
 
     @Override
-    public ManeuverAndPolarsBasedWindEstimator createNewEstimatorInstance() {
+    public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
         return new ManeuverSequenceGraphBasedWindEstimatorImpl(polarService);
     }
 

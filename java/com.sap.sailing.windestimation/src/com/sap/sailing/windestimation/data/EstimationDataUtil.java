@@ -7,8 +7,13 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
+import com.sap.sailing.domain.maneuverdetection.GpsFixWithEstimationData;
+import com.sap.sailing.domain.maneuverdetection.impl.GpsFixWithEstimationDataImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorWithEstimationDataSupportDecoratorImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.TrackTimeInfo;
@@ -18,6 +23,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
 
@@ -31,8 +37,48 @@ public class EstimationDataUtil {
     private EstimationDataUtil() {
     }
 
-    public static List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> getCompetitorTracksWithEstimationData(TrackedRace trackedRace,
-            PolarDataService polarDataService) {
+    // TODO replace GpsFixesWithEstimationDataSerializer with serializers using this methods
+    public static List<CompetitorTrackWithEstimationData<GpsFixWithEstimationData>> getCompetitorTracksWithGPSFixWithEstimationData(
+            TrackedRace trackedRace, PolarDataService polarDataService, boolean smoothFixes) {
+        List<CompetitorTrackWithEstimationData<GpsFixWithEstimationData>> competitorTracks = new ArrayList<>();
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
+            TrackTimeInfo trackTimeInfo = maneuverDetector.getTrackTimeInfo();
+            if (trackTimeInfo != null) {
+                ManeuverDetectorWithEstimationDataSupportDecoratorImpl estimationDataSupportDecoratorImpl = new ManeuverDetectorWithEstimationDataSupportDecoratorImpl(
+                        maneuverDetector, polarDataService);
+                GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                List<GpsFixWithEstimationData> gpsFixesWithEstimationData = new ArrayList<>();
+                track.lockForRead();
+                try {
+                    for (GPSFixMoving gpsFix : track.getFixes(trackTimeInfo.getTrackStartTimePoint(), true,
+                            trackTimeInfo.getTrackEndTimePoint(), true)) {
+                        Wind wind = trackedRace.getWind(gpsFix.getPosition(), gpsFix.getTimePoint());
+                        Distance closestDistanceToMark = estimationDataSupportDecoratorImpl
+                                .getClosestDistanceToMark(gpsFix.getTimePoint());
+                        SpeedWithBearing speedWithBearing = smoothFixes ? track.getEstimatedSpeed(gpsFix.getTimePoint())
+                                : gpsFix.getSpeed();
+                        Bearing relativeBearingToNextMark = speedWithBearing == null ? null
+                                : estimationDataSupportDecoratorImpl.getRelativeBearingToNextMark(gpsFix.getTimePoint(),
+                                        speedWithBearing.getBearing());
+                        GpsFixWithEstimationData gpsFixWithEstimationData = new GpsFixWithEstimationDataImpl(
+                                gpsFix.getPosition(), gpsFix.getTimePoint(), speedWithBearing, wind,
+                                relativeBearingToNextMark, closestDistanceToMark);
+                        gpsFixesWithEstimationData.add(gpsFixWithEstimationData);
+                    }
+                } finally {
+                    track.unlockAfterRead();
+                }
+                CompetitorTrackWithEstimationData<GpsFixWithEstimationData> competitorTrack = createCompetitorTrack(
+                        trackedRace, polarDataService, competitor, trackTimeInfo, gpsFixesWithEstimationData);
+                competitorTracks.add(competitorTrack);
+            }
+        }
+        return competitorTracks;
+    }
+
+    public static List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> getCompetitorTracksWithManeuverEstimationData(
+            TrackedRace trackedRace, PolarDataService polarDataService) {
         // TODO make iterative
         Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
         ManeuverDetectorWithEstimationDataSupportDecoratorImpl maneuverDetector = new ManeuverDetectorWithEstimationDataSupportDecoratorImpl(
@@ -46,22 +92,112 @@ public class EstimationDataUtil {
                         .getCompleteManeuverCurves(maneuvers);
                 List<CompleteManeuverCurveWithEstimationData> completeManeuverCurvesWithEstimationData = maneuverDetector
                         .getCompleteManeuverCurvesWithEstimationData(completeManeuverCurves);
-                BoatClass boatClass = trackedRace.getBoatOfCompetitor(competitor).getBoatClass();
-                GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                Distance distanceTravelled = track.getDistanceTraveled(trackTimeInfo.getTrackStartTimePoint(),
-                        trackTimeInfo.getTrackEndTimePoint());
-                double avgIntervalBetweenFixesInSeconds = track.getAverageIntervalBetweenFixes().asSeconds();
-                CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithEstimationData = new CompetitorTrackWithEstimationData<>(
-                        competitor.getName(), boatClass, completeManeuverCurvesWithEstimationData,
-                        avgIntervalBetweenFixesInSeconds, distanceTravelled, trackTimeInfo.getTrackStartTimePoint(),
-                        trackTimeInfo.getTrackEndTimePoint(),
-                        getFixesCountForPolars(polarDataService, trackedRace, competitor),
-                        getMarkPassingsCount(trackedRace, competitor), getWaypointsCount(trackedRace));
+                CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithEstimationData = createCompetitorTrack(
+                        trackedRace, polarDataService, competitor, trackTimeInfo,
+                        completeManeuverCurvesWithEstimationData);
                 competitorTracks.add(competitorTrackWithEstimationData);
             }
 
         }
         return competitorTracks;
+    }
+
+    public static List<CompetitorTrackWithEstimationData<ManeuverForClassification>> getCompetitorTracksWithManeuversForClassification(
+            List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> competitorTracksWithManeuverEstimationData) {
+        List<CompetitorTrackWithEstimationData<ManeuverForClassification>> competitorTracks = new ArrayList<>();
+        for (CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> otherCompetitorTrack : competitorTracksWithManeuverEstimationData) {
+            List<ManeuverForClassification> maneuversForClassification = new ArrayList<>();
+            for (CompleteManeuverCurveWithEstimationData maneuver : otherCompetitorTrack.getElements()) {
+                ManeuverForClassification maneuverForClassification = getManeuverForClassification(maneuver);
+                maneuversForClassification.add(maneuverForClassification);
+            }
+            CompetitorTrackWithEstimationData<ManeuverForClassification> competitorTrack = new CompetitorTrackWithEstimationData<>(
+                    otherCompetitorTrack.getCompetitorName(), otherCompetitorTrack.getBoatClass(),
+                    maneuversForClassification, otherCompetitorTrack.getAvgIntervalBetweenFixesInSeconds(),
+                    otherCompetitorTrack.getDistanceTravelled(), otherCompetitorTrack.getTrackStartTimePoint(),
+                    otherCompetitorTrack.getTrackEndTimePoint(), otherCompetitorTrack.getFixesCountForPolars(),
+                    otherCompetitorTrack.getMarkPassingsCount(), otherCompetitorTrack.getWaypointsCount());
+            competitorTracks.add(competitorTrack);
+        }
+        return competitorTracks;
+    }
+
+    public static ManeuverForClassification getManeuverForClassification(CompleteManeuverCurveWithEstimationData maneuver) {
+        ManeuverTypeForClassification maneuverType = getManeuverTypeForClassification(maneuver);
+        double absoluteTotalCourseChangeInDegrees = Math
+                .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees());
+        double oversteeringInDegrees = Math.abs(maneuver.getCurveWithUnstableCourseAndSpeed()
+                .getSpeedWithBearingAfter().getBearing()
+                .getDifferenceTo(maneuver.getMainCurve().getSpeedWithBearingAfter().getBearing()).getDegrees());
+        double speedLossRatio = maneuver.getCurveWithUnstableCourseAndSpeed().getLowestSpeed().getKnots()
+                / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots();
+        double speedGainRatio = maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots()
+                / maneuver.getMainCurve().getHighestSpeed().getKnots();
+        double deviationFromOptimalTackAngleInDegrees = Math
+                .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees())
+                - maneuver.getTargetTackAngleInDegrees();
+        double deviationFromOptimalJibeAngleInDegrees = Math
+                .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees())
+                - maneuver.getTargetJibeAngleInDegrees();
+        double highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees = Math
+                .abs(maneuver.getRelativeBearingToNextMarkBeforeManeuver().getDegrees()) > Math
+                        .abs(maneuver.getRelativeBearingToNextMarkAfterManeuver().getDegrees())
+                                ? Math.abs(maneuver.getRelativeBearingToNextMarkBeforeManeuver().getDegrees())
+                                : Math.abs(maneuver.getRelativeBearingToNextMarkAfterManeuver().getDegrees());
+        double mainCurveDurationInSeconds = maneuver.getMainCurve().getDuration().asSeconds();
+        double maneuverDurationInSeconds = maneuver.getCurveWithUnstableCourseAndSpeed().getDuration()
+                .asSeconds();
+        double recoveryPhaseDurationInSeconds = maneuver.getMainCurve().getTimePointAfter()
+                .until(maneuver.getCurveWithUnstableCourseAndSpeed().getTimePointAfter()).asSeconds();
+        double timeLossInSeconds = maneuver.getCurveWithUnstableCourseAndSpeed().getDistanceLost().getMeters()
+                / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore()
+                        .getMetersPerSecond();
+        ManeuverForClassification maneuverForClassification = new ManeuverForClassificationImpl(maneuverType,
+                absoluteTotalCourseChangeInDegrees, oversteeringInDegrees, speedLossRatio, speedGainRatio,
+                maneuver.getMainCurve().getMaxTurningRateInDegreesPerSecond(),
+                deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees,
+                highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
+                mainCurveDurationInSeconds, maneuverDurationInSeconds, recoveryPhaseDurationInSeconds,
+                timeLossInSeconds);
+        return maneuverForClassification;
+    }
+
+    private static ManeuverTypeForClassification getManeuverTypeForClassification(
+            CompleteManeuverCurveWithEstimationData maneuver) {
+        ManeuverType maneuverType = maneuver.getManeuverTypeForCompleteManeuverCurve();
+        switch (maneuverType) {
+        case BEAR_AWAY:
+            return ManeuverTypeForClassification.BEAR_AWAY;
+        case HEAD_UP:
+            return ManeuverTypeForClassification.HEAD_UP;
+        case PENALTY_CIRCLE:
+            return ManeuverTypeForClassification._360;
+        case UNKNOWN:
+            return null;
+        case JIBE:
+            return Math.abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees()) > 120
+                    ? ManeuverTypeForClassification._180_JIBE : ManeuverTypeForClassification.JIBE;
+        case TACK:
+            return Math.abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees()) > 120
+                    ? ManeuverTypeForClassification._180_TACK : ManeuverTypeForClassification.TACK;
+        }
+        throw new IllegalStateException();
+    }
+
+    private static <T> CompetitorTrackWithEstimationData<T> createCompetitorTrack(TrackedRace trackedRace,
+            PolarDataService polarDataService, Competitor competitor, TrackTimeInfo trackTimeInfo,
+            List<T> completeManeuverCurvesWithEstimationData) {
+        BoatClass boatClass = trackedRace.getBoatOfCompetitor(competitor).getBoatClass();
+        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+        Distance distanceTravelled = track.getDistanceTraveled(trackTimeInfo.getTrackStartTimePoint(),
+                trackTimeInfo.getTrackEndTimePoint());
+        double avgIntervalBetweenFixesInSeconds = track.getAverageIntervalBetweenFixes().asSeconds();
+        CompetitorTrackWithEstimationData<T> competitorTrackWithEstimationData = new CompetitorTrackWithEstimationData<>(
+                competitor.getName(), boatClass, completeManeuverCurvesWithEstimationData,
+                avgIntervalBetweenFixesInSeconds, distanceTravelled, trackTimeInfo.getTrackStartTimePoint(),
+                trackTimeInfo.getTrackEndTimePoint(), getFixesCountForPolars(polarDataService, trackedRace, competitor),
+                getMarkPassingsCount(trackedRace, competitor), getWaypointsCount(trackedRace));
+        return competitorTrackWithEstimationData;
     }
 
     // FIXME refactor code duplication with CompetitorTrackWithEstimationDataJsonSerializer
