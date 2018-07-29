@@ -73,11 +73,7 @@ android {
 }
 
 dependencies {
-    /* support libraries */
-    api "com.android.support:appcompat-v7:${rootProject.ext.support}"
-
     /* Google Play Services */
-    api "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
     api "com.google.android.gms:play-services-maps:${rootProject.ext.play_services}"
 
     /* license dialog */

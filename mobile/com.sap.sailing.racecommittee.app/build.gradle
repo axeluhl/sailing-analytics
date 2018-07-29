@@ -75,13 +75,7 @@ android {
 
 dependencies {
     /* support libraries */
-    api "com.android.support:appcompat-v7:${rootProject.ext.support}"
     api "com.android.support:recyclerview-v7:${rootProject.ext.support}"
-    api "com.android.support:support-v13:${rootProject.ext.support}"
-
-    /* Google Play Services */
-    api "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
-    api "com.google.android.gms:play-services-maps:${rootProject.ext.play_services}"
 
     /* license dialog */
     api "de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}"
