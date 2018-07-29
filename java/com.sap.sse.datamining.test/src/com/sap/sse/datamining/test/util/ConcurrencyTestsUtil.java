@@ -19,7 +19,7 @@ public class ConcurrencyTestsUtil extends TestsUtil {
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
     private static final ExecutorService executor = new DataMiningExecutorService(THREAD_POOL_SIZE);
 
-    public static ExecutorService getExecutor() {
+    public static ExecutorService getSharedExecutor() {
         return executor;
     }
 

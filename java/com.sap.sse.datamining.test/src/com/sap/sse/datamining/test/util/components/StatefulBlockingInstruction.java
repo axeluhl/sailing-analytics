@@ -2,18 +2,29 @@ package com.sap.sse.datamining.test.util.components;
 
 import com.sap.sse.datamining.components.ProcessorInstructionHandler;
 import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
+import com.sap.sse.datamining.impl.components.ProcessorInstructionPriority;
 
-public class StatefulBlockingInstruction extends AbstractProcessorInstruction<Object> {
+public class StatefulBlockingInstruction<ResultType> extends AbstractProcessorInstruction<ResultType> {
     
-    private final int duration;
+    protected final long blockDuration;
+    protected final ResultType result;
     
     private boolean runWasCalled;
     private boolean computeResultWasCalled;
     private boolean computeResultWasFinished;
 
-    public StatefulBlockingInstruction(ProcessorInstructionHandler<Object> handler, int duration) {
-        super(handler);
-        this.duration = duration;
+    public StatefulBlockingInstruction(ProcessorInstructionHandler<ResultType> handler, long blockDuration) {
+        this(handler, 0, blockDuration, null);
+    }
+    
+    public StatefulBlockingInstruction(ProcessorInstructionHandler<ResultType> handler, ProcessorInstructionPriority priority, long blockDuration, ResultType result) {
+        this(handler, priority.asIntValue(), blockDuration, result);
+    }
+    
+    public StatefulBlockingInstruction(ProcessorInstructionHandler<ResultType> handler, int priority, long blockDuration, ResultType result) {
+        super(handler, priority);
+        this.blockDuration = blockDuration;
+        this.result = result;
     }
     
     @Override
@@ -23,13 +34,22 @@ public class StatefulBlockingInstruction extends AbstractProcessorInstruction<Ob
     }
 
     @Override
-    protected Object computeResult() throws Exception {
+    protected ResultType computeResult() throws Exception {
         computeResultWasCalled = true;
-        if (duration > 0) {
-            Thread.sleep(duration);
+        actionBeforeBlock();
+        if (blockDuration > 0) {
+            Thread.sleep(blockDuration);
         }
+        actionAfterBlock();
         computeResultWasFinished = true;
-        return null;
+        return result;
+    }
+    
+    protected void actionBeforeBlock() { }
+    protected void actionAfterBlock() { }
+    
+    public long getBlockDuration() {
+        return blockDuration;
     }
 
     public boolean runWasCalled() {

@@ -23,7 +23,7 @@ public class TestAbstractParallelProcessorElementProcessing {
     
     private ThreadPoolExecutor executor;
     private Processor<Integer, Object> processor;
-    private List<StatefulBlockingInstruction> createdInstructions;
+    private List<StatefulBlockingInstruction<?>> createdInstructions;
     
     @Before
     public void initialize() {
@@ -33,7 +33,7 @@ public class TestAbstractParallelProcessorElementProcessing {
         processor = new AbstractParallelProcessor<Integer, Object>(Integer.class, Object.class, executor, Collections.emptySet()) {
             @Override
             protected ProcessorInstruction<Object> createInstruction(Integer sleepTime) {
-                StatefulBlockingInstruction instruction = new StatefulBlockingInstruction(this, sleepTime);
+                StatefulBlockingInstruction<Object> instruction = new StatefulBlockingInstruction<>(this, sleepTime);
                 createdInstructions.add(instruction);
                 return instruction;
             }
@@ -52,7 +52,7 @@ public class TestAbstractParallelProcessorElementProcessing {
         assertThat("Unexpected amount of created instructions", createdInstructions.size(), is(elementCount));
         executor.shutdown();
         assertThat("Executor couldn't terminate", executor.awaitTermination(1, TimeUnit.SECONDS), is(true));
-        for (StatefulBlockingInstruction instruction : createdInstructions) {
+        for (StatefulBlockingInstruction<?> instruction : createdInstructions) {
             assertThat("run wasn't called", instruction.runWasCalled(), is(true));
             assertThat("computeResult wasn't called", instruction.computeResultWasCalled(), is(true));
             assertThat("computeResult didn't finish", instruction.computeResultWasFinished(), is(true));
@@ -84,7 +84,7 @@ public class TestAbstractParallelProcessorElementProcessing {
         processor.processElement(instructionDuration);
         assertThat("Unexpected amount of created instructions", createdInstructions.size(), is(elementCount));
         
-        for (StatefulBlockingInstruction instruction : createdInstructions) {
+        for (StatefulBlockingInstruction<?> instruction : createdInstructions) {
             assertThat("run wasn't called", instruction.runWasCalled(), is(true));
             assertThat("computeResult wasn't called", instruction.computeResultWasCalled(), is(true));
             assertThat("computeResult didn't finish", instruction.computeResultWasFinished(), is(true));
@@ -108,7 +108,7 @@ public class TestAbstractParallelProcessorElementProcessing {
         executor.shutdown();
         assertThat("Executor couldn't terminate", executor.awaitTermination(1, TimeUnit.SECONDS), is(true));
         for (int i = 0; i < createdInstructions.size(); i++) {
-            StatefulBlockingInstruction instruction = createdInstructions.get(i);
+            StatefulBlockingInstruction<?> instruction = createdInstructions.get(i);
             assertThat("run wasn't called", instruction.runWasCalled(), is(true));
             // Last instructions was executed after the processor has been aborted. computeResult() should not be called
             if (i == createdInstructions.size() - 1) {
