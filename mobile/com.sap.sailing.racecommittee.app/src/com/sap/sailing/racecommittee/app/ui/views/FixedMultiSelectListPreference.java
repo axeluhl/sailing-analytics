@@ -24,7 +24,7 @@ import java.util.Set;
 import com.sap.sailing.android.shared.logging.ExLog;
 
 import android.content.Context;
-import android.preference.MultiSelectListPreference;
+import android.support.v14.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.util.AttributeSet;
 

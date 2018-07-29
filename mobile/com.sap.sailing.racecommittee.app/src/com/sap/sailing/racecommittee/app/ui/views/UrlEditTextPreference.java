@@ -3,7 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.views;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
-import android.preference.EditTextPreference;
+import android.support.v7.preference.EditTextPreference;
 import android.util.AttributeSet;
 
 public class UrlEditTextPreference extends EditTextPreference {

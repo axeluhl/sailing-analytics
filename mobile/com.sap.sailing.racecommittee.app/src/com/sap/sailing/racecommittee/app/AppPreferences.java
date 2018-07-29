@@ -151,7 +151,7 @@ public class AppPreferences {
     }
 
     public RacingProcedureType getDefaultRacingProcedureType() {
-        String defaultStartProcedureType = helper.getString(key(R.string.preference_racing_procedure_override_key), "");
+        String defaultStartProcedureType = helper.getString(key(R.string.preference_racing_procedure_override_key), key(R.string.preference_racing_procedure_override_default));
         return RacingProcedureType.valueOf(defaultStartProcedureType);
     }
 
