@@ -5,12 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
-import com.h6ah4i.android.widget.advrecyclerview.decoration.ItemShadowDecorator;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
-import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
-import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
@@ -32,44 +26,42 @@ import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithId
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.HolderAwareOnDragListener;
+import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.ItemTouchHelperCallback;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.CourseMarksDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.support.v4.app.FragmentManager;
 import android.content.DialogInterface;
-import android.support.v4.content.Loader;
-import android.graphics.drawable.NinePatchDrawable;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class CourseFragmentMarks extends CourseFragment implements CourseMarkAdapter.MarkClick, CourseElementAdapter.EventListener, CourseElementAdapter.ItemClick {
+public class CourseFragmentMarks extends CourseFragment implements CourseMarkAdapter.MarkClick, HolderAwareOnDragListener {
 
     private static final String EACH_WAYPOINT_NEEDS_PASSING_INSTRUCTIONS = "Each waypoint needs passing instructions";
     private static final String MISSING_SECOND_MARK = "Missing second mark";
     private ReadonlyDataManager mDataManager;
-    private RecyclerViewDragDropManager mDragDropManager;
-    private RecyclerViewSwipeManager mSwipeManager;
-    private RecyclerViewTouchActionGuardManager mGuardManager;
     private ArrayList<CourseListDataElementWithIdImpl> mHistory;
     private ArrayList<CourseListDataElementWithIdImpl> mElements;
     private ArrayList<Mark> mMarks;
     private RecyclerView mHistoryCourse;
     private RecyclerView mCurrentCourse;
     private CourseElementAdapter mHistoryAdapter;
-    private RecyclerView.Adapter<CourseElementAdapter.ItemViewHolder> mCourseAdapter;
+    private CourseElementAdapter mCourseAdapter;
     private CourseMarksDialogFragment mMarksDialog;
+    private ItemTouchHelper mItemTouchHelper;
     private int mId;
     private Button mReset;
 
@@ -134,47 +126,21 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
             mHistoryCourse.setLayoutManager(layoutManager);
 
-            mHistoryAdapter = new CourseElementAdapter(getActivity(), mHistory, ESSMarkImageHelper.getInstance(getActivity()), false);
+            mHistoryAdapter = new CourseElementAdapter(getActivity(), mHistory, ESSMarkImageHelper.getInstance(getActivity()), false, this);
             mHistoryCourse.setAdapter(mHistoryAdapter);
         }
         mCurrentCourse = ViewHelper.get(layout, R.id.new_course);
         if (mCurrentCourse != null) {
-            mGuardManager = new RecyclerViewTouchActionGuardManager();
-            mGuardManager.setInterceptVerticalScrollingWhileAnimationRunning(true);
-            mGuardManager.setEnabled(true);
 
-            mDragDropManager = new RecyclerViewDragDropManager();
-            NinePatchDrawable drawable = (NinePatchDrawable) ContextCompat.getDrawable(getActivity(), R.drawable.material_shadow_z3);
-            mDragDropManager.setDraggingItemShadowDrawable(drawable);
+            mCourseAdapter = new CourseElementAdapter(getActivity(), mElements, ESSMarkImageHelper.getInstance(getActivity()), true, this);
+            mCourseAdapter.setDragListener(this);
 
-            mSwipeManager = new RecyclerViewSwipeManager();
-
-            LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-
-            CourseElementAdapter adapter = new CourseElementAdapter(getActivity(), mElements, ESSMarkImageHelper.getInstance(getActivity()), true);
-            adapter.setItemClickListener(this);
-            adapter.setEventListener(this);
-
-            @SuppressWarnings("unchecked")
-            RecyclerView.Adapter<CourseElementAdapter.ItemViewHolder> dragAdapter = mDragDropManager.createWrappedAdapter(adapter);
-            mCourseAdapter = dragAdapter;
-
-            @SuppressWarnings("unchecked")
-            RecyclerView.Adapter<CourseElementAdapter.ItemViewHolder> swipeManager = mSwipeManager.createWrappedAdapter(mCourseAdapter);
-            mCourseAdapter = swipeManager;
-
-            mCurrentCourse.setLayoutManager(layoutManager);
             mCurrentCourse.setAdapter(mCourseAdapter);
-            mCurrentCourse.setItemAnimator(new SwipeDismissItemAnimator());
+            mCurrentCourse.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                mCurrentCourse.addItemDecoration(new ItemShadowDecorator((NinePatchDrawable) ContextCompat
-                        .getDrawable(getActivity(), R.drawable.material_shadow_z1)));
-            }
-
-            mGuardManager.attachRecyclerView(mCurrentCourse);
-            mSwipeManager.attachRecyclerView(mCurrentCourse);
-            mDragDropManager.attachRecyclerView(mCurrentCourse);
+            ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(mCourseAdapter);
+            mItemTouchHelper = new ItemTouchHelper(callback);
+            mItemTouchHelper.attachToRecyclerView(mCurrentCourse);
         }
 
         return layout;
@@ -268,28 +234,7 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     }
 
     @Override
-    public void onPause() {
-        mDragDropManager.cancelDrag();
-        super.onPause();
-    }
-
-    @Override
     public void onDestroy() {
-        if (mDragDropManager != null) {
-            mDragDropManager.release();
-            mDragDropManager = null;
-        }
-
-        if (mSwipeManager != null) {
-            mSwipeManager.release();
-            mSwipeManager = null;
-        }
-
-        if (mGuardManager != null) {
-            mGuardManager.release();
-            mGuardManager = null;
-        }
-
         if (mHistoryCourse != null) {
             mHistoryCourse.setAdapter(null);
             mHistoryCourse = null;
@@ -302,11 +247,15 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
         }
 
         if (mCourseAdapter != null) {
-            WrapperAdapterUtils.releaseAll(mCourseAdapter);
             mCourseAdapter = null;
         }
 
         super.onDestroy();
+    }
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewholder) {
+        mItemTouchHelper.startDrag(viewholder);
     }
 
     private void loadMarks() {
@@ -362,25 +311,12 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
         return elementList;
     }
 
-    @Override
     public void onItemEditClick(int type, CourseListDataElementWithIdImpl element) {
-        switch (type) {
-            case CourseElementAdapter.TOUCH_TYPE_AREA:
-                createPassingInstructionDialog(element);
-                mCourseAdapter.notifyDataSetChanged();
-                break;
-
-            default:
-                showMarkDialog(type, element);
-        }
+        createPassingInstructionDialog(element);
+        mCourseAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    public void onAddItemClick() {
-        showMarkDialog(CourseElementAdapter.TOUCH_TYPE_AREA, null);
-    }
-
-    private void showMarkDialog(int type, CourseListDataElementWithIdImpl element) {
+    public void showMarkDialog(int type, CourseListDataElementWithIdImpl element) {
         FragmentManager manager = getActivity().getSupportFragmentManager();
         mMarksDialog = CourseMarksDialogFragment.newInstance(mMarks, element, type);
         mMarksDialog.setListener(this);
@@ -458,7 +394,7 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     }
 
     /**
-     * Cosntructs a message text for each of the {@link PassingIntsruction} values passed. The message strings
+     * Cosntructs a message text for each of the {@link PassingInstruction} values passed. The message strings
      * returned correspond in their order with the {@link PassingInstruction}s passed in the array.
      */
     private CharSequence[] getI18NPassingInstructions(PassingInstruction[] passingInstructionsRelevantForUserEntry) {
@@ -473,30 +409,30 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     private CharSequence getI18NPassingInstruction(PassingInstruction passingInstruction) {
         CharSequence result = "";
         switch (passingInstruction) {
-        case FixedBearing:
-            result = getString(R.string.passing_instruction_fixed_bearing);
-            break;
-        case Gate:
-            result = getString(R.string.passing_instruction_gate);
-            break;
-        case Line:
-            result = getString(R.string.passing_instruction_line);
-            break;
-        case None:
-            result = getString(R.string.passing_instruction_none);
-            break;
-        case Offset:
-            result = getString(R.string.passing_instruction_offset);
-            break;
-        case Port:
-            result = getString(R.string.passing_instruction_port);
-            break;
-        case Single_Unknown:
-            result = getString(R.string.passing_instruction_single_unknown);
-            break;
-        case Starboard:
-            result = getString(R.string.passing_instruction_starboard);
-            break;
+            case FixedBearing:
+                result = getString(R.string.passing_instruction_fixed_bearing);
+                break;
+            case Gate:
+                result = getString(R.string.passing_instruction_gate);
+                break;
+            case Line:
+                result = getString(R.string.passing_instruction_line);
+                break;
+            case None:
+                result = getString(R.string.passing_instruction_none);
+                break;
+            case Offset:
+                result = getString(R.string.passing_instruction_offset);
+                break;
+            case Port:
+                result = getString(R.string.passing_instruction_port);
+                break;
+            case Single_Unknown:
+                result = getString(R.string.passing_instruction_single_unknown);
+                break;
+            case Starboard:
+                result = getString(R.string.passing_instruction_starboard);
+                break;
         }
         return result;
     }
@@ -616,8 +552,7 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
         }
     }
 
-    @Override
-    public void onItemRemoved(int position) {
+    public void onItemRemoved() {
         setResetButton();
     }
 }

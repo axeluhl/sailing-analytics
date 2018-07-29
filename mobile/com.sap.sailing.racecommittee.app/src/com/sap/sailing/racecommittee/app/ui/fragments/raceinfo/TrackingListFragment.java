@@ -12,11 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
-import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
-import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -44,6 +39,8 @@ import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorAndBoatAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorResultsList;
 import com.sap.sailing.racecommittee.app.ui.adapters.FinishListAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.HolderAwareOnDragListener;
+import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.ItemTouchHelperCallback;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorGoalPassingComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorNameComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorSailIdComparator;
@@ -61,18 +58,17 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v4.content.Loader;
-import android.graphics.drawable.NinePatchDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -88,8 +84,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class TrackingListFragment extends BaseFragment
-    implements CompetitorAndBoatAdapter.CompetitorClick, FinishListAdapter.FinishEvents, View.OnClickListener, AdapterView.OnItemSelectedListener,
-    PopupMenu.OnMenuItemClickListener, SearchView.SearchTextWatcher {
+    implements CompetitorAndBoatAdapter.CompetitorClick,  View.OnClickListener, AdapterView.OnItemSelectedListener,
+    PopupMenu.OnMenuItemClickListener, SearchView.SearchTextWatcher, HolderAwareOnDragListener {
 
     private static final int COMPETITOR_LOADER = 0;
     private static final int LEADERBOARD_ORDER_LOADER = 2;
@@ -99,17 +95,15 @@ public class TrackingListFragment extends BaseFragment
     private static final int SORT_GOAL = 2;
     private static final int SORT_START = 3;
 
-    private RecyclerViewDragDropManager mDragDropManager;
-    private RecyclerViewSwipeManager mSwipeManager;
-    private RecyclerViewTouchActionGuardManager mGuardManager;
     private RecyclerView mFinishView;
+    private FinishListAdapter mFinishedAdapter;
+    private CompetitorResultsList<CompetitorResultWithIdImpl> mFinishedData;
+    private ItemTouchHelper mItemTouchHelper;
+
     private Button mConfirm;
     private TextView mEntryCount;
 
-    private FinishListAdapter mAdapter;
-    private RecyclerView.Adapter<FinishListAdapter.ViewHolder> mFinishedAdapter;
     private CompetitorAndBoatAdapter mCompetitorAdapter;
-    private CompetitorResultsList<CompetitorResultWithIdImpl> mFinishedData;
     private CompetitorResults mDraftData;
     private CompetitorResults mConfirmedData;
     private List<Map.Entry<Competitor, Boat>> mCompetitorData;
@@ -239,58 +233,9 @@ public class TrackingListFragment extends BaseFragment
         mDraftData = new CompetitorResultsImpl();
         loadCompetitors();
         if (getView() != null) {
-            RecyclerView competitorView = (RecyclerView) getView().findViewById(R.id.list_positioning_all);
-            if (competitorView != null) {
-                LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-                mCompetitorAdapter = new CompetitorAndBoatAdapter(getActivity(), mFilteredCompetitorData, getRace().getRaceGroup().canBoatsOfCompetitorsChangePerRace());
-                mCompetitorAdapter.setListener(this);
-                competitorView.setLayoutManager(layoutManager);
-                competitorView.setAdapter(mCompetitorAdapter);
-                mPanels.add(competitorView);
-            }
-            mFinishView = (RecyclerView) getView().findViewById(R.id.list_positioning_chosen);
-            if (mFinishView != null) {
-                mGuardManager = new RecyclerViewTouchActionGuardManager();
-                mGuardManager.setInterceptVerticalScrollingWhileAnimationRunning(true);
-                mGuardManager.setEnabled(true);
-                mDragDropManager = new RecyclerViewDragDropManager();
-                NinePatchDrawable drawable = (NinePatchDrawable) ContextCompat.getDrawable(getActivity(), R.drawable.material_shadow_z3);
-                mDragDropManager.setDraggingItemShadowDrawable(drawable);
-                mSwipeManager = new RecyclerViewSwipeManager();
-                LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-                mAdapter = new FinishListAdapter(getActivity(), mFinishedData, getRace().getRaceGroup().canBoatsOfCompetitorsChangePerRace());
-                mAdapter.setListener(this);
-                @SuppressWarnings("unchecked") RecyclerView.Adapter<FinishListAdapter.ViewHolder> dragManager = mDragDropManager
-                    .createWrappedAdapter(mAdapter);
-                mFinishedAdapter = dragManager;
-                @SuppressWarnings("unchecked") RecyclerView.Adapter<FinishListAdapter.ViewHolder> swipeManager = mSwipeManager
-                    .createWrappedAdapter(mFinishedAdapter);
-                mFinishedAdapter = swipeManager;
-                mFinishView.setLayoutManager(layoutManager);
-                mFinishView.setAdapter(mFinishedAdapter);
-                mFinishView.setItemAnimator(new SwipeDismissItemAnimator());
-                mGuardManager.attachRecyclerView(mFinishView);
-                mDragDropManager.attachRecyclerView(mFinishView);
-                mSwipeManager.attachRecyclerView(mFinishView);
-                mPanels.add(mFinishView);
-            }
-            mConfirm = (Button) getView().findViewById(R.id.confirm);
-            if (mConfirm != null) {
-                mConfirm.setEnabled(true);
-                mConfirm.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        TimePoint now = MillisecondsTimePoint.now();
-                        CompetitorResults result = getCompetitorResultsDiff(mConfirmedData);
-                        getRaceState().setFinishPositioningListChanged(now, result);
-                        getRaceState().setFinishPositioningConfirmed(now, result);
-                        initLocalData();
-                        Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
-                        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
-                    }
-                });
-            }
+            initCompetitorsView();
+            initFinishersView();
+            initConfirmationButton();
             if (getArguments().getInt(START_MODE, 0) == 0) {
                 onClick(ViewHelper.get(getView(), R.id.nav_next));
             } else {
@@ -302,6 +247,55 @@ public class TrackingListFragment extends BaseFragment
         mFilteredCompetitorData.addAll(mCompetitorData);
         loadLeaderboardResult();
         initLocalData();
+    }
+
+    private void initCompetitorsView() {
+        RecyclerView competitorView = (RecyclerView) getView().findViewById(R.id.list_positioning_all);
+        if (competitorView != null) {
+            mCompetitorAdapter = new CompetitorAndBoatAdapter(getActivity(), mFilteredCompetitorData, getRace().getRaceGroup().canBoatsOfCompetitorsChangePerRace());
+            mCompetitorAdapter.setListener(this);
+            competitorView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            competitorView.setAdapter(mCompetitorAdapter);
+            mPanels.add(competitorView);
+        }
+    }
+
+    private void initFinishersView() {
+        mFinishView = (RecyclerView) getView().findViewById(R.id.list_positioning_chosen);
+        if (mFinishView != null) {
+
+            mFinishedAdapter = new FinishListAdapter(getActivity(), mFinishedData, getRace().getRaceGroup().canBoatsOfCompetitorsChangePerRace(), this);
+            mFinishedAdapter.setDragListener(this);
+
+            mFinishView.setAdapter(mFinishedAdapter);
+            mFinishView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+            ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(mFinishedAdapter);
+            mItemTouchHelper = new ItemTouchHelper(callback);
+            mItemTouchHelper.attachToRecyclerView(mFinishView);
+
+            mPanels.add(mFinishView);
+        }
+    }
+
+    private void initConfirmationButton() {
+        mConfirm = (Button) getView().findViewById(R.id.confirm);
+        if (mConfirm != null) {
+            mConfirm.setEnabled(true);
+            mConfirm.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    TimePoint now = MillisecondsTimePoint.now();
+                    CompetitorResults result = getCompetitorResultsDiff(mConfirmedData);
+                    getRaceState().setFinishPositioningListChanged(now, result);
+                    getRaceState().setFinishPositioningConfirmed(now, result);
+                    initLocalData();
+                    Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
+                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                }
+            });
+        }
     }
 
     private void initLocalData() {
@@ -322,13 +316,11 @@ public class TrackingListFragment extends BaseFragment
     }
 
     private int getFirstRankZeroPosition() {
-        return mAdapter.getFirstRankZeroPosition();
+        return mFinishedAdapter.getFirstRankZeroPosition();
     }
 
     @Override
     public void onPause() {
-        mDragDropManager.cancelDrag();
-
         super.onPause();
     }
 
@@ -366,21 +358,6 @@ public class TrackingListFragment extends BaseFragment
 
     @Override
     public void onDestroy() {
-        if (mDragDropManager != null) {
-            mDragDropManager.release();
-            mDragDropManager = null;
-        }
-
-        if (mSwipeManager != null) {
-            mSwipeManager.release();
-            mSwipeManager = null;
-        }
-
-        if (mGuardManager != null) {
-            mGuardManager.release();
-            mGuardManager = null;
-        }
-
         if (mFinishView != null) {
             mFinishView.setItemAnimator(null);
             mFinishView.setAdapter(null);
@@ -388,7 +365,6 @@ public class TrackingListFragment extends BaseFragment
         }
 
         if (mFinishedAdapter != null) {
-            WrapperAdapterUtils.releaseAll(mFinishedAdapter);
             mFinishedAdapter = null;
         }
 
@@ -417,6 +393,11 @@ public class TrackingListFragment extends BaseFragment
         sortCompetitors();
         mCompetitorAdapter.notifyDataSetChanged();
         return true;
+    }
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewholder) {
+        mItemTouchHelper.startDrag(viewholder);
     }
 
     private boolean isDirty() {
@@ -580,7 +561,7 @@ public class TrackingListFragment extends BaseFragment
     }
 
     @Nullable
-    private Boat getBoat(Serializable competitorId) {
+    public Boat getBoat(Serializable competitorId) {
         Boat boat = null;
         for (Map.Entry<Competitor, Boat> entry : getRace().getCompetitorsAndBoats().entrySet()) {
             if (entry.getKey().getId().equals(competitorId)) {
@@ -602,13 +583,60 @@ public class TrackingListFragment extends BaseFragment
         }
     }
 
+    public void onItemEdit(final CompetitorResultWithIdImpl item) {
+        Context context = getContext();
+        if (context instanceof AppCompatActivity) {
+            ActionBar actionBar = ((AppCompatActivity) context).getSupportActionBar();
+            if (actionBar != null) {
+                context = actionBar.getThemedContext();
+            }
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
+        builder.setTitle(item.getCompetitorDisplayName());
+        final CompetitorEditLayout layout = new CompetitorEditLayout(getContext(), getRace().getState().getFinishingTime(), item,
+                getFirstRankZeroPosition() +
+                        /* allow for setting rank as the new last in the list in case the competitor did not have a rank so far */
+                        (item.getOneBasedRank() == 0 ? 1 : 0), false, item.getMergeState() == MergeState.ERROR);
+        builder.setView(layout);
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                CompetitorResultWithIdImpl newItem = layout.getValue();
+                updateItem(item, newItem);
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                CompetitorResultWithIdImpl newItem = new CompetitorResultWithIdImpl(item.getId(), getBoat(item.getCompetitorId()), item
+                        .getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item
+                        .getFinishingTime(), item.getComment(), MergeState.OK);
+                updateItem(item, newItem);
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        if (AppUtils.with(getContext()).isTablet()) {
+            Window window = dialog.getWindow();
+            if (window != null) {
+                window.setLayout(getContext().getResources().getDimensionPixelSize(R.dimen.competitor_dialog_width), ViewGroup.LayoutParams.WRAP_CONTENT);
+            }
+        }
+    }
+
     private void moveCompetitorToFinishList(Competitor competitor) {
         String name = "";
         if (competitor.getShortInfo() != null) {
             name += competitor.getShortInfo() + " - ";
         }
         name += competitor.getName();
-        int pos = mAdapter.getFirstRankZeroPosition();
+        int pos = mFinishedAdapter.getFirstRankZeroPosition();
         // FIXME mFinishedData.size()+1 also counts penalized competitors before which the competitor is to be inserted! I just wonder how the position shown in the app seems correct...
         int greatestOneBasedRankSoFar = 0;
         for (final CompetitorResultWithIdImpl result : mFinishedData) {
@@ -660,26 +688,22 @@ public class TrackingListFragment extends BaseFragment
      * @param toPosition   the position (zero-based index <em>after</em> removal of the item from its {@code fromPosition}) where
      *                     to {@link List#add(int, Object)} the item again in {@link #mFinishedData}
      */
-    @Override
-    public void onItemMove(int fromPosition, int toPosition) {
-        CompetitorResultWithIdImpl item = mFinishedData.remove(fromPosition);
-        mFinishedData.add(toPosition, item);
+    public boolean onItemMove(int fromPosition, int toPosition) {
         final int firstPositionChanged = Math.min(getFirstRankZeroPosition(), Math.min(fromPosition, toPosition));
         final int lastPositionChanged = Math.min(getFirstRankZeroPosition(), Math.max(fromPosition, toPosition) + 1);
         adjustRanks(firstPositionChanged, lastPositionChanged);
+        mFinishedAdapter.notifyItemChanged(fromPosition);
+        mFinishedAdapter.notifyItemChanged(toPosition);
         setPublishButton();
-        mFinishedAdapter.notifyItemRangeChanged(firstPositionChanged, lastPositionChanged - firstPositionChanged);
+        return true;
     }
 
-    @Override
-    public void onItemRemove(int position) {
-        CompetitorResultWithIdImpl item = mFinishedData.get(position);
-        if (position >= 0) { // found
-            mFinishedData.remove(position);
-            adjustRanks(position, getFirstRankZeroPosition());
-            setPublishButton();
-            mFinishedAdapter.notifyItemRemoved(position);
+    public void onItemRemove(int position, CompetitorResultWithIdImpl item) {
+        if (position < 0) { // not found
+            return;
         }
+        adjustRanks(position, getFirstRankZeroPosition());
+        setPublishButton();
         for (Map.Entry<Competitor, Boat> entry : getRace().getCompetitorsAndBoats().entrySet()) {
             if (entry.getKey().getId().equals(item.getCompetitorId())) {
                 addNewCompetitorToCompetitorList(entry);
@@ -714,7 +738,6 @@ public class TrackingListFragment extends BaseFragment
             .getFinishingTime(), competitorToReplaceWithAdjustedPosition.getComment(), MergeState.OK);
     }
 
-    @Override
     public void onLongClick(final CompetitorResultWithIdImpl item) {
         final CharSequence[] maxPointsReasons = getAllMaxPointsReasons();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
@@ -729,54 +752,6 @@ public class TrackingListFragment extends BaseFragment
         builder.show();
     }
 
-    @Override
-    public void onItemEdit(final CompetitorResultWithIdImpl item) {
-        Context context = getActivity();
-        if (context instanceof AppCompatActivity) {
-            ActionBar actionBar = ((AppCompatActivity) context).getSupportActionBar();
-            if (actionBar != null) {
-                context = actionBar.getThemedContext();
-            }
-        }
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
-        builder.setTitle(item.getCompetitorDisplayName());
-        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), getRace().getState().getFinishingTime(), item,
-            mAdapter.getFirstRankZeroPosition() +
-            /* allow for setting rank as the new last in the list in case the competitor did not have a rank so far */
-                (item.getOneBasedRank() == 0 ? 1 : 0), false, item.getMergeState() == MergeState.ERROR);
-        builder.setView(layout);
-        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                CompetitorResultWithIdImpl newItem = layout.getValue();
-                updateItem(item, newItem);
-            }
-        });
-        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                CompetitorResultWithIdImpl newItem = new CompetitorResultWithIdImpl(item.getId(), getBoat(item.getCompetitorId()), item
-                    .getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item
-                    .getFinishingTime(), item.getComment(), MergeState.OK);
-                updateItem(item, newItem);
-            }
-        });
-        AlertDialog dialog = builder.create();
-        dialog.show();
-        if (AppUtils.with(getActivity()).isTablet()) {
-            Window window = dialog.getWindow();
-            if (window != null) {
-                window.setLayout(getResources().getDimensionPixelSize(R.dimen.competitor_dialog_width), ViewGroup.LayoutParams.WRAP_CONTENT);
-            }
-        }
-    }
-
     /**
      * The following cases are possible:
      * <ol>
@@ -789,7 +764,7 @@ public class TrackingListFragment extends BaseFragment
      * position</li>
      * </ol>
      */
-    private void updateItem(final CompetitorResultWithIdImpl item, CompetitorResultWithIdImpl newItem) {
+    public void updateItem(final CompetitorResultWithIdImpl item, CompetitorResultWithIdImpl newItem) {
         int index = -1;
         for (int i = 0; i < mFinishedData.size(); i++) {
             if (mFinishedData.get(i).getCompetitorId().equals(item.getCompetitorId())) {
@@ -805,8 +780,9 @@ public class TrackingListFragment extends BaseFragment
             onItemMove(index, mFinishedData.size() - 1); // -1 because first the element is removed, so when inserting the list is one element shorter
         } else if (item.getOneBasedRank() != newItem.getOneBasedRank() && newItem.getOneBasedRank() != 0) {
             onItemMove(index, newItem.getOneBasedRank() - 1);
+            mFinishedAdapter.notifyItemChanged(index);
         } else if (newItem.getOneBasedRank() == 0 && newItem.getMaxPointsReason() == MaxPointsReason.NONE) {
-            onItemRemove(index);
+            onItemRemove(index, item);
         } else {
             mFinishedAdapter.notifyItemChanged(index);
         }
@@ -1114,7 +1090,7 @@ public class TrackingListFragment extends BaseFragment
             }
         }
         setPublishButton();
-        mAdapter.notifyDataSetChanged();
+        mFinishedAdapter.notifyDataSetChanged();
         if (changedCompetitor.size() > 0) { // show message to user
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
             builder.setTitle(R.string.refresh_title);
