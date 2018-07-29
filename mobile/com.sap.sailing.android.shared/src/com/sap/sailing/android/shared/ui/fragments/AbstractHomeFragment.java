@@ -11,19 +11,16 @@ import com.sap.sailing.android.shared.ui.adapters.AbstractRegattaAdapter;
 import com.sap.sailing.android.shared.util.BaseAppPreferences;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
 public abstract class AbstractHomeFragment extends BaseFragment {
     private final static String TAG = AbstractHomeFragment.class.getName();
@@ -57,26 +54,22 @@ public abstract class AbstractHomeFragment extends BaseFragment {
                 R.string.no_qr_code_popup_message);
     }
 
-    private boolean requestQRCodeScan() {
+    private void requestQRCodeScan() {
         Intent intent = new Intent(getContext(), BarcodeCaptureActivity.class);
-        intent.putExtra(BarcodeCaptureActivity.AutoFocus, true);
         startActivityForResult(intent, requestCodeQRCode);
-
-        return true;
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == requestCodeQRCode) {
-            if (resultCode == CommonStatusCodes.SUCCESS) {
-                Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
-                handleQRCode(barcode.displayValue);
-            } else {
-                ExLog.e(getActivity(), TAG, CommonStatusCodes.getStatusCodeString(resultCode));
-            }
-        }
-        else {
+        if (requestCode != requestCodeQRCode) {
             super.onActivityResult(requestCode, resultCode, data);
+            return;
+        }
+        if (resultCode == CommonStatusCodes.SUCCESS && data != null) {
+            Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+            handleQRCode(barcode.displayValue);
+        } else {
+            ExLog.e(getActivity(), TAG, CommonStatusCodes.getStatusCodeString(resultCode));
         }
     }
 

@@ -4,9 +4,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.vision.barcode.Barcode;
 import com.sap.sailing.android.shared.data.LoginData;
 import com.sap.sailing.android.shared.data.http.UnauthorizedException;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity;
 import com.sap.sailing.android.shared.util.AuthCheckTask;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.LoginTask;
@@ -218,6 +221,11 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
         startActivity(intent);
     }
 
+    private void requestQRCodeScan() {
+        Intent intent = new Intent(getActivity(), BarcodeCaptureActivity.class);
+        startActivityForResult(intent, requestCodeQR);
+    }
+
     private void setupOnboarding(View layout) {
         onboarding = ViewHelper.get(layout, R.id.login_onboarding);
 
@@ -238,15 +246,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
             scan.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    try {
-                        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-                        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-                        startActivityForResult(intent, requestCodeQR);
-                    } catch (Exception e) {
-                        Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-                        Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-                        startActivity(marketIntent);
-                    }
+                    requestQRCodeScan();
                 }
             });
         }
@@ -342,17 +342,12 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
             return;
         }
 
-        switch (resultCode) {
-            case Activity.RESULT_CANCELED:
-                break;
-
-            case Activity.RESULT_OK:
-                if (QRHelper.with(getActivity()).saveData(data.getStringExtra("SCAN_RESULT"))) {
+        if (resultCode == CommonStatusCodes.SUCCESS && data != null) {
+            Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+            if (QRHelper.with(getActivity()).saveData(barcode.displayValue)) {
                     BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
                 }
-                break;
-
-            default:
+        } else {
                 Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }
     }

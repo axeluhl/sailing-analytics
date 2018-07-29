@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.vision.barcode.Barcode;
+import com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity;
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.android.shared.ui.views.EditSetPreference;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -9,9 +12,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.CheckBoxPreference;
@@ -174,29 +175,20 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         });
     }
 
-    private boolean requestQRCodeScan() {
-        try {
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, requestCodeQRCode);
-            return true;
-        } catch (Exception e) {
-            Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-            startActivity(marketIntent);
-        }
-        return false;
+    private void requestQRCodeScan() {
+        Intent intent = new Intent(getContext(), BarcodeCaptureActivity.class);
+        startActivityForResult(intent, requestCodeQRCode);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != requestCodeQRCode) {
+        if (requestCode == requestCodeQRCode) {
             super.onActivityResult(requestCode, resultCode, data);
             return;
         }
-
-        if (resultCode == Activity.RESULT_OK) {
-            QRHelper.with(getActivity()).saveData(data.getStringExtra("SCAN_RESULT"));
+        if (resultCode == CommonStatusCodes.SUCCESS && data != null) {
+            Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+            QRHelper.with(getActivity()).saveData(barcode.displayValue);
 
             final AppPreferences appPreferences = AppPreferences.on(getActivity());
             appPreferences.setNeedConfigRefresh(true);
