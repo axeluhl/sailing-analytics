@@ -3,11 +3,14 @@ package com.sap.sailing.selenium.test.adminconsole;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver.TargetLocator;
+import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
@@ -88,6 +91,7 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         tracTracEvents.setReggataForTracking(DEFAULT_REGATTA);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRace(this.trackableRace);
+        
         TargetLocator locator = getWebDriver().switchTo();
         Alert alert = locator.alert();
         String text = alert.getText();
@@ -109,12 +113,16 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         tracTracEvents.setReggataForTracking(idm2013Descriptor);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRace(this.trackableRace);
-        TargetLocator locator = getWebDriver().switchTo();
-        Alert alert = locator.alert();
-        String text = alert.getText();
-        alert.dismiss();
-        String message = String.format("The selected races contain boat classes which are not the same as " +
-                "the boat class '%s' of the selected regatta.", IDM_2013_BOAT_CLASS);
-        assertThat(text, containsString(message));
+        
+        String message = String.format("The selected races contain boat classes which are not the same as "
+                + "the boat class '%s' of the selected regatta.", IDM_2013_BOAT_CLASS);
+        for (WebElement element : getWebDriver().findElement(By.id("notificationBar")).findElements(By.cssSelector("*"))) {
+            if (element.getText().contains(message)) {
+                element.click();
+                assertTrue(true);
+                return;
+            }
+        }
+        assertTrue("Could not find error notification.", false);
     }
 }

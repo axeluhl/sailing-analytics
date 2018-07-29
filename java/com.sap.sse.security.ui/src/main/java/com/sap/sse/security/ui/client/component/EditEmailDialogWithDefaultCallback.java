@@ -2,8 +2,9 @@ package com.sap.sse.security.ui.client.component;
 
 import java.util.HashMap;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -11,9 +12,9 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
- * Forwards the e-mail update request to a {@link UserManagementServiceAsync} and uses default
- * <code>Window.alert(...)</code> calls to show success or failure of the server-side update after
- * calling back to an optional additional callback that can be provided to the constructor.
+ * Forwards the e-mail update request to a {@link UserManagementServiceAsync} and uses notifications to show success or
+ * failure of the server-side update after calling back to an optional additional callback that can be provided to the
+ * constructor.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -39,7 +40,7 @@ public class EditEmailDialogWithDefaultCallback extends EditEmailDialog {
                                 if (callback != null) {
                                     callback.onFailure(caught);
                                 }
-                                Window.alert(stringMessages.errorUpdatingEmail(caught.getMessage()));
+                                Notification.notify(stringMessages.errorUpdatingEmail(caught.getMessage()), NotificationType.ERROR);
                             }
 
                             @Override
@@ -47,7 +48,8 @@ public class EditEmailDialogWithDefaultCallback extends EditEmailDialog {
                                 if (callback != null) {
                                     callback.onSuccess(userData);
                                 }
-                                Window.alert(stringMessages.successfullyUpdatedEmail(userData.getUsername(), userData.getEmail()));
+                                        Notification.notify(stringMessages.successfullyUpdatedEmail(
+                                                userData.getUsername(), userData.getEmail()), NotificationType.SUCCESS);
                             }
                         }));
             }
