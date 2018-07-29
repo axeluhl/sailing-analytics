@@ -69,6 +69,7 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
 
     private final static String TAG = RegattaActivity.class.getName();
     private final static String COMPETITOR_IMAGE_FILENAME_PREFIX = "competitor_";
+    private final static String COMPETITOR_IMAGE_FOLDER = "pictures";
     private final static String FLAG_IMAGE_FILENAME_PREFIX = "flag_";
 
     public EventInfo event;
@@ -383,19 +384,13 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
     public File getImageFile(String fileName) {
         File mediaStorageDir = getMediaStorageDir();
 
-        File mediaFile;
         String mImageName = fileName + ".png";
-        mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
+        File mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
         return mediaFile;
     }
 
     public boolean deleteImageFile(String fileName) {
-        File mediaStorageDir = getMediaStorageDir();
-
-        File mediaFile;
-        String mImageName = fileName + ".png";
-        mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
-
+        File mediaFile = getImageFile(fileName);
         return mediaFile.delete();
     }
 
@@ -403,7 +398,7 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
         File mediaStorageDir;
 
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            mediaStorageDir = getExternalFilesDir(null);
+            mediaStorageDir = new File(getExternalFilesDir(null), COMPETITOR_IMAGE_FOLDER);
         } else {
             mediaStorageDir = getApplicationContext().getCacheDir();
         }

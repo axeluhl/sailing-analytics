@@ -13,6 +13,7 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
 
 public class CameraHelper {
 
@@ -72,14 +73,16 @@ public class CameraHelper {
      * Returns a folder Uri for app depended picture folder
      */
     public Uri getOutputMediaFolderUri(@Nullable String subFolder) {
-        return Uri.fromFile(getOutputMediaFolder(subFolder));
+        File mediaFile = getOutputMediaFolder(subFolder);
+        return FileProvider.getUriForFile(mContext, mContext.getPackageName() + ".fileprovider", mediaFile);
     }
 
     /**
      * Create a file Uri for saving an image or video
      */
     public Uri getOutputMediaFileUri(int type, @Nullable String subFolder) {
-        return Uri.fromFile(getOutputMediaFile(type, subFolder));
+        File mediaFile = getOutputMediaFile(type, subFolder);
+        return FileProvider.getUriForFile(mContext, mContext.getPackageName() + ".fileprovider", mediaFile);
     }
 
     /**

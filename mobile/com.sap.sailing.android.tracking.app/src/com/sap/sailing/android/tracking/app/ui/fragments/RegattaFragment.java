@@ -28,6 +28,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -236,8 +237,10 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
     private void showTakePhotoActivity() {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
         File photoFile = ((RegattaActivity) getActivity()).getImageFile(CAMERA_TEMP_FILE);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+        Uri file = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", photoFile);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, file);
         startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
     }
 
