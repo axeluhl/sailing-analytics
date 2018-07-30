@@ -20,7 +20,6 @@ public class GetBoatPositionsAction extends AbstractGetMapRelatedDataAction<Comp
     @Override
     public void execute(final AsyncCallback<CompactBoatPositionsDTO> callback) {
         Map<String, Date> fromByCompetitorIdAsString = new HashMap<String, Date>();
-        System.out.println(fromByCompetitorIdAsString);
         for (Map.Entry<CompetitorDTO, Date> fromEntry : getFrom().entrySet()) {
             fromByCompetitorIdAsString.put(fromEntry.getKey().getIdAsString(), fromEntry.getValue());
         }

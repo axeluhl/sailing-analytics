@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Duration;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
@@ -46,10 +47,13 @@ public interface HasTrackedRaceContext {
     @Dimension(messageKey="IsTracked", ordinal=9)
     public Boolean isTracked();
     
-    @Statistic(messageKey="NumberOfCompetitorFixes", resultDecimals=0, ordinal=0)
+    @Statistic(messageKey="RaceDuration", ordinal=0)
+    public Duration getDuration();
+    
+    @Statistic(messageKey="NumberOfCompetitorFixes", resultDecimals=0, ordinal=1)
     public int getNumberOfCompetitorFixes();
     
-    @Statistic(messageKey="NumberOfMarkFixes", resultDecimals=0, ordinal=1)
+    @Statistic(messageKey="NumberOfMarkFixes", resultDecimals=0, ordinal=2)
     public int getNumberOfMarkFixes();
     
     // Convenience methods for race dependent calculation to avoid code duplication
