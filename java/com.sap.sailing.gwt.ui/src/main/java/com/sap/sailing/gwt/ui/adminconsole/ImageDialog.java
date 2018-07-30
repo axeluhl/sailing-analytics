@@ -29,7 +29,7 @@ import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
-import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
+import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorWithCheckboxesComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -49,90 +49,143 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
     protected IntegerBox heightInPxBox;
     protected StringListInlineEditorComposite tagsListEditor;
     protected Image image;
-    protected CheckBox doResize;
+    protected List<CheckBox> doResize;
+    protected Label doResizeLabel;
     private final BusyIndicator busyIndicator;
 
     protected static class ImageParameterValidator implements Validator<ImageDTO> {
         private StringMessages stringMessages;
-        private CheckBox doResize;
-
+        private List<CheckBox> doResize;
+        private Label doResizeLabel;
+        
         public ImageParameterValidator(StringMessages stringMessages) {
             this.stringMessages = stringMessages;
         }
         
-        public void setCheckBox(CheckBox doResize) {
+        public void setCheckBox(List<CheckBox> doResize) {
             this.doResize = doResize;
         }
         
+        public void setCheckBoxLabel(Label doResizeLabel) {
+            this.doResizeLabel = doResizeLabel;
+        }
         @Override
         public String getErrorMessage(ImageDTO imageToValidate) {
             String errorMessage = null;
             Integer imageWidth = imageToValidate.getWidthInPx();
             Integer imageHeight = imageToValidate.getHeightInPx();
             
+            for(CheckBox checkBox : doResize) {//set all invisible, so they are updated for all errors that occure before a resizing error in following construct
+                checkBox.setVisible(false);
+            }
+            
             if (imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyUrlOrUploadImage();
             } else if (imageWidth == null || imageHeight == null) {
                 errorMessage = stringMessages.couldNotRetrieveImageSizeYet();
-            } else if (!doResize.getValue()){
-                if (imageToValidate.hasTag(MediaTagConstants.LOGO) && !isValidSize(imageWidth, imageHeight,
-                        MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH,
-                        MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT)) {
-                    errorMessage = getSizeErrorMessage(MediaTagConstants.LOGO, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
-                            MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT,
-                            MediaConstants.MAX_LOGO_IMAGE_HEIGHT, stringMessages);
-                } else if (imageToValidate.hasTag(MediaTagConstants.TEASER) && !isValidSize(imageWidth, imageHeight,
-                        MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH,
-                        MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT)) {
-                    errorMessage = getSizeErrorMessage(MediaTagConstants.TEASER, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
-                            MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT,
-                            MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, stringMessages);
-                } else if (imageToValidate.hasTag(MediaTagConstants.STAGE) && !isValidSize(imageWidth, imageHeight,
-                        MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH,
-                        MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT)) {
-                    errorMessage = getSizeErrorMessage(MediaTagConstants.STAGE, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
-                            MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT,
-                            MediaConstants.MAX_STAGE_IMAGE_HEIGHT, stringMessages);
+            } else {
+                //check if image is too small for resizing
+                errorMessage = "";
+                if (imageToValidate.hasTag(MediaTagConstants.LOGO) && (imageWidth < MediaConstants.MIN_LOGO_IMAGE_WIDTH || imageHeight < MediaConstants.MIN_LOGO_IMAGE_HEIGHT)) {
+                    errorMessage += getImageToSmallErrorMessage(MediaTagConstants.LOGO, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
+                            MediaConstants.MIN_LOGO_IMAGE_HEIGHT, stringMessages) + "\n";
                 }
-            }else {
-                errorMessage = imageRatioFits(imageToValidate);
-                if(errorMessage == null) {
-                    if (imageToValidate.hasTag(MediaTagConstants.LOGO) && (imageWidth < MediaConstants.MIN_LOGO_IMAGE_WIDTH || imageHeight < MediaConstants.MIN_LOGO_IMAGE_HEIGHT)) {
-                        errorMessage = getImageToSmallErrorMessage(MediaTagConstants.LOGO, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
-                                MediaConstants.MIN_LOGO_IMAGE_HEIGHT, stringMessages);
-                    } else if (imageToValidate.hasTag(MediaTagConstants.TEASER) && (imageWidth < MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH || imageHeight < MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT)) {
-                        errorMessage = getImageToSmallErrorMessage(MediaTagConstants.TEASER, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
-                                MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, stringMessages);
-                    } else if (imageToValidate.hasTag(MediaTagConstants.STAGE) && (imageWidth < MediaConstants.MIN_STAGE_IMAGE_WIDTH || imageHeight < MediaConstants.MIN_STAGE_IMAGE_HEIGHT)) {
-                        errorMessage = getImageToSmallErrorMessage(MediaTagConstants.STAGE, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
-                                MediaConstants.MIN_STAGE_IMAGE_HEIGHT, stringMessages);
+                if (imageToValidate.hasTag(MediaTagConstants.TEASER) && (imageWidth < MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH || imageHeight < MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT)) {
+                    errorMessage += getImageToSmallErrorMessage(MediaTagConstants.TEASER, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
+                            MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, stringMessages) + "\n";
+                }
+                if (imageToValidate.hasTag(MediaTagConstants.STAGE) && (imageWidth < MediaConstants.MIN_STAGE_IMAGE_WIDTH || imageHeight < MediaConstants.MIN_STAGE_IMAGE_HEIGHT)) {
+                    errorMessage += getImageToSmallErrorMessage(MediaTagConstants.STAGE, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
+                            MediaConstants.MIN_STAGE_IMAGE_HEIGHT, stringMessages) + "\n";
+                }
+                if(errorMessage.equals("")) {//Check if image ratio fits for resizing
+                    errorMessage = imageRatioFits(imageToValidate);
+                }
+                if(errorMessage.equals("")) {//check for ckeckboxes and resizing
+                    if (imageToValidate.hasTag(MediaTagConstants.LOGO) && !isValidSize(imageWidth, imageHeight,
+                            MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH,
+                            MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT)) {
+                        getCheckBoxForTag(MediaTagConstants.LOGO, imageToValidate).setVisible(true);
+                        if(!getCheckBoxForTag(MediaTagConstants.LOGO, imageToValidate).getValue()) {
+                            errorMessage += getSizeErrorMessage(MediaTagConstants.LOGO, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
+                                    MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT,
+                                    MediaConstants.MAX_LOGO_IMAGE_HEIGHT, stringMessages) + "\n";
+                        }
+                    }
+                    if (imageToValidate.hasTag(MediaTagConstants.TEASER) && !isValidSize(imageWidth, imageHeight,
+                            MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH,
+                            MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT)) {
+                        getCheckBoxForTag(MediaTagConstants.TEASER, imageToValidate).setVisible(true);
+                        if(!getCheckBoxForTag(MediaTagConstants.TEASER, imageToValidate).getValue()) {
+                            errorMessage += getSizeErrorMessage(MediaTagConstants.TEASER, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
+                                    MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT,
+                                    MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, stringMessages) + "\n";
+                        }
+                    }
+                    if (imageToValidate.hasTag(MediaTagConstants.STAGE) && !isValidSize(imageWidth, imageHeight,
+                            MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH,
+                            MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT)) {
+                        getCheckBoxForTag(MediaTagConstants.STAGE, imageToValidate).setVisible(true);
+                        if(!getCheckBoxForTag(MediaTagConstants.STAGE, imageToValidate).getValue()) {
+                            errorMessage += getSizeErrorMessage(MediaTagConstants.STAGE, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
+                                    MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT,
+                                    MediaConstants.MAX_STAGE_IMAGE_HEIGHT, stringMessages) + "\n";
+                        }
                     }
                 }
             }
+            for(CheckBox checkBox : doResize) {//all checkboxes that are set to invisible will now be set it's value to false
+                if(!checkBox.isVisible()) {
+                    checkBox.setValue(false);
+                }
+            }
+            if(checkBoxIsVisible()) {
+                doResizeLabel.setVisible(true);
+            }else {
+                doResizeLabel.setVisible(false);
+            }
+            if(errorMessage.equals(""))
+               return null;
             return errorMessage;
         }
         
-        private String imageRatioFits(ImageDTO imageToValidate) {
+        private boolean checkBoxIsVisible() {
+            for(CheckBox checkBox : doResize) {
+                if(checkBox.isVisible())
+                    return true;
+            }
+            return false;
+        }
 
-            double minMaxRatio = Integer.MAX_VALUE;//the lowest ratio that is defined as the maximum ratio from one of the tags
-            double maxMinRatio = 0;//the highest ratio that is defined as the minimum ratio from one of the tags
-            if(imageToValidate.hasTag(MediaTagConstants.LOGO)) {
-                minMaxRatio = Double.min(minMaxRatio, ((double)MediaConstants.MAX_LOGO_IMAGE_WIDTH)/MediaConstants.MIN_LOGO_IMAGE_HEIGHT);
-                maxMinRatio = Double.max(maxMinRatio, ((double)MediaConstants.MIN_LOGO_IMAGE_WIDTH)/MediaConstants.MAX_LOGO_IMAGE_HEIGHT);
+        private CheckBox getCheckBoxForTag(String tag, ImageDTO imageToValidate) {
+            List<String> tags = imageToValidate.getTags();
+            for(int i = 0; i < tags.size(); i++) {
+                if(tags.get(i).equals(tag)) {
+                    return doResize.get(i);
+                }
             }
-            if(imageToValidate.hasTag(MediaTagConstants.TEASER)) {
-                minMaxRatio = Double.min(minMaxRatio, ((double)MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH)/MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT);
-                maxMinRatio = Double.max(maxMinRatio, ((double)MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH)/MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT);
-            }
-            if(imageToValidate.hasTag(MediaTagConstants.STAGE)) {
-                minMaxRatio = Double.min(minMaxRatio, ((double)MediaConstants.MAX_STAGE_IMAGE_WIDTH)/MediaConstants.MIN_STAGE_IMAGE_HEIGHT);
-                maxMinRatio = Double.max(maxMinRatio, ((double)MediaConstants.MIN_STAGE_IMAGE_WIDTH)/MediaConstants.MAX_STAGE_IMAGE_HEIGHT);
-            }
+            return new CheckBox();//new checkbox instead of null, so there is no need for a null check. this will be deleted from garbage collector anyway
+        }
+        
+        private String imageRatioFits(ImageDTO imageToValidate) {
+            String errorMessage = "";
             double ratio = ((double)imageToValidate.getWidthInPx())/imageToValidate.getHeightInPx();
-            if(ratio < maxMinRatio || ratio > minMaxRatio) {
-                return stringMessages.imageResizeError(maxMinRatio, minMaxRatio, ratio);
+            double minRatio = ((double)MediaConstants.MAX_LOGO_IMAGE_WIDTH)/MediaConstants.MIN_LOGO_IMAGE_HEIGHT;
+            double maxRatio = ((double)MediaConstants.MIN_LOGO_IMAGE_WIDTH)/MediaConstants.MAX_LOGO_IMAGE_HEIGHT;
+            if(imageToValidate.hasTag(MediaTagConstants.LOGO) && (minRatio < ratio || maxRatio > ratio)) {
+                errorMessage += stringMessages.imageResizeError(MediaTagConstants.LOGO, minRatio, maxRatio, ratio);
             }
-            return null;
+            minRatio = ((double)MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH)/MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT;
+            maxRatio = ((double)MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH)/MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT;
+            if(imageToValidate.hasTag(MediaTagConstants.TEASER) && (minRatio < ratio || maxRatio > ratio)) {
+                errorMessage += stringMessages.imageResizeError(MediaTagConstants.TEASER, minRatio, maxRatio, ratio);
+            }
+            minRatio = ((double)MediaConstants.MAX_STAGE_IMAGE_WIDTH)/MediaConstants.MIN_STAGE_IMAGE_HEIGHT;
+            maxRatio = ((double)MediaConstants.MIN_STAGE_IMAGE_WIDTH)/MediaConstants.MAX_STAGE_IMAGE_HEIGHT;
+            if(imageToValidate.hasTag(MediaTagConstants.STAGE) && (minRatio < ratio || maxRatio > ratio)) {
+                errorMessage += stringMessages.imageResizeError(MediaTagConstants.STAGE, minRatio, maxRatio, ratio);
+            }
+            return errorMessage;
         }
 
         private boolean isValidSize(int width, int height, int minWidth, int maxWidth, int minHeight, int maxHeight) {
@@ -189,24 +242,33 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             }
         });
         
+        doResize = new ArrayList<>();
+        doResizeLabel = new Label(stringMessages.doResize());
+        doResizeLabel.setVisible(false);
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-                new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
-                        MediaConstants.imageTagSuggestions, stringMessages.enterTagsForTheImage(), 30));
+                new GenericStringListInlineEditorWithCheckboxesComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
+                        MediaConstants.imageTagSuggestions, stringMessages.enterTagsForTheImage(), 30, doResize,doResizeLabel,new ValueChangeHandler<Boolean>() {
+
+                            @Override
+                            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                                validateAndUpdate();
+                                for(CheckBox checkBox : doResize) {
+                                    if(checkBox.isVisible() && !checkBox.getValue()) {
+                                        //checkBox.setStyleName("AdminConsole.errorLabel");
+                                    }
+                                }
+                            }
+                        }));
         tagsListEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
                 validateAndUpdate();
-            }
-        });
-        doResize = new CheckBox();
-        doResize.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                validateAndUpdate();
+                //((CheckBox)event.getSource()).setStyleName("AdminConsole.errorLabel");
+                
             }
         });
         validator.setCheckBox(doResize);
+        validator.setCheckBoxLabel(doResizeLabel);
     }
 
     @Override
@@ -216,6 +278,13 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             tags.add(tag);
         }
         HashMap<String,Boolean> map = new HashMap<String, Boolean>();
+        for(int i= 0; i < doResize.size(); i++) {
+            if(tags.get(i).equals(MediaTagConstants.LOGO) || tags.get(i).equals(MediaTagConstants.TEASER) || tags.get(i).equals(MediaTagConstants.STAGE) || tags.get(i).equals(MediaTagConstants.GALLERY)) {
+                map.put(tags.get(i), doResize.get(i).getValue());
+            }else {
+                map.put(tags.get(i),null);
+            }
+        }
         ImageDTO result = new ToResizeImageDTO(imageURLAndUploadComposite.getURL(), creationDate, map);
         result.setTitle(titleTextBox.getValue());
         result.setSubtitle(subtitleTextBox.getValue());
@@ -236,7 +305,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             panel.add(additionalWidget);
         }
 
-        Grid grid = new Grid(12, 2);
+        Grid grid = new Grid(11, 2);
 
         grid.setWidget(0, 0, new Label(stringMessages.createdAt() + ":"));
         grid.setWidget(0, 1, createdAtLabel);
@@ -260,8 +329,6 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         grid.setWidget(9, 0, new HTML("&nbsp;"));
         grid.setWidget(10, 0, new Label(stringMessages.tags() + ":"));
         grid.setWidget(10, 1, tagsListEditor);
-        grid.setWidget(11, 0, new Label(stringMessages.doResize() + ":"));
-        grid.setWidget(11, 1, doResize);
 
         panel.add(grid);
 

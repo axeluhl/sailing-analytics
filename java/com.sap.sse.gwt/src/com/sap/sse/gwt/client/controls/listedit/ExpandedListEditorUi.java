@@ -37,7 +37,7 @@ import com.sap.sse.gwt.client.StringMessages;
 public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<ValueType> {
     private final ImageResource removeImage;
 
-    private Grid expandedValuesGrid;
+    protected Grid expandedValuesGrid;
     private final boolean canRemoveItems;
 
     /**
@@ -80,7 +80,7 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
         }
     }
 
-    private void addRow(ValueType newValue) {
+    protected void addRow(ValueType newValue) {
         int rowIndex = expandedValuesGrid.insertRow(expandedValuesGrid.getRowCount());
         if (canRemoveItems) {
             PushButton removeButton = new PushButton(new Image(removeImage));

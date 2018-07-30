@@ -1481,7 +1481,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String noImagesDefinedYet();
     String imageSizeError(String imageType, int minWidth, int maxWidth, int minHeight, int maxHeight);
     String imageToSmallError(String imageType, int minWidth, int minHeight);
-    String imageResizeError(double minRatio, double maxRatio, double ratio);
+    String imageResizeError(String imageType, double minRatio, double maxRatio, double ratio);
     String couldNotRetrieveImageSizeYet();
     @Override
     String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
@@ -2097,4 +2097,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String manage2SailPort();
     String doResize();
     String windFinderSpotCollectionsList();
+    String resizeSuccessfull();
+    String resizeUnsuccessfull();
+    String setUpStorageService();
 }
