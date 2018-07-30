@@ -747,4 +747,9 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         return getActiveAudioContainers().stream().map(f -> f.getMediaPlayer().getMediaTrack())
                 .collect(Collectors.toSet());
     }
+
+    @Override
+    public Status getMediaTrackStatus(MediaTrack track) {
+        return mediaTrackStatus.getOrDefault(track, Status.UNDEFINED);
+    }
 }

@@ -34,8 +34,7 @@ public class MediaSingleSelectionControl extends AbstractMediaSelectionControl i
     }
 
     public void show() {
-        Collection<MediaTrack> mediaTracks = new ArrayList<MediaTrack>();
-        addPotentiallyPlayableMediaTracksTo(mediaTracks);
+        Collection<MediaTrack> mediaTracks = new ArrayList<MediaTrack>(mediaPlayerManager.getAssignedMediaTracks());
         Panel mediaPanel = new VerticalPanel();
         addMediaEntriesToGridPanel(mediaTracks, mediaPanel);
         dialogControl.add(mediaPanel);
@@ -48,16 +47,12 @@ public class MediaSingleSelectionControl extends AbstractMediaSelectionControl i
         }
     }
 
-    private void addPotentiallyPlayableMediaTracksTo(Collection<MediaTrack> mediaTracks) {
-        for (MediaTrack mediaTrack : mediaPlayerManager.getAssignedMediaTracks()) {
-            mediaTracks.add(mediaTrack);
-        }
-    }
-
     private Button createMediaEntry(final MediaTrack mediaTrack) {
-        Button mediaSelectButton = new Button(mediaTrack.title);
+        Button mediaSelectButton = new Button(
+                mediaPlayerManager.getMediaTrackStatus(mediaTrack).toString() + " " + mediaTrack.title);
         mediaSelectButton.setStyleName("Media-Select-Button");
-        if (mediaTrack.equals(mediaPlayerManager.getPlayingAudioTrack()) || mediaPlayerManager.getPlayingVideoTracks().contains(mediaTrack)) {
+        if (mediaPlayerManager.getPlayingAudioTrack().contains(mediaTrack)
+                || mediaPlayerManager.getPlayingVideoTracks().contains(mediaTrack)) {
             mediaSelectButton.setTitle(stringMessages.mediaHideVideoTooltip());
             mediaSelectButton.addStyleName("Media-Select-Button-playing");
             mediaSelectButton.addClickHandler(new ClickHandler() {
