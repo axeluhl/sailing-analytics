@@ -246,18 +246,21 @@ public class TracTracEventManagementPanelPO extends PageArea {
         if (!racesToProcess.isEmpty()) {
             throw new IllegalStateException("Not all given races where selected");
         }
+        startTrackingForSelectedRaces(expectedBoatClassErrorOrNull);
+    }
+    
+    public void startTrackingForAllRaces() {
+        getTrackableRacesTable().selectAllEntries();
+        startTrackingForSelectedRaces(null);
+    }
+    
+    private void startTrackingForSelectedRaces(String expectedBoatClassErrorOrNull) {
         this.startTracking();
         if (expectedBoatClassErrorOrNull == null) {
             waitForAjaxRequests();
         } else {
             waitForSelectedRacesContainDifferentBoatClassesError(expectedBoatClassErrorOrNull);
         }
-    }
-    
-    public void startTrackingForAllRaces() {
-        getTrackableRacesTable().selectAllEntries();
-        startTracking();
-        waitForAjaxRequests();
     }
 
     private void startTracking() {
