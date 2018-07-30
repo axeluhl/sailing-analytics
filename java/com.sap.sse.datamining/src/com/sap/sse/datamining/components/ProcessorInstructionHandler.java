@@ -7,6 +7,6 @@ public interface ProcessorInstructionHandler<ResultType> {
     void instructionSucceeded(ResultType result);
     void instructionFailed(Exception e);
     
-    void afterInstructionFinished();
+    void afterInstructionFinished(ProcessorInstruction<ResultType> instruction);
 
 }
