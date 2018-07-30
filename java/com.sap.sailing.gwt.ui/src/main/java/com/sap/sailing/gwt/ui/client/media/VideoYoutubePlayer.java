@@ -5,18 +5,18 @@ import java.util.List;
 
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
-import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
-import com.sap.sailing.gwt.ui.client.media.shared.WithWidget;
+import com.sap.sailing.gwt.ui.client.media.shared.MediaSynchPlayer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer;
 
-public class VideoYoutubePlayer extends AbstractMediaPlayer implements VideoSynchPlayer, MediaSynchAdapter, WithWidget {
+public class VideoYoutubePlayer extends AbstractMediaPlayer implements MediaSynchPlayer, MediaSynchAdapter, IsWidget {
 
     private interface DeferredAction {
         void execute();
@@ -245,7 +245,7 @@ public class VideoYoutubePlayer extends AbstractMediaPlayer implements VideoSync
     }
 
     @Override
-    public Widget getWidget() {
+    public Widget asWidget() {
         return videoContainer;
     }
 

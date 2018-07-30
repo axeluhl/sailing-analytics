@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.dom.client.VideoElement;
@@ -34,8 +35,7 @@ import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PlayerCloseL
 import com.sap.sailing.gwt.ui.client.media.popup.VideoJSWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.YoutubeWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
-import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
-import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
+import com.sap.sailing.gwt.ui.client.media.shared.MediaSynchPlayer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -59,16 +59,15 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         MediaPlayerManager, CloseHandler<Window>, ClosingHandler {
 
     static interface VideoContainerFactory<T> {
-        T createVideoContainer(VideoSynchPlayer videoPlayer, UserService userService, MediaServiceAsync mediaService,
+        T createVideoContainer(MediaSynchPlayer videoPlayer, UserService userService, MediaServiceAsync mediaService,
                 ErrorReporter errorReporter, PlayerCloseListener playerCloseListener, PopoutListener popoutListener);
     }
     
     private final SimplePanel rootPanel = new SimplePanel();
     private final UserService userService;
 
-    private MediaPlayer activeAudioPlayer;
-    private VideoPlayer dockedVideoPlayer;
-    private final Map<MediaTrack, VideoContainer> activeVideoContainers = new HashMap<MediaTrack, VideoContainer>();
+    private MediaPlayer dockedVideoPlayer;
+    private final Map<MediaTrack, MediaPlayerContainer> activePlayerContainers = new HashMap<MediaTrack, MediaPlayerContainer>();
     private Collection<MediaTrack> assignedMediaTracks = new ArrayList<>();
     private Collection<MediaTrack> overlappingMediaTracks = new ArrayList<>();
     private Map<MediaTrack, Status> mediaTrackStatus = new HashMap<>();
@@ -238,15 +237,15 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void playSpeedFactorChanged(double newPlaySpeedFactor) {
-        for (VideoContainer videoContainer : activeVideoContainers.values()) {
-            VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
+        for (MediaPlayerContainer videoContainer : activePlayerContainers.values()) {
+            MediaPlayer videoPlayer = videoContainer.getMediaPlayer();
             videoPlayer.setPlaybackSpeed(newPlaySpeedFactor);
         }
     }
 
     private void pausePlaying() {
-        for (VideoContainer videoContainer : activeVideoContainers.values()) {
-            VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
+        for (MediaPlayerContainer videoContainer : activePlayerContainers.values()) {
+            MediaPlayer videoPlayer = videoContainer.getMediaPlayer();
             if (!videoPlayer.isMediaPaused()) {
                 videoPlayer.pauseMedia();
             }
@@ -254,8 +253,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     private void startPlaying() {
-        for (VideoContainer videoContainer : activeVideoContainers.values()) {
-            VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
+        for (MediaPlayerContainer videoContainer : activePlayerContainers.values()) {
+            MediaPlayer videoPlayer = videoContainer.getMediaPlayer();
             if (videoPlayer.isMediaPaused() && videoPlayer.isCoveringCurrentRaceTime()) {
                 videoPlayer.playMedia();
             }
@@ -264,8 +263,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void timeChanged(Date newRaceTime, Date oldRaceTime) {
-        for (VideoContainer videoContainer : activeVideoContainers.values()) {
-            VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
+        for (MediaPlayerContainer videoContainer : activePlayerContainers.values()) {
+            MediaPlayer videoPlayer = videoContainer.getMediaPlayer();
             ensurePlayState(videoPlayer);
             videoPlayer.raceTimeChanged(newRaceTime);
         }
@@ -340,10 +339,10 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         if ((dockedVideoPlayer == null) || (dockedVideoPlayer.getMediaTrack() != videoTrack)) {
             closeDockedVideo();
             closeFloatingPlayer(videoTrack);
-            VideoContainer videoDockedContainer = createAndWrapVideoPlayer(videoTrack,
+            MediaPlayerContainer videoDockedContainer = createAndWrapVideoPlayer(videoTrack,
                     new VideoContainerFactory<VideoDockedContainer>() {
                         @Override
-                        public VideoDockedContainer createVideoContainer(VideoSynchPlayer videoPlayer,
+                        public VideoDockedContainer createVideoContainer(MediaSynchPlayer videoPlayer,
                                 UserService userService, MediaServiceAsync mediaService, ErrorReporter errorReporter,
                                 PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
                             VideoDockedContainer videoDockedContainer = new VideoDockedContainer(rootPanel,
@@ -372,20 +371,20 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     @Override
     public void playAudio(MediaTrack audioTrack) {
         muteAudio();
-        if ((activeAudioPlayer == null) || (activeAudioPlayer.getMediaTrack() != audioTrack)) {
-            muteAudio();
-            playFloatingVideo(audioTrack);
-            VideoContainer playingVideoContainer = activeVideoContainers.get(audioTrack);
-            activeAudioPlayer = playingVideoContainer.getVideoPlayer();
-            activeAudioPlayer.setMuted(false);
-        }
-        notifyStateChange();
+        playFloatingVideo(audioTrack);
+        activePlayerContainers.get(audioTrack).getMediaPlayer().setMuted(false);
+    }
+
+    public List<MediaPlayerContainer> getActiveAudioContainers() {
+        return activePlayerContainers.entrySet().stream()
+                .filter(f -> (f.getKey().mimeType.mediaType == MediaType.audio)).map(f -> f.getValue())
+                .collect(Collectors.toList());
     }
 
     @Override
     public void muteAudio() {
-        if (activeAudioPlayer != null) {
-            closeFloatingPlayer(activeAudioPlayer.getMediaTrack());
+        for (MediaPlayerContainer player : getActiveAudioContainers()) {
+            closeFloatingPlayer(player.getMediaPlayer().getMediaTrack());
         }
     }
 
@@ -394,15 +393,15 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         if (dockedVideoPlayer != null && dockedVideoPlayer.getMediaTrack() == videoTrack) {
             closeDockedVideo();
         }
-        VideoContainer activeVideoContainer = activeVideoContainers.get(videoTrack);
+        MediaPlayerContainer activeVideoContainer = activePlayerContainers.get(videoTrack);
         if (activeVideoContainer == null) {
-            VideoFloatingContainer videoFloatingContainer = createAndWrapVideoPlayer(videoTrack,
-                    new VideoContainerFactory<VideoFloatingContainer>() {
+            FloatingMediaPlayerContainerContainer videoFloatingContainer = createAndWrapVideoPlayer(videoTrack,
+                    new VideoContainerFactory<FloatingMediaPlayerContainerContainer>() {
                         @Override
-                        public VideoFloatingContainer createVideoContainer(VideoSynchPlayer videoPlayer,
+                        public FloatingMediaPlayerContainerContainer createVideoContainer(MediaSynchPlayer videoPlayer,
                                 UserService userservice, MediaServiceAsync mediaService, ErrorReporter errorReporter,
                                 PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
-                            VideoFloatingContainer videoFloatingContainer = new VideoFloatingContainer(videoPlayer, popupPositionProvider,
+                            FloatingMediaPlayerContainerContainer videoFloatingContainer = new FloatingMediaPlayerContainerContainer(videoPlayer, popupPositionProvider,
                                     userservice, mediaService, errorReporter, playerCloseListener, popoutListener);
                             return videoFloatingContainer;
                         }
@@ -417,7 +416,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     private <T> T createAndWrapVideoPlayer(final MediaTrack videoTrack, VideoContainerFactory<T> videoContainerFactory) {
         final PopoutWindowPlayer.PlayerCloseListener playerCloseListener = new PopoutWindowPlayer.PlayerCloseListener() {
-            private VideoContainer videoContainer;
+            private MediaPlayerContainer videoContainer;
 
             @Override
             public void playerClosed() {
@@ -430,14 +429,14 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             }
 
             @Override
-            public void setVideoContainer(VideoContainer videoContainer) {
+            public void setVideoContainer(MediaPlayerContainer videoContainer) {
                 this.videoContainer = videoContainer;
             }
         };
         PopoutListener popoutListener = new PopoutListener() {
             @Override
             public void popoutVideo(MediaTrack videoTrack) {
-                VideoContainer videoContainer;
+                MediaPlayerContainer videoContainer;
                 if (videoTrack.isYoutube()) {
                     videoContainer = new YoutubeWindowPlayer(videoTrack, playerCloseListener);
                 } else {
@@ -447,7 +446,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                 closeFloatingPlayer(videoTrack);
             }
         };
-        final VideoSynchPlayer videoPlayer;
+        final MediaSynchPlayer videoPlayer;
         if (videoTrack.isYoutube()) {
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), raceTimer);
         } else {
@@ -458,18 +457,9 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                 playerCloseListener, popoutListener);
     }
 
-    private void registerVideoContainer(final MediaTrack videoTrack, final VideoContainer videoContainer) {
-        VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
-        activeVideoContainers.put(videoTrack, videoContainer);
-        if ((activeAudioPlayer != null) && (activeAudioPlayer.getMediaTrack() == videoTrack)) { // selected video track
-                                                                                                // has been playing as
-                                                                                                // audio-only
-            activeAudioPlayer.pauseMedia();
-            activeAudioPlayer = videoContainer.getVideoPlayer();
-            videoPlayer.setMuted(false);
-        } else {
-            videoPlayer.setMuted(true);
-        }
+    private void registerVideoContainer(final MediaTrack videoTrack, final MediaPlayerContainer videoContainer) {
+        MediaPlayer videoPlayer = videoContainer.getMediaPlayer();
+        activePlayerContainers.put(videoTrack, videoContainer);
         synchPlayState(videoPlayer);
         notifyStateChange();
     }
@@ -494,13 +484,9 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void closeFloatingPlayer(MediaTrack videoTrack) {
-        VideoContainer removedVideoContainer = activeVideoContainers.remove(videoTrack);
+        MediaPlayerContainer removedVideoContainer = activePlayerContainers.remove(videoTrack);
         if (removedVideoContainer != null) {
             removedVideoContainer.shutDown();
-        }
-        if (activeAudioPlayer != null && activeAudioPlayer.getMediaTrack() == videoTrack) {
-            activeAudioPlayer.shutDown();
-            activeAudioPlayer = null;
         }
         notifyStateChange();
     }
@@ -543,22 +529,14 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void stopAll() {
-        if (activeAudioPlayer != null) {
-            if (!activeVideoContainers.containsKey(activeAudioPlayer.getMediaTrack())) { // only if audio player isn't
-                                                                                         // one of the video players
-                                                                                         // anyway.
-                activeAudioPlayer.shutDown();
-            }
-            activeAudioPlayer = null;
-        }
-        for (VideoContainer videoContainer : new ArrayList<VideoContainer>(activeVideoContainers.values())) { // using a
+        for (MediaPlayerContainer mediaContainer : new ArrayList<MediaPlayerContainer>(activePlayerContainers.values())) { // using a
                                                                                                               // copy to
                                                                                                               // prevent
                                                                                                               // a
                                                                                                               // ConcurrentModificationException
-            videoContainer.shutDown();
+            mediaContainer.shutDown();
         }
-        activeVideoContainers.clear();
+        activePlayerContainers.clear();
         notifyStateChange();
     }
 
@@ -633,7 +611,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public Boolean isPlaying() {
-        return (activeAudioPlayer != null) || (!activeVideoContainers.isEmpty());
+        return !activePlayerContainers.isEmpty();
     }
 
     @Override
@@ -643,18 +621,13 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     @Override
-    public MediaTrack getPlayingAudioTrack() {
-        return activeAudioPlayer != null ? activeAudioPlayer.getMediaTrack() : null;
-    }
-
-    @Override
     public MediaTrack getDockedVideoTrack() {
         return dockedVideoPlayer != null ? dockedVideoPlayer.getMediaTrack() : null;
     }
 
     @Override
     public Set<MediaTrack> getPlayingVideoTracks() {
-        return activeVideoContainers.keySet();
+        return activePlayerContainers.keySet();
     }
 
     @Override
@@ -682,6 +655,17 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         List<MediaTrack> result = new ArrayList<MediaTrack>();
         for (MediaTrack mediaTrack : assignedMediaTracks) {
             if (mediaTrack.mimeType != null && mediaTrack.mimeType.mediaType == MediaType.video) {
+                result.add(mediaTrack);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<MediaTrack> getAudioTracks() {
+        List<MediaTrack> result = new ArrayList<MediaTrack>();
+        for (MediaTrack mediaTrack : assignedMediaTracks) {
+            if (mediaTrack.mimeType != null && mediaTrack.mimeType.mediaType == MediaType.audio) {
                 result.add(mediaTrack);
             }
         }
@@ -734,17 +718,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     @Override
-    public List<MediaTrack> getAudioTracks() {
-        List<MediaTrack> result = new ArrayList<MediaTrack>();
-        for (MediaTrack mediaTrack : assignedMediaTracks) {
-            if (mediaTrack.mimeType != null && mediaTrack.mimeType.mediaType == MediaType.audio) {
-                result.add(mediaTrack);
-            }
-        }
-        return result;
-    }
-
-    @Override
     public UserAgentDetails getUserAgent() {
         return userAgent;
     }
@@ -767,5 +740,11 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     @Override
     public String getId() {
         return mediaPlayerLifecycle.getComponentId();
+    }
+
+    @Override
+    public Set<MediaTrack> getPlayingAudioTrack() {
+        return getActiveAudioContainers().stream().map(f -> f.getMediaPlayer().getMediaTrack())
+                .collect(Collectors.toSet());
     }
 }

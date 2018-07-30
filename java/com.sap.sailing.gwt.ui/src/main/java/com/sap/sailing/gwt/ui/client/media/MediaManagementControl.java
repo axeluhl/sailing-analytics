@@ -239,11 +239,9 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> changeEvent) {
                 if (changeEvent.getValue()) {
-                    MediaTrack currentlyPlaying = mediaPlayerManager.getPlayingAudioTrack();
+                    Set<MediaTrack> currentlyPlaying = mediaPlayerManager.getPlayingAudioTrack();
                     if (audioTrack == null) {
-                        if (currentlyPlaying != null) {
-                            mediaPlayerManager.closeFloatingPlayer(currentlyPlaying);
-                        }
+                        currentlyPlaying.forEach(f -> mediaPlayerManager.closeFloatingPlayer(f));
                     } else {
                         mediaPlayerManager.playAudio(audioTrack);
                     }

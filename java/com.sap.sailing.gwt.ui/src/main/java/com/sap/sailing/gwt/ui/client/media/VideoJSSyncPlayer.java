@@ -4,12 +4,12 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
-import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
+import com.sap.sailing.gwt.ui.client.media.shared.MediaSynchPlayer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer;
 
-public class VideoJSSyncPlayer extends AbstractMediaPlayer implements VideoSynchPlayer, RequiresResize {
+public class VideoJSSyncPlayer extends AbstractMediaPlayer implements MediaSynchPlayer, RequiresResize {
     private VideoJSPlayer videoJsDelegate;
 
     private EditFlag editFlag;
@@ -79,7 +79,7 @@ public class VideoJSSyncPlayer extends AbstractMediaPlayer implements VideoSynch
     }
 
     @Override
-    public Widget getWidget() {
+    public Widget asWidget() {
         return videoJsDelegate;
     }
 

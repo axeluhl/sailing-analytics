@@ -44,7 +44,7 @@ public interface MediaPlayerManager {
 
     Boolean isPlaying();
 
-    MediaTrack getPlayingAudioTrack();
+    Set<MediaTrack> getPlayingAudioTrack();
 
     Set<MediaTrack> getPlayingVideoTracks();
 
@@ -53,7 +53,7 @@ public interface MediaPlayerManager {
     Collection<MediaTrack> getOverlappingMediaTracks();
 
     List<MediaTrack> getAudioTracks();
-    
+
     List<MediaTrack> getVideoTracks();
 
     MediaTrack getDockedVideoTrack();
