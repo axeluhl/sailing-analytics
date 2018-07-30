@@ -50,4 +50,8 @@ public class WebDriverWindow {
         if(!handles.contains(this.handle))
             throw new WebDriverException("Window closed or not initialized"); //$NON-NLS-1$
     }
+    
+    public WebDriver getWebDriver() {
+        return driver;
+    }
 }

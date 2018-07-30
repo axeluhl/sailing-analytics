@@ -172,7 +172,7 @@ public abstract class AbstractSeleniumTest {
     //    }
     //}
     
-    private class ScreenShotRule extends TestWatchman {
+    private class ScreenShotAndCloseWindowRule extends TestWatchman {
         @Override
         public void failed(Throwable cause, FrameworkMethod method) {
             try {
@@ -181,13 +181,22 @@ public abstract class AbstractSeleniumTest {
                 exception.printStackTrace();
             }
         }
+        
+        @Override
+        public void finished(FrameworkMethod method) {
+            try {
+                environment.getWindowManager().closeAllExtraWindows();
+            } finally {
+                super.finished(method);
+            }
+        }
     }
     
     /**
      * <p>Rule for capturing of a screenshot if a test fails.</p>
      */
     @Rule
-    public final ScreenShotRule takeScreenshoot = new ScreenShotRule(/*generator*/);
+    public final ScreenShotAndCloseWindowRule takeScreenshotAndCloseWindows = new ScreenShotAndCloseWindowRule(/*generator*/);
 
     /**
      * <p>The test environment used for the execution of the the tests.</p>
@@ -243,25 +252,27 @@ public abstract class AbstractSeleniumTest {
     protected void captureScreenshot(String filename) {
         File screenshotFolder = this.environment.getScreenshotFolder();
         if (screenshotFolder != null) {
-            WebDriver driver = getWebDriver();
-            if (RemoteWebDriver.class.equals(driver.getClass())) {
-                driver = new Augmenter().augment(driver);
-            }
-            InputStream source = getScreenshotNotSupportedImage();
-            if (driver instanceof TakesScreenshot) {
-                source = new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
-            }
-            try {
-                File destinationDir = new File(screenshotFolder, getClass().getName());
-                destinationDir.mkdirs();
-                File destination = new File(destinationDir, filename + SCREENSHOT_FILE_EXTENSION); //$NON-NLS-1$
-                Path path = destination.toPath();
-                Files.copy(source, path, StandardCopyOption.REPLACE_EXISTING);
-                // ATTENTION: Do not remove this line because it is needed for the JUnit Attachment Plugin!
-                System.out.println(String.format(ATTACHMENT_FORMAT, destination.getCanonicalFile().toURI()));
-            } catch (IOException exception) {
-                throw new RuntimeException(exception);
-            }
+            this.environment.getWindowManager().forEachOpenedWindow(window -> {
+                WebDriver driver = window.getWebDriver();
+                if (RemoteWebDriver.class.equals(driver.getClass())) {
+                    driver = new Augmenter().augment(driver);
+                }
+                InputStream source = getScreenshotNotSupportedImage();
+                if (driver instanceof TakesScreenshot) {
+                    source = new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
+                }
+                try {
+                    File destinationDir = new File(screenshotFolder, getClass().getName());
+                    destinationDir.mkdirs();
+                    File destination = new File(destinationDir, filename + SCREENSHOT_FILE_EXTENSION); //$NON-NLS-1$
+                    Path path = destination.toPath();
+                    Files.copy(source, path, StandardCopyOption.REPLACE_EXISTING);
+                    // ATTENTION: Do not remove this line because it is needed for the JUnit Attachment Plugin!
+                    System.out.println(String.format(ATTACHMENT_FORMAT, destination.getCanonicalFile().toURI()));
+                } catch (IOException exception) {
+                    throw new RuntimeException(exception);
+                }
+            });
         }
     }
     
