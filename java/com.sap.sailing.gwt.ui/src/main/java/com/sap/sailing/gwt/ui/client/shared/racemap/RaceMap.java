@@ -679,14 +679,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
               map.addDragEndHandler(new DragEndMapHandler() {
                   @Override
                   public void onEvent(DragEndMapEvent event) {
-                      // stop automatic zoom after a manual drag event
-                      autoZoomIn = false;
-                      autoZoomOut = false;
-                      final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                      RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList, settings.getZoomSettings().isZoomToSelectedCompetitors());
-                      settings = new RaceMapSettings(settings, clearedZoomSettings);
+                        // stop automatic zoom after a manual drag event
+                        autoZoomIn = false;
+                        autoZoomOut = false;
+                        final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
+                        RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList,
+                                settings.getZoomSettings().isZoomToSelectedCompetitors());
+                        settings = new RaceMapSettings(settings, clearedZoomSettings);
                         currentlyDragging = false;
                         removeTransitions();
+                        if ((streamletOverlay != null)) {
+                            streamletOverlay.onDragEnd();
+                        }
                     }
               });
               map.addIdleHandler(new IdleMapHandler() {
