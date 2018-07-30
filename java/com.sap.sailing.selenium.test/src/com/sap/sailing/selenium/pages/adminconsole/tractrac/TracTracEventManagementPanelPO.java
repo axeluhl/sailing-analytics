@@ -5,12 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 
 import com.sap.sailing.domain.common.BoatClassMasterdata;
@@ -234,6 +231,7 @@ public class TracTracEventManagementPanelPO extends PageArea {
     
     public void startTrackingForRaceAndAwaitBoatClassError(TrackableRaceDescriptor race) {
         startTrackingForRaceInternal(race);
+        startTracking();
         waitForSelectedRacesContainDifferentBoatClassesError(race.boatClass);
     }
     
@@ -269,11 +267,13 @@ public class TracTracEventManagementPanelPO extends PageArea {
     }
     
     private void startTrackingAndWaitForAjaxRequests() {
+        startTracking();
+        waitForAjaxRequests();
+    }
+
+
+    private void startTracking() {
         this.startTrackingButton.click();
-        ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
-        if (condition.apply(this.driver) == null) {
-            waitForAjaxRequests();
-        }
     }
     
     public TrackedRacesListPO getTrackedRacesList() {
