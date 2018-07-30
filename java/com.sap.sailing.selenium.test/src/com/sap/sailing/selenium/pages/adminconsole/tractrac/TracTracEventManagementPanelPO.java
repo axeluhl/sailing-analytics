@@ -228,6 +228,16 @@ public class TracTracEventManagementPanelPO extends PageArea {
     }
     
     public void startTrackingForRace(TrackableRaceDescriptor race) {
+        startTrackingForRaceInternal(race);
+        startTrackingAndWaitForAjaxRequests();
+    }
+    
+    public void startTrackingForRaceAndAwaitBoatClassError(TrackableRaceDescriptor race) {
+        startTrackingForRaceInternal(race);
+        waitForSelectedRacesContainDifferentBoatClassesError(race.boatClass);
+    }
+    
+    private void startTrackingForRaceInternal(TrackableRaceDescriptor race) {
         //startTrackingForRaces(Arrays.asList(race));
         CellTablePO<DataEntryPO> table = getTrackableRacesTable();
         DataEntryPO entryToSelect = null;
@@ -240,7 +250,6 @@ public class TracTracEventManagementPanelPO extends PageArea {
             }
         }
         table.selectEntry(entryToSelect);
-        startTrackingAndWaitForAjaxRequests();
     }
     
     public void startTrackingForRaces(List<TrackableRaceDescriptor> races) {
@@ -280,5 +289,12 @@ public class TracTracEventManagementPanelPO extends PageArea {
         
         if(input.isSelected() != selected)
             input.click();
+    }
+    
+    private void waitForSelectedRacesContainDifferentBoatClassesError(String boatClass) {
+        String message = String.format("The selected races contain boat classes which are not the same as "
+                + "the boat class '%s' of the selected regatta.", boatClass);
+        
+        waitForNotificationAndDismiss(message);
     }
 }

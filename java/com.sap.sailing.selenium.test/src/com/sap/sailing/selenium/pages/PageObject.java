@@ -603,16 +603,23 @@ public class PageObject {
     }
 
     /**
-     * Waits for an notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
+     * Waits for a notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
      */
     protected void waitForNotificationAndDismiss() {
         waitForNotificationAndDismiss(DEFAULT_NOTIFICATION_TIMEOUT_SECONDS, null);
+    }
+    
+    /**
+     * Waits for a specific notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
+     */
+    protected void waitForNotificationAndDismiss(String expectedNotificationMessage) {
+        waitForNotificationAndDismiss(DEFAULT_NOTIFICATION_TIMEOUT_SECONDS, expectedNotificationMessage);
     }
 
     /**
      * Waits for an notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
      */
-    protected void waitForNotificationAndDismiss(int timeoutInSeconds) {
+    protected void waitForNotificationAndDismiss(int timeoutInSeconds, String expectedNotificationMessage) {
         WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
         wait.until(new Function<WebDriver, Boolean>() {
 
@@ -624,8 +631,13 @@ public class PageObject {
                     // we got the enclosing panel
                     List<WebElement> notifications = notificationBar.get(0).findElements(By.cssSelector("*"));
                     if (!notifications.isEmpty()) {
-                        notifications.forEach(notification -> notification.click());
-                        clickedNotifications = true;
+                        for (WebElement messageElement : notifications) {
+                            if (expectedNotificationMessage == null
+                                    || messageElement.getText().contains(expectedNotificationMessage)) {
+                                messageElement.click();
+                                clickedNotifications = true;
+                            }
+                        }
                     }
                 }
                 return clickedNotifications;
