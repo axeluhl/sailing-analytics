@@ -59,6 +59,7 @@ public class PageObject {
     private static final Logger logger = Logger.getLogger(PageObject.class.getName());
     
     public static final int DEFAULT_WAIT_TIMEOUT_SECONDS = 120;
+    public static final int DEFAULT_NOTIFICATION_TIMEOUT_SECONDS = 12;
     
     public static final int DEFAULT_POLLING_INTERVAL = 1;
     
@@ -605,7 +606,7 @@ public class PageObject {
      * Waits for an notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
      */
     protected void waitForNotificationAndDismiss() {
-        waitForNotificationAndDismiss(DEFAULT_WAIT_TIMEOUT_SECONDS);
+        waitForNotificationAndDismiss(DEFAULT_NOTIFICATION_TIMEOUT_SECONDS, null);
     }
 
     /**
