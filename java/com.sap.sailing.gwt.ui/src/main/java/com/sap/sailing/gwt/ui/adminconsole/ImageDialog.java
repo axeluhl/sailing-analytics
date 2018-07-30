@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -32,6 +33,7 @@ import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorCom
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.ToResizeImageDTO;
 
 public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
     private final SailingServiceAsync sailingService;
@@ -209,16 +211,17 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
 
     @Override
     protected ImageDTO getResult() {
-        ImageDTO result = new ImageDTO(imageURLAndUploadComposite.getURL(), creationDate);
+        List<String> tags = new ArrayList<String>();
+        for (String tag: tagsListEditor.getValue()) {
+            tags.add(tag);
+        }
+        HashMap<String,Boolean> map = new HashMap<String, Boolean>();
+        ImageDTO result = new ToResizeImageDTO(imageURLAndUploadComposite.getURL(), creationDate, map);
         result.setTitle(titleTextBox.getValue());
         result.setSubtitle(subtitleTextBox.getValue());
         result.setCopyright(copyrightTextBox.getValue());
         if (widthInPxBox.getValue() != null && heightInPxBox.getValue() != null) {
             result.setSizeInPx(widthInPxBox.getValue(), heightInPxBox.getValue());
-        }
-        List<String> tags = new ArrayList<String>();
-        for (String tag: tagsListEditor.getValue()) {
-            tags.add(tag);
         }
         result.setTags(tags);
         return result;

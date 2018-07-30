@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -19,11 +18,11 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -53,9 +52,9 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.gwt.client.media.ConvertedImageDTO;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.ToResizeImageDTO;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
 
 /**
@@ -303,11 +302,15 @@ public class ImagesListComposite extends Composite {
 
             @Override
             public void ok(ImageDTO newImage) {
-                updateImageListDataProvider(newImage);
-                callResizingServlet(newImage);
                 if(!storageServiceAvailable) {
                     Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
                     return;
+                }
+                if(newImage.getClass().equals(ToResizeImageDTO.class)) {
+                    callResizingServlet(null, (ToResizeImageDTO) newImage);
+                }else {
+                    imageListDataProvider.getList().add(newImage);
+                    updateTableVisisbilty();
                 }
             }
         });
@@ -322,30 +325,23 @@ public class ImagesListComposite extends Composite {
 
             @Override
             public void ok(ImageDTO updatedImage) {
-                updateImageListDataProvider(updatedImage);
-                callResizingServlet(updatedImage);
                 if(!storageServiceAvailable) {
                     Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
                     return;
+                }
+                if(updatedImage.getClass().equals(ToResizeImageDTO.class)) {
+                    callResizingServlet(selectedImage, (ToResizeImageDTO) updatedImage);
+                }else {
+                    imageListDataProvider.getList().remove(selectedImage);
+                    imageListDataProvider.getList().add(updatedImage);
+                    updateTableVisisbilty();
                 }
             }
         });
         dialog.show();
     }
     
-    private void updateImageListDataProvider(ImageDTO image) {
-        for(int i = 0; i < imageListDataProvider.getList().size(); i++) {
-            ImageDTO dataProviderImage = imageListDataProvider.getList().get(i);
-            if(dataProviderImage.getSourceRef().equals(image.getSourceRef())) {
-                imageListDataProvider.getList().remove(dataProviderImage);
-                i--;
-            }
-        }
-        imageListDataProvider.getList().add(image);
-        updateTableVisisbilty();
-    }
-    
-    private String imageToJSON(ImageDTO image) {
+    private String imageToJSON(ToResizeImageDTO image) {
         JSONObject obj = new JSONObject();
         obj.put("URI", new JSONString(image.getSourceRef()));
         obj.put("Title", new JSONString(image.getTitle()));
@@ -354,37 +350,15 @@ public class ImagesListComposite extends Composite {
         obj.put("Width", new JSONNumber(image.getWidthInPx()));
         obj.put("Date", new JSONNumber(image.getCreatedAtDate().getTime()));
         obj.put("Copyright", new JSONString(image.getCopyright()));
-        JSONArray tags = new JSONArray();
+        JSONObject tags = new JSONObject();
         for(String tag : image.getTags()) {
-            tags.set(tags.size(), new JSONString(tag));
+            tags.put(tag, JSONBoolean.getInstance(image.resizeForTag(tag)));
         }
         obj.put("Tags", tags);
         return obj.toString();
     }
     
-    public String imageToJSON(ConvertedImageDTO image) {
-        JSONObject obj = new JSONObject();
-        obj.put("URI", new JSONString(image.getSourceRef()));
-        obj.put("Title", new JSONString(image.getTitle()));
-        obj.put("Subtitle", new JSONString(image.getSubtitle()));
-        obj.put("Height", new JSONNumber(image.getHeightInPx()));
-        obj.put("Width", new JSONNumber(image.getWidthInPx()));
-        obj.put("Date", new JSONNumber(image.getCreatedAtDate().getTime()));
-        obj.put("Copyright", new JSONString(image.getCopyright()));
-        JSONArray tags = new JSONArray();
-        JSONObject uriMap = new JSONObject();
-        for(String key : image.getUriMap().keySet()) {
-            uriMap.put(key, new JSONString(image.getResizedImgeUri(key)));
-        }
-        for(String tag : image.getTags()) {
-           tags.set(tags.size(), new JSONString(tag));
-        }
-        obj.put("Tags", tags);
-        obj.put("UriMap", uriMap);
-        return obj.toString();
-    }
-    
-    private void callResizingServlet(ImageDTO image) {
+    private void callResizingServlet(ImageDTO originalImage, ToResizeImageDTO image) {
         
         RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,"/sailingserver/imageResize");
         builder.setHeader("Content-Type", "application/json");
@@ -394,33 +368,28 @@ public class ImagesListComposite extends Composite {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
                     String responseText = response.getText();
-                    JSONObject obj = JSONParser.parseStrict(responseText).isObject();
-                    JSONObject uriJSONMap = obj.get("UriMap").isObject();
-                    HashMap<String,String> uriHashMap = new HashMap<String, String>();
+                    JSONArray images = JSONParser.parseStrict(responseText).isArray();
                     
-                    for(String key : uriJSONMap.keySet()) {
-                        uriHashMap.put(key, uriJSONMap.get(key).isString().stringValue());
+                    for(int i = 0; i < images.size(); i++) {
+                        ImageDTO image = new ImageDTO(images.get(i).isObject().get("URI").isString().stringValue(),new Date(Long.valueOf(images.get(i).isObject().get("Date").isNumber().toString())));
+                        List<String> tags = new ArrayList<>();
+                        JSONObject jsonTags = images.get(i).isObject().get("Tags").isObject();
+                        for(String key : jsonTags.keySet()) {
+                            tags.add(key);
+                        }
+                        image.setTags(tags);
+                        image.setTitle(images.get(i).isObject().get("Title").isString().stringValue());
+                        image.setSubtitle(images.get(i).isObject().get("Subtitle").isString().stringValue());
+                        image.setSizeInPx(Integer.valueOf(images.get(i).isObject().get("Width").isNumber().toString()), Integer.valueOf(images.get(i).isObject().get("Height").isNumber().toString()));
+                        imageListDataProvider.getList().add(image);
                     }
-                    
-                    ConvertedImageDTO image = new ConvertedImageDTO(obj.get("URI").isString().stringValue(),new Date(Long.valueOf(obj.get("Date").isNumber().toString())),obj.get("FileType").isString().stringValue(), uriHashMap);
-                    List<String> tags = new ArrayList<>();
-                    JSONArray jsonTags = obj.get("Tags").isArray();
-                    for(int i = 0; i < jsonTags.size(); i++) {
-                        tags.add(jsonTags.get(i).isString().stringValue());
-                    }
-                    image.setTags(tags);
-                    image.setTitle(obj.get("Title").isString().stringValue());
-                    image.setSubtitle(obj.get("Subtitle").isString().stringValue());
-                    image.setSizeInPx(Integer.valueOf(obj.get("Width").isNumber().toString()), Integer.valueOf(obj.get("Height").isNumber().toString()));
-                                        
-                    updateImageListDataProvider(image);
+                    imageListDataProvider.getList().remove(originalImage);
+                    updateTableVisisbilty();
                     errorReporter.reportError(stringMessages.resizeSuccessfull(), true);
                 }
                 
                 @Override
                 public void onError(Request request, Throwable exception) {
-                    // TODO Auto-generated method stub
-                    
                     errorReporter.reportError(stringMessages.resizeUnsuccessfull(), false);
                 }
             });

@@ -30,37 +30,65 @@ public class ImageResizingServlet extends AbstractJsonHttpServlet {
     
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        //In following size tag will describe the tags, that have a defined size in MediaConstants, which is LOGO, TEASER and STAGE at the moment
         String jsonString = new BufferedReader(new InputStreamReader(req.getInputStream())).readLine();
         JSONObject obj = getObjFromJSON(jsonString);
-        JSONArray tags = null;
-        List<String> sizeTags = new ArrayList<>();
+        List<String> resizeTags = new ArrayList<>();
+        List<String> notResizeSizeTags = new ArrayList<>();
+        JSONArray toReturnArray = new JSONArray();
         if(obj != null) {
             String fileType = ((String)obj.get("URI")).substring(((String)obj.get("URI")).lastIndexOf(".")+1);
-            obj.put("FileType", fileType);
+            JSONObject tags = (JSONObject) obj.get("Tags");
             InputStream is = getInputStreamFromURIString(((String)obj.get("URI")));
             BufferedImage img = ImageConverter.isToBi(is);
             is.close();
-        
-            tags = (JSONArray) obj.get("Tags");
-            for(Object tag : tags) {
-                if(((String)tag).equalsIgnoreCase(MediaTagConstants.LOGO)||((String)tag).equalsIgnoreCase(MediaTagConstants.STAGE)||((String)tag).equalsIgnoreCase(MediaTagConstants.TEASER)) {
-                    sizeTags.add((String)tag);
+            
+            for(Object tagKey : tags.keySet()) {
+                if((boolean) tags.get(tagKey)) {
+                    resizeTags.add((String)tagKey);//size tags, that have the resize checkBox checked
+                }else if(tags.get(tagKey) != null){
+                    notResizeSizeTags.add((String)tagKey);//size tags, that not have the resize checkBox checked
+                }//else all non-size tags
+            }
+            
+            for(String resizeTag : resizeTags) {
+                for(String toDeleteTag : resizeTags) {//delete all size tags
+                    tags.remove(toDeleteTag);
+                }
+                for(String toDeleteTag : notResizeSizeTags) {//delete all size tags
+                    tags.remove(toDeleteTag);
+                }
+                tags.put(resizeTag, "Done");//read the deleted specific size tag
+                resizeAndAddToAr(img, toReturnArray, obj, resizeTag, fileType);
+                obj = getObjFromJSON(jsonString);//reset the object
+                tags = (JSONObject) obj.get("Tags");//and the tags
+            }
+            if(notResizeSizeTags.isEmpty()) {//if there is no size tag that does not need a resize we can delete the original source
+                try {
+                    getService().getFileStorageManagementService().getActiveFileStorageService().removeFile(new URI((String)obj.get("URI")));
+                } catch (NoCorrespondingServiceRegisteredException | OperationFailedException
+                        | InvalidPropertiesException | URISyntaxException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                for(String resizeTag : notResizeSizeTags) {
+                    for(String toDeleteTag : resizeTags) {//delete all size tags
+                        tags.remove(toDeleteTag);
+                    }
+                    for(String toDeleteTag : notResizeSizeTags) {//delete all size tags
+                        tags.remove(toDeleteTag);
+                    }
+                    tags.put(resizeTag, "Done");//re-add the deleted specific size tag
+                    toReturnArray.add(obj);
+                    obj = getObjFromJSON(jsonString);//reset the object for next size-tag-iteration
+                    tags = (JSONObject) obj.get("Tags");//and the tags
                 }
             }
-            JSONObject uriMap = (JSONObject) obj.get("UriMap");
-            if(uriMap == null) {
-                uriMap = new JSONObject();
-                obj.put("UriMap", uriMap);
-            }
-            for(String sizeTag : sizeTags) {
-                if(uriMap.get(sizeTag) == null) {
-                    resizeAndAddToAr(img, uriMap, sizeTag, fileType);
-                }
-            }
-            resp.getWriter().write(obj.toJSONString());
+            
         }else {
             //ERROR
         }
+        resp.getWriter().write(toReturnArray.toJSONString());
     }
 
     private InputStream getInputStreamFromURIString(String uri) {
@@ -83,38 +111,31 @@ public class ImageResizingServlet extends AbstractJsonHttpServlet {
         return null;
     }
     
-    private void resizeAndAddToAr(BufferedImage img, JSONObject uriMap, String tag, String fileType) {
+    private void resizeAndAddToAr(BufferedImage img, JSONArray array, JSONObject resizedImageObject, String tag, String fileType) {
         String imgUri = "";
+        BufferedImage resizedImage = null;
         switch(tag) {
         case MediaTagConstants.LOGO:
-            try (InputStream resizedImage = ImageConverter.biToIs(ImageConverter.resize(img, MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT, fileType, false),fileType)){
-                imgUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(resizedImage, fileType, resizedImage.available()).toString();
-            } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException
-                    | InvalidPropertiesException e) {
-                e.printStackTrace();
-            }
-            uriMap.put(MediaTagConstants.LOGO, imgUri);
+            resizedImage = ImageConverter.resize(img, MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT, fileType, false);
             break;
         case MediaTagConstants.STAGE:
-            try(InputStream resizedImage = ImageConverter.biToIs(ImageConverter.resize(img, MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT, fileType, false),fileType)) {
-                imgUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(resizedImage, fileType, resizedImage.available()).toString();
-            } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException
-                    | InvalidPropertiesException e) {
-                e.printStackTrace();
-            }
-            uriMap.put(MediaTagConstants.LOGO, imgUri);
+            resizedImage = ImageConverter.resize(img, MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT, fileType, false);
             break;
         case MediaTagConstants.TEASER:
-            try (InputStream resizedImage = ImageConverter.biToIs(ImageConverter.resize(img, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, fileType, false),fileType)){
-                imgUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(resizedImage, fileType, resizedImage.available()).toString();
-            } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException
-                    | InvalidPropertiesException e) {
-                e.printStackTrace();
-            }
-            uriMap.put(MediaTagConstants.LOGO, imgUri);
+            resizedImage = ImageConverter.resize(img, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, fileType, false);
             break;
-        default://can not occur, because we only loop over the sizeTags, which are the same as the switch cases
+        default://can not occur, because we only loop over the sizeTags, which are the same as in the switch case
             break;
         }
+        try (InputStream resizedImageInputStream = ImageConverter.biToIs(resizedImage,fileType)){
+            imgUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(resizedImageInputStream, "."+fileType, resizedImageInputStream.available()).toString();
+        } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException
+                | InvalidPropertiesException e) {
+            e.printStackTrace();
+        }
+        resizedImageObject.put("URI", imgUri);
+        resizedImageObject.put("Width", resizedImage.getWidth());
+        resizedImageObject.put("Height", resizedImage.getHeight());
+        array.add(resizedImageObject);
     }
 }
