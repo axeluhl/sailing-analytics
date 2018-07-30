@@ -176,7 +176,7 @@ public abstract class AbstractSeleniumTest {
         @Override
         public void failed(Throwable cause, FrameworkMethod method) {
             try {
-                captureScreenshot(UUID.randomUUID().toString());
+                captureScreenshots();
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
@@ -249,10 +249,12 @@ public abstract class AbstractSeleniumTest {
      * @throws IOException
      *   if an I/O error occurs.
      */
-    protected void captureScreenshot(String filename) {
+    protected void captureScreenshots() {
         File screenshotFolder = this.environment.getScreenshotFolder();
         if (screenshotFolder != null) {
             this.environment.getWindowManager().forEachOpenedWindow(window -> {
+                final String filename = UUID.randomUUID().toString();
+                
                 WebDriver driver = window.getWebDriver();
                 if (RemoteWebDriver.class.equals(driver.getClass())) {
                     driver = new Augmenter().augment(driver);
