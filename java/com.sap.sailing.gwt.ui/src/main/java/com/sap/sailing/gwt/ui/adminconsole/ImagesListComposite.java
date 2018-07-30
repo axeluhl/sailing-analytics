@@ -46,6 +46,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.media.ConvertedImageDTO;
@@ -59,6 +60,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 public class ImagesListComposite extends Composite {
     private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
+    private final ErrorReporter errorReporter;
     
     private CellTable<ImageDTO> imageTable;
     private SingleSelectionModel<ImageDTO> imageSelectionModel;
@@ -84,9 +86,10 @@ public class ImagesListComposite extends Composite {
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public ImagesListComposite(SailingServiceAsync sailingService, final StringMessages stringMessages) {
+    public ImagesListComposite(SailingServiceAsync sailingService, final StringMessages stringMessages, final ErrorReporter errorReporter) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
+        this.errorReporter = errorReporter;
 
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
@@ -390,12 +393,14 @@ public class ImagesListComposite extends Composite {
                     image.setSizeInPx(Integer.valueOf(obj.get("Width").isNumber().toString()), Integer.valueOf(obj.get("Height").isNumber().toString()));
                                         
                     updateImageListDataProvider(image);
+                    errorReporter.reportError(stringMessages.resizeSuccessfull(), true);
                 }
                 
                 @Override
                 public void onError(Request request, Throwable exception) {
                     // TODO Auto-generated method stub
                     
+                    errorReporter.reportError(stringMessages.resizeUnsuccessfull(), false);
                 }
             });
         } catch (RequestException e) {

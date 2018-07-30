@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListEditorComposite;
@@ -126,7 +127,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
      * assignments for re-association with the new {@link EventDTO} created by the {@link #getResult} method.
      */
     public EventDialog(EventParameterValidator validator, SailingServiceAsync sailingService,
-            StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
+            StringMessages stringMessages, ErrorReporter errorReporter, List<LeaderboardGroupDTO> availableLeaderboardGroups,
             Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
@@ -159,8 +160,8 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                 new StringConstantsListEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
                         leaderboardGroupNames, stringMessages.selectALeaderboardGroup()));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
-        imagesListComposite = new ImagesListComposite(sailingService, stringMessages);
-        videosListComposite = new VideosListComposite(stringMessages);
+        imagesListComposite = new ImagesListComposite(sailingService, stringMessages,errorReporter);
+        videosListComposite = new VideosListComposite(sailingService,stringMessages);
         externalLinksComposite = new ExternalLinksComposite(stringMessages);
         final List<String> suggestedWindFinderSpotCollections = AvailableWindFinderSpotCollections
                 .getAllAvailableWindFinderSpotCollectionsInAlphabeticalOrder() == null ? Collections.emptyList()
