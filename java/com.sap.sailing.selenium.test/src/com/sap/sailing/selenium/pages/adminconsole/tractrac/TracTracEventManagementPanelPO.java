@@ -1,10 +1,13 @@
 package com.sap.sailing.selenium.pages.adminconsole.tractrac;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -233,14 +236,14 @@ public class TracTracEventManagementPanelPO extends PageArea {
         startTrackingForRacesInternal(Collections.singletonList(race), expectedBoatClass);
     }
     
-    public void startTrackingForRaces(List<TrackableRaceDescriptor> races) {
+    public void startTrackingForRaces(Collection<TrackableRaceDescriptor> races) {
         startTrackingForRacesInternal(races, null);
     }
     
-    private void startTrackingForRacesInternal(List<TrackableRaceDescriptor> races,
+    private void startTrackingForRacesInternal(Collection<TrackableRaceDescriptor> races,
             String expectedBoatClassErrorOrNull) {
-        List<TrackableRaceDescriptor> racesToProcess = new ArrayList<>(races);
-        CellTablePO<DataEntryPO> table = getTrackableRacesTable();
+        final Set<TrackableRaceDescriptor> racesToProcess = new HashSet<>(races);
+        final CellTablePO<DataEntryPO> table = getTrackableRacesTable();
         table.selectEntries(e -> racesToProcess.remove(new TrackableRaceDescriptor(e.getColumnContent("Event"),
                 e.getColumnContent("Race"), e.getColumnContent("Boat Class"))));
         if (!racesToProcess.isEmpty()) {
