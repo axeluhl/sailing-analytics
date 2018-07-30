@@ -46,7 +46,7 @@ public class TracTracEventManagementPanelPO extends PageArea {
         
         @Override
         public int hashCode() {
-            return Objects.hash(this.boatClass, this.eventName, this.raceName);
+            return Objects.hash(BoatClassMasterdata.resolveBoatClass(this.boatClass), this.eventName, this.raceName);
         }
 
         @Override
