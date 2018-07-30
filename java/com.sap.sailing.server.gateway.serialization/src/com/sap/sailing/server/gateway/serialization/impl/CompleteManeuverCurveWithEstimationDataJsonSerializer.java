@@ -24,8 +24,8 @@ public class CompleteManeuverCurveWithEstimationDataJsonSerializer
     public static final String RELATIVE_BEARING_TO_NEXT_MARK_BEFORE_MANEUVER = "relativeBearingToNextMarkBeforeManeuver";
     public static final String RELATIVE_BEARING_TO_NEXT_MARK_AFTER_MANEUVER = "relativeBearingToNextMarkAfterManeuver";
     public static final String CLOSEST_DISTANCE_TO_MARK = "closestDistanceToMarkInMeters";
-    public static final String DEVIATION_FROM_TARGET_TACK_ANGLE = "deviationFromTargetTackAngleInDegrees";
-    public static final String DEVIATION_FROM_TARGET_JIBE_ANGLE = "deviationFromTargetJibeAngleInDegrees";
+    public static final String TARGET_TACK_ANGLE = "targetTackAngleInDegrees";
+    public static final String TARGET_JIBE_ANGLE = "targetJibeAngleInDegrees";
 
     private final ManeuverCurveBoundariesJsonSerializer mainCurveSerializer;
     private final ManeuverCurveBoundariesJsonSerializer curveWithUnstableCourseAndSpeedSerializer;
@@ -64,10 +64,8 @@ public class CompleteManeuverCurveWithEstimationDataJsonSerializer
                         : maneuverWithEstimationData.getRelativeBearingToNextMarkAfterManeuver().getDegrees());
         result.put(CLOSEST_DISTANCE_TO_MARK, maneuverWithEstimationData.getDistanceToClosestMark() == null ? null
                 : maneuverWithEstimationData.getDistanceToClosestMark().getMeters());
-        result.put(DEVIATION_FROM_TARGET_TACK_ANGLE,
-                maneuverWithEstimationData.getDeviationOfManeuverAngleFromTargetTackAngleInDegrees());
-        result.put(DEVIATION_FROM_TARGET_JIBE_ANGLE,
-                maneuverWithEstimationData.getDeviationOfManeuverAngleFromTargetJibeAngleInDegrees());
+        result.put(TARGET_TACK_ANGLE, maneuverWithEstimationData.getTargetTackAngleInDegrees());
+        result.put(TARGET_JIBE_ANGLE, maneuverWithEstimationData.getTargetJibeAngleInDegrees());
         return result;
     }
 
