@@ -92,9 +92,9 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
     private void addAudioTracksToGridPanel(Collection<MediaTrack> audioTracks, Panel grid) {
         if (!audioTracks.isEmpty()) {
             grid.add(new Label(stringMessages.audioFiles()));
-            grid.add(createAudioButton(null, mediaPlayerManager.getPlayingAudioTrack()));
+            grid.add(createAudioButton(null));
             for (MediaTrack audioTrack : audioTracks) {
-                grid.add(createAudioButton(audioTrack, mediaPlayerManager.getPlayingAudioTrack()));
+                grid.add(createAudioButton(audioTrack));
             }
         }
     }
@@ -134,7 +134,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
                 if (changeEvent.getValue()) {
                     mediaPlayerManager.playFloatingVideo(videoTrack);
                 } else {
-                    mediaPlayerManager.closeFloatingVideo(videoTrack);
+                    mediaPlayerManager.closeFloatingPlayer(videoTrack);
                 }
             }
         });
@@ -195,7 +195,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
             @Override
             public void onSuccess(Void allMediaTracks) {
                 setVideoPlayCheckboxEnabled(videoTrack, false);
-                mediaPlayerManager.closeFloatingVideo(videoTrack);
+                mediaPlayerManager.closeFloatingPlayer(videoTrack);
             }
         });
         
@@ -229,17 +229,24 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
         return deleteButton;
     }
 
-    private Widget createAudioButton(final MediaTrack audioTrack, MediaTrack selectedAudioTrack) {
+    private Widget createAudioButton(final MediaTrack audioTrack) {
         String label = audioTrack != null ? audioTrack.title : "Sound off";
         String title = audioTrack != null ? audioTrack.toString() : "Turn off all sound channels.";
         RadioButton audioButton = new RadioButton("group-name", label);
         audioButton.setTitle(title);
-        audioButton.setValue(audioTrack == selectedAudioTrack);
+        audioButton.setValue(audioTrack == mediaPlayerManager.getPlayingAudioTrack());
         audioButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> changeEvent) {
                 if (changeEvent.getValue()) {
-                    mediaPlayerManager.playAudio(audioTrack);
+                    MediaTrack currentlyPlaying = mediaPlayerManager.getPlayingAudioTrack();
+                    if (audioTrack == null) {
+                        if (currentlyPlaying != null) {
+                            mediaPlayerManager.closeFloatingPlayer(currentlyPlaying);
+                        }
+                    } else {
+                        mediaPlayerManager.playAudio(audioTrack);
+                    }
                 }
             }
         });

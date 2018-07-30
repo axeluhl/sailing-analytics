@@ -238,29 +238,13 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void playSpeedFactorChanged(double newPlaySpeedFactor) {
-        if (isStandaloneAudio()) {// only if audio player isn't one of the video players anyway
-            activeAudioPlayer.setPlaybackSpeed(newPlaySpeedFactor);
-        }
         for (VideoContainer videoContainer : activeVideoContainers.values()) {
             VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
             videoPlayer.setPlaybackSpeed(newPlaySpeedFactor);
         }
     }
 
-    /**
-     * Checks if audio player isn't one of the video players
-     * 
-     * @return
-     */
-    private boolean isStandaloneAudio() {
-        return activeAudioPlayer != null && !activeVideoContainers.containsKey(activeAudioPlayer.getMediaTrack());
-    }
-
     private void pausePlaying() {
-        if (isStandaloneAudio()) { // only if audio player isn't one of the video players anyway
-            activeAudioPlayer.pauseMedia();
-        }
-
         for (VideoContainer videoContainer : activeVideoContainers.values()) {
             VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
             if (!videoPlayer.isMediaPaused()) {
@@ -270,9 +254,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     private void startPlaying() {
-        if (isStandaloneAudio() && activeAudioPlayer.isCoveringCurrentRaceTime()) {
-            activeAudioPlayer.playMedia();
-        }
         for (VideoContainer videoContainer : activeVideoContainers.values()) {
             VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
             if (videoPlayer.isMediaPaused() && videoPlayer.isCoveringCurrentRaceTime()) {
@@ -283,10 +264,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void timeChanged(Date newRaceTime, Date oldRaceTime) {
-        if (isStandaloneAudio()) { // only if audio player isn't one of the video players anyway
-            ensurePlayState(activeAudioPlayer);
-            activeAudioPlayer.raceTimeChanged(newRaceTime);
-        }
         for (VideoContainer videoContainer : activeVideoContainers.values()) {
             VideoPlayer videoPlayer = videoContainer.getVideoPlayer();
             ensurePlayState(videoPlayer);
@@ -355,7 +332,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     private void notifyStateChange() {
         for(PlayerChangeListener listener:playerChangeListener) {
             listener.notifyStateChange();
-            
         }
     }
 
@@ -363,7 +339,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     public void playDockedVideo(MediaTrack videoTrack) {
         if ((dockedVideoPlayer == null) || (dockedVideoPlayer.getMediaTrack() != videoTrack)) {
             closeDockedVideo();
-            closeFloatingVideo(videoTrack);
+            closeFloatingPlayer(videoTrack);
             VideoContainer videoDockedContainer = createAndWrapVideoPlayer(videoTrack,
                     new VideoContainerFactory<VideoDockedContainer>() {
                         @Override
@@ -395,26 +371,21 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void playAudio(MediaTrack audioTrack) {
+        muteAudio();
         if ((activeAudioPlayer == null) || (activeAudioPlayer.getMediaTrack() != audioTrack)) {
             muteAudio();
             playFloatingVideo(audioTrack);
             VideoContainer playingVideoContainer = activeVideoContainers.get(audioTrack);
             activeAudioPlayer = playingVideoContainer.getVideoPlayer();
             activeAudioPlayer.setMuted(false);
-            notifyStateChange();
-        } else {
-            // nothing changed
         }
+        notifyStateChange();
     }
 
     @Override
     public void muteAudio() {
-        if (activeAudioPlayer != null) { // --> then reset active audio player
-            activeAudioPlayer.shutDown();
-            activeAudioPlayer = null;
-            notifyStateChange();
-        } else {
-            // nothing changed
+        if (activeAudioPlayer != null) {
+            closeFloatingPlayer(activeAudioPlayer.getMediaTrack());
         }
     }
 
@@ -451,7 +422,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             @Override
             public void playerClosed() {
                 if (videoContainer == null) {
-                    closeFloatingVideo(videoTrack);
+                    closeFloatingPlayer(videoTrack);
                 } else {
                     registerVideoContainer(videoTrack, videoContainer);
                     videoContainer = null;
@@ -473,7 +444,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                     videoContainer = new VideoJSWindowPlayer(videoTrack, playerCloseListener);
                 }
                 playerCloseListener.setVideoContainer(videoContainer);
-                closeFloatingVideo(videoTrack);
+                closeFloatingPlayer(videoTrack);
             }
         };
         final VideoSynchPlayer videoPlayer;
@@ -522,14 +493,16 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     @Override
-    public void closeFloatingVideo(MediaTrack videoTrack) {
+    public void closeFloatingPlayer(MediaTrack videoTrack) {
         VideoContainer removedVideoContainer = activeVideoContainers.remove(videoTrack);
         if (removedVideoContainer != null) {
             removedVideoContainer.shutDown();
-            notifyStateChange();
-        } else {
-            // nothing changed
         }
+        if (activeAudioPlayer != null && activeAudioPlayer.getMediaTrack() == videoTrack) {
+            activeAudioPlayer.shutDown();
+            activeAudioPlayer = null;
+        }
+        notifyStateChange();
     }
 
     private boolean isLive() {
@@ -578,7 +551,11 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             }
             activeAudioPlayer = null;
         }
-        for (VideoContainer videoContainer : new ArrayList<VideoContainer>(activeVideoContainers.values())) { //using a copy to prevent a ConcurrentModificationException
+        for (VideoContainer videoContainer : new ArrayList<VideoContainer>(activeVideoContainers.values())) { // using a
+                                                                                                              // copy to
+                                                                                                              // prevent
+                                                                                                              // a
+                                                                                                              // ConcurrentModificationException
             videoContainer.shutDown();
         }
         activeVideoContainers.clear();
@@ -636,9 +613,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
                 @Override
                 public void onSuccess(Void _void) {
-                    MediaPlayerManagerComponent.this.closeFloatingVideo(mediaTrack);
                     assignedMediaTracks.remove(mediaTrack);
-                    notifyStateChange();
+                    MediaPlayerManagerComponent.this.closeFloatingPlayer(mediaTrack);
                 }
             });
             return true;

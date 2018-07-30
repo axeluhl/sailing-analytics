@@ -67,7 +67,7 @@ public class MediaSingleSelectionControl extends AbstractMediaSelectionControl i
                     if (mediaPlayerManager.getPlayingAudioTrack() == mediaTrack) {
                         mediaPlayerManager.muteAudio();
                     }
-                    mediaPlayerManager.closeFloatingVideo(mediaTrack);
+                    mediaPlayerManager.closeFloatingPlayer(mediaTrack);
                     hide();
                 };
             });

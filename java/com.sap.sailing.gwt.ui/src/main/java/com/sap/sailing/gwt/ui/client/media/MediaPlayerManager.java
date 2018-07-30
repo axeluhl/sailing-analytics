@@ -26,7 +26,7 @@ public interface MediaPlayerManager {
     
     void playFloatingVideo(MediaTrack videoTrack);
     
-    void closeFloatingVideo(MediaTrack videoTrack);
+    void closeFloatingPlayer(MediaTrack videoTrack);
     
     void playDockedVideo(MediaTrack videoTrack);
     
