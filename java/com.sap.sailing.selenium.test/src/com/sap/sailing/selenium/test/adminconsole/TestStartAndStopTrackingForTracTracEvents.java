@@ -109,6 +109,6 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setReggataForTracking(idm2013Descriptor);
         tracTracEvents.setTrackSettings(false, false, false);
-        tracTracEvents.startTrackingForRaceAndAwaitBoatClassError(this.trackableRace);
+        tracTracEvents.startTrackingForRaceAndAwaitBoatClassError(this.trackableRace, IDM_2013_BOAT_CLASS);
     }
 }
