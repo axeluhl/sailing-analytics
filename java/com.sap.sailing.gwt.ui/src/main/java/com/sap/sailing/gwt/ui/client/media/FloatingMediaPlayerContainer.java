@@ -23,7 +23,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.WindowBox;
 import com.sap.sse.security.ui.client.UserService;
 
-public class FloatingMediaPlayerContainerContainer extends AbstractMediaContainer implements MediaPlayerContainer {
+public class FloatingMediaPlayerContainer extends AbstractMediaContainer implements MediaPlayerContainer {
     VideoContainerRessource res = GWT.create(VideoContainerRessource.class);
 
     private static final int MIN_WIDTH = 420;
@@ -32,7 +32,7 @@ public class FloatingMediaPlayerContainerContainer extends AbstractMediaContaine
     private final PopupPositionProvider popupPositionProvider;
     private Anchor edit;
 
-    public FloatingMediaPlayerContainerContainer(MediaSynchPlayer videoPlayer, PopupPositionProvider popupPositionProvider,
+    public FloatingMediaPlayerContainer(MediaSynchPlayer videoPlayer, PopupPositionProvider popupPositionProvider,
             UserService userservice, MediaServiceAsync mediaService, ErrorReporter errorReporter,
             PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
         super(new FlowPanel(), videoPlayer, popoutListener, playerCloseListener);
@@ -77,8 +77,8 @@ public class FloatingMediaPlayerContainerContainer extends AbstractMediaContaine
 
                     @Override
                     public void popout() {
-                        FloatingMediaPlayerContainerContainer.this.popoutListener
-                                .popoutVideo(FloatingMediaPlayerContainerContainer.this.mediaPlayer.getMediaTrack());
+                        FloatingMediaPlayerContainer.this.popoutListener
+                                .popoutVideo(FloatingMediaPlayerContainer.this.mediaPlayer.getMediaTrack());
                     }
                 });
         // values required for js and youtube player to stay useable
@@ -90,8 +90,8 @@ public class FloatingMediaPlayerContainerContainer extends AbstractMediaContaine
 
             @Override
             public void onClose(CloseEvent<PopupPanel> event) {
-                FloatingMediaPlayerContainerContainer.this.mediaPlayer.pauseMedia();
-                FloatingMediaPlayerContainerContainer.this.popupCloseListener.playerClosed();
+                FloatingMediaPlayerContainer.this.mediaPlayer.pauseMedia();
+                FloatingMediaPlayerContainer.this.popupCloseListener.playerClosed();
             }
 
         });

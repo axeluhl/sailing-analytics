@@ -395,13 +395,13 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         }
         MediaPlayerContainer activeVideoContainer = activePlayerContainers.get(videoTrack);
         if (activeVideoContainer == null) {
-            FloatingMediaPlayerContainerContainer videoFloatingContainer = createAndWrapVideoPlayer(videoTrack,
-                    new VideoContainerFactory<FloatingMediaPlayerContainerContainer>() {
+            FloatingMediaPlayerContainer videoFloatingContainer = createAndWrapVideoPlayer(videoTrack,
+                    new VideoContainerFactory<FloatingMediaPlayerContainer>() {
                         @Override
-                        public FloatingMediaPlayerContainerContainer createVideoContainer(MediaSynchPlayer videoPlayer,
+                        public FloatingMediaPlayerContainer createVideoContainer(MediaSynchPlayer videoPlayer,
                                 UserService userservice, MediaServiceAsync mediaService, ErrorReporter errorReporter,
                                 PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
-                            FloatingMediaPlayerContainerContainer videoFloatingContainer = new FloatingMediaPlayerContainerContainer(videoPlayer, popupPositionProvider,
+                            FloatingMediaPlayerContainer videoFloatingContainer = new FloatingMediaPlayerContainer(videoPlayer, popupPositionProvider,
                                     userservice, mediaService, errorReporter, playerCloseListener, popoutListener);
                             return videoFloatingContainer;
                         }
