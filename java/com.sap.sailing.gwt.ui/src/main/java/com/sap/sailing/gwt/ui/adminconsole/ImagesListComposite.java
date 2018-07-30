@@ -350,9 +350,14 @@ public class ImagesListComposite extends Composite {
         obj.put("Width", new JSONNumber(image.getWidthInPx()));
         obj.put("Date", new JSONNumber(image.getCreatedAtDate().getTime()));
         obj.put("Copyright", new JSONString(image.getCopyright()));
-        JSONObject tags = new JSONObject();
-        for(String tag : image.getTags()) {
-            tags.put(tag, JSONBoolean.getInstance(image.resizeForTag(tag)));
+        JSONObject doResizeMap = new JSONObject();
+        for(String doResize : image.getMap().keySet()) {
+            doResizeMap.put(doResize, JSONBoolean.getInstance(image.resizeForTag(doResize)));
+        }
+        obj.put("ResizeMap", doResizeMap);
+        JSONArray tags = new JSONArray();
+        for(int i = 0; i < image.getTags().size(); i++) {
+            tags.set(i, new JSONString(image.getTags().get(i)));
         }
         obj.put("Tags", tags);
         return obj.toString();
@@ -373,9 +378,9 @@ public class ImagesListComposite extends Composite {
                     for(int i = 0; i < images.size(); i++) {
                         ImageDTO image = new ImageDTO(images.get(i).isObject().get("URI").isString().stringValue(),new Date(Long.valueOf(images.get(i).isObject().get("Date").isNumber().toString())));
                         List<String> tags = new ArrayList<>();
-                        JSONObject jsonTags = images.get(i).isObject().get("Tags").isObject();
-                        for(String key : jsonTags.keySet()) {
-                            tags.add(key);
+                        JSONArray jsonTags = images.get(i).isObject().get("Tags").isArray();
+                        for(int j = 0; j < jsonTags.size(); j++) {
+                            tags.add(jsonTags.get(j).isString().stringValue());
                         }
                         image.setTags(tags);
                         image.setTitle(images.get(i).isObject().get("Title").isString().stringValue());

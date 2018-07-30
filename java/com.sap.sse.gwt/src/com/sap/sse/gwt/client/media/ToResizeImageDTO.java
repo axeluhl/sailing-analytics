@@ -18,4 +18,8 @@ public class ToResizeImageDTO extends ImageDTO {
     public boolean resizeForTag(String tag) {
         return toResizeMap.get(tag);
     }
+    
+    public Map<String, Boolean> getMap(){
+        return toResizeMap;
+    }
 }

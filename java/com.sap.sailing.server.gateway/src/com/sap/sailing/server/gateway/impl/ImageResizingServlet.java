@@ -38,17 +38,18 @@ public class ImageResizingServlet extends AbstractJsonHttpServlet {
         JSONArray toReturnArray = new JSONArray();
         if(obj != null) {
             String fileType = ((String)obj.get("URI")).substring(((String)obj.get("URI")).lastIndexOf(".")+1);
-            JSONObject tags = (JSONObject) obj.get("Tags");
+            JSONArray tags = (JSONArray) obj.get("Tags");
+            JSONObject resizeMap = (JSONObject) obj.get("ResizeMap");
             InputStream is = getInputStreamFromURIString(((String)obj.get("URI")));
             BufferedImage img = ImageConverter.isToBi(is);
             is.close();
             
-            for(Object tagKey : tags.keySet()) {
-                if((boolean) tags.get(tagKey)) {
+            for(Object tagKey : resizeMap.keySet()) {
+                if((boolean) resizeMap.get(tagKey)) {
                     resizeTags.add((String)tagKey);//size tags, that have the resize checkBox checked
-                }else if(tags.get(tagKey) != null){
+                }else{
                     notResizeSizeTags.add((String)tagKey);//size tags, that not have the resize checkBox checked
-                }//else all non-size tags
+                }
             }
             
             for(String resizeTag : resizeTags) {
@@ -58,10 +59,10 @@ public class ImageResizingServlet extends AbstractJsonHttpServlet {
                 for(String toDeleteTag : notResizeSizeTags) {//delete all size tags
                     tags.remove(toDeleteTag);
                 }
-                tags.put(resizeTag, "Done");//read the deleted specific size tag
+                tags.add(resizeTag);//read the deleted specific size tag
                 resizeAndAddToAr(img, toReturnArray, obj, resizeTag, fileType);
                 obj = getObjFromJSON(jsonString);//reset the object
-                tags = (JSONObject) obj.get("Tags");//and the tags
+                tags = (JSONArray) obj.get("Tags");//and the tags
             }
             if(notResizeSizeTags.isEmpty()) {//if there is no size tag that does not need a resize we can delete the original source
                 try {
@@ -78,10 +79,10 @@ public class ImageResizingServlet extends AbstractJsonHttpServlet {
                     for(String toDeleteTag : notResizeSizeTags) {//delete all size tags
                         tags.remove(toDeleteTag);
                     }
-                    tags.put(resizeTag, "Done");//re-add the deleted specific size tag
+                    tags.add(resizeTag);//re-add the deleted specific size tag
                     toReturnArray.add(obj);
                     obj = getObjFromJSON(jsonString);//reset the object for next size-tag-iteration
-                    tags = (JSONObject) obj.get("Tags");//and the tags
+                    tags = (JSONArray) obj.get("Tags");//and the tags
                 }
             }
             

@@ -14,7 +14,6 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -56,7 +55,7 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
 
     private AmazonS3Client createS3Client() throws InvalidPropertiesException {
         AWSCredentials creds;
-
+        
         // first try to use properties
         if (accessId.getValue() != null && accessKey.getValue() != null) {
             creds = new BasicAWSCredentials(accessId.getValue(), accessKey.getValue());
@@ -111,7 +110,7 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
 
     @Override
     public void removeFile(URI uri) throws InvalidPropertiesException, OperationFailedException {
-        String key = uri.getPath().substring(2+bucketName.getValue().length()); // remove 2 slashs and bucketName
+        String key = uri.getPath().substring(uri.getPath().lastIndexOf("/")+1);
         AmazonS3Client s3Client = createS3Client();
         try {
             s3Client.deleteObject(new DeleteObjectRequest(bucketName.getValue(), key));
@@ -125,8 +124,13 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
     public void testProperties() throws InvalidPropertiesException {
         AmazonS3Client s3 = createS3Client();
 
+        
+        if(bucketName.getValue().equals("")) {
+            throw new InvalidPropertiesException("empty bucketname is not allowed");
+        }
         // test if credentials are valid
         // TODO seems to even work if credentials are not valid if bucket is publicly visible
+        // Fix is probably available with doesBucketExistsV2 in a later version of amazons3 library
         try {
             s3.doesBucketExist(bucketName.getValue());
         } catch (Exception e) {
@@ -144,7 +148,7 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
 
     @Override
     public InputStream loadFile(URI uri) throws OperationFailedException, InvalidPropertiesException, IOException {
-        String key = uri.getPath().substring(2+bucketName.getValue().length());
+        String key = uri.getPath().substring(uri.getPath().lastIndexOf("/")+1);
         AmazonS3Client s3Client = createS3Client();
         return s3Client.getObject(bucketName.getValue(), key).getObjectContent();
     }

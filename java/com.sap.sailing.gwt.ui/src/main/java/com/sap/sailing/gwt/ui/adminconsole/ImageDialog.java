@@ -281,8 +281,6 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         for(int i= 0; i < doResize.size(); i++) {
             if(tags.get(i).equals(MediaTagConstants.LOGO) || tags.get(i).equals(MediaTagConstants.TEASER) || tags.get(i).equals(MediaTagConstants.STAGE) || tags.get(i).equals(MediaTagConstants.GALLERY)) {
                 map.put(tags.get(i), doResize.get(i).getValue());
-            }else {
-                map.put(tags.get(i),null);
             }
         }
         ImageDTO result = new ToResizeImageDTO(imageURLAndUploadComposite.getURL(), creationDate, map);
@@ -293,7 +291,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             result.setSizeInPx(widthInPxBox.getValue(), heightInPxBox.getValue());
         }
         result.setTags(tags);
-        return result;
+        return (ImageDTO)result;
     }
 
     @Override
