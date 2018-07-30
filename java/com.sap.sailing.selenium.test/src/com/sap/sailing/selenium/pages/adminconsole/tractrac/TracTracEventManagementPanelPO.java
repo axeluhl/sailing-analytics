@@ -1,6 +1,7 @@
 package com.sap.sailing.selenium.pages.adminconsole.tractrac;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -236,21 +237,15 @@ public class TracTracEventManagementPanelPO extends PageArea {
     }
     
     private void startTrackingForRaceInternal(TrackableRaceDescriptor race) {
-        //startTrackingForRaces(Arrays.asList(race));
-        CellTablePO<DataEntryPO> table = getTrackableRacesTable();
-        DataEntryPO entryToSelect = null;
-        for (DataEntryPO entry : table.getEntries()) {
-            TrackableRaceDescriptor entryDiscribtor = new TrackableRaceDescriptor(entry.getColumnContent("Event"),
-                    entry.getColumnContent("Race"), entry.getColumnContent("Boat Class"));
-            if (race.equals(entryDiscribtor)) {
-                entryToSelect = entry;
-                break;
-            }
-        }
-        table.selectEntry(entryToSelect);
+        startTrackingForRacesInternal(Collections.singletonList(race));
     }
     
     public void startTrackingForRaces(List<TrackableRaceDescriptor> races) {
+        startTrackingForRacesInternal(races);
+        startTrackingAndWaitForAjaxRequests();
+    }
+    
+    private void startTrackingForRacesInternal(List<TrackableRaceDescriptor> races) {
         List<TrackableRaceDescriptor> racesToProcess = new ArrayList<>(races);
         CellTablePO<DataEntryPO> table = getTrackableRacesTable();
         table.selectEntries(e -> racesToProcess.remove(new TrackableRaceDescriptor(e.getColumnContent("Event"),
@@ -258,7 +253,6 @@ public class TracTracEventManagementPanelPO extends PageArea {
         if(!racesToProcess.isEmpty()) {
             throw new IllegalStateException("Not all given races where selected");
         }
-        startTrackingAndWaitForAjaxRequests();
     }
     
     public void startTrackingForAllRaces() {
