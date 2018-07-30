@@ -230,10 +230,10 @@ public class TracTracEventManagementPanelPO extends PageArea {
         startTrackingAndWaitForAjaxRequests();
     }
     
-    public void startTrackingForRaceAndAwaitBoatClassError(TrackableRaceDescriptor race) {
+    public void startTrackingForRaceAndAwaitBoatClassError(TrackableRaceDescriptor race, String expectedBoatClass) {
         startTrackingForRaceInternal(race);
         startTracking();
-        waitForSelectedRacesContainDifferentBoatClassesError(race.boatClass);
+        waitForSelectedRacesContainDifferentBoatClassesError(expectedBoatClass);
     }
     
     private void startTrackingForRaceInternal(TrackableRaceDescriptor race) {
