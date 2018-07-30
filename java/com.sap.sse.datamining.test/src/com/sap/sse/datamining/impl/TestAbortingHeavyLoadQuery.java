@@ -85,7 +85,7 @@ public class TestAbortingHeavyLoadQuery {
     
     // Execution Recording Configuration -------------------------------------------------------------------------
     /** Enables concurrent logging of the query execution and prints the current record before assertions. */
-    private static final boolean RecordExecution = true;
+    private static final boolean RecordExecution = false;
     private static final SimpleDateFormat DateFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
     private ConcurrentLinkedQueue<String> executionRecord;
     //------------------------------------------------------------------------------------------------------------
