@@ -674,6 +674,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                           map.panTo(autoZoomLatLngBounds.getCenter());
                           autoZoomOut = false;
                       }
+                        redraw();
                   }
               });
               map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
