@@ -226,45 +226,39 @@ public class TracTracEventManagementPanelPO extends PageArea {
     }
     
     public void startTrackingForRace(TrackableRaceDescriptor race) {
-        startTrackingForRaceInternal(race);
-        startTrackingAndWaitForAjaxRequests();
+        startTrackingForRacesInternal(Collections.singletonList(race), null);
     }
     
     public void startTrackingForRaceAndAwaitBoatClassError(TrackableRaceDescriptor race, String expectedBoatClass) {
-        startTrackingForRaceInternal(race);
-        startTracking();
-        waitForSelectedRacesContainDifferentBoatClassesError(expectedBoatClass);
-    }
-    
-    private void startTrackingForRaceInternal(TrackableRaceDescriptor race) {
-        startTrackingForRacesInternal(Collections.singletonList(race));
+        startTrackingForRacesInternal(Collections.singletonList(race), expectedBoatClass);
     }
     
     public void startTrackingForRaces(List<TrackableRaceDescriptor> races) {
-        startTrackingForRacesInternal(races);
-        startTrackingAndWaitForAjaxRequests();
+        startTrackingForRacesInternal(races, null);
     }
     
-    private void startTrackingForRacesInternal(List<TrackableRaceDescriptor> races) {
+    private void startTrackingForRacesInternal(List<TrackableRaceDescriptor> races,
+            String expectedBoatClassErrorOrNull) {
         List<TrackableRaceDescriptor> racesToProcess = new ArrayList<>(races);
         CellTablePO<DataEntryPO> table = getTrackableRacesTable();
         table.selectEntries(e -> racesToProcess.remove(new TrackableRaceDescriptor(e.getColumnContent("Event"),
                 e.getColumnContent("Race"), e.getColumnContent("Boat Class"))));
-        if(!racesToProcess.isEmpty()) {
+        if (!racesToProcess.isEmpty()) {
             throw new IllegalStateException("Not all given races where selected");
+        }
+        this.startTracking();
+        if (expectedBoatClassErrorOrNull == null) {
+            waitForAjaxRequests();
+        } else {
+            waitForSelectedRacesContainDifferentBoatClassesError(expectedBoatClassErrorOrNull);
         }
     }
     
     public void startTrackingForAllRaces() {
         getTrackableRacesTable().selectAllEntries();
-        startTrackingAndWaitForAjaxRequests();
-    }
-    
-    private void startTrackingAndWaitForAjaxRequests() {
         startTracking();
         waitForAjaxRequests();
     }
-
 
     private void startTracking() {
         this.startTrackingButton.click();
