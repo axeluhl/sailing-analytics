@@ -54,12 +54,13 @@ import com.sap.sse.datamining.test.util.components.StatefulProcessorInstruction;
  * already scheduled instructions that may or may not have been started.<br>
  * <br>
  * The test is configurable regarding the number of threads for the executor, the number of data elements/heavy load
- * instructions, the duration of heavy load instructions and the time to wait before the query is aborted. Note that
- * the test can fail for some configurations, due to race conditions that would be very hard to check for.<br>
+ * instructions, the duration of heavy load instructions, the time to wait before the query is aborted and the time
+ * given to the executor to finish the remaining instructions. Note that the test can fail for some configurations, due
+ * to race conditions that would be very hard to check for.<br>
  * <br>
  * The test optionally records the process in order of the execution (using a concurrent message queue), which is
- * printed to the console before assertions are performed. This isn't used by the assertions, but can be used to get
- * a better understanding of what happens during the execution.<br>
+ * printed to the console before assertions are performed. This isn't used by the assertions, but can be used to get a
+ * better understanding of what happens during the execution.<br>
  * <br>
  * See {@link #initialize()} for more details about the processor chain.
  * 
@@ -81,6 +82,8 @@ public class TestAbortingHeavyLoadQuery {
     private static final long HeavyLoadInstructionDuration = 500;
     /** The number of milliseconds to wait before {@link Query#abort()} is called. */
     private static final long AbortQueryDelay = (long) (HeavyLoadInstructionDuration * 5.45);
+    /** The time given to the executor to complete all unfinished instructions */
+    private static final long TerminationTimeout = (long) (HeavyLoadInstructionDuration * 1.5);
     //------------------------------------------------------------------------------------------------------------
     
     // Execution Recording Configuration -------------------------------------------------------------------------
@@ -150,7 +153,7 @@ public class TestAbortingHeavyLoadQuery {
 
         // Execution of unfinished instructions
         executor.shutdown();
-        boolean terminated = executor.awaitTermination((long) (HeavyLoadInstructionDuration * 1.5), TimeUnit.MILLISECONDS);
+        boolean terminated = executor.awaitTermination(TerminationTimeout, TimeUnit.MILLISECONDS);
         printExecutionRecord();
         assertTrue("The executor didn't terminate in the given time", terminated);
         
@@ -330,9 +333,10 @@ public class TestAbortingHeavyLoadQuery {
                     
                     @Override
                     protected Iterable<Element> retrieveData(String element) {
-                        logExecution("Retrieving " + ExecutorPoolSize + " elements for " + element);
+                        int count = ExecutorPoolSize;
+                        logExecution("Retrieving " + count + " elements for " + element);
                         Collection<Element> data = new ArrayList<>();
-                        for (int i = 0; i < ExecutorPoolSize; i++) {
+                        for (int i = 0; i < count; i++) {
                             data.add(new Element(element, i));
                         }
                         return data;
