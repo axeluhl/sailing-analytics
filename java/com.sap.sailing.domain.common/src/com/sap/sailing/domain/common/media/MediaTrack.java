@@ -26,6 +26,10 @@ public class MediaTrack implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Deprecated
+    /**
+     * Deprecated, as the server only used undefined in all cases. Left in, to not break serialisation/storage
+     *
+     */
     public enum Status {
         UNDEFINED('?'), CANNOT_PLAY('-'), NOT_REACHABLE('#'), REACHABLE('+');
 
