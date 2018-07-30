@@ -10,7 +10,6 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -83,7 +82,6 @@ public class SettingsTest extends AbstractSeleniumTest {
      * settings and global settings.
      */
     @Test
-    @Ignore
     public void testRaceBoardPageSettingsStorage() throws InterruptedException, UnsupportedEncodingException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         EventConfigurationPanelPO events = adminConsole.goToEvents();
@@ -227,7 +225,6 @@ public class SettingsTest extends AbstractSeleniumTest {
      * Verifies that settings for different modes are distinct and do not have an effect on other modes. 
      */
     @Test
-    @Ignore
     public void testThatUserDefaultsForOneModeDoNotHaveAnEffectOnAnotherMode() throws InterruptedException, UnsupportedEncodingException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         EventConfigurationPanelPO events = adminConsole.goToEvents();
@@ -308,7 +305,6 @@ public class SettingsTest extends AbstractSeleniumTest {
      * Verifies that settings are stored for raceboard.
      */
     @Test
-    @Ignore
     public void testThatModeDependentSettingsAreStoredForOneMode() throws InterruptedException, UnsupportedEncodingException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         EventConfigurationPanelPO events = adminConsole.goToEvents();
