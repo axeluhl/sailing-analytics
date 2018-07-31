@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 class ManeuverTableData {
 
     private final String competitorName;
+    private final String competitorColor;
     private final Date timePoint;
     private final Date timePointBefore;
     private final ManeuverType maneuverType;
@@ -24,8 +25,9 @@ class ManeuverTableData {
     private final double directionChange;
     private final boolean markPassing;
 
-    ManeuverTableData(final CompetitorDTO competitor, final ManeuverDTO maneuver) {
+    ManeuverTableData(final CompetitorDTO competitor, final String competitorColor, final ManeuverDTO maneuver) {
         this.competitorName = competitor.getName();
+        this.competitorColor = competitorColor;
         this.timePoint = maneuver.getTimePoint();
         this.timePointBefore = maneuver.getTimePointBefore();
         this.maneuverType = maneuver.getType();
@@ -41,6 +43,10 @@ class ManeuverTableData {
 
     public String getCompetitorName() {
         return competitorName;
+    }
+
+    public String getCompetitorColor() {
+        return competitorColor;
     }
 
     public Date getTimePoint() {
