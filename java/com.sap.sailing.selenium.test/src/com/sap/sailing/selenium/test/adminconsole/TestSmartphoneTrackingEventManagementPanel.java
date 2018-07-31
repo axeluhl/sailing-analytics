@@ -15,9 +15,9 @@ import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfig
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO.RaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaDetailsCompositePO;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.SeriesEditDialogPO;
-import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.RaceColumnTableWrapperPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
@@ -132,11 +132,6 @@ public class TestSmartphoneTrackingEventManagementPanel extends AbstractSelenium
         tracTracEvents.listTrackableRaces(IDM_5O5_2013_JSON_URL);
         tracTracEvents.setReggataForTracking(this.regatta);
         tracTracEvents.setTrackSettings(false, false, false);
-        // TODO: There exists a bug in Selenium with key modifiers (Issue 3734 and 6817), so we can't use multi
-        //       selection (Firefox on Windows)
-        //tracTracEvents.startTrackingForRaces(this.trackableRaces);
-        for(TrackableRaceDescriptor race : this.trackableRaces) {
-            tracTracEvents.startTrackingForRace(race);
-        }
+        tracTracEvents.startTrackingForRaces(this.trackableRaces);
     }
 }
