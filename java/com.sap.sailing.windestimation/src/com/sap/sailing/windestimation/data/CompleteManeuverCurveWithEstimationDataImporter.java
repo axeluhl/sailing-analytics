@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.http.Header;
@@ -26,7 +27,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorTrackWithEstimationDataJsonSerializer;
+import com.sap.sailing.windestimation.data.deserializer.CompetitorTrackWithEstimationDataJsonDeserializer;
+import com.sap.sailing.windestimation.data.deserializer.ManeuverForClassificationJsonSerializer;
+import com.sap.sailing.windestimation.data.persistence.CompleteManeuverCurveEstimationDataPersistenceManager;
+import com.sap.sailing.windestimation.data.persistence.ManeuverForClassificationPersistenceManager;
 
 /**
  * 
@@ -35,14 +41,16 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorTrackWithEsti
  */
 public class CompleteManeuverCurveWithEstimationDataImporter {
 
-    public static final String REST_API_BASE_URL = "http://127.0.0.1:8888/sailingserver/api/v1";
+    public static final String REST_API_BASE_URL = "https://www.sapsailing.com/sailingserver/api/v1";
     public static final String REST_API_REGATTAS_PATH = "/regattas";
     public static final String REST_API_RACES_PATH = "/races";
     public static final String REST_API_ESTIMATION_DATA_PATH = "/completeManeuverCurvesWithEstimationData";
-    private final EstimationDataPersistenceManager persistanceManager;
+    private final CompleteManeuverCurveEstimationDataPersistenceManager completeManeuverCurvePersistanceManager;
+    private final ManeuverForClassificationPersistenceManager maneuverForClassificationPersistenceManager;
 
     public CompleteManeuverCurveWithEstimationDataImporter() throws UnknownHostException {
-        this.persistanceManager = new EstimationDataPersistenceManager();
+        this.completeManeuverCurvePersistanceManager = new CompleteManeuverCurveEstimationDataPersistenceManager();
+        this.maneuverForClassificationPersistenceManager = new ManeuverForClassificationPersistenceManager();
     }
 
     public HttpClient createNewHttpClient() {
@@ -61,7 +69,8 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
             throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         LoggingUtil.logInfo("Importer for CompleteManeuverCurveWithEstimationData just started");
         LoggingUtil.logInfo("Dropping old database");
-        persistanceManager.dropDb();
+        completeManeuverCurvePersistanceManager.dropDb();
+        maneuverForClassificationPersistenceManager.dropDb();
         LoggingUtil.logInfo("Fetching all existing regatta names");
         ImportStatistics importStatistics = new ImportStatistics();
         HttpGet getAllRegattas = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH);
@@ -157,21 +166,45 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
         JSONObject resultJson;
         try {
             resultJson = (JSONObject) getJsonFromResponse(httpResponse);
-        } catch(Exception e) {
+        } catch (Exception e) {
             System.out.println(getEstimationData);
             throw e;
         }
         List<JSONObject> competitorTracks = new ArrayList<>();
         int maneuversCount = 0;
-        for (Object competitorTrackJson : (JSONArray) resultJson.get(CompetitorTrackWithEstimationDataJsonSerializer.BYCOMPETITOR)) {
+        CompetitorTrackWithEstimationDataJsonDeserializer<CompleteManeuverCurveWithEstimationData> competitorTrackWithEstimationDataJsonDeserializer = completeManeuverCurvePersistanceManager
+                .getNewCompetitorTrackWithEstimationDataJsonDeserializer();
+        List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> competitorTracksWithEstimationData = new ArrayList<>();
+        for (Object competitorTrackJson : (JSONArray) resultJson
+                .get(CompetitorTrackWithEstimationDataJsonSerializer.BYCOMPETITOR)) {
             JSONObject competitorTrack = (JSONObject) competitorTrackJson;
-            JSONArray maneuverCurves = (JSONArray) competitorTrack.get(CompetitorTrackWithEstimationDataJsonSerializer.ELEMENTS);
+            JSONArray maneuverCurves = (JSONArray) competitorTrack
+                    .get(CompetitorTrackWithEstimationDataJsonSerializer.ELEMENTS);
             if (!maneuverCurves.isEmpty()) {
                 competitorTracks.add(competitorTrack);
+                CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithEstimationData = competitorTrackWithEstimationDataJsonDeserializer
+                        .deserialize(competitorTrack);
+                competitorTracksWithEstimationData.add(competitorTrackWithEstimationData);
                 maneuversCount += maneuverCurves.size();
             }
         }
-        persistanceManager.addRace(regattaName, trackedRaceName, competitorTracks);
+        completeManeuverCurvePersistanceManager.addRace(regattaName, trackedRaceName, competitorTracks);
+        List<CompetitorTrackWithEstimationData<ManeuverForClassification>> competitorTracksWithManeuversForClassification = EstimationDataUtil
+                .getCompetitorTracksWithManeuversForClassification(competitorTracksWithEstimationData);
+        Iterator<CompetitorTrackWithEstimationData<ManeuverForClassification>> competitorTracksWithManeuversForClassificationIterator = competitorTracksWithManeuversForClassification
+                .iterator();
+        ManeuverForClassificationJsonSerializer maneuverForClassificationJsonSerializer = new ManeuverForClassificationJsonSerializer();
+        for (JSONObject jsonCompetitorTrack : competitorTracks) {
+            CompetitorTrackWithEstimationData<ManeuverForClassification> competitorTrackWithEstimationData = competitorTracksWithManeuversForClassificationIterator
+                    .next();
+            JSONArray jsonManeuvers = new JSONArray();
+            for (ManeuverForClassification maneuver : competitorTrackWithEstimationData.getElements()) {
+                JSONObject jsonManeuver = maneuverForClassificationJsonSerializer.serialize(maneuver);
+                jsonManeuvers.add(jsonManeuver);
+            }
+            jsonCompetitorTrack.put(CompetitorTrackWithEstimationDataJsonSerializer.ELEMENTS, jsonManeuvers);
+        }
+        maneuverForClassificationPersistenceManager.addRace(encodedRegattaName, trackedRaceName, competitorTracks);
         LoggingUtil.logInfo(
                 "Imported " + competitorTracks.size() + " competitor tracks with " + maneuversCount + " maneuvers");
         importStatistics.competitorTracksCount += competitorTracks.size();

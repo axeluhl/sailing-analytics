@@ -8,9 +8,9 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
     private final double speedLossRatio;
     private final double speedGainRatio;
     private final double maximalTurningRateInDegreesPerSecond;
-    private final double deviationFromOptimalTackAngleInDegrees;
-    private final double deviationFromOptimalJibeAngleInDegrees;
-    private final double highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees;
+    private final Double deviationFromOptimalTackAngleInDegrees;
+    private final Double deviationFromOptimalJibeAngleInDegrees;
+    private final Double highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees;
     private final double mainCurveDurationInSeconds;
     private final double maneuverDurationInSeconds;
     private final double recoveryPhaseDurationInSeconds;
@@ -19,8 +19,8 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
     public ManeuverForClassificationImpl(ManeuverTypeForClassification maneuverType,
             double absoluteTotalCourseChangeInDegrees, double oversteeringInDegrees, double speedLossRatio,
             double speedGainRatio, double maximalTurningRateInDegreesPerSecond,
-            double deviationFromOptimalTackAngleInDegrees, double deviationFromOptimalJibeAngleInDegrees,
-            double highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
+            Double deviationFromOptimalTackAngleInDegrees, Double deviationFromOptimalJibeAngleInDegrees,
+            Double highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
             double mainCurveDurationInSeconds, double maneuverDurationInSeconds, double recoveryPhaseDurationInSeconds,
             double timeLossInSeconds) {
         this.maneuverType = maneuverType;
@@ -64,12 +64,12 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
     }
 
     @Override
-    public double getDeviationFromOptimalTackAngleInDegrees() {
+    public Double getDeviationFromOptimalTackAngleInDegrees() {
         return deviationFromOptimalTackAngleInDegrees;
     }
 
     @Override
-    public double getDeviationFromOptimalJibeAngleInDegrees() {
+    public Double getDeviationFromOptimalJibeAngleInDegrees() {
         return deviationFromOptimalJibeAngleInDegrees;
     }
 
@@ -99,7 +99,7 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
     }
 
     @Override
-    public double getHighestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees() {
+    public Double getHighestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees() {
         return highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees;
     }
 

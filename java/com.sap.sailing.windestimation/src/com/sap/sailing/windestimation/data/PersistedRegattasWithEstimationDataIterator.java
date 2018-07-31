@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.sap.sailing.windestimation.data.persistence.EstimationDataPersistenceManager;
+
 /**
  * 
  * @author Vladislav Chumak (D069712)
@@ -14,7 +16,7 @@ public class PersistedRegattasWithEstimationDataIterator<T> implements Iterator<
     private PersistedRacesWithEstimationDataIterator<T> racesIterator;
     private RaceWithEstimationData<T> nextRegatta;
 
-    public PersistedRegattasWithEstimationDataIterator(EstimationDataPersistenceManager persistenceManager) {
+    public PersistedRegattasWithEstimationDataIterator(EstimationDataPersistenceManager<T> persistenceManager) {
         racesIterator = new PersistedRacesWithEstimationDataIterator<T>(persistenceManager);
         nextRegatta = racesIterator.next();
     }

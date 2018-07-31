@@ -3,11 +3,11 @@ package com.sap.sailing.windestimation.data.deserializer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.mongodb.BasicDBList;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -49,15 +49,13 @@ public class CompetitorTrackWithEstimationDataJsonDeserializer<T>
                 .get(CompetitorTrackWithEstimationDataJsonSerializer.DISTANCE_TRAVELLED_IN_METERS);
         Long startUnixTime = (Long) jsonObject.get(CompetitorTrackWithEstimationDataJsonSerializer.START_TIME_POINT);
         Long endUnixTime = (Long) jsonObject.get(CompetitorTrackWithEstimationDataJsonSerializer.END_TIME_POINT);
-        Double fixedCountForPolars = (Double) jsonObject
+        Long fixedCountForPolars = (Long) jsonObject
                 .get(CompetitorTrackWithEstimationDataJsonSerializer.FIXES_COUNT_FOR_POLARS);
-        Integer markPassingsCount = (Integer) jsonObject
+        Long markPassingsCount = (Long) jsonObject
                 .get(CompetitorTrackWithEstimationDataJsonSerializer.MARK_PASSINGS_COUNT);
-        Integer waypointsCount = (Integer) jsonObject
-                .get(CompetitorTrackWithEstimationDataJsonSerializer.WAYPOINTS_COUNT);
+        Long waypointsCount = (Long) jsonObject.get(CompetitorTrackWithEstimationDataJsonSerializer.WAYPOINTS_COUNT);
 
-        BasicDBList elementsJson = (BasicDBList) jsonObject
-                .get(CompetitorTrackWithEstimationDataJsonSerializer.ELEMENTS);
+        JSONArray elementsJson = (JSONArray) jsonObject.get(CompetitorTrackWithEstimationDataJsonSerializer.ELEMENTS);
         List<T> completeManeuverCurves = new ArrayList<>(elementsJson.size());
         for (Object maneuverCurveObj : elementsJson) {
             T elements;
@@ -73,7 +71,7 @@ public class CompetitorTrackWithEstimationDataJsonDeserializer<T>
                 competitorName, boatClass, completeManeuverCurves, avgIntervalBetweenFixesInSeconds,
                 distanceTravelledInMeters == null ? Distance.NULL : new MeterDistance(distanceTravelledInMeters),
                 startUnixTime == null ? null : new MillisecondsTimePoint(startUnixTime),
-                endUnixTime == null ? null : new MillisecondsTimePoint(endUnixTime), fixedCountForPolars.longValue(),
+                endUnixTime == null ? null : new MillisecondsTimePoint(endUnixTime), fixedCountForPolars,
                 markPassingsCount.intValue(), waypointsCount.intValue());
         return competitorTrackWithEstimationData;
     }

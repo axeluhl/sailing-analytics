@@ -2,17 +2,20 @@ package com.sap.sailing.windestimation.data;
 
 import java.util.Iterator;
 
+import com.sap.sailing.windestimation.data.persistence.EstimationDataPersistenceManager;
+
 /**
  * 
  * @author Vladislav Chumak (D069712)
  *
  */
-public class PersistedCompetitorTrackWithEstimationDataIterator<T> implements Iterator<CompetitorTrackWithEstimationData<T>> {
+public class PersistedCompetitorTrackWithEstimationDataIterator<T>
+        implements Iterator<CompetitorTrackWithEstimationData<T>> {
 
     private final PersistedRacesWithEstimationDataIterator<T> racesIterator;
     private Iterator<CompetitorTrackWithEstimationData<T>> competitorTracksIteratorOfCurrentRace = null;
 
-    public PersistedCompetitorTrackWithEstimationDataIterator(EstimationDataPersistenceManager persistenceManager) {
+    public PersistedCompetitorTrackWithEstimationDataIterator(EstimationDataPersistenceManager<T> persistenceManager) {
         racesIterator = new PersistedRacesWithEstimationDataIterator<>(persistenceManager);
     }
 

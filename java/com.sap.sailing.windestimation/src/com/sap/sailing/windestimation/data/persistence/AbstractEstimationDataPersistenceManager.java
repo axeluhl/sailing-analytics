@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.data;
+package com.sap.sailing.windestimation.data.persistence;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -16,14 +16,9 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.util.JSON;
-import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.impl.CompleteManeuverCurveWithEstimationDataJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.DetailedBoatClassJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.ManeuverMainCurveWithEstimationDataJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.ManeuverWindJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
+import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
+import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.deserializer.CompetitorTrackWithEstimationDataJsonDeserializer;
 
 /**
@@ -31,7 +26,7 @@ import com.sap.sailing.windestimation.data.deserializer.CompetitorTrackWithEstim
  * @author Vladislav Chumak (D069712)
  *
  */
-public class EstimationDataPersistenceManager {
+public abstract class AbstractEstimationDataPersistenceManager<T> implements EstimationDataPersistenceManager<T> {
 
     private static final int DB_PORT = 27017;
     private static final String DB_HOST = "127.0.0.1";
@@ -40,18 +35,16 @@ public class EstimationDataPersistenceManager {
     private static final String FIELD_COMPETITOR_TRACKS = "competitorTracks";
     private static final String FIELD_TRACKED_RACE_NAME = "trackedRaceName";
     private static final String FIELD_REGATTA_NAME = "regattaName";
-    private static final String COLLECTION_RACES = "races";
     private final DB db;
-    private final CompleteManeuverCurveWithEstimationDataJsonDeserializer completeManeuverCurveDeserializer = new CompleteManeuverCurveWithEstimationDataJsonDeserializer(
-            new ManeuverMainCurveWithEstimationDataJsonDeserializer(),
-            new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer(),
-            new ManeuverWindJsonDeserializer(), new PositionJsonDeserializer());
-    private final DetailedBoatClassJsonDeserializer boatClassDeserializer = new DetailedBoatClassJsonDeserializer();
     private final JSONParser jsonParser = new JSONParser();
-    private final CompetitorTrackWithEstimationDataJsonDeserializer<CompleteManeuverCurveWithEstimationData> competitorTrackWithEstimationDataJsonDeserializer = new CompetitorTrackWithEstimationDataJsonDeserializer<>(
-            boatClassDeserializer, completeManeuverCurveDeserializer);
+    private final CompetitorTrackWithEstimationDataJsonDeserializer<T> competitorTrackWithEstimationDataJsonDeserializer;
 
-    public EstimationDataPersistenceManager() throws UnknownHostException {
+    public abstract String getCollectionName();
+
+    public abstract CompetitorTrackWithEstimationDataJsonDeserializer<T> getNewCompetitorTrackWithEstimationDataJsonDeserializer();
+
+    public AbstractEstimationDataPersistenceManager() throws UnknownHostException {
+        this.competitorTrackWithEstimationDataJsonDeserializer = getNewCompetitorTrackWithEstimationDataJsonDeserializer();
         db = new MongoClient(DB_HOST, DB_PORT).getDB(DB_NAME);
     }
 
@@ -69,32 +62,32 @@ public class EstimationDataPersistenceManager {
         dbObject.put(FIELD_REGATTA_NAME, regattaName);
         dbObject.put(FIELD_TRACKED_RACE_NAME, trackedRaceName);
         dbObject.put(FIELD_COMPETITOR_TRACKS, dbCompetitorTracks);
-        DBCollection races = db.getCollection(COLLECTION_RACES);
+        DBCollection races = db.getCollection(getCollectionName());
         races.insert(dbObject);
     }
 
     public long countRacesWithEstimationData() {
-        return db.getCollection(COLLECTION_RACES).count();
+        return db.getCollection(getCollectionName()).count();
     }
 
-    public RaceWithEstimationData<CompleteManeuverCurveWithEstimationData> getNextRaceWithEstimationData(String lastId)
+    public RaceWithEstimationData<T> getNextRaceWithEstimationData(String lastId)
             throws JsonDeserializationException, ParseException {
-        RaceWithEstimationData<CompleteManeuverCurveWithEstimationData> raceWithEstimationData = null;
+        RaceWithEstimationData<T> raceWithEstimationData = null;
         BasicDBObject gtQuery = null;
         if (lastId != null) {
             gtQuery = new BasicDBObject();
             gtQuery.put("_id", new BasicDBObject("$gt", new ObjectId(lastId)));
         }
-        DBObject dbObject = db.getCollection(COLLECTION_RACES).findOne(gtQuery);
+        DBObject dbObject = db.getCollection(getCollectionName()).findOne(gtQuery);
         if (dbObject != null) {
             ObjectId dbId = (ObjectId) dbObject.get(FIELD_DB_ID);
             String regattaName = (String) dbObject.get(FIELD_REGATTA_NAME);
             String raceName = (String) dbObject.get(FIELD_TRACKED_RACE_NAME);
             BasicDBList competitorTracks = (BasicDBList) dbObject.get(FIELD_COMPETITOR_TRACKS);
-            List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> competitorTracksWithEstimationData = new ArrayList<>(
+            List<CompetitorTrackWithEstimationData<T>> competitorTracksWithEstimationData = new ArrayList<>(
                     competitorTracks.size());
             for (Object competitorTrackObj : competitorTracks) {
-                CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithEstimationData = competitorTrackWithEstimationDataJsonDeserializer
+                CompetitorTrackWithEstimationData<T> competitorTrackWithEstimationData = competitorTrackWithEstimationDataJsonDeserializer
                         .deserialize(getJSONObject(competitorTrackObj.toString()));
                 competitorTracksWithEstimationData.add(competitorTrackWithEstimationData);
             }

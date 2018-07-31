@@ -5,6 +5,7 @@ import java.util.Iterator;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.windestimation.data.persistence.EstimationDataPersistenceManager;
 
 /**
  * 
@@ -13,14 +14,14 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
  */
 public class PersistedRacesWithEstimationDataIterator<T> implements Iterator<RaceWithEstimationData<T>> {
 
-    private final EstimationDataPersistenceManager persistenceManager;
+    private final EstimationDataPersistenceManager<T> persistenceManager;
     private String lastDbId = null;
     private RaceWithEstimationData<T> nextRaceWithEstimationData = null;
     private final long numberOfRaces;
     private long currentRaceNumber = 0;
     private int numberOfCharsDuringLastStatusLog = 0;
 
-    public PersistedRacesWithEstimationDataIterator(EstimationDataPersistenceManager persistenceManager) {
+    public PersistedRacesWithEstimationDataIterator(EstimationDataPersistenceManager<T> persistenceManager) {
         this.persistenceManager = persistenceManager;
         numberOfRaces = persistenceManager.countRacesWithEstimationData();
         LoggingUtil.logInfo(numberOfRaces + " races found in MongoDB");
@@ -45,7 +46,7 @@ public class PersistedRacesWithEstimationDataIterator<T> implements Iterator<Rac
         numberOfCharsDuringLastStatusLog = LoggingUtil.logInfo("Loading race " + nextRaceNumber + "/" + numberOfRaces
                 + " (" + (nextRaceNumber * 100 / numberOfRaces) + " %)");
         try {
-            nextRaceWithEstimationData = (RaceWithEstimationData<T>) persistenceManager.getNextRaceWithEstimationData(lastDbId);
+            nextRaceWithEstimationData = persistenceManager.getNextRaceWithEstimationData(lastDbId);
             if (nextRaceWithEstimationData != null) {
                 this.lastDbId = nextRaceWithEstimationData.getDbId();
                 this.currentRaceNumber = nextRaceNumber;
@@ -54,7 +55,7 @@ public class PersistedRacesWithEstimationDataIterator<T> implements Iterator<Rac
             throw new RuntimeException(e);
         }
     }
-    
+
     public long getNumberOfRaces() {
         return numberOfRaces;
     }

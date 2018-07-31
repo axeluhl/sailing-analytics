@@ -122,40 +122,59 @@ public class EstimationDataUtil {
         return competitorTracks;
     }
 
-    public static ManeuverForClassification getManeuverForClassification(CompleteManeuverCurveWithEstimationData maneuver) {
+    public static ManeuverForClassification getManeuverForClassification(
+            CompleteManeuverCurveWithEstimationData maneuver) {
         ManeuverTypeForClassification maneuverType = getManeuverTypeForClassification(maneuver);
         double absoluteTotalCourseChangeInDegrees = Math
                 .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees());
-        double oversteeringInDegrees = Math.abs(maneuver.getCurveWithUnstableCourseAndSpeed()
-                .getSpeedWithBearingAfter().getBearing()
-                .getDifferenceTo(maneuver.getMainCurve().getSpeedWithBearingAfter().getBearing()).getDegrees());
-        double speedLossRatio = maneuver.getCurveWithUnstableCourseAndSpeed().getLowestSpeed().getKnots()
-                / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots();
-        double speedGainRatio = maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots()
-                / maneuver.getMainCurve().getHighestSpeed().getKnots();
-        double deviationFromOptimalTackAngleInDegrees = Math
-                .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees())
-                - maneuver.getTargetTackAngleInDegrees();
-        double deviationFromOptimalJibeAngleInDegrees = Math
-                .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees())
-                - maneuver.getTargetJibeAngleInDegrees();
-        double highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees = Math
-                .abs(maneuver.getRelativeBearingToNextMarkBeforeManeuver().getDegrees()) > Math
-                        .abs(maneuver.getRelativeBearingToNextMarkAfterManeuver().getDegrees())
-                                ? Math.abs(maneuver.getRelativeBearingToNextMarkBeforeManeuver().getDegrees())
-                                : Math.abs(maneuver.getRelativeBearingToNextMarkAfterManeuver().getDegrees());
+        double oversteeringInDegrees = Math
+                .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing()
+                        .getDifferenceTo(maneuver.getMainCurve().getSpeedWithBearingAfter().getBearing()).getDegrees());
+        double speedLossRatio = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots() > 0
+                ? maneuver.getCurveWithUnstableCourseAndSpeed().getLowestSpeed().getKnots()
+                        / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots()
+                : 0;
+        double speedGainRatio = maneuver.getMainCurve().getHighestSpeed().getKnots() > 0
+                ? maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots()
+                        / maneuver.getMainCurve().getHighestSpeed().getKnots()
+                : 0;
+        Double deviationFromOptimalTackAngleInDegrees = maneuver.getTargetTackAngleInDegrees() == null ? null
+                : Math.abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees())
+                        - maneuver.getTargetTackAngleInDegrees();
+        Double deviationFromOptimalJibeAngleInDegrees = maneuver.getTargetJibeAngleInDegrees() == null ? null
+                : Math.abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees())
+                        - maneuver.getTargetJibeAngleInDegrees();
+        Double highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees;
+        if (maneuver.getRelativeBearingToNextMarkBeforeManeuver() == null
+                && maneuver.getRelativeBearingToNextMarkAfterManeuver() == null) {
+            highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees = null;
+        } else if (maneuver.getRelativeBearingToNextMarkBeforeManeuver() == null) {
+            highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees = Math
+                    .abs(maneuver.getRelativeBearingToNextMarkAfterManeuver().getDegrees());
+        } else if (maneuver.getRelativeBearingToNextMarkAfterManeuver() == null) {
+            highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees = Math
+                    .abs(maneuver.getRelativeBearingToNextMarkBeforeManeuver().getDegrees());
+        } else {
+            highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees = Math
+                    .abs(maneuver.getRelativeBearingToNextMarkBeforeManeuver().getDegrees()) > Math
+                            .abs(maneuver.getRelativeBearingToNextMarkAfterManeuver().getDegrees())
+                                    ? Math.abs(maneuver.getRelativeBearingToNextMarkBeforeManeuver().getDegrees())
+                                    : Math.abs(maneuver.getRelativeBearingToNextMarkAfterManeuver().getDegrees());
+        }
         double mainCurveDurationInSeconds = maneuver.getMainCurve().getDuration().asSeconds();
-        double maneuverDurationInSeconds = maneuver.getCurveWithUnstableCourseAndSpeed().getDuration()
-                .asSeconds();
+        double maneuverDurationInSeconds = maneuver.getCurveWithUnstableCourseAndSpeed().getDuration().asSeconds();
         double recoveryPhaseDurationInSeconds = maneuver.getMainCurve().getTimePointAfter()
                 .until(maneuver.getCurveWithUnstableCourseAndSpeed().getTimePointAfter()).asSeconds();
-        double timeLossInSeconds = maneuver.getCurveWithUnstableCourseAndSpeed().getDistanceLost().getMeters()
-                / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore()
-                        .getMetersPerSecond();
+        double timeLossInSeconds = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore()
+                .getMetersPerSecond() > 0
+                        ? maneuver.getCurveWithUnstableCourseAndSpeed().getDistanceLost().getMeters()
+                                / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore()
+                                        .getMetersPerSecond()
+                        : 0;
         ManeuverForClassification maneuverForClassification = new ManeuverForClassificationImpl(maneuverType,
                 absoluteTotalCourseChangeInDegrees, oversteeringInDegrees, speedLossRatio, speedGainRatio,
-                maneuver.getMainCurve().getMaxTurningRateInDegreesPerSecond(),
-                deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees,
+                maneuver.getMainCurve().getMaxTurningRateInDegreesPerSecond(), deviationFromOptimalTackAngleInDegrees,
+                deviationFromOptimalJibeAngleInDegrees,
                 highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
                 mainCurveDurationInSeconds, maneuverDurationInSeconds, recoveryPhaseDurationInSeconds,
                 timeLossInSeconds);
