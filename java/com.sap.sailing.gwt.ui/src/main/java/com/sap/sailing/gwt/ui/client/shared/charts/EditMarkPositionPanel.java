@@ -66,7 +66,6 @@ import com.google.gwt.maps.client.events.rightclick.RightClickMapHandler;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -99,6 +98,7 @@ import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
@@ -773,14 +773,14 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
             sailingService.checkIfRaceIsTracking(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    Window.alert(stringMessages.serverError());
+                    Notification.notify(stringMessages.serverError(), Notification.NotificationType.ERROR);
                     continuation.run();
                 }
 
                 @Override
                 public void onSuccess(Boolean result) {
                     if (Boolean.FALSE.equals(result)) {
-                        Window.alert(stringMessages.positionEditOnNonTrackingRace());
+                        Notification.notify(stringMessages.positionEditOnNonTrackingRace(), Notification.NotificationType.WARNING);
                         nonTrackingWarningWasDisplayed = true;
                     }
                     continuation.run();

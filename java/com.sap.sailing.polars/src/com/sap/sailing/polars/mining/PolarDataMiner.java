@@ -288,7 +288,7 @@ public class PolarDataMiner {
         } else if (legType.equals(LegType.DOWNWIND)) {
             CubicEquation downWindEquation = new CubicEquation(0.0003, -0.0373, 1.5213, -2.1309
                     - speedOverGround.getKnots());
-            int angle = 30 * tackFactor;
+            int angle = 150 * tackFactor;
             solveAndAddResults(resultSet, downWindEquation, angle);
         }
         return resultSet;

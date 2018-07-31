@@ -26,7 +26,7 @@ public class CompetitorOfRaceInLeaderboardRetrievalProcessor extends
         for (RaceColumn raceColumn : element.getLeaderboard().getRaceColumns()) {
             for (Competitor competitor : element.getLeaderboard().getCompetitors()) {
                 HasRaceResultOfCompetitorContext raceResultOfCompetitorContext = new RaceResultOfCompetitorWithContext(element, raceColumn, competitor,
-                		element.getPolarDataService());
+                		element.getLeaderboardGroupContext().getPolarDataService());
                 raceResultsOfCompetitor.add(raceResultOfCompetitorContext);
             }
         }

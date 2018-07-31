@@ -19,7 +19,7 @@ public class TestParallelAveragingProcessors extends AbstractTestParallelAveragi
     @Test
     public void testAverageAggregationProcessor() throws InterruptedException {
         Processor<GroupedDataEntry<Number>, Map<GroupKey, AverageWithStats<Number>>> averageAggregationProcessor = ParallelGroupedNumberDataAverageAggregationProcessor
-                .getDefinition().construct(ConcurrencyTestsUtil.getExecutor(), receivers);
+                .getDefinition().construct(ConcurrencyTestsUtil.getSharedExecutor(), receivers);
         Collection<GroupedDataEntry<Number>> elements = createElements();
         ConcurrencyTestsUtil.processElements(averageAggregationProcessor, elements);
         averageAggregationProcessor.finish();
