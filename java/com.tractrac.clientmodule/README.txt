@@ -17,10 +17,38 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.11.0 ***************
+********************************************
+This is a final version. It changes the implementation of the IRaceSubscriber interface,
+breaking the backward compatibility:
+
+ - The methods IRaceSubscriber.subscribeRoutes() and IRaceSubscriber.unsubscribeRoutes()
+ have been removed.
+ - The IRoutesListener has been removed.
+ - The IControlRouteChangeListener has been extended adding a new method to get updates
+ of a IPathRoute. If you are managing "sailing events" this method will never be invoked.
+ - When any of the attributes of the route is updated, will be notified using the
+ IRaceSubscriber.subscribeRouteChanges(IControlRouteChangeListener) method
+
+Release date: 30/07/2018
+Build number: 416b827959b696583cce509ac39b7fd64aaefe9b
+
+ 1) Features
+
+ - Merging the subscriptions IRaceSubscriber.subscribeRouteChanges and IRaceSubscriber.subscribeRoutes
+ in the same method (Requested by Axel Uhl, 23/07/2018)
+
+ 2) Bugs
+
+  - When the client is offline, if it tries to load a race it gets a RaceLoadingException. But then,
+  when the client is online again, it can't reuse the same race because it is in an internal wrong
+  status (Reported by Thomas Scott, 19/06/2018)
+
+********************************************
 ************* TracAPI 3.10.1 ***************
 ********************************************
- This is a final version.It fixes bugs in the implementation and it adds a some features.
- It keeps the backward compatibility.
+This is a final version.It fixes bugs in the implementation and it adds a some features.
+It keeps the backward compatibility:
 
  Release date: 28/06/2018
  Build number: 35a26e503339fff26fe984617e5190a18438e10b
@@ -35,7 +63,7 @@ It contains also some files:
  when the client is online again, it can't reuse the same race because it is in an internal wrong
  status (Reported by Thomas Scott, 19/06/2018)
  - The live delay is not propagated (sometimes). This feature has been reimplemented and now the
- value is attached and send with the race object using the same approach used to transmit the race
+ value is attached and sent with the race object using the same approach used to transmit the race
  start time or the tracking start time (Reported by Axel Uhl, 19/06/2018)
 
 ********************************************
