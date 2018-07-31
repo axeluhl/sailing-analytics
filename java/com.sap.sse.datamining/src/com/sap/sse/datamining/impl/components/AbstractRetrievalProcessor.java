@@ -38,6 +38,9 @@ public abstract class AbstractRetrievalProcessor<InputType, ResultType> extends 
             @Override
             public ResultType computeResult() {
                 for (ResultType retrievedElement : retrieveData(element)) {
+                    if (isAborted()) {
+                        break;
+                    }
                     retrievedDataAmount.incrementAndGet();
                     forwardResultToReceivers(retrievedElement);
                 }
