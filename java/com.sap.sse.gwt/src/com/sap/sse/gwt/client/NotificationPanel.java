@@ -48,7 +48,7 @@ public class NotificationPanel {
             @Override
             public void onPreviewNativeEvent(NativePreviewEvent event) {
                 Element target = Element.as(event.getNativeEvent().getEventTarget());
-                if (target == panel.getElement()) {
+                if (event.getTypeInt() == Event.ONCLICK && target == panel.getElement()) {
                     animation.cancel();
                 }
             }
@@ -71,7 +71,7 @@ public class NotificationPanel {
                     double relPr = (progress - FADE_OUT_PERCENT) / (1 - FADE_OUT_PERCENT);
                     panel.getElement().getStyle().setOpacity(1 - relPr);
                 } else {
-                    panel.getElement().getStyle().setOpacity(1);
+                    panel.getElement().getStyle().clearOpacity();
                 }
             }
 
