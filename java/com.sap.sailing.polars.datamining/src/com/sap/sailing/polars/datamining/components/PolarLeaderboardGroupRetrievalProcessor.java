@@ -1,9 +1,11 @@
 package com.sap.sailing.polars.datamining.components;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.polars.datamining.data.HasLeaderboardGroupPolarContext;
 import com.sap.sailing.polars.datamining.data.impl.LeaderboardGroupWithPolarContext;
 import com.sap.sailing.server.RacingEventService;
@@ -19,11 +21,14 @@ public class PolarLeaderboardGroupRetrievalProcessor extends AbstractRetrievalPr
 
     @Override
     protected Iterable<HasLeaderboardGroupPolarContext> retrieveData(RacingEventService element) {
-        return element.getLeaderboardGroups()
-                .values()
-                .stream()
-                .map(lg -> new LeaderboardGroupWithPolarContext(lg))
-                .collect(Collectors.toSet());
+        Set<HasLeaderboardGroupPolarContext> data = new HashSet<>();
+        for (LeaderboardGroup leaderboardGroup : element.getLeaderboardGroups().values()) {
+            if (isAborted()) {
+                break;
+            }
+            data.add(new LeaderboardGroupWithPolarContext(leaderboardGroup));
+        }
+        return data;
     }
 
 }
