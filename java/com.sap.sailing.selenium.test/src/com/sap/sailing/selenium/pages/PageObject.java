@@ -614,19 +614,23 @@ public class PageObject {
             @Override
             public Boolean apply(WebDriver t) {
                 boolean clickedNotifications = false;
-                List<WebElement> notificationBar = driver.findElements(By.id("notificationBar"));
-                if (!notificationBar.isEmpty()) {
-                    // we got the enclosing panel
-                    List<WebElement> notifications = notificationBar.get(0).findElements(By.cssSelector("*"));
-                    if (!notifications.isEmpty()) {
-                        for (WebElement messageElement : notifications) {
-                            if (expectedNotificationMessage == null
-                                    || messageElement.getText().contains(expectedNotificationMessage)) {
-                                messageElement.click();
-                                clickedNotifications = true;
+                try {
+                    List<WebElement> notificationBar = driver.findElements(By.id("notificationBar"));
+                    if (!notificationBar.isEmpty()) {
+                        // we got the enclosing panel
+                        List<WebElement> notifications = notificationBar.get(0).findElements(By.cssSelector("*"));
+                        if (!notifications.isEmpty()) {
+                            for (WebElement messageElement : notifications) {
+                                if (expectedNotificationMessage == null
+                                        || messageElement.getText().contains(expectedNotificationMessage)) {
+                                    messageElement.click();
+                                    clickedNotifications = true;
+                                }
                             }
                         }
                     }
+                } catch (Exception e) {
+                    // This call can fail temporarily while notifications are being updated
                 }
                 return clickedNotifications;
             }
