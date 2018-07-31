@@ -104,14 +104,20 @@
   <driver-definition class="org.openqa.selenium.chrome.ChromeDriver">
   </driver-definition>
   -->
-  <!-- <driver-definition class="org.openqa.selenium.ie.InternetExplorerDriver">
+  <!--
+  <driver-definition class="org.openqa.selenium.ie.InternetExplorerDriver">
     <capabilities>
       <capability>
         <name>ignoreZoomSetting</name>
         <value>true</value>
       </capability>
+      <capability>
+        <name>ie.ensureCleanSession</name>
+        <value>true</value>
+      </capability>
     </capabilities>
-  </driver-definition> -->
+  </driver-definition>
+  -->
   <!-- <driver-definition class="com.sap.sailing.selenium.core.HeadlessFirefoxDriver">
   </driver-definition> -->
   <!-- <driver-definition class="com.sap.sailing.selenium.core.HeadlessChromeDriver">
