@@ -87,7 +87,7 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setReggataForTracking(DEFAULT_REGATTA);
         tracTracEvents.setTrackSettings(false, false, false);
-        tracTracEvents.startTrackingForRace(this.trackableRace);
+        tracTracEvents.startTrackingForRacesAndAcceptDefaultRegattaWarning(this.trackableRace);
         
         TargetLocator locator = getWebDriver().switchTo();
         Alert alert = locator.alert();

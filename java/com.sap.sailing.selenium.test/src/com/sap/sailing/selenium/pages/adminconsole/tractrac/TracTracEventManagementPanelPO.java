@@ -229,19 +229,23 @@ public class TracTracEventManagementPanelPO extends PageArea {
     }
     
     public void startTrackingForRace(TrackableRaceDescriptor race) {
-        startTrackingForRacesInternal(Collections.singletonList(race), null);
+        startTrackingForRacesInternal(Collections.singletonList(race), null, false);
+    }
+    
+    public void startTrackingForRacesAndAcceptDefaultRegattaWarning(TrackableRaceDescriptor race) {
+        startTrackingForRacesInternal(Collections.singletonList(race), null, true);
     }
     
     public void startTrackingForRaceAndAwaitBoatClassError(TrackableRaceDescriptor race, String expectedBoatClass) {
-        startTrackingForRacesInternal(Collections.singletonList(race), expectedBoatClass);
+        startTrackingForRacesInternal(Collections.singletonList(race), expectedBoatClass, false);
     }
     
     public void startTrackingForRaces(Collection<TrackableRaceDescriptor> races) {
-        startTrackingForRacesInternal(races, null);
+        startTrackingForRacesInternal(races, null, false);
     }
     
     private void startTrackingForRacesInternal(Collection<TrackableRaceDescriptor> races,
-            String expectedBoatClassErrorOrNull) {
+            String expectedBoatClassErrorOrNull, boolean awaitDefaultRegattaAlert) {
         final Set<TrackableRaceDescriptor> racesToProcess = new HashSet<>(races);
         final CellTablePO<DataEntryPO> table = getTrackableRacesTable();
         table.selectEntries(e -> racesToProcess.remove(new TrackableRaceDescriptor(e.getColumnContent("Event"),
@@ -249,16 +253,21 @@ public class TracTracEventManagementPanelPO extends PageArea {
         if (!racesToProcess.isEmpty()) {
             throw new IllegalStateException("Not all given races where selected");
         }
-        startTrackingForSelectedRaces(expectedBoatClassErrorOrNull);
+        startTrackingForSelectedRaces(expectedBoatClassErrorOrNull, false);
     }
     
     public void startTrackingForAllRaces() {
         getTrackableRacesTable().selectAllEntries();
-        startTrackingForSelectedRaces(null);
+        startTrackingForSelectedRaces(null, false);
     }
     
-    private void startTrackingForSelectedRaces(String expectedBoatClassErrorOrNull) {
+    private void startTrackingForSelectedRaces(String expectedBoatClassErrorOrNull, boolean awaitDefaultRegattaAlert) {
         this.startTracking();
+        
+        if (awaitDefaultRegattaAlert) {
+            waitForAlertAndAccept();
+        }
+        
         if (expectedBoatClassErrorOrNull == null) {
             waitForAjaxRequests();
         } else {
