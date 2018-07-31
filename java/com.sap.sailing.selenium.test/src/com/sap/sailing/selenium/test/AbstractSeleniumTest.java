@@ -20,7 +20,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.model.FrameworkMethod;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -88,13 +87,8 @@ public abstract class AbstractSeleniumTest {
         }
         // clear local storage
         getWebDriver().get(contextRoot);
-        // TODO get to know if all of our used drivers support WebStorage and if yes, remove the old JS solution
-        if (getWebDriver() instanceof WebStorage) {
-            final WebStorage webStorage = (WebStorage)getWebDriver();
-            webStorage.getLocalStorage().clear();
-        } else {
-            ((JavascriptExecutor)getWebDriver()).executeScript("window.localStorage.clear();");
-        }
+        final WebStorage webStorage = (WebStorage)getWebDriver();
+        webStorage.getLocalStorage().clear();
         try {
             // In IE 11 we sometimes see the problem that IE somehow automatically changes the zoom level to 75%.
             // Selenium tests with InternetExplorerDriver fail if the zoom level is not set to 100% due to the fact that coordinates determined aren't correct.
