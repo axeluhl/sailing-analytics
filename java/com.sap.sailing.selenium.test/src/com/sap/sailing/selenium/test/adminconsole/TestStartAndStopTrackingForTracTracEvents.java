@@ -1,13 +1,10 @@
 package com.sap.sailing.selenium.test.adminconsole;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.WebDriver.TargetLocator;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
@@ -88,13 +85,6 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         tracTracEvents.setReggataForTracking(DEFAULT_REGATTA);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRacesAndAcceptDefaultRegattaWarning(this.trackableRace);
-        
-        TargetLocator locator = getWebDriver().switchTo();
-        Alert alert = locator.alert();
-        String text = alert.getText();
-        alert.dismiss();
-        String message = "There is at least one regatta for the selected boat classes.";
-        assertThat(text, containsString(message));
     }
     
     @Test
