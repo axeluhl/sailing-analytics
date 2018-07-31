@@ -52,7 +52,7 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Proces
     @Override
     public void run() {
         try {
-            if (!handler.isAborted()) {
+            if (!isAborted()) {
                 ResultType result = computeResult();
                 handler.instructionSucceeded(result);
             }
@@ -61,6 +61,10 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Proces
         } finally {
             handler.afterInstructionFinished(this);
         }
+    }
+    
+    protected boolean isAborted() {
+        return handler.isAborted();
     }
 
     protected abstract ResultType computeResult() throws Exception;

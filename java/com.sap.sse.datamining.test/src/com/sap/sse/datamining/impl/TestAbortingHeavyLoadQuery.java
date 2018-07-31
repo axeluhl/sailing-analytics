@@ -71,24 +71,31 @@ public class TestAbortingHeavyLoadQuery {
     // Test Configuration ----------------------------------------------------------------------------------------
     /** 
      * Number of threads in the executor. Determines the number of elements (and thus heavy load instructions)
-     * retrieved for each group. This means that each group should have a runtime of {@value #HeavyLoadInstructionDuration}ms,
+     * retrieved for each group. This means that each group should have a runtime of {@value #HeavyLoadInstructionTotalDuration}ms,
      * since the single instructions are executed concurrently.
      */
     private static final int ExecutorPoolSize = Math.max(3, Runtime.getRuntime().availableProcessors());
+    
     /** The number of groups contained in the initial data source. */
     private static final int DataSourceSize = 2000;
     private static final String GroupKeyPrefix = "G";
-    /** The time a heavy load instruction blocks the executing thread using {@link Thread#sleep(long)}. */
-    private static final long HeavyLoadInstructionDuration = 500;
+    
+    /** The time a step of a heavy load instruction blocks the executing thread (using {@link Thread#sleep(long)}). */
+    private static final long HeavyLoadInstructionStepDuration = 50;
+    /** The number of steps a heavy load instruction performs */
+    private static final int HeavyLoadInstructionNumberOfSteps = 10;
+    /** The total time a heavy load instruction blocks the executing thread (using {@link Thread#sleep(long)}). */
+    private static final long HeavyLoadInstructionTotalDuration = HeavyLoadInstructionStepDuration * HeavyLoadInstructionNumberOfSteps;
+    
     /** The number of milliseconds to wait before {@link Query#abort()} is called. */
-    private static final long AbortQueryDelay = (long) (HeavyLoadInstructionDuration * 5.45);
+    private static final long AbortQueryDelay = (long) (HeavyLoadInstructionTotalDuration * 5.45);
     /** The time given to the executor to complete all unfinished instructions */
-    private static final long TerminationTimeout = (long) (HeavyLoadInstructionDuration * 1.5);
+    private static final long TerminationTimeout = HeavyLoadInstructionStepDuration * 2;
     //------------------------------------------------------------------------------------------------------------
     
     // Execution Recording Configuration -------------------------------------------------------------------------
     /** Enables concurrent logging of the query execution and prints the current record before assertions. */
-    private static final boolean RecordExecution = false;
+    private static final boolean RecordExecution = true;
     private static final SimpleDateFormat DateFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
     private ConcurrentLinkedQueue<String> executionRecord;
     //------------------------------------------------------------------------------------------------------------
@@ -174,6 +181,10 @@ public class TestAbortingHeavyLoadQuery {
         for (StatefulProcessorInstruction<?> instruction : runningInstructions) {
             assertTrue("computeResult() of a running unfinished instruction wasn't called", instruction.computeResultWasCalled());
             assertTrue("computeResult() of a running unfinished instruction didn't finish", instruction.computeResultWasFinished());
+            if (instruction instanceof StatefulBlockingInstruction) {
+                StatefulBlockingInstruction<?> blockingInstruction = (StatefulBlockingInstruction<?>) instruction;
+                assertTrue("computeResult() of a running heavy load instruction wasn't aborted", blockingInstruction.computeResultWasAborted());
+            }
         }
         for (StatefulProcessorInstruction<?> instruction : notStartedInstructions) {
             assertTrue("run() of an unstarted unfinished instruction wasn't called", instruction.runWasCalled());
@@ -216,7 +227,7 @@ public class TestAbortingHeavyLoadQuery {
      *   </li>
      *   <li>
      *     A heavy load instruction for each element is scheduled, which blocks the running thread for
-     *     {@value #HeavyLoadInstructionDuration}ms.
+     *     {@value #HeavyLoadInstructionTotalDuration}ms.
      *   </li>
      *   <li>
      *     Each element is grouped by its name and its value is used as value for the {@link GroupedDataEntry}.
@@ -306,8 +317,8 @@ public class TestAbortingHeavyLoadQuery {
                     @Override
                     protected ProcessorInstruction<Element> createInstruction(Element element) {
                         StatefulProcessorInstruction<Element> instruction = new HeavyLoadInstruction(this,
-                                ProcessorInstructionPriority.Extraction, HeavyLoadInstructionDuration, element,
-                                TestAbortingHeavyLoadQuery.this::logExecution);
+                                ProcessorInstructionPriority.Extraction, HeavyLoadInstructionStepDuration,
+                                HeavyLoadInstructionNumberOfSteps, element, TestAbortingHeavyLoadQuery.this::logExecution);
                         unfinishedInstructions.add(instruction);
                         return instruction;
                     }
@@ -397,9 +408,9 @@ public class TestAbortingHeavyLoadQuery {
 
         private final Consumer<String> recorder;
 
-        public HeavyLoadInstruction(ProcessorInstructionHandler<Element> handler,
-                ProcessorInstructionPriority priority, long blockDuration, Element result, Consumer<String> recorder) {
-            super(handler, priority, blockDuration, result);
+        public HeavyLoadInstruction(ProcessorInstructionHandler<Element> handler, ProcessorInstructionPriority priority,
+                long stepDuration, int numberOfSteps, Element result, Consumer<String> recorder) {
+            super(handler, priority, stepDuration, numberOfSteps, result);
             this.recorder = recorder;
         }
         
@@ -412,6 +423,11 @@ public class TestAbortingHeavyLoadQuery {
         @Override
         protected void actionBeforeBlock() {
             recorder.accept("Starting work for heavy load instruction for " + result);
+        }
+        
+        @Override
+        protected void actionBeforeAbort() {
+            recorder.accept("Aborting heavy load instruction for " + result);
         }
         
         @Override
