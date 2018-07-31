@@ -20,6 +20,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.model.FrameworkMethod;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -90,13 +91,22 @@ public abstract class AbstractSeleniumTest {
         // To be able to access LocalStorage we need to load a page having the target origin
         getWebDriver().get(contextRoot);
         
-        // clear local storage
-        final WebStorage webStorage = (WebStorage)getWebDriver();
-        webStorage.getLocalStorage().clear();
-        
-        // extending the timeout of notifications to 100s to prevent timing failures
-        webStorage.getLocalStorage().setItem("sse.notification.customTimeOutInSeconds",
-                Integer.toString(PageObject.DEFAULT_WAIT_TIMEOUT_SECONDS));
+        final String notificationTimeoutKey = "sse.notification.customTimeOutInSeconds";
+        final String notificationTimeoutValue = Integer.toString(PageObject.DEFAULT_WAIT_TIMEOUT_SECONDS);
+        if (getWebDriver() instanceof WebStorage) {
+            // clear local storage
+            final WebStorage webStorage = (WebStorage)getWebDriver();
+            webStorage.getLocalStorage().clear();
+            
+            // extending the timeout of notifications to 100s to prevent timing failures
+            webStorage.getLocalStorage().setItem(notificationTimeoutKey,
+                    notificationTimeoutValue);
+        } else {
+            // Fallback solution for IE
+            ((JavascriptExecutor)getWebDriver()).executeScript("window.localStorage.clear();");
+            ((JavascriptExecutor) getWebDriver()).executeScript("window.localStorage.setItem(\""
+                    + notificationTimeoutKey + "\", \"" + notificationTimeoutValue + "\");");
+        }
         
         try {
             // In IE 11 we sometimes see the problem that IE somehow automatically changes the zoom level to 75%.
