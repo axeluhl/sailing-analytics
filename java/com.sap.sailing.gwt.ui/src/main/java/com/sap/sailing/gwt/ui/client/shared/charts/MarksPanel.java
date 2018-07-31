@@ -85,22 +85,27 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
             @Override
             public void update(int index, final MarkDTO mark, String value) {
                 final Date timePoint = parent.timer.getTime();
-                select(mark);
-                if (parent.hasFixAtTimePoint(mark, timePoint)) {
-                    parent.showNotification(stringMessages.pleaseSelectOtherTimepoint(), NotificationType.ERROR);
-                } else {
-                    parent.createFixPositionChooserToAddFixToMark(mark, new Callback<Position, Exception>() {
-                        @Override
-                        public void onFailure(Exception reason) {
-                            parent.resetCurrentFixPositionChooser();
+                parent.retrieveAndSelectMarkIfNecessary(mark, new Runnable() {
+
+                    @Override
+                    public void run() {
+                        if (parent.hasFixAtTimePoint(mark, timePoint)) {
+                            parent.showNotification(stringMessages.pleaseSelectOtherTimepoint(), NotificationType.ERROR);
+                        } else {
+                            parent.createFixPositionChooserToAddFixToMark(mark, new Callback<Position, Exception>() {
+                                @Override
+                                public void onFailure(final Exception reason) {
+                                    parent.resetCurrentFixPositionChooser();
+                                }
+                                @Override
+                                public void onSuccess(Position result) {
+                                    parent.addMarkFix(mark, timePoint, result);
+                                    parent.resetCurrentFixPositionChooser();
+                                }
+                            });
                         }
-                        @Override
-                        public void onSuccess(Position result) {
-                            parent.addMarkFix(mark, timePoint, result);
-                            parent.resetCurrentFixPositionChooser();
-                        }
-                    });
-                }
+                    }
+                });
             }
         });
         markTable.addColumn(addFixColumn);
