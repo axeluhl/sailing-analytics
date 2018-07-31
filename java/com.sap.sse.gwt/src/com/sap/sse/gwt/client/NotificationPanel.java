@@ -4,6 +4,7 @@ import com.google.gwt.animation.client.Animation;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
@@ -90,9 +91,21 @@ public class NotificationPanel {
      * Displays notification at UI.
      */
     public void show() {
+        final Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+        int timeout = NOTIFICATION_TIME;
+        if (localStorageIfSupported != null) {
+            final String customTimeOut = localStorageIfSupported.getItem("sse.notification.customTimeOutInSeconds");
+            if (customTimeOut != null && !customTimeOut.isEmpty()) {
+                try {
+                    timeout = Integer.parseInt(customTimeOut) * 1000;
+                } catch (Exception e) {
+                    // If the value can't be parsed, we just use the default
+                }
+            }
+        }
         if (!animation.isRunning()) {
             parent.add(panel);
-            animation.run(NOTIFICATION_TIME);
+            animation.run(timeout);
         }
     }
     

@@ -20,7 +20,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.model.FrameworkMethod;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -33,6 +32,7 @@ import com.sap.sailing.selenium.core.Managed;
 import com.sap.sailing.selenium.core.SeleniumRunner;
 import com.sap.sailing.selenium.core.TestEnvironment;
 import com.sap.sailing.selenium.core.WindowManager;
+import com.sap.sailing.selenium.pages.PageObject;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -86,15 +86,18 @@ public abstract class AbstractSeleniumTest {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
-        // clear local storage
+        
+        // To be able to access LocalStorage we need to load a page having the target origin
         getWebDriver().get(contextRoot);
-        // TODO get to know if all of our used drivers support WebStorage and if yes, remove the old JS solution
-        if (getWebDriver() instanceof WebStorage) {
-            final WebStorage webStorage = (WebStorage)getWebDriver();
-            webStorage.getLocalStorage().clear();
-        } else {
-            ((JavascriptExecutor)getWebDriver()).executeScript("window.localStorage.clear();");
-        }
+        
+        // clear local storage
+        final WebStorage webStorage = (WebStorage)getWebDriver();
+        webStorage.getLocalStorage().clear();
+        
+        // extending the timeout of notifications to 100s to prevent timing failures
+        webStorage.getLocalStorage().setItem("sse.notification.customTimeOutInSeconds",
+                Integer.toString(PageObject.DEFAULT_WAIT_TIMEOUT_SECONDS));
+        
         try {
             // In IE 11 we sometimes see the problem that IE somehow automatically changes the zoom level to 75%.
             // Selenium tests with InternetExplorerDriver fail if the zoom level is not set to 100% due to the fact that coordinates determined aren't correct.
