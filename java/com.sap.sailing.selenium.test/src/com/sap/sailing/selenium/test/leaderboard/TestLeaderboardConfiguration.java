@@ -81,7 +81,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             assertThat(races.size(), equalTo(5));
             assertThat(table.getEntries().size(), equalTo(28)); // the regatta already has the races linked; regatta leaderboard obtains competitors from regatta 
             
-            final WebDriver adminConsoleWindowDriver = leaderboardWindow.switchToWindow();
+            final WebDriver adminConsoleWindowDriver = adminConsoleWindow.switchToWindow();
             setUpAuthenticatedSession(adminConsoleWindowDriver);
             AdminConsolePage adminConsole = AdminConsolePage.goToPage(adminConsoleWindowDriver, getContextRoot());
             LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
