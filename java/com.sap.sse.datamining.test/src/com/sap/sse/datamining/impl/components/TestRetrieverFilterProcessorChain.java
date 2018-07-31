@@ -72,7 +72,7 @@ public class TestRetrieverFilterProcessorChain {
         resultReceivers.add(retrievalProcessor);
         @SuppressWarnings("unchecked")
         Processor<Iterable<Iterable<Integer>>, Iterable<Integer>> layeredRetrievalProcessor = new AbstractRetrievalProcessor<Iterable<Iterable<Integer>>, Iterable<Integer>>((Class<Iterable<Iterable<Integer>>>)(Class<?>) Iterable.class, (Class<Iterable<Integer>>)(Class<?>) Iterable.class,
-                                                                                                                                                                                    ConcurrencyTestsUtil.getExecutor(), resultReceivers, 0) {
+                                                                                                                                                                                    ConcurrencyTestsUtil.getSharedExecutor(), resultReceivers, 0) {
             @Override
             protected Iterable<Iterable<Integer>> retrieveData(Iterable<Iterable<Integer>> element) {
                 return element;
@@ -110,11 +110,11 @@ public class TestRetrieverFilterProcessorChain {
                 return element >= 0;
             }
         };
-        Processor<Integer, Integer> filtrationProcessor = new ParallelFilteringProcessor<>(Integer.class, ConcurrencyTestsUtil.getExecutor(), filtrationResultReceivers, elementGreaterZeroFilterCriteria);
+        Processor<Integer, Integer> filtrationProcessor = new ParallelFilteringProcessor<>(Integer.class, ConcurrencyTestsUtil.getSharedExecutor(), filtrationResultReceivers, elementGreaterZeroFilterCriteria);
         
         Collection<Processor<Integer, ?>> retrievalResultReceivers = new ArrayList<>();
         retrievalResultReceivers.add(filtrationProcessor);
-        retrievalProcessor = new AbstractRetrievalProcessor<Iterable<Integer>, Integer>((Class<Iterable<Integer>>)(Class<?>) Iterable.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers, 1) {
+        retrievalProcessor = new AbstractRetrievalProcessor<Iterable<Integer>, Integer>((Class<Iterable<Integer>>)(Class<?>) Iterable.class, Integer.class, ConcurrencyTestsUtil.getSharedExecutor(), retrievalResultReceivers, 1) {
             @Override
             protected Iterable<Integer> retrieveData(Iterable<Integer> element) {
                 return element;

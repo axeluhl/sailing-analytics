@@ -63,7 +63,7 @@ public class TestProcessorQuery {
                 Collection<Processor<Double, ?>> resultReceivers = new ArrayList<>();
                 resultReceivers.add(new AbortResultReceiver(resultReceiver));
                 return new BlockingProcessor<Iterable<Number>, Double>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Double.class,
-                        ConcurrencyTestsUtil.getExecutor(), resultReceivers, 1000) {
+                        ConcurrencyTestsUtil.getSharedExecutor(), resultReceivers, 1000) {
                             @Override
                             protected Double createResult(Iterable<Number> element) {
                                 return 0.0;
@@ -101,7 +101,7 @@ public class TestProcessorQuery {
                 Collection<Processor<Double, ?>> resultReceivers = new ArrayList<>();
                 resultReceivers.add(new AbortResultReceiver(resultReceiver));
                 return new BlockingProcessor<Iterable<Number>, Double>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Double.class,
-                        ConcurrencyTestsUtil.getExecutor(), resultReceivers, 1000) {
+                        ConcurrencyTestsUtil.getSharedExecutor(), resultReceivers, 1000) {
                             @Override
                             protected Double createResult(Iterable<Number> element) {
                                 return 0.0;
@@ -168,7 +168,7 @@ public class TestProcessorQuery {
                 resultReceivers.add(resultReceiver);
                 return new AbstractParallelProcessor<Iterable<Number>, Map<GroupKey, Double>>((Class<Iterable<Number>>)(Class<?>) Iterable.class,
                                                                                                     (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
-                                                                                                    ConcurrencyTestsUtil.getExecutor(),
+                                                                                                    ConcurrencyTestsUtil.getSharedExecutor(),
                                                                                                     resultReceivers) {
                     @Override
                     protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {
@@ -242,7 +242,7 @@ public class TestProcessorQuery {
                 resultReceivers.add(resultReceiver);
                 return new AbstractParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
                                                                                     (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
-                                                                                    ConcurrencyTestsUtil.getExecutor(),
+                                                                                    ConcurrencyTestsUtil.getSharedExecutor(),
                                                                                     resultReceivers) {
                     @Override
                     protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
@@ -282,7 +282,7 @@ public class TestProcessorQuery {
                 resultReceivers.add(resultReceiver);
                 return new AbstractParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
                                                                                     (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
-                                                                                    ConcurrencyTestsUtil.getExecutor(),
+                                                                                    ConcurrencyTestsUtil.getSharedExecutor(),
                                                                                     resultReceivers) {
                     @Override
                     protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
