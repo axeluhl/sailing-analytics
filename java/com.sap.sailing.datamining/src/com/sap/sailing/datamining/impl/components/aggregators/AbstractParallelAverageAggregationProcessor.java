@@ -64,6 +64,9 @@ public abstract class AbstractParallelAverageAggregationProcessor<T extends Comp
         Map<GroupKey, T> minAggregation = minAggregationProcessor.getResult();
         Map<GroupKey, T> maxAggregation = maxAggregationProcessor.getResult();
         for (Entry<GroupKey, T> sumAggregationEntry : sumAggregation.entrySet()) {
+            if (isAborted()) {
+                break;
+            }
             GroupKey key = sumAggregationEntry.getKey();
             result.put(key, new AverageWithStatsImpl<>(
                     /* average */ divide(sumAggregationEntry.getValue(), elementAmountPerKey.get(key).longValue()),
