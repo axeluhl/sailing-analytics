@@ -47,6 +47,9 @@ public class ParallelGroupedNumberDataMedianAggregationProcessor
     protected Map<GroupKey, Number> aggregateResult() {
         Map<GroupKey, Number> result = new HashMap<>();
         for (Entry<GroupKey, List<Number>> groupedValuesEntry : groupedValues.entrySet()) {
+            if (isAborted()) {
+                break;
+            }
             result.put(groupedValuesEntry.getKey(), getMedianOf(groupedValuesEntry.getValue()));
         }
         return result;
