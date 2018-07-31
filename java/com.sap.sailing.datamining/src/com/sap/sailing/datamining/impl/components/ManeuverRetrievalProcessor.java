@@ -48,6 +48,10 @@ public class ManeuverRetrievalProcessor
             Maneuver previousManeuver = null;
             Maneuver currentManeuver = null;
             for (Maneuver nextManeuver : maneuvers) {
+                if (isAborted()) {
+                    break;
+                }
+                
                 if (currentManeuver != null) {
                     ManeuverWithContext maneuverWithContext = new ManeuverWithContext(new TrackedLegOfCompetitorWithSpecificTimePointWithContext(
                             element.getTrackedLegContext(), element.getTrackedLegOfCompetitor(), currentManeuver.getTimePoint()), currentManeuver,
