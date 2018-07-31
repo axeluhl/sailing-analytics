@@ -111,10 +111,6 @@
         <name>ignoreZoomSetting</name>
         <value>true</value>
       </capability>
-      <capability>
-        <name>ie.ensureCleanSession</name>
-        <value>true</value>
-      </capability>
     </capabilities>
   </driver-definition>
   -->
