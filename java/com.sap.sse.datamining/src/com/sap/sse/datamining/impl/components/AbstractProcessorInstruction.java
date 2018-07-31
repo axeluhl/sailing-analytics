@@ -59,11 +59,15 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Proces
         } catch (Exception e) {
             handler.instructionFailed(e);
         } finally {
-            handler.afterInstructionFinished();
+            handler.afterInstructionFinished(this);
         }
     }
 
     protected abstract ResultType computeResult() throws Exception;
+    
+    public ProcessorInstructionHandler<ResultType> getHandler() {
+        return handler;
+    }
     
     @Override
     public int getPriority() {
