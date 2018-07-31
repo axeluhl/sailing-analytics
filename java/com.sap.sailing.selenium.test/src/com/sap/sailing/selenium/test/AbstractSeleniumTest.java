@@ -32,6 +32,7 @@ import com.sap.sailing.selenium.core.Managed;
 import com.sap.sailing.selenium.core.SeleniumRunner;
 import com.sap.sailing.selenium.core.TestEnvironment;
 import com.sap.sailing.selenium.core.WindowManager;
+import com.sap.sailing.selenium.pages.PageObject;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -85,10 +86,18 @@ public abstract class AbstractSeleniumTest {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
-        // clear local storage
+        
+        // To be able to access LocalStorage we need to load a page having the target origin
         getWebDriver().get(contextRoot);
+        
+        // clear local storage
         final WebStorage webStorage = (WebStorage)getWebDriver();
         webStorage.getLocalStorage().clear();
+        
+        // extending the timeout of notifications to 100s to prevent timing failures
+        webStorage.getLocalStorage().setItem("sse.notification.customTimeOutInSeconds",
+                Integer.toString(PageObject.DEFAULT_WAIT_TIMEOUT_SECONDS));
+        
         try {
             // In IE 11 we sometimes see the problem that IE somehow automatically changes the zoom level to 75%.
             // Selenium tests with InternetExplorerDriver fail if the zoom level is not set to 100% due to the fact that coordinates determined aren't correct.
