@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.impl.components.AbstractParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 import com.sap.sse.datamining.impl.components.ProcessorInstructionPriority;
@@ -26,7 +27,7 @@ public abstract class AbstractParallelAggregationProcessor<InputType, Aggregated
     }
 
     @Override
-    protected AbstractProcessorInstruction<AggregatedType> createInstruction(final InputType element) {
+    protected ProcessorInstruction<AggregatedType> createInstruction(final InputType element) {
         if (needsSynchronization()) {
             return new AbstractProcessorInstruction<AggregatedType>(this, ProcessorInstructionPriority.Aggregation) {
                 @Override

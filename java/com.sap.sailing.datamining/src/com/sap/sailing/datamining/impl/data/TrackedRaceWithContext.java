@@ -17,8 +17,10 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackedRaceWithContext implements HasTrackedRaceContext {
@@ -112,6 +114,26 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     @Override
     public Boolean isTracked() {
         return getTrackedRace().hasStarted(MillisecondsTimePoint.now());
+    }
+    
+    @Override
+    public Duration getDuration() {
+        Duration duration = null;
+        TrackedRace race = getTrackedRace();
+        TimePoint start = race.getStartOfRace();
+        if (start == null) {
+            start = race.getStartOfTracking();
+        }
+        if (start != null) {
+            TimePoint end = race.getEndOfRace();
+            if (end == null) {
+                end = race.getEndOfTracking();
+            }
+            if (end != null) {
+                duration = new MillisecondsDurationImpl(end.asMillis() - start.asMillis());
+            }
+        }
+        return duration;
     }
 
     @Override
