@@ -261,12 +261,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         tracTracEvents.listTrackableRaces(IDM_5O5_2013_JSON_URL);
         tracTracEvents.setReggataForTracking(this.regatta);
         tracTracEvents.setTrackSettings(false, false, false);
-        // TODO: There exists a bug in Selenium with key modifiers (Issue 3734 and 6817), so we can't use multi
-        //       selection (Firefox on Windows)
-        //tracTracEvents.startTrackingForRaces(this.trackableRaces);
-        for(int i =0; i<2;i++) {
-            tracTracEvents.startTrackingForRace(trackableRaces.get(i));
-        }
+        tracTracEvents.startTrackingForRaces(this.trackableRaces);
         
         leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(this.regatta.toString());
