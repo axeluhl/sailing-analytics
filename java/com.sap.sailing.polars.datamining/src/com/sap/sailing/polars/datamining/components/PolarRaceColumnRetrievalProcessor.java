@@ -25,6 +25,9 @@ public class PolarRaceColumnRetrievalProcessor extends AbstractRetrievalProcesso
         Set<HasRaceColumnPolarContext> raceColumnWithContext = new HashSet<>();
         Leaderboard leaderboard = element.getLeaderboard();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            if (isAborted()) {
+                break;
+            }
             raceColumnWithContext.add(new RaceColumnWithPolarContext(raceColumn, element));
         }
         return raceColumnWithContext;

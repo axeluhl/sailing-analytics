@@ -50,6 +50,9 @@ public class FoilingSegmentRetrievalProcessor extends AbstractRetrievalProcessor
                 bravoFixTrack.lockForRead();
                 try {
                     for (final BravoFix bravoFix : bravoFixTrack.getFixes(startOfRace, /* fromInclusive */ true, end, /* toInclusive */ false)) {
+                        if (isAborted()) {
+                            break;
+                        }
                         final boolean currentFixIsFoiling = 
                                 (bravoFix.isFoiling(settings.getMinimumRideHeight()) &&
                                         (settings.getMinimumSpeedForFoiling() == null || settings.getMinimumSpeedForFoiling().compareTo(

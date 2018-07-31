@@ -33,6 +33,9 @@ public class WindFixRetrievalProcessor extends AbstractRetrievalProcessor<HasWin
         windTrack.lockForRead();
         try {
             for (final Wind wind : windTrack.getFixes()) {
+                if (isAborted()) {
+                    break;
+                }
                 windFixesWithContext.add(new WindFixWithContext(element.getTrackedRaceContext(), wind, element.getWindSourceType()));
             }
         } finally {
