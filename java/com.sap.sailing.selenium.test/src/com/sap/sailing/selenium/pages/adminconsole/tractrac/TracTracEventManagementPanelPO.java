@@ -249,7 +249,7 @@ public class TracTracEventManagementPanelPO extends PageArea {
         final Set<TrackableRaceDescriptor> racesToProcess = new HashSet<>(races);
         final CellTablePO<DataEntryPO> table = getTrackableRacesTable();
         table.selectEntries(e -> racesToProcess.remove(new TrackableRaceDescriptor(e.getColumnContent("Event"),
-                e.getColumnContent("Race"), e.getColumnContent("Boat Class"))));
+                e.getColumnContent("Race"), e.getColumnContent("Boat Class"))), racesToProcess::isEmpty);
         if (!racesToProcess.isEmpty()) {
             throw new IllegalStateException("Not all given races where selected");
         }
