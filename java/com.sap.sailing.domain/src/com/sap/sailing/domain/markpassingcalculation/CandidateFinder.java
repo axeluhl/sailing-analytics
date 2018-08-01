@@ -54,6 +54,13 @@ public interface CandidateFinder {
     Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> getCandidateDeltasAfterRaceStartTimeChange();
 
     /**
+     * Notifies this finder about the race's start of tracking time having changed. In case of a race that infers
+     * the race start time from the start mark passings, a change in start of tracking needs to adjust the time range
+     * in which candidates are considered valid.
+     */
+    Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> getCandidateDeltasAfterStartOfTrackingChange();
+    
+    /**
      * Notifies this finder about the race's finished time having changed. The candidates collections are adjusted
      * accordingly: new candidates may be added if the finished time was moved to a later point in time and therefore
      * extends the time range for candidates; candidates are removed if the finished time was moved to an earlier point
