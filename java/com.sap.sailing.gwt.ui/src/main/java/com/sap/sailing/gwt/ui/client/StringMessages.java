@@ -2095,7 +2095,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String manage2SailEventURLBox();
     String manage2SailEventIdBoxTooltip();
     String manage2SailPort();
-    String doResize();
+    String allowResizing();
     String windFinderSpotCollectionsList();
     String resizeSuccessfull();
     String resizeUnsuccessfull();

@@ -243,7 +243,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         });
         
         doResize = new ArrayList<>();
-        doResizeLabel = new Label(stringMessages.doResize());
+        doResizeLabel = new Label(stringMessages.allowResizing());
         doResizeLabel.setVisible(false);
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new GenericStringListInlineEditorWithCheckboxesComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
@@ -252,19 +252,18 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                             @Override
                             public void onValueChange(ValueChangeEvent<Boolean> event) {
                                 validateAndUpdate();
-                                for(CheckBox checkBox : doResize) {
-                                    if(checkBox.isVisible() && !checkBox.getValue()) {
-                                        //checkBox.setStyleName("AdminConsole.errorLabel");
-                                    }
-                                }
+                                CheckBox checkBox = (CheckBox)event.getSource();
+                                if(checkBox.getValue()) {
+                                    checkBox.getElement().getStyle().clearBackgroundColor();
+                                }else {
+                                    checkBox.getElement().getStyle().setBackgroundColor("red");
+                                }  
                             }
                         }));
         tagsListEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
                 validateAndUpdate();
-                //((CheckBox)event.getSource()).setStyleName("AdminConsole.errorLabel");
-                
             }
         });
         validator.setCheckBox(doResize);

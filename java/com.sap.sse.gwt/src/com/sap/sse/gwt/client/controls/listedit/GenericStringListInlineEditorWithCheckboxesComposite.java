@@ -2,6 +2,9 @@ package com.sap.sse.gwt.client.controls.listedit;
 
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -43,7 +46,19 @@ public abstract class GenericStringListInlineEditorWithCheckboxesComposite<Value
             checkBoxes.add(checkBox);
             expandedValuesGrid.setWidget(expandedValuesGrid.getRowCount()-1, 2, checkBox);
             checkBox.setVisible(false);
+            checkBox.getElement().getStyle().setBackgroundColor("red");
             checkBox.addValueChangeHandler(checkBoxValueChangeHandler);
+            /*checkBox.addDomHandler(new ClickHandler() {
+                
+                @Override
+                public void onClick(ClickEvent event) {
+                    if(checkBox.getValue()) {
+                        checkBox.getElement().getStyle().clearBackgroundColor();
+                    }else {
+                        checkBox.getElement().getStyle().setBackgroundColor("red");
+                    }                    
+                }
+            }, ClickEvent.getType());*/
         }
         
         @Override
