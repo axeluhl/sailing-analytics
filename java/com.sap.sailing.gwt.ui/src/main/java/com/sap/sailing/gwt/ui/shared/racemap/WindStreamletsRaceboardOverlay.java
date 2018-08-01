@@ -9,15 +9,10 @@ import java.util.Set;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.TextMetrics;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
-import com.google.gwt.dom.client.Style.BorderStyle;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.controls.ControlPosition;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
@@ -39,6 +34,8 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.mutationobserver.ElementStyleMutationObserver;
+import com.sap.sse.gwt.client.mutationobserver.ElementStyleMutationObserver.DomStyleMutationCallback;
 import com.sap.sse.gwt.client.player.Timer;
 
 /**
@@ -71,6 +68,8 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     
     private long latitudeCount;
     private double latitudeSum;
+    private ElementStyleMutationObserver observer;
+    private boolean dragging = false;
 
     public WindStreamletsRaceboardOverlay(MapWidget map, int zIndex, final Timer timer,
             RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService,
@@ -90,18 +89,6 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         this.timer = timer;
         getCanvas().getElement().setId("swarm-display");
         createStreamletLegend(map);
-        canvas.getElement().getStyle().setBorderColor("BLUE");
-        canvas.getElement().getStyle().setBorderStyle(BorderStyle.SOLID);
-        canvas.getElement().getStyle().setBorderWidth(10, Unit.PX);
-
-        Event.sinkEvents(canvas.getElement(), Event.ONCHANGE);
-        Event.setEventListener(canvas.getElement(), new EventListener() {
-
-            @Override
-            public void onBrowserEvent(Event event) {
-                GWT.log("Event: " + event.getType());
-            }
-        });
     }
 
     public double getAverageLatitudeDeg() {
@@ -338,7 +325,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         }
         this.streamletLegend.setVisible(isColored);
     }
-    
+
     @Override
     public void removeFromMap() {
         this.setVisible(false);
@@ -348,18 +335,35 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     protected void drawCenterChanged() {
     }
 
-    @Override
-    protected void setCanvasPosition(double x, double y) {
-        GWT.log("moving windstreamcanvas to " + x + "/" + y);
-        super.setCanvasPosition(x, y);
+    private void addObserverIfNecessary() {
+        if (ElementStyleMutationObserver.isSupported() && observer == null) {
+            observer = new ElementStyleMutationObserver(
+                    new DomStyleMutationCallback() {
+
+                        @Override
+                        public void onStyleChanged() {
+                            if (!dragging && isVisible()) {
+                                stopStreamlets();
+                                setCanvasSettings();
+                                startStreamlets();
+                            }
+                        }
+
+
+            });
+            observer.observe(super.canvas.getElement().getParentElement().getParentElement());
+        }
+    }
+
+    public void onDragStart() {
+        dragging = true;
+        Scheduler.get().scheduleDeferred(() -> addObserverIfNecessary());
+
     }
 
     public void onDragEnd() {
-        // Scheduler.get().scheduleDeferred(() -> {
-        // GWT.log("setting canvas settings...");
-        // setCanvasSettings();
-        // GWT.log("set canvas settings.");
-        // });
+        setCanvasSettings();
+        dragging = false;
     }
 
     public void onBoundsChanged(boolean zoomChanged) {

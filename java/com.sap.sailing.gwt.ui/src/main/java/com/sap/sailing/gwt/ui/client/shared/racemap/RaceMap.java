@@ -644,6 +644,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 map.addZoomChangeHandler(new ZoomChangeMapHandler() {
                     @Override
                     public void onEvent(ZoomChangeMapEvent event) {
+                        remoteCallsToSkipInExecution.addAll(remoteCallsInExecution);
                         if (!autoZoomIn && !autoZoomOut && !orientationChangeInProgress) {
                             // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will
                             // restore old settings
@@ -693,6 +694,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                     }
               });
+
+                map.addDragStartHandler(event -> {
+                    if ((streamletOverlay != null)) {
+                        streamletOverlay.onDragStart();
+                    }
+                });
+
               map.addIdleHandler(new IdleMapHandler() {
                   @Override
                   public void onEvent(IdleMapEvent event) {
@@ -958,7 +966,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         windSourceTypeNames.add(WindSourceType.WINDFINDER.name());
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
         if (remoteCallsInExecution.add(newTime)) {
-            if (currentlyDragging) {
+            if (currentlyDragging || zoomingAnimationsInProgress > 0) {
                 remoteCallsToSkipInExecution.add(newTime);
             }
             GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, raceIdentifier, newTime, 1000L,
@@ -981,16 +989,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 lastCombinedWindTrackInfoDTO = windInfo;
                                 if (remoteCallsToSkipInExecution.remove(newTime)) {
                                     updateMapWithWindInfo(newTime, -1, competitorsToShow, windInfo, windSourcesToShow);
-                                    GWT.log("on-success-remove");
                                 } else {
                                     updateMapWithWindInfo(newTime, transitionTimeInMillis, competitorsToShow, windInfo,
                                             windSourcesToShow);
-                                    GWT.log("on-success-stay");
                                 }
                             }
                             showWindSensorsOnMap(windSourcesToShow);
                         }
                     });
+        }
+        else {
+            GWT.log("added identical call to skip");
+            remoteCallsToSkipInExecution.add(newTime);
         }
     }
 
@@ -1085,10 +1095,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             // entries that are considered not overlapping; subsequently, fromAndToOverlap.getC() will contain true for
                             // all its entries so that the other response received for GetRaceMapDataAction will consider this an
                             // overlap if it happens after this update.
-                            updateBoatPositions(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow,
-                                    result.getBoatPositionsForCompetitors(competitorsByIdAsString), /* updateTailsOnly */ true);
+                            updateBoatPositions(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(),
+                                    competitorsToShow, result.getBoatPositionsForCompetitors(
+                                            competitorsByIdAsString), /* updateTailsOnly */
+                                    true);
                         }
                     }));
+        }
+        else {
         }
     }
 
@@ -1124,7 +1138,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                         // Do boat specific actions
                         Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData = raceMapDataDTO.boatPositions;
-                        updateBoatPositions(newTime, transitionTimeInMillis, hasTailOverlapForCompetitor, competitorsToShow, boatData, /* updateTailsOnly */ false);
+                        updateBoatPositions(newTime, transitionTimeInMillis, hasTailOverlapForCompetitor,
+                                competitorsToShow, boatData, /* updateTailsOnly */ false);
                         if (douglasMarkers != null) {
                             removeAllMarkDouglasPeuckerpoints();
                         }
