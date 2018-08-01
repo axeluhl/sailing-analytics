@@ -29,10 +29,12 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
@@ -355,6 +357,20 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         TimePoint competitorStartTime = firstTrackedLegOfCompetitor.getStartTime();
         Double length = trackedRace.getStartLine(competitorStartTime).getLength().getMeters();
         return distance / length;
+    }
+    
+    @Override
+    public Duration getDuration() {
+        Duration duration = null;
+        TrackedRace race = getTrackedRace();
+        Course course = race.getRace().getCourse();
+        MarkPassing startPassing = race.getMarkPassing(competitor, course.getFirstWaypoint());
+        MarkPassing finishPassing = race.getMarkPassing(competitor, course.getLastWaypoint());
+        if (startPassing != null && finishPassing != null) {
+            long durationMillis = finishPassing.getTimePoint().asMillis() - startPassing.getTimePoint().asMillis();
+            duration = new MillisecondsDurationImpl(durationMillis);
+        }
+        return duration;
     }
     
 }
