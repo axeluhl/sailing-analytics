@@ -120,7 +120,7 @@ public abstract class AbstractSeleniumTest {
     
     protected void setUpAuthenticatedSession(WebDriver webDriver) {
         // To be able to set a cookie we need to load a page having the target origin
-        getWebDriver().get(getContextRoot());
+        webDriver.get(getContextRoot());
         
         logger.info("Authenticating session...");
         Cookie sessionCookie = authenticate(getContextRoot());
