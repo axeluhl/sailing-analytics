@@ -1,5 +1,37 @@
 package com.sap.sailing.server.gateway.impl;
 
+import static java.lang.Math.toIntExact;
+
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.ImageOutputStream;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -7,23 +39,6 @@ import com.sap.sse.common.media.ImageConverter;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
-
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 public class ImageResizingServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 4240540462729675752L;
@@ -40,9 +55,18 @@ public class ImageResizingServlet extends AbstractJsonHttpServlet {
             String fileType = ((String)obj.get("URI")).substring(((String)obj.get("URI")).lastIndexOf(".")+1);
             JSONArray tags = (JSONArray) obj.get("Tags");
             JSONObject resizeMap = (JSONObject) obj.get("ResizeMap");
-            InputStream is = getInputStreamFromURIString(((String)obj.get("URI")));
-            BufferedImage img = ImageConverter.isToBi(is);
-            is.close();
+            IIOMetadata metadata = null;
+            BufferedImage img;
+            try(InputStream is = getInputStreamFromURIString(((String)obj.get("URI")))){
+                ImageReader reader = ImageIO.getImageReadersBySuffix(fileType).next();
+                reader.setInput(ImageIO.createImageInputStream(is));
+                metadata = reader.getImageMetadata(0);
+                img = reader.read(0);
+            }catch(Exception e) {
+                InputStream is = getInputStreamFromURIString(((String)obj.get("URI")));
+                img = ImageConverter.isToBi(is);
+                is.close();
+            }
             
             for(Object tagKey : resizeMap.keySet()) {
                 if((boolean) resizeMap.get(tagKey)) {
@@ -60,7 +84,7 @@ public class ImageResizingServlet extends AbstractJsonHttpServlet {
                     tags.remove(toDeleteTag);
                 }
                 tags.add(resizeTag);//read the deleted specific size tag
-                resizeAndAddToAr(img, toReturnArray, obj, resizeTag, fileType);
+                resizeAndAddToAr(img, toReturnArray, obj, resizeTag, fileType, metadata);
                 obj = getObjFromJSON(jsonString);//reset the object
                 tags = (JSONArray) obj.get("Tags");//and the tags
             }
@@ -86,8 +110,6 @@ public class ImageResizingServlet extends AbstractJsonHttpServlet {
                 }
             }
             
-        }else {
-            //ERROR
         }
         resp.getWriter().write(toReturnArray.toJSONString());
     }
@@ -112,8 +134,8 @@ public class ImageResizingServlet extends AbstractJsonHttpServlet {
         return null;
     }
     
-    private void resizeAndAddToAr(BufferedImage img, JSONArray array, JSONObject resizedImageObject, String tag, String fileType) {
-        String imgUri = "";
+    private void resizeAndAddToAr(BufferedImage img, JSONArray array, JSONObject resizedImageObject, String tag, String fileType, IIOMetadata metaData) {
+        URI imgUri = null;
         BufferedImage resizedImage = null;
         switch(tag) {
         case MediaTagConstants.LOGO:
@@ -128,15 +150,56 @@ public class ImageResizingServlet extends AbstractJsonHttpServlet {
         default://can not occur, because we only loop over the sizeTags, which are the same as in the switch case
             break;
         }
-        try (InputStream resizedImageInputStream = ImageConverter.biToIs(resizedImage,fileType)){
-            imgUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(resizedImageInputStream, "."+fileType, resizedImageInputStream.available()).toString();
-        } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException
-                | InvalidPropertiesException e) {
-            e.printStackTrace();
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(new ByteArrayOutputStream())){
+            //the following should write the exif data of the image to all copies of the image//it should already work, but due to a bug the data array stays empty
+            Iterator<ImageWriter> writers = ImageIO.getImageWritersBySuffix(fileType);
+            byte[] bytes = null;
+            while(writers.hasNext() && bytes == null) {
+                ImageWriter writer = writers.next();
+                if(writer != null) {
+                    writer.setOutput(ios);
+                    IIOImage iioImage = new IIOImage(resizedImage, null, metaData);
+                    ImageWriteParam param = writer.getDefaultWriteParam();
+                    IIOMetadata streamMetadata = writer.getDefaultStreamMetadata(param);
+                    writer.write(streamMetadata, iioImage, param);
+                    writer.dispose();
+                    bytes = new byte[toIntExact(ios.length())*2];
+                    ios.read(bytes);
+                    bytes = trim(bytes);
+                    if(bytes.length == 0)
+                        bytes = null;
+                }
+            }
+            if(bytes == null) {
+                InputStream is = ImageConverter.biToIs(resizedImage, fileType);
+                imgUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(is, "."+fileType, new Long(is.available()));
+                is.close();
+            }else {
+                
+                ByteArrayInputStream byteStream = new ByteArrayInputStream(bytes);
+                imgUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(byteStream, "."+fileType, new Long(byteStream.available()));
+                byteStream.close();
+            }
+        } catch (IOException | NoCorrespondingServiceRegisteredException | OperationFailedException | InvalidPropertiesException e1) {
+            e1.printStackTrace();
         }
-        resizedImageObject.put("URI", imgUri);
+        
+        
+        
+        resizedImageObject.put("URI", imgUri.toString());
         resizedImageObject.put("Width", resizedImage.getWidth());
         resizedImageObject.put("Height", resizedImage.getHeight());
         array.add(resizedImageObject);
+    }
+    
+    static byte[] trim(byte[] bytes)
+    {
+        int i = bytes.length - 1;
+        while (i >= 0 && bytes[i] == 0)
+        {
+            --i;
+        }
+
+        return Arrays.copyOf(bytes, i + 1);
     }
 }
