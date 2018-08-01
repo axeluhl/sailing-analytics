@@ -15,6 +15,7 @@ import com.sap.sailing.domain.tractracadapter.LoadingQueueDoneCallBack;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sse.common.Util;
 import com.tractrac.model.lib.api.route.IControlRoute;
+import com.tractrac.model.lib.api.route.IPathRoute;
 import com.tractrac.subscription.lib.api.control.IControlRouteChangeListener;
 
 public class RouteAssemblyTest extends AbstractTracTracLiveTest {
@@ -65,6 +66,11 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
                             }
                             first = false;
                         }
+                    }
+
+                    @Override
+                    public void gotRouteChange(IPathRoute pathRoute, long timeStamp) {
+                        // will never be invoked for sailing events
                     }
                 });
             }
