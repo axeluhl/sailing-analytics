@@ -11,6 +11,8 @@ public interface QueryDefinitionProvider<SettingsType extends Settings> extends 
     StatisticQueryDefinitionDTO getQueryDefinition();
     Iterable<String> validateQueryDefinition(StatisticQueryDefinitionDTO queryDefinition);
     void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition);
+    
+    void queryDefinitionChangesHaveBeenStored();
 
     void addQueryDefinitionChangedListener(QueryDefinitionChangedListener listener);
     void removeQueryDefinitionChangedListener(QueryDefinitionChangedListener listener);

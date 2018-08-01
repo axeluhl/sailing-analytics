@@ -52,7 +52,7 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
     private final Button runButton;
 
     public SimpleQueryRunner(Component<?> parent, ComponentContext<?> context, DataMiningSession session,
-           DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
             QueryDefinitionProvider<?> queryDefinitionProvider, CompositeResultsPresenter<?> resultsPresenter) {
         super(parent, context);
         this.session = session;
@@ -90,17 +90,20 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             counter.increase();
             resultsPresenter.showBusyIndicator(presenterId);
-            dataMiningService.runQuery(session, queryDefinition, new ManagedDataMiningQueryCallback<Serializable>(counter) {
-                    @Override
-                    protected void handleFailure(Throwable caught) {
-                        errorReporter.reportError("Error running the query: " + caught.getMessage());
-                        resultsPresenter.showError(presenterId, getDataMiningStringMessages().errorRunningDataMiningQuery() + ".");
-                    }
-                    @Override
-                    protected void handleSuccess(QueryResultDTO<Serializable> result) {
-                        resultsPresenter.showResult(presenterId, queryDefinition, result);
-                    }
-                });
+            dataMiningService.runQuery(session, queryDefinition,
+                    new ManagedDataMiningQueryCallback<Serializable>(counter) {
+                        @Override
+                        protected void handleSuccess(QueryResultDTO<Serializable> result) {
+                            resultsPresenter.showResult(presenterId, queryDefinition, result);
+                            queryDefinitionProvider.queryDefinitionChangesHaveBeenStored();
+                        }
+                        @Override
+                        protected void handleFailure(Throwable caught) {
+                            errorReporter.reportError("Error running the query: " + caught.getMessage());
+                            resultsPresenter.showError(presenterId,
+                                    getDataMiningStringMessages().errorRunningDataMiningQuery() + ".");
+                        }
+                    });
         } else {
             resultsPresenter.showError(presenterId, getDataMiningStringMessages().queryNotValidBecause(), errorMessages);
         }

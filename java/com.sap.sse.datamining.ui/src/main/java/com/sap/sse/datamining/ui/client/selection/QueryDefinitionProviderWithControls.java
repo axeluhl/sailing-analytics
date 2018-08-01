@@ -405,33 +405,10 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         dialog.setWidget(contentPanel);
         dialog.center();
     }
-
-    private class ApplyCallback implements Consumer<Iterable<String>> {
-        
-        private final Collection<String> allMessages;
-        private final Set<ApplyCallback> callbacks;
-        private final String retrieverChainName;
-        private boolean isArmed;
-
-        public ApplyCallback(Collection<String> allMessages, Set<ApplyCallback> callbacks, String retrieverChainName) {
-            this.allMessages = allMessages;
-            this.callbacks = callbacks;
-            this.retrieverChainName = retrieverChainName;
-        }
-
-        @Override
-        public void accept(Iterable<String> messages) {
-            Util.addAll(messages, allMessages);
-            callbacks.remove(this);
-            if (isArmed && callbacks.isEmpty()) {
-                if (!allMessages.isEmpty()) {
-                    showErrorWhileApplyingQueryDialog(allMessages, retrieverChainName);
-                }
-                setBlockChangeNotification(false);
-                queryDefinitionChanged = false;
-            }
-        }
-        
+    
+    @Override
+    public void queryDefinitionChangesHaveBeenStored() {
+        queryDefinitionChanged = false;
     }
 
     @Override
@@ -508,6 +485,34 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     @Override
     public String getId() {
         return "QueryDefinitionProviderWithControls";
+    }
+
+    private class ApplyCallback implements Consumer<Iterable<String>> {
+        
+        private final Collection<String> allMessages;
+        private final Set<ApplyCallback> callbacks;
+        private final String retrieverChainName;
+        private boolean isArmed;
+
+        public ApplyCallback(Collection<String> allMessages, Set<ApplyCallback> callbacks, String retrieverChainName) {
+            this.allMessages = allMessages;
+            this.callbacks = callbacks;
+            this.retrieverChainName = retrieverChainName;
+        }
+
+        @Override
+        public void accept(Iterable<String> messages) {
+            Util.addAll(messages, allMessages);
+            callbacks.remove(this);
+            if (isArmed && callbacks.isEmpty()) {
+                if (!allMessages.isEmpty()) {
+                    showErrorWhileApplyingQueryDialog(allMessages, retrieverChainName);
+                }
+                setBlockChangeNotification(false);
+                queryDefinitionChanged = false;
+            }
+        }
+        
     }
 
     private class ProviderListener implements StatisticChangedListener, FilterSelectionChangedListener, GroupingChangedListener {
