@@ -71,11 +71,11 @@ public class WindowManager {
     }
     
     public void forEachOpenedWindow(Consumer<WebDriverWindow> windowConsumer) {
-        this.allWindows.forEach(windowConsumer);
+        new HashSet<>(this.allWindows).forEach(windowConsumer);
     }
     
     public void closeAllExtraWindows() {
-        this.allWindows.forEach(window -> {
+        forEachOpenedWindow(window -> {
             if (window != defaultWindow) {
                 window.close();
             }
