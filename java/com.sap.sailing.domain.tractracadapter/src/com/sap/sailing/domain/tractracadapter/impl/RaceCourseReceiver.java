@@ -37,6 +37,7 @@ import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.route.IControl;
 import com.tractrac.model.lib.api.route.IControlRoute;
+import com.tractrac.model.lib.api.route.IPathRoute;
 import com.tractrac.model.lib.api.route.IRoute;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
@@ -96,6 +97,13 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
             @Override
             public void gotRouteChange(IControlRoute controlRoute, long timeStamp) {
                 enqueue(new Triple<IControlRoute, Long, Void>(controlRoute, timeStamp, null));
+            }
+
+            @Override
+            public void gotRouteChange(IPathRoute pathRoute, long timeStamp) {
+                // will never be invoked for sailing events; Jorge Llodra (2018-07-30):
+                // "The IControlRouteChangeListener has been extended adding a new method to get updates of a
+                // IPathRoute. If you are managing "sailing events" this method will never be invoked."
             }
         };
     }
