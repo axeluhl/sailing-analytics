@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -62,6 +63,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
     private DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition;
     private final List<FunctionDTO> availableDimensions;
     private Iterable<FunctionDTO> dimensionsToSelect;
+    private Consumer<Iterable<String>> selectionCallback;
 
     public MultiDimensionalGroupingProvider(Component<?> parent, ComponentContext<?> context,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
@@ -130,11 +132,12 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
                             if (!availableDimensions.isEmpty()) {
                                 Collections.sort(availableDimensions, DimensionComparator);
                                 if (dimensionsToSelect != null) {
-                                    setSelectedDimensions(dimensionsToSelect);
+                                    setSelectedDimensions(dimensionsToSelect, selectionCallback);
                                 } else {
                                     firstDimensionToGroupByBox.setValue(availableDimensions.iterator().next(), true);
                                 }
                                 dimensionsToSelect = null;
+                                selectionCallback = null;
                             } else {
                                 notifyListeners();
                             }
@@ -144,6 +147,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError("Error fetching the dimensions from the server: " + caught.getMessage());
                             dimensionsToSelect = null;
+                            selectionCallback = null;
                             isUpdating = false;
                         }
                     });
@@ -263,24 +267,30 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
     }
 
     @Override
-    public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
+    public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition, Consumer<Iterable<String>> callback) {
         DataRetrieverChainDefinitionDTO newRetrieverChain = queryDefinition.getDataRetrieverChainDefinition();
         dimensionsToSelect = queryDefinition.getDimensionsToGroupBy();
+        selectionCallback = callback;
         if (!isAwaitingReload && !isUpdating && currentRetrieverChainDefinition.equals(newRetrieverChain)) {
-            setSelectedDimensions(dimensionsToSelect);
+            setSelectedDimensions(dimensionsToSelect, selectionCallback);
             dimensionsToSelect = null;
+            selectionCallback = null;
         }
     }
 
-    private void setSelectedDimensions(Iterable<FunctionDTO> dimensions) {
+    private void setSelectedDimensions(Iterable<FunctionDTO> dimensions, Consumer<Iterable<String>> callback) {
+        Collection<String> callbackMessages = new ArrayList<>();
         int boxIndex = 0;
         for (FunctionDTO dimension : dimensions) {
             int index = availableDimensions.indexOf(dimension);
             if (index != -1) {
                 dimensionToGroupByBoxes.get(boxIndex).setValue(availableDimensions.get(index), true);
                 boxIndex++;
+            } else {
+                callbackMessages.add(getDataMiningStringMessages().groupingDimensionNotAvailable(dimension.getDisplayName()));
             }
         }
+        callback.accept(callbackMessages);
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.Objects;
 import java.util.Set;
 
@@ -83,6 +84,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     private final List<AggregationProcessorDefinitionDTO> availableAggregators;
     
     private AggregationProcessorDefinitionDTO aggregatorToSelect;
+    private Consumer<Iterable<String>> selectionCallback;
 
     public SuggestBoxStatisticProvider(Component<?> parent, ComponentContext<?> componentContext,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
@@ -246,9 +248,10 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
                         Collections.sort(availableAggregators);
                         updateListBox(aggregatorListBox, availableAggregators);
                         
-                        if (aggregatorToSelect != null && availableAggregators.contains(aggregatorToSelect)) {
-                            aggregatorListBox.setValue(aggregatorToSelect, true);
+                        if (aggregatorToSelect != null) {
+                            setAggregator(aggregatorToSelect, selectionCallback);
                             aggregatorToSelect = null;
+                            selectionCallback = null;
                         }
                     }
 
@@ -257,6 +260,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
                         errorReporter.reportError("Error fetching the aggregators for the extraction function'"
                                 + extractionFunction + "': " + caught.getMessage());
                         aggregatorToSelect = null;
+                        selectionCallback = null;
                     }
                 });
         }
@@ -366,28 +370,40 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     }
 
     @Override
-    public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
+    public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition, Consumer<Iterable<String>> callback) {
         DataRetrieverChainDefinitionDTO retrieverChain = queryDefinition.getDataRetrieverChainDefinition();
         FunctionDTO extractionFunction = queryDefinition.getStatisticToCalculate();
         ExtractionFunctionWithContext statistic = new ExtractionFunctionWithContext(retrieverChain, extractionFunction);
         int index = availableExtractionFunctions.indexOf(statistic);
         if (index != -1) {
             statistic = availableExtractionFunctions.get(index);
-        } else {
-            availableExtractionFunctions.add(statistic);
-        }
-
-        DataRetrieverChainDefinitionDTO oldRetrieverChain = getDataRetrieverChainDefinition();
-        extractionFunctionSuggestBox.setExtractionFunction(statistic);
-        
-        AggregationProcessorDefinitionDTO aggregator = queryDefinition.getAggregatorDefinition();
-        if (retrieverChain.equals(oldRetrieverChain)) {
-            if (availableAggregators.contains(aggregator)) {
-                aggregatorListBox.setValue(aggregator);
+            DataRetrieverChainDefinitionDTO oldRetrieverChain = getDataRetrieverChainDefinition();
+            extractionFunctionSuggestBox.setExtractionFunction(statistic);
+            
+            aggregatorToSelect = queryDefinition.getAggregatorDefinition();
+            selectionCallback = callback;
+            if (retrieverChain.equals(oldRetrieverChain)) {
+                setAggregator(aggregatorToSelect, selectionCallback);
+                aggregatorToSelect = null;
+                selectionCallback = null;
             }
         } else {
-            aggregatorToSelect = aggregator;
+            String errorMessage = getDataMiningStringMessages().statisticNotAvailable(
+                    extractionFunction.getDisplayName());
+            callback.accept(Collections.singleton(errorMessage));
         }
+    }
+
+    private void setAggregator(AggregationProcessorDefinitionDTO aggregator, Consumer<Iterable<String>> callback) {
+        Iterable<String> callbackMessages = Collections.emptySet();
+        if (availableAggregators.contains(aggregator)) {
+            aggregatorListBox.setValue(aggregator, true);
+        } else {
+            String errorMessage = getDataMiningStringMessages()
+                    .aggregatorNotAvailable(aggregator.getDisplayName());
+            callbackMessages = Collections.singleton(errorMessage);
+        }
+        callback.accept(callbackMessages);
     }
 
     @Override

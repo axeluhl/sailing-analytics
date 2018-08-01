@@ -22,7 +22,6 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
-import com.sap.sse.datamining.ui.client.FilterSelectionChangedListener;
 import com.sap.sse.datamining.ui.client.FilterSelectionPresenter;
 import com.sap.sse.datamining.ui.client.FilterSelectionProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
@@ -32,7 +31,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSettings> implements
-        FilterSelectionPresenter, FilterSelectionChangedListener, DataRetrieverChainDefinitionChangedListener {
+        FilterSelectionPresenter, DataRetrieverChainDefinitionChangedListener {
 
     private final FilterSelectionProvider filterSelectionProvider;
     private DataRetrieverChainDefinitionDTO retrieverChain;

@@ -6,18 +6,27 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Consumer;
 
+import com.google.gwt.dom.builder.shared.HtmlBuilderFactory;
+import com.google.gwt.dom.builder.shared.HtmlUListBuilder;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.ValueListBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.SerializableSettings;
@@ -40,6 +49,7 @@ import com.sap.sse.datamining.ui.client.GroupingChangedListener;
 import com.sap.sse.datamining.ui.client.GroupingProvider;
 import com.sap.sse.datamining.ui.client.StatisticChangedListener;
 import com.sap.sse.datamining.ui.client.StatisticProvider;
+import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.datamining.ui.client.WithControls;
 import com.sap.sse.datamining.ui.client.developer.PredefinedQueryRunner;
 import com.sap.sse.datamining.ui.client.developer.QueryDefinitionViewer;
@@ -74,6 +84,10 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     private final GroupingProvider groupingProvider;
     private final SplitLayoutPanel filterSplitPanel;
     private final FilterSelectionProvider filterSelectionProvider;
+    
+    private final DialogBox confirmChangeLossDialog;
+    private StatisticQueryDefinitionDTO queryDefinitionToBeApplied;
+    private boolean queryDefinitionChanged;
 
     public QueryDefinitionProviderWithControls(Component<?> parent, ComponentContext<?> context,
             DataMiningSession session, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
@@ -119,6 +133,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             addControl(queryDefinitionViewerToggleButton);
             addControl(predefinedQueryRunner.getEntryWidget());
         }
+        
+        confirmChangeLossDialog = createConfirmChangeLossDialog();
 
         statisticProvider = new SuggestBoxStatisticProvider(parent, context, dataMiningService,
                                                             errorReporter, settingsControl, settingsManager);
@@ -130,8 +146,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         groupingProvider.addGroupingChangedListener(providerListener);
         groupingProvider.getEntryWidget().addStyleName("dataMiningMarginBase");
 
-        filterSelectionProvider = new HierarchicalDimensionListFilterSelectionProvider(
-                parent, context, session, getDataMiningStringMessages(), dataMiningService, errorReporter, statisticProvider);
+        filterSelectionProvider = new HierarchicalDimensionListFilterSelectionProvider(parent, context, session,
+                dataMiningService, errorReporter, statisticProvider);
         filterSelectionProvider.addSelectionChangedListener(providerListener);
         filterSelectionProvider.getEntryWidget().addStyleName("dataMiningBorderTop");
         
@@ -156,6 +172,40 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         providers.add(groupingProvider);
         providers.add(filterSelectionProvider);
         reloadComponents();
+    }
+
+    private DialogBox createConfirmChangeLossDialog() {
+        StringMessages stringMessages = getDataMiningStringMessages();
+        
+        DialogBox dialog = new DialogBox(false, true);
+        dialog.setAnimationEnabled(true);
+        dialog.setText(stringMessages.changesWillBeLost());
+        dialog.setGlassEnabled(true);
+
+        VerticalPanel contentPanel = new VerticalPanel();
+        contentPanel.setSpacing(5);
+        contentPanel.add(new HTML(new SafeHtmlBuilder()
+                .appendEscapedLines(stringMessages.confirmQueryDefinitionChangeLoss()).toSafeHtml()));
+        
+        HorizontalPanel buttonPanel = new HorizontalPanel();
+        buttonPanel.setSpacing(5);
+        buttonPanel.setHorizontalAlignment(HorizontalPanel.ALIGN_RIGHT);
+        contentPanel.add(buttonPanel);
+        
+        Button discardChanges = new Button(stringMessages.discardChanges());
+        discardChanges.addClickHandler(e -> {
+            dialog.hide();
+            setQueryDefinition(queryDefinitionToBeApplied);
+            queryDefinitionToBeApplied = null;
+        });
+        buttonPanel.add(discardChanges);
+        
+        Button keepChanges = new Button(stringMessages.keepChanges());
+        keepChanges.addClickHandler(e -> dialog.hide());
+        buttonPanel.add(keepChanges);
+
+        dialog.setWidget(contentPanel);
+        return dialog;
     }
 
     /**
@@ -245,13 +295,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         dialog.show();
     }
 
-    @Override
-    public void awaitReloadComponents() {
-        // Nothing to do here
-    }
-
-    @Override
-    public boolean isAwaitingReload() {
+    public boolean providersAwaitingReload() {
         for (DataMiningComponentProvider<?> provider : providers) {
             if (provider.isAwaitingReload()) {
                 return true;
@@ -289,12 +333,105 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
     @Override
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
+        if (queryDefinitionChanged) {
+            queryDefinitionToBeApplied = queryDefinition;
+            confirmChangeLossDialog.center();
+        } else {
+            setQueryDefinition(queryDefinition);
+        }
+    }
+
+    private void setQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
+        // TODO The error dialog doesn't work for predefined queries, since they aren't localized
+        Set<ApplyCallback> callbacks = new HashSet<>();
+        Collection<String> errorMessages = new ArrayList<>();
+        String retrieverChainName = queryDefinition.getDataRetrieverChainDefinition().getName();
+        
         setBlockChangeNotification(true);
-        statisticProvider.applyQueryDefinition(queryDefinition);
-        groupingProvider.applyQueryDefinition(queryDefinition);
-        filterSelectionProvider.applyQueryDefinition(queryDefinition);
-        setBlockChangeNotification(false);
-        notifyQueryDefinitionChanged();
+        
+        ApplyCallback statisticCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
+        callbacks.add(statisticCallback);
+        statisticProvider.applyQueryDefinition(queryDefinition, statisticCallback);
+        // The statistic wasn't available, if the callback was called immediately and an error occurred
+        // Applying the query to the remaining component providers can be skipped
+        if (!callbacks.isEmpty() || errorMessages.isEmpty()) {
+            ApplyCallback groupingCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
+            callbacks.add(groupingCallback);
+            groupingProvider.applyQueryDefinition(queryDefinition, groupingCallback);
+            
+            ApplyCallback filterCallback = new ApplyCallback(errorMessages, callbacks, retrieverChainName);
+            callbacks.add(filterCallback);
+            filterSelectionProvider.applyQueryDefinition(queryDefinition, filterCallback);
+        }
+        
+        if (!callbacks.isEmpty()) {
+            for (ApplyCallback callback : callbacks) {
+                callback.isArmed = true;
+            }
+        } else {
+            if (!errorMessages.isEmpty()) {
+                showErrorWhileApplyingQueryDialog(errorMessages, retrieverChainName);
+            }
+            setBlockChangeNotification(false);
+            queryDefinitionChanged = false;
+        }
+    }
+    
+    private void showErrorWhileApplyingQueryDialog(Iterable<String> errorMessages, String retrieverChainName) {
+        StringMessages stringMessages = getDataMiningStringMessages();
+        
+        DialogBox dialog = new DialogBox(false, true);
+        dialog.setText(stringMessages.anErrorOccurredWhileApplyingTheQuery());
+        dialog.setAnimationEnabled(true);
+        dialog.setGlassEnabled(true);
+        
+        VerticalPanel contentPanel = new VerticalPanel();
+        contentPanel.add(new HTML(SafeHtmlUtils.fromString(stringMessages.queryBasedOnRetrieverChainCanNotBeApplied(retrieverChainName))));
+        
+        HtmlUListBuilder messagesBuilder = HtmlBuilderFactory.get().createUListBuilder();
+        for (String errorMessage : errorMessages) {
+            messagesBuilder.startLI().text(errorMessage).end();
+        }
+        contentPanel.add(new HTML(messagesBuilder.asSafeHtml()));
+        
+        HorizontalPanel buttonPanel = new HorizontalPanel();
+        buttonPanel.setHorizontalAlignment(HorizontalPanel.ALIGN_RIGHT);
+        contentPanel.add(buttonPanel);
+        
+        Button okButton = new Button(stringMessages.ok());
+        okButton.addClickHandler(e -> dialog.hide());
+        buttonPanel.add(okButton);
+
+        dialog.setWidget(contentPanel);
+        dialog.center();
+    }
+
+    private class ApplyCallback implements Consumer<Iterable<String>> {
+        
+        private final Collection<String> allMessages;
+        private final Set<ApplyCallback> callbacks;
+        private final String retrieverChainName;
+        private boolean isArmed;
+
+        public ApplyCallback(Collection<String> allMessages, Set<ApplyCallback> callbacks, String retrieverChainName) {
+            this.allMessages = allMessages;
+            this.callbacks = callbacks;
+            this.retrieverChainName = retrieverChainName;
+        }
+
+        @Override
+        public void accept(Iterable<String> messages) {
+            Util.addAll(messages, allMessages);
+            callbacks.remove(this);
+            if (isArmed && callbacks.isEmpty()) {
+                if (!allMessages.isEmpty()) {
+                    showErrorWhileApplyingQueryDialog(allMessages, retrieverChainName);
+                }
+                setBlockChangeNotification(false);
+                queryDefinitionChanged = false;
+            }
+        }
+        
     }
 
     @Override
@@ -377,41 +514,40 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
         @Override
         public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
-            if (isAwaitingReload()) {
+            if (providersAwaitingReload()) {
                 groupingProvider.dataRetrieverChainDefinitionChanged(newDataRetrieverChainDefinition);
                 groupingProvider.reloadComponents();
 
                 filterSelectionProvider.dataRetrieverChainDefinitionChanged(newDataRetrieverChainDefinition);
                 filterSelectionProvider.reloadComponents();
             } else {
-                notifyQueryDefinitionChanged();
+                queryDefinitionChanged();
             }
         }
 
         @Override
         public void aggregatorDefinitionChanged(AggregationProcessorDefinitionDTO newAggregatorDefinition) {
-            if (!isAwaitingReload()) {
-                notifyQueryDefinitionChanged();
-            }
+            queryDefinitionChanged();
         }
 
         @Override
         public void extractionFunctionChanged(FunctionDTO extractionFunction) {
-            if (!isAwaitingReload()) {
-                notifyQueryDefinitionChanged();
-            }
+            queryDefinitionChanged();
         }
 
         @Override
         public void groupingChanged() {
-            if (!isAwaitingReload()) {
-                notifyQueryDefinitionChanged();
-            }
+            queryDefinitionChanged();
         }
 
         @Override
         public void selectionChanged() {
-            if (!isAwaitingReload()) {
+            queryDefinitionChanged();
+        }
+
+        private void queryDefinitionChanged() {
+            if (!providersAwaitingReload()) {
+                queryDefinitionChanged = true;
                 notifyQueryDefinitionChanged();
             }
         }

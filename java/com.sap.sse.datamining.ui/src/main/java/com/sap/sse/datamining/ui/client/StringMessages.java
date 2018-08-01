@@ -66,5 +66,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String filterShownDimensions();
     String selectDimensionsToFilterBy();
     String clear();
+    String changesWillBeLost();
+    String confirmQueryDefinitionChangeLoss();
+    String discardChanges();
+    String keepChanges();
+    String anErrorOccurredWhileApplyingTheQuery();
+    String queryBasedOnRetrieverChainCanNotBeApplied(String retrieverChainName);
+    String statisticNotAvailable(String statisticName);
+    String aggregatorNotAvailable(String aggregatorName);
+    String filterDimensionNotAvailable(String dimensionName);
+    String filterValueNotAvailable(String value);
+    String groupingDimensionNotAvailable(String dimensionName);
     
 }
