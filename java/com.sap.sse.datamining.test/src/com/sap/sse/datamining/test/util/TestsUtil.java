@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.test.util;
 
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
@@ -55,12 +56,16 @@ public class TestsUtil {
     }
     
     public static ModifiableDataMiningServer createNewServer() {
+        return createNewServer(ConcurrencyTestsUtil.getSharedExecutor());
+    }
+    
+    public static ModifiableDataMiningServer createNewServer(ExecutorService executor) {
         FunctionRegistry functionRegistry = new FunctionManager();
         DataSourceProviderRegistry dataSourceProviderRegistry = new DataSourceProviderManager();
         DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new DataRetrieverChainDefinitionManager();
         AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry = new AggregationProcessorDefinitionManager();
         QueryDefinitionDTORegistry queryDefinitionRegistry = new QueryDefinitionDTOManager();
-        return new DataMiningServerImpl(ConcurrencyTestsUtil.getExecutor(), functionRegistry,
+        return new DataMiningServerImpl(executor, functionRegistry,
                                         dataSourceProviderRegistry,
                                         dataRetrieverChainDefinitionRegistry,
                                         aggregationProcessorDefinitionRegistry,

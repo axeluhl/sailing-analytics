@@ -117,6 +117,7 @@ stop_httpd() {
 # See how we were called.
 case "$1" in
   start)
+	/usr/sbin/update-motd
 	start_servers
 	touch /var/lock/subsys/sailing
     ;;
