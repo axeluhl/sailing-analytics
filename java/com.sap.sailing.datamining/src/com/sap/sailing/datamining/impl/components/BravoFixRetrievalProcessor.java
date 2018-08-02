@@ -24,21 +24,24 @@ public class BravoFixRetrievalProcessor extends AbstractRetrievalProcessor<HasTr
     @Override
     protected Iterable<HasBravoFixContext> retrieveData(HasTrackedLegOfCompetitorContext element) {
         Collection<HasBravoFixContext> bravoFixesWithContext = new ArrayList<>();
-        BravoFixTrack<Competitor> bravoFixTrack = element.getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getSensorTrack(element.getCompetitor(), BravoFixTrack.TRACK_NAME);
-        if (bravoFixTrack != null) {
-            bravoFixTrack.lockForRead();
-            try {
-                TrackedLegOfCompetitor trackedLegOfCompetitor = element.getTrackedLegOfCompetitor();
-                if (trackedLegOfCompetitor.getStartTime() != null && trackedLegOfCompetitor.getFinishTime() != null) {
+        TrackedLegOfCompetitor trackedLegOfCompetitor = element.getTrackedLegOfCompetitor();
+        if (trackedLegOfCompetitor.getStartTime() != null && trackedLegOfCompetitor.getFinishTime() != null) {
+            BravoFixTrack<Competitor> bravoFixTrack = element.getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getSensorTrack(element.getCompetitor(), BravoFixTrack.TRACK_NAME);
+            if (bravoFixTrack != null) {
+                bravoFixTrack.lockForRead();
+                try {
                     for (BravoFix bravoFix : bravoFixTrack.getFixes(trackedLegOfCompetitor.getStartTime(), true, trackedLegOfCompetitor.getFinishTime(), true)) {
+                        if (isAborted()) {
+                            break;
+                        }
                         BravoFixWithContext gpsFixWithContext = new BravoFixWithContext(
                                 new TrackedLegOfCompetitorWithSpecificTimePointWithContext(
                                         element.getTrackedLegContext(), element.getTrackedLegOfCompetitor(), bravoFix.getTimePoint()), bravoFix);
                         bravoFixesWithContext.add(gpsFixWithContext);
                     }
+                } finally {
+                    bravoFixTrack.unlockAfterRead();
                 }
-            } finally {
-                bravoFixTrack.unlockAfterRead();
             }
         }
         return bravoFixesWithContext;

@@ -35,6 +35,9 @@ public class PolarLegRetrievalProcessor extends AbstractRetrievalProcessor<HasFl
         if (raceDefinition != null) {
             Course course = raceDefinition.getCourse();
             for (Leg leg : course.getLegs()) {
+                if (isAborted()) {
+                    break;
+                }
                 legWithContext.add(new LegWithPolarContext(leg, trackedRace, element));
             }
         } 

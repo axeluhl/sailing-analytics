@@ -50,6 +50,9 @@ public class ParallelDistanceMedianAggregationProcessor
     protected Map<GroupKey, Distance> aggregateResult() {
         Map<GroupKey, Distance> result = new HashMap<>();
         for (Entry<GroupKey, List<Distance>> groupedValuesEntry : groupedValues.entrySet()) {
+            if (isAborted()) {
+                break;
+            }
             result.put(groupedValuesEntry.getKey(), getMedianOf(groupedValuesEntry.getValue()));
         }
         return result;
