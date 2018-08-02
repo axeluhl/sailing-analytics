@@ -6,6 +6,7 @@ import java.util.List;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.Select;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
@@ -121,9 +122,12 @@ public class SeriesEditDialogPO extends DataEntryDialogPO {
         for(WebElement editorRow : getRaceNameEditors()) {
             WebElement valueTextBox = findElementBySeleniumId(editorRow, "ValueTextBox");
             
-            if(races.contains(valueTextBox.getAttribute("value"))) {
+            if (races.contains(valueTextBox.getAttribute("value"))) {
                 WebElement removeButton = findElementBySeleniumId(editorRow, "RemoveButton");
-                removeButton.click();
+                // A simple "removeButton.click();" does not work on GeckoDriver here.
+                // This only presses the button down but a click isn't detected.
+                // It seems that the mouseup event isn't correctly fired, why we use this workaround.
+                new Actions(driver).sendKeys(removeButton, "\13").perform();
             }
         }
     }
