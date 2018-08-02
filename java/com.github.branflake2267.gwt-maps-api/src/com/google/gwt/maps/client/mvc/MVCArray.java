@@ -70,7 +70,7 @@ public class MVCArray<T extends JavaScriptObject> extends MVCObject<T> {
    * 
    * @param array one ore more objects (like T[] or T)
    */
-  public final static <T extends JavaScriptObject> MVCArray<T> newInstance(T... array) {
+  public final static <T extends JavaScriptObject> MVCArray<T> newInstance(@SuppressWarnings("unchecked") T... array) {
     if (array == null) {
       return null;
     }

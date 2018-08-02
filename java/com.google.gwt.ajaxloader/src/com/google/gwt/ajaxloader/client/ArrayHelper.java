@@ -91,7 +91,7 @@ public class ArrayHelper {
     return ret;
   }
 
-  public static <J extends JavaScriptObject> JsArray<J> toJsArray(J... objects) {
+  public static <J extends JavaScriptObject> JsArray<J> toJsArray(@SuppressWarnings("unchecked") J... objects) {
     JsArray<J> result = JsArray.createArray().cast();
     for (int i = 0; i < objects.length; i++) {
       result.set(i, objects[i]);
