@@ -1226,7 +1226,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private void updateBoatPositions(final Date newTime, final long transitionTimeInMillis,
             final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
             final Iterable<CompetitorDTO> competitorsToShow, Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData, boolean updateTailsOnly) {
-        if (zoomingAnimationsInProgress == 0) {
+        if (zoomingAnimationsInProgress == 0 || currentlyDragging) {
             fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis);
             showBoatsOnMap(newTime, transitionTimeInMillis,
                     /* re-calculate; it could have changed since the asynchronous request was made: */
@@ -1298,7 +1298,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
        
     private void showCourseMarksOnMap(CoursePositionsDTO courseDTO, long transitionTimeInMillis) {
-        if (zoomingAnimationsInProgress == 0) {
+        if (zoomingAnimationsInProgress == 0 || currentlyDragging) {
             if (map != null && courseDTO != null) {
                 WaypointDTO endWaypointForCurrentLegNumber = null;
                 if (courseDTO.currentLegNumber > 0 && courseDTO.currentLegNumber <= courseDTO.totalLegsCount) {

@@ -232,11 +232,15 @@ public abstract class CanvasOverlayV3 {
 
     protected abstract void draw();
 
+    protected void onAttach() {
+    }
+
     protected OverlayViewOnAddHandler getOnAddHandler() {
         OverlayViewOnAddHandler result = new OverlayViewOnAddHandler() {
             @Override
             public void onAdd(OverlayViewMethods methods) {
                 methods.getPanes().getMapPane().appendChild(canvas.getElement());
+                CanvasOverlayV3.this.onAttach();
             }
         };
         return result;
