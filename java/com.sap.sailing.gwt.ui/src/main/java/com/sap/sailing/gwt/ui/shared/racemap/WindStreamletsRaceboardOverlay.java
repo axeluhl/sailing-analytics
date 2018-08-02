@@ -337,12 +337,18 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     protected void drawCenterChanged() {
     }
 
+    /** removes the mutation observer if one is present */
     protected void removeObserverIfPresent() {
         if (observer != null) {
             observer.disconnect();
             observer = null;
         }
     }
+
+    /**
+     * adds a mutation observer to the map canvas to react on style changes, if the transform property changes because
+     * the user pans the map around
+     */
     private void addObserverIfNecessary() {
         if (ElementStyleMutationObserver.isSupported() && observer == null) {
             observer = new ElementStyleMutationObserver(
