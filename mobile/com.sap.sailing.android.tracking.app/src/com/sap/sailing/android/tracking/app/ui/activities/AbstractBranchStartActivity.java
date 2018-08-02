@@ -21,6 +21,8 @@ import org.json.JSONObject;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 
+import static io.branch.referral.Defines.Jsonkey.Clicked_Branch_Link;
+
 public abstract class AbstractBranchStartActivity<C extends BaseCheckinData> extends CheckinDataActivity<C> {
 
     private final static String TAG = com.sap.sailing.android.tracking.app.ui.activities.AbstractBranchStartActivity.class.getName();
@@ -51,7 +53,7 @@ public abstract class AbstractBranchStartActivity<C extends BaseCheckinData> ext
             public void onInitFinished(JSONObject referringParams, BranchError error) {
                 if (error == null) {
                     try {
-                        Boolean clickedBranchLink = referringParams.getBoolean("+clicked_branch_link");
+                        Boolean clickedBranchLink = referringParams.getBoolean(Clicked_Branch_Link.getKey());
                         if (!clickedBranchLink) {
                             AbstractBranchStartActivity.this.handleLegacyStart();
                             return;
