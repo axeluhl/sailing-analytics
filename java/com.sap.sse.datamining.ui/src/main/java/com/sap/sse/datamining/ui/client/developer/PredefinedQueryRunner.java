@@ -61,7 +61,7 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
         });
 
         dialogBox = new DialogBox(false, true);
-        dialogBox.setText(stringMessages.viewQueryDefinition());
+        dialogBox.setText(stringMessages.runPredefinedQuery());
         dialogBox.setAnimationEnabled(true);
 
         Button closeButton = new Button(stringMessages.close(), new ClickHandler() {
