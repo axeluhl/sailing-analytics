@@ -4,8 +4,8 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 
 /**
- * A mutation observer specialized in observing the position by observing the top, left, bottom and right attributes of
- * a DOM element in order to recognize element position changes.
+ * A mutation observer specialized in observing the style attributes of a DOM element in order to recognize element
+ * style changes.
  */
 public class ElementStyleMutationObserver {
     public static interface DomStyleMutationCallback {
