@@ -2,7 +2,6 @@ package com.sap.sailing.domain.racelogtracking.impl;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
@@ -24,7 +23,6 @@ import com.sap.sse.mail.SerializableDefaultMimeBodyPartSupplier;
 import com.sap.sse.mail.SerializableFileMimeBodyPartSupplier;
 import com.sap.sse.mail.SerializableMultipartMimeBodyPartSupplier;
 import com.sap.sse.mail.SerializableMultipartSupplier;
-import com.sap.sse.qrcode.QRCodeGenerationUtil;
 import com.sap.sse.shared.media.ImageDescriptor;
 
 /**
@@ -39,13 +37,9 @@ class RaceLogTrackingInvitationMailBuilder {
      * systems.
      */
     private static final String TEXT_LINE_BREAK = "\r\n";
-
-    /**
-     * URL prefix, so the iOS app will recognize as deep link and pass anything after it to the app for analysis.
-     */
-    private static final String IOS_DEEP_LINK_PREFIX = "comsapsailingtracker://";
     
     private static final String SAIL_INSIGHT_BRANCH_DEEPLINK = "https://d-labs.app.link/YUAdvnZjEO";
+    private static final String BUOY_PINGER_BRANCH_DEEPLINK = "https://a0by.app.link/7menO7xs3O";
 
     private final Locale locale;
     private final Map<String,byte[]> pngAttachAndInline = new HashMap<>();
@@ -77,7 +71,7 @@ class RaceLogTrackingInvitationMailBuilder {
     }
 
     RaceLogTrackingInvitationMailBuilder addSailInSightIntroductoryText(final String invitee) {
-        this.addIntroductoryTextForBranchDeeplink(RaceLogTrackingI18n.sailInSightAppName(locale), invitee);
+        this.addIntroductoryText(RaceLogTrackingI18n.sailInSightAppName(locale), invitee);
         return this;
     }
 
@@ -102,86 +96,16 @@ class RaceLogTrackingInvitationMailBuilder {
         }
         return this;
     }
-
-    RaceLogTrackingInvitationMailBuilder addQrCodeImage(final String url) {
-        try (DataInputStream imageIs = new DataInputStream(QRCodeGenerationUtil.create(url, 250))) {
-            byte[] targetArray = new byte[imageIs.available()];
-            imageIs.readFully(targetArray);
-            insertImage(targetArray, "qr", url);
-        } catch (Exception e) {
-            LOG.log(Level.WARNING, "Error while generating QR code for invitation mail", e);
-        }
-        return this;
-    }
     
-    RaceLogTrackingInvitationMailBuilder addQrCodeDeeplinkImage(final String url) {
-    	String deeplink = String.format("%s?checkinUrl=%s", SAIL_INSIGHT_BRANCH_DEEPLINK, url);
-    	return this.addQrCodeImage(deeplink);
-    }
-
-    RaceLogTrackingInvitationMailBuilder addOpenInAppTextAndLinks(final String targetUrl, final String iOSAppUrl,
-            final String androidAppUrl) {
-        final boolean hasIOSAppUrl = iOSAppUrl != null && !iOSAppUrl.isEmpty();
-        final boolean hasAndroidAppUrl = androidAppUrl != null && !androidAppUrl.isEmpty();
-        if (hasIOSAppUrl || hasAndroidAppUrl) {
-            this.html.append("<p>").append(RaceLogTrackingI18n.alternativelyVisitThisLink(this.locale)).append("</p>");
-        }
-        this.html.append("<table border=\"0\" cellspacing=\"20px\" cellpadding=\"0px\">");
-        this.html.append("<tr>");
-        if (hasIOSAppUrl) {
-            this.html.append("<td>");
-            this.addHtmlLink(IOS_DEEP_LINK_PREFIX + targetUrl, RaceLogTrackingI18n::iOSUsers);
-            this.html.append("</td>");
-            this.addTextLink(IOS_DEEP_LINK_PREFIX + targetUrl, RaceLogTrackingI18n::iOSUsers);
-        }
-        if (hasAndroidAppUrl) {
-            this.html.append("<td>");
-            this.addHtmlLink(targetUrl, RaceLogTrackingI18n::androidUsers);
-            this.html.append("</td>");
-            this.addTextLink(targetUrl, RaceLogTrackingI18n::androidUsers);
-        }
-        this.html.append("</tr>");
-        this.html.append("</table>");
-        return this;
-    }
-
-    RaceLogTrackingInvitationMailBuilder addInstallAppTextAndLinks(final String iOSAppUrl, final String androidAppUrl) {
-        final boolean hasIOSAppUrl = iOSAppUrl != null && !iOSAppUrl.isEmpty();
-        final boolean hasAndroidAppUrl = androidAppUrl != null && !androidAppUrl.isEmpty();
-        if (hasIOSAppUrl || hasAndroidAppUrl) {
-            this.html.append("<p>").append(RaceLogTrackingI18n.appStoreInstallText(this.locale)).append("</p>");
-            text.append(RaceLogTrackingI18n.appStoreInstallText(locale));
-            text.append(TEXT_LINE_BREAK);
-        }
-        this.html.append("<table border=\"0\" cellspacing=\"20px\" cellpadding=\"0px\">");
-        this.html.append("<tr>");
-        if (hasIOSAppUrl) {
-            this.html.append("<td>");
-            this.addHtmlLink(iOSAppUrl, RaceLogTrackingI18n::appIos);
-            this.html.append("</td>");
-            this.addTextLink(iOSAppUrl, RaceLogTrackingI18n::appIos);
-        }
-        if (hasAndroidAppUrl) {
-            this.html.append("<td>");
-            this.addHtmlLink(androidAppUrl, RaceLogTrackingI18n::appAndroid);
-            this.html.append("</td>");
-            this.addTextLink(androidAppUrl, RaceLogTrackingI18n::appAndroid);
-        }
-        this.html.append("</tr>");
-        this.html.append("</table>");
-        return this;
-    }
-    
-    RaceLogTrackingInvitationMailBuilder addSailInsightBranchDeeplink(final String checkinUrl) {
+    RaceLogTrackingInvitationMailBuilder addSailInsightDeeplink(final String checkinUrl) {
     	String deeplink = String.format("%s?checkinUrl=%s", SAIL_INSIGHT_BRANCH_DEEPLINK, checkinUrl);
-        this.html.append("<table border=\"0\" cellspacing=\"20px\" cellpadding=\"0px\">");
-        this.html.append("<tr>");
-        this.html.append("<td>");
-        this.addHtmlLink(deeplink, RaceLogTrackingI18n::register);
-        this.html.append("</td>");
-        this.addTextLink(deeplink, RaceLogTrackingI18n::register);
-        this.html.append("</tr>");
-        this.html.append("</table>");
+    	this.addDeeplink(deeplink, RaceLogTrackingI18n::register);
+    	return this;
+    }
+    
+    RaceLogTrackingInvitationMailBuilder addBuoyPingerDeeplink(final String checkinUrl) {
+    	String deeplink = String.format("%s?checkinUrl=%s", BUOY_PINGER_BRANCH_DEEPLINK, checkinUrl);
+    	this.addDeeplink(deeplink, RaceLogTrackingI18n::register);
     	return this;
     }
 
@@ -213,14 +137,19 @@ class RaceLogTrackingInvitationMailBuilder {
         
         return mixedSupplier;
     }
-
-    private void addIntroductoryText(final String appName, final String invitee) {
-        final String introText = RaceLogTrackingI18n.scanQRCodeOrVisitUrlToRegisterAs(locale, appName);
-        this.html.append("<p>").append(introText).append(" <b>").append(invitee).append("</b></p>");
-        this.text.append(introText).append(" ").append(invitee).append(TEXT_LINE_BREAK).append(TEXT_LINE_BREAK);
+    
+    private void addDeeplink(final String url, final Function<Locale, String> textFactory) {
+        this.html.append("<table border=\"0\" cellspacing=\"20px\" cellpadding=\"0px\">");
+        this.html.append("<tr>");
+        this.html.append("<td>");
+        this.addHtmlLink(url, textFactory);
+        this.html.append("</td>");
+        this.addTextLink(url, textFactory);
+        this.html.append("</tr>");
+        this.html.append("</table>");
     }
     
-    private void addIntroductoryTextForBranchDeeplink(final String appName, final String invitee) {
+    private void addIntroductoryText(final String appName, final String invitee) {
         final String introText = RaceLogTrackingI18n.followBranchDeeplink(locale, appName, invitee);
         this.html.append("<p>").append(introText).append("</p>");
         this.text.append(introText).append(" ").append(invitee).append(TEXT_LINE_BREAK).append(TEXT_LINE_BREAK);
@@ -255,4 +184,5 @@ class RaceLogTrackingInvitationMailBuilder {
         this.html.append("</tr></table>");
         this.html.append("</a>");
     }
+    
 }
