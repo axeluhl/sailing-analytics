@@ -306,12 +306,14 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
                     this.streamletLegend.setVisible(true);
                 }
                 this.startStreamlets();
+                Scheduler.get().scheduleDeferred(() -> addObserverIfNecessary());
                 this.visible = isVisible;
             } else {
                 if (this.windField.getColors()) {
                     this.streamletLegend.setVisible(false);
                 }
                 this.stopStreamlets();
+                removeObserverIfPresent();
                 this.visible = isVisible;
             }
         }
@@ -335,6 +337,12 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     protected void drawCenterChanged() {
     }
 
+    protected void removeObserverIfPresent() {
+        if (observer != null) {
+            observer.disconnect();
+            observer = null;
+        }
+    }
     private void addObserverIfNecessary() {
         if (ElementStyleMutationObserver.isSupported() && observer == null) {
             observer = new ElementStyleMutationObserver(
@@ -357,7 +365,6 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
 
     public void onDragStart() {
         dragging = true;
-        Scheduler.get().scheduleDeferred(() -> addObserverIfNecessary());
 
     }
 
