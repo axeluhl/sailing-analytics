@@ -2829,7 +2829,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
         List<SwissTimingConfigurationDTO> result = new ArrayList<SwissTimingConfigurationDTO>();
         for (SwissTimingConfiguration stConfig : configs) {
-            result.add(new SwissTimingConfigurationDTO(stConfig.getName(), stConfig.getJsonURL(), stConfig.getHostname(), stConfig.getPort()));
+            result.add(new SwissTimingConfigurationDTO(stConfig.getName(), stConfig.getJsonURL(),
+                    stConfig.getHostname(), stConfig.getPort(), stConfig.getUpdateURL(), stConfig.getUpdateUsername(),
+                    stConfig.getUpdatePassword()));
         }
         return result;
     }
@@ -2867,9 +2869,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port) {
+    public void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port, String updateURL, String updateUsername, String updatePassword) {
         if (!jsonURL.equalsIgnoreCase("test")) {
-            swissTimingAdapterPersistence.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, jsonURL, hostname, port));
+            swissTimingAdapterPersistence.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, jsonURL, hostname, port, updateURL, updateUsername, updatePassword));
         }
     }
     

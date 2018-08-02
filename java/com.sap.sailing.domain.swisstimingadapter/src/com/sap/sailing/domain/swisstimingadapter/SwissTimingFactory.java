@@ -49,7 +49,7 @@ public interface SwissTimingFactory {
 
     SailMasterTransceiver createSailMasterTransceiver();
 
-    SwissTimingConfiguration createSwissTimingConfiguration(String name, String jsonURL, String hostname, Integer port);
+    SwissTimingConfiguration createSwissTimingConfiguration(String name, String jsonURL, String hostname, Integer port, String updateURL, String updateUsername, String updatePassword);
     
     SwissTimingRaceTracker createRaceTracker(String raceID, String raceName, String raceDescription,
             BoatClass boatClass, String hostname, int port, StartList startList, long delayToLiveInMillis,

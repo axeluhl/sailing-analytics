@@ -83,8 +83,8 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     }
 
     @Override
-    public SwissTimingConfiguration createSwissTimingConfiguration(String name, String jsonURL, String hostname, Integer port) {
-        return new SwissTimingConfigurationImpl(name, jsonURL, hostname, port);
+    public SwissTimingConfiguration createSwissTimingConfiguration(String name, String jsonURL, String hostname, Integer port, String updateURL, String updateUsername, String updatePassword) {
+        return new SwissTimingConfigurationImpl(name, jsonURL, hostname, port, updateURL, updateUsername, updatePassword);
     }
 
     @Override
