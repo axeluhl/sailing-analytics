@@ -37,6 +37,7 @@ import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.MarkPositionAtTimePointCacheImpl;
 import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sse.common.Bearing;
@@ -1455,12 +1456,26 @@ public class CandidateFinderImpl implements CandidateFinder {
     /**
      * If the {@link #race}'s regatta is configured to infer the start times from start mark passings then {@code null}
      * must be tolerated as a value for {@code from}, leading to an open interval starting at the
-     * {@link TimePoint#BeginningOfTime beginning of time}. However, if the start time is expected to be set and not
-     * inferred, mark passings need to be detected only from the start minus some tolerance interval. In this case,
-     * an interval that has {@code null} as its {@code from} time point and thus is considered empty will be returned.
-     * It hence returns {@code null} from its {@link TimeRangeWithNullStartMeaningEmpty#getTimeRangeOrNull()} method.
+     * {@link TrackedRace#getStartOfTracking()} or, if not set, the {@link TimePoint#BeginningOfTime beginning of time}.
+     * However, if the start time is expected to be set and not inferred, mark passings need to be detected only from
+     * the start minus some tolerance interval. In this case, an interval that has {@code null} as its {@code from} time
+     * point and thus is considered empty will be returned. It hence returns {@code null} from its
+     * {@link TimeRangeWithNullStartMeaningEmpty#getTimeRangeOrNull()} method.
      */
     private TimeRangeWithNullStartMeaningEmpty getTimeRangeOrNull(TimePoint from, TimePoint to) {
+        final TimePoint effectiveFrom = getEffectiveFrom(from);
+        return new TimeRangeWithNullStartMeaningEmpty(effectiveFrom, to);
+    }
+
+    /**
+     * If the {@link #race}'s regatta is configured to infer the start times from start mark passings then {@code null}
+     * must be tolerated as a value for {@code from}, leading to an open interval starting at the
+     * {@link TrackedRace#getStartOfTracking()} or, if not set, the {@link TimePoint#BeginningOfTime beginning of time}.
+     * However, if the start time is expected to be set and not inferred, mark passings need to be detected only from
+     * the start minus some tolerance interval. In this case, for an interval that has {@code null} as its {@code from} time
+     * point and thus is considered empty, {@code null} will be returned.
+     */
+    private TimePoint getEffectiveFrom(TimePoint from) {
         final TimePoint effectiveFrom;
         if (from == null && race.getTrackedRegatta().getRegatta().useStartTimeInference()) {
             // need to check the whole track to be able to find start mark passings
@@ -1470,15 +1485,22 @@ public class CandidateFinderImpl implements CandidateFinder {
         } else {
             effectiveFrom = from;
         }
-        return new TimeRangeWithNullStartMeaningEmpty(effectiveFrom, to);
+        return effectiveFrom;
     }
     
     @Override
     public Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> getCandidateDeltasAfterRaceStartTimeChange() {
-        final Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> result;
         final TimePoint newNonInferredStartTime = race.getStartOfRace(/* inferred */ false);
         final TimePoint newTimePointWhenToStartConsideringCandidates = getTimePointWhenToStartConsideringCandidates(newNonInferredStartTime);
-        final TimeRangeWithNullStartMeaningEmpty newTimeRange = timeRangeForValidCandidates.getWithNewFrom(newTimePointWhenToStartConsideringCandidates);
+        final TimePoint newEffectiveTimePointWhenToStartConsideringCandidates = getEffectiveFrom(newTimePointWhenToStartConsideringCandidates);
+        final TimeRangeWithNullStartMeaningEmpty newTimeRange = timeRangeForValidCandidates.getWithNewFrom(newEffectiveTimePointWhenToStartConsideringCandidates);
+        return getCandidateDeltasAfterTimingChange(newEffectiveTimePointWhenToStartConsideringCandidates, newTimeRange);
+    }
+
+    private Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> getCandidateDeltasAfterTimingChange(
+            final TimePoint newTimePointWhenToStartConsideringCandidates,
+            final TimeRangeWithNullStartMeaningEmpty newTimeRange) {
+        final Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> result;
         if (!Util.equalsWithNull(newTimeRange, timeRangeForValidCandidates)) {
             if (newTimeRange.getTimeRangeOrNull() == null) {
                 result = clearAllCandidates();
@@ -1497,6 +1519,15 @@ public class CandidateFinderImpl implements CandidateFinder {
             result = Collections.emptyMap();
         }
         return result;
+    }
+
+    @Override
+    public Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> getCandidateDeltasAfterStartOfTrackingChange() {
+        final TimePoint newNonInferredStartTime = race.getStartOfRace(/* inferred */ false);
+        final TimePoint newTimePointWhenToStartConsideringCandidates = getTimePointWhenToStartConsideringCandidates(newNonInferredStartTime);
+        final TimePoint newEffectiveTimePointWhenToStartConsideringCandidates = getEffectiveFrom(newTimePointWhenToStartConsideringCandidates);
+        final TimeRangeWithNullStartMeaningEmpty newTimeRange = timeRangeForValidCandidates.getWithNewFrom(newEffectiveTimePointWhenToStartConsideringCandidates);
+        return getCandidateDeltasAfterTimingChange(newEffectiveTimePointWhenToStartConsideringCandidates, newTimeRange);
     }
 
     @Override

@@ -48,7 +48,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
 
     @Test
     public void testAbstractAggregationHandling() throws InterruptedException {
-        Processor<GroupedDataEntry<Integer>, Map<GroupKey, Integer>> processor = new AbstractParallelGroupedDataStoringAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, "Sum") {
+        Processor<GroupedDataEntry<Integer>, Map<GroupKey, Integer>> processor = new AbstractParallelGroupedDataStoringAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getSharedExecutor(), receivers, "Sum") {
             @Override
             protected void storeElement(GroupedDataEntry<Integer> element) {
                 elementStore.add(element);
@@ -104,7 +104,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
                 }
             }
         });
-        Processor<GroupedDataEntry<Integer>, Map<GroupKey, Integer>> processor = new AbstractParallelGroupedDataStoringAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, "Sum") {
+        Processor<GroupedDataEntry<Integer>, Map<GroupKey, Integer>> processor = new AbstractParallelGroupedDataStoringAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getSharedExecutor(), receivers, "Sum") {
             @Override
             protected void storeElement(GroupedDataEntry<Integer> element) {
                 if (element.getDataEntry() < 0) {

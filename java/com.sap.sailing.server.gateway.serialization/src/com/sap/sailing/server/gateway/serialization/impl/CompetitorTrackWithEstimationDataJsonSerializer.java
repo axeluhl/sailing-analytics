@@ -26,7 +26,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
  *
  */
 public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTrackedRaceDataJsonSerializer {
-    public static final String elements = "elements";
+    public static final String ELEMENTS = "elements";
     public static final String BOAT_CLASS = "boatClass";
     public static final String COMPETITOR_NAME = "competitorName";
     public static final String AVG_INTERVAL_BETWEEN_FIXES_IN_SECONDS = "avgIntervalBetweenFixesInSeconds";
@@ -67,27 +67,27 @@ public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTra
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
             TrackTimeInfo trackTimeInfo = maneuverDetector.getTrackTimeInfo();
-            TimePoint from = null;
-            TimePoint to = null;
-            if (startBeforeStartLineInSeconds != null) {
-                from = trackTimeInfo.getTrackStartTimePoint()
-                        .minus(new MillisecondsDurationImpl(startBeforeStartLineInSeconds * 1000L));
-            } else if (startAfterFinishLineInSeconds != null) {
-                from = trackTimeInfo.getTrackEndTimePoint()
-                        .plus(new MillisecondsDurationImpl(startAfterFinishLineInSeconds * 1000L));
-            } else {
-                from = trackTimeInfo.getTrackStartTimePoint();
-            }
-            if (endAfterFinishLineInSeconds != null) {
-                to = trackTimeInfo.getTrackEndTimePoint()
-                        .plus(new MillisecondsDurationImpl(endAfterFinishLineInSeconds * 1000L));
-            } else if (endBeforeStartLineInSeconds != null) {
-                to = trackTimeInfo.getTrackStartTimePoint()
-                        .minus(new MillisecondsDurationImpl(endBeforeStartLineInSeconds * 1000L));
-            } else {
-                to = trackTimeInfo.getTrackEndTimePoint();
-            }
             if (trackTimeInfo != null) {
+                TimePoint from = null;
+                TimePoint to = null;
+                if (startBeforeStartLineInSeconds != null) {
+                    from = trackTimeInfo.getTrackStartTimePoint()
+                            .minus(new MillisecondsDurationImpl(startBeforeStartLineInSeconds * 1000L));
+                } else if (startAfterFinishLineInSeconds != null) {
+                    from = trackTimeInfo.getTrackEndTimePoint()
+                            .plus(new MillisecondsDurationImpl(startAfterFinishLineInSeconds * 1000L));
+                } else {
+                    from = trackTimeInfo.getTrackStartTimePoint();
+                }
+                if (endAfterFinishLineInSeconds != null) {
+                    to = trackTimeInfo.getTrackEndTimePoint()
+                            .plus(new MillisecondsDurationImpl(endAfterFinishLineInSeconds * 1000L));
+                } else if (endBeforeStartLineInSeconds != null) {
+                    to = trackTimeInfo.getTrackStartTimePoint()
+                            .minus(new MillisecondsDurationImpl(endBeforeStartLineInSeconds * 1000L));
+                } else {
+                    to = trackTimeInfo.getTrackEndTimePoint();
+                }
                 final JSONObject forCompetitorJson = new JSONObject();
                 byCompetitorJson.add(forCompetitorJson);
                 forCompetitorJson.put(COMPETITOR_NAME, competitor.getName());
@@ -111,7 +111,7 @@ public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTra
                         : trackTimeInfo.getTrackEndTimePoint().asMillis());
                 forCompetitorJson.put(MARK_PASSINGS_COUNT, getMarkPassingsCount(trackedRace, competitor));
                 forCompetitorJson.put(WAYPOINTS_COUNT, getWaypointsCount(trackedRace));
-                forCompetitorJson.put(elements,
+                forCompetitorJson.put(ELEMENTS,
                         elementsJsonSerializer.serialize(trackedRace, competitor, from, to, trackTimeInfo));
             }
         }
