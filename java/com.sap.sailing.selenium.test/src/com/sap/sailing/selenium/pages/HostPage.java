@@ -3,6 +3,7 @@ package com.sap.sailing.selenium.pages;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -78,5 +79,9 @@ public abstract class HostPage extends PageObject {
     
     public String getCurrentUrl() {
         return driver.getCurrentUrl();
+    }
+
+    protected void scrollToTop() {
+        ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, 0);");
     }
 }
