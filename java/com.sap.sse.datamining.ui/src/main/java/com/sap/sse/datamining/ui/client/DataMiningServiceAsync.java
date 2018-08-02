@@ -55,11 +55,15 @@ public interface DataMiningServiceAsync {
 
     void getPredefinedQueryIdentifiers(AsyncCallback<HashSet<PredefinedQueryIdentifier>> callback);
     
-    void getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier, AsyncCallback<StatisticQueryDefinitionDTO> callback);
+    void getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier, String localeInfoName,
+            AsyncCallback<StatisticQueryDefinitionDTO> callback);
 
     <ResultType extends Serializable> void runPredefinedQuery(DataMiningSession session,
             PredefinedQueryIdentifier identifier, String localeInfoName,
             AsyncCallback<QueryResultDTO<ResultType>> callback);
+    
+    void localize(StatisticQueryDefinitionDTO queryDefinition, String localeInfoName,
+            AsyncCallback<StatisticQueryDefinitionDTO> callback);
 
     /**
      * This method does nothing, but is needed to ensure, that some classes for the data mining (like

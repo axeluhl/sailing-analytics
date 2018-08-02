@@ -342,9 +342,10 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     }
 
     private void setQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
-        // TODO The error dialog doesn't work for predefined queries, since they aren't localized
         Set<ApplyCallback> callbacks = new HashSet<>();
         Collection<String> errorMessages = new ArrayList<>();
+        errorMessages.add("Test");
+        errorMessages.add(queryDefinition.getStatisticToCalculate().getDisplayName());
         String retrieverChainName = queryDefinition.getDataRetrieverChainDefinition().getName();
         
         setBlockChangeNotification(true);

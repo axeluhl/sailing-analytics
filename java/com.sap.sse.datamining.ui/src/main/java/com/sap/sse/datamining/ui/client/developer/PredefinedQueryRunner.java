@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -138,17 +139,18 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
 
     protected void runSelectedPredefinedQuery() {
         PredefinedQueryIdentifier predefinedQueryIdentifier = selectionListBox.getValue();
-        dataMiningService.getPredefinedQueryDefinition(predefinedQueryIdentifier, new AsyncCallback<StatisticQueryDefinitionDTO>() {
-            @Override
-            public void onSuccess(StatisticQueryDefinitionDTO queryDefinition) {
-                queryDefinitionProvider.applyQueryDefinition(queryDefinition);
-                queryRunner.accept(queryDefinition);
-            }
-            @Override
-            public void onFailure(Throwable error) {
-                errorReporter.reportError("Error running the query: " + error.getMessage());
-            }
-        });
+        dataMiningService.getPredefinedQueryDefinition(predefinedQueryIdentifier,
+                LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<StatisticQueryDefinitionDTO>() {
+                    @Override
+                    public void onSuccess(StatisticQueryDefinitionDTO queryDefinition) {
+                        queryDefinitionProvider.applyQueryDefinition(queryDefinition);
+                        queryRunner.accept(queryDefinition);
+                    }
+                    @Override
+                    public void onFailure(Throwable error) {
+                        errorReporter.reportError("Error running the query: " + error.getMessage());
+                    }
+                });
         dialogBox.hide();
     }
 

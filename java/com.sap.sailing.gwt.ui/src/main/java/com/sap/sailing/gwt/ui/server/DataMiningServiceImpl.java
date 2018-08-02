@@ -350,10 +350,10 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
     
     @Override
-    public StatisticQueryDefinitionDTO getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier) {
+    public StatisticQueryDefinitionDTO getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier, String localeInfoName) {
         SecurityUtils.getSubject().checkPermission(
                 Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, identifier.getIdentifier()));
-        return getDataMiningServer().getPredefinedQueryDefinitionDTO(identifier);
+        return localize(getDataMiningServer().getPredefinedQueryDefinitionDTO(identifier), localeInfoName);
     }
 
     @Override
@@ -369,6 +369,16 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
             return runQuery(session, queryDefinitionDTO);
         }
         return null;
+    }
+    
+    @Override
+    public StatisticQueryDefinitionDTO localize(StatisticQueryDefinitionDTO queryDefinitionDTO, String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ,
+                queryDefinitionDTO.getDataRetrieverChainDefinition().getName()));
+        DataMiningServer dataMiningServer = getDataMiningServer();
+        StatisticQueryDefinition<?, ?, ?, ?> queryDefinition = dataMiningServer.getQueryDefinitionForDTO(queryDefinitionDTO);
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+        return dtoFactory.createQueryDefinitionDTO(queryDefinition, dataMiningServer.getStringMessages(), locale, localeInfoName);
     }
 
     @Override
