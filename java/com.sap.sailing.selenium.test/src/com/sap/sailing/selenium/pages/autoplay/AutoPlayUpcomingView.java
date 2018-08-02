@@ -1,13 +1,13 @@
 package com.sap.sailing.selenium.pages.autoplay;
 
 import java.util.List;
+import java.util.function.Function;
 
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.google.common.base.Function;
 import com.sap.sailing.selenium.pages.PageArea;
 
 public class AutoPlayUpcomingView extends PageArea {
