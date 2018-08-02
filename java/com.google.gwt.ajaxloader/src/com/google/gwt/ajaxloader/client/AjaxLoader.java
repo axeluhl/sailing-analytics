@@ -253,7 +253,6 @@ public class AjaxLoader {
    * Called back when the jsapi is finished loaded. It must kick of any API
    * loads that have been queued while waiting on jsapi to finish loading.
    */
-  @SuppressWarnings("unused")
   private static void onLoadCallback() {
     loaded = true;
 
