@@ -21,6 +21,8 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -84,12 +86,12 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                             for (UserDeletedEventHandler userDeletedHandler : userDeletedHandlers) {
                                 userDeletedHandler.onUserDeleted(userToDelete);
                             }
-                            Window.alert(result.getMessage());
+                            Notification.notify(result.getMessage(), NotificationType.SUCCESS);
                         }
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert(stringMessages.errorDeletingUser(username, caught.getMessage()));
+                            errorReporter.reportError(stringMessages.errorDeletingUser(username, caught.getMessage()));
                         }
                     });
                 }

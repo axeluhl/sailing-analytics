@@ -11,7 +11,6 @@ import java.util.UUID;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratorPanel;
@@ -27,6 +26,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -130,20 +131,20 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
                                                 if (caught instanceof UserManagementException) {
                                                     String message = ((UserManagementException) caught).getMessage();
                                                     if (UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS.equals(message)) {
-                                                        Window.alert(stringMessages.passwordDoesNotMeetRequirements());
+                                                        errorReporter.reportError(stringMessages.passwordDoesNotMeetRequirements());
                                                     } else if (UserManagementException.INVALID_CREDENTIALS.equals(message)) {
-                                                        Window.alert(stringMessages.invalidCredentials());
+                                                        errorReporter.reportError(stringMessages.invalidCredentials());
                                                     } else {
-                                                        Window.alert(stringMessages.errorChangingPassword(caught.getMessage()));
+                                                        errorReporter.reportError(stringMessages.errorChangingPassword(caught.getMessage()));
                                                     }
                                                 } else {
-                                                    Window.alert(stringMessages.errorChangingPassword(caught.getMessage()));
+                                                    errorReporter.reportError(stringMessages.errorChangingPassword(caught.getMessage()));
                                                 }
                                             }
 
                                             @Override
                                             public void onSuccess(Void result) {
-                                                Window.alert(stringMessages.passwordSuccessfullyChanged());
+                                                Notification.notify(stringMessages.passwordSuccessfullyChanged(), NotificationType.SUCCESS);
                                             }
                                         }));
                             }
