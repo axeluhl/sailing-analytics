@@ -72,12 +72,6 @@
        
        With IE 10/11, only the 32Bit version works by the time of writing.
        
-       In addition, versions 3.11 to 3.13 are known bad because these often fail with a
-       org.openqa.selenium.ElementClickInterceptedException in case of modal GWT dialogs are shown.
-       This is probably related to the following bug: https://github.com/SeleniumHQ/selenium/issues/5935
-       If you see suspicous ElementClickInterceptedExceptions, use IEDriverServer version 3.10:
-       https://selenium-release.storage.googleapis.com/index.html?path=3.10/
-       
        Some further configuration steps may be required depending on the OS and IE version:
        https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver#required-configuration
      -->
