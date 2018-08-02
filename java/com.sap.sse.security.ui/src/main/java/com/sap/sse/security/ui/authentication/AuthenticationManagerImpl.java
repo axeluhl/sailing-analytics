@@ -10,6 +10,8 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContextImpl;
@@ -279,7 +281,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     private class ErrorMessageViewImpl implements ErrorMessageView {
         @Override
         public void setErrorMessage(String errorMessage) {
-            Window.alert(errorMessage);
+            Notification.notify(errorMessage, NotificationType.ERROR);
         }
     }
 }

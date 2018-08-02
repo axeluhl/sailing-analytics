@@ -2,8 +2,9 @@ package com.sap.sse.security.ui.client.component;
 
 import java.util.HashMap;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -39,7 +40,7 @@ public class CreateUserDialog extends AbstractUserDialog {
 
                                             @Override
                                             public void onFailure(Throwable caught) {
-                                                Window.alert(stringMessages.couldNotCreateUser(caught.getMessage()));
+                                                Notification.notify(stringMessages.couldNotCreateUser(caught.getMessage()), NotificationType.ERROR);
                                             }
                                         });
                     }

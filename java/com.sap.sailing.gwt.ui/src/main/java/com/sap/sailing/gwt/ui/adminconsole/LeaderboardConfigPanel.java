@@ -71,6 +71,8 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
@@ -382,7 +384,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         otherExistingLeaderboard.addAll(availableLeaderboardList);
         otherExistingLeaderboard.remove(leaderboardDTO);
         if (leaderboardDTO.type.isMetaLeaderboard()) {
-            Window.alert(stringMessages.metaLeaderboardCannotBeChanged());
+            Notification.notify(stringMessages.metaLeaderboardCannotBeChanged(), NotificationType.ERROR);
         } else {
             AbstractLeaderboardDialog<?> dialog;
             switch (leaderboardDTO.type) {
@@ -439,7 +441,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                         leaderboardDTO.scoringScheme));
                 break;
             default:
-                Window.alert(stringMessages.unknownLeaderboardType(leaderboardDTO.type.name()));
+                Notification.notify(stringMessages.unknownLeaderboardType(leaderboardDTO.type.name()), NotificationType.ERROR);
             }
         }
     }
@@ -533,7 +535,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             @Override
             public void onClick(ClickEvent event) {
                 if (getSelectedLeaderboard().type.isRegattaLeaderboard()) {
-                    Window.alert(stringMessages.cannotAddRacesToRegattaLeaderboardButOnlyToRegatta());
+                    Notification.notify(stringMessages.cannotAddRacesToRegattaLeaderboardButOnlyToRegatta(), NotificationType.ERROR);
                 } else {
                     addRaceColumnsToLeaderboard();
                 }
@@ -655,7 +657,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                             @Override
                             public void onSuccess(Boolean result) {
                                 if (!result) {
-                                    Window.alert(stringMessages.failedToSetNewStartTime());
+                                    Notification.notify(stringMessages.failedToSetNewStartTime(), NotificationType.ERROR);
                                 }
                             }
                         });
@@ -682,7 +684,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                             @Override
                             public void onSuccess(Pair<Boolean, Boolean> result) {
                                 if (!result.getA() || !result.getB()) {
-                                    Window.alert(stringMessages.failedToSetNewFinishingAndFinishTime());
+                                    Notification.notify(stringMessages.failedToSetNewFinishingAndFinishTime(), NotificationType.ERROR);
                                 }
                             }
                         });

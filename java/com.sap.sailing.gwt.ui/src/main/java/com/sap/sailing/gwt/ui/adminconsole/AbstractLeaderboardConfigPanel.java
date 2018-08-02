@@ -50,6 +50,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
@@ -282,7 +284,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                         refreshRaceLog(column, fleet, false);
                     }
                 }
-                Window.alert(stringMessages.raceLogReloaded());
+                Notification.notify(stringMessages.raceLogReloaded(), NotificationType.ERROR);
             }
         });
         vPanel.add(reloadAllRaceLogs);
@@ -431,7 +433,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                     @Override
                     public void onSuccess(Void result) {
                         if (showAlerts) {
-                            Window.alert(stringMessages.raceLogReloaded());
+                            Notification.notify(stringMessages.raceLogReloaded(), NotificationType.SUCCESS);
                         }
                     }
                 }));

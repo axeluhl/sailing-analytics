@@ -40,6 +40,8 @@ import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
@@ -258,10 +260,10 @@ public class IgtimiAccountsPanel extends FlowPanel {
                                 @Override
                                 public void onSuccess(Boolean result) {
                                     if (result) {
-                                        Window.alert(stringMessages.successfullyAuthorizedAccessToIgtimiUser(editedObject.geteMail()));
+                                        Notification.notify(stringMessages.successfullyAuthorizedAccessToIgtimiUser(editedObject.geteMail()), NotificationType.SUCCESS);
                                         updateAllAccounts(sailingService, filterAccountsPanel, stringMessages, errorReporter);
                                     } else {
-                                        Window.alert(stringMessages.couldNotAuthorizedAccessToIgtimiUser(editedObject.geteMail()));
+                                        Notification.notify(stringMessages.couldNotAuthorizedAccessToIgtimiUser(editedObject.geteMail()), NotificationType.ERROR);
                                     }
                                 }
                             });
@@ -328,7 +330,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
 
             @Override
             public void onSuccess(Void result) {
-                Window.alert(stringMessages.successfullyRemoveIgtimiAccount(eMailOfAccountToRemove));
+                Notification.notify(stringMessages.successfullyRemoveIgtimiAccount(eMailOfAccountToRemove), NotificationType.INFO);
                 removeFrom.getList().remove(eMailOfAccountToRemove);
             }
         });

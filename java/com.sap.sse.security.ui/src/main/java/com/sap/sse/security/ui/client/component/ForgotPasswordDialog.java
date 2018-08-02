@@ -2,11 +2,12 @@ package com.sap.sse.security.ui.client.component;
 
 import java.util.HashMap;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
@@ -36,12 +37,12 @@ public class ForgotPasswordDialog extends AbstractUserDialog {
                     public void onFailure(Throwable caught) {
                         if (caught instanceof UserManagementException) {
                             if (UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL.equals(caught.getMessage())) {
-                                Window.alert(StringMessages.INSTANCE.cannotResetPasswordWithoutValidatedEmail(userData.getUsername()));
+                                Notification.notify(StringMessages.INSTANCE.cannotResetPasswordWithoutValidatedEmail(userData.getUsername()), NotificationType.ERROR);
                             } else {
-                                Window.alert(StringMessages.INSTANCE.errorDuringPasswordReset(caught.getMessage()));
+                                Notification.notify(StringMessages.INSTANCE.errorDuringPasswordReset(caught.getMessage()), NotificationType.ERROR);
                             }
                         } else {
-                            Window.alert(StringMessages.INSTANCE.errorDuringPasswordReset(caught.getMessage()));
+                            Notification.notify(StringMessages.INSTANCE.errorDuringPasswordReset(caught.getMessage()), NotificationType.ERROR);
                         }
                     }
     
@@ -57,7 +58,7 @@ public class ForgotPasswordDialog extends AbstractUserDialog {
                             }
                             nameOrEmail.append(userData.getEmail());
                         }
-                        Window.alert(StringMessages.INSTANCE.passwordResetLinkSent(nameOrEmail.toString()));
+                        Notification.notify(StringMessages.INSTANCE.passwordResetLinkSent(nameOrEmail.toString()), NotificationType.INFO);
                     }
                 }));
             }

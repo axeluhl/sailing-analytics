@@ -18,9 +18,9 @@ public abstract class HostPage extends PageObject {
     protected static final String NO_CODE_SERVER_PARAMTER_VALUE = ""; //$NON-NLS-1$
     
     /**
-     * </p>The default timeout of 60 seconds for the initialization of the page object.</p>
+     * </p>The default timeout of 120 seconds for the initialization of the page object.</p>
      */
-    protected static final int DEFAULT_PAGE_LOAD_TIMEOUT = 120;
+    protected static final int DEFAULT_PAGE_LOAD_TIMEOUT_IN_SECONDS = 120;
     
     public static final String getGWTCodeServerAndLocale() {
         StringBuilder queryBuilder = new StringBuilder("locale=en");
@@ -64,13 +64,12 @@ public abstract class HostPage extends PageObject {
      */
     @Override
     protected void initElements() {
-        waitForAjaxRequests(getPageLoadTimeOut(), 5);
-        
+        waitForAjaxRequests(getPageLoadTimeOutInSeconds(), 5 /* seconds */);
         super.initElements();
     }
     
-    protected int getPageLoadTimeOut() {
-        return DEFAULT_PAGE_LOAD_TIMEOUT;
+    protected int getPageLoadTimeOutInSeconds() {
+        return DEFAULT_PAGE_LOAD_TIMEOUT_IN_SECONDS;
     }
     
     protected interface HostPageSupplier<T extends HostPage> {

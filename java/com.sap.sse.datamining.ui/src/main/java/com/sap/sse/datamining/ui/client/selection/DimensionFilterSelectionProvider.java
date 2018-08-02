@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.ui.client.selection.filter;
+package com.sap.sse.datamining.ui.client.selection;
 
 import java.io.Serializable;
 import java.util.ArrayList;

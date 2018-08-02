@@ -59,6 +59,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
@@ -141,7 +143,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
             public void onClick(ClickEvent event) {
                 Set<MediaTrack> selected = refreshableSelectionModel.getSelectedSet();
                 if (selected.isEmpty()) {
-                    Window.alert(stringMessages.noSelection());
+                    Notification.notify(stringMessages.noSelection(), NotificationType.ERROR);
                 } else {
                     new MultiURLChangeDialog(mediaService, stringMessages, selected, errorReporter,
                             new Runnable() {

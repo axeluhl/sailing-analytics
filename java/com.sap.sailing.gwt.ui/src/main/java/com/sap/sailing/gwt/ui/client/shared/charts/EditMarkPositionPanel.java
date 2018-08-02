@@ -5,9 +5,11 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -64,7 +66,6 @@ import com.google.gwt.maps.client.events.rightclick.RightClickMapHandler;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -97,6 +98,7 @@ import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
@@ -131,6 +133,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     
     private final RaceIdentifierToLeaderboardRaceColumnAndFleetMapper raceIdentifierToLeaderboardRaceColumnAndFleetMapper;
     protected boolean nonTrackingWarningWasDisplayed;
+
+    private final Set<MarkDTO> marksCurrentlyRequestedViaRemoteCall = new HashSet<>();
 
     public EditMarkPositionPanel(Component<?> parent, ComponentContext<?> context, final RaceMap raceMap,
             final SingleRaceLeaderboardPanel leaderboardPanel,
@@ -735,10 +739,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
             }
             raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
         } else {
-            if (currentFixPositionChooser != null) {
-                currentFixPositionChooser.cancel();
-                currentFixPositionChooser = null;
-            }
+            cancelFixPositionChooserAndNotification();
             marksPanel.deselectMark();
             selectedMark = null;
             if (sideBySideComponentViewer != null) {
@@ -754,6 +755,17 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         super.setVisible(visible);
     }
 
+    private void cancelFixPositionChooserAndNotification() {
+        if (currentFixPositionChooser != null) {
+            currentFixPositionChooser.cancel();
+            currentFixPositionChooser = null;
+            if (notificationTimer.isRunning()) {
+                notificationTimer.run();
+                notificationTimer.cancel();
+            }
+        }
+    }
+
     private void checkIfTracking(Runnable continuation) {
         if (nonTrackingWarningWasDisplayed) {
             continuation.run();
@@ -761,14 +773,14 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
             sailingService.checkIfRaceIsTracking(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    Window.alert(stringMessages.serverError());
+                    Notification.notify(stringMessages.serverError(), Notification.NotificationType.ERROR);
                     continuation.run();
                 }
 
                 @Override
                 public void onSuccess(Boolean result) {
                     if (Boolean.FALSE.equals(result)) {
-                        Window.alert(stringMessages.positionEditOnNonTrackingRace());
+                        Notification.notify(stringMessages.positionEditOnNonTrackingRace(), Notification.NotificationType.WARNING);
                         nonTrackingWarningWasDisplayed = true;
                     }
                     continuation.run();
@@ -859,11 +871,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     }
     
     private void selectMark(MarkDTO mark) {
-        selectedMark = mark;
-        if (currentFixPositionChooser != null) {
-            currentFixPositionChooser.cancel();
-            currentFixPositionChooser = null;
+        if (selectedMark != mark) {
+            cancelFixPositionChooserAndNotification();
         }
+        selectedMark = mark;
         if (selectedMark != null) {
             if (marksFromToTimes.get(selectedMark) != null) {
                 // For some reason the time slider does not change with this method only if you comment out line 430 and 432 in TimePanel it works
@@ -905,24 +916,43 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     @Override
     public void onSelectionChange(SelectionChangeEvent event) {
         final MarkDTO mark = marksPanel.getSelectedMark();
+        retrieveAndSelectMarkIfNecessary(mark, null);
+    }
+
+    protected void retrieveAndSelectMarkIfNecessary(final MarkDTO mark, final Runnable callback) {
         if (mark != null && (marks.get(mark) == null || marks.get(mark).isEmpty())) {
-            if (mark != null) {
-                markPositionService.getMarkTrack(raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier), 
+            
+            if (marksCurrentlyRequestedViaRemoteCall.add(mark)) {
+                markPositionService.getMarkTrack(
+                        raceIdentifierToLeaderboardRaceColumnAndFleetMapper
+                                .getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier),
                         mark.getIdAsString(), new AsyncCallback<MarkTrackDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                errorReporter.reportError(stringMessages.errorCommunicatingWithServer()+": "+caught.getMessage());
+                                marksCurrentlyRequestedViaRemoteCall.remove(mark);
+                                errorReporter.reportError(
+                                        stringMessages.errorCommunicatingWithServer() + ": " + caught.getMessage());
                             }
-    
+
                             @Override
                             public void onSuccess(MarkTrackDTO result) {
+                                marksCurrentlyRequestedViaRemoteCall.remove(mark);
                                 createMarkTrackUi(mark, result.getFixes());
                                 selectMark(mark);
+                                if (callback != null) {
+                                    callback.run();
+                                }
                             }
                         });
             }
+            else {
+                // remote call of the same mark already in progress -> ignore this request
+            }
         } else {
             selectMark(mark);
+            if (callback != null) {
+                callback.run();
+            }
         }
     }
     
