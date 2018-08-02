@@ -70,6 +70,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     private double latitudeSum;
     private ElementStyleMutationObserver observer;
     private boolean dragging = false;
+    private boolean isAttached = false, startObserverWhenAttached = false;
 
     public WindStreamletsRaceboardOverlay(MapWidget map, int zIndex, final Timer timer,
             RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService,
@@ -299,6 +300,14 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     }
 
     @Override
+    protected void onAttach() {
+        isAttached = true;
+        if (startObserverWhenAttached) {
+            Scheduler.get().scheduleDeferred(() -> addObserverIfNecessary());
+        }
+    }
+
+    @Override
     public void setVisible(boolean isVisible) {
         if (getCanvas() != null) {
             if (isVisible) {
@@ -306,7 +315,11 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
                     this.streamletLegend.setVisible(true);
                 }
                 this.startStreamlets();
-                Scheduler.get().scheduleDeferred(() -> addObserverIfNecessary());
+                if (isAttached) {
+                    Scheduler.get().scheduleDeferred(() -> addObserverIfNecessary());
+                } else {
+                    startObserverWhenAttached = true;
+                }
                 this.visible = isVisible;
             } else {
                 if (this.windField.getColors()) {
