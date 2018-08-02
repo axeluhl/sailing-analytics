@@ -94,7 +94,6 @@ public class FileStoragePanel extends FlowPanel {
         propertiesListDataProvider = new ListDataProvider<>(new ArrayList<FileStorageServicePropertyDTO>());
         properties = propertiesListDataProvider.getList();
         propertiesListDataProvider.addDataDisplay(propertiesTable);
-
         TextColumn<FileStorageServicePropertyDTO> nameColumn = new TextColumn<FileStorageServicePropertyDTO>() {
             @Override
             public String getValue(FileStorageServicePropertyDTO p) {
@@ -102,7 +101,6 @@ public class FileStoragePanel extends FlowPanel {
             }
         };
         propertiesTable.addColumn(nameColumn, stringMessages.name());
-
         Column<FileStorageServicePropertyDTO, String> inputColumn = new Column<FileStorageServicePropertyDTO, String>(
                 new TabbingTextInputCell()) {
             @Override
@@ -258,12 +256,10 @@ public class FileStoragePanel extends FlowPanel {
         perPropertyErrors.clear();
         serviceDescriptionLabel.setText("");
         FileStorageServiceDTO selected = availableServices.get(getSelectedServiceName());
-        if (selected == null) {
-            return;
+        if (selected != null) {
+            serviceDescriptionLabel.setText(selected.description);
+            properties.addAll(Arrays.asList(selected.properties));
         }
-
-        serviceDescriptionLabel.setText(selected.description);
-        properties.addAll(Arrays.asList(selected.properties));
     }
     
     private String getLocaleInfo() {
