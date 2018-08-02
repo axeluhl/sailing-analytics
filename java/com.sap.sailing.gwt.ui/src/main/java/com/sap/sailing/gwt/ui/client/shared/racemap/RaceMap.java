@@ -1226,15 +1226,19 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private void updateBoatPositions(final Date newTime, final long transitionTimeInMillis,
             final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
             final Iterable<CompetitorDTO> competitorsToShow, Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData, boolean updateTailsOnly) {
-        fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis);
-        showBoatsOnMap(newTime, transitionTimeInMillis,
-                /* re-calculate; it could have changed since the asynchronous request was made: */ getCompetitorsToShow(),
-                updateTailsOnly);
-        if (!updateTailsOnly) {
-            showCompetitorInfoOnMap(newTime, transitionTimeInMillis, competitorSelection.getSelectedFilteredCompetitors());
-            // even though the wind data is retrieved by a separate call, re-draw the advantage line because it needs to
-            // adjust to new boat positions
-            showAdvantageLine(competitorsToShow, newTime, transitionTimeInMillis);
+        if (zoomingAnimationsInProgress == 0) {
+            fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis);
+            showBoatsOnMap(newTime, transitionTimeInMillis,
+                    /* re-calculate; it could have changed since the asynchronous request was made: */
+                    getCompetitorsToShow(), updateTailsOnly);
+            if (!updateTailsOnly) {
+                showCompetitorInfoOnMap(newTime, transitionTimeInMillis,
+                        competitorSelection.getSelectedFilteredCompetitors());
+
+                // even though the wind data is retrieved by a separate call, re-draw the advantage line because it
+                // needs to adjust to new boat positions
+                showAdvantageLine(competitorsToShow, newTime, transitionTimeInMillis);
+            }
         }
     }
 
@@ -1294,44 +1298,46 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
        
     private void showCourseMarksOnMap(CoursePositionsDTO courseDTO, long transitionTimeInMillis) {
-        if (map != null && courseDTO != null) {
-            WaypointDTO endWaypointForCurrentLegNumber = null;
-            if(courseDTO.currentLegNumber > 0 && courseDTO.currentLegNumber <= courseDTO.totalLegsCount) {
-                endWaypointForCurrentLegNumber = courseDTO.getEndWaypointForLegNumber(courseDTO.currentLegNumber);
-            }
-                    
-            Map<String, CourseMarkOverlay> toRemoveCourseMarks = new HashMap<String, CourseMarkOverlay>(courseMarkOverlays);
-            if (courseDTO.marks != null) {
-                for (MarkDTO markDTO : courseDTO.marks) {
-                    boolean isSelected = false;
-                    if (endWaypointForCurrentLegNumber != null && Util.contains(endWaypointForCurrentLegNumber.controlPoint.getMarks(), markDTO)) {
-                        isSelected = true;
-                    }
-                    CourseMarkOverlay courseMarkOverlay = courseMarkOverlays.get(markDTO.getIdAsString());
-                    if (courseMarkOverlay == null) {
-                        courseMarkOverlay = new CourseMarkOverlay(map, RaceMapOverlaysZIndexes.COURSEMARK_ZINDEX, markDTO, coordinateSystem, courseDTO);
-                        courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
-                        courseMarkOverlay.setBuoyZoneRadius(settings.getBuoyZoneRadius());
-                        courseMarkOverlay.setSelected(isSelected);
-                        courseMarkOverlays.put(markDTO.getIdAsString(), courseMarkOverlay);
-                        markDTOs.put(markDTO.getIdAsString(), markDTO);
-                        registerCourseMarkInfoWindowClickHandler(markDTO.getIdAsString());
-                        courseMarkOverlay.addToMap();
-                    } else {
-                        courseMarkOverlay.setMarkPosition(markDTO.position, transitionTimeInMillis);
-                        courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
-                        courseMarkOverlay.setBuoyZoneRadius(settings.getBuoyZoneRadius());
-                        courseMarkOverlay.setSelected(isSelected);
-                        courseMarkOverlay.setCourse(courseDTO);
-                        courseMarkOverlay.draw();
-                        toRemoveCourseMarks.remove(markDTO.getIdAsString());
+        if (zoomingAnimationsInProgress == 0) {
+            if (map != null && courseDTO != null) {
+                WaypointDTO endWaypointForCurrentLegNumber = null;
+                if (courseDTO.currentLegNumber > 0 && courseDTO.currentLegNumber <= courseDTO.totalLegsCount) {
+                    endWaypointForCurrentLegNumber = courseDTO.getEndWaypointForLegNumber(courseDTO.currentLegNumber);
+                }
+
+                Map<String, CourseMarkOverlay> toRemoveCourseMarks = new HashMap<String, CourseMarkOverlay>(courseMarkOverlays);
+                if (courseDTO.marks != null) {
+                    for (MarkDTO markDTO : courseDTO.marks) {
+                        boolean isSelected = false;
+                        if (endWaypointForCurrentLegNumber != null && Util.contains(endWaypointForCurrentLegNumber.controlPoint.getMarks(), markDTO)) {
+                            isSelected = true;
+                        }
+                        CourseMarkOverlay courseMarkOverlay = courseMarkOverlays.get(markDTO.getIdAsString());
+                        if (courseMarkOverlay == null) {
+                            courseMarkOverlay = new CourseMarkOverlay(map, RaceMapOverlaysZIndexes.COURSEMARK_ZINDEX, markDTO, coordinateSystem, courseDTO);
+                            courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
+                            courseMarkOverlay.setBuoyZoneRadius(settings.getBuoyZoneRadius());
+                            courseMarkOverlay.setSelected(isSelected);
+                            courseMarkOverlays.put(markDTO.getIdAsString(), courseMarkOverlay);
+                            markDTOs.put(markDTO.getIdAsString(), markDTO);
+                            registerCourseMarkInfoWindowClickHandler(markDTO.getIdAsString());
+                            courseMarkOverlay.addToMap();
+                        } else {
+                            courseMarkOverlay.setMarkPosition(markDTO.position, transitionTimeInMillis);
+                            courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
+                            courseMarkOverlay.setBuoyZoneRadius(settings.getBuoyZoneRadius());
+                            courseMarkOverlay.setSelected(isSelected);
+                            courseMarkOverlay.setCourse(courseDTO);
+                            courseMarkOverlay.draw();
+                            toRemoveCourseMarks.remove(markDTO.getIdAsString());
+                        }
                     }
                 }
-            }
-            for (String toRemoveMarkIdAsString : toRemoveCourseMarks.keySet()) {
-                CourseMarkOverlay removedOverlay = courseMarkOverlays.remove(toRemoveMarkIdAsString);
-                if (removedOverlay != null) {
-                    removedOverlay.removeFromMap();
+                for (String toRemoveMarkIdAsString : toRemoveCourseMarks.keySet()) {
+                    CourseMarkOverlay removedOverlay = courseMarkOverlays.remove(toRemoveMarkIdAsString);
+                    if (removedOverlay != null) {
+                        removedOverlay.removeFromMap();
+                    }
                 }
             }
         }
