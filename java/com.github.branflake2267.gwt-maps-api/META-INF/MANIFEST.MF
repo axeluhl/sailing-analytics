@@ -7,12 +7,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.google.gwt.user;bundle-version="2.8.2";resolution:=optional,
  com.google.gwt.dev;bundle-version="2.8.2";resolution:=optional,
- com.google.gwt.servlet;bundle-version="2.8.2"
+ com.google.gwt.ajaxloader;bundle-version="1.1.0";visibility:=reexport
 Automatic-Module-Name: com.github.branflake2267.gwt-maps-api
-Bundle-ClassPath: gwt-ajaxloader.jar,
- .
-Export-Package: com.google.gwt.ajaxloader.client,
- com.google.gwt.maps.client,
+Bundle-ClassPath: .
+Export-Package: com.google.gwt.maps.client,
  com.google.gwt.maps.client.adsense,
  com.google.gwt.maps.client.base,
  com.google.gwt.maps.client.controls,
