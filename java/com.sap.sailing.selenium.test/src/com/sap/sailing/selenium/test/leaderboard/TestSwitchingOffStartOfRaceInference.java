@@ -45,7 +45,6 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
     private TrackableRaceDescriptor trackableRace;
     private TrackedRaceDescriptor trackedRace;
     private RaceDescriptor raceColumn;
-    private AdminConsolePage adminConsole;
     
     @Override
     @Before
