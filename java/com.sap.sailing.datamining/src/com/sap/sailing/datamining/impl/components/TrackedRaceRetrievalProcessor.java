@@ -25,7 +25,13 @@ public class TrackedRaceRetrievalProcessor extends AbstractRetrievalProcessor<Ha
     protected Iterable<HasTrackedRaceContext> retrieveData(HasLeaderboardContext element) {
         Collection<HasTrackedRaceContext> trackedRacesWithContext = new ArrayList<>();
         for (RaceColumn raceColumn : element.getLeaderboard().getRaceColumns()) {
+            if (isAborted()) {
+                break;
+            }
             for (Fleet fleet : raceColumn.getFleets()) {
+                if (isAborted()) {
+                    break;
+                }
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null) {
                     Regatta regatta = trackedRace.getTrackedRegatta().getRegatta();

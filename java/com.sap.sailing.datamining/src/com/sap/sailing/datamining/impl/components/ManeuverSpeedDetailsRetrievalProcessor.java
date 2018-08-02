@@ -87,6 +87,10 @@ public class ManeuverSpeedDetailsRetrievalProcessor
 
         double directionChangeForAnalysisSignum = Math.signum(directionChangeInDegreesForAnalysis);
         for (SpeedWithBearingStep bearingStep : maneuverBearingSteps) {
+            if (isAborted()) {
+                break;
+            }
+            
             currentDirectionChangeSumInDegrees += bearingStep.getCourseChangeInDegrees();
             if (previousRoundedTWA != -1
                     && Math.signum(currentDirectionChangeSumInDegrees) != directionChangeForAnalysisSignum
@@ -123,6 +127,9 @@ public class ManeuverSpeedDetailsRetrievalProcessor
                         for (int step = 1, fillingTWA = twaIterationFunction
                                 .apply(previousRoundedTWA); fillingTWA != roundedTWA; fillingTWA = twaIterationFunction
                                         .apply(fillingTWA), ++step) {
+                            if (isAborted()) {
+                                break;
+                            }
                             if (speedPerTWA[fillingTWA] == 0) {
                                 speedPerTWA[fillingTWA] = previousSpeed
                                         + diffWithPreviousSpeed * step / diffWithPreviousTWA;

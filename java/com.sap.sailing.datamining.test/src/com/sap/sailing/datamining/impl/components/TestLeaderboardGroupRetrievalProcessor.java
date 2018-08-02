@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContext;
+import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
 import com.sap.sailing.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sailing.datamining.test.util.NullProcessor;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -27,7 +27,7 @@ import com.sap.sse.datamining.components.Processor;
 public class TestLeaderboardGroupRetrievalProcessor {
     
     private RacingEventService service;
-    private Processor<RacingEventService, LeaderboardGroupWithContext> retriever;
+    private Processor<RacingEventService, HasLeaderboardGroupContext> retriever;
     
     private Collection<LeaderboardGroup> retrievedGroups;
     
@@ -37,14 +37,14 @@ public class TestLeaderboardGroupRetrievalProcessor {
         stub(service.getLeaderboardGroups()).toReturn(getGroupsInService());
 
         retrievedGroups = new HashSet<>();
-        Processor<LeaderboardGroupWithContext, Void> receiver = new NullProcessor<LeaderboardGroupWithContext, Void>(LeaderboardGroupWithContext.class, Void.class) {
+        Processor<HasLeaderboardGroupContext, Void> receiver = new NullProcessor<HasLeaderboardGroupContext, Void>(HasLeaderboardGroupContext.class, Void.class) {
             @Override
-            public void processElement(LeaderboardGroupWithContext element) {
+            public void processElement(HasLeaderboardGroupContext element) {
                 retrievedGroups.add(element.getLeaderboardGroup());
             }
         };
         
-        Collection<Processor<LeaderboardGroupWithContext, ?>> resultReceivers = new ArrayList<>();
+        Collection<Processor<HasLeaderboardGroupContext, ?>> resultReceivers = new ArrayList<>();
         resultReceivers.add(receiver);
         retriever = new LeaderboardGroupRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), resultReceivers, 0);
     }

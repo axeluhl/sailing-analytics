@@ -132,15 +132,15 @@ public class PageObject {
      * 
      * @param input
      *   
-     * @param timeout
+     * @param timeoutInSeconds
      *   
-     * @param polling
+     * @param pollingEverySoManySeconds
      *   
      * @return
      *   
      */
-    public static <T> FluentWait<T> createFluentWait(T input, int timeout, int polling) {
-        return createFluentWait(input, timeout, polling, Collections.<Class<? extends Throwable>>emptyList());
+    public static <T> FluentWait<T> createFluentWait(T input, int timeoutInSeconds, int pollingEverySoManySeconds) {
+        return createFluentWait(input, timeoutInSeconds, pollingEverySoManySeconds, Collections.<Class<? extends Throwable>>emptyList());
     }
     
     /**
@@ -168,20 +168,20 @@ public class PageObject {
      * 
      * @param input
      *   
-     * @param timeout
+     * @param timeoutInSeconds
      *   
-     * @param polling
+     * @param pollingEverySoManySeconds
      *   
      * @param exceptions
      *   
      * @return
      *   
      */
-    public static <T> FluentWait<T> createFluentWait(T input, int timeout, int polling,
+    public static <T> FluentWait<T> createFluentWait(T input, int timeoutInSeconds, int pollingEverySoManySeconds,
             Collection<Class<? extends Throwable>> exceptions) {
         FluentWait<T> wait = new FluentWait<>(input);
-        wait.withTimeout(timeout, TimeUnit.SECONDS);
-        wait.pollingEvery(polling, TimeUnit.SECONDS);
+        wait.withTimeout(timeoutInSeconds, TimeUnit.SECONDS);
+        wait.pollingEvery(pollingEverySoManySeconds, TimeUnit.SECONDS);
         wait.ignoreAll(exceptions);
         
         return wait;
@@ -223,7 +223,7 @@ public class PageObject {
     
     /**
      * <p>Initialize the page object. The default implementation use a factory to lazily initialize the elements
-     *   (annotated fields) of the page object using the timeout duration returned by {@link #getPageLoadTimeOut()}.
+     *   (annotated fields) of the page object using the timeout duration returned by {@link #getPageLoadTimeOutInSeconds()}.
      *   To get a field lazily initialized you have to annotate the field either with {@link FindBy} or with
      *   {@link FindBys}. If the element never changes (that is, that the same instance in the DOM can always be used)
      *   it is also possible to use a cache for the lookup by using the annotation {@code CacheLookup} in addition.</p>
@@ -431,15 +431,15 @@ public class PageObject {
      *   and polling interval. In reality, the interval may be greater as the cost of actually evaluating the condition
      *   is not factored in.</p>
      * 
-     * @param timeout
-     *   The timeout duration for the waiting.
-     * @param polling
-     *   The interval in which the check should be performed.
+     * @param timeoutInSeconds
+     *   The timeout duration for the waiting in seconds.
+     * @param pollingEverySoManySeconds
+     *   The interval in seconds in which the check should be performed.
      * @throws org.openqa.selenium.TimeoutException
      *   if the timeout expires.
      */
-    protected void waitForAjaxRequests(int timeout, int polling) {
-        waitForAjaxRequests(AjaxCallsComplete.CATEGORY_GLOBAL, timeout, polling);
+    protected void waitForAjaxRequests(int timeoutInSeconds, int pollingEverySoManySeconds) {
+        waitForAjaxRequests(AjaxCallsComplete.CATEGORY_GLOBAL, timeoutInSeconds, pollingEverySoManySeconds);
     }
     
     /**
@@ -449,15 +449,15 @@ public class PageObject {
      * 
      * @param category
      *   The category of Ajax requests to wait for.
-     * @param timeout
-     *   The timeout duration for the waiting.
-     * @param polling
-     *   The interval in which the check should be performed.
+     * @param timeoutInSeconds
+     *   The timeout duration for the waiting in seconds.
+     * @param pollingEverySoManySeconds
+     *   The interval in seconds in which the check should be performed.
      * @throws org.openqa.selenium.TimeoutException
      *   if the timeout expires.
      */
-    protected void waitForAjaxRequests(String category, int timeout, int polling) {
-        FluentWait<WebDriver> wait = createFluentWait(this.driver, timeout, polling);
+    protected void waitForAjaxRequests(String category, int timeoutInSeconds, int pollingEverySoManySeconds) {
+        FluentWait<WebDriver> wait = createFluentWait(this.driver, timeoutInSeconds, pollingEverySoManySeconds);
         
         wait.until(new AjaxCallsComplete(category));
     }
