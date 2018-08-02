@@ -56,7 +56,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         this.raceColumn = new RaceDescriptor("D3", "Default", false, false, 0.0);
         clearState(getContextRoot());
         super.setUp();
-        adminConsole = configureRegattaAndLeaderboard();
+        configureRegattaAndLeaderboard();
     }
     
     @Test
@@ -73,7 +73,9 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
                 String raceColumnContent = e.getColumnContent(d3ColumnIndex);
                 assertTrue(Integer.parseInt(raceColumnContent) > 0); // all competitors have a positive score in R3
             }
-            adminConsoleWindow.switchToWindow();
+
+            WebDriver driver = adminConsoleWindow.switchToWindow();
+            AdminConsolePage adminConsole = AdminConsolePage.goToPage(driver, getContextRoot());
             // Go to the administration console and unset the "useStartTimeInference" flag
             RegattaStructureManagementPanelPO regattaManagementPanel = adminConsole.goToRegattaStructure();
             RegattaListCompositePO regattaList = regattaManagementPanel.getRegattaList();
@@ -90,7 +92,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         });
     }
     
-    private AdminConsolePage configureRegattaAndLeaderboard() {
+    private void configureRegattaAndLeaderboard() {
         // Open the admin console for some configuration steps
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         // Create a regatta with 1 series and 5 races as well as a leaderboard
@@ -114,6 +116,5 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARD);
         leaderboardDetails.linkRace(this.raceColumn, this.trackedRace);
-        return adminConsole;
     }
 }
