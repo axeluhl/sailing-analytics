@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.adminconsole.ImageDialog.ImageParameterValidator;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
@@ -58,17 +59,12 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         private List<CheckBox> doResize;
         private Label doResizeLabel;
         
-        public ImageParameterValidator(StringMessages stringMessages) {
+        public ImageParameterValidator(StringMessages stringMessages, ArrayList<CheckBox> doResize, Label doResizeLabel) {
             this.stringMessages = stringMessages;
-        }
-        
-        public void setCheckBox(List<CheckBox> doResize) {
             this.doResize = doResize;
-        }
-        
-        public void setCheckBoxLabel(Label doResizeLabel) {
             this.doResizeLabel = doResizeLabel;
         }
+        
         @Override
         public String getErrorMessage(ImageDTO imageToValidate) {
             String errorMessage = null;
@@ -202,12 +198,17 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             return errorMessage;
         }
     }
-
-    public ImageDialog(Date creationDate, ImageParameterValidator validator, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
-        super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
+    public ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
+        this(creationDate, sailingService, stringMessages, new ArrayList<>(), new Label(stringMessages.allowResizing()), callback);
+    }
+    
+    private ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages, ArrayList<CheckBox> doResize, Label doResizeLabel, DialogCallback<ImageDTO> callback) {
+        super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), new ImageParameterValidator(stringMessages, doResize, doResizeLabel), callback);
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.creationDate = creationDate;
+        this.doResize = doResize;
+        this.doResizeLabel = doResizeLabel;
         getDialogBox().getWidget().setWidth("730px");
         busyIndicator = new SimpleBusyIndicator();
         imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
@@ -242,8 +243,6 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             }
         });
         
-        doResize = new ArrayList<>();
-        doResizeLabel = new Label(stringMessages.allowResizing());
         doResizeLabel.setVisible(false);
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new GenericStringListInlineEditorWithCheckboxesComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
@@ -266,8 +265,6 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                 validateAndUpdate();
             }
         });
-        validator.setCheckBox(doResize);
-        validator.setCheckBoxLabel(doResizeLabel);
     }
 
     @Override

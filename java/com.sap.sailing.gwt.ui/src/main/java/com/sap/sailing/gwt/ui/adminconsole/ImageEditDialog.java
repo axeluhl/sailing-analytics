@@ -10,7 +10,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class ImageEditDialog extends ImageDialog {
     public ImageEditDialog(ImageDTO imageDTO, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
-        super(imageDTO.getCreatedAtDate(), new ImageParameterValidator(stringMessages), sailingService, stringMessages, callback);
+        super(imageDTO.getCreatedAtDate(), sailingService, stringMessages, callback);
         createdAtLabel = new Label(imageDTO.getCreatedAtDate().toString());
         imageURLAndUploadComposite.setURL(imageDTO.getSourceRef());
         titleTextBox = createTextBox(imageDTO.getTitle());

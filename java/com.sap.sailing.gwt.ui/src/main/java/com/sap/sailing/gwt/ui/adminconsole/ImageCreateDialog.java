@@ -12,7 +12,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 public class ImageCreateDialog extends ImageDialog {
 
     public ImageCreateDialog(String initialTag, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
-        super(new Date(), new ImageParameterValidator(stringMessages), sailingService, stringMessages, callback);
+        super(new Date(), sailingService, stringMessages, callback);
         createdAtLabel = new Label(creationDate.toString());
         titleTextBox = createTextBox(null);
         titleTextBox.setVisibleLength(40);
