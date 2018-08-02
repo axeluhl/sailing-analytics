@@ -64,7 +64,6 @@ public class FileStoragePanel extends FlowPanel {
     public FileStoragePanel(FileStorageManagementGwtServiceAsync sailingService, ErrorReporter errorReporter) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-
         Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(new ClickHandler() {
             @Override
@@ -73,12 +72,10 @@ public class FileStoragePanel extends FlowPanel {
             }
         });
         add(refreshButton);
-
         CaptionPanel activeServicePanel = new CaptionPanel(stringMessages.active());
         activeServiceLabel = new Label();
         activeServicePanel.add(activeServiceLabel);
         add(activeServicePanel);
-
         CaptionPanel editServicePanel = new CaptionPanel(stringMessages.edit());
         VerticalPanel editServicePanelContent = new VerticalPanel();
         editServicePanel.add(editServicePanelContent);
@@ -90,10 +87,8 @@ public class FileStoragePanel extends FlowPanel {
             }
         });
         editServicePanelContent.add(servicesListBox);
-
         serviceDescriptionLabel = new Label();
         editServicePanelContent.add(serviceDescriptionLabel);
-
         propertiesTable = new BaseCelltable<>();
         propertiesTable.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED); //allow for default tabbing behaviour
         propertiesListDataProvider = new ListDataProvider<>(new ArrayList<FileStorageServicePropertyDTO>());
@@ -122,7 +117,6 @@ public class FileStoragePanel extends FlowPanel {
             }
         });
         propertiesTable.addColumn(inputColumn, stringMessages.value());
-
         TextColumn<FileStorageServicePropertyDTO> descriptionColumn = new TextColumn<FileStorageServicePropertyDTO>() {
             @Override
             public String getValue(FileStorageServicePropertyDTO p) {
@@ -130,7 +124,6 @@ public class FileStoragePanel extends FlowPanel {
             }
         };
         propertiesTable.addColumn(descriptionColumn, stringMessages.description());
-
         TextColumn<FileStorageServicePropertyDTO> errorColumn = new TextColumn<FileStorageServicePropertyDTO>() {
             @Override
             public String getValue(FileStorageServicePropertyDTO p) {
@@ -140,15 +133,11 @@ public class FileStoragePanel extends FlowPanel {
         };
         errorColumn.setCellStyleNames("errorLabel");
         propertiesTable.addColumn(errorColumn, stringMessages.error());
-
         editServicePanelContent.add(propertiesTable);
-
         propertiesErrorLabel = new Label();
         propertiesErrorLabel.setStyleName("errorLabel");
         editServicePanelContent.add(propertiesErrorLabel);
-
         HorizontalPanel buttonsPanel = new HorizontalPanel();
-
         Button saveAndTestPropertiesButton = new Button(stringMessages.save());
         saveAndTestPropertiesButton.addClickHandler(new ClickHandler() {
             @Override
@@ -157,7 +146,6 @@ public class FileStoragePanel extends FlowPanel {
             }
         });
         buttonsPanel.add(saveAndTestPropertiesButton);
-
         Button setAsActiveServiceButton = new Button(stringMessages.setAsActive());
         setAsActiveServiceButton.addClickHandler(new ClickHandler() {
             @Override
@@ -166,11 +154,8 @@ public class FileStoragePanel extends FlowPanel {
             }
         });
         buttonsPanel.add(setAsActiveServiceButton);
-
         editServicePanelContent.add(buttonsPanel);
-
         add(editServicePanel);
-
         refresh();
     }
 
