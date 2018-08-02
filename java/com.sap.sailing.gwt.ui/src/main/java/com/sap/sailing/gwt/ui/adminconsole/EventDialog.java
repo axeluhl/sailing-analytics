@@ -12,6 +12,8 @@ import java.util.UUID;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
@@ -33,13 +35,17 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
+import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
+import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
 
 public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDTO> {
     protected StringMessages stringMessages;
@@ -58,6 +64,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected ImagesListComposite imagesListComposite;
     protected VideosListComposite videosListComposite;
     protected ExternalLinksComposite externalLinksComposite;
+    private final MutableBoolean storageServiceAvailable = new MutableBoolean();
     
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -121,6 +128,19 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         }
 
     }
+    
+    public static class MutableBoolean{
+        private boolean value;
+        public MutableBoolean() {
+            
+        }
+        public void setValue(boolean value) {
+            this.value = value;
+        }
+        public boolean getValue() {
+            return value;
+        }
+    }
 
     /**
      * @param leaderboardGroupsOfEvent even though not editable in this dialog, this parameter gives an editing subclass a chance to "park" the leaderboard group
@@ -130,6 +150,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             StringMessages stringMessages, ErrorReporter errorReporter, List<LeaderboardGroupDTO> availableLeaderboardGroups,
             Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
+        testFileStorageService(sailingService);//callback: the earlier the better to improve user experience
         this.stringMessages = stringMessages;
         this.availableLeaderboardGroupsByName = new HashMap<>();
         for (final LeaderboardGroupDTO lgDTO : availableLeaderboardGroups) {
@@ -160,8 +181,8 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                 new StringConstantsListEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
                         leaderboardGroupNames, stringMessages.selectALeaderboardGroup()));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
-        imagesListComposite = new ImagesListComposite(sailingService, stringMessages,errorReporter);
-        videosListComposite = new VideosListComposite(sailingService,stringMessages);
+        imagesListComposite = new ImagesListComposite(sailingService, stringMessages,errorReporter,storageServiceAvailable);
+        videosListComposite = new VideosListComposite(sailingService,stringMessages,storageServiceAvailable);
         externalLinksComposite = new ExternalLinksComposite(stringMessages);
         final List<String> suggestedWindFinderSpotCollections = AvailableWindFinderSpotCollections
                 .getAllAvailableWindFinderSpotCollectionsInAlphabeticalOrder() == null ? Collections.emptyList()
@@ -261,5 +282,37 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     @Override
     protected FocusWidget getInitialFocusWidget() {
         return nameEntryField;
+    }
+    
+    //used for ImageListComposite and VideoListComposite to inform user that upload is not possible without needing to try it first
+    private void testFileStorageService(FileStorageManagementGwtServiceAsync sailingService) {//double callback to test if a fileStorageService is enabled and enable upload if it is
+        storageServiceAvailable.setValue(false);
+        sailingService.getActiveFileStorageServiceName(new AsyncCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                sailingService.testFileStorageServiceProperties(result, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
+                    }
+
+                    @Override
+                    public void onSuccess(FileStorageServicePropertyErrorsDTO result) {
+                        if(result == null) {
+                            storageServiceAvailable.setValue(true);
+                        }else {
+                            Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
+                        }
+                        
+                    }
+                });
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
+            }
+        });
     }
 }

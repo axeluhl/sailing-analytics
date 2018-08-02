@@ -16,7 +16,6 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
-import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNumber;
@@ -32,7 +31,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -42,6 +40,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.gwt.ui.adminconsole.EventDialog.MutableBoolean;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -52,10 +51,8 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ToResizeImageDTO;
-import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
 
 /**
  * /** A composite showing the list of media images
@@ -66,7 +63,6 @@ public class ImagesListComposite extends Composite {
     private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private boolean storageServiceAvailable;
     
     private CellTable<ImageDTO> imageTable;
     private SingleSelectionModel<ImageDTO> imageSelectionModel;
@@ -75,6 +71,7 @@ public class ImagesListComposite extends Composite {
 
     private final SimplePanel mainPanel;
     private final VerticalPanel panel;
+    private final MutableBoolean storageServiceAvailable;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -92,12 +89,11 @@ public class ImagesListComposite extends Composite {
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public ImagesListComposite(SailingServiceAsync sailingService, final StringMessages stringMessages, final ErrorReporter errorReporter) {
+    public ImagesListComposite(SailingServiceAsync sailingService, final StringMessages stringMessages, final ErrorReporter errorReporter, MutableBoolean storageServiceAvailable) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-
-        testFileStorageService(sailingService);
+        this.storageServiceAvailable = storageServiceAvailable;
         
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
@@ -238,10 +234,6 @@ public class ImagesListComposite extends Composite {
         imageActionColumn.setFieldUpdater(new FieldUpdater<ImageDTO, String>() {
             @Override
             public void update(int index, ImageDTO image, String value) {
-                if(!storageServiceAvailable) {
-                    Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-                    return;
-                }
                 if (ImageConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
                     imageListDataProvider.getList().remove(image);
                     updateTableVisisbilty();
@@ -295,6 +287,10 @@ public class ImagesListComposite extends Composite {
     }
 
     private void openCreateImageDialog(String initialTag) {
+        if(!storageServiceAvailable.getValue()) {
+            Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
+            return;
+        }
         ImageCreateDialog dialog = new ImageCreateDialog(initialTag, sailingService, stringMessages, new DialogCallback<ImageDTO>() {
             @Override
             public void cancel() {
@@ -302,10 +298,6 @@ public class ImagesListComposite extends Composite {
 
             @Override
             public void ok(ImageDTO newImage) {
-                if(!storageServiceAvailable) {
-                    Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-                    return;
-                }
                 if(newImage.getClass().equals(ToResizeImageDTO.class)) {
                     callResizingServlet(null, (ToResizeImageDTO) newImage);
                 }else {
@@ -318,6 +310,10 @@ public class ImagesListComposite extends Composite {
     }
 
     private void openEditImageDialog(final ImageDTO selectedImage) {
+        if(!storageServiceAvailable.getValue()) {
+            Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
+            return;
+        }
         ImageEditDialog dialog = new ImageEditDialog(selectedImage, sailingService, stringMessages, new DialogCallback<ImageDTO>() {
             @Override
             public void cancel() {
@@ -325,10 +321,6 @@ public class ImagesListComposite extends Composite {
 
             @Override
             public void ok(ImageDTO updatedImage) {
-                if(!storageServiceAvailable) {
-                    Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-                    return;
-                }
                 if(updatedImage.getClass().equals(ToResizeImageDTO.class)) {
                     callResizingServlet(selectedImage, (ToResizeImageDTO) updatedImage);
                 }else {
@@ -423,36 +415,5 @@ public class ImagesListComposite extends Composite {
 
     public List<ImageDTO> getAllImages() {
         return imageListDataProvider.getList();
-    }
-    
-    private void testFileStorageService(FileStorageManagementGwtServiceAsync sailingService) {//double callback to test if a fileStorageService is enabled and enable upload if it is
-        storageServiceAvailable = false;
-        sailingService.getActiveFileStorageServiceName(new AsyncCallback<String>() {
-            @Override
-            public void onSuccess(String result) {
-                sailingService.testFileStorageServiceProperties(result, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-                    }
-
-                    @Override
-                    public void onSuccess(FileStorageServicePropertyErrorsDTO result) {
-                        if(result == null) {
-                            storageServiceAvailable = true;
-                        }else {
-                            Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-                        }
-                        
-                    }
-                });
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-            }
-        });
     }
 }

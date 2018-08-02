@@ -9,7 +9,6 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -19,7 +18,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -29,6 +27,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.gwt.ui.adminconsole.EventDialog.MutableBoolean;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -38,9 +37,7 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.VideoDTO;
-import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
 
 /**
  * /** A composite showing the list of media videos
@@ -57,8 +54,8 @@ public class VideosListComposite extends Composite {
 
     private final SimplePanel mainPanel;
     private final VerticalPanel panel;
-    
-    private boolean storageServiceAvailable;
+
+    private final MutableBoolean storageServiceAvailable;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -76,10 +73,9 @@ public class VideosListComposite extends Composite {
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public VideosListComposite(SailingServiceAsync sailingService, final StringMessages stringMessages) {
+    public VideosListComposite(SailingServiceAsync sailingService, final StringMessages stringMessages, MutableBoolean storageServiceAvailable) {
         this.stringMessages = stringMessages;
-
-        testFileStorageService(sailingService);
+        this.storageServiceAvailable = storageServiceAvailable;
 
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
@@ -256,6 +252,10 @@ public class VideosListComposite extends Composite {
     }
 
     private void openCreateVideoDialog(String initialTag) {
+        if(!storageServiceAvailable.getValue()) {
+            Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
+            return;
+        }
         VideoCreateDialog dialog = new VideoCreateDialog(initialTag, stringMessages, new DialogCallback<VideoDTO>() {
             @Override
             public void cancel() {
@@ -263,10 +263,6 @@ public class VideosListComposite extends Composite {
 
             @Override
             public void ok(VideoDTO newVideo) {
-                if(!storageServiceAvailable) {
-                    Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-                    return;
-                }
                 videoListDataProvider.getList().add(newVideo);
                 updateTableVisisbilty();
             }
@@ -275,6 +271,10 @@ public class VideosListComposite extends Composite {
     }
 
     private void openEditVideoDialog(final VideoDTO selectedVideo) {
+        if(!storageServiceAvailable.getValue()) {
+            Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
+            return;
+        }
         VideoEditDialog dialog = new VideoEditDialog(selectedVideo, stringMessages, new DialogCallback<VideoDTO>() {
             @Override
             public void cancel() {
@@ -282,10 +282,6 @@ public class VideosListComposite extends Composite {
 
             @Override
             public void ok(VideoDTO updatedVideo) {
-                if(!storageServiceAvailable) {
-                    Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-                    return;
-                }
                 videoListDataProvider.getList().remove(selectedVideo);
                 videoListDataProvider.getList().add(updatedVideo);
                 updateTableVisisbilty();
@@ -314,37 +310,5 @@ public class VideosListComposite extends Composite {
 
     public List<VideoDTO> getAllVideos() {
         return videoListDataProvider.getList();
-    }
-    
-    private void testFileStorageService(FileStorageManagementGwtServiceAsync sailingService) {
-        storageServiceAvailable = false;
-        sailingService.getActiveFileStorageServiceName(new AsyncCallback<String>() {
-            @Override
-            public void onSuccess(String result) {
-                sailingService.testFileStorageServiceProperties(result, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-                        
-                    }
-
-                    @Override
-                    public void onSuccess(FileStorageServicePropertyErrorsDTO result) {
-                        if(result == null) {
-                            storageServiceAvailable = true;
-                        }else {
-                            Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-                        }
-                        
-                    }
-                });
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-            }
-        });
     }
 }
