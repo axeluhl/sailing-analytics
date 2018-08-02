@@ -20,8 +20,8 @@ public class RaceLogTrackingI18n {
         return STRING_MESSAGES.get(locale, "scanQRCodeOrVisitUrlToRegisterAs", appName);
     }
     
-    public static String followBranchDeeplink(final Locale locale, final String appName) {
-        return STRING_MESSAGES.get(locale, "followBranchDeeplink", appName);
+    public static String followBranchDeeplink(final Locale locale, final String appName, final String invitee) {
+        return STRING_MESSAGES.get(locale, "followBranchDeeplink", appName, invitee);
     }
     
     public static String register(final Locale locale) {

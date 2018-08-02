@@ -221,8 +221,8 @@ class RaceLogTrackingInvitationMailBuilder {
     }
     
     private void addIntroductoryTextForBranchDeeplink(final String appName, final String invitee) {
-        final String introText = RaceLogTrackingI18n.followBranchDeeplink(locale, appName);
-        this.html.append("<p>").append(introText).append(" <b>").append(invitee).append("</b></p>");
+        final String introText = RaceLogTrackingI18n.followBranchDeeplink(locale, appName, invitee);
+        this.html.append("<p>").append(introText).append("</p>");
         this.text.append(introText).append(" ").append(invitee).append(TEXT_LINE_BREAK).append(TEXT_LINE_BREAK);
     }
 
