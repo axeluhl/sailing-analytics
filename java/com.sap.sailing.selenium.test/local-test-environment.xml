@@ -66,14 +66,8 @@
      -->
      <!--
        You need IEDriverServer.exe to successfully run selenium tests using IE 11.
-       The download is listed on the official Selenium download page:
-       https://www.seleniumhq.org/download/
-       This property needs to point to the downloaded and unzipped IEDriverServer.exe, not the ie.exe!
        
-       With IE 10/11, only the 32Bit version works by the time of writing.
-       
-       Some further configuration steps may be required depending on the OS and IE version:
-       https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver#required-configuration
+       See selenium-ui-tests.md for details!
      -->
      <!--
      <system-property>
