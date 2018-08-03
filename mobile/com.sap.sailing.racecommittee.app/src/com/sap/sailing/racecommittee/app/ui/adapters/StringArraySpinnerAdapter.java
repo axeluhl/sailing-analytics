@@ -94,7 +94,7 @@ public class StringArraySpinnerAdapter implements SpinnerAdapter {
         }
 
         TextView mainText = ViewHelper.get(layout, android.R.id.text1);
-        if (mainText != null) {
+        if (mainText != null && mArray.size() > position) {
             mainText.setText(mArray.get(position));
             mainText.setTextColor(context.getResources().getColor(R.color.constant_black));
             mainText.setTextSize(TEXT_SIZE);
