@@ -201,6 +201,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         assert trackedRace != null;
         raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
         raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
+        raceDTO.raceFinishedTime = trackedRace.getFinishedTime() == null ? null : trackedRace.getFinishedTime().asDate();
         raceDTO.status = new RaceStatusDTO();
         raceDTO.status.status = trackedRace.getStatus() == null ? null : trackedRace.getStatus().getStatus();
         raceDTO.status.loadingProgress = trackedRace.getStatus() == null ? 0.0 : trackedRace.getStatus().getLoadingProgress();
