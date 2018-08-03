@@ -118,6 +118,8 @@ With IE 10/11, only the 32Bit version works by the time of writing.
 Some further configuration steps may be required depending on the Windows version:
 https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver#required-configuration
 
+Be aware that Selenium tests tend to fail on IE11 if the browser window does not keep the focus. This means you must not touch the mouse or keyboard in order to get consistent test results. You may lock your machine while the tests run but ensure that standby mode isn't triggered after a short period.
+
 In case you see test cases fail with a java.net.BindException with message "Address already in use: connect" you can tune Windows' TCP settings via registry (as admin). In "Computer\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" set the following values:
 
 * "MaxUserPort" to decimal value 65534 (create a DWORD if it does not exist)
