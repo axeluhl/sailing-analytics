@@ -37,14 +37,6 @@ public class LicenseHelper {
         return new Notice(name, url, copyright, license);
     }
 
-    public Notice getAdvancedRecyclerViewNotice(Context context) {
-        String name = "Advanced RecyclerView";
-        String url = "https://github.com/h6ah4i/android-advancedrecyclerview";
-        String copyright = getContent(context, R.raw.advanced_recylerview);
-        License license = new ApacheSoftwareLicense20();
-        return new Notice(name, url, copyright, license);
-    }
-
     public Notice getViewPageIndicator(Context context) {
         String name = "Android-ViewPagerIndicator";
         String url = "http://github.com/JakeWharton/Android-ViewPagerIndicator";
