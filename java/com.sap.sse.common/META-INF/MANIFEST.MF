@@ -23,5 +23,3 @@ Export-Package: com.sap.sse.common,
 Require-Bundle: com.sap.sse.datamining.annotations
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: com.sap.sse.common
-Import-Package: com.amazonaws.util,
- org.apache.commons.codec.binary;version="1.6.0"

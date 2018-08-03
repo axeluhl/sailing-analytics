@@ -1,4 +1,4 @@
-package com.sap.sse.common.media;
+package com.sap.sse.util;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -6,12 +6,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
-
-import org.apache.commons.codec.binary.Base64;
 
 public class ImageConverter {
 
@@ -83,7 +82,7 @@ public class ImageConverter {
     }
 
     private static String convertToBase64(byte[] bytes) {
-        return Base64.encodeBase64String(bytes);
+        return Base64.getEncoder().encodeToString(bytes);
     }
 
     public static BufferedImage isToBi(InputStream is) {
