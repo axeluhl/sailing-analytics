@@ -1521,7 +1521,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         assert from != null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         WindInfoForRaceDTO result = getAveragedWindInfo(new MillisecondsTimePoint(from), millisecondsStepWidth, numberOfFixes,
-                windSourceTypeNames, trackedRace, /* onlyUpToNewestEvent */ true, includeCombinedWindForAllLegMiddles);
+                windSourceTypeNames, trackedRace, /* onlyUpToNewestEvent FIXME why not pass through onlyUpToNewestEvent here??? */ true, includeCombinedWindForAllLegMiddles);
         return result;
     }
 
@@ -1860,7 +1860,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
             byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
             Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired) throws NoWindException {
-        Duration estimatedDuration = null;
         final HashSet<String> raceCompetitorIdsAsStrings;
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         // if md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID is null, Arrays.equals will return false, and the
@@ -1873,10 +1872,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceCompetitorIdsAsStrings.add(c.getId().toString());
             }
         }
-        if(estimatedDurationRequired){
-            estimatedDuration = getEstimationForTargetTime(timeToGetTheEstimatedDurationFor, estimatedDuration, trackedRace);
+        final Duration estimatedDuration;
+        if (estimatedDurationRequired) {
+            estimatedDuration = getEstimationForTargetTime(timeToGetTheEstimatedDurationFor, trackedRace);
+        } else {
+            estimatedDuration = null;
         }
-        
         final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions = getBoatPositionsInternal(raceIdentifier,
                 fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate);
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
@@ -1887,18 +1888,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             SimulationService simulationService = getService().getSimulationService();
             simulationResultVersion = simulationService.getSimulationResultsVersion(simulationLegIdentifier);
         }
-       
         return new CompactRaceMapDataDTO(boatPositions, coursePositions, courseSidelines, quickRanks,
                 simulationResultVersion, raceCompetitorIdsAsStrings, estimatedDuration);
     }
 
-    private Duration getEstimationForTargetTime(Date time, Duration estimatedDuration, final TrackedRace trackedRace) {
-        if(trackedRace != null){
+    private Duration getEstimationForTargetTime(Date time, final TrackedRace trackedRace) {
+        Duration estimatedDuration = null;
+        if (trackedRace != null) {
             try {
                 estimatedDuration = trackedRace.getEstimatedTimeToComplete(new MillisecondsTimePoint(time)).getExpectedDuration();
             } catch (NotEnoughDataHasBeenAddedException | NoWindException e) {
-                e.printStackTrace();
-            } finally{
+                logger.log(Level.WARNING, "Problem computing the estimated race duration", e);
             }
         }
         return estimatedDuration;
