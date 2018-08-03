@@ -1,18 +1,19 @@
 package com.sap.sailing.selenium.pages;
 
 import java.text.MessageFormat;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -21,8 +22,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.sap.sailing.selenium.core.AjaxCallsComplete;
 import com.sap.sailing.selenium.core.AjaxCallsExecuted;
 import com.sap.sailing.selenium.core.BySeleniumId;
@@ -60,7 +59,7 @@ public class PageObject {
     
     public static final int DEFAULT_WAIT_TIMEOUT_SECONDS = 120;
     
-    public static final int DEFAULT_POLLING_INTERVAL = 5;
+    public static final int DEFAULT_POLLING_INTERVAL = 1;
     
     private static final MessageFormat TAB_PANEL_EXPRESSION = new MessageFormat(
             ".//div[contains(@class, \"gwt-TabBarItem\")]/div[text()=\"{0}\"]/..");
@@ -132,15 +131,15 @@ public class PageObject {
      * 
      * @param input
      *   
-     * @param timeout
+     * @param timeoutInSeconds
      *   
-     * @param polling
+     * @param pollingEverySoManySeconds
      *   
      * @return
      *   
      */
-    public static <T> FluentWait<T> createFluentWait(T input, int timeout, int polling) {
-        return createFluentWait(input, timeout, polling, Collections.<Class<? extends Throwable>>emptyList());
+    public static <T> FluentWait<T> createFluentWait(T input, int timeoutInSeconds, int pollingEverySoManySeconds) {
+        return createFluentWait(input, timeoutInSeconds, pollingEverySoManySeconds, Collections.<Class<? extends Throwable>>emptyList());
     }
     
     /**
@@ -168,20 +167,20 @@ public class PageObject {
      * 
      * @param input
      *   
-     * @param timeout
+     * @param timeoutInSeconds
      *   
-     * @param polling
+     * @param pollingEverySoManySeconds
      *   
      * @param exceptions
      *   
      * @return
      *   
      */
-    public static <T> FluentWait<T> createFluentWait(T input, int timeout, int polling,
+    public static <T> FluentWait<T> createFluentWait(T input, int timeoutInSeconds, int pollingEverySoManySeconds,
             Collection<Class<? extends Throwable>> exceptions) {
         FluentWait<T> wait = new FluentWait<>(input);
-        wait.withTimeout(timeout, TimeUnit.SECONDS);
-        wait.pollingEvery(polling, TimeUnit.SECONDS);
+        wait.withTimeout(Duration.ofSeconds(timeoutInSeconds));
+        wait.pollingEvery(Duration.ofSeconds(pollingEverySoManySeconds));
         wait.ignoreAll(exceptions);
         
         return wait;
@@ -223,7 +222,7 @@ public class PageObject {
     
     /**
      * <p>Initialize the page object. The default implementation use a factory to lazily initialize the elements
-     *   (annotated fields) of the page object using the timeout duration returned by {@link #getPageLoadTimeOut()}.
+     *   (annotated fields) of the page object using the timeout duration returned by {@link #getPageLoadTimeOutInSeconds()}.
      *   To get a field lazily initialized you have to annotate the field either with {@link FindBy} or with
      *   {@link FindBys}. If the element never changes (that is, that the same instance in the DOM can always be used)
      *   it is also possible to use a cache for the lookup by using the annotation {@code CacheLookup} in addition.</p>
@@ -431,15 +430,15 @@ public class PageObject {
      *   and polling interval. In reality, the interval may be greater as the cost of actually evaluating the condition
      *   is not factored in.</p>
      * 
-     * @param timeout
-     *   The timeout duration for the waiting.
-     * @param polling
-     *   The interval in which the check should be performed.
+     * @param timeoutInSeconds
+     *   The timeout duration for the waiting in seconds.
+     * @param pollingEverySoManySeconds
+     *   The interval in seconds in which the check should be performed.
      * @throws org.openqa.selenium.TimeoutException
      *   if the timeout expires.
      */
-    protected void waitForAjaxRequests(int timeout, int polling) {
-        waitForAjaxRequests(AjaxCallsComplete.CATEGORY_GLOBAL, timeout, polling);
+    protected void waitForAjaxRequests(int timeoutInSeconds, int pollingEverySoManySeconds) {
+        waitForAjaxRequests(AjaxCallsComplete.CATEGORY_GLOBAL, timeoutInSeconds, pollingEverySoManySeconds);
     }
     
     /**
@@ -449,15 +448,15 @@ public class PageObject {
      * 
      * @param category
      *   The category of Ajax requests to wait for.
-     * @param timeout
-     *   The timeout duration for the waiting.
-     * @param polling
-     *   The interval in which the check should be performed.
+     * @param timeoutInSeconds
+     *   The timeout duration for the waiting in seconds.
+     * @param pollingEverySoManySeconds
+     *   The interval in seconds in which the check should be performed.
      * @throws org.openqa.selenium.TimeoutException
      *   if the timeout expires.
      */
-    protected void waitForAjaxRequests(String category, int timeout, int polling) {
-        FluentWait<WebDriver> wait = createFluentWait(this.driver, timeout, polling);
+    protected void waitForAjaxRequests(String category, int timeoutInSeconds, int pollingEverySoManySeconds) {
+        FluentWait<WebDriver> wait = createFluentWait(this.driver, timeoutInSeconds, pollingEverySoManySeconds);
         
         wait.until(new AjaxCallsComplete(category));
     }
@@ -484,7 +483,7 @@ public class PageObject {
         webDriverWait.until(ExpectedConditions.presenceOfElementLocated(new BySeleniumId(seleniumId)));
     }
     
-    protected void waitUntil(Predicate<WebDriver> predicate) {
+    protected void waitUntil(Function<WebDriver, Boolean> predicate) {
         WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
         webDriverWait.until(predicate);
     }
@@ -579,57 +578,67 @@ public class PageObject {
     /**
      * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
      */
-    protected void waitForAlertAndAccept() throws InterruptedException {
+    protected void waitForAlertAndAccept() {
        waitForAlertAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS);
     }
      
     /**
      * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
      */
-    protected void waitForAlertAndAccept(int timeoutInSeconds) throws InterruptedException {
-        int i = 0;
-        while (i < timeoutInSeconds) {
-            i++;
-            try {
-                Alert alert = driver.switchTo().alert();
-                alert.accept();
-                return;
-            } catch (NoAlertPresentException e) {
-                Thread.sleep(1000);
-            }
-        }
-        throw new NoAlertPresentException();
+    protected void waitForAlertAndAccept(int timeoutInSeconds) {
+        final Alert expectedAlert = new WebDriverWait(driver, timeoutInSeconds).until(ExpectedConditions.alertIsPresent());
+        expectedAlert.accept();
+    }
+
+    /**
+     * Waits for a notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
+     */
+    protected void waitForNotificationAndDismiss() {
+        waitForNotificationAndDismiss(DEFAULT_WAIT_TIMEOUT_SECONDS, null);
+    }
+    
+    /**
+     * Waits for a specific notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
+     */
+    protected void waitForNotificationAndDismiss(String expectedNotificationMessage) {
+        waitForNotificationAndDismiss(DEFAULT_WAIT_TIMEOUT_SECONDS, expectedNotificationMessage);
     }
 
     /**
      * Waits for an notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
      */
-    protected void waitForNotificationAndDismiss() throws InterruptedException {
-        waitForNotificationAndDismiss(DEFAULT_WAIT_TIMEOUT_SECONDS);
-    }
+    protected void waitForNotificationAndDismiss(int timeoutInSeconds, String expectedNotificationMessage) {
+        WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
+        wait.until(new Function<WebDriver, Boolean>() {
 
-    /**
-     * Waits for an notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
-     */
-    protected void waitForNotificationAndDismiss(int timeoutInSeconds) throws InterruptedException {
-        int i = 0;
-        while (i < timeoutInSeconds) {
-            i++;
-            try {
-                List<WebElement> notifications = driver.findElements(By.id("notificationBar"));
-                if (notifications.size() > 0) {
-                    notifications.get(0).findElements(By.cssSelector("*"))
-                            .forEach(notification -> notification.click());
-                    ;
-                    return;
-                } else {
-                    throw new NoAlertPresentException();
+            @Override
+            public Boolean apply(WebDriver t) {
+                boolean clickedNotifications = false;
+                try {
+                    List<WebElement> notificationBar = driver.findElements(By.id("notificationBar"));
+                    if (!notificationBar.isEmpty()) {
+                        // we got the enclosing panel
+                        List<WebElement> notifications = notificationBar.get(0).findElements(By.cssSelector("*"));
+                        if (!notifications.isEmpty()) {
+                            for (WebElement messageElement : notifications) {
+                                if (expectedNotificationMessage == null
+                                        || messageElement.getText().contains(expectedNotificationMessage)) {
+                                    messageElement.click();
+                                    clickedNotifications = true;
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    // This call can fail temporarily while notifications are being updated
                 }
-            } catch (NoAlertPresentException e) {
-                Thread.sleep(1000);
+                return clickedNotifications;
             }
-        }
-        throw new NoAlertPresentException();
+        });
+    }
+    
+    protected void scrollToView(WebElement webElement) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(false);", webElement);
     }
     
     public boolean isElementEntirelyVisible(WebElement element) {

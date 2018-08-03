@@ -77,7 +77,6 @@ public class SettingsTest extends AbstractSeleniumTest {
     // Modes settings were formerly patched on the user defaults but are now patched on top of the system defaults.
     // In addition, there are now different settigns keys per mode so that settigns for one mode do not have an effect on other modes.
     // To verify this, there are new tests below but these do not test ReceBoard's embedded Leaderboard.
-    // FIXME uncomment leaderboard test code when selenium infrastructure gets an upgrade
     /**
      * Verifies the settings storage of the raceboard. Checks the precedences of url, context specific settings, mode
      * settings and global settings.
@@ -95,35 +94,29 @@ public class SettingsTest extends AbstractSeleniumTest {
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
                 BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
         
-        //FIXME uncomment the leaderboard code when selenium on remote build server displays the raceboard properly
+        DetailCheckboxInfo[] detailsToSelect = new DetailCheckboxInfo[] {
+                // Overall details
 
-//         DetailCheckboxInfo[] detailsToSelect = new DetailCheckboxInfo[] {
-//         // Overall details
-//        
-//         // Race details
-//         DetailCheckboxInfo.RACE_GAP_TO_LEADER,
-//         DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND,
-//         DetailCheckboxInfo.DISPLAY_LEGS,
-//        
-//         // Race Start Analysis
-//        
-//         // Leg Details
-//         DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
-//        
-//         // Maneuvers
-//         DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE,
-//         DetailCheckboxInfo.PENALTY_CIRCLE
-//        
-//         };
-//        
-//         LeaderboardSettingsDialogPO leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
-//         LeaderboardSettingsPanelPO leaderboardSettingsPanelPO =
-//         leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
-//         DetailCheckboxInfo[] selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
-//         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
-//         leaderboardSettingsPanelPO.setRefreshInterval(2);
-//         leaderboardSettingsDialog.pressMakeDefault();
-//         leaderboardSettingsDialog.pressCancel();
+                // Race details
+                DetailCheckboxInfo.RACE_GAP_TO_LEADER, DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND,
+                DetailCheckboxInfo.DISPLAY_LEGS,
+
+                // Leg Details
+                DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
+
+                // Maneuvers
+                DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE, DetailCheckboxInfo.PENALTY_CIRCLE
+
+        };
+
+        LeaderboardSettingsDialogPO leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
+        LeaderboardSettingsPanelPO leaderboardSettingsPanelPO = leaderboardSettingsDialog
+                .getLeaderboardSettingsPanelPO();
+        DetailCheckboxInfo[] selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
+        Assert.assertArrayEquals(detailsToSelect, selectedDetails);
+        leaderboardSettingsPanelPO.setRefreshInterval(2);
+        leaderboardSettingsDialog.pressMakeDefault();
+        leaderboardSettingsDialog.pressCancel();
 
         MapSettingsPO mapSettings = raceboard.openMapSettings();
         // Verify initial mode settings
@@ -136,58 +129,38 @@ public class SettingsTest extends AbstractSeleniumTest {
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
                 String.format(BMW_RACE, 1), "WINNING_LANES");
 
-//         detailsToSelect = new DetailCheckboxInfo[] {
-//         // Overall details
-//        
-//         // Race details
-//         DetailCheckboxInfo.RACE_GAP_TO_LEADER, //merged from user settings
-//         DetailCheckboxInfo.RACE_DISTANCE,
-//         DetailCheckboxInfo.RACE_TIME,
-//         DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND, //merged from user settings
-//         DetailCheckboxInfo.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR,
-//         DetailCheckboxInfo.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR,
-//        
-//         // Race Start Analysis
-//        
-//         // Leg Details
-//         DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
-//        
-//         // Maneuvers
-//         DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE,
-//         DetailCheckboxInfo.PENALTY_CIRCLE
-//        
-//         };
-//        
-//        
-//         leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
-//         leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
-//         selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
-//         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
-//        
-//         detailsToSelect = new DetailCheckboxInfo[] {
-//         // Overall details
-//        
-//         // Race details
-//         DetailCheckboxInfo.RACE_GAP_TO_LEADER,
-//         DetailCheckboxInfo.RACE_DISTANCE,
-//         DetailCheckboxInfo.RACE_TIME,
-//         DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND,
-//         DetailCheckboxInfo.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL, //new value
-//         DetailCheckboxInfo.DISPLAY_LEGS, //new value which should override mode settings
-//        
-//         // Race Start Analysis
-//        
-//         // Leg Details
-//         DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
-//        
-//         // Maneuvers
-//         DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE,
-//         DetailCheckboxInfo.PENALTY_CIRCLE
-//        
-//         };
-//         leaderboardSettingsPanelPO.selectDetailsAndDeselectOther(detailsToSelect);
-//         leaderboardSettingsPanelPO.setRefreshInterval(1);
-//         leaderboardSettingsDialog.pressOk();
+        detailsToSelect = new DetailCheckboxInfo[] {
+                // Race details
+                DetailCheckboxInfo.RACE_DISTANCE, DetailCheckboxInfo.RACE_TIME,
+                DetailCheckboxInfo.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR,
+                DetailCheckboxInfo.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR,
+                // Leg Details
+                DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
+                // Maneuvers
+                DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE, DetailCheckboxInfo.PENALTY_CIRCLE
+
+        };
+
+        leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
+        leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
+        selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
+        Assert.assertArrayEquals(detailsToSelect, selectedDetails);
+
+        detailsToSelect = new DetailCheckboxInfo[] {
+                // Race details
+                DetailCheckboxInfo.RACE_GAP_TO_LEADER, DetailCheckboxInfo.RACE_DISTANCE, DetailCheckboxInfo.RACE_TIME,
+                DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND,
+                DetailCheckboxInfo.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL,
+                DetailCheckboxInfo.DISPLAY_LEGS,
+                // Leg Details
+                DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
+                // Maneuvers
+                DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE, DetailCheckboxInfo.PENALTY_CIRCLE
+
+        };
+        leaderboardSettingsPanelPO.selectDetailsAndDeselectOther(detailsToSelect);
+        leaderboardSettingsPanelPO.setRefreshInterval(1);
+        leaderboardSettingsDialog.pressOk(false, false);
 
         mapSettings = raceboard.openMapSettings();
         // verify default mode settings override custom user settings
@@ -198,21 +171,22 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assert.assertFalse(mapSettings.isTransparentHoverlines());
         mapSettings.setWindUp(false);
         mapSettings.setTransparentHoverlines(false);
-        mapSettings.pressOk();
+        
+        mapSettings.pressOk(false, false);
 
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
                 String.format(BMW_RACE, 1), "WINNING_LANES");
 
-//         leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
-//         leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
-//         selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
-//        
-//         //verify highest precedence of document settings
-//         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
-//         //verify that document settings are able to override custom user settings by a system default value
-//         Assert.assertEquals(1, leaderboardSettingsPanelPO.getRefreshInterval());
-//        
-//         leaderboardSettingsDialog.pressCancel();
+        leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
+        leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
+        selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
+
+        // verify highest precedence of document settings
+        Assert.assertArrayEquals(detailsToSelect, selectedDetails);
+        // verify that document settings are able to override custom user settings by a system default value
+        Assert.assertEquals(1, leaderboardSettingsPanelPO.getRefreshInterval());
+
+        leaderboardSettingsDialog.pressCancel();
 
         mapSettings = raceboard.openMapSettings();
         // Verify that mode settings are overridden by document settings
@@ -222,35 +196,29 @@ public class SettingsTest extends AbstractSeleniumTest {
 
         //FIXME uncomment when START_ANALYSIS mode can be handled by remote CI server
          // verify that custom document settings override mode settings of other modes
-//         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-//         BMW_CUP_REGATTA,
-//         String.format(BMW_RACE, 1), "START_ANALYSIS");
-//         leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
-//         leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
-//         selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
-//         
-//         detailsToSelect = new DetailCheckboxInfo[] {
-//                 DetailCheckboxInfo.RACE_GAP_TO_LEADER, //start analysis mode
-//                 DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND, //user settings
-//                 DetailCheckboxInfo.DISPLAY_LEGS, //document settings which override mode settings
-//                 DetailCheckboxInfo.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL, //document settings
-//                 DetailCheckboxInfo.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_START, //start analysis mode
-//                 DetailCheckboxInfo.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START, //start analysis mode
-//                 DetailCheckboxInfo.DISTANCE_TO_START_AT_RACE_START, //start analysis mode
-//                 DetailCheckboxInfo.SPEED_OVER_GROUND_AT_RACE_START, //start analysis mode
-//                 DetailCheckboxInfo.SPEED_OVER_GROUND_WHEN_STARTING, //start analysis mode
-//                 DetailCheckboxInfo.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_STARTING, //start analysis mode
-//                 DetailCheckboxInfo.START_TACK, //start analysis mode
-//                 
-//                 DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN, 
-//                 
-//                 DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE, DetailCheckboxInfo.PENALTY_CIRCLE
-//         };
-//         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
-//         leaderboardSettingsDialog.pressCancel();
-//        
-//         mapSettings = raceboard.openMapSettings();
-//         Assert.assertFalse(mapSettings.isWindUp());
+        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
+                String.format(BMW_RACE, 1), "START_ANALYSIS");
+        leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
+        leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
+        selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
+
+        detailsToSelect = new DetailCheckboxInfo[] { DetailCheckboxInfo.RACE_GAP_TO_LEADER, // start analysis mode
+                DetailCheckboxInfo.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_START, // start analysis mode
+                DetailCheckboxInfo.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START, // start analysis mode
+                DetailCheckboxInfo.DISTANCE_TO_START_AT_RACE_START, // start analysis mode
+                DetailCheckboxInfo.SPEED_OVER_GROUND_AT_RACE_START, // start analysis mode
+                DetailCheckboxInfo.SPEED_OVER_GROUND_WHEN_STARTING, // start analysis mode
+                DetailCheckboxInfo.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_STARTING, // start analysis mode
+                DetailCheckboxInfo.START_TACK, // start analysis mode
+
+                DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
+
+                DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE, DetailCheckboxInfo.PENALTY_CIRCLE };
+        Assert.assertArrayEquals(detailsToSelect, selectedDetails);
+        leaderboardSettingsDialog.pressCancel();
+
+        mapSettings = raceboard.openMapSettings();
+        Assert.assertTrue(mapSettings.isWindUp());
     }
 
     /**
@@ -687,7 +655,7 @@ public class SettingsTest extends AbstractSeleniumTest {
 
         // open settings dialog of configurated leaderboard with default values
         LeaderboardSettingsDialogPO leaderboardSettingsDialog = leaderboardPage.getLeaderboardSettings();
-        LeaderboardSettingsPanelPO leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings()
+        LeaderboardSettingsPanelPO leaderboardSettingsPanel = leaderboardSettingsDialog
                 .getLeaderboardSettingsPanelPO();
 
         // store default values for checks later
