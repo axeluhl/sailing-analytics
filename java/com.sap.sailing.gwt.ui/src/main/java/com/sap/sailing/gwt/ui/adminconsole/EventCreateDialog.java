@@ -19,7 +19,7 @@ public class EventCreateDialog extends EventDialog {
 
     public EventCreateDialog(Collection<EventDTO> existingEvents, List<LeaderboardGroupDTO> availableLeaderboardGroups, 
             SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter, DialogCallback<EventDTO> callback) {
-        super(new EventParameterValidator(stringMessages, existingEvents), sailingService, stringMessages, errorReporter,
+        super(new EventParameterValidator(stringMessages, existingEvents), sailingService, stringMessages,
                 availableLeaderboardGroups, /* leaderboardGroups */ Collections.<LeaderboardGroupDTO>emptyList(), callback);
         nameEntryField = createTextBox(null);
         nameEntryField.setVisibleLength(50);

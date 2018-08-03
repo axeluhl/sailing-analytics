@@ -213,15 +213,7 @@
 		<servlet-name>FileUploadServlet</servlet-name>
 		<url-pattern>/fileupload</url-pattern>
 	</servlet-mapping>
-	<servlet>
-        <servlet-name>ImageResizingServlet</servlet-name>
-        <servlet-class>com.sap.sailing.server.gateway.impl.ImageResizingServlet</servlet-class>
-    </servlet>
-    
-    <servlet-mapping>
-        <servlet-name>ImageResizingServlet</servlet-name>
-        <url-pattern>/imageResize</url-pattern>
-    </servlet-mapping>
+	
     <servlet>
     	<servlet-name>Jersey REST API</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>

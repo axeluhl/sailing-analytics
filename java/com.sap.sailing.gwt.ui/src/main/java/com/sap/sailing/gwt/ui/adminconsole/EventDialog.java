@@ -33,7 +33,6 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
-import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -147,7 +146,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
      * assignments for re-association with the new {@link EventDTO} created by the {@link #getResult} method.
      */
     public EventDialog(EventParameterValidator validator, SailingServiceAsync sailingService,
-            StringMessages stringMessages, ErrorReporter errorReporter, List<LeaderboardGroupDTO> availableLeaderboardGroups,
+            StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
             Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         testFileStorageService(sailingService);//callback: the earlier the better to improve user experience
@@ -181,7 +180,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                 new StringConstantsListEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
                         leaderboardGroupNames, stringMessages.selectALeaderboardGroup()));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
-        imagesListComposite = new ImagesListComposite(sailingService, stringMessages,errorReporter,storageServiceAvailable);
+        imagesListComposite = new ImagesListComposite(sailingService, stringMessages,storageServiceAvailable);
         videosListComposite = new VideosListComposite(sailingService,stringMessages,storageServiceAvailable);
         externalLinksComposite = new ExternalLinksComposite(stringMessages);
         final List<String> suggestedWindFinderSpotCollections = AvailableWindFinderSpotCollections

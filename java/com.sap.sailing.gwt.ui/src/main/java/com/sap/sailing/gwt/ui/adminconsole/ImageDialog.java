@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -245,10 +247,10 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         doResizeLabel.setVisible(false);
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new GenericStringListInlineEditorWithCheckboxesComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
-                        MediaConstants.imageTagSuggestions, stringMessages.enterTagsForTheImage(), 30, doResize,doResizeLabel,new ValueChangeHandler<Boolean>() {
-
+                        MediaConstants.imageTagSuggestions, stringMessages.enterTagsForTheImage(), 30, doResize,doResizeLabel,new ClickHandler() {
+                            
                             @Override
-                            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                            public void onClick(ClickEvent event) {
                                 validateAndUpdate();
                                 CheckBox checkBox = (CheckBox)event.getSource();
                                 if(checkBox.getValue()) {
@@ -256,6 +258,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                                 }else {
                                     checkBox.getElement().getStyle().setBackgroundColor("red");
                                 }  
+                                
                             }
                         }));
         tagsListEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
@@ -265,7 +268,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             }
         });
     }
-
+    
     @Override
     protected ImageDTO getResult() {
         List<String> tags = new ArrayList<String>();

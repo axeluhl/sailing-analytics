@@ -1,5 +1,10 @@
 package com.sap.sailing.gwt.ui.server;
 
+import static java.lang.Math.toIntExact;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilterInputStream;
@@ -52,6 +57,13 @@ import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.ImageOutputStream;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -449,6 +461,7 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
@@ -544,12 +557,16 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.common.media.ImageConverter;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.filestorage.OperationFailedException;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.ToResizeImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.dispatch.servlets.ProxiedRemoteServiceServlet;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
@@ -7876,5 +7893,168 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 ShardingContext.clearShardingConstraint(identifiedShardingType);
             }
         }
+    }
+
+    @Override
+    public ImageDTO[] resizeImage(ToResizeImageDTO toResizeImage) throws Exception {
+        //In following size tag will describe the tags, that have a defined size in MediaConstants, which is LOGO, TEASER and STAGE at the moment
+        
+        //create ArrayList that will contain all images that are to return
+        List<ImageDTO> resizedImages = new ArrayList<ImageDTO>();
+        //calculating the fileType of the image by its uri
+        String fileType = toResizeImage.getSourceRef().substring(toResizeImage.getSourceRef().lastIndexOf(".")+1);
+        //splitting the size-tags in size-tags that need a resize and size-tags that do not need a resize
+        List<String> resizeTags = new ArrayList<>();
+        List<String> notResizeSizeTags = new ArrayList<>();
+        ImageConverter.splitSizeTags(toResizeImage.getMap(),resizeTags,notResizeSizeTags);
+        //deleting all size-tags from the tags list, because after resizing there should only be one size tag per image
+        toResizeImage.getTags().removeAll(toResizeImage.getMap().keySet());
+        //trying to receive the EXIF data and loading the image. If this does not work only the image is loaded
+        IIOMetadata metadata = null;
+        BufferedImage img = null;
+        boolean loaded = false;
+        try(InputStream is = getService().getFileStorageManagementService().getActiveFileStorageService().loadFile(new URI(toResizeImage.getSourceRef()))){
+            Iterator<ImageReader> readerIterator = ImageIO.getImageReadersBySuffix(fileType);
+            while(readerIterator.hasNext()&&!loaded) {
+                ImageReader reader = readerIterator.next();
+                reader.setInput(ImageIO.createImageInputStream(is));
+                metadata = reader.getImageMetadata(0);
+                img = reader.read(0);
+                loaded = metadata != null;
+            }
+            if(!loaded) {
+                throw new Exception("Loading file via ImageReader did not work, not able to load metadata, retrying to load with ImageIO.read()");
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+        if(!loaded) {
+            try (InputStream is = getService().getFileStorageManagementService().getActiveFileStorageService().loadFile(new URI(toResizeImage.getSourceRef()))){
+                img = ImageConverter.isToBi(is);
+            } catch (NoCorrespondingServiceRegisteredException | OperationFailedException | InvalidPropertiesException
+                    | IOException | URISyntaxException e) {
+                throw e;
+            }
+        }
+        
+        //iterating over every size-tag that needs a resize  
+        for(String resizeTag : resizeTags) {
+            //creating a new ImageDTO object with all values from the ToResizeImageDTO object
+            ImageDTO image = toImageDTO(toResizeImage);
+            //re-adding the size-tag for this iteration, so every ImageDTO object only has one size-tag
+            image.getTags().add(resizeTag);
+            //resizing the image
+            BufferedImage resizedBufferedImage = resizeImage(img, resizeTag, fileType);
+            //adding the new width and h eight to the ImageDTO object
+            image.setSizeInPx(resizedBufferedImage.getWidth(), resizedBufferedImage.getHeight());
+            //storing the image on FileStorageService
+            String newUri = storeImage(resizedBufferedImage, fileType, metadata).toString();
+            //saving the new image ref uri to the ImageDTO object
+            image.setSourceRef(newUri);
+            //adding the resized ImageDTO object to arraylist
+            resizedImages.add(image);
+        }
+        //if there is no size tag that does not need a resize we can delete the original source
+        if(notResizeSizeTags.isEmpty()) {
+            try {
+                getService().getFileStorageManagementService().getActiveFileStorageService().removeFile(new URI(toResizeImage.getSourceRef()));
+            } catch (NoCorrespondingServiceRegisteredException | OperationFailedException | InvalidPropertiesException
+                    | IOException | URISyntaxException e) {
+                e.printStackTrace();
+                //file deleting did not work -> no important error, because the "only" result of this is one more stored image
+            }
+        }
+        //otherwise we have to create an ImageDTO object for every non-resize-size-tag
+        else {
+            for(String resizeTag : notResizeSizeTags) {
+                ImageDTO image = toImageDTO(toResizeImage);
+                //re-add the deleted specific size tag
+                image.getTags().add(resizeTag);
+                resizedImages.add(image);
+            }
+        }
+        return resizedImages.toArray(new ImageDTO[resizedImages.size()]);
+    }
+
+    private BufferedImage resizeImage(BufferedImage img, String resizeTag, String fileType) {
+        BufferedImage resizedImage = null;
+        switch(resizeTag) {
+        case MediaTagConstants.LOGO:
+            resizedImage = ImageConverter.resize(img, MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT, fileType, false);
+            break;
+        case MediaTagConstants.STAGE:
+            resizedImage = ImageConverter.resize(img, MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT, fileType, false);
+            break;
+        case MediaTagConstants.TEASER:
+            resizedImage = ImageConverter.resize(img, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, fileType, false);
+            break;
+        default://can not occur, because we only loop over the sizeTags, which are the same as in the switch case
+            break;
+        }
+        return resizedImage;
+    }
+
+    private URI storeImage(BufferedImage resizedBufferedImage, String fileType, IIOMetadata metaData) throws Exception {
+        URI imgUri = null;
+        byte[] bytes = null;
+        //trying to obtain OutputStream of the image with EXIF data
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(new ByteArrayOutputStream())){
+            //the following should write the exif data of the image to all copies of the image//it should already work, but due to a bug the data array stays empty
+            Iterator<ImageWriter> writers = ImageIO.getImageWritersBySuffix(fileType);
+            while(writers.hasNext() && bytes == null) {
+                ImageWriter writer = writers.next();
+                if(writer != null) {
+                    writer.setOutput(ios);
+                    IIOImage iioImage = new IIOImage(resizedBufferedImage, null, metaData);
+                    ImageWriteParam param = writer.getDefaultWriteParam();
+                    IIOMetadata streamMetadata = writer.getDefaultStreamMetadata(param);
+                    writer.write(streamMetadata, iioImage, param);
+                    writer.dispose();
+                    bytes = new byte[toIntExact(ios.length())];
+                    ios.read(bytes);
+                    if(isZeroByteArray(bytes))
+                        bytes = null;
+                }
+            }
+            if(bytes == null)
+                throw new Exception("Saving file via FileWriter did not work, not able to write file with metadata, retrying with ImageIO.write()");
+            
+        } catch (Exception e) {
+            bytes = null;
+            e.printStackTrace();
+        }
+        //if obtaining an OutputStream if the image with EXIF data did not work, then write it without
+        if(bytes == null) {
+            try(InputStream is = ImageConverter.biToIs(resizedBufferedImage, fileType)){
+                imgUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(is, "."+fileType, new Long(is.available()));
+            }
+        }else {//if it did work, then write the OutputStream to the FileStorageService
+            try(ByteArrayInputStream byteStream = new ByteArrayInputStream(bytes)){
+                imgUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(byteStream, "."+fileType, new Long(byteStream.available()));
+            }
+        }
+        return imgUri;
+    }
+
+    private boolean isZeroByteArray(byte[] bytes) {
+        for(int i= 0; i < bytes.length; i++){
+            if(bytes[i] != 0)
+                return true;
+        }
+        return false;
+    }
+    
+    public ImageDTO toImageDTO(ToResizeImageDTO toResizeImage) {
+        ImageDTO toReturn = new ImageDTO(toResizeImage.getSourceRef(), toResizeImage.getCreatedAtDate());
+        toReturn.setTitle(toResizeImage.getTitle());
+        toReturn.setCopyright(toResizeImage.getCopyright());
+        toReturn.setLocale(toResizeImage.getLocale());
+        toReturn.setMimeType(MimeType.byName(toResizeImage.getMimeType().name()));//creating a new mimetype object so they do not use the same reference
+        toReturn.setSizeInPx(toResizeImage.getWidthInPx(), toResizeImage.getHeightInPx());
+        toReturn.setSubtitle(toResizeImage.getSubtitle());
+        List<String> tags = new ArrayList<>();//Creating a new list, so they have the same tags, but not use the same reference to these tags, otherwise they could affect each other by editing this list
+        tags.addAll(toResizeImage.getTags());
+        toReturn.setTags(tags);
+        return toReturn;
     }
 }

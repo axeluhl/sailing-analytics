@@ -1,7 +1,8 @@
 package com.sap.sse.gwt.client.controls.listedit;
 
 import java.util.List;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
@@ -24,14 +25,14 @@ public abstract class GenericStringListInlineEditorWithCheckboxesComposite<Value
 
         private List<CheckBox> checkBoxes;
         private Label checkBoxTopLabel;
-        private ValueChangeHandler<Boolean> checkBoxValueChangeHandler;
+        private ClickHandler checkBoxClickHandler;
         
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, List<String> suggestValues,
-                String placeholderTextForAddTextbox, int textBoxSize, List<CheckBox> checkBoxes, Label checkBoxTopLabel, ValueChangeHandler<Boolean> checkBoxValueChangeHandler) {
+                String placeholderTextForAddTextbox, int textBoxSize, List<CheckBox> checkBoxes, Label checkBoxTopLabel, ClickHandler clickHandler) {
             super(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox, textBoxSize);
             this.checkBoxes = checkBoxes;
             this.checkBoxTopLabel = checkBoxTopLabel;
-            this.checkBoxValueChangeHandler = checkBoxValueChangeHandler;
+            this.checkBoxClickHandler = clickHandler;
         }
         
 
@@ -43,18 +44,12 @@ public abstract class GenericStringListInlineEditorWithCheckboxesComposite<Value
             expandedValuesGrid.setWidget(expandedValuesGrid.getRowCount()-1, 2, checkBox);
             checkBox.setVisible(false);
             checkBox.getElement().getStyle().setBackgroundColor("red");
-            checkBox.addValueChangeHandler(checkBoxValueChangeHandler);
-            /*checkBox.addDomHandler(new ClickHandler() {
-                
-                @Override
-                public void onClick(ClickEvent event) {
-                    if(checkBox.getValue()) {
-                        checkBox.getElement().getStyle().clearBackgroundColor();
-                    }else {
-                        checkBox.getElement().getStyle().setBackgroundColor("red");
-                    }                    
-                }
-            }, ClickEvent.getType());*/
+            checkBox.addClickHandler(checkBoxClickHandler);
+        }
+        
+        @Override
+        public void onRowRemoved() {
+            refresh();
         }
         
         @Override

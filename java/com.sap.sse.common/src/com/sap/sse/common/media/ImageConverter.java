@@ -6,27 +6,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+
 import javax.imageio.ImageIO;
+
 import org.apache.commons.codec.binary.Base64;
 
 public class ImageConverter {
-    
-    public static String resizeAndConvertToBase64(InputStream is, int minWidth, int maxWidth, int minHeight,
-            int maxHeight, String imageFormat, boolean upsize) {
-        BufferedImage img = isToBi(is);
-        if(img.getWidth()>maxWidth || img.getHeight() > maxHeight || (upsize && (img.getWidth() < minWidth || img.getHeight() < minHeight))) {
-            int[] dimensions = calculateActualDimensions(img.getWidth(), img.getHeight(), minWidth, maxWidth, minHeight,
-                    maxHeight, upsize);
-            if(dimensions != null) {
-                img = resize(img, dimensions[0], dimensions[1]);
-                return convertToBase64(biToBy(img, imageFormat));
-            }else {
-                return null;
-            }
-        }else {
-            return null;
-        }
-    }
 
     private static int[] calculateActualDimensions(double width, double height, double minWidth, double maxWidth, double minHeight,
             double maxHeight, boolean upsize) {
@@ -125,5 +112,14 @@ public class ImageConverter {
         g.dispose();
         return resizedImage;
     }
-
+    
+    public static void splitSizeTags(Map<String,Boolean> sizeTags, List<String> resizeTags, List<String> notResizeSizeTags) {
+        for(Object tagKey : sizeTags.keySet()) {
+            if(sizeTags.get(tagKey)) {
+                resizeTags.add((String)tagKey);//size tags, that have the resize checkBox checked
+            }else{
+                notResizeSizeTags.add((String)tagKey);//size tags, that not have the resize checkBox checked
+            }
+        }
+    }
 }

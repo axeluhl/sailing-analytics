@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -11,17 +9,6 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONBoolean;
-import com.google.gwt.json.client.JSONNumber;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -31,6 +18,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -46,7 +34,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.util.NaturalComparator;
-import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
@@ -62,7 +49,6 @@ import com.sap.sse.gwt.client.media.ToResizeImageDTO;
 public class ImagesListComposite extends Composite {
     private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
-    private final ErrorReporter errorReporter;
     
     private CellTable<ImageDTO> imageTable;
     private SingleSelectionModel<ImageDTO> imageSelectionModel;
@@ -89,10 +75,9 @@ public class ImagesListComposite extends Composite {
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public ImagesListComposite(SailingServiceAsync sailingService, final StringMessages stringMessages, final ErrorReporter errorReporter, MutableBoolean storageServiceAvailable) {
+    public ImagesListComposite(SailingServiceAsync sailingService, final StringMessages stringMessages, MutableBoolean storageServiceAvailable) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
-        this.errorReporter = errorReporter;
         this.storageServiceAvailable = storageServiceAvailable;
         
         mainPanel = new SimplePanel();
@@ -299,7 +284,7 @@ public class ImagesListComposite extends Composite {
             @Override
             public void ok(ImageDTO newImage) {
                 if(newImage.getClass().equals(ToResizeImageDTO.class)) {
-                    callResizingServlet(null, (ToResizeImageDTO) newImage);
+                    callResizingService(newImage, null);
                 }else {
                     imageListDataProvider.getList().add(newImage);
                     updateTableVisisbilty();
@@ -322,7 +307,7 @@ public class ImagesListComposite extends Composite {
             @Override
             public void ok(ImageDTO updatedImage) {
                 if(updatedImage.getClass().equals(ToResizeImageDTO.class)) {
-                    callResizingServlet(selectedImage, (ToResizeImageDTO) updatedImage);
+                    callResizingService(updatedImage,selectedImage);
                 }else {
                     imageListDataProvider.getList().remove(selectedImage);
                     imageListDataProvider.getList().add(updatedImage);
@@ -332,67 +317,26 @@ public class ImagesListComposite extends Composite {
         });
         dialog.show();
     }
-    
-    private String imageToJSON(ToResizeImageDTO image) {
-        JSONObject obj = new JSONObject();
-        obj.put("URI", new JSONString(image.getSourceRef()));
-        obj.put("Title", new JSONString(image.getTitle()));
-        obj.put("Subtitle", new JSONString(image.getSubtitle()));
-        obj.put("Height", new JSONNumber(image.getHeightInPx()));
-        obj.put("Width", new JSONNumber(image.getWidthInPx()));
-        obj.put("Date", new JSONNumber(image.getCreatedAtDate().getTime()));
-        obj.put("Copyright", new JSONString(image.getCopyright()));
-        JSONObject doResizeMap = new JSONObject();
-        for(String doResize : image.getMap().keySet()) {
-            doResizeMap.put(doResize, JSONBoolean.getInstance(image.resizeForTag(doResize)));
-        }
-        obj.put("ResizeMap", doResizeMap);
-        JSONArray tags = new JSONArray();
-        for(int i = 0; i < image.getTags().size(); i++) {
-            tags.set(i, new JSONString(image.getTags().get(i)));
-        }
-        obj.put("Tags", tags);
-        return obj.toString();
-    }
-    
-    private void callResizingServlet(ImageDTO originalImage, ToResizeImageDTO image) {
+
+    protected void callResizingService(ImageDTO newImage, ImageDTO originalImage) {
+        sailingService.resizeImage((ToResizeImageDTO) newImage, new AsyncCallback<ImageDTO[]>(){
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.resizeUnsuccessfull(), NotificationType.ERROR);
+            }
+
+            @Override
+            public void onSuccess(ImageDTO[] result) {
+                for(int i = 0; i < result.length; i++) {
+                    imageListDataProvider.getList().add(result[i]);
+                }
+                imageListDataProvider.getList().remove(originalImage);
+                updateTableVisisbilty();
+                Notification.notify(stringMessages.resizeSuccessfull(), NotificationType.SUCCESS);
+                
+            }});
         
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,"/sailingserver/imageResize");
-        builder.setHeader("Content-Type", "application/json");
-        try {
-            builder.sendRequest(imageToJSON(image), new RequestCallback() {
-                
-                @Override
-                public void onResponseReceived(Request request, Response response) {
-                    String responseText = response.getText();
-                    JSONArray images = JSONParser.parseStrict(responseText).isArray();
-                    
-                    for(int i = 0; i < images.size(); i++) {
-                        ImageDTO image = new ImageDTO(images.get(i).isObject().get("URI").isString().stringValue(),new Date(Long.valueOf(images.get(i).isObject().get("Date").isNumber().toString())));
-                        List<String> tags = new ArrayList<>();
-                        JSONArray jsonTags = images.get(i).isObject().get("Tags").isArray();
-                        for(int j = 0; j < jsonTags.size(); j++) {
-                            tags.add(jsonTags.get(j).isString().stringValue());
-                        }
-                        image.setTags(tags);
-                        image.setTitle(images.get(i).isObject().get("Title").isString().stringValue());
-                        image.setSubtitle(images.get(i).isObject().get("Subtitle").isString().stringValue());
-                        image.setSizeInPx(Integer.valueOf(images.get(i).isObject().get("Width").isNumber().toString()), Integer.valueOf(images.get(i).isObject().get("Height").isNumber().toString()));
-                        imageListDataProvider.getList().add(image);
-                    }
-                    imageListDataProvider.getList().remove(originalImage);
-                    updateTableVisisbilty();
-                    errorReporter.reportError(stringMessages.resizeSuccessfull(), true);
-                }
-                
-                @Override
-                public void onError(Request request, Throwable exception) {
-                    errorReporter.reportError(stringMessages.resizeUnsuccessfull(), false);
-                }
-            });
-        } catch (RequestException e) {
-            e.printStackTrace();
-        }
     }
 
     private void updateTableVisisbilty() {
