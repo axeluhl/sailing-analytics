@@ -51,6 +51,17 @@ Inside the `config` folder you will find a folder called `instance_templates`. Y
 
 You are ready to use the orchestration tool! Please note, that currently only linux-amd64 versions are built. Windows versions can be easily added, as go can also run under Windows and the project currently does not have any dependencies to linux.
 
+### Develop
+As the only Plugin for Eclipse is not really maintained anymore, we do not recommend to use it (goclipse). There is actually also no reason for it, as we are using Go and not Java or any OSGI features.
+As go is pretty simple and straight forward, you can use any Go supported IDE as stated on https://golang.org/doc/editors.html.
+
+Anyways, we recommend either using Goland (from IntelliJ), VS Code or Atom with respective go-plus Plugin.
+All you need to do after [installing go](https://golang.org/doc/install) and the IDE, is to make sure to set the above mentioned environment variable `PREFIX` to the code directory inside your IDE, so that tests can be successfully executed. Furthermore make sure to set the `GOPATH` correctly, create a directory (outside of the git workspace) and point the `GOPATH` to it. Then, add the code directory from git also to the `GOPATH`. This will result in the fact, that go will download all external dependencies with e.g. `make dep` or `go get` to the first folder and not put everything into the code directories. You will find all dependencies needed for the project inside the top lines for the `makefile`.
+
+An example for a correct `GOPATH` could be: `GOPATH=/home/steffen/.godep:/home/steffen/sailing-automation/`
+
+Happy Coding!
+
 ## Run the software
 You can run the orchestrator using
 
