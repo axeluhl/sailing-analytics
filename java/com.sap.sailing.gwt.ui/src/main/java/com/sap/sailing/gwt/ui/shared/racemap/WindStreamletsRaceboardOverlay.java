@@ -388,7 +388,6 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     }
 
     public void onDragEnd() {
-        setCanvasSettings();
         dragging = false;
     }
 
