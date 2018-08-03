@@ -162,7 +162,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs,
             String hostname, int port, boolean trackWind, boolean correctWindByDeclination,
-            boolean useInternalMarkPassingAlgorithm, AsyncCallback<Void> asyncCallback);
+            boolean useInternalMarkPassingAlgorithm, String updateURL, String updateUsername, String updatePassword, AsyncCallback<Void> asyncCallback);
 
     void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaces,
             boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,

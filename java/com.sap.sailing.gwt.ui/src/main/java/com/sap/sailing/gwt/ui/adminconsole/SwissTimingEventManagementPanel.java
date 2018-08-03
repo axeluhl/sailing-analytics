@@ -518,8 +518,11 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     }
 
     private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm) {
-        String hostname = hostnameTextbox.getValue();
-        Integer port = portIntegerbox.getValue();
+        final String hostname = hostnameTextbox.getValue();
+        final Integer port = portIntegerbox.getValue();
+        final String updateURL = updateURLBox.getValue();
+        final String updateUsername = updateUsernameBox.getValue();
+        final String updatePassword = updatePasswordBox.getValue();
         final List<SwissTimingRaceRecordDTO> selectedRaces = new ArrayList<SwissTimingRaceRecordDTO>();
         for (final SwissTimingRaceRecordDTO race : this.raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(race)) {
@@ -537,7 +540,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             sailingService.trackWithSwissTiming(
                 /* regattaToAddTo */ regattaIdentifier,
                 selectedRaces, hostname, port, trackWind, correctWindByDeclination,
-                useInternalMarkPassingAlgorithm, new AsyncCallback<Void>() {
+                useInternalMarkPassingAlgorithm, updateURL, updateUsername, updatePassword, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to register races " + selectedRaces + " for tracking: "

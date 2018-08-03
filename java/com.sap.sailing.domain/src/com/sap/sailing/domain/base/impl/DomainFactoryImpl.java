@@ -64,11 +64,16 @@ import com.sap.sailing.domain.leaderboard.impl.LowPointTieBreakBasedOnLastSeries
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWithAutomaticRDG;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWithEliminationsAndRoundsWinnerGets07;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.impl.CourseDesignUpdateHandler;
+import com.sap.sailing.domain.tracking.impl.FinishTimeUpdateHandler;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sailing.domain.tracking.impl.RaceAbortedHandler;
+import com.sap.sailing.domain.tracking.impl.StartTimeUpdateHandler;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sse.common.Distance;
@@ -394,11 +399,22 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         return result;
     }
     
+    @Override
     public List<CompetitorAndBoatDTO> getCompetitorDTOList(List<Pair<Competitor, Boat>> competitors) {
         List<CompetitorAndBoatDTO> result = new ArrayList<>();
         for (Pair<Competitor, Boat> competitorAndBoat : competitors) {
             result.add(convertToCompetitorAndBoatDTO(competitorAndBoat.getA(), competitorAndBoat.getB()));
         }
         return result;
+    }
+
+    @Override
+    public void addUpdateHandlers(DynamicTrackedRace trackedRace, CourseDesignUpdateHandler courseDesignHandler,
+            StartTimeUpdateHandler startTimeHandler, RaceAbortedHandler raceAbortedHandler,
+            final FinishTimeUpdateHandler finishTimeUpdateHandler) {
+        trackedRace.addCourseDesignChangedListener(courseDesignHandler);
+        trackedRace.addStartTimeChangedListener(startTimeHandler);
+        trackedRace.addRaceAbortedListener(raceAbortedHandler);
+        trackedRace.addListener(finishTimeUpdateHandler.getListener());
     }
 }

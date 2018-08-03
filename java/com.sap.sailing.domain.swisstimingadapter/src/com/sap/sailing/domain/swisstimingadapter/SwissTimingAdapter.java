@@ -28,10 +28,13 @@ public interface SwissTimingAdapter {
      * @param useInternalMarkPassingAlgorithm use our own instead of the SwissTiming-provided mark passing / split times
      * @param trackWind TODO
      * @param correctWindDirectionByMagneticDeclination TODO
+     * @param updateURL TODO
+     * @param updateUsername TODO
+     * @param updatePassword TODO
      */
     RaceHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID,
             String raceName, String raceDescription, BoatClass boatClass, String hostname, int port,
-            StartList startList, RaceLogStore logStore, RegattaLogStore regattaLogStore, long timeoutInMilliseconds, boolean useInternalMarkPassingAlgorithm, boolean trackWind, boolean correctWindDirectionByMagneticDeclination)
+            StartList startList, RaceLogStore logStore, RegattaLogStore regattaLogStore, long timeoutInMilliseconds, boolean useInternalMarkPassingAlgorithm, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, String updateURL, String updateUsername, String updatePassword)
             throws InterruptedException, UnknownHostException, IOException, ParseException, Exception;
 
     StartList readStartListForRace(String raceId, RegattaResults regattaResults);
