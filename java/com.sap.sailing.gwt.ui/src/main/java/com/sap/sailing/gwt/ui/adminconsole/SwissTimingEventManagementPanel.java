@@ -510,6 +510,12 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                                 if (previousConfigurations.put(stConfig.getName(), stConfig) == null) {
                                     previousConfigurationsComboBox.addItem(stConfig.getName());
                                 }
+                                for (int i=0; i<previousConfigurationsComboBox.getItemCount(); i++) {
+                                    if (previousConfigurationsComboBox.getValue(i).equals(stConfig.getName())) {
+                                        previousConfigurationsComboBox.setSelectedIndex(i);
+                                        break;
+                                    }
+                                }
                                 updatePanelFromSelectedStoredConfiguration();
                             }
                         });

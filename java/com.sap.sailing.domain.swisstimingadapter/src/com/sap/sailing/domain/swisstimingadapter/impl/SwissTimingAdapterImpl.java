@@ -119,9 +119,9 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
                                                 Person person = persons.get(crewMember.getPersonID());
                                                 crew.add(new CrewMemberImpl(
                                                         person.getGivenName() + " " + person.getFamilyName(),
-                                                        person.getNOC().name(), crewMember.getPosition().name()));
+                                                        (person.getNOC()==null)?null:(person.getNOC().name()), crewMember.getPosition().name()));
                                             }
-                                            String nationality = team.getNOC().name();
+                                            String nationality = team.getNOC()==null?null:team.getNOC().name();
                                             CompetitorWithID competitor = new CompetitorWithID(team.getTeamID(),
                                                     boat.getSailNumber(), nationality, team.getTeamName(), crew);
                                             competitors.add(competitor);
