@@ -16,9 +16,9 @@ import org.openqa.selenium.WebDriver;
  *   Riccardo Nimser (D049941)
  */
 public class WindowManager {
-    private final WebDriverWindow defaultWindow;
+    private WebDriverWindow defaultWindow;
     private final Set<WebDriverWindow> allWindows = new HashSet<>();
-    private final WebDriver driver;
+    private WebDriver driver;
 
     private final Supplier<WebDriver> webDriverFactory;
     
@@ -28,15 +28,23 @@ public class WindowManager {
      * @param driver
      *   
      */
-    public WindowManager(WebDriver driver, Supplier<WebDriver> webDriverFactory) {
-        this.driver = driver;
-        defaultWindow = new ManagedWebDriverWindow(this.driver, this.driver.getWindowHandle());
+    public WindowManager(Supplier<WebDriver> webDriverFactory) {
         this.webDriverFactory = webDriverFactory;
-        
-        setWindowMaximized(this.driver);
+    }
+    
+    public WebDriver getDefaultWebDriver() {
+        if (this.driver == null) {
+            this.driver = webDriverFactory.get();
+            this.defaultWindow = new ManagedWebDriverWindow(this.driver, this.driver.getWindowHandle());
+            setWindowMaximized(this.driver);
+        }
+        return this.driver;
     }
     
     public void withExtraWindow(BiConsumer<WebDriverWindow, WebDriverWindow> defaultAndExtraWindow) {
+        // ensures that a default window exists
+        getDefaultWebDriver();
+        
         final WebDriver extraDriver = webDriverFactory.get();
         final WebDriverWindow extraWindow = new ManagedWebDriverWindow(extraDriver, extraDriver.getWindowHandle());
         
@@ -74,12 +82,8 @@ public class WindowManager {
         new HashSet<>(this.allWindows).forEach(windowConsumer);
     }
     
-    public void closeAllExtraWindows() {
-        forEachOpenedWindow(window -> {
-            if (window != defaultWindow) {
-                window.close();
-            }
-        });
+    public void closeAllWindows() {
+        forEachOpenedWindow(WebDriverWindow::close);
     }
     
     private class ManagedWebDriverWindow extends WebDriverWindow {
@@ -90,6 +94,10 @@ public class WindowManager {
         @Override
         public void close() {
             allWindows.remove(this);
+            if (this == defaultWindow) {
+                defaultWindow = null;
+                driver = null;
+            }
             super.close();
         }
     }

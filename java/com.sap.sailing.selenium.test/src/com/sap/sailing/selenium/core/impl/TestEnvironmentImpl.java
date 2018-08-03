@@ -15,7 +15,6 @@ import com.sap.sailing.selenium.core.WindowManager;
  *   D049941
  */
 public class TestEnvironmentImpl implements TestEnvironment {
-    private WebDriver driver;
     private WindowManager manager;
     private String root;
     private File screenshotsFolder;
@@ -31,16 +30,15 @@ public class TestEnvironmentImpl implements TestEnvironment {
      *   The folder where screenshots should be stored.
      */
     public TestEnvironmentImpl(Supplier<WebDriver> webDriverFactory, String root, File screenshotsFolder) {
-        this.driver = webDriverFactory.get();
         this.root = root;
         this.screenshotsFolder = screenshotsFolder;
         
-        this.manager = new WindowManager(driver, webDriverFactory);
+        this.manager = new WindowManager(webDriverFactory);
     }
     
     @Override
     public WebDriver getWebDriver() {
-        return this.driver;
+        return this.manager.getDefaultWebDriver();
     }
 
     @Override
@@ -62,8 +60,7 @@ public class TestEnvironmentImpl implements TestEnvironment {
      * <p>Closes the test environment. This quits the web driver, closing every associated window.</p>
      */
     public void close() {
-        this.driver.quit();
-        this.driver = null;
+        this.manager.closeAllWindows();
         this.root = null;
         this.screenshotsFolder = null;
     }

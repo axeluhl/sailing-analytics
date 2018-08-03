@@ -201,7 +201,7 @@ public abstract class AbstractSeleniumTest {
         @Override
         public void finished(FrameworkMethod method) {
             try {
-                environment.getWindowManager().closeAllExtraWindows();
+                environment.getWindowManager().closeAllWindows();
             } finally {
                 super.finished(method);
             }
