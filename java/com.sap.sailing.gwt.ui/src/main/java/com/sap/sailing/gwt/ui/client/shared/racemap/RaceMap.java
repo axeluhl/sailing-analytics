@@ -436,11 +436,52 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private final ManeuverMarkersAndLossIndicators maneuverMarkersAndLossIndicators;
 
-    private final Set<Date> remoteCallsInExecution = new HashSet<>();
-    private final Set<Date> remoteCallsToSkipInExecution = new HashSet<>();
+    private final MultiHashSet<Date> remoteCallsInExecution = new MultiHashSet<>();
+    private final MultiHashSet<Date> remoteCallsToSkipInExecution = new MultiHashSet<>();
     private boolean currentlyDragging = false;
 
     private int zoomingAnimationsInProgress = 0;
+
+    static class MultiHashSet<T> {
+        private HashMap<T, List<T>> map = new HashMap<>();
+
+        /** @return true if value already in set */
+        public boolean add(T t) {
+            List<T> l = map.get(t);
+            if (l != null) {
+                l.add(t);
+                return true;
+            } else {
+                l = new ArrayList<>();
+                l.add(t);
+                map.put(t, l);
+                return false;
+            }
+        }
+
+        public void addAll(MultiHashSet<T> col) {
+            if (col != null) {
+                col.map.entrySet().forEach(e -> e.getValue().forEach(v -> add(v)));
+            }
+        }
+
+        public boolean remove(T t) {
+            List<T> l = map.get(t);
+            if (l != null) {
+                l.remove(t);
+                if (l.size() == 0) {
+                    map.remove(t);
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        public boolean contains(T t) {
+            return (map.containsKey(t));
+        }
+    }
 
     private class AdvantageLineUpdater implements QuickRanksListener {
         @Override
@@ -688,7 +729,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 settings.getZoomSettings().isZoomToSelectedCompetitors());
                         settings = new RaceMapSettings(settings, clearedZoomSettings);
                         currentlyDragging = false;
-                        removeTransitions();
+                        refreshMapWithoutAnimation();
                         if (streamletOverlay != null) {
                             streamletOverlay.onDragEnd();
                         }
@@ -982,17 +1023,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         @Override
                         public void onSuccess(WindInfoForRaceDTO windInfo) {
                             remoteCallsInExecution.remove(newTime);
-                            List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>>();
-                            if (windInfo != null) {
+                            if (windInfo != null && !remoteCallsToSkipInExecution.remove(newTime)) {
+                                List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>>();
                                 lastCombinedWindTrackInfoDTO = windInfo;
-                                if (remoteCallsToSkipInExecution.remove(newTime)) {
-                                    updateMapWithWindInfo(newTime, -1, competitorsToShow, windInfo, windSourcesToShow);
-                                } else {
-                                    updateMapWithWindInfo(newTime, transitionTimeInMillis, competitorsToShow, windInfo,
-                                            windSourcesToShow);
-                                }
+                                updateMapWithWindInfo(newTime, transitionTimeInMillis, competitorsToShow, windInfo,
+                                        windSourcesToShow);
+                                showWindSensorsOnMap(windSourcesToShow);
                             }
-                            showWindSensorsOnMap(windSourcesToShow);
                         }
                     });
         }
@@ -1109,6 +1146,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             final long transitionTimeInMillis,
             final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
             final Iterable<CompetitorDTO> competitorsToShow, final int requestID) {
+        remoteCallsInExecution.add(newTime);
         return new MarkedAsyncCallback<>(new AsyncCallback<RaceMapDataDTO>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -1117,7 +1155,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             
             @Override
             public void onSuccess(RaceMapDataDTO raceMapDataDTO) {
-                if (map != null && raceMapDataDTO != null) {
+                remoteCallsInExecution.remove(newTime);
+                if (map != null && raceMapDataDTO != null && !remoteCallsToSkipInExecution.remove(newTime)) {
                     // process response only if not received out of order
                     if (startedProcessingRequestID < requestID) {
                         startedProcessingRequestID = requestID;
