@@ -61,7 +61,7 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
         controlsPanel.add(setStartTimeButton);
         selectedRaceContentPanel.add(controlsPanel);
 
-        raceDataGrid = new Grid(6,2);
+        raceDataGrid = new Grid(7, 2);
         this.selectedRaceContentPanel.add(raceDataGrid);
         
         raceDataGrid.setText(0, 0, stringMessages.startTime()+":");
