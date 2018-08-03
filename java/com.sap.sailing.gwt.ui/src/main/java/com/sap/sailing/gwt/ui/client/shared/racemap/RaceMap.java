@@ -689,14 +689,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         settings = new RaceMapSettings(settings, clearedZoomSettings);
                         currentlyDragging = false;
                         removeTransitions();
-                        if ((streamletOverlay != null)) {
+                        if (streamletOverlay != null) {
                             streamletOverlay.onDragEnd();
                         }
                     }
               });
 
                 map.addDragStartHandler(event -> {
-                    if ((streamletOverlay != null)) {
+                    currentlyDragging = true;
+                    if (streamletOverlay != null) {
                         streamletOverlay.onDragStart();
                     }
                 });
@@ -733,9 +734,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         refreshMapWithoutAnimation();
                   }
               });
-                map.addDragStartHandler(event -> {
-                    currentlyDragging = true;
-                });
               
               // If there was a time change before the API was loaded, reset the time
               if (lastTimeChangeBeforeInitialization != null) {
