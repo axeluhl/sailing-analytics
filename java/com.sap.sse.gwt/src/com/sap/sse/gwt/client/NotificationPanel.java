@@ -1,9 +1,13 @@
 package com.sap.sse.gwt.client;
 
 import com.google.gwt.animation.client.Animation;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Cursor;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.storage.client.Storage;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
+import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -24,6 +28,7 @@ public class NotificationPanel {
     private final Animation animation;
 
     private boolean alreadyShown = false;
+    private HandlerRegistration registration;
 
 
     public NotificationPanel(String message, NotificationType type, Panel parent) {
@@ -37,12 +42,17 @@ public class NotificationPanel {
         panel.getElement().getStyle().setColor(type.getColor());
         panel.getElement().getStyle().setBackgroundColor(type.getBackgroundColor());
         panel.getElement().setInnerText(type.getDecorator() + " " + message);
-        panel.addDomHandler(new ClickHandler() {
+
+        // ensure notifications work if a dataentry dialog is open!
+        registration = Event.addNativePreviewHandler(new NativePreviewHandler() {
             @Override
-            public void onClick(ClickEvent event) {
-                animation.cancel();
+            public void onPreviewNativeEvent(NativePreviewEvent event) {
+                Element target = Element.as(event.getNativeEvent().getEventTarget());
+                if (event.getTypeInt() == Event.ONCLICK && target == panel.getElement()) {
+                    animation.cancel();
+                }
             }
-        }, ClickEvent.getType());
+        });
 
         animation = new Animation() {
             @Override
@@ -61,7 +71,7 @@ public class NotificationPanel {
                     double relPr = (progress - FADE_OUT_PERCENT) / (1 - FADE_OUT_PERCENT);
                     panel.getElement().getStyle().setOpacity(1 - relPr);
                 } else {
-                    panel.getElement().getStyle().setOpacity(1);
+                    panel.getElement().getStyle().clearOpacity();
                 }
             }
 
@@ -81,9 +91,21 @@ public class NotificationPanel {
      * Displays notification at UI.
      */
     public void show() {
+        final Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+        int timeout = NOTIFICATION_TIME;
+        if (localStorageIfSupported != null) {
+            final String customTimeOut = localStorageIfSupported.getItem("sse.notification.customTimeOutInSeconds");
+            if (customTimeOut != null && !customTimeOut.isEmpty()) {
+                try {
+                    timeout = Integer.parseInt(customTimeOut) * 1000;
+                } catch (Exception e) {
+                    // If the value can't be parsed, we just use the default
+                }
+            }
+        }
         if (!animation.isRunning()) {
             parent.add(panel);
-            animation.run(NOTIFICATION_TIME);
+            animation.run(timeout);
         }
     }
     
@@ -99,6 +121,7 @@ public class NotificationPanel {
      * Removes panel from parent element at UI and force checking of queue for notifications.
      */
     public void remove() {
+        registration.removeHandler();
         parent.remove(panel);
         Notification.checkQueue(this);
     }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -11,9 +12,7 @@ import java.util.stream.Stream;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.google.common.base.Function;
 import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.common.CSSConstants;
 
@@ -260,12 +259,15 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
      * 
      * <p>Note: If an entry is not contained in the table it will not be selected.</p>
      */
-    public void selectEntries(Predicate<T> toSelectPredicate) {
+    public void selectEntries(Predicate<T> toSelectPredicate, BooleanSupplier canAbort) {
         for (T entry : getEntries()) {
             if(toSelectPredicate.test(entry)) {
                 entry.appendToSelection();
             } else {
                 entry.deselect();
+            }
+            if (canAbort.getAsBoolean()) {
+                break;
             }
         }
     }
@@ -276,7 +278,7 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
      * <p>Note: If an entry is not contained in the table it will not be selected.</p>
      */
     public void selectAllEntries() {
-        selectEntries(e -> true);
+        selectEntries(e -> true, Boolean.FALSE::booleanValue);
     }
     
     /**
@@ -347,11 +349,6 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     }
     
     public void waitForTableToShowData() {
-        new WebDriverWait(driver, 30).until(new Function<WebDriver, Boolean>() {
-            @Override
-            public Boolean apply(WebDriver driver) {
-                return !getRows().isEmpty();
-            }
-        });
+        waitUntil(() -> !getRows().isEmpty());
     }
 }
