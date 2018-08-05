@@ -14,4 +14,10 @@ public interface SwissTimingConfiguration {
     String getHostname();
     
     Integer getPort();
+
+    String getUpdateURL();
+
+    String getUpdateUsername();
+
+    String getUpdatePassword();
 }
