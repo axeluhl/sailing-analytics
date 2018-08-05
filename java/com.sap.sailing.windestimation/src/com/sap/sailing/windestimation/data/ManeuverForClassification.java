@@ -28,4 +28,8 @@ public interface ManeuverForClassification {
 
     double getTimeLossInSeconds();
 
+    boolean isClean();
+
+    ManeuverCategory getManeuverCategory();
+
 }

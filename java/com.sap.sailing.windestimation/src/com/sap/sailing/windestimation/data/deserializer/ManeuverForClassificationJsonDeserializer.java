@@ -4,6 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForClassification;
 import com.sap.sailing.windestimation.data.ManeuverForClassificationImpl;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
@@ -35,12 +36,16 @@ public class ManeuverForClassificationJsonDeserializer implements JsonDeserializ
         double recoveryPhaseDurationInSeconds = (double) object
                 .get(ManeuverForClassificationJsonSerializer.RECOVERY_PHASE_DURATION_IN_SECONDS);
         double timeLossInSeconds = (double) object.get(ManeuverForClassificationJsonSerializer.TIME_LOSS_IN_SECONDS);
+        boolean clean = (boolean) object.get(ManeuverForClassificationJsonSerializer.CLEAN);
+        ManeuverCategory maneuverCategory = ManeuverCategory
+                .valueOf((String) object.get(ManeuverForClassificationJsonSerializer.MANEUVER_CATEGORY));
+
         return new ManeuverForClassificationImpl(maneuverType, absoluteTotalCourseChangeInDegrees,
                 oversteeringInDegrees, speedLossRatio, speedGainRatio, maximalTurningRateInDegreesPerSecond,
                 deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees,
                 highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
                 mainCurveDurationInSeconds, maneuverDurationInSeconds, recoveryPhaseDurationInSeconds,
-                timeLossInSeconds);
+                timeLossInSeconds, clean, maneuverCategory);
     }
 
 }

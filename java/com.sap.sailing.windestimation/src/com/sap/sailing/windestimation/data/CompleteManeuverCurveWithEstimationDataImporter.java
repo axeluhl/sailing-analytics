@@ -188,7 +188,11 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
                 maneuversCount += maneuverCurves.size();
             }
         }
-        completeManeuverCurvePersistanceManager.addRace(regattaName, trackedRaceName, competitorTracks);
+        try {
+            completeManeuverCurvePersistanceManager.addRace(regattaName, trackedRaceName, competitorTracks);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
         List<CompetitorTrackWithEstimationData<ManeuverForClassification>> competitorTracksWithManeuversForClassification = EstimationDataUtil
                 .getCompetitorTracksWithManeuversForClassification(competitorTracksWithEstimationData);
         Iterator<CompetitorTrackWithEstimationData<ManeuverForClassification>> competitorTracksWithManeuversForClassificationIterator = competitorTracksWithManeuversForClassification

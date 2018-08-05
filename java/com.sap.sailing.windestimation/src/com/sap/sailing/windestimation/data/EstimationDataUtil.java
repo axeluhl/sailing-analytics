@@ -107,8 +107,20 @@ public class EstimationDataUtil {
         List<CompetitorTrackWithEstimationData<ManeuverForClassification>> competitorTracks = new ArrayList<>();
         for (CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> otherCompetitorTrack : competitorTracksWithManeuverEstimationData) {
             List<ManeuverForClassification> maneuversForClassification = new ArrayList<>();
-            for (CompleteManeuverCurveWithEstimationData maneuver : otherCompetitorTrack.getElements()) {
-                ManeuverForClassification maneuverForClassification = getManeuverForClassification(maneuver);
+            CompleteManeuverCurveWithEstimationData previousManeuver = null;
+            CompleteManeuverCurveWithEstimationData currentManeuver = null;
+            for (CompleteManeuverCurveWithEstimationData nextManeuver : otherCompetitorTrack.getElements()) {
+                if (currentManeuver != null) {
+                    ManeuverForClassification maneuverForClassification = getManeuverForClassification(currentManeuver,
+                            previousManeuver, nextManeuver);
+                    maneuversForClassification.add(maneuverForClassification);
+                }
+                previousManeuver = currentManeuver;
+                currentManeuver = nextManeuver;
+            }
+            if (currentManeuver != null) {
+                ManeuverForClassification maneuverForClassification = getManeuverForClassification(currentManeuver,
+                        previousManeuver, null);
                 maneuversForClassification.add(maneuverForClassification);
             }
             CompetitorTrackWithEstimationData<ManeuverForClassification> competitorTrack = new CompetitorTrackWithEstimationData<>(
@@ -123,7 +135,8 @@ public class EstimationDataUtil {
     }
 
     public static ManeuverForClassification getManeuverForClassification(
-            CompleteManeuverCurveWithEstimationData maneuver) {
+            CompleteManeuverCurveWithEstimationData maneuver, CompleteManeuverCurveWithEstimationData previousManeuver,
+            CompleteManeuverCurveWithEstimationData nextManeuver) {
         ManeuverTypeForClassification maneuverType = getManeuverTypeForClassification(maneuver);
         double absoluteTotalCourseChangeInDegrees = Math
                 .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees());
@@ -171,14 +184,64 @@ public class EstimationDataUtil {
                                 / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore()
                                         .getMetersPerSecond()
                         : 0;
+        boolean clean = maneuver.getCurveWithUnstableCourseAndSpeed().getLongestIntervalBetweenTwoFixes()
+                .asSeconds() < 4
+                && maneuver.getCurveWithUnstableCourseAndSpeed().getIntervalBetweenFirstFixOfCurveAndPreviousFix()
+                        .asSeconds() <= 4
+                && maneuver.getCurveWithUnstableCourseAndSpeed().getIntervalBetweenLastFixOfCurveAndNextFix()
+                        .asSeconds() <= 4
+                && maneuver.getCurveWithUnstableCourseAndSpeed()
+                        .getGpsFixesCountFromPreviousManeuverEndToManeuverStart()
+                        / maneuver.getCurveWithUnstableCourseAndSpeed()
+                                .getDurationFromPreviousManeuverEndToManeuverStart().asSeconds() <= 8
+                && maneuver.getCurveWithUnstableCourseAndSpeed().getGpsFixesCountFromManeuverEndToNextManeuverStart()
+                        / maneuver.getCurveWithUnstableCourseAndSpeed().getDurationFromManeuverEndToNextManeuverStart()
+                                .asSeconds() <= 8
+                && (maneuver.getCurveWithUnstableCourseAndSpeed().getDurationFromPreviousManeuverEndToManeuverStart()
+                        .asSeconds() >= 4
+                        || previousManeuver != null
+                                && Math.abs(previousManeuver.getCurveWithUnstableCourseAndSpeed()
+                                        .getDirectionChangeInDegrees()) < Math.abs(maneuver
+                                                .getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees())
+                                                * 0.3)
+                && (maneuver.getCurveWithUnstableCourseAndSpeed().getDurationFromManeuverEndToNextManeuverStart()
+                        .asSeconds() >= 4
+                        || nextManeuver != null
+                                && Math.abs(nextManeuver.getCurveWithUnstableCourseAndSpeed()
+                                        .getDirectionChangeInDegrees()) < Math.abs(maneuver
+                                                .getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees())
+                                                * 0.3)
+                && maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots() > 2
+                && maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots() > 2
+                && Math.abs(maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots()
+                        - maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots())
+                        * 2 < Math.min(
+                                maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots(),
+                                maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots());
+        ManeuverCategory maneuverCategory = getManeuverCategory(maneuver);
         ManeuverForClassification maneuverForClassification = new ManeuverForClassificationImpl(maneuverType,
                 absoluteTotalCourseChangeInDegrees, oversteeringInDegrees, speedLossRatio, speedGainRatio,
                 maneuver.getMainCurve().getMaxTurningRateInDegreesPerSecond(), deviationFromOptimalTackAngleInDegrees,
                 deviationFromOptimalJibeAngleInDegrees,
                 highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
                 mainCurveDurationInSeconds, maneuverDurationInSeconds, recoveryPhaseDurationInSeconds,
-                timeLossInSeconds);
+                timeLossInSeconds, clean, maneuverCategory);
         return maneuverForClassification;
+    }
+
+    private static ManeuverCategory getManeuverCategory(CompleteManeuverCurveWithEstimationData maneuver) {
+        double absCourseChangeInDegrees = Math
+                .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees());
+        if (absCourseChangeInDegrees < 20) {
+            return ManeuverCategory.SMALL;
+        }
+        if (absCourseChangeInDegrees <= 120) {
+            return maneuver.isMarkPassing() ? ManeuverCategory.MARK_PASSING : ManeuverCategory.REGULAR;
+        }
+        if (absCourseChangeInDegrees <= 300) {
+            return ManeuverCategory._180;
+        }
+        return ManeuverCategory._360;
     }
 
     private static ManeuverTypeForClassification getManeuverTypeForClassification(

@@ -20,6 +20,8 @@ public class ManeuverForClassificationJsonSerializer implements JsonSerializer<M
     public static final String MAIN_CURVE_DURATION_IN_SECONDS = "mainCurveDurationInSeconds";
     public static final String RECOVERY_PHASE_DURATION_IN_SECONDS = "recoveryPhaseDurationInSeconds";
     public static final String TIME_LOSS_IN_SECONDS = "timeLossInSeconds";
+    public static final String CLEAN = "clean";
+    public static final String MANEUVER_CATEGORY = "maneuverCategory";
 
     @Override
     public JSONObject serialize(ManeuverForClassification maneuver) {
@@ -38,6 +40,8 @@ public class ManeuverForClassificationJsonSerializer implements JsonSerializer<M
         json.put(MAIN_CURVE_DURATION_IN_SECONDS, maneuver.getMainCurveDurationInSeconds());
         json.put(RECOVERY_PHASE_DURATION_IN_SECONDS, maneuver.getRecoveryPhaseDurationInSeconds());
         json.put(TIME_LOSS_IN_SECONDS, maneuver.getTimeLossInSeconds());
+        json.put(CLEAN, maneuver.isClean());
+        json.put(MANEUVER_CATEGORY, maneuver.getManeuverCategory().name());
         return json;
     }
 

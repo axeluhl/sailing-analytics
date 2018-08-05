@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation.data;
 import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedImpl;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -83,6 +84,13 @@ public class CompetitorTrackWithEstimationData<T> {
 
     public int getWaypointsCount() {
         return waypointsCount;
+    }
+
+    public boolean isClean() {
+        return waypointsCount == markPassingsCount && markPassingsCount > 1 && avgIntervalBetweenFixesInSeconds < 8
+                && new MeterPerSecondSpeedImpl(
+                        distanceTravelled.getMeters() / trackEndTimePoint.until(trackStartTimePoint).asSeconds())
+                                .getKnots() > 1;
     }
 
 }

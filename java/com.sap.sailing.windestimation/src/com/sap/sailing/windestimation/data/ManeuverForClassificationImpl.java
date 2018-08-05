@@ -15,6 +15,8 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
     private final double maneuverDurationInSeconds;
     private final double recoveryPhaseDurationInSeconds;
     private final double timeLossInSeconds;
+    private boolean clean;
+    private ManeuverCategory maneuverCategory;
 
     public ManeuverForClassificationImpl(ManeuverTypeForClassification maneuverType,
             double absoluteTotalCourseChangeInDegrees, double oversteeringInDegrees, double speedLossRatio,
@@ -22,7 +24,7 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
             Double deviationFromOptimalTackAngleInDegrees, Double deviationFromOptimalJibeAngleInDegrees,
             Double highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
             double mainCurveDurationInSeconds, double maneuverDurationInSeconds, double recoveryPhaseDurationInSeconds,
-            double timeLossInSeconds) {
+            double timeLossInSeconds, boolean clean, ManeuverCategory maneuverCategory) {
         this.maneuverType = maneuverType;
         this.absoluteTotalCourseChangeInDegrees = absoluteTotalCourseChangeInDegrees;
         this.oversteeringInDegrees = oversteeringInDegrees;
@@ -36,6 +38,8 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
         this.maneuverDurationInSeconds = maneuverDurationInSeconds;
         this.recoveryPhaseDurationInSeconds = recoveryPhaseDurationInSeconds;
         this.timeLossInSeconds = timeLossInSeconds;
+        this.clean = clean;
+        this.maneuverCategory = maneuverCategory;
     }
 
     @Override
@@ -101,6 +105,16 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
     @Override
     public Double getHighestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees() {
         return highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees;
+    }
+
+    @Override
+    public boolean isClean() {
+        return clean;
+    }
+
+    @Override
+    public ManeuverCategory getManeuverCategory() {
+        return maneuverCategory;
     }
 
 }
