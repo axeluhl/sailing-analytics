@@ -11,6 +11,7 @@ Export-Package: com.sap.sse.concurrent,
  com.sap.sse.shared.media,
  com.sap.sse.shared.media.impl,
  com.sap.sse.shared.settings,
+ com.sap.sse.util,
  com.sap.sse.util.impl
 Import-Package: com.sap.sse.common.settings,
  com.sap.sse.common.settings.generic,
