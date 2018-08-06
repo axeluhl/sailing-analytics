@@ -57,12 +57,16 @@ public class TagUsernameFilter extends AbstractTextFilter<TagDTO> implements Fil
 
     @Override
     public String getLocalizedName(StringMessages stringMessages) {
-        return stringMessages.username();
+        // return stringMessages.username();
+        // TODO: Proper way to handle multiple instances of string messages?
+        return com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.username();
     }
 
     @Override
     public String getLocalizedDescription(StringMessages stringMessages) {
-        return stringMessages.username();
+        // return stringMessages.username();
+        // TODO: Proper way to handle multiple instances of string messages?
+        return com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.username();
     }
 
     @Override
