@@ -18,6 +18,7 @@ public class BasicRaceDTO extends NamedDTO {
     
     public Date startOfRace;
     public Date endOfRace;
+    public Date raceFinishedTime;
     public TrackedRaceDTO trackedRace;
 
     public BasicRaceDTO() {} // for GWT serialization only

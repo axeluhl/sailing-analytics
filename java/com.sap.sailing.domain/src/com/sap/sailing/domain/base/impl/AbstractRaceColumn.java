@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,15 +62,15 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     private TrackedRaces trackedRaces;
     private Map<Fleet, RaceIdentifier> raceIdentifiers;
 
-    private Map<Fleet, RaceLog> raceLogs;
-
+    private ConcurrentMap<Fleet, RaceLog> raceLogs;
+    
     private transient RaceLogStore raceLogStore;
     private RegattaLikeIdentifier regattaLikeParent;
 
     public AbstractRaceColumn() {
         this.trackedRaces = new TrackedRaces();
         this.raceIdentifiers = new HashMap<Fleet, RaceIdentifier>();
-        this.raceLogs = new HashMap<Fleet, RaceLog>();
+        this.raceLogs = new ConcurrentHashMap<Fleet, RaceLog>();
     }
 
     @Override
@@ -82,9 +84,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public RaceLog getRaceLog(Fleet fleet) {
-        synchronized (raceLogs) {
-            return raceLogs.get(fleet);
-        }
+        return raceLogs.get(fleet);
     }
 
     @Override
@@ -197,25 +197,23 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public void reloadRaceLog(Fleet fleet) {
-        synchronized (raceLogs) {
-            RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
-            RaceLog newOrLoadedRaceLog = raceLogStore.getRaceLog(identifier, /* ignoreCache */true);
-            RaceLog raceLogAvailable = raceLogs.get(fleet);
-            if (raceLogAvailable == null) {
-                RaceColumnRaceLogReplicator listener = new RaceColumnRaceLogReplicator(this, identifier);
-                // FIXME Wouldn't this skip any listener notifications that a merge below would trigger if the race log already existed?
-                // FIXME For example, how about the race log-provided score corrections that need application to the leaderboard and replication?
-                newOrLoadedRaceLog.addListener(listener);
-                raceLogs.put(fleet, newOrLoadedRaceLog);
-                final TrackedRace trackedRace = getTrackedRace(fleet);
-                if (trackedRace != null) {
-                    // need to attach race log
-                    trackedRace.attachRaceLog(newOrLoadedRaceLog);
-                }
-            } else {
-                // now add all race log events from newOrLoadedRaceLog that are not already in raceLogAvailable
-                raceLogAvailable.merge(newOrLoadedRaceLog);
+        RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
+        RaceLog newOrLoadedRaceLog = raceLogStore.getRaceLog(identifier, /* ignoreCache */true);
+        RaceLog raceLogAvailable = raceLogs.get(fleet);
+        if (raceLogAvailable == null) {
+            RaceColumnRaceLogReplicator listener = new RaceColumnRaceLogReplicator(this, identifier);
+            // FIXME Wouldn't this skip any listener notifications that a merge below would trigger if the race log already existed?
+            // FIXME For example, how about the race log-provided score corrections that need application to the leaderboard and replication?
+            newOrLoadedRaceLog.addListener(listener);
+            raceLogs.put(fleet, newOrLoadedRaceLog);
+            final TrackedRace trackedRace = getTrackedRace(fleet);
+            if (trackedRace != null) {
+                // need to attach race log
+                trackedRace.attachRaceLog(newOrLoadedRaceLog);
             }
+        } else {
+            // now add all race log events from newOrLoadedRaceLog that are not already in raceLogAvailable
+            raceLogAvailable.merge(newOrLoadedRaceLog);
         }
     }
 
