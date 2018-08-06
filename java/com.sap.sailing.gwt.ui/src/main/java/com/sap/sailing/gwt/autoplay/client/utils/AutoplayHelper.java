@@ -137,12 +137,11 @@ public class AutoplayHelper {
                     RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
                     boolean notNullInRequiredValues = raceTimes != null && raceTimes.startOfTracking != null
                             && raceTimes.getStartOfRace() != null;
-                    
-                    boolean raceHasNotEndedOrOnlyRecentlyEnded = raceTimes.endOfRace == null
+                    Date endTime = raceTimes.getFinishedTime() != null ? raceTimes.getFinishedTime() : raceTimes.getEndOfRace();
+                    boolean raceHasNotEndedOrOnlyRecentlyEnded = endTime == null
                             || serverTimeDuringRequest.getTime()
-                                    - raceTimes.delayToLiveInMs < raceTimes.endOfRace.getTime()
+                                    - raceTimes.delayToLiveInMs < endTime.getTime()
                                             + waitTimeAfterRaceEndInMillis;
-
                     if (notNullInRequiredValues && raceHasNotEndedOrOnlyRecentlyEnded) {
                         long startTimeInMs = raceTimes.getStartOfRace().getTime();
                         long startIn = startTimeInMs - serverTimeDuringRequest.getTime() - raceTimes.delayToLiveInMs;

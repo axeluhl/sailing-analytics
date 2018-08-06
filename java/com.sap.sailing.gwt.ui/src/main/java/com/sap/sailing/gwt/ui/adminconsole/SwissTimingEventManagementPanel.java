@@ -25,6 +25,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
@@ -62,6 +63,9 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private final ListBox previousConfigurationsComboBox;
     private final TextBox eventIdBox;
     private final TextBox jsonUrlBox;
+    private final TextBox updateURLBox;
+    private final TextBox updateUsernameBox;
+    private final PasswordTextBox updatePasswordBox;
     private final TextBox hostnameTextbox;
     private final IntegerBox portIntegerbox;
     private final List<SwissTimingRaceRecordDTO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDTO>();
@@ -75,22 +79,16 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             RegattaRefresher regattaRefresher, StringMessages stringConstants) {
         super(sailingService, regattaRefresher, errorReporter, true, stringConstants);
         this.errorReporter = errorReporter;
-
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
-        
         CaptionPanel captionPanelConnections = new CaptionPanel(stringConstants.connections());
         mainPanel.add(captionPanelConnections);
-
         VerticalPanel verticalPanel = new VerticalPanel();
-        
         captionPanelConnections.setContentWidget(verticalPanel);
         captionPanelConnections.setStyleName("bold");
-
-        Grid connectionsGrid = new Grid(6, 2);
+        Grid connectionsGrid = new Grid(9, 2);
         verticalPanel.add(connectionsGrid);
-        
         previousConfigurations = new HashMap<String, SwissTimingConfigurationDTO>();
         previousConfigurationsComboBox = new ListBox();
         connectionsGrid.setWidget(0, 1, previousConfigurationsComboBox);
@@ -107,10 +105,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             }
         });
         fillConfigurations();
-        
-        jsonUrlBox = new TextBox();
-        jsonUrlBox.getElement().getStyle().setWidth(50, Unit.EM);
-
         connectionsGrid.setWidget(0, 0, new Label(stringMessages.swissTimingEvents() + ":"));
         connectionsGrid.setWidget(0, 1, previousConfigurationsComboBox);
         
@@ -125,6 +119,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             }
         });
 
+        jsonUrlBox = new TextBox();
+        jsonUrlBox.getElement().getStyle().setWidth(50, Unit.EM);
         connectionsGrid.setWidget(2, 0, new Label(stringMessages.manage2SailEventURLBox() + ":"));
         connectionsGrid.setWidget(2, 1, jsonUrlBox);
         jsonUrlBox.addChangeHandler(event -> {
@@ -142,8 +138,23 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         connectionsGrid.setWidget(4, 0, new Label(stringMessages.manage2SailPort() + ":"));
         connectionsGrid.setWidget(4, 1, portIntegerbox);
 
+        updateURLBox = new TextBox();
+        updateURLBox.getElement().getStyle().setWidth(50, Unit.EM);
+        connectionsGrid.setWidget(5, 0, new Label(stringMessages.swissTimingUpdateURL() + ":"));
+        connectionsGrid.setWidget(5, 1, updateURLBox);
+        
+        updateUsernameBox = new TextBox();
+        updateUsernameBox.getElement().getStyle().setWidth(50, Unit.EM);
+        connectionsGrid.setWidget(6, 0, new Label(stringMessages.swissTimingUpdateUsername() + ":"));
+        connectionsGrid.setWidget(6, 1, updateUsernameBox);
+
+        updatePasswordBox = new PasswordTextBox();
+        updatePasswordBox.getElement().getStyle().setWidth(50, Unit.EM);
+        connectionsGrid.setWidget(7, 0, new Label(stringMessages.swissTimingUpdatePassword() + ":"));
+        connectionsGrid.setWidget(7, 1, updatePasswordBox);
+
         Button btnListRaces = new Button(stringConstants.listRaces());
-        connectionsGrid.setWidget(5, 1, btnListRaces);
+        connectionsGrid.setWidget(8, 1, btnListRaces);
         btnListRaces.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -459,6 +470,9 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
     private void fillRaces(final SailingServiceAsync sailingService) {
         final String jsonUrl = jsonUrlBox.getValue();
+        final String updateURL = updateURLBox.getValue();
+        final String updateUsername = updateUsernameBox.getValue();
+        final String updatePassword = updatePasswordBox.getValue();
         sailingService.getRacesOfSwissTimingEvent(jsonUrl, new AsyncCallback<SwissTimingEventRecordDTO>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -469,21 +483,18 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             @Override
             public void onSuccess(final SwissTimingEventRecordDTO result) {
                 availableSwissTimingRaces.clear();
-                if (result != null)
+                if (result != null) {
                     availableSwissTimingRaces.addAll(result.races);
-
+                }
                 raceList.getList().clear();
                 raceList.getList().addAll(availableSwissTimingRaces);
-
                 filterablePanelEvents.getTextBox().setText(null);
                 filterablePanelEvents.updateAll(result.races);
-
                 // store a successful configuration in the database for later retrieval
                 final String hostname = result.trackingDataHost;
                 final Integer port = result.trackingDataPort;
                 final String configName = result.eventName;
-                
-                sailingService.storeSwissTimingConfiguration(configName, jsonUrl, hostname, port, 
+                sailingService.storeSwissTimingConfiguration(configName, jsonUrl, hostname, port, updateURL, updateUsername, updatePassword,
                         new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -495,9 +506,15 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                             public void onSuccess(Void voidResult) {
                                 // refresh list of previous configurations
                                 SwissTimingConfigurationDTO stConfig = new SwissTimingConfigurationDTO(configName, jsonUrl,
-                                        hostname, port);
+                                        hostname, port, updateURL, updateUsername, updatePassword);
                                 if (previousConfigurations.put(stConfig.getName(), stConfig) == null) {
                                     previousConfigurationsComboBox.addItem(stConfig.getName());
+                                }
+                                for (int i=0; i<previousConfigurationsComboBox.getItemCount(); i++) {
+                                    if (previousConfigurationsComboBox.getValue(i).equals(stConfig.getName())) {
+                                        previousConfigurationsComboBox.setSelectedIndex(i);
+                                        break;
+                                    }
                                 }
                                 updatePanelFromSelectedStoredConfiguration();
                             }
@@ -507,8 +524,11 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     }
 
     private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm) {
-        String hostname = hostnameTextbox.getValue();
-        Integer port = portIntegerbox.getValue();
+        final String hostname = hostnameTextbox.getValue();
+        final Integer port = portIntegerbox.getValue();
+        final String updateURL = updateURLBox.getValue();
+        final String updateUsername = updateUsernameBox.getValue();
+        final String updatePassword = updatePasswordBox.getValue();
         final List<SwissTimingRaceRecordDTO> selectedRaces = new ArrayList<SwissTimingRaceRecordDTO>();
         for (final SwissTimingRaceRecordDTO race : this.raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(race)) {
@@ -526,7 +546,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             sailingService.trackWithSwissTiming(
                 /* regattaToAddTo */ regattaIdentifier,
                 selectedRaces, hostname, port, trackWind, correctWindByDeclination,
-                useInternalMarkPassingAlgorithm, new AsyncCallback<Void>() {
+                useInternalMarkPassingAlgorithm, updateURL, updateUsername, updatePassword, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to register races " + selectedRaces + " for tracking: "
@@ -549,6 +569,9 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 hostnameTextbox.setValue(stConfig.getHostname());
                 portIntegerbox.setValue(stConfig.getPort());
                 jsonUrlBox.setValue(stConfig.getJsonURL());
+                updateURLBox.setValue(stConfig.getUpdateURL());
+                updateUsernameBox.setValue(stConfig.getUpdateUsername());
+                updatePasswordBox.setValue(stConfig.getUpdatePassword());
             }
         }
     }

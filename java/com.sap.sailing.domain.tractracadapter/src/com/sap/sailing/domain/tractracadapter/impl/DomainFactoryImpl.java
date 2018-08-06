@@ -14,8 +14,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,6 +73,9 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.FinishTimeUpdateHandler;
+import com.sap.sailing.domain.tracking.impl.RaceAbortedHandler;
+import com.sap.sailing.domain.tracking.impl.StartTimeUpdateHandler;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.MetadataParser;
@@ -677,17 +680,16 @@ public class DomainFactoryImpl implements DomainFactory {
         TracTracCourseDesignUpdateHandler courseDesignHandler = new TracTracCourseDesignUpdateHandler(
                 tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
                 raceDefinition.getId(), tractracRace, this);
-        trackedRace.addCourseDesignChangedListener(courseDesignHandler);
-        TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(
+        StartTimeUpdateHandler startTimeHandler = new StartTimeUpdateHandler(
                 tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
                 raceDefinition.getId(), trackedRace.getTrackedRegatta().getRegatta());
-        trackedRace.addStartTimeChangedListener(startTimeHandler);
-        TracTracRaceAbortedHandler raceAbortedHandler = new TracTracRaceAbortedHandler(
+        RaceAbortedHandler raceAbortedHandler = new RaceAbortedHandler(
                 tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
                 raceDefinition.getId());
-        trackedRace.addRaceAbortedListener(raceAbortedHandler);
-        trackedRace.addListener(new TracTracFinishTimeUpdateHandler(tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
-                raceDefinition.getId(), trackedRace.getTrackedRegatta().getRegatta()).getListener());
+        final FinishTimeUpdateHandler finishTimeUpdateHandler = new FinishTimeUpdateHandler(tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
+                raceDefinition.getId(), trackedRace.getTrackedRegatta().getRegatta());
+        baseDomainFactory.addUpdateHandlers(trackedRace, courseDesignHandler, startTimeHandler, raceAbortedHandler,
+                finishTimeUpdateHandler);
     }
 
     private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race,
