@@ -19,7 +19,6 @@ public abstract class GenericStringListInlineEditorWithCheckboxesComposite<Value
             StringMessages stringMessages, ImageResource removeImage, List<String> suggestValues, int textBoxSize) {
         super(initialValues, stringMessages, removeImage, suggestValues, textBoxSize);
     }
-    
 
     public static class ExpandedUi<ValueType> extends GenericStringListInlineEditorComposite.ExpandedUi<ValueType> {
 
@@ -34,7 +33,6 @@ public abstract class GenericStringListInlineEditorWithCheckboxesComposite<Value
             this.checkBoxTopLabel = checkBoxTopLabel;
             this.checkBoxClickHandler = clickHandler;
         }
-        
 
         @Override
         protected void addRow(ValueType newValue) {
@@ -45,11 +43,6 @@ public abstract class GenericStringListInlineEditorWithCheckboxesComposite<Value
             checkBox.setVisible(false);
             checkBox.getElement().getStyle().setBackgroundColor("red");
             checkBox.addClickHandler(checkBoxClickHandler);
-        }
-        
-        @Override
-        public void onRowRemoved() {
-            refresh();
         }
         
         @Override

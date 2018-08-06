@@ -75,7 +75,8 @@ public class ImagesListComposite extends Composite {
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public ImagesListComposite(SailingServiceAsync sailingService, final StringMessages stringMessages, MutableBoolean storageServiceAvailable) {
+    public ImagesListComposite(SailingServiceAsync sailingService, final StringMessages stringMessages,
+            MutableBoolean storageServiceAvailable) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.storageServiceAvailable = storageServiceAvailable;
@@ -157,12 +158,12 @@ public class ImagesListComposite extends Composite {
             public SafeHtml getValue(ImageDTO image) {
                 String linkName = "";
                 String link = image.getSourceRef();
-                if(link.endsWith("/")) {
+                if (link.endsWith("/")) {
                     link = link.substring(0, link.length() - 1);
                 }
                 int index = link.lastIndexOf("/");
-                if(index > 0) {
-                    linkName =  link.substring(index+1, link.length());
+                if (index > 0) {
+                    linkName = link.substring(index + 1, link.length());
                 }
                 return ANCHORTEMPLATE.cell(UriUtils.fromString(image.getSourceRef()), linkName);
             }
@@ -272,55 +273,56 @@ public class ImagesListComposite extends Composite {
     }
 
     private void openCreateImageDialog(String initialTag) {
-        if(!storageServiceAvailable.getValue()) {
+        if (!storageServiceAvailable.getValue()) {
             Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
             return;
         }
-        ImageCreateDialog dialog = new ImageCreateDialog(initialTag, sailingService, stringMessages, new DialogCallback<ImageDTO>() {
-            @Override
-            public void cancel() {
-            }
+        ImageCreateDialog dialog = new ImageCreateDialog(initialTag, sailingService, stringMessages,
+                new DialogCallback<ImageDTO>() {
+                    @Override
+                    public void cancel() {
+                    }
 
-            @Override
-            public void ok(ImageDTO newImage) {
-                if(newImage.getClass().equals(ToResizeImageDTO.class)) {
-                    callResizingService(newImage, null);
-                }else {
-                    imageListDataProvider.getList().add(newImage);
-                    updateTableVisisbilty();
-                }
-            }
-        });
+                    @Override
+                    public void ok(ImageDTO newImage) {
+                        if (newImage.getClass().equals(ToResizeImageDTO.class)) {
+                            callResizingService(newImage, null);
+                        } else {
+                            imageListDataProvider.getList().add(newImage);
+                            updateTableVisisbilty();
+                        }
+                    }
+                });
         dialog.show();
     }
 
     private void openEditImageDialog(final ImageDTO selectedImage) {
-        if(!storageServiceAvailable.getValue()) {
+        if (!storageServiceAvailable.getValue()) {
             Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-            return;
-        }
-        ImageEditDialog dialog = new ImageEditDialog(selectedImage, sailingService, stringMessages, new DialogCallback<ImageDTO>() {
-            @Override
-            public void cancel() {
-            }
+        } else {
+            ImageEditDialog dialog = new ImageEditDialog(selectedImage, sailingService, stringMessages,
+                    new DialogCallback<ImageDTO>() {
+                        @Override
+                        public void cancel() {
+                        }
 
-            @Override
-            public void ok(ImageDTO updatedImage) {
-                if(updatedImage.getClass().equals(ToResizeImageDTO.class)) {
-                    callResizingService(updatedImage,selectedImage);
-                }else {
-                    imageListDataProvider.getList().remove(selectedImage);
-                    imageListDataProvider.getList().add(updatedImage);
-                    updateTableVisisbilty();
-                }
-            }
-        });
-        dialog.show();
+                        @Override
+                        public void ok(ImageDTO updatedImage) {
+                            if (updatedImage.getClass().equals(ToResizeImageDTO.class)) {
+                                callResizingService(updatedImage, selectedImage);
+                            } else {
+                                imageListDataProvider.getList().remove(selectedImage);
+                                imageListDataProvider.getList().add(updatedImage);
+                                updateTableVisisbilty();
+                            }
+                        }
+                    });
+            dialog.show();
+        }
     }
 
     protected void callResizingService(ImageDTO newImage, ImageDTO originalImage) {
-        sailingService.resizeImage((ToResizeImageDTO) newImage, new AsyncCallback<ImageDTO[]>(){
-
+        sailingService.resizeImage((ToResizeImageDTO) newImage, new AsyncCallback<ImageDTO[]>() {
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify(stringMessages.resizeUnsuccessfull(), NotificationType.ERROR);
@@ -328,15 +330,14 @@ public class ImagesListComposite extends Composite {
 
             @Override
             public void onSuccess(ImageDTO[] result) {
-                for(int i = 0; i < result.length; i++) {
+                for (int i = 0; i < result.length; i++) {
                     imageListDataProvider.getList().add(result[i]);
                 }
                 imageListDataProvider.getList().remove(originalImage);
                 updateTableVisisbilty();
                 Notification.notify(stringMessages.resizeSuccessfull(), NotificationType.SUCCESS);
-                
-            }});
-        
+            }
+        });
     }
 
     private void updateTableVisisbilty() {

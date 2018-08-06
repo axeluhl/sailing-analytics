@@ -7,6 +7,7 @@ public class ToResizeImageDTO extends ImageDTO {
 
     Map<String, Boolean> toResizeMap;
     
+    /** for GWT */
     protected ToResizeImageDTO() {
     }
 

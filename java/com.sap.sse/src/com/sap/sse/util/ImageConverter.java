@@ -14,32 +14,32 @@ import javax.imageio.ImageIO;
 
 public class ImageConverter {
 
-    private static int[] calculateActualDimensions(double width, double height, double minWidth, double maxWidth, double minHeight,
-            double maxHeight, boolean upsize) {
+    private static int[] calculateActualDimensions(double width, double height, double minWidth, double maxWidth,
+            double minHeight, double maxHeight, boolean upsize) {
         if (maxWidth > 0 && maxHeight > 0 && maxHeight > minHeight && maxWidth > minWidth) {
-            if(maxWidth <= width || maxHeight <= height) {
-                if (width/maxWidth>height/maxHeight) {
+            if (maxWidth <= width || maxHeight <= height) {
+                if (width / maxWidth > height / maxHeight) {
                     maxHeight = height / width * maxWidth;
-                    if(maxHeight >= minHeight) {
-                        return new int[]{(int)maxWidth,(int)maxHeight};
+                    if (maxHeight >= minHeight) {
+                        return new int[] { (int) maxWidth, (int) maxHeight };
                     }
                 } else {
                     maxWidth = width / height * maxHeight;
-                    if(maxWidth >= minWidth) {
-                        return new int[]{(int)maxWidth,(int)maxHeight};
+                    if (maxWidth >= minWidth) {
+                        return new int[] { (int) maxWidth, (int) maxHeight };
                     }
                 }
-            }else if(upsize) {
-                if (width/maxWidth>height/maxHeight) {
+            } else if (upsize) {
+                if (width / maxWidth > height / maxHeight) {
                     minHeight = height / width * maxWidth;
-                    if(maxHeight >= minHeight) {
-                        return new int[]{(int)maxWidth,(int)minHeight};
+                    if (maxHeight >= minHeight) {
+                        return new int[] { (int) maxWidth, (int) minHeight };
                     }
-                    
+
                 } else {
                     minWidth = width / height * maxHeight;
-                    if(maxWidth >= minWidth) {
-                        return new int[]{(int)minWidth,(int)maxHeight};
+                    if (maxWidth >= minWidth) {
+                        return new int[] { (int) minWidth, (int) maxHeight };
                     }
                 }
             }
@@ -50,12 +50,12 @@ public class ImageConverter {
     public static BufferedImage resize(BufferedImage img, int demandWidth, int demandHeight) {
         return resizeScale(img, demandWidth, demandHeight);
     }
-    
-    public static BufferedImage resize(BufferedImage img, int minWidth, int maxWidth, int minHeight,
-            int maxHeight, String imageFormat, boolean upsize) {
+
+    public static BufferedImage resize(BufferedImage img, int minWidth, int maxWidth, int minHeight, int maxHeight,
+            String imageFormat, boolean upsize) {
         int[] dimensions = calculateActualDimensions(img.getWidth(), img.getHeight(), minWidth, maxWidth, minHeight,
                 maxHeight, upsize);
-        if(dimensions != null) {
+        if (dimensions != null) {
             return resize(img, dimensions[0], dimensions[1]);
         }
         return null;
@@ -111,13 +111,14 @@ public class ImageConverter {
         g.dispose();
         return resizedImage;
     }
-    
-    public static void splitSizeTags(Map<String,Boolean> sizeTags, List<String> resizeTags, List<String> notResizeSizeTags) {
-        for(Object tagKey : sizeTags.keySet()) {
-            if(sizeTags.get(tagKey)) {
-                resizeTags.add((String)tagKey);//size tags, that have the resize checkBox checked
-            }else{
-                notResizeSizeTags.add((String)tagKey);//size tags, that not have the resize checkBox checked
+
+    public static void splitSizeTags(Map<String, Boolean> sizeTags, List<String> resizeTags,
+            List<String> notResizeSizeTags) {
+        for (Object tagKey : sizeTags.keySet()) {
+            if (sizeTags.get(tagKey)) {
+                resizeTags.add((String) tagKey);// size tags, that have the resize checkBox checked
+            } else {
+                notResizeSizeTags.add((String) tagKey);// size tags, that not have the resize checkBox checked
             }
         }
     }

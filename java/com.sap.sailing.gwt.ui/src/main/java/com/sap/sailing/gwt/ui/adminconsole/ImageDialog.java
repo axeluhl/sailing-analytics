@@ -72,7 +72,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             Integer imageWidth = imageToValidate.getWidthInPx();
             Integer imageHeight = imageToValidate.getHeightInPx();
             
-            for(CheckBox checkBox : doResize) {//set all invisible, so they are updated for all errors that occure before a resizing error in following construct
+            for (CheckBox checkBox : doResize) {//set all invisible, so they are updated for all errors that occure before a resizing error in following construct
                 checkBox.setVisible(false);
             }
             
@@ -95,7 +95,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                     errorMessage += getImageToSmallErrorMessage(MediaTagConstants.STAGE, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
                             MediaConstants.MIN_STAGE_IMAGE_HEIGHT, stringMessages) + "\n";
                 }
-                if(errorMessage.equals("")) {//Check if image ratio fits for resizing
+                if (errorMessage.equals("")) {//Check if image ratio fits for resizing
                     errorMessage = imageRatioFits(imageToValidate);
                 }
                 if(errorMessage.equals("")) {//check for ckeckboxes and resizing
@@ -103,7 +103,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                             MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH,
                             MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT)) {
                         getCheckBoxForTag(MediaTagConstants.LOGO, imageToValidate).setVisible(true);
-                        if(!getCheckBoxForTag(MediaTagConstants.LOGO, imageToValidate).getValue()) {
+                        if (!getCheckBoxForTag(MediaTagConstants.LOGO, imageToValidate).getValue()) {
                             errorMessage += getSizeErrorMessage(MediaTagConstants.LOGO, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
                                     MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT,
                                     MediaConstants.MAX_LOGO_IMAGE_HEIGHT, stringMessages) + "\n";
@@ -113,7 +113,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                             MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH,
                             MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT)) {
                         getCheckBoxForTag(MediaTagConstants.TEASER, imageToValidate).setVisible(true);
-                        if(!getCheckBoxForTag(MediaTagConstants.TEASER, imageToValidate).getValue()) {
+                        if (!getCheckBoxForTag(MediaTagConstants.TEASER, imageToValidate).getValue()) {
                             errorMessage += getSizeErrorMessage(MediaTagConstants.TEASER, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
                                     MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT,
                                     MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, stringMessages) + "\n";
@@ -123,7 +123,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                             MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH,
                             MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT)) {
                         getCheckBoxForTag(MediaTagConstants.STAGE, imageToValidate).setVisible(true);
-                        if(!getCheckBoxForTag(MediaTagConstants.STAGE, imageToValidate).getValue()) {
+                        if (!getCheckBoxForTag(MediaTagConstants.STAGE, imageToValidate).getValue()) {
                             errorMessage += getSizeErrorMessage(MediaTagConstants.STAGE, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
                                     MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT,
                                     MediaConstants.MAX_STAGE_IMAGE_HEIGHT, stringMessages) + "\n";
@@ -131,18 +131,19 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                     }
                 }
             }
-            for(CheckBox checkBox : doResize) {//all checkboxes that are set to invisible will now be set it's value to false
-                if(!checkBox.isVisible()) {
+            for (CheckBox checkBox : doResize) {//all checkboxes that are set to invisible will now be set it's value to false
+                if (!checkBox.isVisible()) {
                     checkBox.setValue(false);
                 }
             }
-            if(checkBoxIsVisible()) {
+            if (checkBoxIsVisible()) {
                 doResizeLabel.setVisible(true);
-            }else {
+            } else {
                 doResizeLabel.setVisible(false);
             }
-            if(errorMessage.equals(""))
-               return null;
+            if (errorMessage.equals("")) {
+               errorMessage = null;
+            }
             return errorMessage;
         }
         
@@ -156,12 +157,13 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
 
         private CheckBox getCheckBoxForTag(String tag, ImageDTO imageToValidate) {
             List<String> tags = imageToValidate.getTags();
-            for(int i = 0; i < tags.size(); i++) {
-                if(tags.get(i).equals(tag)) {
-                    return doResize.get(i);
+            CheckBox toReturn = null;
+            for (int i = 0; i < tags.size(); i++) {
+                if (tags.get(i).equals(tag)) {
+                    toReturn = doResize.get(i);
                 }
             }
-            return new CheckBox();//new checkbox instead of null, so there is no need for a null check. this will be deleted from garbage collector anyway
+            return toReturn == null ? new CheckBox() : toReturn;//new checkbox instead of null, so there is no need for a null check. this will be deleted from garbage collector anyway
         }
         
         private String imageRatioFits(ImageDTO imageToValidate) {
@@ -169,17 +171,17 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             double ratio = ((double)imageToValidate.getWidthInPx())/imageToValidate.getHeightInPx();
             double minRatio = ((double)MediaConstants.MAX_LOGO_IMAGE_WIDTH)/MediaConstants.MIN_LOGO_IMAGE_HEIGHT;
             double maxRatio = ((double)MediaConstants.MIN_LOGO_IMAGE_WIDTH)/MediaConstants.MAX_LOGO_IMAGE_HEIGHT;
-            if(imageToValidate.hasTag(MediaTagConstants.LOGO) && (minRatio < ratio || maxRatio > ratio)) {
+            if (imageToValidate.hasTag(MediaTagConstants.LOGO) && (minRatio < ratio || maxRatio > ratio)) {
                 errorMessage += stringMessages.imageResizeError(MediaTagConstants.LOGO, minRatio, maxRatio, ratio);
             }
             minRatio = ((double)MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH)/MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT;
             maxRatio = ((double)MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH)/MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT;
-            if(imageToValidate.hasTag(MediaTagConstants.TEASER) && (minRatio < ratio || maxRatio > ratio)) {
+            if (imageToValidate.hasTag(MediaTagConstants.TEASER) && (minRatio < ratio || maxRatio > ratio)) {
                 errorMessage += stringMessages.imageResizeError(MediaTagConstants.TEASER, minRatio, maxRatio, ratio);
             }
             minRatio = ((double)MediaConstants.MAX_STAGE_IMAGE_WIDTH)/MediaConstants.MIN_STAGE_IMAGE_HEIGHT;
             maxRatio = ((double)MediaConstants.MIN_STAGE_IMAGE_WIDTH)/MediaConstants.MAX_STAGE_IMAGE_HEIGHT;
-            if(imageToValidate.hasTag(MediaTagConstants.STAGE) && (minRatio < ratio || maxRatio > ratio)) {
+            if (imageToValidate.hasTag(MediaTagConstants.STAGE) && (minRatio < ratio || maxRatio > ratio)) {
                 errorMessage += stringMessages.imageResizeError(MediaTagConstants.STAGE, minRatio, maxRatio, ratio);
             }
             return errorMessage;
@@ -253,9 +255,9 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                             public void onClick(ClickEvent event) {
                                 validateAndUpdate();
                                 CheckBox checkBox = (CheckBox)event.getSource();
-                                if(checkBox.getValue()) {
+                                if (checkBox.getValue()) {
                                     checkBox.getElement().getStyle().clearBackgroundColor();
-                                }else {
+                                } else {
                                     checkBox.getElement().getStyle().setBackgroundColor("red");
                                 }  
                                 
@@ -276,8 +278,8 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             tags.add(tag);
         }
         HashMap<String,Boolean> map = new HashMap<String, Boolean>();
-        for(int i= 0; i < doResize.size(); i++) {
-            if(tags.get(i).equals(MediaTagConstants.LOGO) || tags.get(i).equals(MediaTagConstants.TEASER) || tags.get(i).equals(MediaTagConstants.STAGE) || tags.get(i).equals(MediaTagConstants.GALLERY)) {
+        for (int i= 0; i < doResize.size(); i++) {
+            if (tags.get(i).equals(MediaTagConstants.LOGO) || tags.get(i).equals(MediaTagConstants.TEASER) || tags.get(i).equals(MediaTagConstants.STAGE) || tags.get(i).equals(MediaTagConstants.GALLERY)) {
                 map.put(tags.get(i), doResize.get(i).getValue());
             }
         }

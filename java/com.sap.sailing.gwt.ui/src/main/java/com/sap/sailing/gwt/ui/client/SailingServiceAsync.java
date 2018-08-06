@@ -991,5 +991,5 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      */
     void checkIfRaceIsTracking(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
 
-    void resizeImage(ToResizeImageDTO updatedImage, AsyncCallback<ImageDTO[]> asyncCallback) ;
+    void resizeImage(ToResizeImageDTO updatedImage, AsyncCallback<ImageDTO[]> asyncCallback);
 }

@@ -7926,7 +7926,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 throw new Exception("Loading file via ImageReader did not work, not able to load metadata, retrying to load with ImageIO.read()");
             }
         }catch(Exception e) {
-            e.printStackTrace();
+            logger.log(Level.INFO, e.getMessage());
         }
         if(!loaded) {
             try (InputStream is = getService().getFileStorageManagementService().getActiveFileStorageService().loadFile(new URI(toResizeImage.getSourceRef()))){
@@ -7960,7 +7960,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 getService().getFileStorageManagementService().getActiveFileStorageService().removeFile(new URI(toResizeImage.getSourceRef()));
             } catch (NoCorrespondingServiceRegisteredException | OperationFailedException | InvalidPropertiesException
                     | IOException | URISyntaxException e) {
-                e.printStackTrace();
+                logger.log(Level.WARNING, "Deleting original image after resize did not ork because of: " + e.getMessage());
                 //file deleting did not work -> no important error, because the "only" result of this is one more stored image
             }
         }
@@ -7989,6 +7989,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             resizedImage = ImageConverter.resize(img, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, fileType, false);
             break;
         default://can not occur, because we only loop over the sizeTags, which are the same as in the switch case
+            logger.log(Level.WARNING,"No resizing for avaylable for tag " + resizeTag + ". Code has to be adjusted to allow resizing for that tag.");
             break;
         }
         return resizedImage;
@@ -8012,24 +8013,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     writer.dispose();
                     bytes = new byte[toIntExact(ios.length())];
                     ios.read(bytes);
-                    if(isZeroByteArray(bytes))
+                    if(isZeroByteArray(bytes)) {
                         bytes = null;
+                    }
                 }
             }
-            if(bytes == null)
+            if(bytes == null) {
                 throw new Exception("Saving file via FileWriter did not work, not able to write file with metadata, retrying with ImageIO.write()");
+            }
             
         } catch (Exception e) {
             bytes = null;
-            e.printStackTrace();
+            logger.log(Level.INFO,e.getMessage());
         }
         //if obtaining an OutputStream if the image with EXIF data did not work, then write it without
         if(bytes == null) {
-            try(InputStream is = ImageConverter.biToIs(resizedBufferedImage, fileType)){
+            try(InputStream is = ImageConverter.biToIs(resizedBufferedImage, fileType)) {
                 imgUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(is, "."+fileType, new Long(is.available()));
             }
-        }else {//if it did work, then write the OutputStream to the FileStorageService
-            try(ByteArrayInputStream byteStream = new ByteArrayInputStream(bytes)){
+        } else {//if it did work, then write the OutputStream to the FileStorageService
+            try(ByteArrayInputStream byteStream = new ByteArrayInputStream(bytes)) {
                 imgUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(byteStream, "."+fileType, new Long(byteStream.available()));
             }
         }
@@ -8037,11 +8040,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private boolean isZeroByteArray(byte[] bytes) {
-        for(int i= 0; i < bytes.length; i++){
-            if(bytes[i] != 0)
-                return true;
+        boolean toReturn = true;
+        for (int i= 0; i < bytes.length; i++) {
+            if(bytes[i] != 0) {
+                toReturn = false;
+            }
         }
-        return false;
+        return toReturn;
     }
     
     public ImageDTO toImageDTO(ToResizeImageDTO toResizeImage) {
