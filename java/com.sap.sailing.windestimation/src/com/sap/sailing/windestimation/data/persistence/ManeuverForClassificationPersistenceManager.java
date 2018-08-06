@@ -19,7 +19,7 @@ public class ManeuverForClassificationPersistenceManager
         super();
     }
 
-    private static final String COLLECTION_NAME = "races_with_maneuvers_for_classification";
+    public static final String COLLECTION_NAME = "races_with_maneuvers_for_classification";
 
     @Override
     public String getCollectionName() {

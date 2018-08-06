@@ -184,6 +184,7 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
                 competitorTracks.add(competitorTrack);
                 CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithEstimationData = competitorTrackWithEstimationDataJsonDeserializer
                         .deserialize(competitorTrack);
+                competitorTrack.put("clean", competitorTrackWithEstimationData.isClean());
                 competitorTracksWithEstimationData.add(competitorTrackWithEstimationData);
                 maneuversCount += maneuverCurves.size();
             }

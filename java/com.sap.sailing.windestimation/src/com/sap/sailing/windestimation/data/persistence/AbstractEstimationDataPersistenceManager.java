@@ -28,9 +28,9 @@ import com.sap.sailing.windestimation.data.deserializer.CompetitorTrackWithEstim
  */
 public abstract class AbstractEstimationDataPersistenceManager<T> implements EstimationDataPersistenceManager<T> {
 
-    private static final int DB_PORT = 27017;
-    private static final String DB_HOST = "127.0.0.1";
-    private static final String DB_NAME = "windEstimation";
+    public static final int DB_PORT = 27017;
+    public static final String DB_HOST = "127.0.0.1";
+    public static final String DB_NAME = "windEstimation";
     private static final String FIELD_DB_ID = "_id";
     private static final String FIELD_COMPETITOR_TRACKS = "competitorTracks";
     private static final String FIELD_TRACKED_RACE_NAME = "trackedRaceName";
