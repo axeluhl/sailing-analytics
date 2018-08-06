@@ -126,6 +126,7 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
     @Override
     public void showBusyIndicator() {
         if (state != ResultsPresenterState.BUSY) {
+            mainPanel.setWidgetHidden(controlsPanel, true);
             presentationPanel.setWidget(labeledBusyIndicator);
             state = ResultsPresenterState.BUSY;
         }
