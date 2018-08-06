@@ -18,6 +18,7 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -53,6 +54,7 @@ import com.sap.sse.datamining.ui.client.WithControls;
 import com.sap.sse.datamining.ui.client.developer.PredefinedQueryRunner;
 import com.sap.sse.datamining.ui.client.developer.QueryDefinitionViewer;
 import com.sap.sse.datamining.ui.client.settings.AdvancedDataMiningSettings;
+import com.sap.sse.datamining.ui.client.settings.AdvancedDataMiningSettings.ChangeLossStrategy;
 import com.sap.sse.datamining.ui.client.settings.AdvancedDataMiningSettingsDialogComponent;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -185,6 +187,9 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         contentPanel.setSpacing(5);
         contentPanel.add(new HTML(new SafeHtmlBuilder()
                 .appendEscapedLines(stringMessages.confirmQueryDefinitionChangeLoss()).toSafeHtml()));
+        
+        CheckBox rememberDecisionCheckBox = new CheckBox(stringMessages.rememberDecisionCanBeChangedInSettings());
+        contentPanel.add(rememberDecisionCheckBox);
 
         FlowPanel buttonPanel = new FlowPanel();
         buttonPanel.addStyleName("floatRight");
@@ -195,12 +200,22 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             dialog.hide();
             setQueryDefinition(queryDefinitionToBeApplied);
             queryDefinitionToBeApplied = null;
+            if (rememberDecisionCheckBox.getValue()) {
+                settings.setChangeLossStrategy(ChangeLossStrategy.DISCARD_CHANGES);
+                rememberDecisionCheckBox.setValue(false);
+            }
         });
         discardChanges.addStyleName("dataMiningMarginLeft");
         buttonPanel.add(discardChanges);
         
         Button keepChanges = new Button(stringMessages.keepChanges());
-        keepChanges.addClickHandler(e -> dialog.hide());
+        keepChanges.addClickHandler(e -> {
+            dialog.hide();
+            if (rememberDecisionCheckBox.getValue()) {
+                settings.setChangeLossStrategy(ChangeLossStrategy.KEEP_CHANGES);
+                rememberDecisionCheckBox.setValue(false);
+            }
+        });
         keepChanges.addStyleName("dataMiningMarginLeft");
         buttonPanel.add(keepChanges);
 
@@ -333,12 +348,32 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
     @Override
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
+        applyQueryDefinition(queryDefinition, settings.getChangeLossStrategy());
+    }
+    
+    /**
+     * Displays the given query definition, using the given {@link ChangeLossStrategy} to handle a possible loss of changes.
+     * @param queryDefinition The query to be displayed
+     * @param strategy The strategy to use if the current query definition has been changed
+     */
+    public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition, ChangeLossStrategy strategy) {
         if (queryDefinitionChanged) {
-            queryDefinitionToBeApplied = queryDefinition;
-            confirmChangeLossDialog.center();
+            switch (strategy) {
+            case ASK:
+                queryDefinitionToBeApplied = queryDefinition;
+                confirmChangeLossDialog.center();
+                break;
+            case DISCARD_CHANGES:
+                setQueryDefinition(queryDefinition);
+                break;
+            case KEEP_CHANGES:
+                // Do nothing
+                break;
+            }
         } else {
             setQueryDefinition(queryDefinition);
         }
+        
     }
 
     private void setQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
@@ -474,6 +509,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                 removeControl(predefinedQueryRunner.getEntryWidget());
             }
         }
+        settings.setChangeLossStrategy(newSettings.getChangeLossStrategy());
     }
 
     @Override

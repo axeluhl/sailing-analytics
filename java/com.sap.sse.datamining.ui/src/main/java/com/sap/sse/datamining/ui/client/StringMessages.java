@@ -77,5 +77,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String filterDimensionNotAvailable(String dimensionName);
     String filterValueNotAvailable(String value);
     String groupingDimensionNotAvailable(String dimensionName);
+    String rememberDecisionCanBeChangedInSettings();
+    String changeLossStrategy();
+    String changeLossStrageyTooltip();
+    String askChangeLossStrategyName();
+    String askChangeLossStrategyTooltip();
+    String discardChangesChangeLossStrategyName();
+    String discardChangesChangeLossStrategyTooltip();
+    String keepChangesChangeLossStrategyName();
+    String keepChangesChangeLossStrategyTooltip();
     
 }
