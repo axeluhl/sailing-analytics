@@ -6,12 +6,15 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 
 import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
@@ -117,9 +120,27 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         assertTrue("Url does not contain proper title " + url, url.contains("lbwh.saph.title=Leaderboard%3A+BMW+Cup+(J80)"));
         assertTrue("Url does not contain proper name " + url, url.contains("name=BMW+Cup+(J80)"));
         AutoPlayLeaderboardView autoplayPage = page.goToAutoPlayClassicUrl(getWebDriver(), url);
-        LeaderboardTablePO leaderBoard = autoplayPage.getLeaderBoard();
-        leaderBoard.waitForLeaderboardToHaveData();
-        List<String> races = leaderBoard.getRaceNames();
+        LeaderboardTablePO leaderBoard = autoplayPage.getLeaderBoardWithData();
+        final List<String> races = new WebDriverWait(getWebDriver(), 20).until(new Function<WebDriver, List<String>>() {
+            @Override
+            public List<String> apply(WebDriver arg0) {
+                try {
+                    final List<String> races = leaderBoard.getRaceNames();
+                    final List<String> result;
+                    if (races != null && !races.isEmpty()) {
+                        result = races;
+                    } else {
+                        // The table may seem to be empty while the leaderboard updates itself
+                        result = null;
+                    }
+                    return result;
+                } catch (Exception e) {
+                    // While the leaderboard updates its contents, errors may occur while reading data via selenium
+                    // In this case we need to try this in the next loop again
+                    return null;
+                }
+            }
+        });
         Assert.assertTrue(races.contains("R1"));
         Assert.assertTrue(races.contains("R2"));
         Assert.assertTrue(races.contains("R3"));

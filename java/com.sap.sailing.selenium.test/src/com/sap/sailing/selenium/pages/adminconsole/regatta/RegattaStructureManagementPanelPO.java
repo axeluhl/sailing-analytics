@@ -1,7 +1,10 @@
 package com.sap.sailing.selenium.pages.adminconsole.regatta;
 
+import java.util.function.Function;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
@@ -64,7 +67,7 @@ public class RegattaStructureManagementPanelPO extends PageArea {
     }
     
     private DefaultRegattaLeaderboardCreateDialogPO createDefaultRegattaLeaderboard() {
-        WebElement dialog = findElementBySeleniumId(this.driver, "CreateDefaultRegattaLeaderboardDialog"); //$NON-NLS-1$
+        final WebElement dialog = waitForElementBySeleniumId(this.driver, "CreateDefaultRegattaLeaderboardDialog", 10); //$NON-NLS-1$
         return new DefaultRegattaLeaderboardCreateDialogPO(this.driver, dialog);
     }
 
@@ -80,9 +83,14 @@ public class RegattaStructureManagementPanelPO extends PageArea {
     }
     
     public RegattaDetailsCompositePO getRegattaDetails() {
-        if (this.regattaDetails.isDisplayed()) {
-            return new RegattaDetailsCompositePO(this.driver, this.regattaDetails);
-        }
-        return null;
+        return new WebDriverWait(driver, DEFAULT_WAIT_TIMEOUT_SECONDS).until(new Function<WebDriver, RegattaDetailsCompositePO>() {
+            @Override
+            public RegattaDetailsCompositePO apply(WebDriver t) {
+                if (regattaDetails.isDisplayed()) {
+                    return new RegattaDetailsCompositePO(driver, regattaDetails);
+                }
+                return null;
+            }
+        });
     }
 }

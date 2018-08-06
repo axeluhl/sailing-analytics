@@ -228,7 +228,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     
     @Override
     public String toString() {
-        return getSimpleName();
+        return getDeclaringType().getSimpleName() + "." + getSimpleName() + " : " + getReturnType().getSimpleName();
     }
 
     @Override

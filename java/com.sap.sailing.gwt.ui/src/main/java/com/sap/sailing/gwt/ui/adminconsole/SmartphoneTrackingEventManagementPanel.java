@@ -67,6 +67,8 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -233,7 +235,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                                     }
                                 }).show();
                     } else {
-                        Window.alert(stringMessages.canNotRegisterBoats());
+                        Notification.notify(stringMessages.canNotRegisterBoats(), NotificationType.ERROR);
                     }
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
                     new RegattaLogTrackingDeviceMappingsDialog(sailingService, stringMessages, errorReporter,
@@ -755,7 +757,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
 
                     @Override
                     public void onSuccess(Void result) {
-                        Window.alert(stringMessages.notificationRegattaConfigurationUpdatedUsingByMarks());
+                        Notification.notify(stringMessages.notificationRegattaConfigurationUpdatedUsingByMarks(), NotificationType.SUCCESS);
                     }
                 }));
     }
@@ -845,7 +847,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     @Override
                     public void onSuccess(Boolean result) {
                         if (!result) {
-                            Window.alert(stringMessages.failedToSetNewStartTime());
+                            Notification.notify(stringMessages.failedToSetNewStartTime(), NotificationType.ERROR);
                         } else {
                             trackedRacesListComposite.regattaRefresher.fillRegattas();
                         }
@@ -872,7 +874,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                             @Override
                             public void onSuccess(Pair<Boolean, Boolean> result) {
                                 if (!result.getA() || !result.getB()) {
-                                    Window.alert(stringMessages.failedToSetNewFinishingAndFinishTime());
+                                    Notification.notify(stringMessages.failedToSetNewFinishingAndFinishTime(), NotificationType.ERROR);
                                 } else {
                                     trackedRacesListComposite.regattaRefresher.fillRegattas();
                                 }
@@ -942,12 +944,12 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                         getLocaleInfo(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.sendingMailsFailed() + caught.getMessage());
+                                Notification.notify(stringMessages.sendingMailsFailed() + caught.getMessage(), NotificationType.ERROR);
                             }
 
                             @Override
                             public void onSuccess(Void result) {
-                                Window.alert(stringMessages.sendingMailsSuccessful());
+                                Notification.notify(stringMessages.sendingMailsSuccessful(), NotificationType.SUCCESS);
                             }
                         });
             }

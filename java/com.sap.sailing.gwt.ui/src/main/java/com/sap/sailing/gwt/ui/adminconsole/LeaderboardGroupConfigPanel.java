@@ -54,6 +54,8 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
@@ -986,7 +988,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 setDescriptionEditable(false);
                 updateGroup(selectedGroup);
             } else {
-                Window.alert(stringMessages.pleaseEnterNonEmptyDescription() + ".");
+                Notification.notify(stringMessages.pleaseEnterNonEmptyDescription() + ".", NotificationType.ERROR);
                 descriptionTextArea.setText(selectedGroup.description);
             }
         }

@@ -5,24 +5,27 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
-import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContext;
+import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
 import com.sap.sailing.datamining.impl.data.LeaderboardWithContext;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
-public class LeaderboardRetrievalProcessor extends AbstractRetrievalProcessor<LeaderboardGroupWithContext, HasLeaderboardContext> {
+public class LeaderboardRetrievalProcessor extends AbstractRetrievalProcessor<HasLeaderboardGroupContext, HasLeaderboardContext> {
 
     public LeaderboardRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasLeaderboardContext, ?>> resultReceivers, int retrievalLevel) {
-        super(LeaderboardGroupWithContext.class, HasLeaderboardContext.class, executor, resultReceivers, retrievalLevel);
+        super(HasLeaderboardGroupContext.class, HasLeaderboardContext.class, executor, resultReceivers, retrievalLevel);
     }
 
     @Override
-    protected Iterable<HasLeaderboardContext> retrieveData(LeaderboardGroupWithContext element) {
+    protected Iterable<HasLeaderboardContext> retrieveData(HasLeaderboardGroupContext element) {
         Collection<HasLeaderboardContext> leaderboardsWithContext = new ArrayList<>();
         for (Leaderboard leaderboard : element.getLeaderboardGroup().getLeaderboards()) {
-            leaderboardsWithContext.add(new LeaderboardWithContext(leaderboard, element, element.getPolarDataService()));
+            if (isAborted()) {
+                break;
+            }
+            leaderboardsWithContext.add(new LeaderboardWithContext(leaderboard, element));
         }
         return leaderboardsWithContext;
     }

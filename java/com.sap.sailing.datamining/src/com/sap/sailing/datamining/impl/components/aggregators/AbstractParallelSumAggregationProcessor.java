@@ -19,8 +19,6 @@ public abstract class AbstractParallelSumAggregationProcessor<T> extends
         super(executor, resultReceivers, "Sum");
         results = new HashMap<>();
     }
-    
-    protected abstract T add(T t1, T t2);
 
     @Override
     protected void handleElement(GroupedDataEntry<T> element) {
@@ -31,6 +29,8 @@ public abstract class AbstractParallelSumAggregationProcessor<T> extends
             results.put(key, add(results.get(key), element.getDataEntry()));
         }
     }
+    
+    protected abstract T add(T t1, T t2);
 
     @Override
     protected Map<GroupKey, T> getResult() {

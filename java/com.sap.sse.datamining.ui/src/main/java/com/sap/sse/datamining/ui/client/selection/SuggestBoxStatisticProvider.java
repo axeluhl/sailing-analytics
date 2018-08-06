@@ -219,24 +219,12 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         awaitingRetrieverChainStatistics--;
         if (awaitingRetrieverChainStatistics == 0) {
             Collections.sort(availableExtractionFunctions);
-            Map<String, ExtractionFunctionWithContext> displayDuplicates = new HashMap<>();
-            for (ExtractionFunctionWithContext statistic : availableExtractionFunctions) {
-                ExtractionFunctionWithContext duplicate = displayDuplicates
-                        .get(statistic.getExtractionFunction().getDisplayName());
-                if (duplicate == null) {
-                    displayDuplicates.put(statistic.getExtractionFunction().getDisplayName(), statistic);
-                } else {
-                    statistic.setVerbose(true);
-                    duplicate.setVerbose(true);
-                }
-            }
             extractionFunctionSuggestBox.setSelectableValues(availableExtractionFunctions);
 
             // TODO Do not pre-select the first element. The other UI components have to be able to handle "empty content"
             ExtractionFunctionWithContext currentValue = extractionFunctionSuggestBox.getExtractionFunction();
             ExtractionFunctionWithContext valueToBeSelected = availableExtractionFunctions.contains(currentValue)
                     ? currentValue : Util.first(availableExtractionFunctions);
-            extractionFunctionSuggestBox.getValueBox().setValue(valueToBeSelected.getDisplayString(), false);
             extractionFunctionSuggestBox.setExtractionFunction(valueToBeSelected);
         }
     }
@@ -377,18 +365,9 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         if (index != -1) {
             statistic = availableExtractionFunctions.get(index);
         } else {
-            String displayName = extractionFunction.getDisplayName();
-            for (ExtractionFunctionWithContext availableStatistic : availableExtractionFunctions) {
-                if (availableStatistic.getExtractionFunction().getDisplayName().equals(displayName)) {
-                    statistic.setVerbose(true);
-                    availableStatistic.setVerbose(true);
-                }
-            }
             availableExtractionFunctions.add(statistic);
-            extractionFunctionSuggestBox.setSelectableValues(availableExtractionFunctions);
         }
 
-        extractionFunctionSuggestBox.getValueBox().setValue(statistic.getDisplayString(), false);
         extractionFunctionSuggestBox.setExtractionFunction(statistic);
         aggregatorListBox.setValue(queryDefinition.getAggregatorDefinition());
     }
@@ -488,7 +467,6 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         private final DataRetrieverChainDefinitionDTO retrieverChain;
         private final FunctionDTO extractionFunction;
         private final Collection<String> matchingStrings;
-        private boolean verbose;
 
         public ExtractionFunctionWithContext(DataRetrieverChainDefinitionDTO retrieverChain,
                 FunctionDTO extractionFunction) {
@@ -511,30 +489,13 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             return matchingStrings;
         }
 
-        public boolean isVerbose() {
-            return verbose;
-        }
-
-        public void setVerbose(boolean verbose) {
-            this.verbose = verbose;
-        }
-
-        public String getDisplayString() {
-            StringBuilder builder = new StringBuilder(extractionFunction.getDisplayName());
-            if (isVerbose()) {
-                builder.append(" (").append(getDataMiningStringMessages().basedOn()).append(" ")
-                        .append(retrieverChain.getName()).append(")");
-            }
-            return builder.toString();
-        }
-
         @Override
         public int compareTo(ExtractionFunctionWithContext o) {
-            int comparedDisplayName = extractionFunction.getDisplayName()
-                    .compareTo(o.getExtractionFunction().getDisplayName());
-            if (comparedDisplayName != 0)
+            String otherDisplayName = o.getExtractionFunction().getDisplayName();
+            int comparedDisplayName = extractionFunction.getDisplayName().compareToIgnoreCase(otherDisplayName);
+            if (comparedDisplayName != 0) {
                 return comparedDisplayName;
-
+            }
             return retrieverChain.compareTo(o.getRetrieverChain());
         }
 
@@ -597,12 +558,12 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
 
                 @Override
                 protected String createSuggestionKeyString(ExtractionFunctionWithContext value) {
-                    return value.getDisplayString();
+                    return value.getExtractionFunction().getDisplayName();
                 }
 
                 @Override
                 protected String createSuggestionAdditionalDisplayString(ExtractionFunctionWithContext value) {
-                    return null;
+                    return value.getRetrieverChain().getName();
                 }
             }, new ScrollableSuggestionDisplay());
             suggestOracle = (AbstractListSuggestOracle<ExtractionFunctionWithContext>) getSuggestOracle();
@@ -622,9 +583,10 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         public void setExtractionFunction(ExtractionFunctionWithContext extractionFunction) {
             if (!Objects.equals(this.extractionFunction, extractionFunction)) {
                 this.extractionFunction = extractionFunction;
-                this.setFocus(false);
+                setValue(extractionFunction.getExtractionFunction().getDisplayName(), false);
                 onValueChange();
             }
+            setFocus(false);
         }
 
         public ExtractionFunctionWithContext getExtractionFunction() {

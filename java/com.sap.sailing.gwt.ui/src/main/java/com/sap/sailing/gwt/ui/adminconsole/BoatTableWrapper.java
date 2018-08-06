@@ -13,7 +13,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.BoatDTO;
@@ -24,6 +23,8 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -282,7 +283,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
 
             @Override
             public void onSuccess(Void result) {
-                Window.alert(stringMessages.successfullyAllowedBoatReset(boats.toString()));
+                Notification.notify(stringMessages.successfullyAllowedBoatReset(boats.toString()), NotificationType.SUCCESS);
             }
         });
     }

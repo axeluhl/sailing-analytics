@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# source variables
+if [ "$TMP" = "" ]; then
+  TMP=/tmp
+fi
+
+source "env.sh"
+
+# make some checks
+JAVA_BINARY="$JAVA_HOME/bin/java"
+if [[ ! -x "$JAVA_BINARY" ]]
+then
+	echo "java not found" 1>&2
+	exit 0
+fi
+
+if netstat -tlnp 2>/dev/null | grep ":$SERVER_PORT" >/dev/null
+then
+        echo "There is something already running on port $SERVER_PORT. Perhaps your server that has not been stopped?" 1>&2
+        exit 0
+fi
+
+scriptdir="$(dirname "$(readlink -f "$0")")"
+LIB_DIR="$(pwd)/native-libraries"
+
+if [[ ! -d "logs" ]]; then
+    mkdir logs
+fi
+
+if [[ ! -d "tmp" ]]; then
+    mkdir tmp
+fi
+
+echo "Script directory is $scriptdir and LIB_DIR is $LIB_DIR"
+
+# Make really sure that parameters from config.ini are not used
+sed -i "/mongo.host/d" ./configuration/config.ini
+sed -i "/mongo.port/d" ./configuration/config.ini
+sed -i "/expedition.udp.port/d" ./configuration/config.ini
+sed -i "/replication.exchangeName/d" ./configuration/config.ini
+sed -i "/replication.exchangeHost/d" ./configuration/config.ini
+
+# Ensure that Jetty Port is set correctly
+sed -i "s/^.*jetty.http.port.*$/<Set name=\"port\"><Property name=\"jetty.http.port\" deprecated=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" ./configuration/jetty/etc/jetty-http.xml
+
+# Update monitoring with the right ports
+sed -i "s/127.0.0.1:[0-9][0-9][0-9][0-9]\//127.0.0.1:$SERVER_PORT\//g" ./configuration/monitoring.properties
+
+# Inject information for system
+HEAD_DATE=$(date "+%Y%m%d%H%M")
+sed -i "s/System:.*$/ System: $MONGODB_HOST:$MONGODB_PORT\/$MONGODB_NAME-$EXPEDITION_PORT-$REPLICATION_HOST:$REPLICATION_PORT\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
+
+props=(
+	-D$SERVER_NAME
+	-Djava.awt.headless=true
+	-Dcom.sap.sailing.server.name=$SERVER_NAME
+	-Dmongo.host="$MONGODB_HOST"
+	-Dmongo.port="$MONGODB_PORT"
+	-Dmongo.dbName="$MONGODB_NAME"
+	-Dexpedition.udp.port="$EXPEDITION_PORT"
+	-Dreplication.exchangeHost="$REPLICATION_HOST"
+	-Dreplication.exchangePort="$REPLICATION_PORT"
+	-Dreplication.exchangeName="$REPLICATION_CHANNEL"
+	-Dreplicate.on.start="$REPLICATE_ON_START"
+	-Dreplicate.master.servlet.host="$REPLICATE_MASTER_SERVLET_HOST"
+	-Dreplicate.master.servlet.port="$REPLICATE_MASTER_SERVLET_PORT"
+	-Dreplicate.master.queue.host="$REPLICATE_MASTER_QUEUE_HOST"
+	-Dreplicate.master.queue.port="$REPLICATE_MASTER_QUEUE_PORT"
+	-Dreplicate.master.exchange.name="$REPLICATE_MASTER_EXCHANGE_NAME"
+	-Djava.io.tmpdir="$PWD/tmp"
+	-Dfile.encoding=cp1252
+	-Djetty.home=$scriptdir/configuration/jetty
+	-Djava.util.logging.config.file=$scriptdir/configuration/logging.properties
+	-Djava.library.path=$LIB_DIR
+	-Dosgi.shell.telnet.port=$TELNET_PORT
+)
+
+jar="plugins/org.eclipse.equinox.launcher_1.3.0.v20140415-2008.jar"
+args=(-configuration ./ -clean)
+
+"$JAVA_BINARY"  "${props[@]}" $ADDITIONAL_JAVA_ARGS -Xmx$MEMORY -jar "$jar" "${args[@]}"
+

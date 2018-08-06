@@ -17,6 +17,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.PasswordTextBoxWithWatermark;
 import com.sap.sse.gwt.client.controls.TextBoxWithWatermark;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
@@ -83,13 +85,13 @@ public class LoginView extends Composite {
                     if (!result.getRedirectURL().equals("")) {
                         Window.Location.replace(result.getRedirectURL());
                     } else  {
-                        Window.alert(stringMessages.loggedIn(result.getUserDTO().getName()));
+                        Notification.notify(stringMessages.loggedIn(result.getUserDTO().getName()), NotificationType.INFO);
                     }
                 } else {
                     if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {
-                        Window.alert(stringMessages.failedToSignIn());
+                        Notification.notify(stringMessages.failedToSignIn(), NotificationType.ERROR);
                     } else {
-                        Window.alert(result.getMessage());
+                        Notification.notify(result.getMessage(), NotificationType.ERROR);
                     }
                 }
             }

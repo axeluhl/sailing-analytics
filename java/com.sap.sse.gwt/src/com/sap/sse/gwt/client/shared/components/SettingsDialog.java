@@ -3,9 +3,10 @@ package com.sap.sse.gwt.client.shared.components;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
@@ -87,13 +88,13 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
                             @Override
                             public void onSuccess() {
                                 setButtonSavingState(false, stringMessages);
-                                Window.alert(stringMessages.settingsSavedMessage());
+                                Notification.notify(stringMessages.settingsSavedMessage(), NotificationType.SUCCESS);
                             }
 
                             @Override
                             public void onError(Throwable caught) {
                                 setButtonSavingState(false, stringMessages);
-                                Window.alert(stringMessages.settingsSaveErrorMessage());
+                                Notification.notify(stringMessages.settingsSaveErrorMessage(), NotificationType.ERROR);
                             }
 
                         });
@@ -111,15 +112,14 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
                             public void onError(Throwable caught, SettingsType fallbackDefaultSettings) {
                                 setButtonSavingState(false, stringMessages);
                                 onChange(fallbackDefaultSettings);
-                                Window.alert(stringMessages.settingsRemovedError());
+                                Notification.notify(stringMessages.settingsRemovedError(), NotificationType.ERROR);
                             }
 
                             @Override
                             public void onSuccess(SettingsType settings) {
                                 setButtonSavingState(false, stringMessages);
                                 setDialogComponent(component.getSettingsDialogComponent(settings));
-                                
-                                Window.alert(stringMessages.settingsRemoved());
+                                Notification.notify(stringMessages.settingsRemoved(), NotificationType.SUCCESS);
                             }
                         });
             }
