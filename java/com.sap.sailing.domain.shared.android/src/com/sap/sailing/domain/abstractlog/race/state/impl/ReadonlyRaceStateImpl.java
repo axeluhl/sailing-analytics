@@ -44,6 +44,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
+import com.sap.sse.util.WeakIdentityHashMap;
 
 /**
  * Implementation of {@link ReadonlyRaceState}. Use the static factory methods to instantiate your race state.
@@ -55,8 +56,37 @@ import com.sap.sse.common.Util;
  * See {@link ReadonlyRaceStateImpl#update()} for the core of the algorithm.
  */
 public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedListener {
-
-    public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog) {
+    private static final WeakIdentityHashMap<RaceLog, WeakIdentityHashMap<RaceLogResolver, ReadonlyRaceState>> raceStateCache =
+            new WeakIdentityHashMap<>();
+    
+    /**
+     * Obtains a race state for the combination of {@code raceLog} and {@code raceLogResolver}. The result is
+     * cache using weak references to the race log and the race log resolver for quick retrieval upon equal
+     * requests, saving memory, saving listeners and thereby avoiding more synchronization issues.
+     * 
+     * See also bug4704.
+     */
+    public static ReadonlyRaceState getOrCreate(RaceLogResolver raceLogResolver, RaceLog raceLog) {
+        WeakIdentityHashMap<RaceLogResolver, ReadonlyRaceState> raceStatesForRaceLog;
+        ReadonlyRaceState result = null;
+        synchronized (raceStateCache) {
+            raceStatesForRaceLog = raceStateCache.get(raceLog);
+            if (raceStatesForRaceLog == null) {
+                raceStatesForRaceLog = new WeakIdentityHashMap<>();
+                raceStateCache.put(raceLog, raceStatesForRaceLog);
+            } else {
+                result = raceStatesForRaceLog.get(raceLogResolver);
+            }
+            if (result == null) {
+                result = createInternal(raceLogResolver, raceLog);
+                raceStatesForRaceLog.put(raceLogResolver, result);
+            }
+        }
+        return result;
+    }
+        
+        
+    private static final ReadonlyRaceState createInternal(RaceLogResolver raceLogResolver, RaceLog raceLog) {
         return create(raceLogResolver, raceLog, /* forRaceLogIdentifier */null,
                 Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState> emptyMap());
     }

@@ -104,7 +104,7 @@ public class RaceContext {
         this.fleet = fleet;
         trackedRace = raceColumn.getTrackedRace(fleet);
         raceLog = raceColumn.getRaceLog(fleet);
-        state = (raceLog == null) ? null : ReadonlyRaceStateImpl.create(raceLogResolver, raceLog);
+        state = (raceLog == null) ? null : ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, raceLog);
     }
 
     private boolean isShowFleetData() {

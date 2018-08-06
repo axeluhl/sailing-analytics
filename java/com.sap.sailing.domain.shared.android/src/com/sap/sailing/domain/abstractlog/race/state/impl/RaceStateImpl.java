@@ -55,10 +55,6 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     
     private final AbstractLogEventAuthor author;
     
-    public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog) {
-        return create(raceLogResolver, raceLog, /* forRaceLogIdentifier */ null, Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
-    }
-
     /**
      * Creates a {@link RaceState} with the initial racing procedure type set to a fallback value and an empty configuration.
      */

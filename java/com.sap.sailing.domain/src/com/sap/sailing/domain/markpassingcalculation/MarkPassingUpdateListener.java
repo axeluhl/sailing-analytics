@@ -196,6 +196,25 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
     }
 
     @Override
+    public void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
+        markPassingCalculator.enqueueUpdate(new StorePositionUpdateStrategy() {
+            @Override
+            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
+                    Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
+                    IntHolder smallestChangedWaypointIndex,
+                    List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
+                    List<Pair<Competitor, Integer>> removedMarkPassings,
+                    List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder, CandidateChooser candidateChooser) {
+                final Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> newAndRemovedCandidatesPerCompetitor =
+                        candidateFinder.getCandidateDeltasAfterStartOfTrackingChange();
+                for (final Entry<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> i : newAndRemovedCandidatesPerCompetitor.entrySet()) {
+                    candidateChooser.calculateMarkPassDeltas(i.getKey(), i.getValue().getA(), i.getValue().getB());
+                }
+            }
+        });
+    }
+
+    @Override
     public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
         markPassingCalculator.enqueueUpdate(new StorePositionUpdateStrategy() {
             @Override

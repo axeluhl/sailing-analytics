@@ -170,8 +170,10 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
         if (closestTwsTwa == null) {
             result = new Pair<>(0.0, null);
         } else {
-            double minDiffDeg = Math.abs(Math.abs(Math.abs(closestTwsTwa.getObject().getBearing().getDegrees() * 2)
-                    - Math.abs(courseChangeDeg)));
+            double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(
+                    closestTwsTwa.getObject().getBearing().getDegrees(), maneuverType);
+            double minDiffDeg = Math.abs(Math.abs(targetManeuverAngle)
+                    - Math.abs(courseChangeDeg));
             result = new Pair<>(1. / (1. + (minDiffDeg / 10.) * (minDiffDeg / 10.)), closestTwsTwa);
         }
         return result;
@@ -189,7 +191,7 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
                         : courseChangeDeg >= 0 ? Tack.STARBOARD : Tack.PORT)) {
             double targetManeuverAngle = getManeuverAngleInDegreesFromTwa(
                     trueWindSpeedAndAngle.getObject().getBearing().getDegrees(), type);
-            double diff = Math.abs(targetManeuverAngle) - Math.abs(courseChangeDeg);
+            double diff = Math.abs(Math.abs(targetManeuverAngle) - Math.abs(courseChangeDeg));
             if (diff < minDiff) {
                 minDiff = diff;
                 closestTwsTwa = trueWindSpeedAndAngle;
