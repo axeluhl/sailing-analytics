@@ -71,13 +71,12 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
             @Override
             public Widget get() {
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null);
-                CompositeResultsPresenter<?> resultsPresenter = new TabbedSailingResultsPresenter(/*parent*/ null, /*context*/ null, 
-                        /*drillDownCallback*/ groupKey -> {
+                CompositeResultsPresenter<?> resultsPresenter = new TabbedSailingResultsPresenter(/* parent */ null,
+                        /* context */ null, /* drillDownCallback */ groupKey -> {
                             queryDefinitionProvider.drillDown(groupKey, () -> {
                                 queryRunner.run(queryDefinitionProvider.getQueryDefinition());
                             });
-                        },
-                        getStringMessages());
+                        }, getStringMessages());
                 resultsPresenter.addCurrentPresenterChangedListener(presenterId -> {
                     StatisticQueryDefinitionDTO queryDefinition = resultsPresenter.getQueryDefinition(presenterId);
                     if (queryDefinition != null) {
