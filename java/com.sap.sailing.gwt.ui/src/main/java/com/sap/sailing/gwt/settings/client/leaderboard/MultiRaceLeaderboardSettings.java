@@ -9,6 +9,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.EnumSetting;
 import com.sap.sse.common.settings.generic.IntegerSetting;
 import com.sap.sse.common.settings.generic.StringSetSetting;
+import com.sap.sse.common.settings.generic.support.SettingsUtil;
 
 public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
     private static final long serialVersionUID = -3445146715292390755L;
@@ -52,20 +53,8 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
     }
     
     public MultiRaceLeaderboardSettings overrideDefaultsForNamesOfRaceColumns(List<String> namesOfRaceColumns) {
-        MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings();
-        newSettings.legDetailsToShow.setValues(this.getLegDetailsToShow());
-        newSettings.raceDetailsToShow.setValues(this.getRaceDetailsToShow());
-        newSettings.overallDetailsToShow.setValues(this.getOverallDetailsToShow());
-        newSettings.numberOfLastRacesToShow.setValue(this.getNumberOfLastRacesToShow());
-        newSettings.activeRaceColumnSelectionStrategy.setValue(this.getActiveRaceColumnSelectionStrategy());
-        newSettings.delayBetweenAutoAdvancesInMilliseconds.setValue(this.getDelayBetweenAutoAdvancesInMilliseconds());
-        newSettings.maneuverDetailsToShow.setValues(this.getManeuverDetailsToShow());
-        newSettings.showAddedScores.setValue(this.isShowAddedScores());
-        newSettings.showCompetitorShortNameColumn.setValue(this.isShowCompetitorShortNameColumn());
-        newSettings.showCompetitorFullNameColumn.setValue(this.isShowCompetitorFullNameColumn());
-        newSettings.showCompetitorBoatInfoColumn.setValue(this.isShowCompetitorBoatInfoColumn());
-        newSettings.isShowCompetitorNationality.setValue(this.isShowCompetitorNationality());
-        newSettings.namesOfRaceColumnsToShow.setValues(this.getNamesOfRaceColumnsToShow());
+        final MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings();
+        SettingsUtil.copyValuesAndDefaults(this, this, newSettings);
         newSettings.namesOfRaceColumnsToShow.setDefaultValues(namesOfRaceColumns);
         return newSettings;
     }
