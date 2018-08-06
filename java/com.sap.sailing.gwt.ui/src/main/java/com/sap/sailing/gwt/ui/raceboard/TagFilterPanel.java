@@ -55,7 +55,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     private final FlowPanel searchBoxPanel;
     private final StringMessages stringMessages;
     private final TagsFilterSets tagsFilterSets;
-    private final TagProvider tagSelectionProvider = null;
+    private final TagProvider tagProvider = null;
     
     private FilterSet<TagDTO, FilterWithUI<TagDTO>> lastActiveTagFilterSet;
 
@@ -133,14 +133,14 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
                 stringMessages, new DialogCallback<TagsFilterSets>() {
             @Override
             public void ok(final TagsFilterSets newTagsFilterSets) {
-                /*tagsFilterSets.getFilterSets().clear();
+                tagsFilterSets.getFilterSets().clear();
                 tagsFilterSets.getFilterSets().addAll(newTagsFilterSets.getFilterSets());
                 tagsFilterSets.setActiveFilterSet(newTagsFilterSets.getActiveFilterSet());
                 
                 updateTagsFilterContexts(newTagsFilterSets);
-                tagSelectionProvider.setTagsFilterSet(newTagsFilterSets.getActiveFilterSetWithGeneralizedType());
+                tagProvider.setTagsFilterSet(newTagsFilterSets.getActiveFilterSetWithGeneralizedType());
                 updateTagsFilterControlState(newTagsFilterSets);
-                storeTagsFilterSets(newTagsFilterSets);*/
+                storeTagsFilterSets(newTagsFilterSets);
              }
 
             @Override
@@ -154,13 +154,14 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     
     private void insertSelectedTagsFilter(TagsFilterSets filterSet) {
         // selected tags filter
-        FilterSet<TagDTO, FilterWithUI<TagDTO>> selectedTagsFilterSet = 
+        FilterSet<TagDTO, FilterWithUI<TagDTO>> tagsFilterSet = 
                 new FilterSet<TagDTO, FilterWithUI<TagDTO>>(stringMessages.selectedCompetitors());
-        selectedTagsFilterSet.setEditable(false);
+        tagsFilterSet.setEditable(false);
+        
         SelectedTagsFilter selectedTagsFilter = new SelectedTagsFilter();
-        selectedTagsFilter.setTagSelectionProvider(tagSelectionProvider);
-        selectedTagsFilterSet.addFilter(selectedTagsFilter);
-        filterSet.addFilterSet(0, selectedTagsFilterSet);
+        selectedTagsFilter.setTagSelectionProvider(tagProvider);
+        tagsFilterSet.addFilter(selectedTagsFilter);
+        filterSet.addFilterSet(0, tagsFilterSet);
     }
     
     private void updateTagsFilterContexts(TagsFilterSets filterSets) {
@@ -168,7 +169,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
             for (Filter<TagDTO> filter : filterSet.getFilters()) {
                 if (filter instanceof TagSelectionProviderFilterContext) {
                     ((TagSelectionProviderFilterContext) filter)
-                            .setTagSelectionProvider(tagSelectionProvider);
+                            .setTagSelectionProvider(tagProvider);
                 }
             }
         }
