@@ -1,7 +1,7 @@
 package com.sap.sailing.datamining.impl.components;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.datamining.data.HasBravoFixTrackContext;
@@ -28,13 +28,9 @@ public class BravoFixTrackRetrievalProcessor extends AbstractRetrievalProcessor<
 
     @Override
     protected Iterable<HasBravoFixTrackContext> retrieveData(HasRaceOfCompetitorContext element) {
-        Collection<HasBravoFixTrackContext> bravoTracksWithContext = new ArrayList<>();
         final TrackedRace trackedRace = element.getTrackedRaceContext().getTrackedRace();
         final BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(element.getCompetitor(), BravoFixTrack.TRACK_NAME);
-        if (bravoFixTrack != null) {
-            bravoTracksWithContext.add(new BravoFixTrackWithContext(element, bravoFixTrack));
-        }
-        return bravoTracksWithContext;
+        return bravoFixTrack == null ? Collections.emptySet() : Collections.singleton(new BravoFixTrackWithContext(element, bravoFixTrack));
     }
 
 }

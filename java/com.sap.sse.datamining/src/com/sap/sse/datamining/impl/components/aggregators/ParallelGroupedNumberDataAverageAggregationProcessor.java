@@ -82,6 +82,9 @@ public class ParallelGroupedNumberDataAverageAggregationProcessor
     protected Map<GroupKey, AverageWithStats<Number>> aggregateResult() {
         Map<GroupKey, AverageWithStats<Number>> result = new HashMap<>();
         for (Entry<GroupKey, DoubleHolder> sumAggregationEntry : sumPerKey.entrySet()) {
+            if (isAborted()) {
+                break;
+            }
             GroupKey key = sumAggregationEntry.getKey();
             result.put(key, new AverageWithStatsImpl<Number>(sumAggregationEntry.getValue().value / elementAmountPerKey.get(key).get(),
                     minPerKey.get(key), maxPerKey.get(key),

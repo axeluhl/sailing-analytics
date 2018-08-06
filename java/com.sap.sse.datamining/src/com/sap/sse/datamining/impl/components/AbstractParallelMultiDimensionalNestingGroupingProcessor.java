@@ -69,6 +69,9 @@ public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<D
         } else {
             List<GroupKey> keys = new ArrayList<>();
             for (ParameterizedFunction<?> parameterizedDimension : parameterizedDimensions) {
+                if (isAborted()) {
+                    break;
+                }
                 keys.add(createGroupKeyFor(input, parameterizedDimension.getFunction(), parameterizedDimension.getParameterProvider()));
             }
             return new CompoundGroupKey(keys);

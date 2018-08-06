@@ -38,8 +38,8 @@ import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.actions.GetManeuversForCompetitorsAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
@@ -47,6 +47,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel.LeaderBoardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
@@ -75,7 +76,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private final ManeuverTablePanelResources resources = GWT.create(ManeuverTablePanelResources.class);
 
     private final StringMessages stringMessages;
-    private final CompetitorSelectionProvider competitorSelectionModel;
+    private final RegattaAndRaceIdentifier raceIdentifier;
+    private final RaceCompetitorSelectionProvider competitorSelectionModel;
 
     private final SimplePanel contentPanel = new SimplePanel();
     private final Label importantMessageLabel = new Label();
@@ -89,7 +91,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     public ManeuverTablePanel(final Component<?> parent, ComponentContext<?> context,
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
             final RegattaAndRaceIdentifier raceIdentifier, final StringMessages stringMessages,
-            final CompetitorSelectionProvider competitorSelectionModel, final ErrorReporter errorReporter,
+            final RaceCompetitorSelectionProvider competitorSelectionModel, final ErrorReporter errorReporter,
             final Timer timer, final ManeuverTableSettings initialSettings,
             final TimeRangeWithZoomModel timeRangeWithZoomProvider, final LeaderBoardStyle style,
             final UserService userService) {
@@ -106,10 +108,11 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         userStatusChangeHandler.onUserStatusChange(userService.getCurrentUser(), /* preAuthenticated */ true);
         this.resources.css().ensureInjected();
         this.settings = initialSettings;
+        this.raceIdentifier = raceIdentifier;
         this.competitorSelectionModel = competitorSelectionModel;
         this.stringMessages = stringMessages;
         this.competitorDataProvider = new CachedManeuverTableDataProvider(timeRangeWithZoomProvider, timer,
-                raceIdentifier, sailingService, asyncActionsExecutor);
+                sailingService, asyncActionsExecutor);
         this.competitorSelectionModel.addCompetitorSelectionChangeListener(this);
         timer.addTimeListener(this);
         final FlowPanel rootPanel = new FlowPanel();
@@ -263,14 +266,23 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         return column;
     }
 
-    private SortableColumn<ManeuverTableData, String> createCompetitorColumn() {
+    private SortableColumn<ManeuverTableData, ManeuverTableData> createCompetitorColumn() {
         InvertibleComparator<ManeuverTableData> comparator = new InvertibleComparatorAdapter<ManeuverTableData>() {
             @Override
             public int compare(ManeuverTableData o1, ManeuverTableData o2) {
                 return o1.getCompetitorName().compareTo(o2.getCompetitorName());
             }
         };
-        return new SortableColumn<ManeuverTableData, String>(new TextCell(), SortingOrder.ASCENDING) {
+        return new SortableColumn<ManeuverTableData, ManeuverTableData>(new AbstractCell<ManeuverTableData>() {
+            @Override
+            public void render(Context context, ManeuverTableData data, SafeHtmlBuilder sb) {
+                final String color = data.getCompetitorColor();
+                final String divStyle = color == null ? "border: none;" : "border-bottom: 2px solid " + color + ";";
+                sb.appendHtmlConstant("<div style=\"" + divStyle + "\">");
+                sb.appendEscaped(data.getCompetitorName());
+                sb.appendHtmlConstant("</div>");
+            }
+        }, SortingOrder.ASCENDING) {
             @Override
             public InvertibleComparator<ManeuverTableData> getComparator() {
                 return comparator;
@@ -282,8 +294,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             }
 
             @Override
-            public String getValue(ManeuverTableData object) {
-                return object.getCompetitorName();
+            public ManeuverTableData getValue(ManeuverTableData object) {
+                return object;
             }
         };
     }
@@ -321,7 +333,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         for (final Entry<CompetitorDTO, Iterable<ManeuverDTO>> entry : cachedData.entrySet()) {
             for (ManeuverDTO maneuver : entry.getValue()) {
                 if (settings.getSelectedManeuverTypes().contains(maneuver.getType())) {
-                    data.add(new ManeuverTableData(entry.getKey(), maneuver));
+                    final Color competitorColor = competitorSelectionModel.getColor(entry.getKey(), raceIdentifier);
+                    data.add(new ManeuverTableData(entry.getKey(), competitorColor.getAsHtml(), maneuver));
                 }
             }
         }
@@ -429,15 +442,12 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
     private class CachedManeuverTableDataProvider extends CachedRaceDataProvider<CompetitorDTO, ManeuverDTO> {
         private final AsyncActionsExecutor asyncActionsExecutor;
-        private final RegattaAndRaceIdentifier raceIdentifier;
         private final SailingServiceAsync sailingService;
 
         private CachedManeuverTableDataProvider(final TimeRangeProvider timeRangeProvider, final Timer timer,
-                final RegattaAndRaceIdentifier raceIdentifier, final SailingServiceAsync sailingService,
-                final AsyncActionsExecutor asyncActionsExecutor) {
+                final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor) {
             super(timeRangeProvider, timer, m -> m.getTimePoint(), LOADING_OFFSET_TO_NEXT_MANEUVER_PROVIDER, true);
             this.asyncActionsExecutor = asyncActionsExecutor;
-            this.raceIdentifier = raceIdentifier;
             this.sailingService = sailingService;
         }
 

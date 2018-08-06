@@ -129,6 +129,7 @@ public class LeaderboardPage extends HostPage {
     }
     
     public LeaderboardSettingsDialogPO getLeaderboardSettings() {
+        scrollToTop();
         this.leaderboardSettingsButton.click();
         return new LeaderboardSettingsDialogPO(this.driver,
                 findElementBySeleniumId(this.driver, "LeaderboardSettingsDialog"));

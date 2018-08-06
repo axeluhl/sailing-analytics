@@ -3636,7 +3636,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         final Triple<TimePoint, Integer, RacingProcedureType> result;
         if (leaderboard instanceof HasRegattaLike && raceLog != null) {
-            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(/* race log resolver */ this, raceLog);
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.getOrCreate(/* race log resolver */ this, raceLog);
             result = new com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(),
                 raceLog.getCurrentPassId(), state.getRacingProcedure().getType());
         } else {
@@ -3652,7 +3652,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         final Triple<TimePoint, TimePoint, Integer> result;
         if (leaderboard instanceof HasRegattaLike && raceLog != null) {
-            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(/* race log resolver */ this, raceLog);
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.getOrCreate(/* race log resolver */ this, raceLog);
             result = new com.sap.sse.common.Util.Triple<>(state.getFinishingTime(), state.getFinishedTime(),
                 raceLog.getCurrentPassId());
         } else {

@@ -13,8 +13,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.sap.sailing.selenium.core.WebDriverWindow;
-import com.sap.sailing.selenium.core.WindowManager;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
@@ -36,10 +34,6 @@ import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
-    private static WindowManager manager;
-    private static WebDriverWindow windowForEdit;
-    private static WebDriverWindow windowForSelection;
-    
     // TestMaintenanceOfSelectionAfterDataChanges
     private CompetitorEntry competitorEntry;
     private CompetitorEntry competitorEntryToSelect;
@@ -66,9 +60,6 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
     @Before
     public void setUp() {
         clearState(getContextRoot());
-        manager = this.environment.getWindowManager();
-        windowForEdit = manager.getCurrentWindow();
-        windowForSelection = manager.openNewWindow();
         super.setUp();
     }
 
@@ -80,85 +71,87 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
 
     @Test
     public void testMaintenanceOfSelectionAfterDataChanges() {
-        windowForEdit.switchToWindow();
-        final TrackedRacesCompetitorsPanelPO competitorsPanel = goToCompetitorsPanel();
-
-        for (int i = 0; i < 2; i++) {
+        this.environment.getWindowManager().withExtraWindow((windowForSelection, windowForEdit) -> {
+            windowForEdit.switchToWindow();
+            final TrackedRacesCompetitorsPanelPO competitorsPanel = goToCompetitorsPanel();
+            
+            for (int i = 0; i < 2; i++) {
+                TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddCompetitorButton();
+                dialog.setNameTextBox("" + System.currentTimeMillis());
+                dialog.setShortNameTextBox("" + System.currentTimeMillis());
+                dialog.pressOk();
+            }
+            
             TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddCompetitorButton();
-            dialog.setNameTextBox("" + System.currentTimeMillis());
-            dialog.setShortNameTextBox("" + System.currentTimeMillis());
+            final String name = "" + System.currentTimeMillis();
+            dialog.setNameTextBox(name);
+            final String shortName = "" + System.currentTimeMillis();
+            dialog.setShortNameTextBox(shortName);
             dialog.pressOk();
-        }
-
-        TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddCompetitorButton();
-        final String name = "" + System.currentTimeMillis();
-        dialog.setNameTextBox(name);
-        final String shortName = "" + System.currentTimeMillis();
-        dialog.setShortNameTextBox(shortName);
-        dialog.pressOk();
-
-        boolean found = false;
-        for (final CompetitorEntry it : competitorsPanel.getCompetitorTable().getEntries()) {
-            String itName = it.getName();
-            if (itName.equals(name)) {
-                found = true;
-                competitorEntry = it;
-                break;
+            
+            boolean found = false;
+            for (final CompetitorEntry it : competitorsPanel.getCompetitorTable().getEntries()) {
+                String itName = it.getName();
+                if (itName.equals(name)) {
+                    found = true;
+                    competitorEntry = it;
+                    break;
+                }
             }
-        }
-        assertTrue(found);
-
-        windowForSelection.switchToWindow();
-        TrackedRacesCompetitorsPanelPO competitorPanelForSelection = goToCompetitorsPanel();
-        found = false;
-        for (final CompetitorEntry it : competitorPanelForSelection.getCompetitorTable().getEntries()) {
-            String itName = it.getName();
-            if (itName.equals(name)) {
-                found = true;
-                competitorEntryToSelect = it;
-                break;
+            assertTrue(found);
+            
+            windowForSelection.switchToWindow();
+            TrackedRacesCompetitorsPanelPO competitorPanelForSelection = goToCompetitorsPanel();
+            found = false;
+            for (final CompetitorEntry it : competitorPanelForSelection.getCompetitorTable().getEntries()) {
+                String itName = it.getName();
+                if (itName.equals(name)) {
+                    found = true;
+                    competitorEntryToSelect = it;
+                    break;
+                }
             }
-        }
-        assertTrue(found);
-        competitorPanelForSelection.getCompetitorTable().selectEntry(competitorEntryToSelect);
-
-        assertEquals(1, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size());
-        assertEquals(name, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName());
-        assertEquals(shortName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getShortName());
-        // change competitor
-        windowForEdit.switchToWindow();
-        dialog = competitorEntry.clickEditButton();
-        final String changedName = "" + System.currentTimeMillis();
-        dialog.setNameTextBox(changedName);
-        final String changedShortName = "" + System.currentTimeMillis();
-        dialog.setShortNameTextBox(changedShortName);
-        dialog.pressOk();
-
-        // assert selection
-        windowForSelection.switchToWindow();
-        
-        competitorPanelForSelection.pushRefreshButton();
-        WebDriverWait waitTimer = new WebDriverWait(competitorPanelForSelection.driver, 10);
-        ExpectedCondition<Boolean> condition = new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver arg0) {
-                return competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size() == 1;
+            assertTrue(found);
+            competitorPanelForSelection.getCompetitorTable().selectEntry(competitorEntryToSelect);
+            
+            assertEquals(1, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size());
+            assertEquals(name, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName());
+            assertEquals(shortName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getShortName());
+            // change competitor
+            windowForEdit.switchToWindow();
+            dialog = competitorEntry.clickEditButton();
+            final String changedName = "" + System.currentTimeMillis();
+            dialog.setNameTextBox(changedName);
+            final String changedShortName = "" + System.currentTimeMillis();
+            dialog.setShortNameTextBox(changedShortName);
+            dialog.pressOk();
+            
+            // assert selection
+            windowForSelection.switchToWindow();
+            
+            competitorPanelForSelection.pushRefreshButton();
+            WebDriverWait waitTimer = new WebDriverWait(competitorPanelForSelection.driver, 10);
+            ExpectedCondition<Boolean> condition = new ExpectedCondition<Boolean>() {
+                @Override
+                public Boolean apply(WebDriver arg0) {
+                    return competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size() == 1;
+                }
+            };
+            waitTimer.until(condition);
+            
+            assertEquals(1, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size());
+            for (final CompetitorEntry it : competitorPanelForSelection.getCompetitorTable().getEntries()) {
+                String itName = it.getName();
+                if (itName.equals(changedName)) {
+                    found = true;
+                    competitorEntryToSelect = it;
+                    break;
+                }
             }
-        };
-        waitTimer.until(condition);
-        
-        assertEquals(1, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size());
-        for (final CompetitorEntry it : competitorPanelForSelection.getCompetitorTable().getEntries()) {
-            String itName = it.getName();
-            if (itName.equals(changedName)) {
-                found = true;
-                competitorEntryToSelect = it;
-                break;
-            }
-        }
-        assertTrue(found);
-        assertEquals(changedName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName());
-        assertEquals(changedShortName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getShortName());
+            assertTrue(found);
+            assertEquals(changedName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName());
+            assertEquals(changedShortName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getShortName());
+        });
     }
 
     private void setUpTestRefreshOfDependingUIElements() {
@@ -201,62 +194,63 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
 
     @Test
     public void testRefreshOfDependingUIElements() {
-        windowForSelection.switchToWindow();
-        setUpTestRefreshOfDependingUIElements();
-        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        SmartphoneTrackingEventManagementPanelPO smartphoneTrackingPanel = adminConsole.goToSmartphoneTrackingPanel();
-        CellTablePO<DataEntryPO> leaderboards = smartphoneTrackingPanel.getLeaderboardTable();
-        // select leaderboard
-        DataEntryPO entryToSelect = null;
-        for(DataEntryPO entry : leaderboards.getEntries()) {
-            if(entry.getColumnContent("Name").equals(LEADERBOARD)) {
-                entryToSelect = entry;
-                break;
+        this.environment.getWindowManager().withExtraWindow((windowForSelection, windowForEdit) -> {
+            windowForSelection.switchToWindow();
+            setUpTestRefreshOfDependingUIElements();
+            AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+            SmartphoneTrackingEventManagementPanelPO smartphoneTrackingPanel = adminConsole.goToSmartphoneTrackingPanel();
+            CellTablePO<DataEntryPO> leaderboards = smartphoneTrackingPanel.getLeaderboardTable();
+            // select leaderboard
+            DataEntryPO entryToSelect = null;
+            for(DataEntryPO entry : leaderboards.getEntries()) {
+                if(entry.getColumnContent("Name").equals(LEADERBOARD)) {
+                    entryToSelect = entry;
+                    break;
+                }
             }
-        }
-        assertNotNull(entryToSelect);
-        leaderboards.selectEntry(entryToSelect);
-        
-        RaceColumnTableWrapperPO raceColumnTableWrapper = smartphoneTrackingPanel.getRaceColumnTableWrapper();
-        CellTablePO<DataEntryPO> raceColumnTable = raceColumnTableWrapper.getRaceColumnTable();
-        final int anzRaceColumns = raceColumnTable.getEntries().size();
-        assertEquals(5, anzRaceColumns);
-        
-        // Open a second window & setup second window
-        windowForEdit.switchToWindow();
-        
-        AdminConsolePage adminConsoleForEdit = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        RegattaStructureManagementPanelPO regattaStructure = adminConsoleForEdit.goToRegattaStructure();
-        
-        RegattaDetailsCompositePO regattaDetails = regattaStructure.getRegattaDetails(this.regatta);
-        SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
-        seriesDialog.addRaces(6, 7);
-        seriesDialog.pressOk();
-        
-        windowForSelection.switchToWindow();
-        adminConsole.goToTracTracEvents();
-        smartphoneTrackingPanel = adminConsole.goToSmartphoneTrackingPanel();
-        leaderboards = smartphoneTrackingPanel.getLeaderboardTable();
-        // select leaderboard
-        entryToSelect = null;
-        for(DataEntryPO entry : leaderboards.getEntries()) {
-            if(entry.getColumnContent("Name").equals(LEADERBOARD)) {
-                entryToSelect = entry;
-                break;
+            assertNotNull(entryToSelect);
+            leaderboards.selectEntry(entryToSelect);
+            
+            RaceColumnTableWrapperPO raceColumnTableWrapper = smartphoneTrackingPanel.getRaceColumnTableWrapper();
+            CellTablePO<DataEntryPO> raceColumnTable = raceColumnTableWrapper.getRaceColumnTable();
+            final int anzRaceColumns = raceColumnTable.getEntries().size();
+            assertEquals(5, anzRaceColumns);
+            
+            // Open a second window & setup second window
+            windowForEdit.switchToWindow();
+            
+            AdminConsolePage adminConsoleForEdit = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+            RegattaStructureManagementPanelPO regattaStructure = adminConsoleForEdit.goToRegattaStructure();
+            
+            RegattaDetailsCompositePO regattaDetails = regattaStructure.getRegattaDetails(this.regatta);
+            SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
+            seriesDialog.addRaces(6, 7);
+            seriesDialog.pressOk();
+            
+            windowForSelection.switchToWindow();
+            adminConsole.goToTracTracEvents();
+            smartphoneTrackingPanel = adminConsole.goToSmartphoneTrackingPanel();
+            leaderboards = smartphoneTrackingPanel.getLeaderboardTable();
+            // select leaderboard
+            entryToSelect = null;
+            for(DataEntryPO entry : leaderboards.getEntries()) {
+                if(entry.getColumnContent("Name").equals(LEADERBOARD)) {
+                    entryToSelect = entry;
+                    break;
+                }
             }
-        }
-        assertNotNull(entryToSelect);
-        leaderboards.selectEntry(entryToSelect);
-        
-        raceColumnTableWrapper = smartphoneTrackingPanel.getRaceColumnTableWrapper();
-        raceColumnTable = raceColumnTableWrapper.getRaceColumnTable();
-        final int newAnzRaceColumns = raceColumnTable.getEntries().size();
-        assertEquals(7, newAnzRaceColumns);
+            assertNotNull(entryToSelect);
+            leaderboards.selectEntry(entryToSelect);
+            
+            raceColumnTableWrapper = smartphoneTrackingPanel.getRaceColumnTableWrapper();
+            raceColumnTable = raceColumnTableWrapper.getRaceColumnTable();
+            final int newAnzRaceColumns = raceColumnTable.getEntries().size();
+            assertEquals(7, newAnzRaceColumns);
+        });
     }
     
     @Test
     public void testMaintenanceOfSelectionAfterFilteringTrackedracesOnLeaderboardConfigPanel() {
-        windowForSelection.switchToWindow();
         setUpTestRefreshOfDependingUIElements();
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
@@ -267,12 +261,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         tracTracEvents.listTrackableRaces(IDM_5O5_2013_JSON_URL);
         tracTracEvents.setReggataForTracking(this.regatta);
         tracTracEvents.setTrackSettings(false, false, false);
-        // TODO: There exists a bug in Selenium with key modifiers (Issue 3734 and 6817), so we can't use multi
-        //       selection (Firefox on Windows)
-        //tracTracEvents.startTrackingForRaces(this.trackableRaces);
-        for(int i =0; i<2;i++) {
-            tracTracEvents.startTrackingForRace(trackableRaces.get(i));
-        }
+        tracTracEvents.startTrackingForRaces(this.trackableRaces);
         
         leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(this.regatta.toString());
