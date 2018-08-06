@@ -89,7 +89,7 @@ public class CompetitorTrackWithEstimationData<T> {
     public boolean isClean() {
         return waypointsCount == markPassingsCount && markPassingsCount > 1 && avgIntervalBetweenFixesInSeconds < 8
                 && new MeterPerSecondSpeedImpl(
-                        distanceTravelled.getMeters() / trackEndTimePoint.until(trackStartTimePoint).asSeconds())
+                        distanceTravelled.getMeters() / trackStartTimePoint.until(trackEndTimePoint).asSeconds())
                                 .getKnots() > 1;
     }
 
