@@ -13,8 +13,8 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -101,9 +101,8 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
                 .appendEscapedLines(getDataMiningStringMessages().dataMiningComponentsNeedReloadDialogMessage())
                 .toSafeHtml()));
 
-        HorizontalPanel buttonPanel = new HorizontalPanel();
-        buttonPanel.setSpacing(5);
-        buttonPanel.setHorizontalAlignment(HorizontalPanel.ALIGN_RIGHT);
+        FlowPanel buttonPanel = new FlowPanel();
+        buttonPanel.addStyleName("floatRight");
         contentPanel.add(buttonPanel);
 
         Button reloadButton = new Button(getDataMiningStringMessages().reload());
@@ -114,6 +113,7 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
                 reloadComponents();
             }
         });
+        reloadButton.addStyleName("dataMiningMarginLeft");
         buttonPanel.add(reloadButton);
 
         Button closeButton = new Button(getDataMiningStringMessages().close());
@@ -123,6 +123,7 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
                 AbstractQueryDefinitionProvider.this.componentsChangedDialog.hide();
             }
         });
+        closeButton.addStyleName("dataMiningMarginLeft");
         buttonPanel.add(closeButton);
 
         componentsChangedDialog.setWidget(contentPanel);

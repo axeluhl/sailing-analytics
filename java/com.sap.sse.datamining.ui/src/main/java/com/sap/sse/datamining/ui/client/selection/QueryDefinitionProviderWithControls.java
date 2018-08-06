@@ -22,7 +22,6 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.ValueListBox;
@@ -186,10 +185,9 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         contentPanel.setSpacing(5);
         contentPanel.add(new HTML(new SafeHtmlBuilder()
                 .appendEscapedLines(stringMessages.confirmQueryDefinitionChangeLoss()).toSafeHtml()));
-        
-        HorizontalPanel buttonPanel = new HorizontalPanel();
-        buttonPanel.setSpacing(5);
-        buttonPanel.setHorizontalAlignment(HorizontalPanel.ALIGN_RIGHT);
+
+        FlowPanel buttonPanel = new FlowPanel();
+        buttonPanel.addStyleName("floatRight");
         contentPanel.add(buttonPanel);
         
         Button discardChanges = new Button(stringMessages.discardChanges());
@@ -198,10 +196,12 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             setQueryDefinition(queryDefinitionToBeApplied);
             queryDefinitionToBeApplied = null;
         });
+        discardChanges.addStyleName("dataMiningMarginLeft");
         buttonPanel.add(discardChanges);
         
         Button keepChanges = new Button(stringMessages.keepChanges());
         keepChanges.addClickHandler(e -> dialog.hide());
+        keepChanges.addStyleName("dataMiningMarginLeft");
         buttonPanel.add(keepChanges);
 
         dialog.setWidget(contentPanel);
@@ -392,9 +392,9 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             messagesBuilder.startLI().text(errorMessage).end();
         }
         contentPanel.add(new HTML(messagesBuilder.asSafeHtml()));
-        
-        HorizontalPanel buttonPanel = new HorizontalPanel();
-        buttonPanel.setHorizontalAlignment(HorizontalPanel.ALIGN_RIGHT);
+
+        FlowPanel buttonPanel = new FlowPanel();
+        buttonPanel.addStyleName("floatRight");
         contentPanel.add(buttonPanel);
         
         Button okButton = new Button(stringMessages.ok());
