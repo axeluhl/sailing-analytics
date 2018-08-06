@@ -1,11 +1,9 @@
 package com.sap.sailing.gwt.ui.client;
 
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
-
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.Util;
@@ -14,23 +12,21 @@ import com.sap.sse.common.filter.FilterSet;
 
 public class TagListProvider extends ListDataProvider<TagDTO> implements TagProvider{
     
-    private final List<TagDTO> allTags;
-    
     private FilterSet<TagDTO, Filter<TagDTO>> tagsFilterSet;     
     
 
-    public TagListProvider(List<TagDTO> allTags, FilterSet<TagDTO, Filter<TagDTO>> tagsFilterSet) {
-        this.allTags = allTags;
+    public TagListProvider(FilterSet<TagDTO, Filter<TagDTO>> tagsFilterSet) {
         this.tagsFilterSet = tagsFilterSet;
     }
+    
     @Override
-    public Iterable<TagDTO> getAllTags() {
-        return allTags;
+    public List<TagDTO> getAllTags() {
+        return getList();
     }
 
     @Override
-    public Iterable<TagDTO> getFilteredTags() {
-        Set<TagDTO> currentFilteredList = new LinkedHashSet<>(allTags);
+    public List<TagDTO> getFilteredTags() {
+        List<TagDTO> currentFilteredList = new ArrayList<TagDTO>(getAllTags());
         
         if (tagsFilterSet != null) {
             for (Filter<TagDTO> filter : tagsFilterSet.getFilters()) {
@@ -65,7 +61,7 @@ public class TagListProvider extends ListDataProvider<TagDTO> implements TagProv
     @Override
     public boolean hasActiveFilters() {
         return (tagsFilterSet != null && !tagsFilterSet.getFilters().isEmpty() 
-                && Util.size(getFilteredTags()) != allTags.size());
+                && Util.size(getFilteredTags()) != getAllTags().size());
     }
 
     @Override
@@ -77,5 +73,9 @@ public class TagListProvider extends ListDataProvider<TagDTO> implements TagProv
     @Override
     public int getFilteredTagsListSize() {
         return Util.size(getFilteredTags());
+    }
+
+    public void addTag(TagDTO tag) {
+        getAllTags().add(tag);
     }
 }

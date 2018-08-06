@@ -16,7 +16,7 @@ public class SelectedTagsFilter implements FilterWithUI<TagDTO>, TagSelectionPro
     @Override
     public boolean matches(TagDTO tag) {
         boolean result = false;
-        if(tagsSelectionProvider != null && tagsSelectionProvider.isSelected(tag)) {
+        if(tagsSelectionProvider != null) {// && tagsSelectionProvider.isSelected(tag)) {
             result = true;
         }
         return result;

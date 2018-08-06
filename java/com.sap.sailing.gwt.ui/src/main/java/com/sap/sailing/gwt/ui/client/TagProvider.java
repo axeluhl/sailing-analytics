@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.List;
+
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
@@ -7,15 +9,14 @@ import com.sap.sse.common.filter.FilterSet;
 public interface TagProvider {
 
     /**
-     * @return a non-<code>null</code> sequence of all Tags which may be empty.
+     * @return all tags.
      */
-    Iterable<TagDTO> getAllTags();
+    List<TagDTO> getAllTags();
 
     /**
-     * @return a non-<code>null</code> sequence of all Tags filtered by the applied
-     * {@link #getTagsFilterSet() filter set} (which may be null).
+     * @return all tags which match current filtering criteria
      */
-    Iterable<TagDTO> getFilteredTags();
+    List<TagDTO> getFilteredTags();
   
     
     public FilterSet<TagDTO, Filter<TagDTO>> getTagsFilterSet();

@@ -152,8 +152,6 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     private final Panel buttonsPanel;
 
     private final List<Button> buttons;
-    private final List<TagDTO> tags;
-    private final ListDataProvider<TagDTO> tagProvider;
     private final TagListProvider tagListProvider;
     private final TagsFilterSets tagsFilterSet;
 
@@ -174,13 +172,11 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         TagPanelResources.INSTANCE.style().ensureInjected();
         CellListResources.INSTANCE.cellListStyle().ensureInjected();
         
-        tags = new ArrayList<TagDTO>();
-        tagProvider = new ListDataProvider<TagDTO>();
         tagsFilterSet = new TagsFilterSets();
-        tagListProvider = new TagListProvider(tags, tagsFilterSet.getActiveFilterSetWithGeneralizedType());
+        tagListProvider = new TagListProvider(tagsFilterSet.getActiveFilterSetWithGeneralizedType());
         
         panel = new HeaderPanel();
-        filterbarPanel = new TagFilterPanel(null, stringMessages, tagsFilterSet, tagListProvider);
+        filterbarPanel = new TagFilterPanel(null, stringMessages, tagListProvider);
         tagCellList = new CellList<TagDTO>(new TagCell(), CellListResources.INSTANCE);
         tagSelectionModel = new SingleSelectionModel<TagDTO>();
         
@@ -223,8 +219,8 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         panel.setFooterWidget(buttonsPanel);
 
         // Content (tags)
-        tagProvider.addDataDisplay(tagCellList);
-        tagProvider.setList(tags);
+        tagListProvider.addDataDisplay(tagCellList);
+        tagListProvider.setList(new ArrayList<TagDTO>());
         
         tagCellList.setSelectionModel(tagSelectionModel);
         tagSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -283,7 +279,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                             @Override
                             public void onSuccess(Void result) {
                                 Notification.notify("Added new tag successfully", NotificationType.INFO);
-                                tags.add(tag);
+                                tagListProvider.addTag(tag);
                                 updateContent();
                             }
                         });
@@ -300,8 +296,8 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     }
 
     private void updateContent() {
-        tagCellList.setVisibleRange(0, tags.size());
-        tags.sort(new Comparator<TagDTO>() {
+        tagCellList.setVisibleRange(0, tagListProvider.getFilteredTagsListSize());
+        tagListProvider.getAllTags().sort(new Comparator<TagDTO>() {
             @Override
             public int compare(TagDTO tag1, TagDTO tag2) {
                 long time1 = tag1.getRaceTimepoint().asMillis();
@@ -309,7 +305,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                 return time1 < time2 ? -1 : time1 == time2 ? 0 : 1;
             }
         });
-        tagProvider.refresh();
+        tagListProvider.refresh();
     }
 
     private void updateButtons() {
@@ -336,8 +332,9 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                         @Override
                         public void onSuccess(List<TagDTO> result) {
                             if (result != null) {
+                                List<TagDTO> tags = tagListProvider.getAllTags();
                                 for (TagDTO tag : result) {
-                                    if (!tags.contains(tag)) {
+                                    if (!tagListProvider.getAllTags().contains(tag)) {
                                         tags.add(tag);
                                         lastReceivedTag = tag.getRaceTimepoint();
                                         updateContent();

@@ -12,28 +12,18 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TagListProvider;
-import com.sap.sailing.gwt.ui.client.TagProvider;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorSelectionProviderFilterContext;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorTotalRankFilter;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsJsonDeSerializer;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterUIFactory;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
-import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFilterContext;
 import com.sap.sailing.gwt.ui.client.shared.filter.SelectedTagsFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagSelectionProviderFilterContext;
-import com.sap.sailing.gwt.ui.client.shared.filter.SelectedRaceFilterContext;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsJsonDeSerializer;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterResources;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterResources.CompetitorFilterCss;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
-import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -60,11 +50,10 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     
     private FilterSet<TagDTO, FilterWithUI<TagDTO>> lastActiveTagFilterSet;
 
-    public TagFilterPanel(RaceIdentifier selectedRaceIdentifier, StringMessages stringMessages, TagsFilterSets tagsFilterSets, TagListProvider tagProvider) {
+    public TagFilterPanel(RaceIdentifier selectedRaceIdentifier, StringMessages stringMessages, TagListProvider tagProvider) {
         css.ensureInjected();
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.stringMessages = stringMessages;
-        this.tagsFilterSets = tagsFilterSets;
         this.tagProvider = tagProvider;
         this.setStyleName(css.competitorFilterContainer());
         
