@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TagListProvider;
 import com.sap.sailing.gwt.ui.client.TagProvider;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorSelectionProviderFilterContext;
@@ -55,15 +56,16 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     private final FlowPanel searchBoxPanel;
     private final StringMessages stringMessages;
     private final TagsFilterSets tagsFilterSets;
-    private final TagProvider tagProvider = null;
+    private final TagListProvider tagProvider;
     
     private FilterSet<TagDTO, FilterWithUI<TagDTO>> lastActiveTagFilterSet;
 
-    public TagFilterPanel(RaceIdentifier selectedRaceIdentifier, StringMessages stringMessages, TagsFilterSets tagsFilterSets) {
+    public TagFilterPanel(RaceIdentifier selectedRaceIdentifier, StringMessages stringMessages, TagsFilterSets tagsFilterSets, TagListProvider tagProvider) {
         css.ensureInjected();
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.stringMessages = stringMessages;
         this.tagsFilterSets = tagsFilterSets;
+        this.tagProvider = tagProvider;
         this.setStyleName(css.competitorFilterContainer());
         
         TagsFilterSets loadedTagsFilterSets = loadTagsFilterSets();

@@ -3,25 +3,26 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
-public class TagProviderModel implements TagProvider{
+public class TagListProvider extends ListDataProvider<TagDTO> implements TagProvider{
     
-    private final Set<TagDTO> allTags;
+    private final List<TagDTO> allTags;
     
     private FilterSet<TagDTO, Filter<TagDTO>> tagsFilterSet;     
     
 
-    public TagProviderModel(Set<TagDTO> allTags, FilterSet<TagDTO, Filter<TagDTO>> tagsFilterSet) {
+    public TagListProvider(List<TagDTO> allTags, FilterSet<TagDTO, Filter<TagDTO>> tagsFilterSet) {
         this.allTags = allTags;
         this.tagsFilterSet = tagsFilterSet;
     }
-
     @Override
     public Iterable<TagDTO> getAllTags() {
         return allTags;

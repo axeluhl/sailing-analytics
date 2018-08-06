@@ -33,6 +33,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TagListProvider;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSets;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.raceboard.TaggingPanel.TagPanelResources.TagPanelStyle;
@@ -153,6 +154,8 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     private final List<Button> buttons;
     private final List<TagDTO> tags;
     private final ListDataProvider<TagDTO> tagProvider;
+    private final TagListProvider tagListProvider;
+    private final TagsFilterSets tagsFilterSet;
 
     private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
@@ -171,17 +174,20 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         TagPanelResources.INSTANCE.style().ensureInjected();
         CellListResources.INSTANCE.cellListStyle().ensureInjected();
         
+        tags = new ArrayList<TagDTO>();
+        tagProvider = new ListDataProvider<TagDTO>();
+        tagsFilterSet = new TagsFilterSets();
+        tagListProvider = new TagListProvider(tags, tagsFilterSet.getActiveFilterSetWithGeneralizedType());
+        
         panel = new HeaderPanel();
-        filterbarPanel = new TagFilterPanel(null, stringMessages, new TagsFilterSets());
+        filterbarPanel = new TagFilterPanel(null, stringMessages, tagsFilterSet, tagListProvider);
         tagCellList = new CellList<TagDTO>(new TagCell(), CellListResources.INSTANCE);
         tagSelectionModel = new SingleSelectionModel<TagDTO>();
         
         contentPanel = new ScrollPanel();
         buttonsPanel = new FlowPanel();
 
-        buttons = new ArrayList<Button>();
-        tags = new ArrayList<TagDTO>();
-        tagProvider = new ListDataProvider<TagDTO>();
+        buttons = new ArrayList<Button>();        
 
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
