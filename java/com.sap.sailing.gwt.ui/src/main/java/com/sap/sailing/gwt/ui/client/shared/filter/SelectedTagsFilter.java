@@ -29,12 +29,12 @@ public class SelectedTagsFilter implements FilterWithUI<TagDTO>, TagSelectionPro
 
     @Override
     public String getLocalizedName(StringMessages stringMessages) {
-        return stringMessages.selectedTags();
+        return stringMessages.tagSelectedTags();
     }
 
     @Override
     public String getLocalizedDescription(StringMessages stringMessages) {
-        return stringMessages.selectedTags();
+        return stringMessages.tagSelectedTags();
     }
     
     @Override

@@ -23,6 +23,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HeaderPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -66,10 +67,10 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
             String tagImage();
         }
     }
-    
+
     public interface CellListResources extends CellList.Resources {
         public static final CellListResources INSTANCE = GWT.create(CellListResources.class);
-        
+
         @Override
         @Source("tagging-celllist.css")
         public CellListStyle cellListStyle();
@@ -113,12 +114,13 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
             if (tag == null) {
                 return;
             }
-            
+
             SafeHtml safeTag = SafeHtmlUtils.fromString(tag.getTag());
             SafeHtml safeAuthor = SafeHtmlUtils.fromString(tag.getUsername());
-            SafeHtml safeCreatedAt = SafeHtmlUtils.fromString(DateAndTimeFormatterUtil.shortTimeFormatter.render(tag.getRaceTimepoint().asDate()));
+            SafeHtml safeCreatedAt = SafeHtmlUtils
+                    .fromString(DateAndTimeFormatterUtil.shortTimeFormatter.render(tag.getRaceTimepoint().asDate()));
             SafeHtml safeComment = SafeHtmlUtils.fromString(tag.getComment());
-            SafeUri  trustedImageURL = UriUtils.fromTrustedString(tag.getImageURL());
+            SafeUri trustedImageURL = UriUtils.fromTrustedString(tag.getImageURL());
 
             SafeHtml cell = null;
             if (tag.getComment().length() <= 0 && tag.getImageURL().length() <= 0) {
@@ -128,7 +130,8 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
             } else if (tag.getComment().length() > 0 && tag.getImageURL().length() <= 0) {
                 // comment & no image
                 cell = tagCellTemplate.cellWithCommentWithoutImage(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
-                        tagPanelStyle.tagCreated(), tagPanelStyle.tagComment(), safeTag, safeAuthor, safeCreatedAt, safeComment);
+                        tagPanelStyle.tagCreated(), tagPanelStyle.tagComment(), safeTag, safeAuthor, safeCreatedAt,
+                        safeComment);
             } else if (tag.getComment().length() <= 0 && tag.getImageURL().length() > 0) {
                 // no comment & image
                 cell = tagCellTemplate.cellWithoutCommentWithImage(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
@@ -168,18 +171,18 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
             SailingServiceAsync sailingService, UserService userService, Timer timer) {
         super(parent, context);
-        
+
         TagPanelResources.INSTANCE.style().ensureInjected();
         CellListResources.INSTANCE.cellListStyle().ensureInjected();
-        
+
         tagsFilterSet = new TagsFilterSets();
         tagListProvider = new TagListProvider(tagsFilterSet.getActiveFilterSetWithGeneralizedType());
-        
+
         panel = new HeaderPanel();
         filterbarPanel = new TagFilterPanel(null, stringMessages, tagListProvider);
         tagCellList = new CellList<TagDTO>(new TagCell(), CellListResources.INSTANCE);
         tagSelectionModel = new SingleSelectionModel<TagDTO>();
-        
+
         contentPanel = new ScrollPanel();
         buttonsPanel = new FlowPanel();
 
@@ -203,14 +206,14 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
 
     private void initializePanel() {
         // Panel
-        panel.setTitle(stringMessages.tagging());
+        panel.setTitle(stringMessages.tagPanel());
         panel.setStyleName(TagPanelResources.INSTANCE.style().tagPanel());
-        
+
         // Searchbar
         panel.setHeaderWidget(filterbarPanel);
 
         // Buttons
-        buttons.add(new Button("Add new Tag-Button", new ClickHandler() {
+        buttons.add(new Button(stringMessages.tagAddButton(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 addNewTagButton();
@@ -221,7 +224,8 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         // Content (tags)
         tagListProvider.addDataDisplay(tagCellList);
         tagListProvider.setList(new ArrayList<TagDTO>());
-        
+        tagCellList.setEmptyListWidget(new Label(stringMessages.tagNoTagsFound()));
+
         tagCellList.setSelectionModel(tagSelectionModel);
         tagSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -230,13 +234,14 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                 timer.setTime(tagSelectionModel.getSelectedObject().getRaceTimepoint().asMillis());
             }
         });
-        
+
         contentPanel.add(tagCellList);
         contentPanel.getElement().getStyle().setHeight(100, Unit.PCT);
         contentPanel.getElement().getStyle().setPaddingTop(10, Unit.PX);
 
         panel.setContentWidget(contentPanel);
-        updateUi();
+        updateButtons();
+        updateContent();
     }
 
     public void updateRace(String leaderboardName, RaceColumnDTO raceColumn, FleetDTO fleet) {
@@ -257,12 +262,11 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
             @Override
             public void onClick(ClickEvent event) {
                 if (leaderboardName == null || raceColumn == null || fleet == null) {
-                    Notification.notify("Could not trigger RaceLogTagEvent, missing information!",
-                            NotificationType.ERROR);
+                    Notification.notify(stringMessages.tagNotAdded(), NotificationType.ERROR);
                     return;
                 }
                 if (userService.getCurrentUser() == null) {
-                    Notification.notify("Please log in to add new tags!", NotificationType.WARNING);
+                    Notification.notify(stringMessages.tagNotLoggedIn(), NotificationType.WARNING);
                     return;
                 }
 
@@ -272,13 +276,12 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                         tag.getComment(), tag.getImageURL(), tag.getRaceTimepoint(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                GWT.log("Could not add new tag to race log!", caught);
-                                Notification.notify("Could not add new tag to race log!", NotificationType.ERROR);
+                                Notification.notify(stringMessages.tagNotAdded(), NotificationType.ERROR);
                             }
 
                             @Override
                             public void onSuccess(Void result) {
-                                Notification.notify("Added new tag successfully", NotificationType.INFO);
+                                Notification.notify(stringMessages.tagAddedSuccessfully(), NotificationType.INFO);
                                 tagListProvider.addTag(tag);
                                 updateContent();
                             }
@@ -288,11 +291,6 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
 
         buttons.add(tagButton);
         updateButtons();
-    }
-
-    private void updateUi() {
-        updateButtons();
-        updateContent();
     }
 
     private void updateContent() {
@@ -325,8 +323,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                     new MillisecondsTimePoint(newTime.getTime()), new AsyncCallback<List<TagDTO>>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            Notification.notify("Could not load tags!", NotificationType.ERROR);
-                            GWT.log("Could not load tags!", caught);
+                            Notification.notify(stringMessages.tagNotLoaded(), NotificationType.ERROR);
                         }
 
                         @Override
@@ -345,7 +342,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                     });
         }
     }
-    
+
     @Override
     public String getId() {
         return "TaggingPanel";
@@ -353,7 +350,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.tagging();
+        return stringMessages.tagPanel();
     }
 
     @Override
