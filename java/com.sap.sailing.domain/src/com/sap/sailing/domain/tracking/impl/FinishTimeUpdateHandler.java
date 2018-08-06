@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.tractracadapter.impl;
+package com.sap.sailing.domain.tracking.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,12 +20,11 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
-public class TracTracFinishTimeUpdateHandler extends UpdateHandler {
-    private final static Logger logger = Logger.getLogger(TracTracFinishTimeUpdateHandler.class.getName());
+public class FinishTimeUpdateHandler extends UpdateHandler {
+    private final static Logger logger = Logger.getLogger(FinishTimeUpdateHandler.class.getName());
 
     private final static String ACTION_STOP_TRACKING = "end_tracking";
     private final static String FIELD_TRACKING_END_TIME = "tracking_end_time";
@@ -36,9 +35,9 @@ public class TracTracFinishTimeUpdateHandler extends UpdateHandler {
      */
     private final Regatta regatta;
     
-    public TracTracFinishTimeUpdateHandler(URI updateURI, String tracTracUsername, String tracTracPassword,
-            Serializable tracTracEventId, Serializable raceId, Regatta regatta) {
-        super(updateURI, ACTION_STOP_TRACKING, tracTracUsername, tracTracPassword, tracTracEventId, raceId);
+    public FinishTimeUpdateHandler(URI updateURI, String username, String password,
+            Serializable eventId, Serializable raceId, Regatta regatta) {
+        super(updateURI, ACTION_STOP_TRACKING, username, password, eventId, raceId);
         this.regatta = regatta;
     }
     

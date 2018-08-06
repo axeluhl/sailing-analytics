@@ -1,8 +1,7 @@
-package com.sap.sailing.domain.tractracadapter.impl;
+package com.sap.sailing.domain.tracking.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.tractracadapter.UpdateResponse;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 

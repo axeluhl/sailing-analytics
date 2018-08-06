@@ -251,17 +251,19 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         }
     }
 
-    private DynamicTrackedRace createTrackedRace(RaceDefinition race, Iterable<Sideline> sidelines, Consumer<DynamicTrackedRace> runAfterCreatingTrackedRace) {
-        DynamicTrackedRace trackedRace = getTrackedRegatta().createTrackedRace(race, sidelines,
-                windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
-                /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
+    private DynamicTrackedRace createTrackedRace(RaceDefinition race, Iterable<Sideline> sidelines,
+            Consumer<DynamicTrackedRace> runAfterCreatingTrackedRace) {
+        DynamicTrackedRace trackedRace = getTrackedRegatta().createTrackedRace(race, sidelines, windStore,
+                delayToLiveInMillis, millisecondsOverWhichToAverageWind,
+                /* time over which to average speed: */ race.getBoatClass()
+                        .getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate, useInternalMarkPassingAlgorithm, raceLogResolver,
                 /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
         if (runAfterCreatingTrackedRace != null) {
-        	runAfterCreatingTrackedRace.accept(trackedRace);
+            runAfterCreatingTrackedRace.accept(trackedRace);
         }
-        getDomainFactory().addTracTracUpdateHandlers(tracTracUpdateURI, getTracTracEvent().getId(), tracTracUsername, tracTracPassword, race, trackedRace,
-        		tractracRace);
+        getDomainFactory().addTracTracUpdateHandlers(tracTracUpdateURI, getTracTracEvent().getId(), tracTracUsername,
+                tracTracPassword, race, trackedRace, tractracRace);
         return trackedRace;
     }
 
