@@ -85,11 +85,10 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                     }
                 });
                 
-                DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
                 queryDefinitionProvider = new QueryDefinitionProviderWithControls(null, null, session,
                         dataMiningService, DataMiningEntryPoint.this, settingsControl, settingsManager,
                         queryDefinition -> queryRunner.run(queryDefinition));
-                selectionDockPanel.add(queryDefinitionProvider.getEntryWidget());
+
                 queryRunner = new SimpleQueryRunner(null, null, session, dataMiningService, DataMiningEntryPoint.this,
                         queryDefinitionProvider, resultsPresenter);
                 queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
@@ -102,7 +101,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 
                 SplitLayoutPanel splitPanel = new SplitLayoutPanel(10);
                 splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
-                splitPanel.add(selectionDockPanel);
+                splitPanel.add(queryDefinitionProvider.getEntryWidget());
                 return splitPanel;
             }
         });
