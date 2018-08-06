@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TagSelectionProvider;
+import com.sap.sailing.gwt.ui.client.TagProvider;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorSelectionProviderFilterContext;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorTotalRankFilter;
@@ -55,7 +55,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     private final FlowPanel searchBoxPanel;
     private final StringMessages stringMessages;
     private final TagsFilterSets tagsFilterSets;
-    private final TagSelectionProvider tagSelectionProvider = null;
+    private final TagProvider tagSelectionProvider = null;
     
     private FilterSet<TagDTO, FilterWithUI<TagDTO>> lastActiveTagFilterSet;
 
@@ -65,7 +65,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         this.stringMessages = stringMessages;
         this.tagsFilterSets = tagsFilterSets;
         this.setStyleName(css.competitorFilterContainer());
-        /*
+        
         TagsFilterSets loadedTagsFilterSets = loadTagsFilterSets();
         if (loadedTagsFilterSets != null) {
             tagsFilterSets = loadedTagsFilterSets;
@@ -74,7 +74,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
             tagsFilterSets = createAndAddDefaultTagsFilter();
             storeTagsFilterSets(tagsFilterSets);
         }
-        */
+        
         
         Button submitButton = new Button();
         submitButton.setStyleName(css.button());
