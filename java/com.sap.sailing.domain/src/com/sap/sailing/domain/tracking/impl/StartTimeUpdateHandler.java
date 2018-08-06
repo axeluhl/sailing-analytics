@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.tractracadapter.impl;
+package com.sap.sailing.domain.tracking.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,8 +28,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
-public class TracTracStartTimeUpdateHandler extends UpdateHandler implements StartTimeChangedListener {
-    private final static Logger logger = Logger.getLogger(TracTracStartTimeUpdateHandler.class.getName());
+public class StartTimeUpdateHandler extends UpdateHandler implements StartTimeChangedListener {
+    private final static Logger logger = Logger.getLogger(StartTimeUpdateHandler.class.getName());
 
     private final static String ACTION = "update_race_start_time";
     private final static String ACTION_START_TRACKING = "start_tracking";
@@ -42,7 +42,7 @@ public class TracTracStartTimeUpdateHandler extends UpdateHandler implements Sta
      */
     private final Regatta regatta;
     
-    public TracTracStartTimeUpdateHandler(URI updateURI, String tracTracUsername, String tracTracPassword,
+    public StartTimeUpdateHandler(URI updateURI, String tracTracUsername, String tracTracPassword,
             Serializable tracTracEventId, Serializable raceId, Regatta regatta) {
         super(updateURI, ACTION, tracTracUsername, tracTracPassword, tracTracEventId, raceId);
         this.regatta = regatta;

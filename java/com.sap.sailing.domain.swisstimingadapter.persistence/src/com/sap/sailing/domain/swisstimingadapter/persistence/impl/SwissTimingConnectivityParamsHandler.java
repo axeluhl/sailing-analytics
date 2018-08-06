@@ -54,6 +54,9 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
     private static final String PORT = "port";
     private static final String BOAT_CLASS_NAME = "boatClassName";
     private static final String HOSTNAME = "hostname";
+    private static final String UPDATE_URL = "updateURL";
+    private static final String UPDATE_USERNAME = "updateUsername";
+    private static final String UPDATE_PASSWORD = "updatePassword";
     private final RaceLogStore raceLogStore;
     private final RegattaLogStore regattaLogStore;
     private final DomainFactory domainFactory;
@@ -78,6 +81,9 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
         result.put(START_LIST, createStartListDBObject(stParams));
         result.put(DELAY_TO_LIVE_IN_MILLIS, stParams.getDelayToLiveInMillis());
         result.put(USE_INTERNAL_MARK_PASSING_ALGORITHM, stParams.isUseInternalMarkPassingAlgorithm());
+        result.put(UPDATE_URL, stParams.getUpdateURL());
+        result.put(UPDATE_USERNAME, stParams.getUpdateUsername());
+        result.put(UPDATE_PASSWORD, stParams.getUpdatePassword());
         addWindTrackingParameters(stParams, result);
         return result;
     }
@@ -175,7 +181,10 @@ public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingCo
                 map.get(START_LIST) == null ? null : createStartListFromDBObject((String) map.get(RACE_ID), (BasicDBList) map.get(START_LIST)),
                 ((Number) map.get(DELAY_TO_LIVE_IN_MILLIS)).longValue(),
                 swissTimingFactory, domainFactory, raceLogStore, regattaLogStore,
-                (boolean) map.get(USE_INTERNAL_MARK_PASSING_ALGORITHM), isTrackWind(map), isCorrectWindDirectionByMagneticDeclination(map));
+                (boolean) map.get(USE_INTERNAL_MARK_PASSING_ALGORITHM), isTrackWind(map), isCorrectWindDirectionByMagneticDeclination(map),
+                (String) map.get(UPDATE_URL),
+                (String) map.get(UPDATE_USERNAME),
+                (String) map.get(UPDATE_PASSWORD));
     }
 
     @Override

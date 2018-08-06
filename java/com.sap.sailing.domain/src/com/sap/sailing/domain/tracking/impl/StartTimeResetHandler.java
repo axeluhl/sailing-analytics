@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.tractracadapter.impl;
+package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -13,14 +13,14 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sse.common.TimePoint;
 
-public class TracTracStartTimeResetHandler extends UpdateHandler implements StartTimeChangedListener {
+public class StartTimeResetHandler extends UpdateHandler implements StartTimeChangedListener {
     
     private static final String ACTION = "resetStartTime";
     
-    private final static Logger logger = Logger.getLogger(TracTracStartTimeResetHandler.class.getName());
+    private final static Logger logger = Logger.getLogger(StartTimeResetHandler.class.getName());
     
-    public TracTracStartTimeResetHandler(URI updateURI, String tracTracUsername, String tracTracPassword, Serializable tracTracEventId, Serializable raceId) {
-        super(updateURI, ACTION, tracTracUsername, tracTracPassword, tracTracEventId, raceId);
+    public StartTimeResetHandler(URI updateURI, String username, String password, Serializable eventId, Serializable raceId) {
+        super(updateURI, ACTION, username, password, eventId, raceId);
     }
 
     @Override
