@@ -959,8 +959,8 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         if (curveBoundaryExtension == null) {
             return false;
         }
-        return Math.abs(curveBoundaryExtension.getCourseChangeInDegreesWithinExtensionArea()) > Math
-                .abs(curveBoundaryExtension.getCourseChangeInDegreesWithinExtensionArea()) / 3.0;
+        return Math.abs(maneuverMainCurveDetails.getDirectionChangeInDegrees()) / 3.0 > Math
+                .abs(curveBoundaryExtension.getCourseChangeInDegreesWithinExtensionArea());
     }
 
     /**
