@@ -6,16 +6,17 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wra
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfilePresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileView.Presenter;
+import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
-public class SailorProfilePresenterOverviewImpl implements SailorProfileOverviewWrapper.Presenter {
+public class SailorProfileOverviewImplPresenter implements SailorProfileOverviewWrapper.Presenter {
 
     private final SailorProfileOverviewWrapper wrapperView;
     private final SailorProfileOverview view;
     private final UserProfileView.Presenter userProfilePresenter;
     private final SharedSailorProfileView.Presenter sharedSailorProfilePresenter;
 
-    public SailorProfilePresenterOverviewImpl(final SailorProfileOverview view,
+    public SailorProfileOverviewImplPresenter(final SailorProfileOverview view,
             final SailorProfileOverviewWrapper wrapperView, final UserProfileView.Presenter userProfilePresenter) {
         this.view = view;
         this.wrapperView = wrapperView;
@@ -23,6 +24,11 @@ public class SailorProfilePresenterOverviewImpl implements SailorProfileOverview
         this.sharedSailorProfilePresenter = new SharedSailorProfilePresenter<UserProfileClientFactory>(
                 userProfilePresenter.getClientFactory());
         view.setPresenter(this);
+    }
+
+    @Override
+    public ClientFactory getClientFactory() {
+        return userProfilePresenter.getClientFactory();
     }
 
     @Override

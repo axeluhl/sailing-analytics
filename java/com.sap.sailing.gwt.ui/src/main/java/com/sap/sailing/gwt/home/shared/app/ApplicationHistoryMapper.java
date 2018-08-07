@@ -39,6 +39,7 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPl
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileSettingsPlace;
 
 @WithTokenizers({ AboutUsPlace.Tokenizer.class, ContactPlace.Tokenizer.class, EventPlace.Tokenizer.class,
@@ -73,6 +74,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileS
         UserProfileDefaultPlace.Tokenizer.class,
         UserProfileDetailsPlace.Tokenizer.class,
         UserProfilePreferencesPlace.Tokenizer.class,
+        SailorProfilePlace.Tokenizer.class,
         UserProfileSettingsPlace.Tokenizer.class,
         AuthenticationPlace.Tokenizer.class,
         ConfirmationPlace.Tokenizer.class,

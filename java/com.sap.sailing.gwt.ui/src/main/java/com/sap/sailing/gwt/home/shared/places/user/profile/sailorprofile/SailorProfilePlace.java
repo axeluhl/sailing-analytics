@@ -22,7 +22,7 @@ public class SailorProfilePlace extends AbstractUserProfilePlace implements HasM
     }
 
     @Prefix(PlaceTokenPrefixes.SailorProfile)
-    public static abstract class Tokenizer implements PlaceTokenizer<SailorProfilePlace> {
+    public static class Tokenizer implements PlaceTokenizer<SailorProfilePlace> {
         @Override
         public SailorProfilePlace getPlace(String token) {
             try {

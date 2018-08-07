@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.ButtonCell;
@@ -10,13 +11,13 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wrapper.SailorProfileOverviewWrapper;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -28,6 +29,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     }
 
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
+    private SailorProfileOverviewWrapper.Presenter presenter;
 
     @UiField(provided = true)
     final SortedCellTable<SailorProfileEntry> sailorProfilesTable = new SortedCellTable<>(0,
@@ -38,6 +40,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
 
     @Override
     public void setPresenter(SailorProfileOverviewWrapper.Presenter presenter) {
+        this.presenter = presenter;
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();
     }
@@ -59,7 +62,8 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         showColumn.setFieldUpdater(new FieldUpdater<SailorProfileEntry, String>() {
             @Override
             public void update(int index, SailorProfileEntry entry, String value) {
-                Window.alert("go to: " + entry.getName());
+                presenter.getClientFactory().getPlaceController()
+                        .goTo(new SailorProfilePlace(UUID.fromString(entry.getKey())));
             }
         });
     }

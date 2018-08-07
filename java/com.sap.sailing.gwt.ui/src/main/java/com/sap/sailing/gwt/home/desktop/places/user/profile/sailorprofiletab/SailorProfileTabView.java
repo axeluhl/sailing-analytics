@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
@@ -33,6 +34,7 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
     @Override
     public void start(SailorProfilePlace myPlace, AcceptsOneWidget contentArea) {
         contentArea.setWidget(view);
+        GWT.log("place: " + myPlace.getSailorProfileUuid());
     }
 
     @Override
@@ -52,6 +54,6 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
     @Override
     public void setPresenter(UserProfileView.Presenter currentPresenter) {
         view = new SailorProfileOverviewImpl(flagImageResolver);
-        this.currentPresenter = new SailorProfilePresenterOverviewImpl(view, null, currentPresenter);
+        this.currentPresenter = new SailorProfileOverviewImplPresenter(view, null, currentPresenter);
     }
 }
