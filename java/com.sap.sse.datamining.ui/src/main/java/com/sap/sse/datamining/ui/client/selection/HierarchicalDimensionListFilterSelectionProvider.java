@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
@@ -297,6 +298,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     private void setSelection(HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection, Consumer<Iterable<String>> callback) {
         Set<InnerSelectionCallback> innerCallbacks = new HashSet<>();
         Collection<String> callbackMessages = new ArrayList<>();
+        Collection<DimensionWithContext> missingDimensions = new ArrayList<>();
         for (DataRetrieverLevelDTO retrieverLevel : filterSelection.keySet()) {
             HashMap<FunctionDTO, HashSet<? extends Serializable>> levelSelection = filterSelection.get(retrieverLevel);
             for (FunctionDTO dimension : levelSelection.keySet()) {
@@ -307,9 +309,15 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
                     innerCallbacks.add(innerCallback);
                     setDimensionSelection(availableFilterDimensions.get(index), levelSelection.get(dimension), innerCallback);
                 } else {
-                    callbackMessages.add(getDataMiningStringMessages().filterDimensionNotAvailable(dimension.getDisplayName()));
+                    missingDimensions.add(dimensionWithContext);
                 }
             }
+        }
+        
+        if (!missingDimensions.isEmpty()) {
+            String listedDimensions = missingDimensions.stream().map(d -> d.getDimension().getDisplayName())
+                                                                .collect(Collectors.joining(", "));
+            callbackMessages.add(getDataMiningStringMessages().filterDimensionsAreNotAvailable(listedDimensions));
         }
 
         if (!innerCallbacks.isEmpty()) {

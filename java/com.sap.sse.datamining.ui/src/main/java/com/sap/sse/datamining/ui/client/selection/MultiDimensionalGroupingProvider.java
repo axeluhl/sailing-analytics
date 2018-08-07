@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -276,7 +277,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
     }
 
     private void setSelectedDimensions(Iterable<FunctionDTO> dimensions, Consumer<Iterable<String>> callback) {
-        Collection<String> callbackMessages = new ArrayList<>();
+        Collection<FunctionDTO> missingDimensions = new ArrayList<>();
         int boxIndex = 0;
         for (FunctionDTO dimension : dimensions) {
             int index = availableDimensions.indexOf(dimension);
@@ -284,10 +285,18 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
                 setDimensionToGroupBy(boxIndex, availableDimensions.get(index));
                 boxIndex++;
             } else {
-                callbackMessages.add(getDataMiningStringMessages().groupingDimensionNotAvailable(dimension.getDisplayName()));
+                missingDimensions.add(dimension);
             }
         }
-        callback.accept(callbackMessages);
+        
+        if (!missingDimensions.isEmpty()) {
+            String listedDimensions = missingDimensions.stream().map(FunctionDTO::getDisplayName)
+                                                                .collect(Collectors.joining(", "));
+            callback.accept(Collections
+                    .singleton(getDataMiningStringMessages().groupingDimensionsAreNotAvailable(listedDimensions)));
+        } else {
+            callback.accept(Collections.emptySet());
+        }
     }
 
     @Override

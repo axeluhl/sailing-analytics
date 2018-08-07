@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.Scheduler;
@@ -274,16 +275,23 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
     }
 
     private void internalSetSelection(Iterable<? extends Serializable> selection, Consumer<Iterable<String>> callback) {
-        Collection<String> callbackMessages = new ArrayList<>();
         clearSelection();
-        for (Serializable item : selection) {
-            if (availableData.contains(item)) {
-                selectionModel.setSelected(item, true);
+        Collection<Serializable> missingValues = new ArrayList<>();
+        for (Serializable value : selection) {
+            if (availableData.contains(value)) {
+                selectionModel.setSelected(value, true);
             } else {
-                callbackMessages.add(getDataMiningStringMessages().filterValueNotAvailable(elementAsString(item)));
+                missingValues.add(value);
             }
         }
-        callback.accept(callbackMessages);
+        
+        if (!missingValues.isEmpty()) {
+            String listedValues = missingValues.stream().map(this::elementAsString).collect(Collectors.joining(", "));
+            callback.accept(
+                    Collections.singleton(getDataMiningStringMessages().filterValuesAreNotAvailable(listedValues)));
+        } else {
+            callback.accept(Collections.emptySet());
+        }
     }
 
     public void clearSelection() {

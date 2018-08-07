@@ -74,9 +74,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String queryBasedOnRetrieverChainCanNotBeApplied(String retrieverChainName);
     String statisticNotAvailable(String statisticName);
     String aggregatorNotAvailable(String aggregatorName);
-    String filterDimensionNotAvailable(String dimensionName);
-    String filterValueNotAvailable(String value);
-    String groupingDimensionNotAvailable(String dimensionName);
+    String filterDimensionsAreNotAvailable(String listedDimensions);
+    String filterValuesAreNotAvailable(String listedValues);
+    String groupingDimensionsAreNotAvailable(String listedDimensions);
     String rememberDecisionCanBeChangedInSettings();
     String changeLossStrategy();
     String changeLossStrageyTooltip();
