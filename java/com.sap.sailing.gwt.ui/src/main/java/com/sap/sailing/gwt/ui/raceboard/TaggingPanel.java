@@ -265,10 +265,9 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                     return;
                 }
 
-                TagDTO tag = new TagDTO("Super Duper Tag!", "Fancy comment...", "https://localhost:8080/image/abc.png",
-                        userService.getCurrentUser().getName(), new MillisecondsTimePoint(timer.getTime()));
-                sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag.getTag(),
-                        tag.getComment(), tag.getImageURL(), tag.getRaceTimepoint(), new AsyncCallback<Void>() {
+                sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(),
+                        "Super Duper Tag!", "Fancy comment...", "https://localhost:8080/image/abc.png",
+                        new MillisecondsTimePoint(timer.getTime()), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 Notification.notify(stringMessages.tagNotAdded(), NotificationType.ERROR);
@@ -277,7 +276,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                             @Override
                             public void onSuccess(Void result) {
                                 Notification.notify(stringMessages.tagAddedSuccessfully(), NotificationType.INFO);
-                                tagListProvider.addTag(tag);
+                                // tagListProvider.addTag(tag);
                                 updateContent();
                             }
                         });
@@ -316,7 +315,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
             // load tags since last received tag => decrease required bandwidth as only difference in tags will be sent
             // over network
             sailingService.getTags(leaderboardName, raceColumn.getName(), fleet.getName(), lastReceivedTag,
-                    new MillisecondsTimePoint(newTime.getTime()), new AsyncCallback<List<TagDTO>>() {
+                    new AsyncCallback<List<TagDTO>>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             Notification.notify(stringMessages.tagNotLoaded(), NotificationType.ERROR);
@@ -327,9 +326,13 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                             if (result != null) {
                                 List<TagDTO> tags = tagListProvider.getAllTags();
                                 for (TagDTO tag : result) {
-                                    if (!tagListProvider.getAllTags().contains(tag)) {
+                                    if (!tags.contains(tag)) {
                                         tags.add(tag);
-                                        lastReceivedTag = tag.getRaceTimepoint();
+                                        if (lastReceivedTag == null) {
+                                            lastReceivedTag = tag.getCreatedAt();
+                                        } else if (lastReceivedTag.before(tag.getCreatedAt())) {
+                                            lastReceivedTag = tag.getCreatedAt();
+                                        }
                                         updateContent();
                                     }
                                 }

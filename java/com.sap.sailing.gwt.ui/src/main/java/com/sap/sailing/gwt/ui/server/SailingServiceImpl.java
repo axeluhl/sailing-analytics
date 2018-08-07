@@ -7906,14 +7906,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     /**
      * @param from may be null, results in loading every tag since the race start
      */
-    public List<TagDTO> getTags(String leaderboardName, String raceColumnName, String fleetName, TimePoint from, TimePoint to) {
+    public List<TagDTO> getTags(String leaderboardName, String raceColumnName, String fleetName, TimePoint from) {
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-        TagFinder tagFinder = new TagFinder(raceLog, from, to);
+        TagFinder tagFinder = new TagFinder(raceLog, from);
         List<RaceLogTagEvent> foundTagEvents = tagFinder.analyze();
         
         List<TagDTO> result = new ArrayList<>();
         for(RaceLogTagEvent tagEvent : foundTagEvents) {
-            result.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(), tagEvent.getUsername(), tagEvent.getLogicalTimePoint()));
+            result.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(), tagEvent.getUsername(), tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt()));
         }
         return result;
     }

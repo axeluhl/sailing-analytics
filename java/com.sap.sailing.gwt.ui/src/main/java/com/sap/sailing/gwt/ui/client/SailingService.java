@@ -787,5 +787,5 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment, String imageURL, TimePoint raceTimepoint);
     
-    List<TagDTO> getTags(String leaderboardName, String raceColumnName, String fleetName, TimePoint from, TimePoint to);
+    List<TagDTO> getTags(String leaderboardName, String raceColumnName, String fleetName, TimePoint from);
 }

@@ -10,16 +10,18 @@ public class TagDTO implements IsSerializable {
     private String imageURL;
     private String username;
     private TimePoint raceTimepoint;
+    private TimePoint createdAt;
     
     // for GWT
     public TagDTO() {}
     
-    public TagDTO(String tag, String comment, String imageURL, String username, TimePoint raceTimepoint) {
+    public TagDTO(String tag, String comment, String imageURL, String username, TimePoint raceTimepoint, TimePoint createdAt) {
         this.tag = tag;
         this.comment = comment;
         this.imageURL = imageURL;
         this.username = username;
         this.raceTimepoint = raceTimepoint;
+        this.createdAt = createdAt;
     }
 
     public String getTag() {
@@ -40,6 +42,10 @@ public class TagDTO implements IsSerializable {
 
     public TimePoint getRaceTimepoint() {
         return raceTimepoint;
+    }
+    
+    public TimePoint getCreatedAt() {
+        return createdAt;
     }
 
     @Override
@@ -87,6 +93,7 @@ public class TagDTO implements IsSerializable {
                 + ", imageURL=" + imageURL
                 + ", username=" + username
                 + ", raceTimepoint=" + raceTimepoint
+                + ", createdAt=" + createdAt
                 + "]";
     }
 }
