@@ -287,8 +287,8 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         
         if (!missingValues.isEmpty()) {
             String listedValues = missingValues.stream().map(this::elementAsString).collect(Collectors.joining(", "));
-            callback.accept(
-                    Collections.singleton(getDataMiningStringMessages().filterValuesAreNotAvailable(listedValues)));
+            callback.accept(Collections.singleton(getDataMiningStringMessages()
+                    .filterValuesOfDimensionAreNotAvailable(dimension.getDisplayName(), listedValues)));
         } else {
             callback.accept(Collections.emptySet());
         }

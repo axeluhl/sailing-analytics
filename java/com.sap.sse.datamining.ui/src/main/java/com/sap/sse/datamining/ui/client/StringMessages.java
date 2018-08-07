@@ -75,7 +75,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String statisticNotAvailable(String statisticName);
     String aggregatorNotAvailable(String aggregatorName);
     String filterDimensionsAreNotAvailable(String listedDimensions);
-    String filterValuesAreNotAvailable(String listedValues);
+    String filterValuesOfDimensionAreNotAvailable(String dimensionName, String listedValues);
     String groupingDimensionsAreNotAvailable(String listedDimensions);
     String rememberDecisionCanBeChangedInSettings();
     String changeLossStrategy();
