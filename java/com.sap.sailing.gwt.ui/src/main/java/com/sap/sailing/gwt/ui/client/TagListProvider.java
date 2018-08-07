@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.ui.client;
 
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.Util;
@@ -51,11 +51,11 @@ public class TagListProvider extends ListDataProvider<TagDTO> implements TagProv
         List<TagDTO> currentFilteredList = new ArrayList<TagDTO>(getAllTags());
 
         if (currentFilterSet != null) {
-            for (TagDTO tag : currentFilteredList) {
-                for (Filter<TagDTO> filter : currentFilterSet.getFilters()) {
+            for (Filter<TagDTO> filter : currentFilterSet.getFilters()) {
+                for (Iterator<TagDTO> i = currentFilteredList.iterator(); i.hasNext();) {
+                    TagDTO tag = i.next();
                     if (!filter.matches(tag)) {
-                        currentFilteredList.remove(tag);
-                        break;
+                        i.remove();
                     }
                 }
             }
