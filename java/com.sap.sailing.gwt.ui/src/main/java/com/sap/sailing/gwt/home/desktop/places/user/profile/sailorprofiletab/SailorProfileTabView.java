@@ -5,15 +5,15 @@ import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wrapper.SailorProfileWrapperView;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wrapper.SailorProfileOverviewWrapperView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 public class SailorProfileTabView extends Composite implements UserProfileTabView<SailorProfilePlace> {
 
-    private SailorProfileWrapperView.Presenter currentPresenter;
-    private SailorProfileView view;
+    private SailorProfileOverviewWrapperView.Presenter currentPresenter;
+    private SailorProfileOverviewView view;
     private final FlagImageResolver flagImageResolver;
 
     public SailorProfileTabView(FlagImageResolver flagImageResolver) {
@@ -51,7 +51,7 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
 
     @Override
     public void setPresenter(UserProfileView.Presenter currentPresenter) {
-        view = new SailorProfile(flagImageResolver);
-        this.currentPresenter = new SailorProfilePresenterImpl(view, null, currentPresenter);
+        view = new SailorProfileOverview(flagImageResolver);
+        this.currentPresenter = new SailorProfilePresenterOverviewImpl(view, null, currentPresenter);
     }
 }

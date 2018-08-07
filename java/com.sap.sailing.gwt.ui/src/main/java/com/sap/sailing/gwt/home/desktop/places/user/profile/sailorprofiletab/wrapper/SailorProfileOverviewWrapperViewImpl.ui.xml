@@ -9,7 +9,7 @@
  <um:AuthorizedContentDecoratorDesktop
   ui:field="decoratorUi">
   <um:content>
-   <us:SailorProfile ui:field="sailorProfileUi" />
+   <us:SailorProfileOverview ui:field="sailorProfileUi" />
   </um:content>
  </um:AuthorizedContentDecoratorDesktop>
 </ui:UiBinder>

@@ -7,33 +7,33 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfile;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileOverview;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.gwt.resources.CommonControlsCSS;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
-public class SailorProfileWrapperViewImpl extends Composite implements SailorProfileWrapperView {
+public class SailorProfileOverviewWrapperViewImpl extends Composite implements SailorProfileOverviewWrapperView {
 
-    interface MyBinder extends UiBinder<Widget, SailorProfileWrapperViewImpl> {
+    interface MyBinder extends UiBinder<Widget, SailorProfileOverviewWrapperViewImpl> {
     }
 
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
     @UiField(provided = true) AuthorizedContentDecoratorDesktop decoratorUi;
-    @UiField(provided = true) SailorProfile sailorProfileUi;
+    @UiField(provided = true) SailorProfileOverview sailorProfileUi;
     
     private final FlagImageResolver flagImageResolver;
 
-    public SailorProfileWrapperViewImpl(FlagImageResolver flagImageResolver) {
+    public SailorProfileOverviewWrapperViewImpl(FlagImageResolver flagImageResolver) {
         this.flagImageResolver = flagImageResolver;
     }
 
     @Override
     public void setPresenter(Presenter presenter) {
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
-        sailorProfileUi = new SailorProfile(flagImageResolver);
+        sailorProfileUi = new SailorProfileOverview(flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
     }
     

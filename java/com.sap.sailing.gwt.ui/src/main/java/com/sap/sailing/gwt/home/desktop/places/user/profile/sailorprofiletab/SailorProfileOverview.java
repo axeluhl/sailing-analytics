@@ -15,15 +15,15 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wrapper.SailorProfileWrapperView;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wrapper.SailorProfileOverviewWrapperView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 
-public class SailorProfile extends Composite implements SailorProfileView {
+public class SailorProfileOverview extends Composite implements SailorProfileOverviewView {
 
-    interface MyBinder extends UiBinder<Widget, SailorProfile> {
+    interface MyBinder extends UiBinder<Widget, SailorProfileOverview> {
     }
 
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
@@ -32,11 +32,11 @@ public class SailorProfile extends Composite implements SailorProfileView {
     final SortedCellTable<SailorProfileEntry> sailorProfilesTable = new SortedCellTable<>(0,
             DesignedCellTableResources.INSTANCE);
 
-    public SailorProfile(FlagImageResolver flagImageResolver) {
+    public SailorProfileOverview(FlagImageResolver flagImageResolver) {
     }
 
     @Override
-    public void setPresenter(SailorProfileWrapperView.Presenter presenter) {
+    public void setPresenter(SailorProfileOverviewWrapperView.Presenter presenter) {
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();
     }
