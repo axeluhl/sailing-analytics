@@ -330,12 +330,29 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     }
     
     private void setSelectionCompleted(Consumer<Iterable<String>> callback, Iterable<String> messages) {
+        HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> selection = getSelection();
+        boolean updateAvailableFilterValues = selection.size() >= 2;
+        if (!updateAvailableFilterValues) {
+            for (HashMap<FunctionDTO, HashSet<? extends Serializable>> levelSelection : selection.values()) {
+                if (levelSelection.size() >= 2) {
+                    updateAvailableFilterValues = true;
+                    break;
+                }
+            }
+        }
+
         ignoreSelectionChangedNotifications = false;
-        updateAvailableFilterValues(retrieverChain.getRetrieverLevel(0), null, () -> {
-            mainPanel.setWidgetHidden(filterSelectionPresenterContainer, getSelection().isEmpty());
+        Runnable finalizeSelection = () -> {
+            mainPanel.setWidgetHidden(filterSelectionPresenterContainer, selection.isEmpty());
             filterSelectionPresenter.selectionChanged();
             callback.accept(messages);
-        });
+        };
+        if (updateAvailableFilterValues) {
+            isUpdatingAvailableFilterValues = false;
+            updateAvailableFilterValues(retrieverChain.getRetrieverLevel(0), null, finalizeSelection);
+        } else {
+            finalizeSelection.run();
+        }
     }
     
     private class InnerSelectionCallback implements Consumer<Iterable<String>> {
