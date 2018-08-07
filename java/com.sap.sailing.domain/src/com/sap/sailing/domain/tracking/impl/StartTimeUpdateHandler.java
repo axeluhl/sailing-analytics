@@ -56,13 +56,12 @@ public class StartTimeUpdateHandler extends UpdateHandler implements StartTimeCh
     public void startTimeChanged(TimePoint newStartTime) throws MalformedURLException, IOException, URISyntaxException {
         if (isActive()) {
             if (newStartTime == null) {
-                raceAbortedHandler.raceAborted(Flags.AP); /* notify race status as POSTPONED according to Jorge's mail
-                The method that @frank has commented has to work: 
-
-                    http://em.aws.tractrac.com/update_race_status?eventid=5f2f20f0-6cb2-0136-9eca-60a44ce903c3&raceid=81c082a0-7b1f-0136-166e-028f184941da&username=trac%40sapsailing.com&password=sap0912&race_status=POSTPONED 
-
-                This method changes the race start time to null.
-                */
+                /* notify race status as POSTPONED according to Jorge's comment https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4708#c5 :
+                 * The method that @frank has commented has to work:
+                 *    http://em.aws.tractrac.com/update_race_status?eventid=5f2f20f0-6cb2-0136-9eca-60a44ce903c3&raceid=81c082a0-7b1f-0136-166e-028f184941da&username=trac%40sapsailing.com&password=sap0912&race_status=POSTPONED
+                 * This method changes the race start time to null.
+                 */
+                raceAbortedHandler.raceAborted(Flags.AP); // will send POSTPONED
             } else {
                 HashMap<String, String> additionalParameters = new HashMap<String, String>();
                 additionalParameters.put(FIELD_RACE_START_TIME, String.valueOf(newStartTime.asMillis()));

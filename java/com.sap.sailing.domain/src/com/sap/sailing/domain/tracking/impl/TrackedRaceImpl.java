@@ -949,7 +949,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             if (newStartTime == null) {
                 logger.finest(()->"No start time found in race logs for race "+getRace().getName());
-                newStartTime = getStartTimeReceived(); // TODO bug 4708: wouldn't it be a problem here to use the connector's start time before having sent the start time update to the connector?
+                newStartTime = getStartTimeReceived();
                 if (newStartTime != null) {
                     newStartTimeWithoutInferenceFromStartMarkPassings = newStartTime;
                 }
