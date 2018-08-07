@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -63,6 +64,17 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         });
     }
 
+    private String createCommaSeparatedString(List<String> strings) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < strings.size(); i++) {
+            sb.append(strings.get(i));
+            if (i < strings.size() - 1) {
+                sb.append(", ");
+            }
+        }
+        return sb.toString();
+    }
+
     private final Column<SailorProfileEntry, String> profileNameColumn = new Column<SailorProfileEntry, String>(
             new TextCell()) {
         @Override
@@ -75,12 +87,8 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         @Override
         public String getValue(SailorProfileEntry entry) {
             if (entry != null && entry.getBadges() != null) {
-                StringBuilder sb = new StringBuilder();
-                for (BadgeDTO badge : entry.getBadges()) {
-                    sb.append(badge.getName());
-                    sb.append(" ");
-                }
-                return sb.toString();
+                return createCommaSeparatedString(
+                        entry.getBadges().stream().map(BadgeDTO::getName).collect(Collectors.toList()));
             }
             return "-";
         }
@@ -90,12 +98,8 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         @Override
         public String getValue(SailorProfileEntry entry) {
             if (entry != null && entry.getBoatclasses() != null) {
-                StringBuilder sb = new StringBuilder();
-                for (BoatClassDTO boatclass : entry.getBoatclasses()) {
-                    sb.append(boatclass.getName());
-                    sb.append(" ");
-                }
-                return sb.toString();
+                return createCommaSeparatedString(
+                        entry.getBoatclasses().stream().map(BoatClassDTO::getName).collect(Collectors.toList()));
             }
             return "-";
         }
@@ -105,12 +109,8 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         @Override
         public String getValue(SailorProfileEntry entry) {
             if (entry != null && entry.getCompetitors() != null) {
-                StringBuilder sb = new StringBuilder();
-                for (CompetitorDTO competitor : entry.getCompetitors()) {
-                    sb.append(competitor.getName());
-                    sb.append(" ");
-                }
-                return sb.toString();
+                return createCommaSeparatedString(
+                        entry.getCompetitors().stream().map(CompetitorDTO::getName).collect(Collectors.toList()));
             }
             return "-";
         }
