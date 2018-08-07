@@ -22,11 +22,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
  * Implementation of {@link SharedSailorProfileView} where users can change their preferred selections and
  * notifications.
  */
-public class SharedSailorProfile extends Composite implements SharedSailorProfileView {
+public class EditSailorProfile extends Composite implements SharedSailorProfileView {
 
     private static SharedSailorProfileUiBinder uiBinder = GWT.create(SharedSailorProfileUiBinder.class);
 
-    interface SharedSailorProfileUiBinder extends UiBinder<Widget, SharedSailorProfile> {
+    interface SharedSailorProfileUiBinder extends UiBinder<Widget, EditSailorProfile> {
     }
 
     interface Style extends CssResource {
@@ -42,7 +42,7 @@ public class SharedSailorProfile extends Composite implements SharedSailorProfil
     @UiField
     DivElement notificationsTextUi;
 
-    public SharedSailorProfile(SharedSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver) {
+    public EditSailorProfile(SharedSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver) {
         competitorSelectionUi = new CompetitorDisplayImpl(presenter.getFavoriteCompetitorsDataProvider(),
                 flagImageResolver).selectionUi;
         initWidget(uiBinder.createAndBindUi(this));

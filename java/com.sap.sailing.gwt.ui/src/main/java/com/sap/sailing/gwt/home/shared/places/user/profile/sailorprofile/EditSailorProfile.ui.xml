@@ -4,7 +4,7 @@
             xmlns:ms="urn:import:com.sap.sailing.gwt.home.shared.partials.multiselection">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:style type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfile.Style">
+    <ui:style type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfile.Style">
         .edgeToEdge {
             border-radius: 0;
             border-left: none;

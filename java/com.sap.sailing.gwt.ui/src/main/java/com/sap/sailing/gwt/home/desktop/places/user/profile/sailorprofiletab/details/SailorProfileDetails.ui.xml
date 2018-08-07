@@ -22,8 +22,8 @@
   <um:AuthorizedContentDecoratorDesktop
    ui:field="decoratorUi">
    <um:content>
-    <up:SharedSailorProfile
-     ui:field="sharedSailorProfileUi" />
+    <up:EditSailorProfile
+     ui:field="editSailorProfileUi" />
    </um:content>
   </um:AuthorizedContentDecoratorDesktop>
  </g:HTMLPanel>
