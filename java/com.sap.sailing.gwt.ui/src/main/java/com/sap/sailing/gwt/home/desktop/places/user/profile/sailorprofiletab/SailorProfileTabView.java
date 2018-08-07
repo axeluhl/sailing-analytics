@@ -6,14 +6,13 @@ import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wrapper.SailorProfileOverviewWrapper;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 public class SailorProfileTabView extends Composite implements UserProfileTabView<SailorProfilePlace> {
 
-    private SailorProfileOverviewWrapper.Presenter currentPresenter;
+    private SailingProfileOverviewPresenter currentPresenter;
     private SailorProfileOverview view;
     private final FlagImageResolver flagImageResolver;
 
@@ -54,6 +53,6 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
     @Override
     public void setPresenter(UserProfileView.Presenter currentPresenter) {
         view = new SailorProfileOverviewImpl(flagImageResolver);
-        this.currentPresenter = new SailorProfileOverviewImplPresenter(view, null, currentPresenter);
+        this.currentPresenter = new SailorProfileOverviewImplPresenter(view, currentPresenter);
     }
 }

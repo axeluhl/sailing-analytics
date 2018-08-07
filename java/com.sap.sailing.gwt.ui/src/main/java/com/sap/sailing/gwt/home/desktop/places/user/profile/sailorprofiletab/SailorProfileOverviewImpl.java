@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wrapper.SailorProfileOverviewWrapper;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
@@ -29,7 +28,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     }
 
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
-    private SailorProfileOverviewWrapper.Presenter presenter;
+    private SailingProfileOverviewPresenter presenter;
 
     @UiField(provided = true)
     final SortedCellTable<SailorProfileEntry> sailorProfilesTable = new SortedCellTable<>(0,
@@ -39,7 +38,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     }
 
     @Override
-    public void setPresenter(SailorProfileOverviewWrapper.Presenter presenter) {
+    public void setPresenter(SailingProfileOverviewPresenter presenter) {
         this.presenter = presenter;
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();

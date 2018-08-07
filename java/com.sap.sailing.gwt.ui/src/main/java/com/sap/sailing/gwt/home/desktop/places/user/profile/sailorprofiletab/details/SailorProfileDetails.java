@@ -5,7 +5,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wrapper.SailorProfileOverviewWrapper;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailingProfileOverviewPresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfile;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
@@ -30,7 +30,7 @@ public class SailorProfileDetails extends Composite implements SailorProfileDeta
     }
 
     @Override
-    public void setPresenter(SailorProfileOverviewWrapper.Presenter presenter) {
+    public void setPresenter(SailingProfileOverviewPresenter presenter) {
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
         editSailorProfileUi = new EditSailorProfile(presenter.getSharedSailorProfilePresenter(), entry);
         initWidget(uiBinder.createAndBindUi(this));
