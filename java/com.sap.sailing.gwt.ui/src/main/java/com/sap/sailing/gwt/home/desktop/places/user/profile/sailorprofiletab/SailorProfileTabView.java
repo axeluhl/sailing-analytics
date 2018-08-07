@@ -33,6 +33,9 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
     @Override
     public void start(SailorProfilePlace myPlace, AcceptsOneWidget contentArea) {
         contentArea.setWidget(view);
+        // if (clientFactory.getAuthenticationManager().getAuthenticationContext().isLoggedIn()) {
+        view.setProfileList(new SailorProfileDataProviderImpl().loadSailorProfiles());
+        // }
     }
 
     @Override
