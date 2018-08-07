@@ -256,61 +256,22 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
      */
     public void drillDown(GroupKey groupKey, Runnable onSuccessCallback) {
         assert groupKey instanceof GenericGroupKey<?>;
-        final GenericGroupKey<?> groupKeyForSingleDimension = (GenericGroupKey<?>) groupKey;
+        final Serializable filterValue = (Serializable) ((GenericGroupKey<?>) groupKey).getValue();
         final Collection<FunctionDTO> dimensionsToGroupBy = groupingProvider.getDimensionsToGroupBy();
         if (!dimensionsToGroupBy.isEmpty()) {
-            final FunctionDTO firstDimension = dimensionsToGroupBy.iterator().next();
+            final FunctionDTO firstDimension = Util.first(dimensionsToGroupBy);
             if (dimensionsToGroupBy.size() == 1) {
-                letUserSelectADifferentFirstDimension(() -> {
-                    filterSelectionProvider.setHighestRetrieverLevelWithFilterDimension(firstDimension,
-                            (Serializable) groupKeyForSingleDimension.getValue());
-                    onSuccessCallback.run();
+                showSelectNewFirstDimensionDialog(() -> {
+                    filterSelectionProvider.setFilterSelectionForUnreducedDimension(firstDimension, filterValue, onSuccessCallback);
                 });
             } else {
-                filterSelectionProvider.setHighestRetrieverLevelWithFilterDimension(firstDimension,
-                        (Serializable) groupKeyForSingleDimension.getValue());
                 groupingProvider.removeDimensionToGroupBy(firstDimension);
-                onSuccessCallback.run();
+                filterSelectionProvider.setFilterSelectionForUnreducedDimension(firstDimension, filterValue, onSuccessCallback);
             }
         }
     }
 
-    private class FirstDimensionSelectionDialog extends DataEntryDialog<FunctionDTO> {
-        private ValueListBox<FunctionDTO> dimensionChooser;
-
-        public FirstDimensionSelectionDialog(DialogCallback<FunctionDTO> callback) {
-            super(getDataMiningStringMessages().chooseDifferentDimensionTitle(),
-                    getDataMiningStringMessages().chooseDifferentDimensionMessage(), getDataMiningStringMessages().ok(),
-                    getDataMiningStringMessages().cancel(), new DataEntryDialog.Validator<FunctionDTO>() {
-                        @Override
-                        public String getErrorMessage(FunctionDTO valueToValidate) {
-                            if (valueToValidate == null) {
-                                return getDataMiningStringMessages().pleaseSelectADimension();
-                            } else {
-                                return null;
-                            }
-                        }
-                    }, callback);
-            dimensionChooser = groupingProvider.createDimensionToGroupByBoxWithoutEventHandler();
-            Collection<FunctionDTO> acceptableValues = new ArrayList<>();
-            Util.addAll(groupingProvider.getAvailableDimensions(), acceptableValues);
-            acceptableValues.add(null);
-            dimensionChooser.setAcceptableValues(acceptableValues);
-            dimensionChooser.addValueChangeHandler(e -> validateAndUpdate());
-        }
-
-        @Override
-        protected Widget getAdditionalWidget() {
-            return dimensionChooser;
-        }
-
-        @Override
-        protected FunctionDTO getResult() {
-            return dimensionChooser.getValue();
-        }
-    }
-
-    private void letUserSelectADifferentFirstDimension(final Runnable onSuccessCallback) {
+    private void showSelectNewFirstDimensionDialog(final Runnable onSuccessCallback) {
         final FirstDimensionSelectionDialog dialog = new FirstDimensionSelectionDialog(
                 new DialogCallback<FunctionDTO>() {
                     @Override
@@ -612,6 +573,41 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             }
         }
 
+    }
+
+    private class FirstDimensionSelectionDialog extends DataEntryDialog<FunctionDTO> {
+        private ValueListBox<FunctionDTO> dimensionChooser;
+
+        public FirstDimensionSelectionDialog(DialogCallback<FunctionDTO> callback) {
+            super(getDataMiningStringMessages().chooseDifferentDimensionTitle(),
+                    getDataMiningStringMessages().chooseDifferentDimensionMessage(), getDataMiningStringMessages().ok(),
+                    getDataMiningStringMessages().cancel(), new DataEntryDialog.Validator<FunctionDTO>() {
+                        @Override
+                        public String getErrorMessage(FunctionDTO valueToValidate) {
+                            if (valueToValidate == null) {
+                                return getDataMiningStringMessages().pleaseSelectADimension();
+                            } else {
+                                return null;
+                            }
+                        }
+                    }, callback);
+            dimensionChooser = groupingProvider.createDimensionToGroupByBoxWithoutEventHandler();
+            Collection<FunctionDTO> acceptableValues = new ArrayList<>();
+            Util.addAll(groupingProvider.getAvailableDimensions(), acceptableValues);
+            acceptableValues.add(null);
+            dimensionChooser.setAcceptableValues(acceptableValues);
+            dimensionChooser.addValueChangeHandler(e -> validateAndUpdate());
+        }
+
+        @Override
+        protected Widget getAdditionalWidget() {
+            return dimensionChooser;
+        }
+
+        @Override
+        protected FunctionDTO getResult() {
+            return dimensionChooser.getValue();
+        }
     }
 
 }

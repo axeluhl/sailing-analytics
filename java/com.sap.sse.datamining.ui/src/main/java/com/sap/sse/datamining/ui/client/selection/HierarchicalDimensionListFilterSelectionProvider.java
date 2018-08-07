@@ -277,18 +277,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         filterDimensionSelectionModel.clear();
         filterFilterDimensionsPanel.removeAll();
     }
-
-    @Override
-    public void setHighestRetrieverLevelWithFilterDimension(FunctionDTO dimension, Serializable groupKey) {
-        FunctionDTO reducedDimension = reducedDimensions == null ? dimension : reducedDimensions.getReducedDimension(dimension);
-        Collection<Serializable> items = Collections.singleton(groupKey);
-        for (DimensionWithContext dimensionWithContext : availableFilterDimensions) {
-            if (dimensionWithContext.getDimension().equals(reducedDimension)) {
-                setDimensionSelection(dimensionWithContext, items, m -> { });
-                break;
-            }
-        }
-    }
     
     @Override
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition, Consumer<Iterable<String>> callback) {
@@ -365,6 +353,25 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
             }
         }
         
+    }
+
+    @Override
+    public void setFilterSelectionForUnreducedDimension(FunctionDTO unreducedDimension, Serializable filterValue, Runnable onCompletion) {
+        FunctionDTO reducedDimension = reducedDimensions == null ? unreducedDimension : reducedDimensions.getReducedDimension(unreducedDimension);
+        DimensionWithContext dimensionToChange = null;
+        for (DimensionWithContext dimensionWithContext : availableFilterDimensions) {
+            if (dimensionWithContext.getDimension().equals(reducedDimension)) {
+                dimensionToChange = dimensionWithContext;
+                break;
+            }
+        }
+
+        if (dimensionToChange != null) {
+            ignoreSelectionChangedNotifications = true;
+            setDimensionSelection(dimensionToChange, Collections.singleton(filterValue), m -> { });
+            ignoreSelectionChangedNotifications = false;
+            updateAvailableFilterValues(dimensionToChange.getRetrieverLevel(), dimensionToChange, onCompletion);
+        }
     }
 
     private void setDimensionSelection(DimensionWithContext dimension, Collection<? extends Serializable> items, Consumer<Iterable<String>> callback) {
