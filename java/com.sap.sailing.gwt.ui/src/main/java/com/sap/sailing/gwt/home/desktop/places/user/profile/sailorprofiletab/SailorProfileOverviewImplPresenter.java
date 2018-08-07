@@ -10,11 +10,11 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 public class SailorProfileOverviewImplPresenter implements SailingProfileOverviewPresenter {
 
-    private final SailorProfileOverview view;
+    private final SailorProfileView view;
     private final UserProfileView.Presenter userProfilePresenter;
     private final SharedSailorProfileView.Presenter sharedSailorProfilePresenter;
 
-    public SailorProfileOverviewImplPresenter(final SailorProfileOverview view,
+    public SailorProfileOverviewImplPresenter(final SailorProfileView view,
             final UserProfileView.Presenter userProfilePresenter) {
         this.view = view;
         this.userProfilePresenter = userProfilePresenter;
@@ -35,8 +35,9 @@ public class SailorProfileOverviewImplPresenter implements SailingProfileOvervie
 
     @Override
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
-        if (authenticationContext.isLoggedIn()) {
-            view.setProfileList(sharedSailorProfilePresenter.getDataProvider().loadSailorProfiles());
+        if (authenticationContext.isLoggedIn() && view instanceof SailorProfileOverview) {
+            ((SailorProfileOverview) view)
+                    .setProfileList(sharedSailorProfilePresenter.getDataProvider().loadSailorProfiles());
         }
     }
 

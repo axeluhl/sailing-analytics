@@ -1,11 +1,14 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab;
 
+import java.util.UUID;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetails;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -13,8 +16,10 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 public class SailorProfileTabView extends Composite implements UserProfileTabView<SailorProfilePlace> {
 
     private SailingProfileOverviewPresenter currentPresenter;
-    private SailorProfileOverview view;
+    private SailorProfileView view;
     private final FlagImageResolver flagImageResolver;
+
+    UserProfileView.Presenter ownPresenter;
 
     public SailorProfileTabView(FlagImageResolver flagImageResolver) {
         this.flagImageResolver = flagImageResolver;
@@ -32,7 +37,17 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
 
     @Override
     public void start(SailorProfilePlace myPlace, AcceptsOneWidget contentArea) {
-        contentArea.setWidget(view);
+        try {
+            UUID uuid = myPlace.getSailorProfileUuid();
+            view = new SailorProfileDetails(uuid);
+            this.currentPresenter = new SailorProfileOverviewImplPresenter(view, ownPresenter);
+            contentArea.setWidget(view);
+        } catch (Exception e) {
+            view = new SailorProfileOverviewImpl(flagImageResolver);
+            this.currentPresenter = new SailorProfileOverviewImplPresenter(view, ownPresenter);
+            contentArea.setWidget(view);
+
+        }
         GWT.log("place: " + myPlace.getSailorProfileUuid());
     }
 
@@ -51,8 +66,7 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
     }
 
     @Override
-    public void setPresenter(UserProfileView.Presenter currentPresenter) {
-        view = new SailorProfileOverviewImpl(flagImageResolver);
-        this.currentPresenter = new SailorProfileOverviewImplPresenter(view, currentPresenter);
+    public void setPresenter(UserProfileView.Presenter ownPresenter) {
+        this.ownPresenter = ownPresenter;
     }
 }

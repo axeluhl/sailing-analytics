@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details;
 
+import java.util.UUID;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -25,8 +27,9 @@ public class SailorProfileDetails extends Composite implements SailorProfileDeta
     
     private final SailorProfileEntry entry;
 
-    public SailorProfileDetails(SailorProfileEntry entry) {
-        this.entry = entry;
+    public SailorProfileDetails(UUID uuid) {
+        // TODO: lookup entry
+        this.entry = null;
     }
 
     @Override
