@@ -11,11 +11,13 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 public class SailorProfilePresenterOverviewImpl implements SailorProfileOverviewWrapper.Presenter {
 
     private final SailorProfileOverviewWrapper wrapperView;
+    private final SailorProfileOverview view;
     private final UserProfileView.Presenter userProfilePresenter;
     private final SharedSailorProfileView.Presenter sharedSailorProfilePresenter;
 
-    public SailorProfilePresenterOverviewImpl(final SailorProfileOverview view, final SailorProfileOverviewWrapper wrapperView,
-            final UserProfileView.Presenter userProfilePresenter) {
+    public SailorProfilePresenterOverviewImpl(final SailorProfileOverview view,
+            final SailorProfileOverviewWrapper wrapperView, final UserProfileView.Presenter userProfilePresenter) {
+        this.view = view;
         this.wrapperView = wrapperView;
         this.userProfilePresenter = userProfilePresenter;
         this.sharedSailorProfilePresenter = new SharedSailorProfilePresenter<UserProfileClientFactory>(
@@ -30,9 +32,11 @@ public class SailorProfilePresenterOverviewImpl implements SailorProfileOverview
 
     @Override
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
-        wrapperView.getDecorator().setAuthenticationContext(authenticationContext);
+        if (wrapperView != null) {
+            wrapperView.getDecorator().setAuthenticationContext(authenticationContext);
+        }
         if (authenticationContext.isLoggedIn()) {
-            sharedSailorProfilePresenter.loadPreferences();
+            view.setProfileList(sharedSailorProfilePresenter.getDataProvider().loadSailorProfiles());
         }
     }
 

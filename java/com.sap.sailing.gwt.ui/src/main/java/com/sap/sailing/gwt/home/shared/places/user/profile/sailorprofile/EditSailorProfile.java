@@ -60,8 +60,8 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
 
         private CompetitorDisplayImpl(final SuggestedMultiSelectionCompetitorDataProvider dataProvider,
                 FlagImageResolver flagImageResolver) {
-            selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider,
-                    StringMessages.INSTANCE.competitors(), flagImageResolver);
+            selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, StringMessages.INSTANCE.competitors(),
+                    flagImageResolver);
             notifyAboutResultsUi = selectionUi.addNotificationToggle(new NotificationCallback() {
                 @Override
                 public void onNotificationToggled(boolean enabled) {

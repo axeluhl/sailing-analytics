@@ -15,6 +15,8 @@ import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggested
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.SailorProfileDataProvider;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.SailorProfileDataProviderImpl;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -31,11 +33,11 @@ import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 public class SharedSailorProfilePresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory>
         implements SharedSailorProfileView.Presenter {
 
-    private final SuggestedMultiSelectionCompetitorDataProvider competitorDataProvider = 
-            new SuggestedMultiSelectionCompetitorDataProviderImpl();
-    private final SuggestedMultiSelectionBoatClassDataProvider boatClassDataProvider = 
-            new SuggestedMultiSelectionBoatClassDataProviderImpl();
+    private final SuggestedMultiSelectionCompetitorDataProvider competitorDataProvider = new SuggestedMultiSelectionCompetitorDataProviderImpl();
+    private final SuggestedMultiSelectionBoatClassDataProvider boatClassDataProvider = new SuggestedMultiSelectionBoatClassDataProviderImpl();
     private final C clientFactory;
+
+    private final SailorProfileDataProvider sailorProfileDataProvider = new SailorProfileDataProviderImpl();
 
     public SharedSailorProfilePresenter(C clientFactory) {
         this.clientFactory = clientFactory;
@@ -121,6 +123,11 @@ public class SharedSailorProfilePresenter<C extends ClientFactoryWithDispatch & 
         @Override
         public void onSuccess(VoidResult result) {
         }
+    }
+
+    @Override
+    public SailorProfileDataProvider getDataProvider() {
+        return sailorProfileDataProvider;
     }
 
 }
