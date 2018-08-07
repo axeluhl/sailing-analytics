@@ -39,7 +39,6 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     private final Button clearTextBoxButton;
     private final Button settingsButton;
     private final Button filterSettingsButton;
-    private final RaceIdentifier selectedRaceIdentifier;
     private final TagsFilterSets tagFilterSets;
     private final FlowPanel searchBoxPanel;
     private final StringMessages stringMessages;
@@ -47,9 +46,8 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     
     private FilterSet<TagDTO, FilterWithUI<TagDTO>> lastActiveTagFilterSet;
 
-    public TagFilterPanel(RaceIdentifier selectedRaceIdentifier, StringMessages stringMessages, TagListProvider tagProvider) {
+    public TagFilterPanel(StringMessages stringMessages, TagListProvider tagProvider) {
         css.ensureInjected();
-        this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.stringMessages = stringMessages;
         this.tagProvider = tagProvider;
         this.setStyleName(css.competitorFilterContainer());

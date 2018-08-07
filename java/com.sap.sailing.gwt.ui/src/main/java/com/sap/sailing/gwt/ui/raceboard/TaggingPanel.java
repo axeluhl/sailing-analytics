@@ -27,7 +27,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -179,7 +178,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         tagListProvider = new TagListProvider(tagsFilterSet.getActiveFilterSetWithGeneralizedType());
 
         panel = new HeaderPanel();
-        filterbarPanel = new TagFilterPanel(null, stringMessages, tagListProvider);
+        filterbarPanel = new TagFilterPanel(stringMessages, tagListProvider);
         tagCellList = new CellList<TagDTO>(new TagCell(), CellListResources.INSTANCE);
         tagSelectionModel = new SingleSelectionModel<TagDTO>();
 
