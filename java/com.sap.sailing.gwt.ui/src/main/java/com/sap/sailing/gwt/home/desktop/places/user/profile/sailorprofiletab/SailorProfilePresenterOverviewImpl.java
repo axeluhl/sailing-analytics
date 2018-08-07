@@ -2,19 +2,19 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab;
 
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileClientFactory;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wrapper.SailorProfileOverviewWrapperView;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wrapper.SailorProfileOverviewWrapper;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfilePresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileView.Presenter;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
-public class SailorProfilePresenterOverviewImpl implements SailorProfileOverviewWrapperView.Presenter {
+public class SailorProfilePresenterOverviewImpl implements SailorProfileOverviewWrapper.Presenter {
 
-    private final SailorProfileOverviewWrapperView wrapperView;
+    private final SailorProfileOverviewWrapper wrapperView;
     private final UserProfileView.Presenter userProfilePresenter;
     private final SharedSailorProfileView.Presenter sharedSailorProfilePresenter;
 
-    public SailorProfilePresenterOverviewImpl(final SailorProfileOverviewView view, final SailorProfileOverviewWrapperView wrapperView,
+    public SailorProfilePresenterOverviewImpl(final SailorProfileOverview view, final SailorProfileOverviewWrapper wrapperView,
             final UserProfileView.Presenter userProfilePresenter) {
         this.wrapperView = wrapperView;
         this.userProfilePresenter = userProfilePresenter;

@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 import com.sap.sse.security.ui.authentication.decorator.NotLoggedInPresenter;
 
-public interface SailorProfileOverviewWrapperView extends IsWidget {
+public interface SailorProfileOverviewWrapper extends IsWidget {
 
     void setPresenter(Presenter presenter);
     
