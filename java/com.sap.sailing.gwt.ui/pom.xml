@@ -42,7 +42,11 @@
       <groupId>com.github.branflake2267</groupId>
       <artifactId>com.github.branflake2267.gwt-maps-api</artifactId>
       <version>3.10.0-SNAPSHOT</version>
-      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.branflake2267</groupId>
+      <artifactId>com.github.branflake2267.gwt-maps-api</artifactId>
+      <version>3.10.0-SNAPSHOT</version>
       <classifier>sources</classifier>
     </dependency>
     <dependency>
