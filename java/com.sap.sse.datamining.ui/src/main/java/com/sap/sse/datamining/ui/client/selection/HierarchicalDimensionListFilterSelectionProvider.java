@@ -342,9 +342,8 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         updateDimensionFilterSelectionProviders(dimensionsToUpdate.iterator(), null, () -> {
             mainPanel.setWidgetHidden(filterSelectionPresenterContainer, getSelection().isEmpty());
             filterSelectionPresenter.selectionChanged();
+            callback.accept(messages);
         });
-        
-        callback.accept(messages);
     }
     
     private class InnerSelectionCallback implements Consumer<Iterable<String>> {

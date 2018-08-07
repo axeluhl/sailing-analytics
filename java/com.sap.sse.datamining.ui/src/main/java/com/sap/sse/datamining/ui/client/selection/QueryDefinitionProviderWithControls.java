@@ -23,6 +23,9 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.LayoutPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.ValueListBox;
@@ -70,7 +73,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     private static final double FooterPanelHeight = 50;
     private static final int SplitterSize = 10;
 
-    private final DockLayoutPanel mainPanel;
+    private final Panel mainPanel;
     private final FlowPanel controlsPanel;
     private final ToggleButton queryDefinitionViewerToggleButton;
     private final QueryDefinitionViewer queryDefinitionViewer;
@@ -85,6 +88,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     private final GroupingProvider groupingProvider;
     private final SplitLayoutPanel filterSplitPanel;
     private final FilterSelectionProvider filterSelectionProvider;
+    
+    private final Panel applyQueryBusyIndicator;
     
     private final DialogBox confirmChangeLossDialog;
     private StatisticQueryDefinitionDTO queryDefinitionToBeApplied;
@@ -157,15 +162,26 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         filterSplitPanel.addEast(queryDefinitionViewer.getEntryWidget(), 600);
         filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
         filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
+        
+        Widget glass = new SimplePanel();
+        glass.addStyleName("whiteGlass");
+        HTML labeledBusyIndicator = new HTML(SafeHtmlUtils.fromString(getDataMiningStringMessages().applyingQuery()));
+        labeledBusyIndicator.setStyleName("applyQueryBusyMessage");
+        applyQueryBusyIndicator = new LayoutPanel();
+        applyQueryBusyIndicator.add(glass);
+        applyQueryBusyIndicator.add(labeledBusyIndicator);
 
         SplitLayoutPanel headerPanel = new SplitLayoutPanel(SplitterSize);
         headerPanel.addStyleName("dataMiningMarginBase");
         headerPanel.addWest(statisticProvider.getEntryWidget(), 800);
         headerPanel.add(controlsPanel);
         
-        mainPanel = new DockLayoutPanel(Unit.PX);
-        mainPanel.addNorth(headerPanel, HeaderPanelHeight);
-        mainPanel.add(filterSplitPanel);
+        DockLayoutPanel contentPanel = new DockLayoutPanel(Unit.PX);
+        contentPanel.addNorth(headerPanel, HeaderPanelHeight);
+        contentPanel.add(filterSplitPanel);
+        
+        mainPanel = new LayoutPanel();
+        mainPanel.add(contentPanel);
 
         // Storing the different component providers in a list
         providers = new ArrayList<>();
@@ -402,13 +418,21 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             for (ApplyCallback callback : callbacks) {
                 callback.isArmed = true;
             }
-        } else {
-            if (!errorMessages.isEmpty()) {
-                showErrorWhileApplyingQueryDialog(errorMessages, retrieverChainName);
+            if (applyQueryBusyIndicator.getParent() == null) {
+                mainPanel.add(applyQueryBusyIndicator);
             }
-            setBlockChangeNotification(false);
-            queryDefinitionChanged = false;
+        } else {
+            applyQueryDefinitionCompleted(errorMessages, retrieverChainName);
         }
+    }
+
+    private void applyQueryDefinitionCompleted(Collection<String> errorMessages, String retrieverChainName) {
+        if (!errorMessages.isEmpty()) {
+            showErrorWhileApplyingQueryDialog(errorMessages, retrieverChainName);
+        }
+        applyQueryBusyIndicator.removeFromParent();
+        setBlockChangeNotification(false);
+        queryDefinitionChanged = false;
     }
     
     private void showErrorWhileApplyingQueryDialog(Iterable<String> errorMessages, String retrieverChainName) {
@@ -540,11 +564,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             Util.addAll(messages, allMessages);
             callbacks.remove(this);
             if (isArmed && callbacks.isEmpty()) {
-                if (!allMessages.isEmpty()) {
-                    showErrorWhileApplyingQueryDialog(allMessages, retrieverChainName);
-                }
-                setBlockChangeNotification(false);
-                queryDefinitionChanged = false;
+                applyQueryDefinitionCompleted(allMessages, retrieverChainName);
             }
         }
         

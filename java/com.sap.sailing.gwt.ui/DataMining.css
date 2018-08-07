@@ -160,7 +160,7 @@ input.magnifier {
     font-size: 20px;
     height: 70px;
     margin: 0 auto;
-    padding: 49px 0 0 80px;
+    padding: 25px 0 0 80px;
     width: 400px;
     color: #7c7c7c;
 	background: url(images/important-message.png) left center no-repeat;
@@ -172,7 +172,7 @@ input.magnifier {
     font-size: 20px;
     height: 70px;
     margin: 0 auto;
-    padding: 49px 0 0 40px;
+    padding: 25px 0 0 40px;
     width: 400px;
     color: #7c7c7c;
 	background: url(images/busy_indicator_circle.gif) left center no-repeat;
@@ -346,4 +346,23 @@ input.magnifier {
 
 .floatRight {
 	float: right;
+}
+
+.whiteGlass {
+	background-color: #fff;
+	opacity: 0.6;
+	z-index: 19;
+}
+
+.applyQueryBusyMessage {
+    font-family: 'Open Sans',Arial,Verdana,sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    height: 70px;
+    margin: auto auto;
+    padding: 25px 0 0 40px;
+    width: 200px;
+    color: #7c7c7c;
+    background: url(images/busy_indicator_circle.gif) left center no-repeat;
+    z-index: 20;
 }
