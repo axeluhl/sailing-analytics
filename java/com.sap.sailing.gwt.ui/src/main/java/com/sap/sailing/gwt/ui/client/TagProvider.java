@@ -16,10 +16,6 @@ public interface TagProvider {
 
     int getFilteredTagsListSize();
 
-    void clearAllFilters();
-
-    boolean hasActiveFilters();
-
     void setTagsFilterSet(FilterSet<TagDTO, Filter<TagDTO>> tagsFilterSet);
 
     FilterSet<TagDTO, Filter<TagDTO>> getTagsFilterSet();

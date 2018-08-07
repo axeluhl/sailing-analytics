@@ -16,10 +16,6 @@ public class TagListProvider extends ListDataProvider<TagDTO> implements TagProv
     
     private FilterSet<TagDTO, Filter<TagDTO>> currentFilterSet;     
     
-    public TagListProvider(FilterSet<TagDTO, Filter<TagDTO>> currentFilterSet) {
-        this.currentFilterSet = currentFilterSet;
-    }
-    
     @Override
     public List<TagDTO> getAllTags() {
         return allTags;
@@ -71,21 +67,11 @@ public class TagListProvider extends ListDataProvider<TagDTO> implements TagProv
     @Override
     public void setTagsFilterSet(FilterSet<TagDTO, Filter<TagDTO>> tagsFilterSet) {
         this.currentFilterSet = tagsFilterSet;
+        this.updateFilteredTags();
+        this.refresh();
         
     }
-
-    @Override
-    public boolean hasActiveFilters() {
-        return (currentFilterSet != null && !currentFilterSet.getFilters().isEmpty() 
-                && Util.size(getFilteredTags()) != getAllTags().size());
-    }
-
-    @Override
-    public void clearAllFilters() {
-        currentFilterSet = null;
-        
-    }
-
+    
     @Override
     public int getFilteredTagsListSize() {
         return Util.size(getFilteredTags());

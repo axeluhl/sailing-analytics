@@ -122,8 +122,6 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
                 tagFilterSets.setActiveFilterSet(newTagsFilterSets.getActiveFilterSet());
                 
                 tagProvider.setTagsFilterSet(newTagsFilterSets.getActiveFilterSetWithGeneralizedType());
-                tagProvider.updateFilteredTags();
-                tagProvider.refresh();
                 updateTagsFilterControlState(newTagsFilterSets);
                 storeTagsFilterSets(newTagsFilterSets);
              }

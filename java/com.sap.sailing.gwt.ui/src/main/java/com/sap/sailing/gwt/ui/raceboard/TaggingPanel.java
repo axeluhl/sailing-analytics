@@ -34,7 +34,6 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TagListProvider;
-import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSets;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.raceboard.TaggingPanel.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
@@ -155,7 +154,6 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
 
     private final List<Button> buttons;
     private final TagListProvider tagListProvider;
-    private final TagsFilterSets tagsFilterSet;
 
     private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
@@ -174,8 +172,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         TagPanelResources.INSTANCE.style().ensureInjected();
         CellListResources.INSTANCE.cellListStyle().ensureInjected();
 
-        tagsFilterSet = new TagsFilterSets();
-        tagListProvider = new TagListProvider(tagsFilterSet.getActiveFilterSetWithGeneralizedType());
+        tagListProvider = new TagListProvider();
 
         panel = new HeaderPanel();
         filterbarPanel = new TagFilterPanel(stringMessages, tagListProvider);
