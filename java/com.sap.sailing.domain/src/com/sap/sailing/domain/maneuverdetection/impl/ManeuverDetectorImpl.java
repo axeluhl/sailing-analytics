@@ -698,8 +698,9 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
             } catch (NoWindException e) {
                 tackAfterManeuver = null;
             }
-            maneuver = new ManeuverWithMainCurveBoundariesImpl(maneuverType, tackAfterManeuver, maneuverPosition, maneuverMainCurveDetails.getTimePoint(),
-                    maneuverMainCurveDetails.extractCurveBoundariesOnly(), maneuverUnstableCourseAndSpeedBoundaries,
+            maneuver = new ManeuverWithMainCurveBoundariesImpl(maneuverType, tackAfterManeuver, maneuverPosition,
+                    maneuverMainCurveDetails.getTimePoint(), maneuverMainCurveDetails.extractCurveBoundariesOnly(),
+                    maneuverUnstableCourseAndSpeedBoundaries,
                     maneuverMainCurveDetails.getMaxTurningRateInDegreesPerSecond(), markPassing, maneuverLoss);
         }
         return maneuver;
@@ -723,7 +724,8 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         // For upwind/downwind legs, find the mean course between inbound and outbound course and project actual
         // and
         // extrapolated positions onto it:
-        Bearing middleManeuverAngle = speedWithBearingWhenSpeedStartedToDrop.getBearing().middle(speedWithBearingAfterManeuver.getBearing());
+        Bearing middleManeuverAngle = speedWithBearingWhenSpeedStartedToDrop.getBearing()
+                .middle(speedWithBearingAfterManeuver.getBearing());
         // extrapolate maximum speed before maneuver to time point of maximum speed after maneuver and project
         // resulting position
         // onto the average maneuver course; compare to the projected position actually reached at the time
@@ -731,9 +733,9 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         // maneuver:
         Position positionWhenSpeedStartedToDrop = track.getEstimatedPosition(timePointWhenSpeedStartedToDrop,
                 /* extrapolate */ false);
-        Position extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver = speedWithBearingWhenSpeedStartedToDrop.travelTo(
-                positionWhenSpeedStartedToDrop, timePointWhenSpeedStartedToDrop,
-                timePointWhenSpeedLevelledOffAfterManeuver);
+        Position extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver = speedWithBearingWhenSpeedStartedToDrop
+                .travelTo(positionWhenSpeedStartedToDrop, timePointWhenSpeedStartedToDrop,
+                        timePointWhenSpeedLevelledOffAfterManeuver);
         Position actualPositionAtTimePointOfMaxSpeedAfterManeuver = track
                 .getEstimatedPosition(timePointWhenSpeedLevelledOffAfterManeuver, /* extrapolate */ false);
         Position projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver = extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver
@@ -745,9 +747,8 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         Distance projectedDistanceSailedIfNotManeuvering = positionWhenSpeedStartedToDrop
                 .getDistance(projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver);
         return new ManeuverLoss(projectedDistanceSailed, projectedDistanceSailedIfNotManeuvering,
-                positionWhenSpeedStartedToDrop,
-                actualPositionAtTimePointOfMaxSpeedAfterManeuver, maneuverDuration, speedWithBearingWhenSpeedStartedToDrop,
-                middleManeuverAngle);
+                positionWhenSpeedStartedToDrop, actualPositionAtTimePointOfMaxSpeedAfterManeuver, maneuverDuration,
+                speedWithBearingWhenSpeedStartedToDrop, middleManeuverAngle);
     }
 
     protected Duration getDurationForDouglasPeuckerExtensionForMainCurveAnalysis(Duration approximateManeuverDuration) {
@@ -938,11 +939,25 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         if (isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, maneuverStart)) {
             maneuverStart = null;
         }
-        // Stable course analysis is considered as not necessary for preparation phase of maneuver because no
-        // oversteering is usually performed before maneuver
+        TimePoint stableBearingAnalysisUntil = maneuverStart == null ? maneuverMainCurveDetails.getTimePointBefore()
+                : maneuverStart.getExtensionTimePoint();
         Speed lowestSpeed = maneuverStart == null ? null : maneuverStart.getLowestSpeedWithinExtensionArea();
         double courseChangeSinceManeuverMainCurveInDegrees = maneuverStart == null ? 0
                 : maneuverStart.getCourseChangeInDegreesWithinExtensionArea();
+        stepsToAnalyze = getSpeedWithBearingStepsWithinTimeRange(stepsToAnalyze, earliestTimePointForSpeedTrendAnalysis,
+                stableBearingAnalysisUntil);
+        ManeuverCurveBoundaryExtension stableBearingExtension = findStableBearingWithMaxAbsCourseChangeSpeed(
+                stepsToAnalyze, true, MAX_TURNING_RATE_IN_DEG_PER_SECOND_FOR_STABLE_COURSE_ANALYSIS);
+        if (stableBearingExtension != null
+                && !isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, stableBearingExtension)) {
+            maneuverStart = stableBearingExtension;
+            courseChangeSinceManeuverMainCurveInDegrees += stableBearingExtension
+                    .getCourseChangeInDegreesWithinExtensionArea();
+            if (lowestSpeed == null
+                    || lowestSpeed.compareTo(stableBearingExtension.getLowestSpeedWithinExtensionArea()) > 0) {
+                lowestSpeed = stableBearingExtension.getLowestSpeedWithinExtensionArea();
+            }
+        }
         return maneuverStart != null
                 ? new ManeuverCurveBoundaryExtension(maneuverStart.getExtensionTimePoint(),
                         maneuverStart.getSpeedWithBearingAtExtensionTimePoint(),
@@ -959,7 +974,7 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         if (curveBoundaryExtension == null) {
             return false;
         }
-        return Math.abs(maneuverMainCurveDetails.getDirectionChangeInDegrees()) / 3.0 > Math
+        return Math.abs(maneuverMainCurveDetails.getDirectionChangeInDegrees()) / 2.0 > Math
                 .abs(curveBoundaryExtension.getCourseChangeInDegreesWithinExtensionArea());
     }
 
