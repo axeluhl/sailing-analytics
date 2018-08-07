@@ -13,7 +13,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
@@ -88,7 +87,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     private final Set<FilterSelectionChangedListener> listeners;
 
     private boolean isAwaitingReload;
-    private boolean isUpdating;
+    private boolean isUpdatingFilterDimensions;
     private boolean ignoreSelectionChangedNotifications;
     private DataRetrieverChainDefinitionDTO retrieverChain;
     private ReducedDimensionsDTO reducedDimensions;
@@ -104,7 +103,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     
     private final DockLayoutPanel dimensionFilterSelectionProvidersPanel;
     private final Map<DimensionWithContext, DimensionFilterSelectionProvider> dimensionFilterSelectionProviders;
-    private boolean filterFilterSelectionInProgress;
+    private boolean isUpdatingAvailableFilterValues;
     
     private final FilterSelectionPresenter filterSelectionPresenter;
     private final ScrollPanel filterSelectionPresenterContainer;
@@ -239,7 +238,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     }
     
     private void updateFilterDimensions() {
-        isUpdating = true;
+        isUpdatingFilterDimensions = true;
         clearContent();
         dataMiningService.getReducedDimensionsMappedByLevelFor(retrieverChain, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<ReducedDimensionsDTO>() {
             @Override
@@ -259,14 +258,14 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
                     selectionToBeApplied = null;
                     selectionCallback = null;
                 }
-                isUpdating = false;
+                isUpdatingFilterDimensions = false;
             }
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error fetching the dimensions of the retriever chain from the server: " + caught.getMessage());
                 selectionToBeApplied = null;
                 selectionCallback = null;
-                isUpdating = false;
+                isUpdatingFilterDimensions = false;
             }
         });
     }
@@ -295,7 +294,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         DataRetrieverChainDefinitionDTO retrieverChain = queryDefinition.getDataRetrieverChainDefinition();
         selectionToBeApplied = queryDefinition.getFilterSelection();
         selectionCallback = callback;
-        if (!isUpdating && !isAwaitingReload && retrieverChain.equals(this.retrieverChain)) {
+        if (!isUpdatingFilterDimensions && !isAwaitingReload && retrieverChain.equals(this.retrieverChain)) {
             setSelection(selectionToBeApplied, selectionCallback);
             selectionToBeApplied = null;
             selectionCallback = null;
@@ -333,13 +332,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     
     private void setSelectionCompleted(Consumer<Iterable<String>> callback, Iterable<String> messages) {
         ignoreSelectionChangedNotifications = false;
-        
-        // Trigger an update for the values of all selected filter dimensions, so that only values
-        // that match the current filter selection are shown
-        filterFilterSelectionInProgress = true;
-        List<DimensionWithContext> dimensionsToUpdate = new ArrayList<>(dimensionFilterSelectionProviders.keySet());
-        dimensionsToUpdate.sort(null);
-        updateDimensionFilterSelectionProviders(dimensionsToUpdate.iterator(), null, () -> {
+        updateAvailableFilterValues(retrieverChain.getRetrieverLevel(0), null, () -> {
             mainPanel.setWidgetHidden(filterSelectionPresenterContainer, getSelection().isEmpty());
             filterSelectionPresenter.selectionChanged();
             callback.accept(messages);
@@ -427,15 +420,26 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     }
     
     private void filterSelectionChanged(DimensionWithContext changedDimension) {
-        if (!filterFilterSelectionInProgress && !ignoreSelectionChangedNotifications) {
-            filterFilterSelectionInProgress = true;
-            int levelToStartWith = changedDimension.getRetrieverLevel().getLevel();
-            List<DimensionWithContext> dimensionsToUpdate = dimensionFilterSelectionProviders.keySet()
-                .stream().filter(d -> d.getRetrieverLevel().getLevel() >= levelToStartWith)
-                .collect(Collectors.toList());
-            dimensionsToUpdate.sort(null);
-            updateDimensionFilterSelectionProviders(dimensionsToUpdate.iterator(), changedDimension, this::notifyListeners);
+        if (!isUpdatingAvailableFilterValues && !ignoreSelectionChangedNotifications) {
+            updateAvailableFilterValues(changedDimension.getRetrieverLevel(), changedDimension, this::notifyListeners);
         }
+    }
+    
+    private void updateAvailableFilterValues(DataRetrieverLevelDTO fromRetrieverLevel, DimensionWithContext exceptDimension, Runnable onCompletion) {
+        if (isUpdatingAvailableFilterValues) {
+            throw new IllegalStateException("Update of availabe filter values already in progress");
+        }
+
+        List<DimensionWithContext> dimensionsToUpdate = new ArrayList<>();
+        for (DimensionWithContext dimension : dimensionFilterSelectionProviders.keySet()) {
+            if (dimension.getRetrieverLevel().getLevel() >= fromRetrieverLevel.getLevel()) {
+                dimensionsToUpdate.add(dimension);
+            }
+        }
+        dimensionsToUpdate.sort(null);
+
+        isUpdatingAvailableFilterValues = true;
+        updateDimensionFilterSelectionProviders(dimensionsToUpdate.iterator(), exceptDimension, onCompletion);
     }
 
     private void updateDimensionFilterSelectionProviders(Iterator<DimensionWithContext> dimensionIterator, DimensionWithContext exceptDimension, Runnable onCompletion) {
@@ -449,15 +453,15 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
                 selectionProvider.updateContent(() -> {
                     boolean selectionChanged = !selectionBefore.equals(selectionProvider.getSelection());
                     if (selectionChanged) {
-                        filterFilterSelectionInProgress = false;
-                        filterSelectionChanged(dimension);
+                        isUpdatingAvailableFilterValues = false;
+                        updateAvailableFilterValues(dimension.getRetrieverLevel(), dimension, onCompletion);
                     } else {
                         updateDimensionFilterSelectionProviders(dimensionIterator, exceptDimension, onCompletion);
                     }
                 });
             }
         } else {
-            filterFilterSelectionInProgress = false;
+            isUpdatingAvailableFilterValues = false;
             onCompletion.run();
         }
     }
