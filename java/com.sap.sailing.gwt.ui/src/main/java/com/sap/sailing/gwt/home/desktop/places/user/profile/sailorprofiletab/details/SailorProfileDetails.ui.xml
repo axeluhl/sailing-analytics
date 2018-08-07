@@ -19,16 +19,12 @@
     </ui:style>
  <g:HTMLPanel
   addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
-
-  <div
-   class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
-   <c:CellTable ui:field="sailorProfilesTable"
-    addStyleNames="{style.table}">
-    <c:emptyTableWidget>
-     <g:Label text="{i18n.noDataFound}"
-      addStyleNames="{style.empty}" />
-    </c:emptyTableWidget>
-   </c:CellTable>
-  </div>
+  <um:AuthorizedContentDecoratorDesktop
+   ui:field="decoratorUi">
+   <um:content>
+    <up:SharedSailorProfile
+     ui:field="sharedSailorProfileUi" />
+   </um:content>
+  </um:AuthorizedContentDecoratorDesktop>
  </g:HTMLPanel>
 </ui:UiBinder>

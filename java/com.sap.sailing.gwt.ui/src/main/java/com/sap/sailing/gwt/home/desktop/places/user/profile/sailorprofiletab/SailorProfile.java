@@ -17,13 +17,10 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.BadgeDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileEntry;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfile;
-import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
-import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
-public class SailorProfile extends Composite implements SailorProfileView {
+public class SailorProfile extends Composite implements InnerSailorProfileView {
 
     interface MyBinder extends UiBinder<Widget, SailorProfile> {
     }
@@ -31,23 +28,17 @@ public class SailorProfile extends Composite implements SailorProfileView {
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
     @UiField(provided = true)
-    AuthorizedContentDecoratorDesktop decoratorUi;
-    @UiField(provided = true)
-    SharedSailorProfile sharedSailorProfileUi;
-    @UiField(provided = true)
     final SortedCellTable<SailorProfileEntry> sailorProfilesTable = new SortedCellTable<>(0,
             DesignedCellTableResources.INSTANCE);
 
-    private final FlagImageResolver flagImageResolver;
+    // private final FlagImageResolver flagImageResolver;
 
     public SailorProfile(FlagImageResolver flagImageResolver) {
-        this.flagImageResolver = flagImageResolver;
+        // this.flagImageResolver = flagImageResolver;
     }
 
     @Override
-    public void setPresenter(Presenter presenter) {
-        decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
-        sharedSailorProfileUi = new SharedSailorProfile(presenter.getSharedSailorProfilePresenter(), flagImageResolver);
+    public void setPresenter(SailorProfileView.Presenter presenter) {
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();
     }
@@ -68,10 +59,10 @@ public class SailorProfile extends Composite implements SailorProfileView {
         });
     }
 
-    @Override
-    public NeedsAuthenticationContext getDecorator() {
-        return decoratorUi;
-    }
+    // @Override
+    // public NeedsAuthenticationContext getDecorator() {
+    // return decoratorUi;
+    // }
 
     @Override
     public void setProfileList(List<SailorProfileEntry> entries) {

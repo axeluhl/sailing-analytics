@@ -7,15 +7,15 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedS
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileView.Presenter;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
-public class SailorProfilePresenter implements SailorProfileView.Presenter {
+public class SailorProfilePresenterImpl implements SailorProfileView.Presenter {
 
-    private final SailorProfileView view;
+    // private final InnerSailorProfileView view;
     private final UserProfileView.Presenter userProfilePresenter;
     private final SharedSailorProfileView.Presenter sharedSailorProfilePresenter;
             
-    public SailorProfilePresenter(final SailorProfileView view,
+    public SailorProfilePresenterImpl(final InnerSailorProfileView view,
             final UserProfileView.Presenter userProfilePresenter) {
-        this.view = view;
+        // this.view = view;
         this.userProfilePresenter = userProfilePresenter;
         this.sharedSailorProfilePresenter = new SharedSailorProfilePresenter<UserProfileClientFactory>(
                 userProfilePresenter.getClientFactory());
@@ -29,10 +29,10 @@ public class SailorProfilePresenter implements SailorProfileView.Presenter {
     
     @Override
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
-        view.getDecorator().setAuthenticationContext(authenticationContext);
-        if (authenticationContext.isLoggedIn()) {
-            sharedSailorProfilePresenter.loadPreferences();
-        }
+        // view.getDecorator().setAuthenticationContext(authenticationContext);
+        // if (authenticationContext.isLoggedIn()) {
+        // sharedSailorProfilePresenter.loadPreferences();
+        // }
     }
     
     @Override

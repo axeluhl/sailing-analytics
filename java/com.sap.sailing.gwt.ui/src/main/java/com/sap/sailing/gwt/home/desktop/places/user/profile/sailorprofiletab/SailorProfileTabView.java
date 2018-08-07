@@ -12,7 +12,7 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 public class SailorProfileTabView extends Composite implements UserProfileTabView<SailorProfilePlace> {
 
     private SailorProfileView.Presenter currentPresenter;
-    private SailorProfileView view;
+    private InnerSailorProfileView view;
     private final FlagImageResolver flagImageResolver;
     
     public SailorProfileTabView(FlagImageResolver flagImageResolver) {
@@ -51,6 +51,6 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
     @Override
     public void setPresenter(UserProfileView.Presenter currentPresenter) {
         view = new SailorProfile(flagImageResolver);
-        this.currentPresenter = new SailorProfilePresenter(view, currentPresenter);
+        this.currentPresenter = new SailorProfilePresenterImpl(view, currentPresenter);
     }
 }

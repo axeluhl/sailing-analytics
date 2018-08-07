@@ -12,11 +12,11 @@ public interface SailorProfileView extends IsWidget {
 
     void setPresenter(Presenter presenter);
     
-    NeedsAuthenticationContext getDecorator();
-    
     void setProfileList(List<SailorProfileEntry> entries);
 
     public interface Presenter extends NotLoggedInPresenter, NeedsAuthenticationContext {
         SharedSailorProfileView.Presenter getSharedSailorProfilePresenter();
     }
+
+    NeedsAuthenticationContext getDecorator();
 }
