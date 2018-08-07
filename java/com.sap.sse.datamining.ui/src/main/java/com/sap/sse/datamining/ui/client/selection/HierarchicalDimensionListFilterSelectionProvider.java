@@ -254,6 +254,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
                 filterFilterDimensionsPanel.updateAll(availableFilterDimensions);
                 
                 if (selectionToBeApplied != null) {
+                    ignoreSelectionChangedNotifications = true;
                     setSelection(selectionToBeApplied, selectionCallback);
                     selectionToBeApplied = null;
                     selectionCallback = null;
@@ -295,17 +296,19 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         selectionToBeApplied = queryDefinition.getFilterSelection();
         selectionCallback = callback;
         if (!isUpdatingFilterDimensions && !isAwaitingReload && retrieverChain.equals(this.retrieverChain)) {
-            setSelection(selectionToBeApplied, selectionCallback);
-            selectionToBeApplied = null;
-            selectionCallback = null;
+            ignoreSelectionChangedNotifications = true;
+            clearSelection();
+            updateAvailableFilterValues(retrieverChain.getRetrieverLevel(0), null, () -> {
+                setSelection(selectionToBeApplied, selectionCallback);
+                selectionToBeApplied = null;
+                selectionCallback = null;
+            });
         }
     }
 
     private void setSelection(HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection, Consumer<Iterable<String>> callback) {
         Set<InnerSelectionCallback> innerCallbacks = new HashSet<>();
         Collection<String> callbackMessages = new ArrayList<>();
-        ignoreSelectionChangedNotifications = true;
-        clearSelection();
         for (DataRetrieverLevelDTO retrieverLevel : filterSelection.keySet()) {
             HashMap<FunctionDTO, HashSet<? extends Serializable>> levelSelection = filterSelection.get(retrieverLevel);
             for (FunctionDTO dimension : levelSelection.keySet()) {
