@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import com.google.gwt.view.client.ListDataProvider;
@@ -54,6 +55,14 @@ public class TagListProvider extends ListDataProvider<TagDTO> implements TagProv
                 }
             }
         }
+        currentFilteredList.sort(new Comparator<TagDTO>() {
+            @Override
+            public int compare(TagDTO tag1, TagDTO tag2) {
+                long time1 = tag1.getRaceTimepoint().asMillis();
+                long time2 = tag2.getRaceTimepoint().asMillis();
+                return time1 < time2 ? -1 : time1 == time2 ? 0 : 1;
+            }
+        });
         setList(currentFilteredList);
     }
 

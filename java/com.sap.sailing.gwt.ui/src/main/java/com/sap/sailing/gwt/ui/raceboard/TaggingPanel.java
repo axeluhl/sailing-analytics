@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -290,14 +289,6 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     private void updateContent() {
         tagListProvider.updateFilteredTags();
         tagCellList.setVisibleRange(0, tagListProvider.getFilteredTagsListSize());
-        tagListProvider.getFilteredTags().sort(new Comparator<TagDTO>() {
-            @Override
-            public int compare(TagDTO tag1, TagDTO tag2) {
-                long time1 = tag1.getRaceTimepoint().asMillis();
-                long time2 = tag2.getRaceTimepoint().asMillis();
-                return time1 < time2 ? -1 : time1 == time2 ? 0 : 1;
-            }
-        });
         tagListProvider.refresh();
     }
 
