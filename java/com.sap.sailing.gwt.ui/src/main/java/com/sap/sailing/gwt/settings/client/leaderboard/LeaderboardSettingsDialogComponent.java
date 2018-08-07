@@ -46,7 +46,8 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected T initialSettings;
     protected Iterable<DetailType> availableDetailTypes;
 
-    public LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShown) {
+    protected LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages,
+            Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShown) {
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
         this.canBoatInfoBeShown = canBoatInfoBeShown;
