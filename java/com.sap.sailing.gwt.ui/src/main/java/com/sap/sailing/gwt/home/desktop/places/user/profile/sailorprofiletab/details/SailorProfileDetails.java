@@ -7,8 +7,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wrapper.SailorProfileOverviewWrapper;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfile;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
-import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 public class SailorProfileDetails extends Composite implements SailorProfileDetailsView {
@@ -23,16 +23,16 @@ public class SailorProfileDetails extends Composite implements SailorProfileDeta
     @UiField(provided = true)
     EditSailorProfile editSailorProfileUi;
     
-    private final FlagImageResolver flagImageResolver;
+    private final SailorProfileEntry entry;
 
-    public SailorProfileDetails(FlagImageResolver flagImageResolver) {
-        this.flagImageResolver = flagImageResolver;
+    public SailorProfileDetails(SailorProfileEntry entry) {
+        this.entry = entry;
     }
 
     @Override
     public void setPresenter(SailorProfileOverviewWrapper.Presenter presenter) {
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
-        editSailorProfileUi = new EditSailorProfile(presenter.getSharedSailorProfilePresenter(), flagImageResolver);
+        editSailorProfileUi = new EditSailorProfile(presenter.getSharedSailorProfilePresenter(), entry);
         initWidget(uiBinder.createAndBindUi(this));
     }
 

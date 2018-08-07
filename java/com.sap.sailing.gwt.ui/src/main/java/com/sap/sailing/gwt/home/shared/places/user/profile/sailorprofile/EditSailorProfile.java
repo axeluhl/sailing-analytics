@@ -7,6 +7,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
@@ -15,6 +16,7 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection.NotificationCallback;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -42,10 +44,20 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     @UiField
     DivElement notificationsTextUi;
 
-    public EditSailorProfile(SharedSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver) {
-        competitorSelectionUi = new CompetitorDisplayImpl(presenter.getFavoriteCompetitorsDataProvider(),
-                flagImageResolver).selectionUi;
-        initWidget(uiBinder.createAndBindUi(this));
+    public EditSailorProfile(SharedSailorProfileView.Presenter presenter, SailorProfileEntry entry) {
+        FlagImageResolver.get(new AsyncCallback<FlagImageResolver>() {
+
+            @Override
+            public void onSuccess(FlagImageResolver flagImageResolver) {
+                competitorSelectionUi = new CompetitorDisplayImpl(presenter.getFavoriteCompetitorsDataProvider(),
+                        flagImageResolver).selectionUi;
+                initWidget(uiBinder.createAndBindUi(EditSailorProfile.this));
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+        });
         // TODO hide notificationsTextUi if the user's mail address is already verified
     }
 

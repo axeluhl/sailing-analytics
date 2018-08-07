@@ -46,7 +46,7 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
 
     @Override
     public SailorProfilePlace placeToFire() {
-        return new SailorProfilePlace();
+        return new SailorProfilePlace(null);
     }
 
     @Override

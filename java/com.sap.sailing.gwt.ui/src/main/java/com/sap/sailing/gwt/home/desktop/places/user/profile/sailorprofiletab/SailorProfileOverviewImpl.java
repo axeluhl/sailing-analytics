@@ -58,8 +58,8 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         showColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
         showColumn.setFieldUpdater(new FieldUpdater<SailorProfileEntry, String>() {
             @Override
-            public void update(int index, SailorProfileEntry object, String value) {
-                Window.alert("on-goto-click");
+            public void update(int index, SailorProfileEntry entry, String value) {
+                Window.alert("go to: " + entry.getName());
             }
         });
     }
