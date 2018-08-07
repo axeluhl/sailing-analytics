@@ -223,7 +223,6 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
 
         // Content (tags)
         tagListProvider.addDataDisplay(tagCellList);
-        tagListProvider.setList(new ArrayList<TagDTO>());
         tagCellList.setEmptyListWidget(new Label(stringMessages.tagNoTagsFound()));
 
         tagCellList.setSelectionModel(tagSelectionModel);
@@ -294,8 +293,9 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     }
 
     private void updateContent() {
+        tagListProvider.updateFilteredTags();
         tagCellList.setVisibleRange(0, tagListProvider.getFilteredTagsListSize());
-        tagListProvider.getAllTags().sort(new Comparator<TagDTO>() {
+        tagListProvider.getFilteredTags().sort(new Comparator<TagDTO>() {
             @Override
             public int compare(TagDTO tag1, TagDTO tag2) {
                 long time1 = tag1.getRaceTimepoint().asMillis();
