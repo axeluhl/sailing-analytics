@@ -24,26 +24,32 @@ public class TagTagFilter extends AbstractTextFilter<TagDTO> implements FilterWi
                 if(tag.getTag().contains(value)) {
                     return true;       
                 }
+                break;
             case Equals:
                 if(tag.getTag().equals(value)) {
                     return true;       
                 }
+                break;
             case NotContains:
                 if(!tag.getTag().contains(value)) {
                     return true;       
                 }
+                break;
             case NotEqualTo:
                 if(!tag.getTag().equals(value)) {
                     return true;       
                 }
+                break;
             case EndsWith:
                 if(tag.getTag().endsWith(value)) {
                     return true;       
                 }
+                break;
             case StartsWith:
                 if(tag.getTag().startsWith(value)) {
                     return true;       
                 }
+                break;
             default:    
                 throw new RuntimeException("Operator " + operator.getOperator().name() + " is not supported."); 
             }
