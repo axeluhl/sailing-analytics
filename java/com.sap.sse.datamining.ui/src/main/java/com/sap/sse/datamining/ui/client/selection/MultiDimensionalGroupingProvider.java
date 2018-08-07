@@ -123,7 +123,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
                     LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<HashSet<FunctionDTO>>() {
                         @Override
                         public void onSuccess(HashSet<FunctionDTO> dimensions) {
-                            clearAvailableDimensionsAndGroupByBoxes();
+                            clear();
                             for (FunctionDTO dimension : dimensions) {
                                 availableDimensions.add(dimension);
                             }
@@ -152,17 +152,15 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
                         }
                     });
         } else {
-            clearAvailableDimensionsAndGroupByBoxes();
+            clear();
             ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
             addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
             dimensionsToSelect = null;
         }
     }
 
-    private void clearAvailableDimensionsAndGroupByBoxes() {
-        for (ValueListBox<FunctionDTO> dimensionToGroupByBox : dimensionToGroupByBoxes) {
-            mainPanel.remove(dimensionToGroupByBox);
-        }
+    private void clear() {
+        mainPanel.clear();
         dimensionToGroupByBoxes.clear();
         availableDimensions.clear();
     }
@@ -189,9 +187,8 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
                     addDimensionToGroupByBox(newDimensionToGroupByBox);
                     firstChange = false;
                 } else if (event.getValue() == null) {
-                    Widget changedDimensionToGroupByBox = (Widget) event.getSource();
-                    mainPanel.remove(changedDimensionToGroupByBox);
-                    dimensionToGroupByBoxes.remove(changedDimensionToGroupByBox);
+                    mainPanel.remove(dimensionToGroupByBox);
+                    dimensionToGroupByBoxes.remove(dimensionToGroupByBox);
                 }
                 updateAcceptableValues();
                 notifyListeners();
@@ -262,16 +259,16 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
     }
 
     @Override
-    public String getCustomGrouperScriptText() {
-        return "";
-    }
-
-    @Override
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition, Consumer<Iterable<String>> callback) {
         DataRetrieverChainDefinitionDTO newRetrieverChain = queryDefinition.getDataRetrieverChainDefinition();
         dimensionsToSelect = queryDefinition.getDimensionsToGroupBy();
         selectionCallback = callback;
         if (!isAwaitingReload && !isUpdating && currentRetrieverChainDefinition.equals(newRetrieverChain)) {
+            mainPanel.clear();
+            dimensionToGroupByBoxes.clear();
+            ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
+            addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
+            
             setSelectedDimensions(dimensionsToSelect, selectionCallback);
             dimensionsToSelect = null;
             selectionCallback = null;
@@ -284,7 +281,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
         for (FunctionDTO dimension : dimensions) {
             int index = availableDimensions.indexOf(dimension);
             if (index != -1) {
-                dimensionToGroupByBoxes.get(boxIndex).setValue(availableDimensions.get(index), true);
+                setDimensionToGroupBy(boxIndex, availableDimensions.get(index));
                 boxIndex++;
             } else {
                 callbackMessages.add(getDataMiningStringMessages().groupingDimensionNotAvailable(dimension.getDisplayName()));

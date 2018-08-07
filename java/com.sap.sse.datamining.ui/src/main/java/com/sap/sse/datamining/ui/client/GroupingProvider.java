@@ -10,8 +10,6 @@ public interface GroupingProvider
         extends DataMiningComponentProvider<SerializableSettings>, DataRetrieverChainDefinitionChangedListener {
     Collection<FunctionDTO> getDimensionsToGroupBy();
 
-    String getCustomGrouperScriptText();
-
     void addGroupingChangedListener(GroupingChangedListener listener);
 
     void removeDimensionToGroupBy(FunctionDTO dimension);
