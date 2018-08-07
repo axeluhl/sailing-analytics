@@ -12,28 +12,16 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TagSelectionProvider;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorSelectionProviderFilterContext;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorTotalRankFilter;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsJsonDeSerializer;
+import com.sap.sailing.gwt.ui.client.TagListProvider;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterUIFactory;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
-import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFilterContext;
-import com.sap.sailing.gwt.ui.client.shared.filter.SelectedTagsFilter;
-import com.sap.sailing.gwt.ui.client.shared.filter.TagSelectionProviderFilterContext;
-import com.sap.sailing.gwt.ui.client.shared.filter.SelectedRaceFilterContext;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsJsonDeSerializer;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterResources;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterResources.CompetitorFilterCss;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
-import com.sap.sse.common.filter.BinaryOperator;
-import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -52,29 +40,28 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     private final Button settingsButton;
     private final Button filterSettingsButton;
     private final RaceIdentifier selectedRaceIdentifier;
+    private final TagsFilterSets tagFilterSets;
     private final FlowPanel searchBoxPanel;
     private final StringMessages stringMessages;
-    private final TagsFilterSets tagsFilterSets;
-    private final TagSelectionProvider tagSelectionProvider = null;
+    private final TagListProvider tagProvider;
     
     private FilterSet<TagDTO, FilterWithUI<TagDTO>> lastActiveTagFilterSet;
 
-    public TagFilterPanel(RaceIdentifier selectedRaceIdentifier, StringMessages stringMessages, TagsFilterSets tagsFilterSets) {
+    public TagFilterPanel(RaceIdentifier selectedRaceIdentifier, StringMessages stringMessages, TagListProvider tagProvider) {
         css.ensureInjected();
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.stringMessages = stringMessages;
-        this.tagsFilterSets = tagsFilterSets;
+        this.tagProvider = tagProvider;
         this.setStyleName(css.competitorFilterContainer());
-        /*
+        
         TagsFilterSets loadedTagsFilterSets = loadTagsFilterSets();
         if (loadedTagsFilterSets != null) {
-            tagsFilterSets = loadedTagsFilterSets;
-            insertSelectedTagsFilter(tagsFilterSets);
+            tagFilterSets = loadedTagsFilterSets;
         } else {
-            tagsFilterSets = createAndAddDefaultTagsFilter();
-            storeTagsFilterSets(tagsFilterSets);
+            tagFilterSets = createAndAddDefaultTagsFilter();
+            storeTagsFilterSets(tagFilterSets);
         }
-        */
+        
         
         Button submitButton = new Button();
         submitButton.setStyleName(css.button());
@@ -129,18 +116,19 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     }
     
     private void showEditTagsFiltersDialog() {
-        TagsFilterSetsDialog tagsFilterSetsDialog = new TagsFilterSetsDialog(tagsFilterSets,
+        TagsFilterSetsDialog tagsFilterSetsDialog = new TagsFilterSetsDialog(tagFilterSets,
                 stringMessages, new DialogCallback<TagsFilterSets>() {
             @Override
             public void ok(final TagsFilterSets newTagsFilterSets) {
-                /*tagsFilterSets.getFilterSets().clear();
-                tagsFilterSets.getFilterSets().addAll(newTagsFilterSets.getFilterSets());
-                tagsFilterSets.setActiveFilterSet(newTagsFilterSets.getActiveFilterSet());
+                tagFilterSets.getFilterSets().clear();
+                tagFilterSets.getFilterSets().addAll(newTagsFilterSets.getFilterSets());
+                tagFilterSets.setActiveFilterSet(newTagsFilterSets.getActiveFilterSet());
                 
-                updateTagsFilterContexts(newTagsFilterSets);
-                tagSelectionProvider.setTagsFilterSet(newTagsFilterSets.getActiveFilterSetWithGeneralizedType());
+                tagProvider.setTagsFilterSet(newTagsFilterSets.getActiveFilterSetWithGeneralizedType());
+                tagProvider.updateFilteredTags();
+                tagProvider.refresh();
                 updateTagsFilterControlState(newTagsFilterSets);
-                storeTagsFilterSets(newTagsFilterSets);*/
+                storeTagsFilterSets(newTagsFilterSets);
              }
 
             @Override
@@ -150,28 +138,6 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         });
         
         tagsFilterSetsDialog .show();
-    }
-    
-    private void insertSelectedTagsFilter(TagsFilterSets filterSet) {
-        // selected tags filter
-        FilterSet<TagDTO, FilterWithUI<TagDTO>> selectedTagsFilterSet = 
-                new FilterSet<TagDTO, FilterWithUI<TagDTO>>(stringMessages.selectedCompetitors());
-        selectedTagsFilterSet.setEditable(false);
-        SelectedTagsFilter selectedTagsFilter = new SelectedTagsFilter();
-        selectedTagsFilter.setTagSelectionProvider(tagSelectionProvider);
-        selectedTagsFilterSet.addFilter(selectedTagsFilter);
-        filterSet.addFilterSet(0, selectedTagsFilterSet);
-    }
-    
-    private void updateTagsFilterContexts(TagsFilterSets filterSets) {
-        for (FilterSet<TagDTO, FilterWithUI<TagDTO>> filterSet : filterSets.getFilterSets()) {
-            for (Filter<TagDTO> filter : filterSet.getFilters()) {
-                if (filter instanceof TagSelectionProviderFilterContext) {
-                    ((TagSelectionProviderFilterContext) filter)
-                            .setTagSelectionProvider(tagSelectionProvider);
-                }
-            }
-        }
     }
 
     /**
@@ -236,8 +202,6 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     
     private TagsFilterSets createAndAddDefaultTagsFilter() {
         TagsFilterSets filterSets = new TagsFilterSets();
-        // 1. selected tags filter
-        insertSelectedTagsFilter(filterSets);
         
         FilterSet<TagDTO, FilterWithUI<TagDTO>> defaultTagFilterSet = new FilterSet<>("Default empty filter");
         filterSets.addFilterSet(defaultTagFilterSet);

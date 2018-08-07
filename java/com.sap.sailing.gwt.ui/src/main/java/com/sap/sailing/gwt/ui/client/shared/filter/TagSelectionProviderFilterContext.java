@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import com.sap.sailing.gwt.ui.client.TagSelectionProvider;
+import com.sap.sailing.gwt.ui.client.TagProvider;
 
 public interface TagSelectionProviderFilterContext {
-    TagSelectionProvider getTagSelectionProvider();
+    TagProvider getTagSelectionProvider();
     
-    void setTagSelectionProvider(TagSelectionProvider tagSelectionProvider); 
+    void setTagSelectionProvider(TagProvider tagSelectionProvider); 
 }

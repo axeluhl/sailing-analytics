@@ -34,6 +34,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TagListProvider;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSets;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.raceboard.TaggingPanel.TagPanelResources.TagPanelStyle;
@@ -154,8 +155,8 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     private final Panel buttonsPanel;
 
     private final List<Button> buttons;
-    private final List<TagDTO> tags;
-    private final ListDataProvider<TagDTO> tagProvider;
+    private final TagListProvider tagListProvider;
+    private final TagsFilterSets tagsFilterSet;
 
     private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
@@ -174,17 +175,18 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         TagPanelResources.INSTANCE.style().ensureInjected();
         CellListResources.INSTANCE.cellListStyle().ensureInjected();
 
+        tagsFilterSet = new TagsFilterSets();
+        tagListProvider = new TagListProvider(tagsFilterSet.getActiveFilterSetWithGeneralizedType());
+
         panel = new HeaderPanel();
-        filterbarPanel = new TagFilterPanel(null, stringMessages, new TagsFilterSets());
+        filterbarPanel = new TagFilterPanel(null, stringMessages, tagListProvider);
         tagCellList = new CellList<TagDTO>(new TagCell(), CellListResources.INSTANCE);
         tagSelectionModel = new SingleSelectionModel<TagDTO>();
 
         contentPanel = new ScrollPanel();
         buttonsPanel = new FlowPanel();
 
-        buttons = new ArrayList<Button>();
-        tags = new ArrayList<TagDTO>();
-        tagProvider = new ListDataProvider<TagDTO>();
+        buttons = new ArrayList<Button>();        
 
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
@@ -220,10 +222,9 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         panel.setFooterWidget(buttonsPanel);
 
         // Content (tags)
-        tagProvider.addDataDisplay(tagCellList);
-        tagProvider.setList(tags);
-
+        tagListProvider.addDataDisplay(tagCellList);
         tagCellList.setEmptyListWidget(new Label(stringMessages.tagNoTagsFound()));
+
         tagCellList.setSelectionModel(tagSelectionModel);
         tagSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -280,7 +281,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                             @Override
                             public void onSuccess(Void result) {
                                 Notification.notify(stringMessages.tagAddedSuccessfully(), NotificationType.INFO);
-                                tags.add(tag);
+                                tagListProvider.addTag(tag);
                                 updateContent();
                             }
                         });
@@ -292,8 +293,9 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     }
 
     private void updateContent() {
-        tagCellList.setVisibleRange(0, tags.size());
-        tags.sort(new Comparator<TagDTO>() {
+        tagListProvider.updateFilteredTags();
+        tagCellList.setVisibleRange(0, tagListProvider.getFilteredTagsListSize());
+        tagListProvider.getFilteredTags().sort(new Comparator<TagDTO>() {
             @Override
             public int compare(TagDTO tag1, TagDTO tag2) {
                 long time1 = tag1.getRaceTimepoint().asMillis();
@@ -301,7 +303,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                 return time1 < time2 ? -1 : time1 == time2 ? 0 : 1;
             }
         });
-        tagProvider.refresh();
+        tagListProvider.refresh();
     }
 
     private void updateButtons() {
@@ -327,8 +329,9 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                         @Override
                         public void onSuccess(List<TagDTO> result) {
                             if (result != null) {
+                                List<TagDTO> tags = tagListProvider.getAllTags();
                                 for (TagDTO tag : result) {
-                                    if (!tags.contains(tag)) {
+                                    if (!tagListProvider.getAllTags().contains(tag)) {
                                         tags.add(tag);
                                         lastReceivedTag = tag.getRaceTimepoint();
                                         updateContent();

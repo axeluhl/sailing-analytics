@@ -1,13 +1,13 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TagSelectionProvider;
+import com.sap.sailing.gwt.ui.client.TagProvider;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 
 public class SelectedTagsFilter implements FilterWithUI<TagDTO>, TagSelectionProviderFilterContext {
     public static final String FILTER_NAME = "SelectedTagsFilter";
 
-    private TagSelectionProvider tagsSelectionProvider;
+    private TagProvider tagsSelectionProvider;
     
     public SelectedTagsFilter() {
         tagsSelectionProvider = null;
@@ -16,7 +16,7 @@ public class SelectedTagsFilter implements FilterWithUI<TagDTO>, TagSelectionPro
     @Override
     public boolean matches(TagDTO tag) {
         boolean result = false;
-        if(tagsSelectionProvider != null && tagsSelectionProvider.isSelected(tag)) {
+        if(tagsSelectionProvider != null) {// && tagsSelectionProvider.isSelected(tag)) {
             result = true;
         }
         return result;
@@ -38,12 +38,12 @@ public class SelectedTagsFilter implements FilterWithUI<TagDTO>, TagSelectionPro
     }
     
     @Override
-    public TagSelectionProvider getTagSelectionProvider() {
+    public TagProvider getTagSelectionProvider() {
         return tagsSelectionProvider;
     }
 
     @Override
-    public void setTagSelectionProvider(TagSelectionProvider tagSelectionProvider) {
+    public void setTagSelectionProvider(TagProvider tagSelectionProvider) {
         this.tagsSelectionProvider = tagSelectionProvider;
     }
 

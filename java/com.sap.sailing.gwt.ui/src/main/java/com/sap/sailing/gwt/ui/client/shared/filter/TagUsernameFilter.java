@@ -23,26 +23,32 @@ public class TagUsernameFilter extends AbstractTextFilter<TagDTO> implements Fil
                 if(tag.getUsername().contains(value)) {
                     return true;       
                 }
+                break;
             case Equals:
                 if(tag.getUsername().equals(value)) {
                     return true;       
                 }
+                break;
             case NotContains:
                 if(!tag.getUsername().contains(value)) {
                     return true;       
                 }
+                break;
             case NotEqualTo:
                 if(!tag.getUsername().equals(value)) {
                     return true;       
                 }
+                break;
             case EndsWith:
                 if(tag.getUsername().endsWith(value)) {
                     return true;       
                 }
+                break;
             case StartsWith:
                 if(tag.getUsername().startsWith(value)) {
                     return true;       
                 }
+                break;
             default:    
                 throw new RuntimeException("Operator " + operator.getOperator().name() + " is not supported."); 
             }
