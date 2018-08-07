@@ -15,12 +15,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wrapper.SailorProfileWrapperView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.BadgeDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileEntry;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 
-public class SailorProfile extends Composite implements InnerSailorProfileView {
+public class SailorProfile extends Composite implements SailorProfileView {
 
     interface MyBinder extends UiBinder<Widget, SailorProfile> {
     }
@@ -31,16 +32,19 @@ public class SailorProfile extends Composite implements InnerSailorProfileView {
     final SortedCellTable<SailorProfileEntry> sailorProfilesTable = new SortedCellTable<>(0,
             DesignedCellTableResources.INSTANCE);
 
-    // private final FlagImageResolver flagImageResolver;
-
     public SailorProfile(FlagImageResolver flagImageResolver) {
-        // this.flagImageResolver = flagImageResolver;
     }
 
     @Override
-    public void setPresenter(SailorProfileView.Presenter presenter) {
+    public void setPresenter(SailorProfileWrapperView.Presenter presenter) {
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();
+    }
+
+    @Override
+    public void setProfileList(List<SailorProfileEntry> entries) {
+        sailorProfilesTable.setPageSize(entries.size());
+        sailorProfilesTable.setList(entries);
     }
 
     private void setupTable() {
@@ -57,17 +61,6 @@ public class SailorProfile extends Composite implements InnerSailorProfileView {
                 Window.alert("on-goto-click");
             }
         });
-    }
-
-    // @Override
-    // public NeedsAuthenticationContext getDecorator() {
-    // return decoratorUi;
-    // }
-
-    @Override
-    public void setProfileList(List<SailorProfileEntry> entries) {
-        sailorProfilesTable.setPageSize(entries.size());
-        sailorProfilesTable.setList(entries);
     }
 
     private final Column<SailorProfileEntry, String> profileNameColumn = new Column<SailorProfileEntry, String>(

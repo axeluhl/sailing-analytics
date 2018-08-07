@@ -5,7 +5,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileView;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wrapper.SailorProfileWrapperView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfile;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -30,7 +30,7 @@ public class SailorProfileDetails extends Composite implements SailorProfileDeta
     }
 
     @Override
-    public void setPresenter(SailorProfileView.Presenter presenter) {
+    public void setPresenter(SailorProfileWrapperView.Presenter presenter) {
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
         sharedSailorProfileUi = new SharedSailorProfile(presenter.getSharedSailorProfilePresenter(), flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));

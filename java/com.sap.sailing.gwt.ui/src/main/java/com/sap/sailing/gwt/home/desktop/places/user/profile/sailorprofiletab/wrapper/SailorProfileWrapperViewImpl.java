@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab;
+package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wrapper;
 
 import java.util.List;
 
@@ -7,15 +7,16 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfile;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileEntry;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.gwt.resources.CommonControlsCSS;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
-public class SailorProfileViewImpl extends Composite implements SailorProfileView {
+public class SailorProfileWrapperViewImpl extends Composite implements SailorProfileWrapperView {
 
-    interface MyBinder extends UiBinder<Widget, SailorProfileViewImpl> {
+    interface MyBinder extends UiBinder<Widget, SailorProfileWrapperViewImpl> {
     }
 
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
@@ -25,7 +26,7 @@ public class SailorProfileViewImpl extends Composite implements SailorProfileVie
     
     private final FlagImageResolver flagImageResolver;
 
-    public SailorProfileViewImpl(FlagImageResolver flagImageResolver) {
+    public SailorProfileWrapperViewImpl(FlagImageResolver flagImageResolver) {
         this.flagImageResolver = flagImageResolver;
     }
 
