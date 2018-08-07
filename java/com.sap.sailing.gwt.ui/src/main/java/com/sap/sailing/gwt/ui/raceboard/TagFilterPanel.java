@@ -66,7 +66,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         submitButton.addStyleName(css.searchButtonBackgroundImage());
 
         searchTextBox = new TextBox();
-        searchTextBox.getElement().setAttribute("placeholder", stringMessages.searchCompetitorsBySailNumberOrName());
+        searchTextBox.getElement().setAttribute("placeholder", stringMessages.searchTags());
         searchTextBox.addKeyUpHandler(this);
         searchTextBox.setStyleName(css.searchInput());
 
@@ -92,7 +92,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         filterSettingsButton = new Button("");
         filterSettingsButton.setStyleName(css.button());
         filterSettingsButton.addStyleName(css.filterButton());
-        filterSettingsButton.setTitle(stringMessages.competitorsFilter());
+        filterSettingsButton.setTitle(stringMessages.tagsFilter());
         filterSettingsButton.addStyleName(css.filterInactiveButtonBackgroundImage());
         filterSettingsButton.addClickHandler(new ClickHandler() {
             @Override
@@ -141,7 +141,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
      * filter selected
      */
     private void updateTagsFilterControlState(TagsFilterSets filterSets) {
-        String tagsFilterTitle = stringMessages.competitorsFilter();
+        String tagsFilterTitle = stringMessages.tagsFilter();
         FilterSet<TagDTO, FilterWithUI<TagDTO>> activeFilterSet = filterSets.getActiveFilterSet();
         if (activeFilterSet != null) {
             if (lastActiveTagFilterSet == null) {

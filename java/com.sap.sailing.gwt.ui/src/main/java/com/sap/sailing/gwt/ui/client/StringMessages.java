@@ -2107,4 +2107,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagNotLoggedIn();
     String tagFilterExplanation();
     String tagSelectedTags();
+    String tagsFilter();
+    String tagSearchTags();
 }
