@@ -286,12 +286,10 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         selectionCallback = callback;
         if (!isUpdatingFilterDimensions && !isAwaitingReload && retrieverChain.equals(this.retrieverChain)) {
             ignoreSelectionChangedNotifications = true;
-            clearSelection();
-            updateAvailableFilterValues(retrieverChain.getRetrieverLevel(0), null, () -> {
-                setSelection(selectionToBeApplied, selectionCallback);
-                selectionToBeApplied = null;
-                selectionCallback = null;
-            });
+            filterDimensionSelectionModel.clear();
+            setSelection(selectionToBeApplied, selectionCallback);
+            selectionToBeApplied = null;
+            selectionCallback = null;
         }
     }
 
