@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.datapr
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -15,8 +16,8 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
     public List<SailorProfileEntry> loadSailorProfiles() {
 
         List<BadgeDTO> badges = new ArrayList<>();
-        BadgeDTO b1 = new BadgeDTO("0000", "Best Sailor Ever");
-        BadgeDTO b2 = new BadgeDTO("0001", "100 Miles Sailed");
+        BadgeDTO b1 = new BadgeDTO(UUID.randomUUID().toString(), "Best Sailor Ever");
+        BadgeDTO b2 = new BadgeDTO(UUID.randomUUID().toString(), "100 Miles Sailed");
         badges.add(b1);
         badges.add(b2);
 
@@ -34,8 +35,10 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
         boatclasses.add(bc1);
         boatclasses.add(bc2);
 
-        SailorProfileEntry e1 = new SailorProfileEntry("0000", "My Favourite Guy", competitors, badges, boatclasses);
-        SailorProfileEntry e2 = new SailorProfileEntry("0001", "This Other Guy", competitors, badges, boatclasses);
+        SailorProfileEntry e1 = new SailorProfileEntry(UUID.randomUUID().toString(), "My Favourite Guy", competitors,
+                badges, boatclasses);
+        SailorProfileEntry e2 = new SailorProfileEntry(UUID.randomUUID().toString(), "This Other Guy", competitors,
+                badges, boatclasses);
 
         List<SailorProfileEntry> entries = new ArrayList<>();
         entries.add(e1);

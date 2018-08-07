@@ -17,6 +17,10 @@ public class SailorProfilePlace extends AbstractUserProfilePlace implements HasM
         this.sailorProfileUuid = sailorProfileUuid;
     }
 
+    public SailorProfilePlace() {
+        this(null);
+    }
+
     public UUID getSailorProfileUuid() {
         return sailorProfileUuid;
     }
