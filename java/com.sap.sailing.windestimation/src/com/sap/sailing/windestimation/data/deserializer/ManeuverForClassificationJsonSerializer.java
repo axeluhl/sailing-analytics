@@ -9,6 +9,7 @@ public class ManeuverForClassificationJsonSerializer implements JsonSerializer<M
 
     public static final String MANEUVER_TYPE = "maneuverType";
     public static final String ABSOLUTE_TOTAL_COURSE_CHANGE_IN_DEGREES = "absoluteTotalCourseChangeInDegrees";
+    public static final String SPEED_IN_SPEED_OUT_RATIO = "speedInSpeedOutRatio";
     public static final String OVERSTEERING_IN_DEGREES = "oversteeringInDegrees";
     public static final String SPEED_LOSS_RATIO = "speedLossRatio";
     public static final String SPEED_GAIN_RATIO = "speedGainRatio";
@@ -28,6 +29,7 @@ public class ManeuverForClassificationJsonSerializer implements JsonSerializer<M
         JSONObject json = new JSONObject();
         json.put(MANEUVER_TYPE, maneuver.getManeuverType().name());
         json.put(ABSOLUTE_TOTAL_COURSE_CHANGE_IN_DEGREES, maneuver.getAbsoluteTotalCourseChangeInDegrees());
+        json.put(SPEED_IN_SPEED_OUT_RATIO, maneuver.getSpeedInSpeedOutRatio());
         json.put(OVERSTEERING_IN_DEGREES, maneuver.getOversteeringInDegrees());
         json.put(SPEED_LOSS_RATIO, maneuver.getSpeedLossRatio());
         json.put(SPEED_GAIN_RATIO, maneuver.getSpeedGainRatio());

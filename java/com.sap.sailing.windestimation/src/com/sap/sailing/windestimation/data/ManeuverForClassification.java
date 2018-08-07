@@ -5,6 +5,8 @@ public interface ManeuverForClassification {
     ManeuverTypeForClassification getManeuverType();
 
     double getAbsoluteTotalCourseChangeInDegrees();
+    
+    double getSpeedInSpeedOutRatio();
 
     double getOversteeringInDegrees();
 

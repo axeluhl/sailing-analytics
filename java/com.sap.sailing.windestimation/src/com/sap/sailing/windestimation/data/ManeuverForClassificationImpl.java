@@ -4,6 +4,7 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
 
     private final ManeuverTypeForClassification maneuverType;
     private final double absoluteTotalCourseChangeInDegrees;
+    private final double speedInSpeedOutRatio;
     private final double oversteeringInDegrees;
     private final double speedLossRatio;
     private final double speedGainRatio;
@@ -19,7 +20,7 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
     private ManeuverCategory maneuverCategory;
 
     public ManeuverForClassificationImpl(ManeuverTypeForClassification maneuverType,
-            double absoluteTotalCourseChangeInDegrees, double oversteeringInDegrees, double speedLossRatio,
+            double absoluteTotalCourseChangeInDegrees, double speedInSpeedOutRatio, double oversteeringInDegrees, double speedLossRatio,
             double speedGainRatio, double maximalTurningRateInDegreesPerSecond,
             Double deviationFromOptimalTackAngleInDegrees, Double deviationFromOptimalJibeAngleInDegrees,
             Double highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
@@ -27,6 +28,7 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
             double timeLossInSeconds, boolean clean, ManeuverCategory maneuverCategory) {
         this.maneuverType = maneuverType;
         this.absoluteTotalCourseChangeInDegrees = absoluteTotalCourseChangeInDegrees;
+        this.speedInSpeedOutRatio = speedInSpeedOutRatio;
         this.oversteeringInDegrees = oversteeringInDegrees;
         this.speedLossRatio = speedLossRatio;
         this.speedGainRatio = speedGainRatio;
@@ -47,6 +49,11 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
         return absoluteTotalCourseChangeInDegrees;
     }
 
+    @Override
+    public double getSpeedInSpeedOutRatio() {
+        return speedInSpeedOutRatio;
+    }
+    
     @Override
     public double getOversteeringInDegrees() {
         return oversteeringInDegrees;

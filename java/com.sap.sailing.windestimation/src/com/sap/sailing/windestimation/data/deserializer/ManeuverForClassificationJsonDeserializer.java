@@ -17,6 +17,8 @@ public class ManeuverForClassificationJsonDeserializer implements JsonDeserializ
                 .valueOf((String) object.get(ManeuverForClassificationJsonSerializer.MANEUVER_TYPE));
         double absoluteTotalCourseChangeInDegrees = (double) object
                 .get(ManeuverForClassificationJsonSerializer.ABSOLUTE_TOTAL_COURSE_CHANGE_IN_DEGREES);
+        double speedInSpeedOutRatio = (double) object
+                .get(ManeuverForClassificationJsonSerializer.SPEED_IN_SPEED_OUT_RATIO);
         double oversteeringInDegrees = (double) object
                 .get(ManeuverForClassificationJsonSerializer.OVERSTEERING_IN_DEGREES);
         double speedLossRatio = (double) object.get(ManeuverForClassificationJsonSerializer.SPEED_LOSS_RATIO);
@@ -40,7 +42,7 @@ public class ManeuverForClassificationJsonDeserializer implements JsonDeserializ
         ManeuverCategory maneuverCategory = ManeuverCategory
                 .valueOf((String) object.get(ManeuverForClassificationJsonSerializer.MANEUVER_CATEGORY));
 
-        return new ManeuverForClassificationImpl(maneuverType, absoluteTotalCourseChangeInDegrees,
+        return new ManeuverForClassificationImpl(maneuverType, absoluteTotalCourseChangeInDegrees, speedInSpeedOutRatio,
                 oversteeringInDegrees, speedLossRatio, speedGainRatio, maximalTurningRateInDegreesPerSecond,
                 deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees,
                 highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
