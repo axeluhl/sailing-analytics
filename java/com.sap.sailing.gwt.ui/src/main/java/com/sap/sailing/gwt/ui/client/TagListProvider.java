@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -10,38 +9,37 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
-public class TagListProvider extends ListDataProvider<TagDTO> implements TagProvider{
-    
-    private List<TagDTO> allTags = new ArrayList<TagDTO>();
-    
+public class TagListProvider extends ListDataProvider<TagDTO> implements TagProvider {
+
+    private List<TagDTO> allTags = new ArrayList<TagDTO>();    
     private FilterSet<TagDTO, Filter<TagDTO>> currentFilterSet;     
-    
+
     @Override
     public List<TagDTO> getAllTags() {
         return allTags;
     }
-    
+
     @Override
     public void addTags(final List<TagDTO> tags) {
-        if(tags != null) {
-            for(TagDTO tag: tags) {
+        if (tags != null) {
+            for (TagDTO tag : tags) {
                 addTag(tag);
-            }          
+            }
         }
-    }   
-    
+    }
+
     @Override
     public void addTag(final TagDTO tag) {
-        if(tag != null) {
+        if (tag != null) {
             allTags.add(tag);
         }
     }
-    
+
     @Override
     public List<TagDTO> getFilteredTags() {
         return getList();
     }
-    
+
     @Override
     public void updateFilteredTags() {
         List<TagDTO> currentFilteredList = new ArrayList<TagDTO>(getAllTags());
@@ -69,9 +67,8 @@ public class TagListProvider extends ListDataProvider<TagDTO> implements TagProv
         this.currentFilterSet = tagsFilterSet;
         this.updateFilteredTags();
         this.refresh();
-        
     }
-    
+
     @Override
     public int getFilteredTagsListSize() {
         return Util.size(getFilteredTags());

@@ -29,10 +29,10 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * @author Julian Rendl (D067890)
  * 
  */
-public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWithUI<TagDTO>{
-    
+public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWithUI<TagDTO> {
+
     private final static String LOCAL_STORAGE_TAGS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.tagsFilterSets";
-    
+
     private final static CompetitorFilterCss css = CompetitorFilterResources.INSTANCE.css();
     private final TextBox searchTextBox;
     private final Button clearTextBoxButton;
@@ -42,7 +42,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     private final FlowPanel searchBoxPanel;
     private final StringMessages stringMessages;
     private final TagListProvider tagProvider;
-    
+
     private FilterSet<TagDTO, FilterWithUI<TagDTO>> lastActiveTagFilterSet;
 
     public TagFilterPanel(StringMessages stringMessages, TagListProvider tagProvider) {
@@ -50,7 +50,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         this.stringMessages = stringMessages;
         this.tagProvider = tagProvider;
         this.setStyleName(css.competitorFilterContainer());
-        
+
         TagsFilterSets loadedTagsFilterSets = loadTagsFilterSets();
         if (loadedTagsFilterSets != null) {
             tagFilterSets = loadedTagsFilterSets;
@@ -58,18 +58,17 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
             tagFilterSets = createAndAddDefaultTagsFilter();
             storeTagsFilterSets(tagFilterSets);
         }
-        
-        
+
         Button submitButton = new Button();
         submitButton.setStyleName(css.button());
         submitButton.addStyleName(css.searchButton());
         submitButton.addStyleName(css.searchButtonBackgroundImage());
-        
+
         searchTextBox = new TextBox();
         searchTextBox.getElement().setAttribute("placeholder", stringMessages.searchCompetitorsBySailNumberOrName());
         searchTextBox.addKeyUpHandler(this);
         searchTextBox.setStyleName(css.searchInput());
-        
+
         clearTextBoxButton = new Button();
         clearTextBoxButton.setStyleName(css.button());
         clearTextBoxButton.addStyleName(css.clearButton());
@@ -81,14 +80,14 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
                 clearSelection();
             }
         });
-        
+
         settingsButton = new Button();
         settingsButton.ensureDebugId("tagSettingsButton");
         settingsButton.setTitle("settings");
         settingsButton.setStyleName(css.button());
         settingsButton.addStyleName(css.settingsButton());
         settingsButton.addStyleName(css.settingsButtonBackgroundImage());
-        
+
         filterSettingsButton = new Button("");
         filterSettingsButton.setStyleName(css.button());
         filterSettingsButton.addStyleName(css.filterButton());
@@ -100,8 +99,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
                 showEditTagsFiltersDialog();
             }
         });
-        
-        
+
         searchBoxPanel = new FlowPanel();
         searchBoxPanel.setStyleName(css.searchBox());
         searchBoxPanel.add(submitButton);
@@ -111,33 +109,35 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         add(settingsButton);
         add(filterSettingsButton);
     }
-    
-    private void showEditTagsFiltersDialog() {
-        TagsFilterSetsDialog tagsFilterSetsDialog = new TagsFilterSetsDialog(tagFilterSets,
-                stringMessages, new DialogCallback<TagsFilterSets>() {
-            @Override
-            public void ok(final TagsFilterSets newTagsFilterSets) {
-                tagFilterSets.getFilterSets().clear();
-                tagFilterSets.getFilterSets().addAll(newTagsFilterSets.getFilterSets());
-                tagFilterSets.setActiveFilterSet(newTagsFilterSets.getActiveFilterSet());
-                
-                tagProvider.setTagsFilterSet(newTagsFilterSets.getActiveFilterSetWithGeneralizedType());
-                updateTagsFilterControlState(newTagsFilterSets);
-                storeTagsFilterSets(newTagsFilterSets);
-             }
 
-            @Override
-            public void cancel() { 
-            }
-            
-        });
-        
-        tagsFilterSetsDialog .show();
+    private void showEditTagsFiltersDialog() {
+        TagsFilterSetsDialog tagsFilterSetsDialog = new TagsFilterSetsDialog(tagFilterSets, stringMessages,
+                new DialogCallback<TagsFilterSets>() {
+                    @Override
+                    public void ok(final TagsFilterSets newTagsFilterSets) {
+                        tagFilterSets.getFilterSets().clear();
+                        tagFilterSets.getFilterSets().addAll(newTagsFilterSets.getFilterSets());
+                        tagFilterSets.setActiveFilterSet(newTagsFilterSets.getActiveFilterSet());
+
+                        tagProvider.setTagsFilterSet(newTagsFilterSets.getActiveFilterSetWithGeneralizedType());
+                        tagProvider.updateFilteredTags();
+                        tagProvider.refresh();
+                        updateTagsFilterControlState(newTagsFilterSets);
+                        storeTagsFilterSets(newTagsFilterSets);
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+
+                });
+
+        tagsFilterSetsDialog.show();
     }
 
     /**
-     * Updates the tags filter checkbox state by setting its check mark and updating its label according to the
-     * current filter selected
+     * Updates the tags filter checkbox state by setting its check mark and updating its label according to the current
+     * filter selected
      */
     private void updateTagsFilterControlState(TagsFilterSets filterSets) {
         String tagsFilterTitle = stringMessages.competitorsFilter();
@@ -156,14 +156,14 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
             lastActiveTagFilterSet = null;
         }
         if (lastActiveTagFilterSet != null) {
-            filterSettingsButton.setTitle(tagsFilterTitle+" ("+lastActiveTagFilterSet.getName()+")");
+            filterSettingsButton.setTitle(tagsFilterTitle + " (" + lastActiveTagFilterSet.getName() + ")");
         } else {
             filterSettingsButton.setTitle(tagsFilterTitle);
         }
     }
-    
-   private TagsFilterSets loadTagsFilterSets() {
-       TagsFilterSets result = null;
+
+    private TagsFilterSets loadTagsFilterSets() {
+        TagsFilterSets result = null;
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
             try {
@@ -184,20 +184,20 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
 
     private void storeTagsFilterSets(TagsFilterSets newTagsFilterSets) {
         Storage localStorage = Storage.getLocalStorageIfSupported();
-        if(localStorage != null) {
+        if (localStorage != null) {
             // delete old value
             localStorage.removeItem(LOCAL_STORAGE_TAGS_FILTER_SETS_KEY);
-            
-            // store the tags filter set 
+
+            // store the tags filter set
             TagsFilterSetsJsonDeSerializer serializer = new TagsFilterSetsJsonDeSerializer();
             JSONObject jsonObject = serializer.serialize(newTagsFilterSets);
             localStorage.setItem(LOCAL_STORAGE_TAGS_FILTER_SETS_KEY, jsonObject.toString());
         }
     }
-    
+
     private TagsFilterSets createAndAddDefaultTagsFilter() {
         TagsFilterSets filterSets = new TagsFilterSets();
-        
+
         FilterSet<TagDTO, FilterWithUI<TagDTO>> defaultTagFilterSet = new FilterSet<>("Default empty filter");
         filterSets.addFilterSet(defaultTagFilterSet);
 
@@ -209,7 +209,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         clearTextBoxButton.addStyleName(css.hiddenButton());
         onKeyUp(null);
     }
-    
+
     @Override
     public boolean matches(TagDTO object) {
         // TODO Auto-generated method stub
@@ -253,6 +253,6 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     @Override
     public void onKeyUp(KeyUpEvent event) {
         // TODO Auto-generated method stub
-        
+
     }
 }

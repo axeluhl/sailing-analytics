@@ -79,4 +79,14 @@ public class TagDTO implements IsSerializable {
         }
         return true;
     }
+    
+    @Override
+    public String toString() {
+        return "TagDTO [tag=" + tag
+                + ", comment=" + comment
+                + ", imageURL=" + imageURL
+                + ", username=" + username
+                + ", raceTimepoint=" + raceTimepoint
+                + "]";
+    }
 }
