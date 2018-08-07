@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
+
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
