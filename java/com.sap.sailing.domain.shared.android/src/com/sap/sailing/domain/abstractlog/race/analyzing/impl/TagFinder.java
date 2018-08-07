@@ -9,10 +9,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sse.common.TimePoint;
 
 public class TagFinder extends RaceLogAnalyzer<List<RaceLogTagEvent>> {
-    
+
     private final TimePoint from;
     private final TimePoint to;
-    
+
     public TagFinder(RaceLog raceLog, TimePoint from, TimePoint to) {
         super(raceLog);
         this.from = from;
@@ -22,13 +22,13 @@ public class TagFinder extends RaceLogAnalyzer<List<RaceLogTagEvent>> {
     @Override
     protected List<RaceLogTagEvent> performAnalysis() {
         List<RaceLogTagEvent> result = new ArrayList<>();
-        for(RaceLogEvent event : getAllEvents()) {
-            if(event instanceof RaceLogTagEvent) {
+        for (RaceLogEvent event : getAllEvents()) {
+            if (event instanceof RaceLogTagEvent) {
                 RaceLogTagEvent tagEvent = (RaceLogTagEvent) event;
-                if(from == null && tagEvent.getLogicalTimePoint().before(to)) {
+                if (from == null && tagEvent.getCreatedAt().before(to)) {
                     // from is not specified => load every tag until to
                     result.add(tagEvent);
-                } else if(from != null && tagEvent.getLogicalTimePoint().after(from) && tagEvent.getLogicalTimePoint().before(to)) {
+                } else if (from != null && tagEvent.getCreatedAt().after(from) && tagEvent.getCreatedAt().before(to)) {
                     // from is specified => load only tags between from and to
                     result.add(tagEvent);
                 }
