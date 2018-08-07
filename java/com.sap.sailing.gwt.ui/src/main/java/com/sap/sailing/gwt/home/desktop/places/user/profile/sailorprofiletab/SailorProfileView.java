@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.wrapper.SailorProfileWrapperView;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileEntry;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
 
 public interface SailorProfileView extends IsWidget {
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile;
+package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain;
 
 public class BadgeDTO {
 
