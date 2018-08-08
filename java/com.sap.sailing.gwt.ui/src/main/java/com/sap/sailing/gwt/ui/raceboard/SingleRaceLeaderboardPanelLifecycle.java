@@ -51,38 +51,6 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     public boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard() {
         return isScreenLargeEnoughToInitiallyDisplayLeaderboard;
     }
-    
-    @Override
-    public SingleRaceLeaderboardSettings extractDocumentSettings(SingleRaceLeaderboardSettings currentLeaderboardSettings) {
-        SingleRaceLeaderboardSettings defaultLeaderboardSettings = createDefaultSettings();
-        SingleRaceLeaderboardSettings contextSpecificLeaderboardSettings = new SingleRaceLeaderboardSettings(
-                currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),
-                currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
-                currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                currentLeaderboardSettings.isShowAddedScores(),
-                currentLeaderboardSettings.isShowCompetitorShortNameColumn(),
-                currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
-                currentLeaderboardSettings.isShowCompetitorBoatInfoColumn(),
-                currentLeaderboardSettings.isShowCompetitorNationality(),
-                currentLeaderboardSettings.isShowRaceRankColumn());
-        return SettingsUtil.copyValues(contextSpecificLeaderboardSettings, defaultLeaderboardSettings);
-    }
-    
-    @Override
-    public SingleRaceLeaderboardSettings extractUserSettings(SingleRaceLeaderboardSettings currentLeaderboardSettings) {
-        SingleRaceLeaderboardSettings defaultLeaderboardSettings = createDefaultSettings();
-        SingleRaceLeaderboardSettings globalLeaderboardSettings = new SingleRaceLeaderboardSettings(
-                currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),
-                currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
-                currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                currentLeaderboardSettings.isShowAddedScores(),
-                currentLeaderboardSettings.isShowCompetitorShortNameColumn(),
-                currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
-                currentLeaderboardSettings.isShowCompetitorBoatInfoColumn(),
-                currentLeaderboardSettings.isShowCompetitorNationality(),
-                currentLeaderboardSettings.isShowRaceRankColumn());
-        return SettingsUtil.copyValues(globalLeaderboardSettings, defaultLeaderboardSettings);
-    }
 
     @Override
     public SingleRaceLeaderboardSettingsDialogComponent getSettingsDialogComponent(SingleRaceLeaderboardSettings settings) {
