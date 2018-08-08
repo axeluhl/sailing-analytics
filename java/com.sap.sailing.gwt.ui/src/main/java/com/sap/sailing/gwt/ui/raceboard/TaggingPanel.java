@@ -162,9 +162,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
             addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    if (isAuthorized()) {
-                        addNewTag(getTag(), getComment(), getImageURL());
-                    }
+                    addNewTag(getTag(), getComment(), getImageURL());
                 }
             });
         }
@@ -185,18 +183,20 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     private class TagCreationPanel extends VerticalPanel{
         protected Button createTagFromTextBoxes, editCustomTagButtons;
         protected Panel customButtonsPanel = new FlowPanel();
-        private final TagCreationInputPanel inputPanel = new TagCreationInputPanel();
+        private final TagCreationInputPanel inputPanel;
         
         public TagCreationPanel(StringMessages stringMessages) {    
             setHeight("4cm");
-            
+            inputPanel = new TagCreationInputPanel(stringMessages);
             add(inputPanel);
                      
             createTagFromTextBoxes = new Button(stringMessages.tagAddButton());
             createTagFromTextBoxes.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    addNewTag(inputPanel.getTagValue(), inputPanel.getCommentValue(), inputPanel.getImageURLValue());
+                    if (isAuthorized()) {
+                        addNewTag(inputPanel.getTagValue(), inputPanel.getCommentValue(), inputPanel.getImageURLValue());
+                    }
                 }
             });
             add(createTagFromTextBoxes);
@@ -283,9 +283,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
             addCustomTagButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    if (isAuthorized()) {
-                        customTagButtons.add(new TagButton(inputPanel.getTagValue(), inputPanel.getTagValue(), inputPanel.getCommentValue(), inputPanel.getImageURLValue()));
-                    }
+                    customTagButtons.add(new TagButton(inputPanel.getTagValue(), inputPanel.getTagValue(), inputPanel.getCommentValue(), inputPanel.getImageURLValue()));
                 }
             });
             rightPanel.add(addCustomTagButton);
@@ -397,7 +395,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     }
 
     private void addNewTag(String tag, String comment, String imageURL) {
-        if (!isAuthorized()) {
+        if (isAuthorized()) {
             sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag, comment,
                     imageURL, new MillisecondsTimePoint(timer.getTime()), new AsyncCallback<Void>() {
                         @Override
