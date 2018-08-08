@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
@@ -64,11 +63,6 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
 
     @Override
     public void findSailorProfileById(UUID uuid, AsyncCallback<SailorProfileEntry> asyncCallback) {
-        SailorProfileEntry entr = entries.get(uuid);
-        GWT.log("" + entr);
-        GWT.log("" + uuid);
-        entries.keySet().forEach(e -> GWT.log(" " + e.toString()));
-
         asyncCallback.onSuccess(entries.get(uuid));
     }
 
