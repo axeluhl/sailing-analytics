@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ButtonCell;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -263,11 +264,17 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
             ButtonCell buttonCell = new ButtonCell();
             Column<TagButton, String> buttonColumn = new Column<TagButton, String>(buttonCell) {
                 @Override
-                public String getValue(TagButton object) {
-                    // The value to display in the button.
+                public String getValue(TagButton tag) {
                     return "delete";
                 }
             };
+            buttonColumn.setFieldUpdater(new FieldUpdater<TagButton, String>() {
+                public void update(int index, TagButton button, String value) {
+                    customTagButtons.remove(button);
+                    customButtonsPanel.remove(button);
+                    customTagButtonsTable.setRowData(customTagButtons);
+                }
+              });
             customTagButtonsTable.addColumn(tagColumn, stringMessages.tagLabelTag());
             customTagButtonsTable.addColumn(commentColumn, stringMessages.tagLabelComment());
             customTagButtonsTable.addColumn(imageURLColumn, stringMessages.tagLabelImageURL());
