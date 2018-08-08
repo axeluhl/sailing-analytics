@@ -153,8 +153,8 @@ public class MarkPassingUpdateFromRaceLogFinishPositioingListTest extends Abstra
         final CompetitorResults results = new CompetitorResultsImpl();
         int rank = 1;
         for (Pair<Competitor, TimePoint> finishingTime : finishingTimes) {
-            results.add(new CompetitorResultImpl(finishingTime.getA().getId(), finishingTime.getA().getName(), rank++, /* maxPointsReason */
-                    null, /* score */null, finishingTime.getB(), /* comment */null, MergeState.OK));
+            results.add(new CompetitorResultImpl(finishingTime.getA().getId(), finishingTime.getA().getName(), finishingTime.getA().getShortName(),
+                    "BoatName", "BoatSailId", rank++, /* maxPointsReason */ null, /* score */null, finishingTime.getB(), /* comment */null, MergeState.OK));
         }
         return results;
     }

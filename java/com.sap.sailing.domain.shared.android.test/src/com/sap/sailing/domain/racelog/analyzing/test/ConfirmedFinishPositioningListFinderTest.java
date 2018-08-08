@@ -57,10 +57,10 @@ public class ConfirmedFinishPositioningListFinderTest extends
     public void testMostRecent() {
         RaceLogFinishPositioningConfirmedEvent event1 = createEvent(RaceLogFinishPositioningConfirmedEvent.class, 1);
         RaceLogFinishPositioningConfirmedEvent event2 = createEvent(RaceLogFinishPositioningConfirmedEvent.class, 2);
-        final CompetitorResultImpl oldResultC1 = new CompetitorResultImpl("Comp1", "Comp 1", 1, MaxPointsReason.NONE, 1.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
-        final CompetitorResultImpl oldResultC2 = new CompetitorResultImpl("Comp2", "Comp 2", 2, MaxPointsReason.NONE, 2.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
+        final CompetitorResultImpl oldResultC1 = new CompetitorResultImpl("Comp1", "Comp 1", "Comp 1 Short", "Comp 1 Boat", "Comp 1 Boat Id", 1, MaxPointsReason.NONE, 1.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
+        final CompetitorResultImpl oldResultC2 = new CompetitorResultImpl("Comp2", "Comp 2", "Comp 2 Short", "Comp 2 Boat", "Comp 2 Boat Id", 2, MaxPointsReason.NONE, 2.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
         final CompetitorResults olderResults = mockCompetitorResults(oldResultC1, oldResultC2);
-        final CompetitorResultImpl newResultC2 = new CompetitorResultImpl("Comp2", "Comp 2", 2, MaxPointsReason.DNF, 3.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
+        final CompetitorResultImpl newResultC2 = new CompetitorResultImpl("Comp2", "Comp 2", "Comp 3 Short", "Comp 3 Boat", "Comp 3 Boat Id", 2, MaxPointsReason.DNF, 3.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
         final CompetitorResults newerResults = mockCompetitorResults(newResultC2);
         when(event1.getPositionedCompetitorsIDsNamesMaxPointsReasons()).thenReturn(olderResults);
         when(event2.getPositionedCompetitorsIDsNamesMaxPointsReasons()).thenReturn(newerResults);
@@ -75,16 +75,16 @@ public class ConfirmedFinishPositioningListFinderTest extends
         RaceLogFinishPositioningConfirmedEvent event2 = createEvent(/* priority */ 1, RaceLogFinishPositioningConfirmedEvent.class, 2);
         RaceLogFinishPositioningConfirmedEvent event3 = createEvent(/* priority */ 2, RaceLogFinishPositioningConfirmedEvent.class, 3);
         RaceLogFinishPositioningConfirmedEvent event4 = createEvent(/* priority */ 1, RaceLogFinishPositioningConfirmedEvent.class, 4);
-        final CompetitorResultImpl e1ResultC1 = new CompetitorResultImpl("Comp1", "Comp 1", 1, MaxPointsReason.DNC, 6.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
-        final CompetitorResultImpl e1ResultC2 = new CompetitorResultImpl("Comp2", "Comp 2", 2, MaxPointsReason.NONE, 2.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
+        final CompetitorResultImpl e1ResultC1 = new CompetitorResultImpl("Comp1", "Comp 1", "Comp 1 Short", "Comp 1 Boat", "Comp 1 Boat Id", 1, MaxPointsReason.DNC, 6.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
+        final CompetitorResultImpl e1ResultC2 = new CompetitorResultImpl("Comp2", "Comp 2", "Comp 2 Short", "Comp 2 Boat", "Comp 2 Boat Id", 2, MaxPointsReason.NONE, 2.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
         final CompetitorResults e1Results = mockCompetitorResults(e1ResultC1, e1ResultC2);
-        final CompetitorResultImpl e2ResultC2 = new CompetitorResultImpl("Comp2", "Comp 2", 2, MaxPointsReason.DNF, 3.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
+        final CompetitorResultImpl e2ResultC2 = new CompetitorResultImpl("Comp2", "Comp 2", "Comp 2 Short", "Comp 2 Boat", "Comp 2 Boat Id", 2, MaxPointsReason.DNF, 3.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
         final CompetitorResults e2Results = mockCompetitorResults(e2ResultC2);
-        final CompetitorResultImpl e3ResultC2 = new CompetitorResultImpl("Comp2", "Comp 2", 2, MaxPointsReason.DSQ, 6.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
-        final CompetitorResultImpl e3ResultC3 = new CompetitorResultImpl("Comp3", "Comp 3", 2, MaxPointsReason.DNF, 3.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
+        final CompetitorResultImpl e3ResultC2 = new CompetitorResultImpl("Comp2", "Comp 2", "Comp 2 Short", "Comp 2 Boat", "Comp 2 Boat Id", 2, MaxPointsReason.DSQ, 6.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
+        final CompetitorResultImpl e3ResultC3 = new CompetitorResultImpl("Comp3", "Comp 3", "Comp 3 Short", "Comp 3 Boat", "Comp 3 Boat Id", 2, MaxPointsReason.DNF, 3.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
         final CompetitorResults e3Results = mockCompetitorResults(e3ResultC2, e3ResultC3);
-        final CompetitorResultImpl e4ResultC1 = new CompetitorResultImpl("Comp1", "Comp 1", 1, /* maxPointsReason */ null, /* score */ null, /* finishing time */ null, /* comment */ null, MergeState.OK);
-        final CompetitorResultImpl e4ResultC4 = new CompetitorResultImpl("Comp4", "Comp 4", 2, MaxPointsReason.DNF, 3.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
+        final CompetitorResultImpl e4ResultC1 = new CompetitorResultImpl("Comp1", "Comp 1", "Comp 1 Short", "Comp 1 Boat", "Comp 1 Boat Id", 1, /* maxPointsReason */ null, /* score */ null, /* finishing time */ null, /* comment */ null, MergeState.OK);
+        final CompetitorResultImpl e4ResultC4 = new CompetitorResultImpl("Comp4", "Comp 4", "Comp 4 Short", "Comp 4 Boat", "Comp 4 Boat Id", 2, MaxPointsReason.DNF, 3.0, /* finishing time */ null, /* comment */ null, MergeState.OK);
         final CompetitorResults e4Results = mockCompetitorResults(e4ResultC1, e4ResultC4);
         when(event1.getPositionedCompetitorsIDsNamesMaxPointsReasons()).thenReturn(e1Results);
         when(event2.getPositionedCompetitorsIDsNamesMaxPointsReasons()).thenReturn(e2Results);
