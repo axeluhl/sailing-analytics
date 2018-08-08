@@ -36,24 +36,6 @@ public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycl
     }
     
     @Override
-    public MultiRaceLeaderboardSettings extractDocumentSettings(MultiRaceLeaderboardSettings currentLeaderboardSettings) {
-        MultiRaceLeaderboardSettings defaultLeaderboardSettings = createDefaultSettings();
-        MultiRaceLeaderboardSettings contextSpecificLeaderboardSettings = new MultiRaceLeaderboardSettings(
-                currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),
-                currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
-                defaultLeaderboardSettings.getNamesOfRaceColumnsToShow(),
-                currentLeaderboardSettings.getNumberOfLastRacesToShow(),
-                currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                currentLeaderboardSettings.getActiveRaceColumnSelectionStrategy(),
-                currentLeaderboardSettings.isShowAddedScores(),
-                currentLeaderboardSettings.isShowCompetitorShortNameColumn(),
-                currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
-                currentLeaderboardSettings.isShowCompetitorBoatInfoColumn(),
-                currentLeaderboardSettings.isShowCompetitorNationality());
-        return SettingsUtil.copyValues(contextSpecificLeaderboardSettings, defaultLeaderboardSettings);
-    }
-    
-    @Override
     public MultiRaceLeaderboardSettingsDialogComponent getSettingsDialogComponent(MultiRaceLeaderboardSettings settings) {
         return new MultiRaceLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages, availableDetailTypes, false);
     }
