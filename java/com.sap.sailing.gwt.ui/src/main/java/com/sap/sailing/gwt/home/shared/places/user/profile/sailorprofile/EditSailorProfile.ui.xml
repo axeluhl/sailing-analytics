@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
             xmlns:um="urn:import:com.sap.sailing.gwt.home.shared.usermanagement.decorator"
-            xmlns:ms="urn:import:com.sap.sailing.gwt.home.shared.partials.multiselection">
+            xmlns:ms="urn:import:com.sap.sailing.gwt.home.shared.partials.editable">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:style type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfile.Style">
@@ -20,9 +20,9 @@
         }
     </ui:style>
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
-        <div ui:field="title" class="{style.header}" />
+        <div ui:field="titleUi" class="{style.header}" />
         <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mainCss.spacermargintopmediumsmall}">
-            <ms:SuggestedMultiSelection ui:field="competitorSelectionUi"/>
+            <ms:EditableCompetitorSuggestedMultiSelection ui:field="competitorSelectionUi"/>
         </div>
     </g:HTMLPanel>
 </ui:UiBinder> 
