@@ -16,6 +16,7 @@ public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycl
         super(stringMessages, availableDetailTypes);
         this.namesOfRaceColumns = leaderboard != null ? leaderboard.getNamesOfRaceColumns() : new ArrayList<String>();
     }
+    
     @Override
     public MultiRaceLeaderboardSettings extractUserSettings(MultiRaceLeaderboardSettings currentLeaderboardSettings) {
         // All settings except namesOfRaceColumnsToShow are used for the user settings
