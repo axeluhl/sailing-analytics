@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.actions.GetRaceTimesInfoAction;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 
@@ -35,6 +36,8 @@ public class RaceTimesInfoProvider {
     private final Set<RaceTimesInfoProviderListener> listeners;
     private boolean terminated = false;
     
+    private Map<RegattaAndRaceIdentifier, TimePoint> latestReceivedTagTimes;
+    
     /**
      * The <code>raceIdentifiers</code> has to be non-<code>null</code>, but can be empty.
      */
@@ -47,6 +50,7 @@ public class RaceTimesInfoProvider {
         this.requestIntervalInMillis = requestIntervalInMillis;
         raceTimesInfos = new HashMap<RegattaAndRaceIdentifier, RaceTimesInfoDTO>();
         listeners = new HashSet<RaceTimesInfoProviderListener>();
+        latestReceivedTagTimes = new HashMap<RegattaAndRaceIdentifier, TimePoint>();
         RepeatingCommand command = new RepeatingCommand() {
             @Override
             public boolean execute() {
@@ -82,7 +86,7 @@ public class RaceTimesInfoProvider {
         raceIdentifiers.add(raceIdentifier);
         if (forceTimesInfoRequest) {
             final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-            sailingService.getRaceTimesInfo(raceIdentifier, new AsyncCallback<RaceTimesInfoDTO>() {
+            sailingService.getRaceTimesInfo(raceIdentifier, latestReceivedTagTimes.get(raceIdentifier), new AsyncCallback<RaceTimesInfoDTO>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to obtain the time infos for race "
@@ -104,7 +108,7 @@ public class RaceTimesInfoProvider {
     private void readTimesInfos() {
         if (!raceIdentifiers.isEmpty()) {
             final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-            GetRaceTimesInfoAction getRaceTimesInfoAction = new GetRaceTimesInfoAction(sailingService, raceIdentifiers);
+            GetRaceTimesInfoAction getRaceTimesInfoAction = new GetRaceTimesInfoAction(sailingService, raceIdentifiers, latestReceivedTagTimes);
             asyncActionsExecutor.execute(getRaceTimesInfoAction, new AsyncCallback<List<RaceTimesInfoDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -226,4 +230,11 @@ public class RaceTimesInfoProvider {
         raceTimesInfos.clear();
     }
 
+    public TimePoint getLatestReceivedTag(RegattaAndRaceIdentifier raceIdentifier) {
+        return latestReceivedTagTimes.get(raceIdentifier);
+    }
+    
+    public void setLatestReceivedTagTime(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime) {
+        latestReceivedTagTimes.put(raceIdentifier, latestReceivedTagTime);
+    }
 }

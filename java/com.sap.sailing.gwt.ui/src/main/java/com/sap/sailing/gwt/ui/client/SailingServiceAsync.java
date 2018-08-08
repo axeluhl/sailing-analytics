@@ -91,7 +91,6 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
-import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
@@ -236,9 +235,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void removeWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO, AsyncCallback<Void> callback);
 
-    void getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<RaceTimesInfoDTO> callback);
+    void getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime, AsyncCallback<RaceTimesInfoDTO> callback);
 
-    void getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
+    void getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers, Map<RegattaAndRaceIdentifier, TimePoint> latestReceivedTagTimes,
             AsyncCallback<List<RaceTimesInfoDTO>> callback);
 
     void getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date,
@@ -992,6 +991,4 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void checkIfRaceIsTracking(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
     
     void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment, String imageURL, TimePoint raceTimepoint, AsyncCallback<Void> asyncCallback);
-    
-    void getTags(String leaderboardName, String raceColumnName, String fleetName, TimePoint from, AsyncCallback<List<TagDTO>> callback);
 }
