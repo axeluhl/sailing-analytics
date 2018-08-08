@@ -25,9 +25,6 @@ public class SailorProfileDetails extends Composite implements SailorProfileDeta
 
     private SailorProfileEntry entry;
 
-    public SailorProfileDetails() {
-    }
-
     public void setEntry(SailorProfileEntry entry) {
         this.entry = entry;
         propagateEntryIfNecessary();

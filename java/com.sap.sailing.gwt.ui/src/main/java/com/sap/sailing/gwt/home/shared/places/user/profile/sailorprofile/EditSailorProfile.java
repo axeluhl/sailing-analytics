@@ -46,8 +46,8 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     public EditSailorProfile(SharedSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver) {
         competitorSelectionUi = new CompetitorDisplayImpl(presenter.getFavoriteCompetitorsDataProvider(),
                 flagImageResolver).selectionUi;
-        initWidget(uiBinder.createAndBindUi(EditSailorProfile.this));
-        GWT.log("init-finished");
+        initWidget(uiBinder.createAndBindUi(this));
+        // TODO hide notificationsTextUi if the user's mail address is already verified
     }
 
     public void setEdgeToEdge(boolean edgeToEdge) {

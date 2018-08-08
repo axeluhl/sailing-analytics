@@ -17,7 +17,6 @@ import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableRes
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
-import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 
 public class SailorProfileOverviewImpl extends Composite implements SailorProfileOverview {
@@ -31,9 +30,6 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     @UiField(provided = true)
     final SortedCellTable<SailorProfileEntry> sailorProfilesTable = new SortedCellTable<>(0,
             DesignedCellTableResources.INSTANCE);
-
-    public SailorProfileOverviewImpl(FlagImageResolver flagImageResolver) {
-    }
 
     @Override
     public void setPresenter(SailingProfileOverviewPresenter presenter) {

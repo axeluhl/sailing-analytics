@@ -59,7 +59,7 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
                         }
                     });
         } else {
-            view = new SailorProfileOverviewImpl(flagImageResolver);
+            view = new SailorProfileOverviewImpl();
             this.currentPresenter = new SailorProfileOverviewImplPresenter(view, ownPresenter, flagImageResolver);
             contentArea.setWidget(view);
         }
