@@ -116,6 +116,9 @@ public final class EditableCompetitorSuggestedMultiSelection extends Composite {
 
         // TODO: move to CSS file
         item.getElement().getStyle().setProperty("borderTop", "1px solid #ddd");
+        item.getElement().getStyle().setMarginTop(0.333333333333333333, Unit.EM);
+        item.getElement().getStyle().setMarginBottom(0.333333333333333333, Unit.EM);
+        item.getElement().getStyle().setMarginLeft(0.333333333333333333, Unit.EM);
         DOM.getChild(item.getElement(), 2).getStyle().setPosition(Position.RELATIVE);
         DOM.getChild(item.getElement(), 2).getStyle().setTop(-0.333333333333333333, Unit.EM);
     }
