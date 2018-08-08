@@ -725,6 +725,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             List<Util.Pair<ControlPointDTO, PassingInstruction>> course, AsyncCallback<Void> callback);
 
+    void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
+            String imageURL, TimePoint raceTimepoint, AsyncCallback<Void> asyncCallback);
+
     void getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<RaceCourseDTO> callback);
 
@@ -989,6 +992,4 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @see SailingService#checkIfRaceIsTracking(RegattaAndRaceIdentifier)
      */
     void checkIfRaceIsTracking(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
-    
-    void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment, String imageURL, TimePoint raceTimepoint, AsyncCallback<Void> asyncCallback);
 }

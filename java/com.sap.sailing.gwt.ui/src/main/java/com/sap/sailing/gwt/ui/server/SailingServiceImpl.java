@@ -6045,7 +6045,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 getService().getServerAuthor(), raceLog.getCurrentPassId(), course, CourseDesignerMode.ADMIN_CONSOLE);
         raceLog.add(event);
     }
-    
+
+    @Override
+    public void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag,
+            String comment, String imageURL, TimePoint raceTimepoint) {
+        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
+        raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint, getService().getServerAuthor(),
+                raceLog.getCurrentPassId()));
+    }
+
     /**
      * @param trackedRace
      *            if <code>null</code>, no position data will be attached to the {@link MarkDTO}s
@@ -7906,11 +7914,5 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 ShardingContext.clearShardingConstraint(identifiedShardingType);
             }
         }
-    }
-    
-    @Override
-    public void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment, String imageURL, TimePoint raceTimepoint) {
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-        raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint, getService().getServerAuthor(), raceLog.getCurrentPassId()));
     }
 }

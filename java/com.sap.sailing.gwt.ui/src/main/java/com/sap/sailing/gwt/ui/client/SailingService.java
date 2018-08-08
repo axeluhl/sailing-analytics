@@ -537,6 +537,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName, List<Util.Pair<ControlPointDTO, PassingInstruction>> course) throws NotFoundException;
     
+    void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
+            String imageURL, TimePoint raceTimepoint);
+    
     RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
     
     /**
@@ -783,6 +786,4 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * Checks if the given race is currently in state tracking or loading.
      */
     Boolean checkIfRaceIsTracking(RegattaAndRaceIdentifier race);
-
-    void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment, String imageURL, TimePoint raceTimepoint);
 }
