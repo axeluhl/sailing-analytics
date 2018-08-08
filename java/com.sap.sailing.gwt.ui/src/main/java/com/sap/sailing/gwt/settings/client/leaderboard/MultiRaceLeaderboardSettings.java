@@ -59,6 +59,19 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
         return newSettings;
     }
     
+    /**
+     * Constructs a new {@link MultiRaceLeaderboardSettings} instance with all defaults and values taken from this
+     * instance except the namesOfRaceColumnsToShow. The defaults as well as the value of namesOfRaceColumnsToShow is
+     * set to the given values.
+     */
+    public MultiRaceLeaderboardSettings withDefaultNamesOfRaceColumnsToShow(Iterable<String> namesOfRaceColumnsToShow) {
+        MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings();
+        SettingsUtil.copyValuesAndDefaults(this, this, newSettings);
+        newSettings.namesOfRaceColumnsToShow.setDefaultValues(namesOfRaceColumnsToShow);
+        newSettings.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
+        return newSettings;
+    }
+    
     @Override
     protected void addChildSettings() {
         super.addChildSettings();

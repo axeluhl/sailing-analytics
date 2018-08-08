@@ -6,7 +6,6 @@ import java.util.List;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.settings.generic.support.SettingsUtil;
 
 public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle<MultiRaceLeaderboardSettings> {
 
@@ -19,20 +18,8 @@ public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycl
     }
     @Override
     public MultiRaceLeaderboardSettings extractUserSettings(MultiRaceLeaderboardSettings currentLeaderboardSettings) {
-        MultiRaceLeaderboardSettings defaultLeaderboardSettings = createDefaultSettings();
-        MultiRaceLeaderboardSettings globalLeaderboardSettings = new MultiRaceLeaderboardSettings(
-                currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),
-                currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
-                defaultLeaderboardSettings.getNamesOfRaceColumnsToShow(),
-                currentLeaderboardSettings.getNumberOfLastRacesToShow(),
-                currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                currentLeaderboardSettings.getActiveRaceColumnSelectionStrategy(),
-                currentLeaderboardSettings.isShowAddedScores(),
-                currentLeaderboardSettings.isShowCompetitorShortNameColumn(),
-                currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
-                currentLeaderboardSettings.isShowCompetitorBoatInfoColumn(),
-                currentLeaderboardSettings.isShowCompetitorNationality());
-        return SettingsUtil.copyValues(globalLeaderboardSettings, defaultLeaderboardSettings);
+        // All settings except namesOfRaceColumnsToShow are used for the user settings
+        return currentLeaderboardSettings.withDefaultNamesOfRaceColumnsToShow(namesOfRaceColumns);
     }
     
     @Override
