@@ -44,7 +44,9 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     @UiField
     DivElement notificationsTextUi;
 
-    public EditSailorProfile(SharedSailorProfileView.Presenter presenter, SailorProfileEntry entry) {
+    private SailorProfileEntry entry;
+
+    public EditSailorProfile(SharedSailorProfileView.Presenter presenter) {
         FlagImageResolver.get(new AsyncCallback<FlagImageResolver>() {
 
             @Override
@@ -52,6 +54,7 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
                 competitorSelectionUi = new CompetitorDisplayImpl(presenter.getFavoriteCompetitorsDataProvider(),
                         flagImageResolver).selectionUi;
                 initWidget(uiBinder.createAndBindUi(EditSailorProfile.this));
+                setEntryWhenReady();
             }
 
             @Override
@@ -59,6 +62,12 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
             }
         });
         // TODO hide notificationsTextUi if the user's mail address is already verified
+    }
+
+    private void setEntryWhenReady() {
+        if (competitorSelectionUi != null && entry != null) {
+            competitorSelectionUi.setSelectedItems(entry.getCompetitors());
+        }
     }
 
     public void setEdgeToEdge(boolean edgeToEdge) {
@@ -92,5 +101,10 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
         public void setNotifyAboutResults(boolean notifyAboutResults) {
             notifyAboutResultsUi.setEnabled(notifyAboutResults);
         }
+    }
+
+    public void setEntry(SailorProfileEntry entry) {
+        this.entry = entry;
+        setEntryWhenReady();
     }
 }

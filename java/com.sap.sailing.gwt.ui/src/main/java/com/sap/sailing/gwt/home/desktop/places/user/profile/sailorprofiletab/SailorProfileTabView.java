@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
@@ -10,6 +11,7 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetails;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
@@ -37,18 +39,30 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
 
     @Override
     public void start(SailorProfilePlace myPlace, AcceptsOneWidget contentArea) {
-        try {
-            UUID uuid = myPlace.getSailorProfileUuid();
-            view = new SailorProfileDetails(uuid);
-            this.currentPresenter = new SailorProfileOverviewImplPresenter(view, ownPresenter);
+        UUID uuid = myPlace.getSailorProfileUuid();
+        if (uuid != null) {
+            final SailorProfileDetails sailorView = new SailorProfileDetails();
+            view = sailorView;
+            currentPresenter = new SailorProfileOverviewImplPresenter(view, ownPresenter);
             contentArea.setWidget(view);
-        } catch (Exception e) {
+            currentPresenter.getSharedSailorProfilePresenter().getDataProvider().findSailorProfileById(uuid,
+                    new AsyncCallback<SailorProfileEntry>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            GWT.log(caught.getMessage(), caught);
+                        }
+
+                        @Override
+                        public void onSuccess(SailorProfileEntry result) {
+                            sailorView.setEntry(result);
+                        }
+                    });
+        } else {
             view = new SailorProfileOverviewImpl(flagImageResolver);
             this.currentPresenter = new SailorProfileOverviewImplPresenter(view, ownPresenter);
             contentArea.setWidget(view);
-
         }
-        GWT.log("place: " + myPlace.getSailorProfileUuid());
     }
 
     @Override

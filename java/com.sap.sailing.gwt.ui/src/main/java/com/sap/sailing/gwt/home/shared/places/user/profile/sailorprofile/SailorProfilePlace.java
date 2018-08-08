@@ -29,11 +29,15 @@ public class SailorProfilePlace extends AbstractUserProfilePlace implements HasM
     public static class Tokenizer implements PlaceTokenizer<SailorProfilePlace> {
         @Override
         public SailorProfilePlace getPlace(String token) {
-            try {
-                UUID uuid = UUID.fromString(token);
-                return new SailorProfilePlace(uuid);
-            } catch (Exception e) {
+            if (token == null || "".equals(token)) {
                 return new SailorProfilePlace(null);
+            } else {
+                try {
+                    UUID uuid = UUID.fromString(token);
+                    return new SailorProfilePlace(uuid);
+                } catch (Exception e) {
+                    return new SailorProfilePlace(null);
+                }
             }
         }
 
