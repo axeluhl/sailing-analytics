@@ -41,7 +41,7 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     @UiField(provided = true)
     SuggestedMultiSelection<SimpleCompetitorWithIdDTO> competitorSelectionUi;
     @UiField
-    DivElement notificationsTextUi;
+    DivElement title;
 
     public EditSailorProfile(SharedSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver) {
         competitorSelectionUi = new CompetitorDisplayImpl(presenter.getFavoriteCompetitorsDataProvider(),
@@ -85,5 +85,6 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
 
     public void setEntry(SailorProfileEntry entry) {
         competitorSelectionUi.setSelectedItems(entry.getCompetitors());
+        title.setInnerText(entry.getName());
     }
 }

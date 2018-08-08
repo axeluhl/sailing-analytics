@@ -10,11 +10,17 @@
             border-left: none;
             border-right: none;
         }
+
+        .header {
+            font-size: 1.866666666666667em;
+            font-weight: bold;
+            color: #333;
+            margin-top: 10px;
+            margin-left: 50px;
+        }
     </ui:style>
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
-        <div ui:field="notificationsTextUi" class="{res.mediaCss.column} {res.mediaCss.medium12} {res.mainCss.spacermargintopsmall} {res.mainCss.spacermarginbottomsmall}">
-            <ui:text from="{i18n.userNotificationsOnlyIfMailAddressIsVerified}" />
-        </div>
+        <div ui:field="title" class="{style.header}" />
         <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mainCss.spacermargintopmediumsmall}">
             <ms:SuggestedMultiSelection ui:field="competitorSelectionUi"/>
         </div>
