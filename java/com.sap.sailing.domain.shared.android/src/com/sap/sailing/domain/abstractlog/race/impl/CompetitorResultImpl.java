@@ -26,11 +26,16 @@ public class CompetitorResultImpl implements CompetitorResult {
     private final String comment;
 
     private final MergeState mergeState;
-    
+
     private final String boatName;
 
     private final String boatSailId;
 
+    public CompetitorResultImpl(CompetitorResult item) {
+        this(item.getCompetitorId(), item.getName(), item.getShortName(), item.getBoatName(), item.getBoatSailId(),
+                item.getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(),
+                item.getComment(), item.getMergeState());
+    }
 
     public CompetitorResultImpl(Serializable competitorId, String competitorName, String competitorShortName,
             String boatName, String boatSailId, int oneBasedRank, MaxPointsReason maxPointsReason, Double score,
@@ -73,7 +78,7 @@ public class CompetitorResultImpl implements CompetitorResult {
     public String getBoatSailId() {
         return boatSailId;
     }
-    
+
     @Override
     public int getOneBasedRank() {
         return oneBasedRank;

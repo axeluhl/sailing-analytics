@@ -219,8 +219,9 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
         if (mComment != null) {
             comment = mComment.getText().toString();
         }
-        CompetitorResult result = new CompetitorResultImpl(mCompetitor.getCompetitorId(), mCompetitor
-            .getCompetitorDisplayName(), oneBaseRank, maxPointsReason, score, finishingTime, comment, MergeState.OK);
+        CompetitorResult result = new CompetitorResultImpl(mCompetitor.getCompetitorId(), mCompetitor.getName(),
+                mCompetitor.getShortName(), mCompetitor.getBoatName(), mCompetitor.getBoatSailId(), oneBaseRank,
+                maxPointsReason, score, finishingTime, comment, MergeState.OK);
         return new CompetitorResultWithIdImpl(mCompetitor.getId(), mCompetitor.getBoat(), result);
     }
 
