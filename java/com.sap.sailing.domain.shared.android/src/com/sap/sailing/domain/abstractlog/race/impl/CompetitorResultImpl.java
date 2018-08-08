@@ -11,7 +11,9 @@ public class CompetitorResultImpl implements CompetitorResult {
 
     private final Serializable competitorId;
     
-    private final String competitorDisplayName;
+    private final String competitorName;
+
+    private final String competitorShortName;
     
     private final int oneBasedRank;
     
@@ -25,12 +27,20 @@ public class CompetitorResultImpl implements CompetitorResult {
 
     private final MergeState mergeState;
     
-    public CompetitorResultImpl(Serializable competitorId, String competitorDisplayName, int oneBasedRank,
-            MaxPointsReason maxPointsReason, Double score, TimePoint finishingTime, String comment,
-            MergeState mergeState) {
+    private final String boatName;
+
+    private final String boatSailId;
+
+
+    public CompetitorResultImpl(Serializable competitorId, String competitorName, String competitorShortName,
+            String boatName, String boatSailId, int oneBasedRank, MaxPointsReason maxPointsReason, Double score,
+            TimePoint finishingTime, String comment, MergeState mergeState) {
         super();
         this.competitorId = competitorId;
-        this.competitorDisplayName = competitorDisplayName;
+        this.competitorName = competitorName;
+        this.competitorShortName = competitorShortName;
+        this.boatName = boatName;
+        this.boatSailId = boatSailId;
         this.oneBasedRank = oneBasedRank;
         this.maxPointsReason = maxPointsReason;
         this.score = score;
@@ -45,8 +55,23 @@ public class CompetitorResultImpl implements CompetitorResult {
     }
 
     @Override
-    public String getCompetitorDisplayName() {
-        return competitorDisplayName;
+    public String getName() {
+        return competitorName;
+    }
+
+    @Override
+    public String getShortName() {
+        return competitorShortName;
+    }
+
+    @Override
+    public String getBoatName() {
+        return boatName;
+    }
+
+    @Override
+    public String getBoatSailId() {
+        return boatSailId;
     }
     
     @Override
@@ -79,13 +104,23 @@ public class CompetitorResultImpl implements CompetitorResult {
         return mergeState == null ? MergeState.OK : mergeState; // default in case of having de-serialized an old version
     }
 
+    public String getCompetitorDisplayName() {
+        if (competitorShortName != null) {
+            return competitorShortName + " - " + competitorName;
+        }
+        return competitorName;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((comment == null) ? 0 : comment.hashCode());
-        result = prime * result + ((competitorDisplayName == null) ? 0 : competitorDisplayName.hashCode());
+        result = prime * result + ((competitorName == null) ? 0 : competitorName.hashCode());
+        result = prime * result + ((competitorShortName == null) ? 0 : competitorShortName.hashCode());
         result = prime * result + ((competitorId == null) ? 0 : competitorId.hashCode());
+        result = prime * result + ((boatName == null) ? 0 : boatName.hashCode());
+        result = prime * result + ((boatSailId == null) ? 0 : boatSailId.hashCode());
         result = prime * result + ((finishingTime == null) ? 0 : finishingTime.hashCode());
         result = prime * result + ((maxPointsReason == null) ? 0 : maxPointsReason.hashCode());
         result = prime * result + oneBasedRank;
@@ -108,15 +143,25 @@ public class CompetitorResultImpl implements CompetitorResult {
                 return false;
         } else if (!comment.equals(other.comment))
             return false;
-        if (competitorDisplayName == null) {
-            if (other.competitorDisplayName != null)
+        if (competitorName == null) {
+            if (other.competitorName != null)
                 return false;
-        } else if (!competitorDisplayName.equals(other.competitorDisplayName))
+        } else if (!competitorName.equals(other.competitorName))
             return false;
         if (competitorId == null) {
             if (other.competitorId != null)
                 return false;
         } else if (!competitorId.equals(other.competitorId))
+            return false;
+        if (boatName == null) {
+            if (other.boatName != null)
+                return false;
+        } else if (!boatName.equals(other.boatName))
+            return false;
+        if (boatSailId == null) {
+            if (other.boatSailId != null)
+                return false;
+        } else if (!boatSailId.equals(other.boatSailId))
             return false;
         if (finishingTime == null) {
             if (other.finishingTime != null)
@@ -142,9 +187,10 @@ public class CompetitorResultImpl implements CompetitorResult {
 
     @Override
     public String toString() {
-        return "CompetitorResultImpl [competitorId=" + competitorId + ", competitorName=" + competitorDisplayName + ", rank="
-                + oneBasedRank + ", maxPointsReason=" + maxPointsReason + ", score=" + score + ", finishingTime="
-                + finishingTime + ", comment=" + comment + ", mergeState=" + mergeState + "]";
+        return "CompetitorResultImpl [competitorId=" + competitorId + ", competitorName=" + competitorName
+                + ", competitorShortName=" + competitorShortName + ", boatName=" + boatName+ ", boatSailId="
+                + boatSailId + ", rank=" + oneBasedRank + ", maxPointsReason=" + maxPointsReason + ", score="+ score
+                + ", finishingTime=" + finishingTime + ", comment=" + comment + ", mergeState=" + mergeState + "]";
     }
     
 }
