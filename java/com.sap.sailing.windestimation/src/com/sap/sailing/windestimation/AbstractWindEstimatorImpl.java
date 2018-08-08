@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedImpl;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
@@ -37,8 +38,10 @@ public abstract class AbstractWindEstimatorImpl<T> implements WindEstimator<T> {
             Iterable<CompetitorTrackWithEstimationData<T>> competitorTracks) {
         List<CompetitorTrackWithEstimationData<T>> result = new ArrayList<>();
         for (CompetitorTrackWithEstimationData<T> track : competitorTracks) {
-            if (track.getAvgIntervalBetweenFixesInSeconds() <= 100.0 && track.getDuration().asSeconds() != 0
-                    && track.getDistanceTravelled().getKilometers() / track.getDuration().asHours() >= 1.852) {
+            if (track.getAvgIntervalBetweenFixesInSeconds() < 8
+                    && new MeterPerSecondSpeedImpl(track.getDistanceTravelled().getMeters()
+                            / track.getTrackStartTimePoint().until(track.getTrackEndTimePoint()).asSeconds())
+                                    .getKnots() > 1) {
                 result.add(track);
             }
         }

@@ -40,12 +40,12 @@ public class MultipleBoatClassBestsPathEvaluator<T extends ManeuverNodesLevel<T>
         Map<BoatClass, List<Pair<T, FineGrainedPointOfSail>>> pathPerBoatClass = new HashMap<>();
         for (Pair<T, FineGrainedPointOfSail> pair : pathWithVariousBoatClasses) {
             BoatClass boatClass = pair.getA().getBoatClass();
-            List<Pair<T, FineGrainedPointOfSail>> athOfSingleBoatClass = pathPerBoatClass.get(boatClass);
-            if (athOfSingleBoatClass == null) {
-                athOfSingleBoatClass = new ArrayList<>();
-                pathPerBoatClass.put(boatClass, athOfSingleBoatClass);
+            List<Pair<T, FineGrainedPointOfSail>> pathOfSingleBoatClass = pathPerBoatClass.get(boatClass);
+            if (pathOfSingleBoatClass == null) {
+                pathOfSingleBoatClass = new ArrayList<>();
+                pathPerBoatClass.put(boatClass, pathOfSingleBoatClass);
             }
-            athOfSingleBoatClass.add(pair);
+            pathOfSingleBoatClass.add(pair);
         }
         return pathPerBoatClass;
     }

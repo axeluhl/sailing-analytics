@@ -17,6 +17,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
 import com.sap.sailing.windestimation.maneuvergraph.ManeuverNodesLevel;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
@@ -197,8 +198,12 @@ public class WindTrackFromManeuverGraphExtractor<T extends ManeuverNodesLevel<T>
         WindWithConfidenceImpl<TimePoint> windWithConfidence = null;
         if (tackOrJibeLikelihoodWithTwaTws.getA() > 0.0001) {
             SpeedWithBearing windSpeedAndTwaIfTackOrJibe = tackOrJibeLikelihoodWithTwaTws.getB().getObject();
+            Bearing windCourse = currentLevel.getManeuver().getCurveWithUnstableCourseAndSpeed().getMiddleCourse();
+            if (tackOrJibe == ManeuverType.TACK) {
+                windCourse = windCourse.reverse();
+            }
             SpeedWithBearing windSpeedWithCourse = new KnotSpeedWithBearingImpl(windSpeedAndTwaIfTackOrJibe.getKnots(),
-                    currentLevel.getManeuver().getCurveWithUnstableCourseAndSpeed().getMiddleCourse().reverse());
+                    windCourse);
             windWithConfidence = constructWindWithConfidence(windSpeedWithCourse, currentLevel,
                     tackOrJibeLikelihoodWithTwaTws.getA() * baseConfidence);
 

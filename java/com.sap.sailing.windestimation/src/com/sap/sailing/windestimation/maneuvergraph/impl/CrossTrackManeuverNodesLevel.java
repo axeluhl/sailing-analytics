@@ -52,12 +52,8 @@ public class CrossTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Cro
                 FineGrainedPointOfSail previousSingleTrackNode;
                 if (thisLevelPreviousSingleTrackLevel != null) {
                     double courseDiffBetweenThisLevelPreviousSingleTrackLevelAndPreviousLevel = previousLevel
-                            .getCourseAfter().getDifferenceTo(thisLevelPreviousSingleTrackLevel.getCourseAfter()).getDegrees();
-                    previousSingleTrackNode = previousNode
-                            .getNextPointOfSail(courseDiffBetweenThisLevelPreviousSingleTrackLevelAndPreviousLevel);
-                } else if (previousLevel != null) {
-                    double courseDiffBetweenThisLevelPreviousSingleTrackLevelAndPreviousLevel = getCourseBefore()
-                            .getDifferenceTo(previousLevel.getCourseAfter()).getDegrees();
+                            .getCourseAfter().getDifferenceTo(thisLevelPreviousSingleTrackLevel.getCourseAfter())
+                            .getDegrees();
                     previousSingleTrackNode = previousNode
                             .getNextPointOfSail(courseDiffBetweenThisLevelPreviousSingleTrackLevelAndPreviousLevel);
                 } else {

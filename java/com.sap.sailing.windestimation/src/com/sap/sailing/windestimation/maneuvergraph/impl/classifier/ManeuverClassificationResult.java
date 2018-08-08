@@ -44,8 +44,7 @@ public class ManeuverClassificationResult {
                     ? courseChangeDegUntilLowestSpeed + 360 : courseChangeDegUntilLowestSpeed - 360;
         }
         for (CoarseGrainedPointOfSail pointOfSailAfterManeuver : CoarseGrainedPointOfSail.values()) {
-            double likelihoodSum = 0;
-            int numberOfLikelihoodSummands = 0;
+            double likelihood = 0;
             for (CoarseGrainedManeuverType maneuverType : CoarseGrainedManeuverType.values()) {
                 if (likelihoodPerManeuverType[maneuverType.ordinal()] != 0) {
                     boolean addLikelihood = false;
@@ -195,17 +194,18 @@ public class ManeuverClassificationResult {
                         break;
                     }
                     if (addLikelihood) {
-                        likelihoodSum += likelihoodPerManeuverType[maneuverType.ordinal()];
-                        ++numberOfLikelihoodSummands;
+                        double newLikelihood = likelihoodPerManeuverType[maneuverType.ordinal()];
                         if (addTackProbabilityBonus) {
-                            likelihoodSum += tackProbabilityBonus;
+                            newLikelihood += tackProbabilityBonus;
+                        }
+                        if (newLikelihood > likelihood) {
+                            likelihood = newLikelihood;
                         }
                     }
                 }
             }
-            if (numberOfLikelihoodSummands > 0) {
-                likelihoodsForPointOfSailAfterManeuvers[pointOfSailAfterManeuver.ordinal()] = likelihoodSum
-                        / numberOfLikelihoodSummands;
+            if (likelihood > 0) {
+                likelihoodsForPointOfSailAfterManeuvers[pointOfSailAfterManeuver.ordinal()] = likelihood;
             }
         }
         ProbabilityUtil.normalizeLikelihoodArray(likelihoodsForPointOfSailAfterManeuvers, 0.05);

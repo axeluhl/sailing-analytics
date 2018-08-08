@@ -40,8 +40,8 @@ public class SameBoatClassBestPathsEvaluator<T extends ManeuverNodesLevel<T>> im
             FineGrainedManeuverType maneuverType = pair.getB();
             double absDirectionChangeInDegrees = Math
                     .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees());
-            double lowestSpeedRatio = maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots()
-                    / maneuver.getMainCurve().getLowestSpeed().getKnots();
+            double lowestSpeedRatio = maneuver.getMainCurve().getLowestSpeed().getKnots()
+                    / maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots();
             double turningRate = maneuver.getMainCurve().getMaxTurningRateInDegreesPerSecond();
             switch (maneuverType) {
             case TACK:
@@ -52,7 +52,7 @@ public class SameBoatClassBestPathsEvaluator<T extends ManeuverNodesLevel<T>> im
                             && otherManeuverType != FineGrainedManeuverType._360
                             && averageStatistics.getNumberOfCleanManeuvers(otherManeuverType) > 0) {
                         double lowestSpeedRatioDifference = lowestSpeedRatio - averageStatistics
-                                .getAverageRatioBetweenManeuverEnteringSpeedAndLowestSpeedForManeuverType(
+                                .getAverageRatioBetweenLowestSpeedAndManeuverEnteringSpeedForManeuverType(
                                         otherManeuverType);
                         double turningRateDifference = turningRate
                                 - averageStatistics.getAverageTurningRateForManeuverType(otherManeuverType);
@@ -70,7 +70,7 @@ public class SameBoatClassBestPathsEvaluator<T extends ManeuverNodesLevel<T>> im
             case _180_TACK:
                 if (averageStatistics.getNumberOfCleanManeuvers(FineGrainedManeuverType._180_JIBE) > 0) {
                     double lowestSpeedRatioDifference = lowestSpeedRatio - averageStatistics
-                            .getAverageRatioBetweenManeuverEnteringSpeedAndLowestSpeedForManeuverType(
+                            .getAverageRatioBetweenLowestSpeedAndManeuverEnteringSpeedForManeuverType(
                                     FineGrainedManeuverType._180_JIBE);
                     if (lowestSpeedRatioDifference > 0) {
                         tackProbabilityBonus -= lowestSpeedRatioDifference;
@@ -79,7 +79,7 @@ public class SameBoatClassBestPathsEvaluator<T extends ManeuverNodesLevel<T>> im
                 break;
             case _180_JIBE:
                 double lowestSpeedRatioDifference = lowestSpeedRatio
-                        - averageStatistics.getAverageRatioBetweenManeuverEnteringSpeedAndLowestSpeedForManeuverType(
+                        - averageStatistics.getAverageRatioBetweenLowestSpeedAndManeuverEnteringSpeedForManeuverType(
                                 FineGrainedManeuverType._180_TACK);
                 if (lowestSpeedRatioDifference < 0) {
                     tackProbabilityBonus += lowestSpeedRatioDifference * -1;
@@ -88,18 +88,18 @@ public class SameBoatClassBestPathsEvaluator<T extends ManeuverNodesLevel<T>> im
             default:
                 if (averageStatistics.getNumberOfCleanManeuvers(FineGrainedManeuverType.TACK) > 0) {
                     lowestSpeedRatioDifference = lowestSpeedRatio - averageStatistics
-                            .getAverageRatioBetweenManeuverEnteringSpeedAndLowestSpeedForManeuverType(
+                            .getAverageRatioBetweenLowestSpeedAndManeuverEnteringSpeedForManeuverType(
                                     FineGrainedManeuverType.TACK);
                     double turningRateDifference = turningRate
                             - averageStatistics.getAverageTurningRateForManeuverType(FineGrainedManeuverType.TACK);
                     if (lowestSpeedRatioDifference < 0 && turningRateDifference > 0) {
                         tackProbabilityBonus += lowestSpeedRatioDifference * -2 + turningRateDifference / 100;
                     }
-                    courseChangeDifference = absDirectionChangeInDegrees - averageStatistics
-                            .getAverageAbsCourseChangeInDegreesForManeuverType(FineGrainedManeuverType.TACK);
-                    if (courseChangeDifference > 0) {
-                        tackProbabilityBonus += courseChangeDifference / 180;
-                    }
+                    // courseChangeDifference = absDirectionChangeInDegrees - averageStatistics
+                    // .getAverageAbsCourseChangeInDegreesForManeuverType(FineGrainedManeuverType.TACK);
+                    // if (courseChangeDifference > 0) {
+                    // tackProbabilityBonus += courseChangeDifference / 180;
+                    // }
                 }
                 break;
             }
@@ -154,7 +154,7 @@ public class SameBoatClassBestPathsEvaluator<T extends ManeuverNodesLevel<T>> im
         private double[] sumOfAbsCourseChangesInDegreesPerManeuverType = new double[FineGrainedManeuverType
                 .values().length];
         private double[] sumOfTurningRatesPerManeuverType = new double[sumOfAbsCourseChangesInDegreesPerManeuverType.length];
-        private double[] sumOfRatiosBetweenManeuverEnteringSpeedAndLowestSpeedPerManeuverType = new double[sumOfAbsCourseChangesInDegreesPerManeuverType.length];
+        private double[] sumOfRatiosBetweenLowestSpeedAndManeuverEnteringSpeedPerManeuverType = new double[sumOfAbsCourseChangesInDegreesPerManeuverType.length];
         private int[] maneuversCountPerManeuverType = new int[sumOfAbsCourseChangesInDegreesPerManeuverType.length];
         // speed data
         private double[] sumOfAverageSpeedsPerPointOfSail = new double[FineGrainedPointOfSail.values().length];
@@ -172,10 +172,10 @@ public class SameBoatClassBestPathsEvaluator<T extends ManeuverNodesLevel<T>> im
                             / maneuversCountPerManeuverType[maneuverType.ordinal()];
         }
 
-        public double getAverageRatioBetweenManeuverEnteringSpeedAndLowestSpeedForManeuverType(
+        public double getAverageRatioBetweenLowestSpeedAndManeuverEnteringSpeedForManeuverType(
                 FineGrainedManeuverType maneuverType) {
             return maneuversCountPerManeuverType[maneuverType.ordinal()] == 0 ? 0
-                    : sumOfRatiosBetweenManeuverEnteringSpeedAndLowestSpeedPerManeuverType[maneuverType.ordinal()]
+                    : sumOfRatiosBetweenLowestSpeedAndManeuverEnteringSpeedPerManeuverType[maneuverType.ordinal()]
                             / maneuversCountPerManeuverType[maneuverType.ordinal()];
         }
 
@@ -195,16 +195,16 @@ public class SameBoatClassBestPathsEvaluator<T extends ManeuverNodesLevel<T>> im
                         .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees());
                 sumOfTurningRatesPerManeuverType[maneuverType.ordinal()] += maneuver.getMainCurve()
                         .getMaxTurningRateInDegreesPerSecond();
-                sumOfRatiosBetweenManeuverEnteringSpeedAndLowestSpeedPerManeuverType[maneuverType.ordinal()] += maneuver
-                        .getMainCurve().getSpeedWithBearingBefore().getKnots()
-                        / maneuver.getMainCurve().getLowestSpeed().getKnots();
+                sumOfRatiosBetweenLowestSpeedAndManeuverEnteringSpeedPerManeuverType[maneuverType.ordinal()] += maneuver
+                        .getMainCurve().getLowestSpeed().getKnots()
+                        / maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots();
                 maneuversCountPerManeuverType[maneuverType.ordinal()]++;
                 maneuverDataAdded = true;
             }
             boolean speedDataAdded = false;
             if (1.0 * maneuver.getCurveWithUnstableCourseAndSpeed().getGpsFixesCountFromManeuverEndToNextManeuverStart()
-                    / maneuver.getCurveWithUnstableCourseAndSpeed()
-                            .getGpsFixesCountFromManeuverEndToNextManeuverStart() < 1.0
+                    / maneuver.getCurveWithUnstableCourseAndSpeed().getDurationFromManeuverEndToNextManeuverStart()
+                            .asSeconds() > 1.0
                                     / maneuverLevel.getBoatClass().getApproximateManeuverDuration().asSeconds()) {
                 // speed data
                 sumOfAverageSpeedsPerPointOfSail[pointOfSailAfterManeuver.ordinal()] += maneuver
