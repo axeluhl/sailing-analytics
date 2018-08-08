@@ -42,9 +42,9 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
         UUID uuid = myPlace.getSailorProfileUuid();
         if (uuid != null) {
             final SailorProfileDetails sailorView = new SailorProfileDetails();
+            currentPresenter = new SailorProfileOverviewImplPresenter(sailorView, ownPresenter, flagImageResolver);
+            contentArea.setWidget(sailorView);
             view = sailorView;
-            currentPresenter = new SailorProfileOverviewImplPresenter(view, ownPresenter, flagImageResolver);
-            contentArea.setWidget(view);
             currentPresenter.getSharedSailorProfilePresenter().getDataProvider().findSailorProfileById(uuid,
                     new AsyncCallback<SailorProfileEntry>() {
 
@@ -68,6 +68,9 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
     @Override
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
         currentPresenter.setAuthenticationContext(authenticationContext);
+        if (view instanceof SailorProfileDetails) {
+            view.getAuthenticationContext().setAuthenticationContext(authenticationContext);
+        }
     }
 
     @Override

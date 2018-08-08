@@ -46,7 +46,7 @@ public class SailorProfileDetails extends Composite implements SailorProfileDeta
     }
 
     @Override
-    public NeedsAuthenticationContext getDecorator() {
+    public NeedsAuthenticationContext getAuthenticationContext() {
         return decoratorUi;
     }
 }

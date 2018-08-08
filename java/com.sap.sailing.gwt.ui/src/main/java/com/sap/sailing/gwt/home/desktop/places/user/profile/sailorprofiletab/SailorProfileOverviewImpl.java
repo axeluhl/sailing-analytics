@@ -18,6 +18,8 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorP
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 public class SailorProfileOverviewImpl extends Composite implements SailorProfileOverview {
 
@@ -55,8 +57,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         showColumn.setFieldUpdater(new FieldUpdater<SailorProfileEntry, String>() {
             @Override
             public void update(int index, SailorProfileEntry entry, String value) {
-                presenter.getClientFactory().getPlaceController()
-                        .goTo(new SailorProfilePlace(entry.getKey()));
+                presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(entry.getKey()));
             }
         });
     }
@@ -105,4 +106,13 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
             return ">";
         }
     };
+
+    @Override
+    public NeedsAuthenticationContext getAuthenticationContext() {
+        return new NeedsAuthenticationContext() {
+            @Override
+            public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+            }
+        };
+    }
 }
