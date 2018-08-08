@@ -1234,7 +1234,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private DBObject storePositionedCompetitor(CompetitorResult competitorResult) {
         DBObject result = new BasicDBObject();
         result.put(FieldNames.COMPETITOR_ID.name(), competitorResult.getCompetitorId());
-        result.put(FieldNames.COMPETITOR_DISPLAY_NAME.name(), competitorResult.getCompetitorDisplayName());
+        result.put(FieldNames.COMPETITOR_DISPLAY_NAME.name(), competitorResult.getName());
+        result.put(FieldNames.COMPETITOR_SHORT_NAME.name(), competitorResult.getShortName());
+        result.put(FieldNames.COMPETITOR_BOAT_NAME.name(), competitorResult.getBoatName());
+        result.put(FieldNames.COMPETITOR_BOAT_SAIL_ID.name(), competitorResult.getBoatSailId());
         result.put(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name(), competitorResult.getMaxPointsReason() == null ? null : competitorResult.getMaxPointsReason().name());
         result.put(FieldNames.LEADERBOARD_CORRECTED_SCORE.name(), competitorResult.getScore());
         result.put(FieldNames.RACE_LOG_FINISHING_TIME_AS_MILLIS.name(), competitorResult.getFinishingTime() == null ? null : competitorResult.getFinishingTime().asMillis());
