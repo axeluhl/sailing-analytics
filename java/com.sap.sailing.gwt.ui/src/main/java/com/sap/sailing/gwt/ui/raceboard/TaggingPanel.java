@@ -187,12 +187,12 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         protected Panel customButtonsPanel = new FlowPanel();
         private final TagCreationInputPanel inputPanel = new TagCreationInputPanel();
         
-        public TagCreationPanel() {    
+        public TagCreationPanel(StringMessages stringMessages) {    
             setHeight("4cm");
             
             add(inputPanel);
                      
-            createTagFromTextBoxes = new Button("Create Tag from Formular");
+            createTagFromTextBoxes = new Button(stringMessages.tagAddButton());
             createTagFromTextBoxes.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -201,7 +201,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
             });
             add(createTagFromTextBoxes);
            
-            editCustomTagButtons = new Button("Edit Custom Tags");
+            editCustomTagButtons = new Button(stringMessages.tagEditCustomTagButtons());
             editCustomTagButtons.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -231,7 +231,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         private CellTable<TagButton> customTagButtonsTable;
         
         public EditCustomTagsDialog() {
-            super("Edit Custom Tags", "", stringMessages.ok(), stringMessages.cancel(), null, null);
+            super(stringMessages.tagEditCustomTagsButtonDialogHeader(), "", stringMessages.ok(), stringMessages.cancel(), null, null);
             
         }
         
@@ -268,9 +268,9 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                     return "delete";
                 }
             };
-            customTagButtonsTable.addColumn(tagColumn, "Tag");
-            customTagButtonsTable.addColumn(commentColumn, "Comment");
-            customTagButtonsTable.addColumn(imageURLColumn, "ImageURL");
+            customTagButtonsTable.addColumn(tagColumn, stringMessages.tagLabelTag());
+            customTagButtonsTable.addColumn(commentColumn, stringMessages.tagLabelComment());
+            customTagButtonsTable.addColumn(imageURLColumn, stringMessages.tagLabelImageURL());
             customTagButtonsTable.addColumn(buttonColumn, "Delete");
             customTagButtonsTable.setRowData(customTagButtons);
             mainPanel.add(rightPanel);
@@ -279,7 +279,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
             inputPanel = new TagCreationInputPanel();
             rightPanel.add(inputPanel);
             
-            addCustomTagButton = new Button("Add Tag Button");
+            addCustomTagButton = new Button(stringMessages.tagAddCustomTagButton());
             addCustomTagButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -337,7 +337,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         tagSelectionModel = new SingleSelectionModel<TagDTO>();
 
         contentPanel = new ScrollPanel();
-        tagCreationPanel = new TagCreationPanel();    
+        tagCreationPanel = new TagCreationPanel(stringMessages);    
 
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;

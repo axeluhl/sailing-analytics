@@ -2109,4 +2109,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagSelectedTags();
     String tagsFilter();
     String tagSearchTags();
+    String tagLabelTag();
+    String tagLabelComment();
+    String tagLabelImageURL();
+    String tagCreateTag();
+    String tagEditCustomTagButtons();
+    String tagEditCustomTagsButtonDialogHeader();
+    String tagAddCustomTagButton();
 }
