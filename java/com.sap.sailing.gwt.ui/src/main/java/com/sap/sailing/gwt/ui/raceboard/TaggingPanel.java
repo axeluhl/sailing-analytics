@@ -186,7 +186,6 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         private final TagCreationInputPanel inputPanel;
         
         public TagCreationPanel(StringMessages stringMessages) {    
-            setHeight("4cm");
             inputPanel = new TagCreationInputPanel(stringMessages);
             add(inputPanel);
                      
