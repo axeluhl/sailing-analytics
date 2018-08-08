@@ -36,7 +36,6 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     private final static CompetitorFilterCss css = CompetitorFilterResources.INSTANCE.css();
     private final TextBox searchTextBox;
     private final Button clearTextBoxButton;
-    private final Button settingsButton;
     private final Button filterSettingsButton;
     private final TagsFilterSets tagFilterSets;
     private final FlowPanel searchBoxPanel;
@@ -82,13 +81,6 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
             }
         });
 
-        settingsButton = new Button();
-        settingsButton.ensureDebugId("tagSettingsButton");
-        settingsButton.setTitle("settings");
-        settingsButton.setStyleName(css.button());
-        settingsButton.addStyleName(css.settingsButton());
-        settingsButton.addStyleName(css.settingsButtonBackgroundImage());
-
         filterSettingsButton = new Button("");
         filterSettingsButton.setStyleName(css.button());
         filterSettingsButton.addStyleName(css.filterButton());
@@ -107,7 +99,6 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         searchBoxPanel.add(searchTextBox);
         searchBoxPanel.add(clearTextBoxButton);
         add(searchBoxPanel);
-        add(settingsButton);
         add(filterSettingsButton);
     }
 
